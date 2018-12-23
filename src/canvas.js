@@ -134,9 +134,10 @@ Molecule.prototype.update = function() {
 
 //Connectors   *****************************************************************************************
 
-function Connector(parentMolecule) {
+function Connector(parentMolecule, connector) {
     this.parentMolecule = parentMolecule
-	this.molecule2
+	this.connector1 = connector;
+	this.connector2;
 	this.startX = this.parentMolecule.outputX
 	this.startY = this.parentMolecule.y
 	this.endX
@@ -160,6 +161,27 @@ Connector.prototype.clickDown = function(x,y){
 }
 
 Connector.prototype.clickUp = function(x,y){
+	
+	var connectionNode = null;
+	
+	moleculesOnTheScreen.forEach(molecule => {
+        molecule.children.forEach(child => {
+			if(child.wasConnectionMade(x,y) instanceof AttachmentPoint){
+				connectionNode = child.wasConnectionMade(x,y);
+			}
+		});
+	});
+	
+	if(this.isMoving){
+		if (connectionNode != null){
+			this.connector2 = connectionNode;
+		}
+		else{
+			//remove this connector from the stack
+			this.parentMolecule.children.pop();
+		}
+	}
+	
 	this.isMoving = false;
 	
 	//find what element is closest
@@ -175,7 +197,15 @@ Connector.prototype.clickMove = function(x,y){
 Connector.prototype.update = function() {
     this.startX = this.parentMolecule.outputX
 	this.startY = this.parentMolecule.y
+	if (this.connector2 instanceof AttachmentPoint){
+		this.endX = this.connector2.x;
+		this.endY = this.connector2.y;
+	}
 	this.draw()
+}
+
+Connector.prototype.wasConnectionMade = function(x,y){
+	return false;
 }
 
 //Attachment Points   **********************************************************************************
@@ -218,6 +248,16 @@ AttachmentPoint.prototype.clickMove = function(x,y){
 	}
 	else{
 		this.radius = this.defaultRadius;
+	}
+}
+
+AttachmentPoint.prototype.wasConnectionMade = function(x,y){
+	//this function returns itself if the cordinates passed in are within itself
+	if (distBetweenPoints(this.x, x, this.y, y) < this.radius){
+		return this;
+	}
+	else{
+		return false;
 	}
 }
 
