@@ -148,18 +148,12 @@ addEventListener('mouseup', function (event) {
 
 // Objects
 
-//Molecule
+//Molecule  *******************************************************************************************
+
 function Molecule(x, y) {
 	this.x = x;
 	this.y = y;
 	this.radius = 20;
-
-	this.defaultSmallRadius = 8;
-	this.expandedSmallRadius = 14;
-	this.smallRadiusL = 8;
-	this.smallRadiusR = 8;
-	this.inputX = this.x - this.radius;
-	this.outputX = this.x + this.radius;
 
 	this.defaultColor = '#F3EFEF';
 	this.selectedColor = 'green';
@@ -168,6 +162,12 @@ function Molecule(x, y) {
 	this.isMoving = false;
 
 	this.children = [];
+
+	this.input = new AttachmentPoint(this, this.x - this.radius, this.y, this.color);
+	this.children.push(this.input);
+
+	this.output = new AttachmentPoint(this, this.x + this.radius, this.y, this.color);
+	this.children.push(this.output);
 }
 
 Molecule.prototype.draw = function () {
@@ -199,7 +199,6 @@ Molecule.prototype.clickDown = function (x, y) {
 	} else if (distBetweenPoints(this.x + this.radius, x, this.y, y) < this.defaultSmallRadius | distBetweenPoints(this.x - this.radius, x, this.y, y) < this.defaultSmallRadius) {
 		var connector = new Connector(this);
 		this.children.push(connector);
-		console.log(moleculesOnTheScreen);
 	} else {
 		this.color = this.defaultColor;
 	}
@@ -223,29 +222,23 @@ Molecule.prototype.clickMove = function (x, y) {
 		this.y = y;
 	}
 
-	//check the right
-	if (distBetweenPoints(this.x + this.radius, x, this.y, y) < this.defaultSmallRadius) {
-		this.smallRadiusR = this.expandedSmallRadius;
-	} else {
-		this.smallRadiusR = this.defaultSmallRadius;
-	}
-
-	if (distBetweenPoints(this.x - this.radius, x, this.y, y) < this.defaultSmallRadius) {
-		this.smallRadiusL = this.expandedSmallRadius;
-	} else {
-		this.smallRadiusL = this.defaultSmallRadius;
-	}
-
 	this.children.forEach(function (child) {
 		child.clickMove(x, y);
 	});
 };
 
 Molecule.prototype.update = function () {
+
+	console.log(this.children);
+
+	this.children.forEach(function (child) {
+		child.draw();
+	});
+
 	this.draw();
 };
 
-//Connectors
+//Connectors   *****************************************************************************************
 
 function Connector(molecule1) {
 	this.molecule1 = molecule1;
@@ -285,6 +278,45 @@ Connector.prototype.clickMove = function (x, y) {
 Connector.prototype.update = function () {
 	this.startX = this.molecule1.outputX;
 	this.startY = this.molecule1.y;
+	this.draw();
+};
+
+//Attachment Points   **********************************************************************************
+
+function AttachmentPoint(molecule1, x, y, color) {
+	this.molecule1 = molecule1;
+	this.x = x;
+	this.y = y;
+	this.color = color;
+	this.defaultRadius = 8;
+	this.expandedRadius = 14;
+	this.radius = 8;
+}
+
+AttachmentPoint.prototype.draw = function () {
+
+	c.beginPath();
+	c.fillStyle = this.color;
+	c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+	c.fill();
+	c.closePath();
+};
+
+AttachmentPoint.prototype.clickDown = function (x, y) {};
+
+AttachmentPoint.prototype.clickUp = function (x, y) {};
+
+AttachmentPoint.prototype.clickMove = function (x, y) {
+	//expand if touched by mouse
+	if (distBetweenPoints(this.x, x, this.y, y) < this.defaultRadius) {
+		this.radius = this.expandedRadius;
+	} else {
+		this.radius = this.defaultRadius;
+	}
+};
+
+AttachmentPoint.prototype.update = function () {
+
 	this.draw();
 };
 
