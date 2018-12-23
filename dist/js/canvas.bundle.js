@@ -166,12 +166,18 @@ function Molecule(x, y) {
 	this.color = this.defaultColor;
 	this.name = "sphereoid";
 	this.isMoving = false;
+
+	this.children = [];
 }
 
 Molecule.prototype.draw = function () {
 
 	this.inputX = this.x - this.radius;
 	this.outputX = this.x + this.radius;
+
+	this.children.forEach(function (child) {
+		child.draw();
+	});
 
 	c.beginPath();
 	c.fillStyle = this.color;
@@ -192,15 +198,23 @@ Molecule.prototype.clickDown = function (x, y) {
 		this.isMoving = true;
 	} else if (distBetweenPoints(this.x + this.radius, x, this.y, y) < this.defaultSmallRadius | distBetweenPoints(this.x - this.radius, x, this.y, y) < this.defaultSmallRadius) {
 		var connector = new Connector(this);
-		moleculesOnTheScreen.push(connector);
+		this.children.push(connector);
 		console.log(moleculesOnTheScreen);
 	} else {
 		this.color = this.defaultColor;
 	}
+
+	this.children.forEach(function (child) {
+		child.clickDown(x, y);
+	});
 };
 
 Molecule.prototype.clickUp = function (x, y) {
 	this.isMoving = false;
+
+	this.children.forEach(function (child) {
+		child.clickUp(x, y);
+	});
 };
 
 Molecule.prototype.clickMove = function (x, y) {
@@ -221,6 +235,10 @@ Molecule.prototype.clickMove = function (x, y) {
 	} else {
 		this.smallRadiusL = this.defaultSmallRadius;
 	}
+
+	this.children.forEach(function (child) {
+		child.clickMove(x, y);
+	});
 };
 
 Molecule.prototype.update = function () {
