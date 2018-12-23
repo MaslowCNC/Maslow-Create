@@ -61,10 +61,10 @@ function Molecule(x, y) {
 	
 	this.children = [];
 	
-	this.input = new AttachmentPoint(this, this.x - this.radius, this.y, this.color);
+	this.input = new AttachmentPoint(this, -1* this.radius, 0);
 	this.children.push(this.input);
 	
-	this.output = new AttachmentPoint(this, this.x + this.radius, this.y, this.color);
+	this.output = new AttachmentPoint(this, this.radius, 0);
 	this.children.push(this.output);
 }
 
@@ -94,10 +94,6 @@ Molecule.prototype.clickDown = function(x,y){
 	if (distFromClick < this.radius){
 		this.color = this.selectedColor;
 		this.isMoving = true;
-	}
-	else if(distBetweenPoints (this.x + this.radius, x, this.y, y) < this.defaultSmallRadius | distBetweenPoints (this.x - this.radius, x, this.y, y) < this.defaultSmallRadius){
-	    var connector = new Connector(this);
-	    this.children.push(connector);
 	}
 	else{
 		this.color = this.defaultColor;
@@ -129,10 +125,8 @@ Molecule.prototype.clickMove = function(x,y){
 
 Molecule.prototype.update = function() {
     
-	console.log(this.children);
-	
 	this.children.forEach(child => {
-        child.draw();		
+        child.update();		
 	});
 	
 	this.draw()
@@ -140,11 +134,11 @@ Molecule.prototype.update = function() {
 
 //Connectors   *****************************************************************************************
 
-function Connector(molecule1) {
-    this.molecule1 = molecule1
+function Connector(parentMolecule) {
+    this.parentMolecule = parentMolecule
 	this.molecule2
-	this.startX = this.molecule1.outputX
-	this.startY = this.molecule1.y
+	this.startX = this.parentMolecule.outputX
+	this.startY = this.parentMolecule.y
 	this.endX
 	this.endY
 	this.isMoving = true;
@@ -179,18 +173,19 @@ Connector.prototype.clickMove = function(x,y){
 }
 
 Connector.prototype.update = function() {
-    this.startX = this.molecule1.outputX
-	this.startY = this.molecule1.y
+    this.startX = this.parentMolecule.outputX
+	this.startY = this.parentMolecule.y
 	this.draw()
 }
 
 //Attachment Points   **********************************************************************************
 
-function AttachmentPoint(molecule1, x, y, color) {
-    this.molecule1 = molecule1
-	this.x = x;
-	this.y = y;
-	this.color = color;
+function AttachmentPoint(parentMolecule, offsetX, offsetY) {
+    this.parentMolecule = parentMolecule
+	this.offsetX = offsetX;
+	this.offsetY = offsetY;
+	this.x = this.parentMolecule.x + offsetX;
+	this.y = this.parentMolecule.y + offsetY;
 	this.defaultRadius = 8;
 	this.expandedRadius = 14;
 	this.radius = 8;
@@ -199,14 +194,17 @@ function AttachmentPoint(molecule1, x, y, color) {
 AttachmentPoint.prototype.draw = function() {
 	
     c.beginPath()
-	c.fillStyle = this.color
+	c.fillStyle = this.parentMolecule.color
     c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
     c.fill()
     c.closePath()
 }
 
 AttachmentPoint.prototype.clickDown = function(x,y){
-	
+	if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+	    var connector = new Connector(this.parentMolecule);
+	    this.parentMolecule.children.push(connector);
+	}
 }
 
 AttachmentPoint.prototype.clickUp = function(x,y){
@@ -224,7 +222,8 @@ AttachmentPoint.prototype.clickMove = function(x,y){
 }
 
 AttachmentPoint.prototype.update = function() {
-
+	this.x = this.parentMolecule.x + this.offsetX;
+	this.y = this.parentMolecule.y + this.offsetY;
 	this.draw()
 }
 
