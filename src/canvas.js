@@ -134,10 +134,10 @@ Molecule.prototype.update = function() {
 
 //Connectors   *****************************************************************************************
 
-function Connector(parentMolecule, connector) {
+function Connector(parentMolecule, attachmentPoint1) {
     this.parentMolecule = parentMolecule
-	this.connector1 = connector;
-	this.connector2;
+	this.attachmentPoint1 = attachmentPoint1;
+	this.attachmentPoint2;
 	this.startX = this.parentMolecule.outputX
 	this.startY = this.parentMolecule.y
 	this.endX
@@ -174,7 +174,7 @@ Connector.prototype.clickUp = function(x,y){
 	
 	if(this.isMoving){
 		if (connectionNode != null){
-			this.connector2 = connectionNode;
+			this.attachmentPoint2 = connectionNode;
 		}
 		else{
 			//remove this connector from the stack
@@ -195,11 +195,11 @@ Connector.prototype.clickMove = function(x,y){
 }
 
 Connector.prototype.update = function() {
-    this.startX = this.parentMolecule.outputX
-	this.startY = this.parentMolecule.y
-	if (this.connector2 instanceof AttachmentPoint){
-		this.endX = this.connector2.x;
-		this.endY = this.connector2.y;
+    this.startX = this.attachmentPoint1.x
+	this.startY = this.attachmentPoint1.y
+	if (this.attachmentPoint2 instanceof AttachmentPoint){
+		this.endX = this.attachmentPoint2.x;
+		this.endY = this.attachmentPoint2.y;
 	}
 	this.draw()
 }
@@ -232,7 +232,7 @@ AttachmentPoint.prototype.draw = function() {
 
 AttachmentPoint.prototype.clickDown = function(x,y){
 	if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
-	    var connector = new Connector(this.parentMolecule);
+	    var connector = new Connector(this.parentMolecule, this);
 	    this.parentMolecule.children.push(connector);
 	}
 }
