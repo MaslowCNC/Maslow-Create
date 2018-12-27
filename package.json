@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@jscad/csg": "^0.7.0",
     "gsap": "^2.0.1"
   },
   "devDependencies": {

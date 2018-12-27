@@ -32,9 +32,19 @@ addEventListener('resize', () => {
 
 addEventListener('mousedown', event => {
 	//every time the mouse button goes down
+	
+	var clickHandledByMolecule = false;
+	
 	moleculesOnTheScreen.forEach(molecule => {
-        molecule.clickDown(event.clientX,event.clientY);		
+        if (molecule.clickDown(event.clientX,event.clientY) == true){
+			clickHandledByMolecule = true;
+		}
 	});
+	
+	if (clickHandledByMolecule == false){
+		createNewMolecule(event.clientX, event.clientY);
+	}
+	
 })
 
 addEventListener('mouseup', event => {
@@ -80,28 +90,35 @@ Molecule.prototype.draw = function() {
     c.beginPath()
 	c.fillStyle = this.color
     c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-    c.arc(this.inputX, this.y, this.smallRadiusL, 0, Math.PI * 2, false)
-    c.arc(this.outputX, this.y, this.smallRadiusR, 0, Math.PI * 2, false)
 	c.fillText(this.name, this.x + this.radius, this.y-this.radius)
     c.fill()
     c.closePath()
 }
 
 Molecule.prototype.clickDown = function(x,y){
+	//returns true if something was done with the click
+	
+	
+	var clickProcessed = false;
 	
     var distFromClick = distBetweenPoints(x, this.x, y, this.y);
 	
 	if (distFromClick < this.radius){
 		this.color = this.selectedColor;
 		this.isMoving = true;
+		clickProcessed = true;
 	}
 	else{
 		this.color = this.defaultColor;
 	}
 	
 	this.children.forEach(child => {
-        child.clickDown(x,y);		
+        if(child.clickDown(x,y) == true){
+			clickProcessed = true;
+		}
 	});
+	
+	return clickProcessed; 
 }
 
 Molecule.prototype.clickUp = function(x,y){
@@ -234,6 +251,10 @@ AttachmentPoint.prototype.clickDown = function(x,y){
 	if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
 	    var connector = new Connector(this.parentMolecule, this);
 	    this.parentMolecule.children.push(connector);
+		return true; //indicate that the click was handled by this object
+	}
+	else{
+		return false; //indicate that the click was not handled by this object
 	}
 }
 
@@ -274,7 +295,7 @@ var molecule;
 function init() {
     moleculesOnTheScreen = []
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 2; i++) {
         molecule = new Molecule(Math.random()*500,Math.random()*500);
 	    moleculesOnTheScreen.push(molecule);
     }
@@ -286,6 +307,11 @@ function distBetweenPoints(x1, x2, y1, y2){
     var dist = Math.sqrt(a2 + b2);
 	
 	return dist;
+}
+
+function createNewMolecule(x,y){
+	molecule = new Molecule(x,y);
+	moleculesOnTheScreen.push(molecule);
 }
 
 // Animation Loop
