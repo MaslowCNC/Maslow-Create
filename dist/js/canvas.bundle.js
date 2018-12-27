@@ -106,7 +106,7 @@ var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
 
 canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.height = innerHeight / 2;
 
 var mouse = {
 	x: innerWidth / 2,
@@ -386,7 +386,7 @@ function init() {
 	moleculesOnTheScreen = [];
 
 	for (var i = 0; i < 2; i++) {
-		molecule = new Molecule(Math.random() * 500, Math.random() * 500);
+		molecule = new Molecule(Math.random() * 500, Math.random() * 200);
 		moleculesOnTheScreen.push(molecule);
 	}
 }
