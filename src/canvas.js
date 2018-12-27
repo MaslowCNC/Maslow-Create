@@ -6,7 +6,7 @@ const c = canvas.getContext('2d')
 var gProcessor = null;        // required by OpenJScad.org
 
 canvas.width = innerWidth
-canvas.height = innerHeight/3
+canvas.height = innerHeight/2
 
 
 const mouse = {
