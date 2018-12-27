@@ -3,8 +3,11 @@ import utils from './utils'
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
+var gProcessor = null;        // required by OpenJScad.org
+
 canvas.width = innerWidth
-canvas.height = innerHeight/2
+canvas.height = innerHeight/3
+
 
 const mouse = {
     x: innerWidth / 2,
@@ -294,7 +297,7 @@ let moleculesOnTheScreen;
 var molecule;
 function init() {
     moleculesOnTheScreen = []
-
+	
     for (let i = 0; i < 2; i++) {
         molecule = new Molecule(Math.random()*500,Math.random()*200);
 	    moleculesOnTheScreen.push(molecule);
