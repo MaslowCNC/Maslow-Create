@@ -20,7 +20,7 @@
   padding: 0px; /* not inherited */
 
   background: white;
-  width: 400px;
+  width: 900px;
   height: 300px;
 
   top: 0px;
@@ -47,7 +47,6 @@ canvas {
 }
 
 #parametersdiv table {
-  margin-bottom: 5px;
 
   text-align: left;
   font-size: 0.8em;
@@ -56,7 +55,6 @@ canvas {
 
 #parametersdiv th {
   margin:  0px; /* not inherited */
-  border:  0px none gray; /* not inherited */
   padding: 0px; /* not inherited */
 
   font-weight: bold;
@@ -73,7 +71,6 @@ canvas {
 
 #parametersdiv td {
   margin:  0px; /* not inherited */
-  border:  0px none gray; /* not inherited */
   padding: 0px; /* not inherited */
 }
 
@@ -88,7 +85,6 @@ canvas {
   padding: 0px; /* not inherited */
   background: white;
 
-  margin-left: 1em;
 }
 
 #tail { 
