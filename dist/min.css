@@ -3,22 +3,20 @@
  */
 
 .jscad-container {
-  margin: 5px 15px 5px 5px; /* not inherited */
-  padding: 20px; /* not inherited */
+  margin: 0px 0px 0px 0px; /* not inherited */
+  padding: 0px; /* not inherited */
   color: Black;
   font-weight: bold;
   font-family: Helvetica, Arial, Sans;
-  border: thin solid black;
   min-width: 410px;
 }
 
 #header {
-  margin: 5px; /* not inherited */
+  margin: 0px; /* not inherited */
 }
 
 #viewerContext {
-  margin: 5px; /* not inherited */
-  border: thin solid gray; /* not inherited */
+  margin: 0px; /* not inherited */
   padding: 0px; /* not inherited */
 
   background: white;
@@ -27,24 +25,22 @@
 
   top: 0px;
   bottom: 0px;
+  
+  cursor: move; 
 }
 
 canvas { 
   margin: 0px; /* not inherited */
-  border: 0px none gray; /* not inherited */
   padding: 0px; /* not inherited */
 
   width: 100%;
   height: 100%;
 
-  cursor: move; 
 }
 
 #parametersdiv {
-  margin: 5px; /* not inherited */
-  border: thin solid rgb(200,200,200);
-  border-radius: 1em;     
-  padding: 10px;
+  margin: 0px; /* not inherited */
+  padding: 0px;
 
   background: white;
   opacity: 0.8;
@@ -61,7 +57,7 @@ canvas {
 #parametersdiv th {
   margin:  0px; /* not inherited */
   border:  0px none gray; /* not inherited */
-  padding: 5px; /* not inherited */
+  padding: 0px; /* not inherited */
 
   font-weight: bold;
 }
@@ -88,17 +84,15 @@ canvas {
 }
 
 #updateButton {
-  margin:  5px; /* not inherited */
-  border:  thin solid Black; /* not inherited */
-  padding: 2px; /* not inherited */
-  border-radius: 4px;
+  margin:  0px; /* not inherited */
+  padding: 0px; /* not inherited */
   background: white;
 
   margin-left: 1em;
 }
 
 #tail { 
-  margin: 5px; /* not inherited */
+  margin: 0px; /* not inherited */
 }
 
 #busy {
