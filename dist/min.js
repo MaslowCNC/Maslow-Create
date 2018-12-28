@@ -1,3 +1,7 @@
+ function testCrossFunction(){
+	console.log("Test cross function ran");
+}
+
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const WebWorkify = require('webworkify')
 const { CAG, CSG } = require('@jscad/csg')
@@ -15,6 +19,7 @@ const { toArray } = require('../utils/arrays')
  * @param {Object} callback the callback to call once evaluation is done /failed
  * @param {Object} options the settings to use when rebuilding the solid
  */
+ 
 function rebuildSolids (script, fullurl, parameters, callback, options) {
   let basePath = fullurl
   if (basePath.lastIndexOf('/') >= 0) {
@@ -54543,13 +54548,13 @@ var gProcessor = null;
 function init() {
   var versionText = 'OpenJSCAD.org Version ' + version;
   console.log(versionText);
-
+  
   // Show all exceptions to the user: // WARNING !! this is not practical at dev time
   AlertUserOfUncaughtExceptions();
 
   var viewer = document.getElementById('viewerContext');
   var design = viewer.getAttribute('design-url');
-
+  
   gProcessor = new Processor(viewer);
 
   // load the given design
@@ -54559,11 +54564,16 @@ function init() {
     gProcessor.setStatus('Loading ' + design + " <img id=busy src='imgs/busy.gif'>");
 
     xhr.onload = function () {
-      var source = this.responseText;
+      //var source = this.responseText;
+	  var source = "function main () {return sphere({r: 10, center: true})}";
        console.log(source);
 
       if (design.match(/\.jscad$/i) || design.match(/\.js$/i)) {
         gProcessor.setStatus('Processing ' + design + " <img id=busy src='imgs/busy.gif'>");
+		console.log("%#########################");
+		console.log(source);
+		console.log("__________________-------------");
+		console.log(design);
         gProcessor.setJsCad(source, design);
       }
     };
