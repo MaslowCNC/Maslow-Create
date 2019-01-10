@@ -46,7 +46,8 @@ addEventListener('dblclick', event => {
     });
     
     if (clickHandledByMolecule == false){
-        createNewMolecule(event.clientX, event.clientY);
+        //createNewMolecule(event.clientX, event.clientY);
+        showmenu(event);
     }
     
 })
@@ -58,6 +59,8 @@ addEventListener('mouseup', event => {
     });
 })
 
+
+addEventListener('contextmenu', showmenu);
 // Objects
 
 var AttachmentPoint = {
@@ -341,6 +344,7 @@ var Atom = DrawingNode.create({
 
 var Molecule = DrawingNode.create({
     children: [], 
+    name: "Molecule",
     topLevel: false //a flag to signal if this node is the top level node
 });
 
@@ -360,17 +364,32 @@ var Cubeoid = Atom.create({
 
 // Implementation
 
+var availableTypes = [Molecule, Sphereoid, Cubeoid];
 
 let moleculesOnTheScreen;
+let menu;
 
 function init() {
-    moleculesOnTheScreen = []
+     moleculesOnTheScreen = []
+     
+    var typeToCreate = Math.floor(Math.random() * (availableTypes.length));
+    var atom = availableTypes[typeToCreate].create({x: 500*Math.random(), y: 200*Math.random()});
+    moleculesOnTheScreen.push(atom);
     
-   var atom = Sphereoid.create({x: 500*Math.random(), y: 200*Math.random()});
-   moleculesOnTheScreen.push(atom);
-   atom = Cubeoid.create({x: 500*Math.random(), y: 200*Math.random()});
-   moleculesOnTheScreen.push(atom);
-   
+    menu = document.querySelector('.menu');
+    menu.classList.add('off');
+    
+    
+    availableTypes.forEach(type => {
+        var newElement = document.createElement("LI");
+        var text = document.createTextNode(type.name);
+        newElement.setAttribute("class", "menu-item");
+        newElement.setAttribute("id", type.name);
+        newElement.appendChild(text); 
+        menu.appendChild(newElement); 
+        
+        document.getElementById(type.name).addEventListener('click', setColour);
+    }); 
 }
 
 function distBetweenPoints(x1, x2, y1, y2){
@@ -382,8 +401,32 @@ function distBetweenPoints(x1, x2, y1, y2){
 }
 
 function createNewMolecule(x,y){
-    var molecule = DrawingNode.create({x: x, y: y});
+    
+    var typeToCreate = Math.floor(Math.random() * (availableTypes.length));
+    var molecule = availableTypes[typeToCreate].create({x: x, y: y});
     moleculesOnTheScreen.push(molecule);
+}
+
+function setColour(ev){
+    hidemenu();
+    let clr = ev.target.id;
+    console.log(clr);
+}
+
+function showmenu(ev){
+    //stop the real right click menu
+    ev.preventDefault(); 
+    //show the custom menu
+    console.log( ev.clientX, ev.clientY );
+    menu.style.top = `${ev.clientY - 20}px`;
+    menu.style.left = `${ev.clientX - 20}px`;
+    menu.classList.remove('off');
+}
+
+function hidemenu(ev){
+    menu.classList.add('off');
+    menu.style.top = '-200%';
+    menu.style.left = '-200%';
 }
 
 // Animation Loop
