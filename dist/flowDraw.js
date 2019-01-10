@@ -7,18 +7,8 @@ canvas.width = innerWidth
 canvas.height = innerHeight/2
 
 
-const mouse = {
-    x: innerWidth / 2,
-    y: innerHeight / 2
-}
-
-const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']
-
 // Event Listeners
 addEventListener('mousemove', event => {
-    mouse.x = event.clientX
-    mouse.y = event.clientY
-    
     moleculesOnTheScreen.forEach(molecule => {
         molecule.clickMove(event.clientX,event.clientY);        
     });
@@ -42,10 +32,6 @@ addEventListener('mousedown', event => {
         }
     });
     
-    //if (clickHandledByMolecule == false){
-    //  createNewMolecule(event.clientX, event.clientY);
-    //}
-    
 })
 
 addEventListener('dblclick', event => {
@@ -65,7 +51,6 @@ addEventListener('dblclick', event => {
     
 })
 
-
 addEventListener('mouseup', event => {
     //every time the mouse button goes up
     moleculesOnTheScreen.forEach(molecule => {
@@ -75,29 +60,113 @@ addEventListener('mouseup', event => {
 
 // Objects
 
+var AttachmentPoint = {
+    
+    defaultRadius: 8,
+    expandedRadius: 14,
+    radius: 8,
+
+    create: function(values){
+        var instance = Object.create(this);
+        Object.keys(values).forEach(function(key) {
+            instance[key] = values[key];
+        });
+        instance.x = instance.parentMolecule.x + instance.offsetX;
+        instance.y = instance.parentMolecule.y + instance.offsetY;
+        console.log("Position");
+        console.log(instance.parentMolecule);
+        console.log(instance.x);
+        console.log(instance.y);
+        return instance;
+    },
+    
+    draw: function() {
+        
+        c.beginPath();
+        c.fillStyle = this.parentMolecule.color;
+        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        c.fill();
+        c.closePath();
+    },
+
+    clickDown: function(x,y){
+        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+            var connector = new Connector(this.parentMolecule, this);
+            this.parentMolecule.children.push(connector);
+            return true; //indicate that the click was handled by this object
+        }
+        else{
+            return false; //indicate that the click was not handled by this object
+        }
+    },
+
+    clickUp: function(x,y){
+        
+    },
+
+    clickMove: function(x,y){
+        //expand if touched by mouse
+        if (distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+            this.radius = this.expandedRadius;
+        }
+        else{
+            this.radius = this.defaultRadius;
+        }
+    },
+
+    wasConnectionMade: function(x,y){
+        //this function returns itself if the cordinates passed in are within itself
+        if (distBetweenPoints(this.x, x, this.y, y) < this.radius){
+            return this;
+        }
+        else{
+            return false;
+        }
+    },
+
+    update: function() {
+        this.x = this.parentMolecule.x + this.offsetX;
+        this.y = this.parentMolecule.y + this.offsetY;
+        this.draw()
+    }
+
+}
+
 var DrawingNode = {
-    x: = 0;,
-    y:  0;,
-    radius: 20;,
-    defaultColor = '#F3EFEF';,
-    selectedColor = 'green';,
-    color = defaultColor;,
-    name = "name";,
-    isMoving = false;,
+    x: 0,
+    y:  0,
+    radius: 20,
+    defaultColor: '#F3EFEF',
+    selectedColor: 'green',
+    color: '#F3EFEF',
+    name: "name",
+    isMoving: false,
     
-    children = [];,
+    children: [],
     
-    input = new AttachmentPoint(this, -1* this.radius, 0);,
-    children.push(this.input);,
     
-    output = new AttachmentPoint(this, this.radius, 0);,
-    children.push(this.output);
+    
+    
+    //output: new AttachmentPoint(this, this.radius, 0),
+    
     
     create: function(values){
         var instance = Object.create(this);
-        Object.keys(values).foreEach(function(key) {
+        Object.keys(values).forEach(function(key) {
             instance[key] = values[key];
         });
+        input = AttachmentPoint.create({
+            parentMolecule: instance, 
+            offsetX: -1* instance.radius, 
+            offsetY: 0
+        });
+        output = AttachmentPoint.create({
+            parentMolecule: instance, 
+            offsetX: 1* instance.radius, 
+            offsetY: 0
+        });
+        instance.children.push(input);
+        instance.children.push(output);
         return instance;
     },
     
@@ -188,7 +257,7 @@ var DrawingNode = {
         this.draw()
     }
 }
-
+/*
 var Connector =  {
     
     parentMolecule: parentMolecule;,
@@ -262,66 +331,7 @@ var Connector =  {
     }
 
 }
-
-var AttachmentPoint = {
-    //x = this.parentMolecule.x + offsetX;
-    //y = this.parentMolecule.y + offsetY;
-    defaultRadius: 8;,
-    expandedRadius: 14;,
-    radius: 8;,
-
-    draw: function() {
-        
-        c.beginPath()
-        c.fillStyle = this.parentMolecule.color
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        c.fill()
-        c.closePath()
-    }
-
-    clickDown: function(x,y){
-        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
-            var connector = new Connector(this.parentMolecule, this);
-            this.parentMolecule.children.push(connector);
-            return true; //indicate that the click was handled by this object
-        }
-        else{
-            return false; //indicate that the click was not handled by this object
-        }
-    }
-
-    clickUp: function(x,y){
-        
-    }
-
-    clickMove: function(x,y){
-        //expand if touched by mouse
-        if (distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
-            this.radius = this.expandedRadius;
-        }
-        else{
-            this.radius = this.defaultRadius;
-        }
-    }
-
-    wasConnectionMade: function(x,y){
-        //this function returns itself if the cordinates passed in are within itself
-        if (distBetweenPoints(this.x, x, this.y, y) < this.radius){
-            return this;
-        }
-        else{
-            return false;
-        }
-    }
-
-    update: function() {
-        this.x = this.parentMolecule.x + this.offsetX;
-        this.y = this.parentMolecule.y + this.offsetY;
-        this.draw()
-    }
-
-}
-
+*/
 
 // Implementation
 
@@ -331,10 +341,10 @@ let moleculesOnTheScreen;
 function init() {
     moleculesOnTheScreen = []
     
-//    for (let i = 0; i < 2; i++) {
-//        var molecule = new Molecule(Math.random()*500,Math.random()*200);
-//        moleculesOnTheScreen.push(molecule);
-//    }
+   for (let i = 0; i < 2; i++) {
+       var molecule = DrawingNode.create({x: 500*Math.random(), y: 200*Math.random()});
+       moleculesOnTheScreen.push(molecule);
+   }
 }
 
 function distBetweenPoints(x1, x2, y1, y2){
@@ -346,7 +356,7 @@ function distBetweenPoints(x1, x2, y1, y2){
 }
 
 function createNewMolecule(x,y){
-    molecule = new Molecule(x,y);
+    var molecule = DrawingNode.create({x: x, y: y});
     moleculesOnTheScreen.push(molecule);
 }
 
