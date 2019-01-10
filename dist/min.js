@@ -1,5 +1,6 @@
  function testCrossFunction(){
 	console.log("Test cross function ran");
+	loadDesign("test", "test");
 }
 
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
@@ -54564,21 +54565,20 @@ function init() {
     gProcessor.setStatus('Loading ' + design + " <img id=busy src='imgs/busy.gif'>");
 
     xhr.onload = function () {
-      //var source = this.responseText;
-	  var source = "function main () {return sphere({r: 10, center: true})}";
-       console.log(source);
-
-      if (design.match(/\.jscad$/i) || design.match(/\.js$/i)) {
-        gProcessor.setStatus('Processing ' + design + " <img id=busy src='imgs/busy.gif'>");
-		console.log("%#########################");
-		console.log(source);
-		console.log("__________________-------------");
-		console.log(design);
-        gProcessor.setJsCad(source, design);
-      }
+      var source = this.responseText;
+	  loadDesign(source, design);
     };
     xhr.send();
   }
+}
+
+function loadDesign(source, design){
+	var source = "function main () {return sphere({r: 10, center: true})}";
+	
+    if (design.match(/\.jscad$/i) || design.match(/\.js$/i)) {
+        gProcessor.setStatus('Processing ' + design + " <img id=busy src='imgs/busy.gif'>");
+        gProcessor.setJsCad(source, design);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
