@@ -166,7 +166,7 @@ var Connector =  {
 
     clickUp: function(x,y){
         
-        var connectionNode = null;
+        var connectionNode = false;
         
         moleculesOnTheScreen.forEach(molecule => {
             molecule.children.forEach(child => {
@@ -177,18 +177,18 @@ var Connector =  {
         });
         
         if(this.isMoving){
-            if (connectionNode != null){
+            if (connectionNode){
                 this.attachmentPoint2 = connectionNode;
             }
             else{
                 //remove this connector from the stack
+                console.log(this.parentMolecule.children);
                 this.parentMolecule.children.pop();
             }
         }
         
         this.isMoving = false;
         
-        //find what element is closest
     },
 
     clickMove: function(x,y){
@@ -224,14 +224,6 @@ var DrawingNode = {
     name: "name",
     isMoving: false,
     
-    children: [],
-    
-    
-    
-    
-    //output: new AttachmentPoint(this, this.radius, 0),
-    
-    
     create: function(values){
         var instance = Object.create(this);
         Object.keys(values).forEach(function(key) {
@@ -247,6 +239,7 @@ var DrawingNode = {
             offsetX: 1* instance.radius, 
             offsetY: 0
         });
+        instance.children = [];
         instance.children.push(input);
         instance.children.push(output);
         return instance;
@@ -340,7 +333,28 @@ var DrawingNode = {
     }
 }
 
+var Atom = DrawingNode.create({
+    codeBlock: ""
+});
 
+var Molecule = DrawingNode.create({
+    children: [], 
+    topLevel: false //a flag to signal if this node is the top level node
+});
+
+var Sphereoid = Atom.create({
+    name: "Sphereoid",
+    sphereRadius: 10,
+    codeBlock: "some code to create a sphere"
+});
+
+var Cubeoid = Atom.create({
+    name: "Cubeoid",
+    xL: 10,
+    yL: 10,
+    zL: 10,
+    codeBlock: "some code to create a sphere"
+});
 
 // Implementation
 
@@ -350,10 +364,11 @@ let moleculesOnTheScreen;
 function init() {
     moleculesOnTheScreen = []
     
-   for (let i = 0; i < 2; i++) {
-       var molecule = DrawingNode.create({x: 500*Math.random(), y: 200*Math.random()});
-       moleculesOnTheScreen.push(molecule);
-   }
+   var atom = Sphereoid.create({x: 500*Math.random(), y: 200*Math.random()});
+   moleculesOnTheScreen.push(atom);
+   atom = Cubeoid.create({x: 500*Math.random(), y: 200*Math.random()});
+   moleculesOnTheScreen.push(atom);
+   
 }
 
 function distBetweenPoints(x1, x2, y1, y2){
