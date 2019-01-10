@@ -8,20 +8,23 @@ canvas.height = innerHeight/2
 
 
 // Event Listeners
-addEventListener('mousemove', event => {
+let flowCanvas = document.getElementById('flow-canvas');
+flowCanvas.addEventListener('contextmenu', showmenu);
+
+flowCanvas.addEventListener('mousemove', event => {
     moleculesOnTheScreen.forEach(molecule => {
         molecule.clickMove(event.clientX,event.clientY);        
     });
 })
 
-addEventListener('resize', () => {
+flowCanvas.addEventListener('resize', () => {
     canvas.width = innerWidth
     canvas.height = innerHeight
 
     init()
 })
 
-addEventListener('mousedown', event => {
+flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down
     
     var clickHandledByMolecule = false;
@@ -34,7 +37,7 @@ addEventListener('mousedown', event => {
     
 })
 
-addEventListener('dblclick', event => {
+flowCanvas.addEventListener('dblclick', event => {
     //every time the mouse button goes down
     
     var clickHandledByMolecule = false;
@@ -52,7 +55,7 @@ addEventListener('dblclick', event => {
     
 })
 
-addEventListener('mouseup', event => {
+flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     moleculesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY);      
@@ -60,7 +63,7 @@ addEventListener('mouseup', event => {
 })
 
 
-addEventListener('contextmenu', showmenu);
+
 // Objects
 
 var AttachmentPoint = {
@@ -378,7 +381,7 @@ function init() {
     
     menu = document.querySelector('.menu');
     menu.classList.add('off');
-    
+    menu.addEventListener('mouseleave', hidemenu);
     
     availableTypes.forEach(type => {
         var newElement = document.createElement("LI");
@@ -388,7 +391,7 @@ function init() {
         newElement.appendChild(text); 
         menu.appendChild(newElement); 
         
-        document.getElementById(type.name).addEventListener('click', setColour);
+        document.getElementById(type.name).addEventListener('click', placeNewNode);
     }); 
 }
 
@@ -407,19 +410,28 @@ function createNewMolecule(x,y){
     moleculesOnTheScreen.push(molecule);
 }
 
-function setColour(ev){
+function placeNewNode(ev){
     hidemenu();
     let clr = ev.target.id;
-    console.log(clr);
+    
+    
+    availableTypes.forEach(type => {
+        if (type.name === clr){
+            var molecule = type.create({x: menu.x, y: menu.y});
+            moleculesOnTheScreen.push(molecule);
+        }
+    });
+    
 }
 
 function showmenu(ev){
     //stop the real right click menu
     ev.preventDefault(); 
     //show the custom menu
-    console.log( ev.clientX, ev.clientY );
     menu.style.top = `${ev.clientY - 20}px`;
     menu.style.left = `${ev.clientX - 20}px`;
+    menu.x = ev.clientX;
+    menu.y = ev.clientY;
     menu.classList.remove('off');
 }
 

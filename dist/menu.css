@@ -33,4 +33,5 @@
 .menu-item:active{
     color: #000;
     font-weight: 500;
+    background-color: #ffffff;
 }
