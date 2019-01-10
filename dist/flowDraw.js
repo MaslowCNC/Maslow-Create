@@ -73,10 +73,6 @@ var AttachmentPoint = {
         });
         instance.x = instance.parentMolecule.x + instance.offsetX;
         instance.y = instance.parentMolecule.y + instance.offsetY;
-        console.log("Position");
-        console.log(instance.parentMolecule);
-        console.log(instance.x);
-        console.log(instance.y);
         return instance;
     },
     
@@ -91,7 +87,11 @@ var AttachmentPoint = {
 
     clickDown: function(x,y){
         if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
-            var connector = new Connector(this.parentMolecule, this);
+            
+            var connector = Connector.create({
+                parentMolecule: this.parentMolecule, 
+                attachmentPoint1: this
+            });
             this.parentMolecule.children.push(connector);
             return true; //indicate that the click was handled by this object
         }
@@ -128,6 +128,88 @@ var AttachmentPoint = {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
         this.draw()
+    }
+
+}
+
+var Connector =  {
+    
+    isMoving: true,
+    color: 'black',
+
+    create: function(values){
+        var instance = Object.create(this);
+        Object.keys(values).forEach(function(key) {
+            instance[key] = values[key];
+        });
+        
+        instance.startX = instance.parentMolecule.outputX;
+        instance.startY = instance.parentMolecule.y;
+        
+        return instance;
+    },
+    
+    draw: function() {
+        
+        c.beginPath()
+        c.fillStyle = this.color
+        c.globalCompositeOperation = 'destination-over'; //draw under other elements
+        c.moveTo(this.startX, this.startY)
+        c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
+        c.stroke()
+        c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
+    },
+
+    clickDown: function(x,y){
+        
+    },
+
+    clickUp: function(x,y){
+        
+        var connectionNode = null;
+        
+        moleculesOnTheScreen.forEach(molecule => {
+            molecule.children.forEach(child => {
+                if(child.wasConnectionMade(x,y)){
+                    connectionNode = child.wasConnectionMade(x,y);
+                }
+            });
+        });
+        
+        if(this.isMoving){
+            if (connectionNode != null){
+                this.attachmentPoint2 = connectionNode;
+            }
+            else{
+                //remove this connector from the stack
+                this.parentMolecule.children.pop();
+            }
+        }
+        
+        this.isMoving = false;
+        
+        //find what element is closest
+    },
+
+    clickMove: function(x,y){
+        if (this.isMoving == true){
+            this.endX = x;
+            this.endY = y;
+        }
+    },
+
+    update: function() {
+        this.startX = this.attachmentPoint1.x
+        this.startY = this.attachmentPoint1.y
+        if (this.attachmentPoint2){  //check to see if the attachment point is defined
+            this.endX = this.attachmentPoint2.x;
+            this.endY = this.attachmentPoint2.y;
+        }
+        this.draw()
+    },
+
+    wasConnectionMade: function(x,y){
+        return false;
     }
 
 }
@@ -257,81 +339,8 @@ var DrawingNode = {
         this.draw()
     }
 }
-/*
-var Connector =  {
-    
-    parentMolecule: parentMolecule;,
-    attachmentPoint1: attachmentPoint1;,
-    startX: this.parentMolecule.outputX;,
-    startY: this.parentMolecule.y;,
-    isMoving: true;,
-    color: 'black';,
 
-    draw: function() {
-        
-        c.beginPath()
-        c.fillStyle = this.color
-        c.globalCompositeOperation = 'destination-over'; //draw under other elements
-        c.moveTo(this.startX, this.startY)
-        c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
-        c.stroke()
-        c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
-    },
 
-    clickDown: function(x,y){
-        
-    },
-
-    clickUp: function(x,y){
-        
-        var connectionNode = null;
-        
-        moleculesOnTheScreen.forEach(molecule => {
-            molecule.children.forEach(child => {
-                if(child.wasConnectionMade(x,y) instanceof AttachmentPoint){
-                    connectionNode = child.wasConnectionMade(x,y);
-                }
-            });
-        });
-        
-        if(this.isMoving){
-            if (connectionNode != null){
-                this.attachmentPoint2 = connectionNode;
-            }
-            else{
-                //remove this connector from the stack
-                this.parentMolecule.children.pop();
-            }
-        }
-        
-        this.isMoving = false;
-        
-        //find what element is closest
-    },
-
-    clickMove: function(x,y){
-        if (this.isMoving == true){
-            this.endX = x;
-            this.endY = y;
-        }
-    },
-
-    update: function() {
-        this.startX = this.attachmentPoint1.x
-        this.startY = this.attachmentPoint1.y
-        if (this.attachmentPoint2 instanceof AttachmentPoint){
-            this.endX = this.attachmentPoint2.x;
-            this.endY = this.attachmentPoint2.y;
-        }
-        this.draw()
-    }
-
-    wasConnectionMade: function(x,y){
-        return false;
-    }
-
-}
-*/
 
 // Implementation
 
