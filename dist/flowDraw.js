@@ -65,6 +65,7 @@ var AttachmentPoint = {
     defaultRadius: 8,
     expandedRadius: 14,
     radius: 8,
+    type: "output",
 
     create: function(values){
         var instance = Object.create(this);
@@ -86,7 +87,7 @@ var AttachmentPoint = {
     },
 
     clickDown: function(x,y){
-        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius && this.type == 'output'){
             
             var connector = Connector.create({
                 parentMolecule: this.parentMolecule, 
@@ -177,12 +178,11 @@ var Connector =  {
         });
         
         if(this.isMoving){
-            if (connectionNode){
+            if (connectionNode && connectionNode.type === "input"){
                 this.attachmentPoint2 = connectionNode;
             }
             else{
                 //remove this connector from the stack
-                console.log(this.parentMolecule.children);
                 this.parentMolecule.children.pop();
             }
         }
@@ -232,12 +232,14 @@ var DrawingNode = {
         input = AttachmentPoint.create({
             parentMolecule: instance, 
             offsetX: -1* instance.radius, 
-            offsetY: 0
+            offsetY: 0,
+            type: "input"
         });
         output = AttachmentPoint.create({
             parentMolecule: instance, 
             offsetX: 1* instance.radius, 
-            offsetY: 0
+            offsetY: 0,
+            type: "output"
         });
         instance.children = [];
         instance.children.push(input);
