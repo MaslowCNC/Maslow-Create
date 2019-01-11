@@ -70,6 +70,16 @@ var AttachmentPoint = {
     defaultRadius: 8,
     expandedRadius: 14,
     radius: 8,
+    
+    hoverDetectRadius: 8,
+    hoverOffsetX: 0,
+    hoverOffsetY: 30,
+    defaultOffsetX: 0,
+    defaultOffsetY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    showHoverText: false,
+    
     type: "output",
 
     create: function(values){
@@ -77,6 +87,8 @@ var AttachmentPoint = {
         Object.keys(values).forEach(function(key) {
             instance[key] = values[key];
         });
+        instance.offsetX = instance.defaultOffsetX;
+        instance.offsetY = instance.defaultOffsetY;
         instance.x = instance.parentMolecule.x + instance.offsetX;
         instance.y = instance.parentMolecule.y + instance.offsetY;
         return instance;
@@ -87,6 +99,10 @@ var AttachmentPoint = {
         c.beginPath();
         c.fillStyle = this.parentMolecule.color;
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        if (this.showHoverText){
+            c.textAlign = "end"; 
+            c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
+        }
         c.fill();
         c.closePath();
     },
@@ -112,11 +128,30 @@ var AttachmentPoint = {
 
     clickMove: function(x,y){
         //expand if touched by mouse
-        if (distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+        
+        var distFromCursor = distBetweenPoints (this.x, x, this.y, y);
+        
+        //If we are hovering over the attachment point, indicate that by making it big
+        if (distFromCursor < this.defaultRadius){
             this.radius = this.expandedRadius;
         }
         else{
             this.radius = this.defaultRadius;
+        }
+        
+        
+        //If we are close to the attachment point move it to it's hover location to make it accessable
+        if (distFromCursor < this.hoverDetectRadius){
+            this.offsetX = this.hoverOffsetX;
+            this.offsetY = this.hoverOffsetY;
+            this.showHoverText = true;
+            this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
+        }
+        else{
+            this.offsetX = this.defaultOffsetX;
+            this.offsetY = this.defaultOffsetY;
+            this.showHoverText = false;
+            this.hoverDetectRadius = this.defaultRadius;
         }
     },
 
@@ -251,12 +286,13 @@ var DrawingNode = {
             child.draw();       
         });
         
-        c.beginPath()
-        c.fillStyle = this.color
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        c.fill()
-        c.closePath()
+        c.beginPath();
+        c.fillStyle = this.color;
+        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        c.textAlign = "start"; 
+        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        c.fill();
+        c.closePath();
     },
     
     addIO: function(type, name, target){
@@ -269,8 +305,8 @@ var DrawingNode = {
         }
         input = AttachmentPoint.create({
             parentMolecule: target, 
-            offsetX: offset, 
-            offsetY: 0,
+            defaultOffsetX: offset, 
+            defaultOffsetY: 0,
             type: type,
             name: name
         });
