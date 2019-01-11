@@ -43,7 +43,6 @@ flowCanvas.addEventListener('dblclick', event => {
     var clickHandledByMolecule = false;
     
     currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        console.log(molecule);
         if (molecule.doubleClick(event.clientX,event.clientY) == true){
             clickHandledByMolecule = true;
         }
@@ -363,7 +362,6 @@ var DrawingNode = {
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
-            console.log("double click on a node");
             clickProcessed = true;
         }
         
@@ -401,6 +399,100 @@ var DrawingNode = {
 
 var Atom = DrawingNode.create({
     codeBlock: ""
+});
+
+var Input = DrawingNode.create({
+    codeBlock: "",
+    type: "input",
+    name: "Input",
+    height: 16,
+    radius: 15,
+    create: function(values){
+        var instance = DrawingNode.create.call(this, values);
+        instance.addIO("output", "number", instance);
+        return instance;
+    },
+    draw: function() {
+        
+        this.children.forEach(child => {
+            child.draw();       
+        });
+        
+        c.beginPath();
+        c.fillStyle = this.color;
+        c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
+        c.textAlign = "start"; 
+        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        c.fill();
+        c.closePath();
+        
+        c.beginPath();
+        c.fillStyle = "#949294";
+        c.moveTo(this.x - this.radius, this.y - this.height/2);
+        c.lineTo(this.x - this.radius + 10, this.y);
+        c.lineTo(this.x - this.radius, this.y + this.height/2);
+        c.fill();
+    }
+});
+
+var Output = DrawingNode.create({
+    codeBlock: "",
+    type: "output",
+    name: "Output",
+    height: 16,
+    radius: 15,
+    create: function(values){
+        var instance = DrawingNode.create.call(this, values);
+        instance.addIO("input", "number or geometry", instance);
+        return instance;
+    },
+    draw: function() {
+        
+        this.children.forEach(child => {
+            child.draw();       
+        });
+        
+        c.beginPath();
+        c.fillStyle = this.color;
+        c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
+        c.textAlign = "end"; 
+        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        c.fill();
+        c.closePath();
+        
+        c.beginPath();
+        c.moveTo(this.x + this.radius, this.y - this.height/2);
+        c.lineTo(this.x + this.radius + 10, this.y);
+        c.lineTo(this.x + this.radius, this.y + this.height/2);
+        c.fill();
+    }
+});
+
+var Constant = DrawingNode.create({
+    codeBlock: "",
+    type: "constant",
+    name: "Constant",
+    height: 16,
+    radius: 15,
+    create: function(values){
+        var instance = DrawingNode.create.call(this, values);
+        instance.addIO("output", "number", instance);
+        return instance;
+    },
+    draw: function() {
+        
+        this.children.forEach(child => {
+            child.draw();       
+        });
+        
+        c.beginPath();
+        c.fillStyle = this.color;
+        c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
+        c.textAlign = "start"; 
+        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        c.fill();
+        c.closePath();
+    }
 });
 
 var Molecule = DrawingNode.create({
@@ -443,7 +535,6 @@ var Molecule = DrawingNode.create({
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
-            console.log("double click on a molecule");
             currentMolecule = this; //set this to be the currently displayed molecule
             clickProcessed = true;
         }
@@ -472,9 +563,6 @@ var UpOneLevelBtn = DrawingNode.create({
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
-            console.log("double click on a go up");
-            console.log(this.parentMolecule.topLevel);
-            console.log(this.parentMolecule.parent);
             currentMolecule = this.parentMolecule.parent; //set parent this to be the currently displayed molecule
             clickProcessed = true;
         }
@@ -513,17 +601,13 @@ var Cubeoid = Atom.create({
 
 // Implementation
 
-var availableTypes = [Molecule, Sphereoid, Cubeoid];
+var availableTypes = [Molecule, Sphereoid, Cubeoid, Input, Output, Constant];
 
 let currentMolecule;
 let menu;
 
 function init() {
     currentMolecule = Molecule.create({x: 0, y: 0, topLevel: true});
-     
-    var typeToCreate = Math.floor(Math.random() * (availableTypes.length));
-    var atom = availableTypes[typeToCreate].create({x: 500*Math.random(), y: 200*Math.random()});
-    currentMolecule.nodesOnTheScreen.push(atom);
     
     menu = document.querySelector('.menu');
     menu.classList.add('off');
