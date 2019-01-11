@@ -235,21 +235,10 @@ var DrawingNode = {
         Object.keys(values).forEach(function(key) {
             instance[key] = values[key];
         });
-        input = AttachmentPoint.create({
-            parentMolecule: instance, 
-            offsetX: -1* instance.radius, 
-            offsetY: 0,
-            type: "input"
-        });
-        output = AttachmentPoint.create({
-            parentMolecule: instance, 
-            offsetX: 1* instance.radius, 
-            offsetY: 0,
-            type: "output"
-        });
+        
         instance.children = [];
-        instance.children.push(input);
-        instance.children.push(output);
+        instance.addIO("input", "radius", instance);
+        instance.addIO("output", "sphere", instance);
         return instance;
     },
     
@@ -269,7 +258,25 @@ var DrawingNode = {
         c.fill()
         c.closePath()
     },
-
+    
+    addIO: function(type, name, target){
+        var offset;
+        if (type == "input"){
+            offset = -1* target.radius;
+        }
+        else{
+            offset = target.radius;
+        }
+        input = AttachmentPoint.create({
+            parentMolecule: target, 
+            offsetX: offset, 
+            offsetY: 0,
+            type: type,
+            name: name
+        });
+        target.children.push(input);
+    },
+    
     clickDown: function(x,y){
         //returns true if something was done with the click
         
@@ -397,14 +404,20 @@ var Molecule = DrawingNode.create({
 var UpOneLevelBtn = DrawingNode.create({
     name: "Go Up One Level",
     children: [],
-    color: "green",
+    color: "blue",
+    defaultColor: 'blue',
+    selectedColor: 'blue',
     radius: 30,
+    
+    create: function(values){
+        var instance = DrawingNode.create.call(this, values);
+        return instance;
+    },
     
     doubleClick: function(x,y){
         //returns true if something was done with the click
         
         var clickProcessed = false;
-        
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
