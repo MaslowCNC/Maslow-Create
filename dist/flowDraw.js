@@ -100,8 +100,14 @@ var AttachmentPoint = {
         c.fillStyle = this.parentMolecule.color;
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         if (this.showHoverText){
-            c.textAlign = "end"; 
-            c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
+            if(this.type == "input"){
+                c.textAlign = "end";
+                c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
+            }
+            else{
+                c.textAlign = "start"; 
+                c.fillText(this.name, this.x + (this.radius + 3), this.y+2)
+            }
         }
         c.fill();
         c.closePath();
@@ -272,8 +278,6 @@ var DrawingNode = {
         });
         
         instance.children = [];
-        instance.addIO("input", "radius", instance);
-        instance.addIO("output", "sphere", instance);
         return instance;
     },
     
@@ -296,6 +300,8 @@ var DrawingNode = {
     },
     
     addIO: function(type, name, target){
+        
+        //compute the baseline offset from parent node
         var offset;
         if (type == "input"){
             offset = -1* target.radius;
@@ -303,10 +309,19 @@ var DrawingNode = {
         else{
             offset = target.radius;
         }
+        
+        //compute hover offset from parent node
+        //find the number of elements of the same type already in the array 
+        var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
+        //multiply that number by an offset to find the new x offset
+        var hoverOffsetComputed = numberOfSameTypeIO * -30;
+        
         input = AttachmentPoint.create({
             parentMolecule: target, 
             defaultOffsetX: offset, 
             defaultOffsetY: 0,
+            hoverOffsetX: offset,
+            hoverOffsetY: hoverOffsetComputed,
             type: type,
             name: name
         });
@@ -471,7 +486,13 @@ var UpOneLevelBtn = DrawingNode.create({
 var Sphereoid = Atom.create({
     name: "Sphereoid",
     sphereRadius: 10,
-    codeBlock: "some code to create a sphere"
+    codeBlock: "some code to create a sphere",
+    create: function(values){
+        var instance = DrawingNode.create.call(this, values);
+        instance.addIO("input", "radius", instance);
+        instance.addIO("output", "geometry", instance);
+        return instance;
+    }
 });
 
 var Cubeoid = Atom.create({
@@ -479,7 +500,15 @@ var Cubeoid = Atom.create({
     xL: 10,
     yL: 10,
     zL: 10,
-    codeBlock: "some code to create a sphere"
+    codeBlock: "some code to create a sphere",
+    create: function(values){
+        var instance = DrawingNode.create.call(this, values);
+        instance.addIO("input", "L", instance);
+        instance.addIO("input", "W", instance);
+        instance.addIO("input", "H", instance);
+        instance.addIO("output", "geometry", instance);
+        return instance;
+    }
 });
 
 // Implementation
