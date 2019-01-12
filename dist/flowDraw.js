@@ -6,6 +6,9 @@ const c = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight/2
 
+let sideBar = document.querySelector('.sideBar');
+let lowerHalfOfScreen = document.querySelector('.flex-parent');
+lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
 
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');

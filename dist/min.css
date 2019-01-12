@@ -8,7 +8,15 @@
   color: Black;
   font-weight: bold;
   font-family: Helvetica, Arial, Sans;
-  min-width: 410px;
+  flex: 2;
+}
+
+.sideBar {
+    flex: 1;
+}
+
+.flex-parent {
+  display: flex;
 }
 
 #header {
@@ -20,13 +28,14 @@
   padding: 0px; /* not inherited */
 
   background: white;
-  width: 900px;
-  height: 300px;
 
   top: 0px;
   bottom: 0px;
   
   cursor: move; 
+  
+  height: 100%;
+  width: 100%;
 }
 
 canvas { 
