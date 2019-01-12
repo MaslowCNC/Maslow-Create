@@ -60,6 +60,15 @@ flowCanvas.addEventListener('mouseup', event => {
     });
 })
 
+window.addEventListener('keydown', event => {
+    //every time the mouse button goes up
+    
+    currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.keyPress(event.key);      
+    });
+})
+
+
 
 
 // Objects
@@ -86,6 +95,9 @@ var AttachmentPoint = {
         Object.keys(values).forEach(function(key) {
             instance[key] = values[key];
         });
+        
+        instance.connectors = [];
+        
         instance.offsetX = instance.defaultOffsetX;
         instance.offsetY = instance.defaultOffsetY;
         instance.x = instance.parentMolecule.x + instance.offsetX;
@@ -110,25 +122,42 @@ var AttachmentPoint = {
         }
         c.fill();
         c.closePath();
+        
     },
 
     clickDown: function(x,y){
-        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius && this.type == 'output'){
+        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
             
-            var connector = Connector.create({
-                parentMolecule: this.parentMolecule, 
-                attachmentPoint1: this
-            });
-            this.parentMolecule.children.push(connector);
+            if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
+                var connector = Connector.create({
+                    parentMolecule: this.parentMolecule, 
+                    attachmentPoint1: this
+                });
+                this.connectors.push(connector);
+            }
+            
+            if(this.type == 'input'){ //connectors can only be selected by clicking on an input
+                this.connectors.forEach(connector => {     //select any connectors attached to this node
+                    connector.selected = true;
+                });
+            }
+            
             return true; //indicate that the click was handled by this object
         }
         else{
+            if(this.type == 'input'){ //connectors can only be selected by clicking on an input
+                this.connectors.forEach(connector => {      //unselect any connectors attached to this node
+                    connector.selected = false;
+                });
+            }
             return false; //indicate that the click was not handled by this object
         }
     },
 
     clickUp: function(x,y){
-        
+        this.connectors.forEach(connector => {
+            connector.clickUp(x, y);       
+        });
     },
 
     clickMove: function(x,y){
@@ -158,30 +187,57 @@ var AttachmentPoint = {
             this.showHoverText = false;
             this.hoverDetectRadius = this.defaultRadius;
         }
+        
+        this.connectors.forEach(connector => {
+            connector.clickMove(x, y);       
+        });
     },
-
-    wasConnectionMade: function(x,y){
+    
+    keyPress: function(key){
+        this.connectors.forEach(connector => {
+            connector.keyPress(key);       
+        });
+    },
+    
+    deleteSelf: function(){
+        //remove any connectors which were attached to this attachment point
+        
+        this.connectors.forEach(connector => {
+            connector.deleteSelf();       
+        });
+    },
+    
+    wasConnectionMade: function(x,y, connector){
         //this function returns itself if the cordinates passed in are within itself
         if (distBetweenPoints(this.x, x, this.y, y) < this.radius){
+            
+            
+            if(this.connectors.length > 0 && this.type == 'input'){ //Don't accept a second connection to an input
+                return false;
+            }
+            
+            this.connectors.push(connector);
             return this;
         }
-        else{
-            return false;
-        }
+        return false;
     },
 
     update: function() {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
         this.draw()
+        
+        this.connectors.forEach(connector => {
+            connector.update();       
+        });
     }
-
 }
 
 var Connector =  {
     
     isMoving: true,
     color: 'black',
+    selected: false,
 
     create: function(values){
         var instance = Object.create(this);
@@ -197,38 +253,44 @@ var Connector =  {
     
     draw: function() {
         
-        c.beginPath()
-        c.fillStyle = this.color
-        c.globalCompositeOperation = 'destination-over'; //draw under other elements
-        c.moveTo(this.startX, this.startY)
+        c.beginPath();
+        c.fillStyle = this.color;
+        c.globalCompositeOperation = 'destination-over'; //draw under other elements;
+        if(this.selected){
+            c.lineWidth = 3;
+        }
+        else{
+            c.lineWidth = 1;
+        }
+        c.moveTo(this.startX, this.startY);
         c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
-        c.stroke()
+        c.stroke();
         c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
-    },
-
-    clickDown: function(x,y){
-        
     },
 
     clickUp: function(x,y){
         
         var connectionNode = false;
-        
-        currentMolecule.nodesOnTheScreen.forEach(molecule => {
-            molecule.children.forEach(child => {
-                if(child.wasConnectionMade(x,y)){
-                    connectionNode = child.wasConnectionMade(x,y);
-                }
+        if(this.isMoving){  //we only want to attach the connector which is currently moving
+            currentMolecule.nodesOnTheScreen.forEach(molecule => {                  //for every molecule on the screen  (should run three times)
+                molecule.children.forEach(child => {
+                    var thisConnectionValid = child.wasConnectionMade(x,y, this);
+                    if(thisConnectionValid){
+                        connectionNode = thisConnectionValid;
+                    }
+                });
             });
-        });
+        }
+        
+        //FIXME: This bit needs to be refactored, its pretty ugly as is
         
         if(this.isMoving){
-            if (connectionNode && connectionNode.type === "input"){
+            if (connectionNode && connectionNode.type === "input" ){
                 this.attachmentPoint2 = connectionNode;
             }
             else{
                 //remove this connector from the stack
-                this.parentMolecule.children.pop();
+                this.attachmentPoint1.connectors.pop();
             }
         }
         
@@ -242,8 +304,28 @@ var Connector =  {
             this.endY = y;
         }
     },
-
+    
+    keyPress: function(key){
+        if(this.selected){
+            if (key == 'D' || key == 'd' || key == 'Delete'){
+                this.deleteSelf();
+            }
+        }
+    },
+    
+    deleteSelf: function(){
+        
+        console.log("this code here");
+        console.log(this.attachmentPoint1);
+        console.log(this.attachmentPoint2);
+        
+        this.attachmentPoint2.connectors = []; //free up the point to which this was attached
+        
+        this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
+    },
+    
     update: function() {
+        
         this.startX = this.attachmentPoint1.x
         this.startY = this.attachmentPoint1.y
         if (this.attachmentPoint2){  //check to see if the attachment point is defined
@@ -253,7 +335,7 @@ var Connector =  {
         this.draw()
     },
 
-    wasConnectionMade: function(x,y){
+    wasConnectionMade: function(x,y, connector){
         return false;
     }
 
@@ -265,6 +347,7 @@ var DrawingNode = {
     radius: 20,
     defaultColor: '#F3EFEF',
     selectedColor: 'green',
+    selected: false,
     color: '#F3EFEF',
     name: "name",
     parentMolecule: null,
@@ -338,10 +421,12 @@ var DrawingNode = {
         if (distFromClick < this.radius){
             this.color = this.selectedColor;
             this.isMoving = true;
+            this.selected = true;
             clickProcessed = true;
         }
         else{
             this.color = this.defaultColor;
+            this.selected = false;
         }
         
         this.children.forEach(child => {
@@ -386,7 +471,30 @@ var DrawingNode = {
             child.clickMove(x,y);       
         });
     },
-
+    
+    keyPress: function(key){
+        //runs whenver a key is pressed
+        if (key == 'D' || key == 'd' || key == 'Delete'){
+            if(this.selected == true){
+                this.deleteNode();
+            }
+        }
+        
+        this.children.forEach(child => {
+            child.keyPress(key);
+        });
+    },
+    
+    deleteNode: function(){
+        //deletes this node and all of it's children
+        
+        this.children.forEach(child => {
+            child.deleteSelf();       
+        });
+        
+        this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1); //remove this node from the list
+    },
+    
     update: function() {
         
         this.children.forEach(child => {
@@ -409,7 +517,11 @@ var Input = DrawingNode.create({
     radius: 15,
     create: function(values){
         var instance = DrawingNode.create.call(this, values);
-        instance.addIO("output", "number", instance);
+        instance.addIO("output", "number or geometry", instance);
+        
+        //add a new input to the parent molecule
+        instance.parent.addIO("input", this.name, instance.parent);
+        
         return instance;
     },
     draw: function() {
@@ -418,20 +530,22 @@ var Input = DrawingNode.create({
             child.draw();       
         });
         
-        c.beginPath();
+        
         c.fillStyle = this.color;
-        c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
+        
         c.textAlign = "start"; 
         c.fillText(this.name, this.x + this.radius, this.y-this.radius);
-        c.fill();
-        c.closePath();
+
         
         c.beginPath();
-        c.fillStyle = "#949294";
         c.moveTo(this.x - this.radius, this.y - this.height/2);
         c.lineTo(this.x - this.radius + 10, this.y);
         c.lineTo(this.x - this.radius, this.y + this.height/2);
+        c.lineTo(this.x + this.radius, this.y + this.height/2);
+        c.lineTo(this.x + this.radius, this.y - this.height/2);
         c.fill();
+        c.closePath();
+
     }
 });
 
@@ -444,6 +558,10 @@ var Output = DrawingNode.create({
     create: function(values){
         var instance = DrawingNode.create.call(this, values);
         instance.addIO("input", "number or geometry", instance);
+        
+        //add a new output to the parent molecule
+        instance.parent.addIO("output", this.name, instance.parent);
+        
         return instance;
     },
     draw: function() {
@@ -474,6 +592,7 @@ var Constant = DrawingNode.create({
     name: "Constant",
     height: 16,
     radius: 15,
+    value: 0,
     create: function(values){
         var instance = DrawingNode.create.call(this, values);
         instance.addIO("output", "number", instance);
@@ -647,12 +766,7 @@ function placeNewNode(ev){
     
     availableTypes.forEach(type => {
         if (type.name === clr){
-            if (type.name === 'Molecule'){
-                var molecule = type.create({x: menu.x, y: menu.y, parent: currentMolecule});
-            }
-            else{
-                var molecule = type.create({x: menu.x, y: menu.y});
-            }
+            var molecule = type.create({x: menu.x, y: menu.y, parent: currentMolecule});
             currentMolecule.nodesOnTheScreen.push(molecule);
         }
     });
