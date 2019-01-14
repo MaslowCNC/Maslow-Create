@@ -114,3 +114,70 @@ canvas {
   vertical-align: middle;
 }
 
+#box{
+    border: 1px solid #999;
+}
+
+.menu{
+    width: 12rem;
+    background-color: #f4f4f4;
+    color: #333;
+    border: 1px solid #aaa;
+    box-shadow: 2px 2px 2px #999;
+    border-radius: 0.2rem;
+    list-style: none;
+    position: fixed;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.menu.off{
+    top: -200%;
+    left: -200%;
+}
+
+.menu-item{
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 1rem;
+    font-weight: 100;
+    padding: 0 1rem;
+    cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:active{
+    color: #000;
+    font-weight: 500;
+    background-color: #ffffff;
+}
+
+.sidebar-list{
+    list-style: none;
+}
+
+.sidebar-item{
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 1rem;
+    font-weight: 100;
+    padding: 0 1rem;
+    cursor: pointer;
+}
+
+.sidebar-item:hover,
+
+.sidebar-item:active{
+    color: #000;
+    font-weight: 500;
+    background-color: #ffffff;
+}
+
+.sidebar-subitem{
+    display:inline-block;
+    padding-left: 10px;
+}
