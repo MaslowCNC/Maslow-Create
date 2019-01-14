@@ -57,6 +57,10 @@ canvas {
 
 }
 
+body {
+    font-family: 'Work Sans', sans-serif;
+}
+
 #parametersdiv {
   margin: 0px; /* not inherited */
   padding: 0px;
