@@ -6,6 +6,7 @@ const c = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight/2
 
+//put some content in the sidebar at launch
 let sideBar = document.querySelector('.sideBar');
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
@@ -425,6 +426,7 @@ var DrawingNode = {
             this.color = this.selectedColor;
             this.isMoving = true;
             this.selected = true;
+            this.updateSidebar();
             clickProcessed = true;
         }
         else{
@@ -486,6 +488,21 @@ var DrawingNode = {
         this.children.forEach(child => {
             child.keyPress(key);
         });
+    },
+    
+    updateSidebar: function(){
+        //updates the sidebar to display information about this node
+        
+        //remove everything in the sideBar now
+        while (sideBar.firstChild) {
+            sideBar.removeChild(sideBar.firstChild);
+        }
+        
+        //add the new things we want to display
+        var name = document.createElement('h1');
+        name.textContent = this.name;
+        name.setAttribute("style","text-align:center;");
+        sideBar.appendChild(name);
     },
     
     deleteNode: function(){
@@ -601,6 +618,14 @@ var Constant = DrawingNode.create({
         instance.addIO("output", "number", instance);
         return instance;
     },
+        updateSidebar: function(){
+        //updates the sidebar to display information about this node
+        
+        DrawingNode.updateSidebar.call(this) //call the super function
+        
+        var radiusText = document.createTextNode("Value: " + this.value);
+        sideBar.appendChild(radiusText);
+    },
     draw: function() {
         
         this.children.forEach(child => {
@@ -668,14 +693,41 @@ var Molecule = DrawingNode.create({
 var UpOneLevelBtn = DrawingNode.create({
     name: "Go Up One Level",
     children: [],
-    color: "blue",
-    defaultColor: 'blue',
-    selectedColor: 'blue',
+    color: '#F3EFEF',
+    defaultColor: '#F3EFEF',
+    selectedColor: '#F3EFEF',
     radius: 30,
     
     create: function(values){
         var instance = DrawingNode.create.call(this, values);
         return instance;
+    },
+    
+    draw: function() {
+        
+        this.children.forEach(child => {
+            child.draw();       
+        });
+        
+        
+        c.fillStyle = this.color;
+        
+        c.textAlign = "start"; 
+        c.fillText(this.name, this.x, this.y-(this.radius-5));
+
+        var shaftWidth = 7;
+        
+        c.beginPath();
+        c.moveTo(this.x, this.y - this.radius/2);
+        c.lineTo(this.x + this.radius/2, this.y);
+        c.lineTo(this.x + shaftWidth, this.y);
+        c.lineTo(this.x + shaftWidth, this.y + this.radius/2);
+        c.lineTo(this.x - shaftWidth, this.y + this.radius/2);
+        c.lineTo(this.x - shaftWidth, this.y);
+        c.lineTo(this.x - this.radius/2, this.y);
+        c.fill();
+        c.closePath();
+
     },
     
     doubleClick: function(x,y){
