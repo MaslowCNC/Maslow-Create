@@ -35,3 +35,22 @@
     font-weight: 500;
     background-color: #ffffff;
 }
+.sidebar-list{
+    list-style: none;
+    display: flex;
+}
+.sidebar-item{
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 1rem;
+    font-weight: 100;
+    padding: 0 1rem;
+    cursor: pointer;
+}
+.sidebar-item:hover,
+.sidebar-item:active{
+    color: #000;
+    font-weight: 500;
+    background-color: #ffffff;
+}
+    

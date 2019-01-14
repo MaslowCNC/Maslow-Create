@@ -618,13 +618,19 @@ var Constant = DrawingNode.create({
         instance.addIO("output", "number", instance);
         return instance;
     },
-        updateSidebar: function(){
+    updateSidebar: function(){
         //updates the sidebar to display information about this node
         
-        DrawingNode.updateSidebar.call(this) //call the super function
+        DrawingNode.updateSidebar.call(this); //call the super function
         
-        var radiusText = document.createTextNode("Value: " + this.value);
-        sideBar.appendChild(radiusText);
+        var valueList = document.createElement("ul");
+        sideBar.appendChild(valueList);
+        valueList.setAttribute("class", "sidebar-list");
+        valueList.setAttribute("id", "sidebar-list");
+        
+        createEditableValueListItem(valueList,this,this.value, "Value", true);
+        createEditableValueListItem(valueList,this,this.name, "Name", false);
+        
     },
     draw: function() {
         
@@ -805,6 +811,53 @@ function distBetweenPoints(x1, x2, y1, y2){
     var dist = Math.sqrt(a2 + b2);
     
     return dist;
+}
+
+function createEditableValueListItem(list,parent,variableToChange, label, resultShouldBeNumber){
+    var listElement = document.createElement("LI");
+    list.appendChild(listElement);
+    
+    
+    //Div which contains the entire element
+    var div = document.createElement("div");
+    listElement.appendChild(div);
+    div.setAttribute("class", "sidebar-item");
+    
+    //Left div which displays the label
+    var labelDiv = document.createElement("div");
+    div.appendChild(labelDiv);
+    var labelText = document.createTextNode(label + ":");
+    labelDiv.appendChild(labelText);
+    labelDiv.setAttribute("style", "display:inline-block");
+    
+    
+    //Right div which is editable and displays the value
+    var valueTextDiv = document.createElement("div");
+    div.appendChild(valueTextDiv);
+    var valueText = document.createTextNode(variableToChange);
+    valueTextDiv.appendChild(valueText);
+    valueTextDiv.setAttribute("contenteditable", "true");
+    valueTextDiv.setAttribute("style", "display:inline-block");
+    valueTextDiv.setAttribute("id", label);
+    
+    
+    document.getElementById(label).addEventListener('focusout', event => {
+        var valueInBox = document.getElementById(label).textContent;
+        if(resultShouldBeNumber){
+            valueInBox = parseFloat(valueInBox);
+        }
+        parent.variableToChange = valueInBox;
+        console.log(parent);
+    });
+    
+    //prevent the return key from being used when editing a value
+    document.getElementById(label).addEventListener('keypress', function(evt) {
+        if (evt.which === 13) {
+            evt.preventDefault();
+            document.getElementById(label).blur();  //shift focus away if someone presses enter
+        }
+    });
+
 }
 
 function createNewMolecule(x,y, parent){
