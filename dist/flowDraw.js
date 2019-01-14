@@ -75,7 +75,7 @@ window.addEventListener('keydown', event => {
 
 
 
-// Objects
+// Node prototype objects
 
 var AttachmentPoint = {
     
@@ -93,6 +93,7 @@ var AttachmentPoint = {
     showHoverText: false,
     
     type: "output",
+    value: 10, //The default input value when nothing is connected
 
     create: function(values){
         var instance = Object.create(this);
@@ -211,6 +212,10 @@ var AttachmentPoint = {
         });
     },
     
+    updateSidebar: function(){
+        this.parent.updateSidebar();
+    },
+    
     wasConnectionMade: function(x,y, connector){
         //this function returns itself if the cordinates passed in are within itself
         if (distBetweenPoints(this.x, x, this.y, y) < this.radius){
@@ -311,17 +316,13 @@ var Connector =  {
     
     keyPress: function(key){
         if(this.selected){
-            if (key == 'D' || key == 'd' || key == 'Delete'){
+            if (key == 'Delete'){
                 this.deleteSelf();
             }
         }
     },
     
     deleteSelf: function(){
-        
-        console.log("this code here");
-        console.log(this.attachmentPoint1);
-        console.log(this.attachmentPoint2);
         
         this.attachmentPoint2.connectors = []; //free up the point to which this was attached
         
@@ -479,7 +480,7 @@ var DrawingNode = {
     
     keyPress: function(key){
         //runs whenver a key is pressed
-        if (key == 'D' || key == 'd' || key == 'Delete'){
+        if (key == 'Delete'){
             if(this.selected == true){
                 this.deleteNode();
             }
@@ -498,11 +499,25 @@ var DrawingNode = {
             sideBar.removeChild(sideBar.firstChild);
         }
         
-        //add the new things we want to display
+        //add the name as a title
         var name = document.createElement('h1');
         name.textContent = this.name;
         name.setAttribute("style","text-align:center;");
         sideBar.appendChild(name);
+        
+        //Create a list element
+        valueList = document.createElement("ul");
+        sideBar.appendChild(valueList);
+        valueList.setAttribute("class", "sidebar-list");
+        
+        //Add options to set all of the inputs
+        this.children.forEach(child => {
+            if(child.type == 'input'){
+                createEditableValueListItem(valueList,child,"value", child.name, true);
+            }
+        });
+        
+        return valueList;
     },
     
     deleteNode: function(){
@@ -529,7 +544,9 @@ var Atom = DrawingNode.create({
     codeBlock: ""
 });
 
-var Input = DrawingNode.create({
+// Types of nodes
+
+var Input = Atom.create({
     codeBlock: "",
     type: "input",
     name: "Input",
@@ -539,10 +556,15 @@ var Input = DrawingNode.create({
         var instance = DrawingNode.create.call(this, values);
         instance.addIO("output", "number or geometry", instance);
         
-        //add a new input to the parent molecule
-        instance.parent.addIO("input", this.name, instance.parent);
-        
         return instance;
+    },
+    updateSidebar: function(){
+        //updates the sidebar to display information about this node
+        
+        var valueList =  DrawingNode.updateSidebar.call(this); //call the super function
+        
+        createEditableValueListItem(valueList,this,"name", "Name", false);
+        
     },
     draw: function() {
         
@@ -569,7 +591,7 @@ var Input = DrawingNode.create({
     }
 });
 
-var Output = DrawingNode.create({
+var Output = Atom.create({
     codeBlock: "",
     type: "output",
     name: "Output",
@@ -578,9 +600,6 @@ var Output = DrawingNode.create({
     create: function(values){
         var instance = DrawingNode.create.call(this, values);
         instance.addIO("input", "number or geometry", instance);
-        
-        //add a new output to the parent molecule
-        instance.parent.addIO("output", this.name, instance.parent);
         
         return instance;
     },
@@ -606,7 +625,7 @@ var Output = DrawingNode.create({
     }
 });
 
-var Constant = DrawingNode.create({
+var Constant = Atom.create({
     codeBlock: "",
     type: "constant",
     name: "Constant",
@@ -621,12 +640,7 @@ var Constant = DrawingNode.create({
     updateSidebar: function(){
         //updates the sidebar to display information about this node
         
-        DrawingNode.updateSidebar.call(this); //call the super function
-        
-        var valueList = document.createElement("ul");
-        sideBar.appendChild(valueList);
-        valueList.setAttribute("class", "sidebar-list");
-        valueList.setAttribute("id", "sidebar-list");
+        var valueList = DrawingNode.updateSidebar.call(this); //call the super function
         
         createEditableValueListItem(valueList,this,"value", "Value", true);
         createEditableValueListItem(valueList,this,"name", "Name", false);
@@ -648,7 +662,7 @@ var Constant = DrawingNode.create({
     }
 });
 
-var Molecule = DrawingNode.create({
+var Molecule = Atom.create({
     children: [], 
     name: "Molecule",
     topLevel: false, //a flag to signal if this node is the top level node
@@ -660,8 +674,8 @@ var Molecule = DrawingNode.create({
         if (!instance.topLevel){
             goUpOneLevel = UpOneLevelBtn.create({
                 parentMolecule: instance, 
-                x: 100,
-                y: 100
+                x: 50,
+                y: 50
             });
             instance.nodesOnTheScreen.push(goUpOneLevel);
         }
@@ -679,6 +693,22 @@ var Molecule = DrawingNode.create({
         c.fill();
         
     },
+    
+    updateIO: function(){
+        
+        this.children = [];
+        
+        this.nodesOnTheScreen.forEach(node => {
+            
+            if(node.type == "input"){
+                this.addIO("input", node.name, this);
+            }
+            if(node.type == "output"){
+                this.addIO("output", node.name, this);
+            }
+        });
+    },
+    
     doubleClick: function(x,y){
         //returns true if something was done with the click
         
@@ -696,7 +726,7 @@ var Molecule = DrawingNode.create({
     }
 });
 
-var UpOneLevelBtn = DrawingNode.create({
+var UpOneLevelBtn = Atom.create({
     name: "Go Up One Level",
     children: [],
     color: '#F3EFEF',
@@ -743,6 +773,7 @@ var UpOneLevelBtn = DrawingNode.create({
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
+            this.parentMolecule.updateIO(); //updates the IO shown on the parent molecule
             currentMolecule = this.parentMolecule.parent; //set parent this to be the currently displayed molecule
             clickProcessed = true;
         }
@@ -813,7 +844,7 @@ function distBetweenPoints(x1, x2, y1, y2){
     return dist;
 }
 
-function createEditableValueListItem(list,parent,key, label, resultShouldBeNumber){
+function createEditableValueListItem(list,object,key, label, resultShouldBeNumber){
     var listElement = document.createElement("LI");
     list.appendChild(listElement);
     
@@ -828,16 +859,16 @@ function createEditableValueListItem(list,parent,key, label, resultShouldBeNumbe
     div.appendChild(labelDiv);
     var labelText = document.createTextNode(label + ":");
     labelDiv.appendChild(labelText);
-    labelDiv.setAttribute("style", "display:inline-block");
+    labelDiv.setAttribute("class", "sidebar-subitem");
     
     
     //Right div which is editable and displays the value
     var valueTextDiv = document.createElement("div");
     div.appendChild(valueTextDiv);
-    var valueText = document.createTextNode(parent[key]);
+    var valueText = document.createTextNode(object[key]);
     valueTextDiv.appendChild(valueText);
     valueTextDiv.setAttribute("contenteditable", "true");
-    valueTextDiv.setAttribute("style", "display:inline-block");
+    valueTextDiv.setAttribute("class", "sidebar-subitem");
     valueTextDiv.setAttribute("id", label);
     
     
@@ -846,8 +877,8 @@ function createEditableValueListItem(list,parent,key, label, resultShouldBeNumbe
         if(resultShouldBeNumber){
             valueInBox = parseFloat(valueInBox);
         }
-        parent[key] = valueInBox;
-        console.log(parent);
+        object[key] = valueInBox;
+        object.updateSidebar();
     });
     
     //prevent the return key from being used when editing a value

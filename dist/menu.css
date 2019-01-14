@@ -37,7 +37,6 @@
 }
 .sidebar-list{
     list-style: none;
-    display: flex;
 }
 .sidebar-item{
     height: 1.5rem;
@@ -53,4 +52,7 @@
     font-weight: 500;
     background-color: #ffffff;
 }
-    
+.sidebar-subitem{
+    display:inline-block;
+    padding-left: 10px;
+}
