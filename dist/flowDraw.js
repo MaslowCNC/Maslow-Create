@@ -628,8 +628,8 @@ var Constant = DrawingNode.create({
         valueList.setAttribute("class", "sidebar-list");
         valueList.setAttribute("id", "sidebar-list");
         
-        createEditableValueListItem(valueList,this,this.value, "Value", true);
-        createEditableValueListItem(valueList,this,this.name, "Name", false);
+        createEditableValueListItem(valueList,this,"value", "Value", true);
+        createEditableValueListItem(valueList,this,"name", "Name", false);
         
     },
     draw: function() {
@@ -813,7 +813,7 @@ function distBetweenPoints(x1, x2, y1, y2){
     return dist;
 }
 
-function createEditableValueListItem(list,parent,variableToChange, label, resultShouldBeNumber){
+function createEditableValueListItem(list,parent,key, label, resultShouldBeNumber){
     var listElement = document.createElement("LI");
     list.appendChild(listElement);
     
@@ -834,7 +834,7 @@ function createEditableValueListItem(list,parent,variableToChange, label, result
     //Right div which is editable and displays the value
     var valueTextDiv = document.createElement("div");
     div.appendChild(valueTextDiv);
-    var valueText = document.createTextNode(variableToChange);
+    var valueText = document.createTextNode(parent[key]);
     valueTextDiv.appendChild(valueText);
     valueTextDiv.setAttribute("contenteditable", "true");
     valueTextDiv.setAttribute("style", "display:inline-block");
@@ -846,7 +846,7 @@ function createEditableValueListItem(list,parent,variableToChange, label, result
         if(resultShouldBeNumber){
             valueInBox = parseFloat(valueInBox);
         }
-        parent.variableToChange = valueInBox;
+        parent[key] = valueInBox;
         console.log(parent);
     });
     
