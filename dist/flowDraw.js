@@ -39,6 +39,11 @@ flowCanvas.addEventListener('mousedown', event => {
         }
     });
     
+    if(!clickHandledByMolecule){
+        currentMolecule.updateIO();
+        currentMolecule.updateSidebar();
+    }
+    
 })
 
 flowCanvas.addEventListener('dblclick', event => {
