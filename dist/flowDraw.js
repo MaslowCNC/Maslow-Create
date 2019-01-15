@@ -21,11 +21,15 @@ flowCanvas.addEventListener('mousemove', event => {
     });
 })
 
-flowCanvas.addEventListener('resize', () => {
-    canvas.width = innerWidth
-    canvas.height = innerHeight
+window.addEventListener('resize', event => {
+    
+    console.log("resize");
+    
+    var bounds = canvas.getBoundingClientRect();
+    canvas.width = bounds.width;
+    canvas.height = bounds.height; 
 
-    init()
+    //init()
 })
 
 flowCanvas.addEventListener('mousedown', event => {
