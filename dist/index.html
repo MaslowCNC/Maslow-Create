@@ -9,14 +9,16 @@
         }
     </style>
     
-	<link rel="stylesheet" href="min.css" type="text/css">
+	<link rel="stylesheet" href="maslowCreate.css" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 	<script src="/min.js"></script>
 	
 </head>
 <body>
     
-    <ul class="menu ">
+    
+    <ul class="menu " id="menuList">
+        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu()" placeholder="Search for atom..">
         <li class="menu-item" id="red">Select Node Type</li>
     </ul>
     

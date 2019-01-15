@@ -44,6 +44,11 @@ flowCanvas.addEventListener('mousedown', event => {
         currentMolecule.updateSidebar();
     }
     
+    //hide the menu if it is visible
+    if (!document.querySelector('.menu').contains(event.target)) {
+        hidemenu();
+    }
+    
 })
 
 flowCanvas.addEventListener('dblclick', event => {
@@ -859,7 +864,8 @@ function init() {
     
     menu = document.querySelector('.menu');
     menu.classList.add('off');
-    menu.addEventListener('mouseleave', hidemenu);
+    
+    //Add the search bar to the list item
     
     availableTypes.forEach(type => {
         var newElement = document.createElement("LI");
@@ -952,7 +958,15 @@ function placeNewNode(ev){
 function showmenu(ev){
     //stop the real right click menu
     ev.preventDefault(); 
-    //show the custom menu
+    
+    //make sure all elements are unhidden
+    ul = document.getElementById("menuList");
+    li = ul.getElementsByTagName('li');
+    for (i = 0; i < li.length; i++) {
+        li[i].style.display = ""; //set each item to display
+    }
+    
+    //show the menu
     menu.style.top = `${ev.clientY - 20}px`;
     menu.style.left = `${ev.clientX - 20}px`;
     menu.x = ev.clientX;
@@ -964,6 +978,26 @@ function hidemenu(ev){
     menu.classList.add('off');
     menu.style.top = '-200%';
     menu.style.left = '-200%';
+}
+
+function searchMenu() {
+  // Declare variables
+  var input, filter, ul, li, a, i, txtValue;
+  input = document.getElementById('menuInput');
+  filter = input.value.toUpperCase();
+  ul = document.getElementById("menuList");
+  li = ul.getElementsByTagName('li');
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < li.length; i++) {
+    a = li[i]; //this is the link part of the list item
+    txtValue = a.textContent || a.innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) { //if the entered string matches
+      li[i].style.display = "";
+    } else {
+      li[i].style.display = "none";
+    }
+  }
 }
 
 // Animation Loop
