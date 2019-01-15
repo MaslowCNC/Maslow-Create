@@ -29,7 +29,6 @@ window.addEventListener('resize', event => {
     canvas.width = bounds.width;
     canvas.height = bounds.height; 
 
-    //init()
 })
 
 flowCanvas.addEventListener('mousedown', event => {
