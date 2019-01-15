@@ -269,6 +269,7 @@ var Connector =  {
         
         c.beginPath();
         c.fillStyle = this.color;
+        c.strokeStyle = this.color;
         c.globalCompositeOperation = 'destination-over'; //draw under other elements;
         if(this.selected){
             c.lineWidth = 3;
@@ -351,7 +352,7 @@ var Connector =  {
 
 }
 
-var DrawingNode = {
+var Atom = {
     x: 0,
     y:  0,
     radius: 20,
@@ -545,10 +546,6 @@ var DrawingNode = {
     }
 }
 
-var Atom = DrawingNode.create({
-    codeBlock: ""
-});
-
 // Types of nodes
 
 var Input = Atom.create({
@@ -558,7 +555,7 @@ var Input = Atom.create({
     height: 16,
     radius: 15,
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         instance.addIO("output", "number or geometry", instance);
         
         return instance;
@@ -566,7 +563,7 @@ var Input = Atom.create({
     updateSidebar: function(){
         //updates the sidebar to display information about this node
         
-        var valueList =  DrawingNode.updateSidebar.call(this); //call the super function
+        var valueList =  Atom.updateSidebar.call(this); //call the super function
         
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
@@ -603,7 +600,7 @@ var Output = Atom.create({
     height: 16,
     radius: 15,
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         instance.addIO("input", "number or geometry", instance);
         
         return instance;
@@ -638,14 +635,14 @@ var Constant = Atom.create({
     radius: 15,
     value: 0,
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         instance.addIO("output", "number", instance);
         return instance;
     },
     updateSidebar: function(){
         //updates the sidebar to display information about this node
         
-        var valueList = DrawingNode.updateSidebar.call(this); //call the super function
+        var valueList = Atom.updateSidebar.call(this); //call the super function
         
         createEditableValueListItem(valueList,this,"value", "Value", true);
         createEditableValueListItem(valueList,this,"name", "Name", false);
@@ -673,7 +670,7 @@ var Molecule = Atom.create({
     topLevel: false, //a flag to signal if this node is the top level node
     
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         instance.nodesOnTheScreen = [];
         
         if (!instance.topLevel){
@@ -688,7 +685,7 @@ var Molecule = Atom.create({
     },
     
     draw: function(){
-        DrawingNode.draw.call(this); //Super call to draw the rest
+        Atom.draw.call(this); //Super call to draw the rest
         
         //draw the circle in the middle
         c.beginPath();
@@ -740,7 +737,7 @@ var UpOneLevelBtn = Atom.create({
     radius: 30,
     
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         return instance;
     },
     
@@ -792,7 +789,7 @@ var Sphereoid = Atom.create({
     sphereRadius: 10,
     codeBlock: "some code to create a sphere",
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         instance.addIO("input", "radius", instance);
         instance.addIO("output", "geometry", instance);
         return instance;
@@ -806,7 +803,7 @@ var Cubeoid = Atom.create({
     zL: 10,
     codeBlock: "some code to create a sphere",
     create: function(values){
-        var instance = DrawingNode.create.call(this, values);
+        var instance = Atom.create.call(this, values);
         instance.addIO("input", "L", instance);
         instance.addIO("input", "W", instance);
         instance.addIO("input", "H", instance);
@@ -824,14 +821,14 @@ var Readme = Atom.create({
     updateSidebar: function(){
         //updates the sidebar to display information about this node
         
-        var valueList = DrawingNode.updateSidebar.call(this); //call the super function
+        var valueList = Atom.updateSidebar.call(this); //call the super function
         
         createEditableValueListItem(valueList,this,"readmeText", "Notes", false);
         
     },
     draw: function() {
         
-        DrawingNode.draw.call(this); //Super call to draw the rest
+        Atom.draw.call(this); //Super call to draw the rest
         
         //draw the two slashes on the node//
         c.strokeStyle = "#949294";
