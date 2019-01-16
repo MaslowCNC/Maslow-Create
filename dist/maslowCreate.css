@@ -208,11 +208,16 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.login-popup{
+.centered-div{
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    height: 100%;
+}
+
+.float-left-div{
+    float: left;
 }
 
 .github-login-display{
@@ -220,4 +225,18 @@ body {
     height: 90%;
     border: 1px solid black;
     text-align: center;
+}
+
+.project{
+    width: 100px;
+    height: 100px;
+    boarder: 1px solid black;
+    display: inline-block;
+    padding: 10px;
+}
+
+.project:hover{
+    background-color: #ffffff;
+    width: 110px;
+    height: 110px;
 }
