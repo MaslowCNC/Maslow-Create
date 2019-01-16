@@ -8,32 +8,59 @@
             margin: 0;
         }
     </style>
-	<link rel="stylesheet" href="min.css" type="text/css">
+    
+	<link rel="stylesheet" href="maslowCreate.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 	<script src="/min.js"></script>
 	
 </head>
 <body>
+    
+    
+    <ul class="menu " id="menuList">
+        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu()" placeholder="Search for atom..">
+        <li class="menu-item" id="red">Select Node Type</li>
+    </ul>
+    
     <!-- Draw the canvas for creating the design -->
-    <canvas style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
+    <canvas id = "flow-canvas" style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
 	
-	<script src="/flowDraw.js"></script>
-	
-    <!-- setup display of the errors as required by OpenJSCAD.js -->
-	<div class="jscad-container">
-	    
-		<!-- setup display of the viewer, i.e. canvas -->
-		<div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
+    <div class='parent flex-parent'>
+    
+        <!-- setup display of the errors as required by OpenJSCAD.js -->
+        <div class="jscad-container">
+            
+            <!-- setup display of the viewer, i.e. canvas -->
+            <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
 
-		<!-- setup display of the status, as required by OpenJSCAD.js -->
-		<!-- set display: block to display this -->
-		<div id="tail" style="display: none;">
-			 <div id="statusdiv"></div>
-		</div>
-		
-		<div id="header">
-            <div id="errordiv"></div>
-		</div>
-		
+            <!-- setup display of the status, as required by OpenJSCAD.js -->
+            <!-- set display: block to display this -->
+            <div id="tail" style="display: none;">
+                 <div id="statusdiv"></div>
+            </div>
+            
+            <div id="header">
+                <div id="errordiv"></div>
+            </div>
+            
+        </div>
+        
+        
+        <div class="sideBar">
+            Maslow Create
+        </div>
     </div>
+    
+    <script src="/js/molecules/prototypes.js"></script>
+    <script src="/js/molecules/input.js"></script>
+    <script src="/js/molecules/output.js"></script>
+    <script src="/js/molecules/constant.js"></script>
+    <script src="/js/molecules/molecule.js"></script>
+    <script src="/js/molecules/sphereoid.js"></script>
+    <script src="/js/molecules/cubeoid.js"></script>
+    <script src="/js/molecules/readme.js"></script>
+    <script src="/js/molecules/menu.js"></script>
+    <script src="/flowDraw.js"></script>
+    <script type="text/javascript" src="./js/canvas.bundle.js"></script>
 </body>
 </html>
