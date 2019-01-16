@@ -11,6 +11,11 @@
     
 	<link rel="stylesheet" href="maslowCreate.css" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <script src="https://cdn.rawgit.com/oauth-io/oauth-js/c5af4519/dist/oauth.js"></script>
 	<script src="/min.js"></script>
 	
 </head>
@@ -23,8 +28,18 @@
     </ul>
     
     <!-- The login popup -->
-    <div class = "login-popup">
-        Some Placeholder Text
+    <div class = "login-popup" id = "projects-popup">
+        <div class = "github-login-display">
+            <h1>Maslow Create uses GitHub to store your projects</h1>
+            <br>
+            <br>
+            <br>
+            <br>
+            <a id="github-button" class="btn btn-block btn-social btn-github">
+                <i class="fa fa-github"></i> Sign in with GitHub
+            </a>
+            You can create a free account <a href="https://github.com/join" target="_blank">here</a>
+        </div>
     </div>
     
     <!-- Draw the canvas for creating the design -->
@@ -56,6 +71,7 @@
         </div>
     </div>
     
+    <script src="/js/githubOauth.js"></script>
     <script src="/js/molecules/prototypes.js"></script>
     <script src="/js/molecules/input.js"></script>
     <script src="/js/molecules/output.js"></script>

@@ -201,7 +201,23 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    width: 90%;
+    height: 90%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.login-popup{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.github-login-display{
+    width: 50%;
+    height: 90%;
+    border: 1px solid black;
+    text-align: center;
 }
