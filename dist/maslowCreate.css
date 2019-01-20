@@ -208,6 +208,11 @@ body {
     transform: translate(-50%, -50%);
 }
 
+.login-popup.off{
+    top: -200%;
+    left: -200%;
+}
+
 .centered-div{
     display: flex;
     align-items: center;
