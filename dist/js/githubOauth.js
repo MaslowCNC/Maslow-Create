@@ -1,11 +1,6 @@
 const octokit = new Octokit()
+var popup = document.getElementById('projects-popup');
 
-
-//create a new repo
-// octokit.repos.createForAuthenticatedUser({
-    // name: "A test repo",
-    // description: "A description of this test repo"
-// });
 
 function tryLogin(){
     console.log("trying to log in");
@@ -32,7 +27,7 @@ function loginSucessfull(){
     console.log("logged in");
     
     //remove everything in the popup now
-    var popup = document.getElementById('projects-popup');
+    
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
@@ -53,7 +48,7 @@ function loginSucessfull(){
     
     
     //Add the create a new project button
-    addProject(projectsSpaceDiv, ({name: "New Project"}));
+    addProject(({name: "New Project"}));
     
     
     //List all of the repos that a user is the onwer of
@@ -61,13 +56,13 @@ function loginSucessfull(){
       affiliation: 'owner',
     }).then(({data, headers, status}) => {
         data.forEach(repo => {
-            addProject(projectsSpaceDiv, repo);
+            addProject(repo);
         });
     })
     
 }
 
-function addProject(popup, repo){
+function addProject(repo){
     //create a project element to display
     
     var project = document.createElement("DIV");
@@ -91,19 +86,87 @@ function addProject(popup, repo){
 }
 
 function projectClicked(projectName){
-    console.log("project clicked:");
-    console.log(projectName);
-    
+    //runs when you click on one of the projects
     if(projectName == "New Project"){
-        console.log("create new project");
-        
+        createNewProjectPopup();
     }
     else{
         console.log("Load project: " + projectName);
     }
 }
 
-function loadProject(repo){
+function createNewProjectPopup(){
+    //Clear the popup and populate the fields we will need to create the new repo
+    while (popup.firstChild) {
+        popup.removeChild(popup.firstChild);
+    }
     
+    //Project name
+    // <div class="form">
+    var createNewProjectDiv = document.createElement("DIV");
+    createNewProjectDiv.setAttribute("class", "form");
+    
+    //Add a title
+    var header = document.createElement("H1");
+    var title = document.createTextNode("Create a new project");
+    header.appendChild(title);
+    createNewProjectDiv.appendChild(header);
+    
+    //Create the form object
+    var form = document.createElement("form");
+    form.setAttribute("class", "login-form");
+    createNewProjectDiv.appendChild(form);
+    
+    //Create the name field
+    var name = document.createElement("input");
+    name.setAttribute("id","project-name");
+    name.setAttribute("type","text");
+    name.setAttribute("placeholder","Project name");
+    form.appendChild(name);
+    
+    //Add the description field
+    var description = document.createElement("input");
+    description.setAttribute("id", "project-description");
+    description.setAttribute("type", "text");
+    description.setAttribute("placeholder", "Project description");
+    form.appendChild(description);
+    
+    //Add the button
+    var createButton = document.createElement("button");
+    createButton.setAttribute("type", "button");
+    createButton.setAttribute("onclick", "createNewProject()");
+    var buttonText = document.createTextNode("Create Project");
+    createButton.appendChild(buttonText);
+    form.appendChild(createButton);
+    
+
+    popup.appendChild(createNewProjectDiv);
+
 }
 
+function createNewProject(){
+    console.log("new project should be created now");
+    
+    //Get name and description
+    var name = document.getElementById('project-name').value;
+    var description = document.getElementById('project-description').value;
+    
+    //Create a new repo
+    octokit.repos.createForAuthenticatedUser({
+        name: name,
+        description: description
+    });
+    
+    //Clear the popup
+    while (popup.firstChild) {
+        popup.removeChild(popup.firstChild);
+    }
+    
+    //Save a blank project to the repo
+    
+    //Load the project we just created
+}
+
+
+
+        
