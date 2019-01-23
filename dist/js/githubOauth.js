@@ -1,9 +1,10 @@
 const octokit = new Octokit()
 var popup = document.getElementById('projects-popup');
+var currentRepo = null;
 
 
 function tryLogin(){
-    console.log("trying to log in");
+    
     let username = document.getElementById('login-username').value;
     let password = document.getElementById('login-password').value;
     document.getElementById('login-password').value = "";
@@ -23,11 +24,7 @@ function tryLogin(){
 }
 
 function loginSucessfull(){
-    //clear the login popup
-    console.log("logged in");
-    
-    //remove everything in the popup now
-    
+    //Remove everything in the popup now
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
@@ -145,28 +142,58 @@ function createNewProjectPopup(){
 }
 
 function createNewProject(){
-    console.log("new project should be created now");
     
     //Get name and description
     var name = document.getElementById('project-name').value;
     var description = document.getElementById('project-description').value;
     
+    //Load a blank project
+    currentMolecule = Molecule.create({x: 0, y: 0, topLevel: true, name: name});
+    
     //Create a new repo
     octokit.repos.createForAuthenticatedUser({
         name: name,
         description: description
+    }).then(result => {
+        //Once we have created the new repo we need to create a file within it to store the project in
+        currentRepo = result.data;
+        console.log(currentRepo);
+        console.log("trying to create");
+        var path = name + ".maslowcreate";
+        console.log(path);
+        console.log(currentRepo.owner.login);
+        console.log(currentRepo.name);
+        var content = window.btoa("this is some test content");
+        octokit.repos.createFile({
+            owner: currentRepo.owner.login,
+            repo: currentRepo.name,
+            path: path,
+            message: "initialize repo", 
+            content: content
+        })
     });
+
     
-    //Clear the popup
+
+    
+    
+    //Clear and hide the popup
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
+    popup.classList.add('off');
     
-    //Save a blank project to the repo
     
-    //Load the project we just created
+    
+    //Save the current project to the repo
+    saveProject();
+    
+}
+
+function saveProject(){
+    console.log("should save molecule to the current project as projectname.maslowcreate");
+    
 }
 
 
 
-        
