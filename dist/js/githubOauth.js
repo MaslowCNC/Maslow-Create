@@ -160,7 +160,7 @@ function createNewProject(){
         //Once we have created the new repo we need to create a file within it to store the project in
         currentRepo = result.data;
         var path = currentMolecule.name + ".maslowcreate";
-        var content = window.btoa(JSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         console.log(content);
         octokit.repos.createFile({
             owner: currentRepo.owner.login,
@@ -189,7 +189,7 @@ function saveProject(){
         console.log(currentRepo);
         
         var path = currentMolecule.name + ".maslowcreate";
-        var content = window.btoa(JSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({

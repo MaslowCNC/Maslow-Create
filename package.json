@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@jscad/csg": "^0.7.0",
+    "circular-json": "^0.5.9",
     "gsap": "^2.0.1"
   },
   "devDependencies": {
