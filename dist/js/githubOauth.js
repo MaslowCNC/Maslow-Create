@@ -2,6 +2,8 @@ const octokit = new Octokit()
 var popup = document.getElementById('projects-popup');
 var currentRepo = null;
 
+setInterval(saveProject, 5000); //Save the project regularly
+
 
 function tryLogin(){
     
@@ -157,13 +159,9 @@ function createNewProject(){
     }).then(result => {
         //Once we have created the new repo we need to create a file within it to store the project in
         currentRepo = result.data;
-        console.log(currentRepo);
-        console.log("trying to create");
-        var path = name + ".maslowcreate";
-        console.log(path);
-        console.log(currentRepo.owner.login);
-        console.log(currentRepo.name);
-        var content = window.btoa("this is some test content");
+        var path = currentMolecule.name + ".maslowcreate";
+        var content = window.btoa(JSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        console.log(content);
         octokit.repos.createFile({
             owner: currentRepo.owner.login,
             repo: currentRepo.name,
@@ -174,9 +172,6 @@ function createNewProject(){
     });
 
     
-
-    
-    
     //Clear and hide the popup
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
@@ -184,15 +179,38 @@ function createNewProject(){
     popup.classList.add('off');
     
     
-    
-    //Save the current project to the repo
-    saveProject();
-    
 }
 
 function saveProject(){
+    //Save the current project into the github repo
     console.log("should save molecule to the current project as projectname.maslowcreate");
-    
+    if(currentRepo != null){
+        console.log(currentMolecule);
+        console.log(currentRepo);
+        
+        var path = currentMolecule.name + ".maslowcreate";
+        var content = window.btoa(JSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        
+        //Get the SHA for the file
+        octokit.repos.getContents({
+          owner: currentRepo.owner.login,
+          repo: currentRepo.name,
+          path: path
+        }).then(result => {
+            var sha = result.data.sha
+            console.log(sha);
+            
+            //Save the repo to the file
+            octokit.repos.updateFile({
+                owner: currentRepo.owner.login,
+                repo: currentRepo.name,
+                path: path,
+                message: "autosave", 
+                content: content,
+                sha: sha
+            })
+        })
+    }
 }
 
 
