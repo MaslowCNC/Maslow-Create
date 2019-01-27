@@ -2,7 +2,7 @@ const octokit = new Octokit()
 var popup = document.getElementById('projects-popup');
 var currentRepo = null;
 
-setInterval(saveProject, 5000); //Save the project regularly
+setInterval(saveProject, 60000); //Save the project regularly
 
 
 function tryLogin(){
@@ -47,21 +47,38 @@ function loginSucessfull(){
     
     
     //Add the create a new project button
-    addProject(({name: "New Project"}));
+    addProject("New Project");
     
+    
+    // octokit.repos.listTopics({owner: owner, repo: repoName}).then(topics => {
+        // console.log(topics);
+    // })
     
     //List all of the repos that a user is the onwer of
     octokit.repos.list({
       affiliation: 'owner',
     }).then(({data, headers, status}) => {
         data.forEach(repo => {
-            addProject(repo);
+            
+            //Check to see if this is a maslow create project
+            octokit.repos.listTopics({
+                owner: repo.owner.login, 
+                repo: repo.name,
+                headers: {
+                    accept: 'application/vnd.github.mercy-preview+json'
+                }
+            }).then(data => {
+                if(data.data.names.includes("maslowcreate")){
+                    addProject(repo.name);
+                }
+            })
+            
         });
     })
     
 }
 
-function addProject(repo){
+function addProject(projectName){
     //create a project element to display
     
     var project = document.createElement("DIV");
@@ -72,14 +89,14 @@ function addProject(repo){
     projectPicture.setAttribute("style", "height: 100%");
     project.appendChild(projectPicture);
     
-    var projectName = document.createTextNode(repo.name.substr(0,7)+"..");
+    var shortProjectName = document.createTextNode(projectName.substr(0,7)+"..");
     project.setAttribute("class", "project");
-    project.setAttribute("id", repo.name);
-    project.appendChild(projectName); 
+    project.setAttribute("id", projectName);
+    project.appendChild(shortProjectName); 
     popup.appendChild(project); 
     
-    document.getElementById(repo.name).addEventListener('click', event => {
-        projectClicked(repo.name);
+    document.getElementById(projectName).addEventListener('click', event => {
+        projectClicked(projectName);
     })
 
 }
@@ -160,7 +177,7 @@ function createNewProject(){
         //Once we have created the new repo we need to create a file within it to store the project in
         currentRepo = result.data;
         var path = currentMolecule.name + ".maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         console.log(content);
         octokit.repos.createFile({
             owner: currentRepo.owner.login,
@@ -189,7 +206,7 @@ function saveProject(){
         console.log(currentRepo);
         
         var path = currentMolecule.name + ".maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
