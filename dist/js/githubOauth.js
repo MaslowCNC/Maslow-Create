@@ -1,6 +1,7 @@
 const octokit = new Octokit()
 var popup = document.getElementById('projects-popup');
-var currentRepo = null;
+var currentRepoName = null;
+var currentUser = null;
 
 setInterval(saveProject, 60000); //Save the project regularly
 
@@ -107,7 +108,7 @@ function projectClicked(projectName){
         createNewProjectPopup();
     }
     else{
-        console.log("Load project: " + projectName);
+        loadProject(projectName);
     }
 }
 
@@ -175,19 +176,29 @@ function createNewProject(){
         description: description
     }).then(result => {
         //Once we have created the new repo we need to create a file within it to store the project in
-        currentRepo = result.data;
-        var path = currentMolecule.name + ".maslowcreate";
+        currentRepoName = result.data.name;
+        currentUser = result.data.owner.login;
+        var path = "project.maslowcreate";
         var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
-        console.log(content);
         octokit.repos.createFile({
-            owner: currentRepo.owner.login,
-            repo: currentRepo.name,
+            owner: currentUser,
+            repo: currentRepoName,
             path: path,
             message: "initialize repo", 
             content: content
         })
+        
+        //Update the project topics
+        octokit.repos.replaceTopics({
+            owner: currentUser,
+            repo: currentRepoName,
+            names: ["maslowcreate"],
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
+            }
+        })
     });
-
+    
     
     //Clear and hide the popup
     while (popup.firstChild) {
@@ -200,27 +211,24 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    console.log("should save molecule to the current project as projectname.maslowcreate");
-    if(currentRepo != null){
-        console.log(currentMolecule);
-        console.log(currentRepo);
+    console.log("Work saved");
+    if(currentRepoName != null){
         
-        var path = currentMolecule.name + ".maslowcreate";
+        var path = "project.maslowcreate";
         var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
-          owner: currentRepo.owner.login,
-          repo: currentRepo.name,
+          owner: currentUser,
+          repo: currentRepoName,
           path: path
         }).then(result => {
             var sha = result.data.sha
-            console.log(sha);
             
             //Save the repo to the file
             octokit.repos.updateFile({
-                owner: currentRepo.owner.login,
-                repo: currentRepo.name,
+                owner: currentUser,
+                repo: currentRepoName,
                 path: path,
                 message: "autosave", 
                 content: content,
@@ -230,5 +238,28 @@ function saveProject(){
     }
 }
 
+function loadProject(projectName){
+    console.log(projectName);
+    
+    octokit.repos.getContents({
+        owner: 'barboursmith',
+        repo: projectName,
+        path: 'project.maslowcreate'
+    })
+    .then(result => {
+        //content will be base64 encoded
+        const content = CircularJSON.parse(atob(result.data.content));
+        console.log(content);
+        currentMolecule = content;
+        
+        //Clear and hide the popup
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild);
+        }
+        popup.classList.add('off');
+    })
+    
+    
+}
 
 
