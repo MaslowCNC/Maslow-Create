@@ -2,6 +2,7 @@ var Constant = Atom.create({
     codeBlock: "",
     type: "constant",
     name: "Constant",
+    atomType: "Constant",
     height: 16,
     radius: 15,
     value: 0,

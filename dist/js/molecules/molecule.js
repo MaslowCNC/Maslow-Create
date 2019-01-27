@@ -1,6 +1,7 @@
 var Molecule = Atom.create({
     children: [], 
     name: "Molecule",
+    atomType: "Molecule",
     topLevel: false, //a flag to signal if this node is the top level node
     
     create: function(values){

@@ -1,6 +1,7 @@
 
 var Readme = Atom.create({
     codeBlock: "",
+    atomType: "Readme",
     readmeText: "Readme text here",
     type: "readme",
     name: "README",

@@ -3,6 +3,7 @@ var Output = Atom.create({
     codeBlock: "",
     type: "output",
     name: "Output",
+    atomType: "Output",
     height: 16,
     radius: 15,
     create: function(values){

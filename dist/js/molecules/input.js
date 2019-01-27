@@ -1,6 +1,7 @@
 var Input = Atom.create({
     codeBlock: "",
     type: "input",
+    atomType: "Input",
     name: "Input",
     height: 16,
     radius: 15,

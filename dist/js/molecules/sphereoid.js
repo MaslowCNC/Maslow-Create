@@ -1,5 +1,6 @@
 var Sphereoid = Atom.create({
     name: "Sphereoid",
+    atomType: "Sphereoid",
     sphereRadius: 10,
     codeBlock: "some code to create a sphere",
     create: function(values){
