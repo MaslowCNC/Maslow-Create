@@ -353,6 +353,9 @@ var Atom = {
             this.isMoving = true;
             this.selected = true;
             this.updateSidebar();
+            
+            this.sendToRender();
+            
             clickProcessed = true;
         }
         else{
@@ -462,5 +465,14 @@ var Atom = {
         });
         
         this.draw()
+    },
+    
+    sendToRender: function(){
+        console.log("clicked on a molecule");
+                
+        var toRender = "function main () {return " + this.codeBlock + "}"
+        
+        window.loadDesign(toRender,"test");
     }
+        
 }

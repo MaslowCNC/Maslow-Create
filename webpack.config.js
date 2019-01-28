@@ -27,7 +27,7 @@ module.exports = {
             host: 'localhost',
             port: 3000,
             server: { baseDir: ['dist'] },
-            files: ['./dist/*']
+            files: ['./dist/*, !./dist/example001.jscad']
         }),
         new HtmlWebpackPlugin({
             filename: 'index.html',

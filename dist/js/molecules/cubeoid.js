@@ -5,7 +5,7 @@ var Cubeoid = Atom.create({
     xL: 10,
     yL: 10,
     zL: 10,
-    codeBlock: "some code to create a sphere",
+    codeBlock: "cube({size: 3, center: true})",
     create: function(values){
         var instance = Atom.create.call(this, values);
         instance.addIO("input", "L", instance);

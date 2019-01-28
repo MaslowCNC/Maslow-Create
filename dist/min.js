@@ -54566,19 +54566,24 @@ function init() {
 
     xhr.onload = function () {
       var source = this.responseText;
-	  loadDesign(source, design);
+	  window.loadDesign(source, design);
     };
     xhr.send();
   }
 }
 
-function loadDesign(source, design){
-	var source = "function main () {return sphere({r: 10, center: true})}";
+window.loadDesign = function(source, design){
+    console.log("load design");
+    // console.log(source);
+    
+	// var source = "function main () {return sphere({r: 10, center: true})}";
+    
+    
+    console.log(source);
 	
-    if (design.match(/\.jscad$/i) || design.match(/\.js$/i)) {
-        gProcessor.setStatus('Processing ' + design + " <img id=busy src='imgs/busy.gif'>");
-        gProcessor.setJsCad(source, design);
-    }
+    gProcessor.setStatus("Processing design <img id=busy src='imgs/busy.gif'>");
+    gProcessor.setJsCad(source, design);
+    
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {

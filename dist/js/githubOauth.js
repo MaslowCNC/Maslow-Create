@@ -3,7 +3,7 @@ var popup = document.getElementById('projects-popup');
 var currentRepoName = null;
 var currentUser = null;
 
-setInterval(saveProject, 60000); //Save the project regularly
+setInterval(saveProject, 30000); //Save the project regularly
 
 
 function tryLogin(){
@@ -212,6 +212,7 @@ function createNewProject(){
 function saveProject(){
     //Save the current project into the github repo
     console.log("Work saved");
+    console.log(currentMolecule);
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
