@@ -169,6 +169,9 @@ var AttachmentPoint = {
                 connector.propogate();
             });
         }
+        else{   //update the code block to reflect the new values
+            this.parentMolecule.updateCodeBlock();
+        }
     },
     
     update: function() {
@@ -317,6 +320,7 @@ var Atom = {
         });
         
         instance.children = [];
+        
         return instance;
     },
     
@@ -499,8 +503,6 @@ var Atom = {
     },
     
     sendToRender: function(){
-        
-        this.updateCodeBlock();
         
         var toRender = "function main () {return " + this.codeBlock + "}"
         
