@@ -160,6 +160,17 @@ var AttachmentPoint = {
         return this.value;
     },
     
+    setValue: function(newValue){
+        this.value = newValue;
+        
+        //propigate the change to linked elements if this is an output
+        if (this.type == 'output'){
+            this.connectors.forEach(connector => {     //select any connectors attached to this node
+                connector.propogate();
+            });
+        }
+    },
+    
     update: function() {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
@@ -224,8 +235,12 @@ var Connector =  {
         //FIXME: This bit needs to be refactored, its pretty ugly as is
         
         if(this.isMoving){
+            //if we have connected to a valid connector
             if (connectionNode && connectionNode.type === "input" ){
                 this.attachmentPoint2 = connectionNode;
+                console.log("getting value: ");
+                console.log(this.attachmentPoint1.getValue());
+                this.propogate();//send the information
             }
             else{
                 //remove this connector from the stack
@@ -259,6 +274,11 @@ var Connector =  {
         this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
     },
     
+    propogate: function(){
+        //takes the input and passes it to the output
+        this.attachmentPoint2.setValue(this.attachmentPoint1.getValue());
+    },
+    
     update: function() {
         
         this.startX = this.attachmentPoint1.x
@@ -269,7 +289,9 @@ var Connector =  {
         }
         this.draw()
     },
-
+    
+    
+    
     wasConnectionMade: function(x,y, connector){
         return false;
     }

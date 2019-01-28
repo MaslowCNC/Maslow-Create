@@ -5,7 +5,6 @@ var Constant = Atom.create({
     atomType: "Constant",
     height: 16,
     radius: 15,
-    value: 0,
     create: function(values){
         var instance = Atom.create.call(this, values);
         instance.addIO("output", "number", instance);
@@ -16,7 +15,9 @@ var Constant = Atom.create({
         
         var valueList = Atom.updateSidebar.call(this); //call the super function
         
-        createEditableValueListItem(valueList,this,"value", "Value", true);
+        var output = this.children[0];
+        
+        createEditableValueListItem(valueList,output,"value", "Value", true);
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
     },
