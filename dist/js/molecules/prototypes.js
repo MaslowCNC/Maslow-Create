@@ -499,7 +499,10 @@ var Atom = {
     },
     
     updateCodeBlock: function(){
+        //substitue the result from each input for the ~...~ section with it's name
         
+        var regex = /~.*~/;
+        this.codeBlock = this.defaultCodeBlock.replace(regex, x => {return this.findIOValue(x);});
     },
     
     sendToRender: function(){
