@@ -88,7 +88,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Molecule, Sphereoid, Input, Output, Constant, Readme, Cube];
+var availableTypes = [Sphereoid, Cube, Constant, Molecule, Input, Output, Readme];
 
 let currentMolecule;
 let menu;

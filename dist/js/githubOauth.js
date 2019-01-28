@@ -211,8 +211,8 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    console.log("Work saved");
-    console.log(currentMolecule);
+    //console.log("Work saved");
+    //console.log(currentMolecule);
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";

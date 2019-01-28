@@ -156,7 +156,6 @@ var AttachmentPoint = {
     },
     
     getValue: function(){
-        console.log("value is: " + this.value);
         return this.value;
     },
     
@@ -241,8 +240,7 @@ var Connector =  {
             //if we have connected to a valid connector
             if (connectionNode && connectionNode.type === "input" ){
                 this.attachmentPoint2 = connectionNode;
-                console.log("getting value: ");
-                console.log(this.attachmentPoint1.getValue());
+                
                 this.propogate();//send the information
             }
             else{
@@ -311,6 +309,7 @@ var Atom = {
     color: '#F3EFEF',
     name: "name",
     parentMolecule: null,
+    codeBlock: "",
     isMoving: false,
     
     create: function(values){
@@ -506,25 +505,20 @@ var Atom = {
     },
     
     sendToRender: function(){
-        
-        var toRender = "function main () {return " + this.codeBlock + "}"
-        
-        window.loadDesign(toRender,"test");
+        //Send code to JSCAD to render
+        if (this.codeBlock != ""){
+            var toRender = "function main () {return " + this.codeBlock + "}"
+            window.loadDesign(toRender,"MaslowCreate");
+        }
     }, 
     
     findIOValue: function(ioName){
-        console.log("finding IO for: " + ioName);
+        //find the value of an input for a given name
         
         ioName = ioName.split('~').join('');
-        
-        console.log(ioName);
-        
-        console.log(this.children);
-        
         ioValue = null;
         
         this.children.forEach(child => {
-            console.log(child.name);
             if(child.name == ioName){
                 ioValue = child.getValue();
             }
