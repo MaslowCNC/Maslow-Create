@@ -154,7 +154,12 @@ var AttachmentPoint = {
         }
         return false;
     },
-
+    
+    getValue: function(){
+        console.log("value is: " + this.value);
+        return this.value;
+    },
+    
     update: function() {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
@@ -467,12 +472,37 @@ var Atom = {
         this.draw()
     },
     
+    updateCodeBlock: function(){
+        
+    },
+    
     sendToRender: function(){
-        console.log("clicked on a molecule");
-                
+        
+        this.updateCodeBlock();
+        
         var toRender = "function main () {return " + this.codeBlock + "}"
         
         window.loadDesign(toRender,"test");
-    }
+    }, 
+    
+    findIOValue: function(ioName){
+        console.log("finding IO for: " + ioName);
         
+        ioName = ioName.split('~').join('');
+        
+        console.log(ioName);
+        
+        console.log(this.children);
+        
+        ioValue = null;
+        
+        this.children.forEach(child => {
+            console.log(child.name);
+            if(child.name == ioName){
+                ioValue = child.getValue();
+            }
+        });
+        
+        return ioValue;
+    }
 }

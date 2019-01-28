@@ -54573,13 +54573,13 @@ function init() {
 }
 
 window.loadDesign = function(source, design){
-    console.log("load design");
+    //console.log("load design");
     // console.log(source);
     
 	// var source = "function main () {return sphere({r: 10, center: true})}";
     
     
-    console.log(source);
+    //console.log(source);
 	
     gProcessor.setStatus("Processing design <img id=busy src='imgs/busy.gif'>");
     gProcessor.setJsCad(source, design);
