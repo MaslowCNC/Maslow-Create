@@ -45,8 +45,7 @@ flowCanvas.addEventListener('mousedown', event => {
     if(!clickHandledByMolecule){
         currentMolecule.updateIO();
         currentMolecule.updateSidebar();
-        var toRender = "function main () {return sphere({r: .0001, center: true})}"
-        window.loadDesign(toRender,"MaslowCreate");
+        currentMolecule.backgroundClick();
     }
     
     //hide the menu if it is visible

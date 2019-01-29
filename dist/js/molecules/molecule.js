@@ -60,6 +60,25 @@ var Molecule = Atom.create({
         }
         
         return clickProcessed; 
+    },
+    
+    backgroundClick: function(){
+        console.log("click in the background of the molecule");
+        
+        var allElements = new Array();
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            console.log(atom.codeBlock);
+            if (atom.codeBlock != ""){
+                allElements.push(atom.codeBlock);
+            }
+        });
+        
+        console.log(allElements.join());
+        
+        var toRender = "function main () {\nreturn [\n    " + allElements.join(",\n    ") + "\n]}"
+        console.log(toRender);
+        window.loadDesign(toRender,"MaslowCreate");
     }
 });
 

@@ -55248,7 +55248,7 @@ Viewer.defaults = function () {
       faces: true,
       overlay: false, // use overlay when drawing lines or not
       smooth: false, // use smoothing or not
-      faceColor: { r: 1.0, g: 0.4, b: 1.0, a: 1.0 }, // default face color
+      faceColor: { r: 0.37, g: 0.40, b: 0.44, a: 1.0 }, // default face color
       outlineColor: { r: 0.0, g: 0.0, b: 0.0, a: 0.1 // default outline color
       } },
     background: {

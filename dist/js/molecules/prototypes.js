@@ -471,7 +471,7 @@ var Atom = {
         
         //Add options to set all of the inputs
         this.children.forEach(child => {
-            if(child.type == 'input'){
+            if(child.type == 'input' && child.name != 'geometry'){
                 createEditableValueListItem(valueList,child,"value", child.name, true);
             }
         });

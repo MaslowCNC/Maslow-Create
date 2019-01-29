@@ -7,6 +7,10 @@ var Cube = Atom.create({
         var instance = Atom.create.call(this, values);
         instance.addIO("input", "size", instance);
         instance.addIO("output", "geometry", instance);
+        
+        //generate the correct codeblock for this atom on creation
+        instance.updateCodeBlock();
+        
         return instance;
     }
 });
