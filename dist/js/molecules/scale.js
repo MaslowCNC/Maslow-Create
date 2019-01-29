@@ -5,9 +5,9 @@ var Scale = Atom.create({
     codeBlock: "",
     create: function(values){
         var instance = Atom.create.call(this, values);
-        instance.addIO("input", "geometry", instance);
-        instance.addIO("input", "multiple", instance);
-        instance.addIO("output", "geometry", instance);
+        instance.addIO("input", "geometry", instance, "geometry");
+        instance.addIO("input", "multiple", instance, "number");
+        instance.addIO("output", "geometry", instance, "geometry");
         return instance;
     }
 });

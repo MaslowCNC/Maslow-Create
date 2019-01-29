@@ -7,7 +7,7 @@ var Constant = Atom.create({
     radius: 15,
     create: function(values){
         var instance = Atom.create.call(this, values);
-        instance.addIO("output", "number", instance);
+        instance.addIO("output", "number", instance, "number");
         return instance;
     },
     updateSidebar: function(){

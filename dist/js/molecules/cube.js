@@ -5,8 +5,8 @@ var Cube = Atom.create({
     codeBlock: "cube({size: 10, center: true})",
     create: function(values){
         var instance = Atom.create.call(this, values);
-        instance.addIO("input", "size", instance);
-        instance.addIO("output", "geometry", instance);
+        instance.addIO("input", "size", instance, "number");
+        instance.addIO("output", "geometry", instance, "geometry");
         
         //generate the correct codeblock for this atom on creation
         instance.updateCodeBlock();

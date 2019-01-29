@@ -16,6 +16,7 @@ var AttachmentPoint = {
     offsetY: 0,
     showHoverText: false,
     
+    valueType: "number", //options are number, geometry, array
     type: "output",
     value: 10, //The default input value when nothing is connected
 
@@ -342,7 +343,7 @@ var Atom = {
         c.closePath();
     },
     
-    addIO: function(type, name, target){
+    addIO: function(type, name, target, valueType){
         
         //compute the baseline offset from parent node
         var offset;
@@ -366,6 +367,7 @@ var Atom = {
             hoverOffsetX: offset,
             hoverOffsetY: hoverOffsetComputed,
             type: type,
+            valueType: valueType,
             name: name
         });
         target.children.push(input);
@@ -471,7 +473,7 @@ var Atom = {
         
         //Add options to set all of the inputs
         this.children.forEach(child => {
-            if(child.type == 'input' && child.name != 'geometry'){
+            if(child.type == 'input' && child.valueType != 'geometry'){
                 createEditableValueListItem(valueList,child,"value", child.name, true);
             }
         });
@@ -508,7 +510,7 @@ var Atom = {
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
-            if(child.name == 'geometry' && child.type == 'output'){
+            if(child.valueType == 'geometry' && child.type == 'output'){
                 child.setValue(this.codeBlock);
             }
         });
