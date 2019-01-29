@@ -168,6 +168,7 @@ var AttachmentPoint = {
                 connector.propogate();
             });
         }
+        //if this is an input
         else{   //update the code block to reflect the new values
             this.parentMolecule.updateCodeBlock();
         }
@@ -500,14 +501,34 @@ var Atom = {
     updateCodeBlock: function(){
         //substitue the result from each input for the ~...~ section with it's name
         
-        var regex = /~.*~/;
-        this.codeBlock = this.defaultCodeBlock.replace(regex, x => {return this.findIOValue(x);});
+        var regex = /~(.*?)~/gi;
+        this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
+            return this.findIOValue(x);
+        });
+        
+        //Set the output nodes with name 'geometry' to be the generated code
+        this.children.forEach(child => {
+            if(child.name == 'geometry' && child.type == 'output'){
+                child.setValue(this.codeBlock);
+            }
+        });
+        
+        //If this molecule is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender();
+        }
     },
     
     sendToRender: function(){
         //Send code to JSCAD to render
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
+            console.log("Sending to render: " + toRender);
+            window.loadDesign(toRender,"MaslowCreate");
+        }
+        //Send something invisible just to wipe the rendering
+        else{
+            var toRender = "function main () {return sphere({r: .0001, center: true})}"
             window.loadDesign(toRender,"MaslowCreate");
         }
     }, 
@@ -519,7 +540,7 @@ var Atom = {
         ioValue = null;
         
         this.children.forEach(child => {
-            if(child.name == ioName){
+            if(child.name == ioName && child.type == "input"){
                 ioValue = child.getValue();
             }
         });

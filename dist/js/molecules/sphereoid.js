@@ -9,7 +9,8 @@ var Sphereoid = Atom.create({
         instance.addIO("input", "radius", instance);
         instance.addIO("output", "geometry", instance);
         
-        //update the code to display on this atom with the new values
+        //generate the correct codeblock for this atom on creation
+        instance.updateCodeBlock();
         
         return instance;
     }

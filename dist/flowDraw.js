@@ -45,6 +45,8 @@ flowCanvas.addEventListener('mousedown', event => {
     if(!clickHandledByMolecule){
         currentMolecule.updateIO();
         currentMolecule.updateSidebar();
+        var toRender = "function main () {return sphere({r: .0001, center: true})}"
+        window.loadDesign(toRender,"MaslowCreate");
     }
     
     //hide the menu if it is visible
@@ -88,7 +90,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Sphereoid, Cube, Constant, Molecule, Input, Output, Readme];
+var availableTypes = [Sphereoid, Cube, Constant, Molecule, Input, Output, Readme, Translate];
 
 let currentMolecule;
 let menu;
