@@ -5,7 +5,14 @@ function placeNewNode(ev){
     
     availableTypes.forEach(type => {
         if (type.name === clr){
-            var molecule = type.create({x: menu.x, y: menu.y, parent: currentMolecule});
+            var molecule = type.create({
+                x: menu.x, 
+                y: menu.y, 
+                parent: currentMolecule,
+                name: type.name,
+                atomType: type.name,
+                uniqueID: Math.floor(Math.random()*900000) + 100000
+            });
             currentMolecule.nodesOnTheScreen.push(molecule);
         }
     }); 

@@ -312,6 +312,7 @@ var Atom = {
     name: "name",
     parentMolecule: null,
     codeBlock: "",
+    defaultCodeBlock: "",
     isMoving: false,
     
     create: function(values){

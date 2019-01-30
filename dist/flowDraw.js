@@ -95,7 +95,14 @@ let currentMolecule;
 let menu;
 
 function init() {
-    currentMolecule = Molecule.create({x: 0, y: 0, topLevel: true, name: "Maslow Create"});
+    currentMolecule = Molecule.create({
+        x: 0, 
+        y: 0, 
+        topLevel: true, 
+        name: "Maslow Create",
+        atomType: "Molecule",
+        uniqueID: Math.floor(Math.random()*900000) + 100000
+    });
     
     menu = document.querySelector('.menu');
     menu.classList.add('off');

@@ -16,6 +16,7 @@ var Molecule = Atom.create({
             });
             instance.nodesOnTheScreen.push(goUpOneLevel);
         }
+        
         return instance;
     },
     
@@ -65,6 +66,19 @@ var Molecule = Atom.create({
     backgroundClick: function(){
         console.log("click in the background of the molecule");
         
+        this.updateCodeBlock();
+        
+        var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.codeBlock
+        
+        console.log(toRender);
+        
+        window.loadDesign(toRender,"MaslowCreate");
+    },
+    
+    updateCodeBlock: function(){
+        //Generate the function created by this molecule
+        //FIXME the function should be named by the molecule ID number
+        
         var allElements = new Array();
         
         this.nodesOnTheScreen.forEach(atom => {
@@ -74,11 +88,34 @@ var Molecule = Atom.create({
             }
         });
         
-        console.log(allElements.join());
+        var nodes =  {node1: 'test', node2: 'more test'};
+        var nodesString = CircularJSON.stringify(this, this.stripFat, 4);
+        nodesString = nodesString.replace(/\n/gi, "\n    ");
         
-        var toRender = "function main () {\nreturn [\n    " + allElements.join(",\n    ") + "\n]}"
-        console.log(toRender);
-        window.loadDesign(toRender,"MaslowCreate");
+        this.codeBlock = "function molecule" + this.uniqueID + " () {"
+            +"\n    var containedNodes = " + nodesString + ";"
+            +"\n    return [\n        " + allElements.join(",\n        ") 
+            +"\n    ];"
+        +"\n}"
+        
+        console.log(this);
+        
+    },
+    
+    stripFat: function(name, val) {
+        //Strips out the excess variables we don't want to store in our file
+        
+        var variablesToIgnore = ["defaultOffsetX", "defaultOffsetY", "hoverOffsetX", "hoverOffsetY", "showHoverText", "hoverDetectRadius"];
+        
+        if(name == "codeBlock"){
+            return "";
+        }
+        else if(variablesToIgnore.indexOf(name) > -1){
+            return undefined;
+        }
+        else{
+            return val;
+        }
     }
 });
 
