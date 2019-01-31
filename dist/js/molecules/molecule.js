@@ -64,13 +64,13 @@ var Molecule = Atom.create({
     },
     
     backgroundClick: function(){
-        console.log("click in the background of the molecule");
+        //console.log("click in the background of the molecule");
         
         this.updateCodeBlock();
         
         var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.codeBlock
         
-        console.log(toRender);
+        //console.log(toRender);
         
         window.loadDesign(toRender,"MaslowCreate");
     },
@@ -82,7 +82,7 @@ var Molecule = Atom.create({
         var allElements = new Array();
         
         this.nodesOnTheScreen.forEach(atom => {
-            console.log(atom.codeBlock);
+            
             if (atom.codeBlock != ""){
                 allElements.push(atom.codeBlock);
             }
@@ -97,9 +97,6 @@ var Molecule = Atom.create({
             +"\n    return [\n        " + allElements.join(",\n        ") 
             +"\n    ];"
         +"\n}"
-        
-        console.log(this);
-        
     },
     
     stripFat: function(name, val) {

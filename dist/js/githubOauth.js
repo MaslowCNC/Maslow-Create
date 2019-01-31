@@ -179,7 +179,7 @@ function createNewProject(){
         currentRepoName = result.data.name;
         currentUser = result.data.owner.login;
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule, currentMolecule.trimFat, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         octokit.repos.createFile({
             owner: currentUser,
             repo: currentRepoName,
@@ -211,12 +211,12 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    //console.log("Work saved");
+    console.log("Work saved");
     //console.log(currentMolecule);
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule, currentMolecule.trimFat, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
@@ -249,9 +249,12 @@ function loadProject(projectName){
     })
     .then(result => {
         //content will be base64 encoded
-        const content = CircularJSON.parse(atob(result.data.content));
-        console.log(content);
-        currentMolecule = content;
+        let jsonContent = CircularJSON.parse(atob(result.data.content));
+        console.log(jsonContent);
+        
+        currentMolecule = populateMolecule(jsonContent);
+        
+        console.log(currentMolecule);
         
         //Clear and hide the popup
         while (popup.firstChild) {
@@ -260,7 +263,39 @@ function loadProject(projectName){
         popup.classList.add('off');
     })
     
+}
+
+function populateMolecule(json){
     
+    thisMolecule = Molecule.create({
+        x: json.x, 
+        y: json.y, 
+        topLevel: json.topLevel, 
+        name: json.name,
+        atomType: "Molecule"
+    });
+    
+    json.nodesOnTheScreen.forEach(atom => {
+        console.log(atom.atomType);
+        availableTypes.forEach(type => {
+            if (type.name === atom.atomType){
+                console.log("creating atom:");
+                console.log(atom.atomType);
+                var thisAtom = type.create({
+                    x: atom.x, 
+                    y: atom.y, 
+                    parent: thisMolecule,
+                    name: atom.name,
+                    atomType: atom.atomType,
+                    uniqueID: atom.uniqueID
+                });
+                console.log(thisAtom);
+                thisMolecule.nodesOnTheScreen.push(thisAtom);
+            }
+        }); 
+    });
+    
+    return thisMolecule;
 }
 
 
