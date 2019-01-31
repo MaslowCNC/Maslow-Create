@@ -51,10 +51,6 @@ function loginSucessfull(){
     addProject("New Project");
     
     
-    // octokit.repos.listTopics({owner: owner, repo: repoName}).then(topics => {
-        // console.log(topics);
-    // })
-    
     //List all of the repos that a user is the onwer of
     octokit.repos.list({
       affiliation: 'owner',
@@ -262,9 +258,6 @@ function loadProject(projectName){
         //
         
         currentMolecule = jsonContent;
- 
-        console.log("molecule loaded");
-        console.log(currentMolecule);
         
         //Clear and hide the popup
         while (popup.firstChild) {
@@ -282,10 +275,8 @@ function applyInheritance(object){
     
     //If the object has an atomType property implying that it is an atom and should have inheritance
     if('atomType' in object){
-        console.log("Atom type found");
         listOfPrototypes.forEach(thisPrototype => {
             if (object.atomType == thisPrototype.atomType){
-                console.log("Recognized type: " + thisPrototype.atomType); 
                 Object.setPrototypeOf(object, thisPrototype)  //Give it it's inheritance
             }
         }); 
@@ -293,19 +284,16 @@ function applyInheritance(object){
     
     //If the atom contains a list of displayed nodes which might need their inheritance applied
     if('nodesOnTheScreen' in object){
-        console.log("Nodes on the screen found");
         object.nodesOnTheScreen.forEach(node => {applyInheritance(node)});
     }
     
     //If the atom contains a list of children which might need their inheritance applied
     if('connectors' in object){
-        console.log("connectors found");
         object.connectors.forEach(connector => {applyInheritance(connector)});
     }
     
     //If the atom contains a list of connectors which might need their inheritance applied
     if('children' in object){
-        console.log("Nodes on the screen found");
         object.children.forEach(child => {applyInheritance(child)});
     }
 }

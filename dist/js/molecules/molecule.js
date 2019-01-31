@@ -64,13 +64,10 @@ var Molecule = Atom.create({
     },
     
     backgroundClick: function(){
-        //console.log("click in the background of the molecule");
         
         this.updateCodeBlock();
         
         var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.codeBlock
-        
-        //console.log(toRender);
         
         window.loadDesign(toRender,"MaslowCreate");
     },
