@@ -9,7 +9,7 @@ function placeNewNode(ev){
                 x: menu.x, 
                 y: menu.y, 
                 parent: currentMolecule,
-                name: "Top Level",
+                name: type.name,
                 atomType: type.name,
                 uniqueID: generateUniqueID()
             });

@@ -1,6 +1,6 @@
 var Sphere = Atom.create({
     name: "Sphere",
-    atomType: "Sphereoid",
+    atomType: "Sphere",
     sphereRadius: 10,
     defaultCodeBlock: "sphere({r: ~radius~, center: true, fn: 50})",
     codeBlock: "sphere({r: 10, center: true, fn: 50})",
