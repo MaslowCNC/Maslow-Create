@@ -1,7 +1,7 @@
-var Sphere = Atom.create({
-    name: "Sphere",
-    atomType: "Sphere",
-    defaultCodeBlock: "sphere({r: ~radius~, center: true, fn: 50})",
+var Circle = Atom.create({
+    name: "Circle",
+    atomType: "Circle",
+    defaultCodeBlock: "circle({r: ~radius~, center: true, fn: 25})",
     codeBlock: "",
     create: function(values){
         var instance = Atom.create.call(this, values);
