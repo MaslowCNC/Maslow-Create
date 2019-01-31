@@ -50,8 +50,12 @@ function loginSucessfull(){
     //Add the create a new project button
     addProject("New Project");
     
+    //store the current user name for later use
+    octokit.users.getAuthenticated({}).then(result => {
+        currentUser = result.data.login;
+    });
     
-    //List all of the repos that a user is the onwer of
+    //List all of the repos that a user is the owner of
     octokit.repos.list({
       affiliation: 'owner',
     }).then(({data, headers, status}) => {
@@ -180,7 +184,6 @@ function createNewProject(){
     }).then(result => {
         //Once we have created the new repo we need to create a file within it to store the project in
         currentRepoName = result.data.name;
-        currentUser = result.data.owner.login;
         var path = "project.maslowcreate";
         var content = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
         octokit.repos.createFile({
@@ -214,7 +217,6 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    console.log("Work saved");
     
     if(currentRepoName != null){
         
@@ -237,15 +239,17 @@ function saveProject(){
                 message: "autosave", 
                 content: content,
                 sha: sha
-            })
+            }).then(result => {console.log("Work saved");})
         })
     }
 }
 
 function loadProject(projectName){
     
+    currentRepoName = projectName;
+    
     octokit.repos.getContents({
-        owner: 'barboursmith',
+        owner: currentUser,
         repo: projectName,
         path: 'project.maslowcreate'
     })
