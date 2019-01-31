@@ -1,4 +1,4 @@
-var Sphereoid = Atom.create({
+var Sphere = Atom.create({
     name: "Sphere",
     atomType: "Sphereoid",
     sphereRadius: 10,

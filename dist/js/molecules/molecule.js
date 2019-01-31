@@ -102,12 +102,9 @@ var Molecule = Atom.create({
     stripFat: function(name, val) {
         //Strips out the excess variables we don't want to store in our file
         
-        var variablesToIgnore = ["defaultOffsetX", "defaultOffsetY", "hoverOffsetX", "hoverOffsetY", "showHoverText", "hoverDetectRadius"];
+        var variablesToIgnore = ["defaultOffsetX", "defaultOffsetY", "hoverOffsetX", "hoverOffsetY", "showHoverText", "hoverDetectRadius", "codeBlock"];
         
-        if(name == "codeBlock"){
-            return "";
-        }
-        else if(variablesToIgnore.indexOf(name) > -1){
+        if(variablesToIgnore.indexOf(name) > -1){
             return undefined;
         }
         else{

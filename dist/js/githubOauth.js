@@ -168,7 +168,14 @@ function createNewProject(){
     var description = document.getElementById('project-description').value;
     
     //Load a blank project
-    currentMolecule = Molecule.create({x: 0, y: 0, topLevel: true, name: name});
+    currentMolecule = Molecule.create({
+        x: 0, 
+        y: 0, 
+        topLevel: true, 
+        name: name,
+        atomType: "Molecule",
+        uniqueID: generateUniqueID()
+    });
     
     //Create a new repo
     octokit.repos.createForAuthenticatedUser({
@@ -179,7 +186,7 @@ function createNewProject(){
         currentRepoName = result.data.name;
         currentUser = result.data.owner.login;
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule, currentMolecule.trimFat, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
         octokit.repos.createFile({
             owner: currentUser,
             repo: currentRepoName,
@@ -212,17 +219,17 @@ function createNewProject(){
 function saveProject(){
     //Save the current project into the github repo
     console.log("Work saved");
-    //console.log(currentMolecule);
+    
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule, currentMolecule.trimFat, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
-          owner: currentUser,
-          repo: currentRepoName,
-          path: path
+            owner: currentUser,
+            repo: currentRepoName,
+            path: path
         }).then(result => {
             var sha = result.data.sha
             
@@ -240,7 +247,6 @@ function saveProject(){
 }
 
 function loadProject(projectName){
-    console.log(projectName);
     
     octokit.repos.getContents({
         owner: 'barboursmith',
@@ -250,10 +256,14 @@ function loadProject(projectName){
     .then(result => {
         //content will be base64 encoded
         let jsonContent = CircularJSON.parse(atob(result.data.content));
-        console.log(jsonContent);
         
-        currentMolecule = populateMolecule(jsonContent);
+        applyInheritance(jsonContent);
         
+        //
+        
+        currentMolecule = jsonContent;
+ 
+        console.log("molecule loaded");
         console.log(currentMolecule);
         
         //Clear and hide the popup
@@ -263,6 +273,41 @@ function loadProject(projectName){
         popup.classList.add('off');
     })
     
+}
+
+function applyInheritance(object){
+    //Takes an object and if it has an atomType attribute it is given the inheritance of that attribute
+    
+    var listOfPrototypes = availableTypes.concat([AttachmentPoint, Connector]); //add to the list of available prototypes
+    
+    //If the object has an atomType property implying that it is an atom and should have inheritance
+    if('atomType' in object){
+        console.log("Atom type found");
+        listOfPrototypes.forEach(thisPrototype => {
+            if (object.atomType == thisPrototype.atomType){
+                console.log("Recognized type: " + thisPrototype.atomType); 
+                Object.setPrototypeOf(object, thisPrototype)  //Give it it's inheritance
+            }
+        }); 
+    }
+    
+    //If the atom contains a list of displayed nodes which might need their inheritance applied
+    if('nodesOnTheScreen' in object){
+        console.log("Nodes on the screen found");
+        object.nodesOnTheScreen.forEach(node => {applyInheritance(node)});
+    }
+    
+    //If the atom contains a list of children which might need their inheritance applied
+    if('connectors' in object){
+        console.log("connectors found");
+        object.connectors.forEach(connector => {applyInheritance(connector)});
+    }
+    
+    //If the atom contains a list of connectors which might need their inheritance applied
+    if('children' in object){
+        console.log("Nodes on the screen found");
+        object.children.forEach(child => {applyInheritance(child)});
+    }
 }
 
 function populateMolecule(json){
@@ -276,11 +321,10 @@ function populateMolecule(json){
     });
     
     json.nodesOnTheScreen.forEach(atom => {
-        console.log(atom.atomType);
+        
         availableTypes.forEach(type => {
             if (type.name === atom.atomType){
-                console.log("creating atom:");
-                console.log(atom.atomType);
+                
                 var thisAtom = type.create({
                     x: atom.x, 
                     y: atom.y, 
@@ -289,7 +333,7 @@ function populateMolecule(json){
                     atomType: atom.atomType,
                     uniqueID: atom.uniqueID
                 });
-                console.log(thisAtom);
+                
                 thisMolecule.nodesOnTheScreen.push(thisAtom);
             }
         }); 

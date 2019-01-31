@@ -10,11 +10,13 @@ var AttachmentPoint = {
     hoverDetectRadius: 8,
     hoverOffsetX: 0,
     hoverOffsetY: 30,
+    uniqueID: 0,
     defaultOffsetX: 0,
     defaultOffsetY: 0,
     offsetX: 0,
     offsetY: 0,
     showHoverText: false,
+    atomType: "AttachmentPoint",
     
     valueType: "number", //options are number, geometry, array
     type: "output",
@@ -61,7 +63,8 @@ var AttachmentPoint = {
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = Connector.create({
                     parentMolecule: this.parentMolecule, 
-                    attachmentPoint1: this
+                    attachmentPoint1: this,
+                    atomType: "Connector"
                 });
                 this.connectors.push(connector);
             }
@@ -190,6 +193,7 @@ var Connector =  {
     
     isMoving: true,
     color: 'black',
+    atomType: "Connector",
     selected: false,
 
     create: function(values){
@@ -369,7 +373,9 @@ var Atom = {
             hoverOffsetY: hoverOffsetComputed,
             type: type,
             valueType: valueType,
-            name: name
+            name: name,
+            uniqueID: generateUniqueID(),
+            atomType: "AttachmentPoint"
         });
         target.children.push(input);
     },

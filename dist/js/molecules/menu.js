@@ -9,9 +9,9 @@ function placeNewNode(ev){
                 x: menu.x, 
                 y: menu.y, 
                 parent: currentMolecule,
-                name: type.name,
+                name: "Top Level",
                 atomType: type.name,
-                uniqueID: Math.floor(Math.random()*900000) + 100000
+                uniqueID: generateUniqueID()
             });
             currentMolecule.nodesOnTheScreen.push(molecule);
         }

@@ -89,7 +89,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Sphereoid, Cube, Constant, Molecule, Input, Output, Readme, Translate, Scale, Intersection, Difference];
+var availableTypes = [Sphere, Cube, Constant, Molecule, Input, Output, Readme, Translate, Scale, Intersection, Difference];
 
 let currentMolecule;
 let menu;
@@ -101,7 +101,7 @@ function init() {
         topLevel: true, 
         name: "Maslow Create",
         atomType: "Molecule",
-        uniqueID: Math.floor(Math.random()*900000) + 100000
+        uniqueID: generateUniqueID()
     });
     
     menu = document.querySelector('.menu');
@@ -119,6 +119,10 @@ function init() {
         
         document.getElementById(type.name).addEventListener('click', placeNewNode);
     }); 
+}
+
+function generateUniqueID(){
+    return Math.floor(Math.random()*900000) + 100000;
 }
 
 function distBetweenPoints(x1, x2, y1, y2){
