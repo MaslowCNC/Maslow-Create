@@ -532,6 +532,9 @@ var Atom = {
         //Send code to JSCAD to render
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
+            
+            console.log("To render: " + toRender);
+            
             window.loadDesign(toRender,"MaslowCreate");
         }
         //Send something invisible just to wipe the rendering
