@@ -1,11 +1,12 @@
-var Sphere = Atom.create({
-    name: "Sphere",
-    atomType: "Sphere",
-    defaultCodeBlock: "sphere({r: ~radius~, center: true, fn: 50})",
+var Rectangle = Atom.create({
+    name: "Rectangle",
+    atomType: "Rectangle",
+    defaultCodeBlock: "square([~length~,~width~])",
     codeBlock: "",
     create: function(values){
         var instance = Atom.create.call(this, values);
-        instance.addIO("input", "radius", instance, "number");
+        instance.addIO("input", "length", instance, "number");
+        instance.addIO("input", "width", instance, "number");
         instance.addIO("output", "geometry", instance, "geometry");
         
         //generate the correct codeblock for this atom on creation
