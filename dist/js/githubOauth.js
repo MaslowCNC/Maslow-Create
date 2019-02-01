@@ -259,9 +259,9 @@ function loadProject(projectName){
         
         applyInheritance(jsonContent);
         
-        //
-        
         currentMolecule = jsonContent;
+        
+        console.log(currentMolecule);
         
         //Clear and hide the popup
         while (popup.firstChild) {
@@ -275,13 +275,16 @@ function loadProject(projectName){
 function applyInheritance(object){
     //Takes an object and if it has an atomType attribute it is given the inheritance of that attribute
     
-    var listOfPrototypes = availableTypes.concat([AttachmentPoint, Connector]); //add to the list of available prototypes
+    var listOfPrototypes = availableTypes.concat([AttachmentPoint, Connector, UpOneLevelBtn, Output]); //add to the list of available prototypes
     
     //If the object has an atomType property implying that it is an atom and should have inheritance
     if('atomType' in object){
+        console.log("AtomType: " + object.atomType + " trying:");
         listOfPrototypes.forEach(thisPrototype => {
+            
             if (object.atomType == thisPrototype.atomType){
                 Object.setPrototypeOf(object, thisPrototype)  //Give it it's inheritance
+                console.log("--Rehydrated");
             }
         }); 
     }
@@ -301,37 +304,4 @@ function applyInheritance(object){
         object.children.forEach(child => {applyInheritance(child)});
     }
 }
-
-function populateMolecule(json){
-    
-    thisMolecule = Molecule.create({
-        x: json.x, 
-        y: json.y, 
-        topLevel: json.topLevel, 
-        name: json.name,
-        atomType: "Molecule"
-    });
-    
-    json.nodesOnTheScreen.forEach(atom => {
-        
-        availableTypes.forEach(type => {
-            if (type.name === atom.atomType){
-                
-                var thisAtom = type.create({
-                    x: atom.x, 
-                    y: atom.y, 
-                    parent: thisMolecule,
-                    name: atom.name,
-                    atomType: atom.atomType,
-                    uniqueID: atom.uniqueID
-                });
-                
-                thisMolecule.nodesOnTheScreen.push(thisAtom);
-            }
-        }); 
-    });
-    
-    return thisMolecule;
-}
-
 

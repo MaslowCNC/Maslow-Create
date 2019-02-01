@@ -134,6 +134,7 @@ var Molecule = Atom.create({
 
 var UpOneLevelBtn = Atom.create({
     name: "Go Up One Level",
+    atomType: "UpOneLevelBtn",
     children: [],
     color: '#F3EFEF',
     defaultColor: '#F3EFEF',
