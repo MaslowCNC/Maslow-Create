@@ -43,7 +43,6 @@ flowCanvas.addEventListener('mousedown', event => {
     });
     
     if(!clickHandledByMolecule){
-        currentMolecule.updateIO();
         currentMolecule.updateSidebar();
         currentMolecule.backgroundClick();
     }

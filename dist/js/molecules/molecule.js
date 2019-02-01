@@ -19,21 +19,19 @@ var Molecule = Atom.create({
                 uniqueID: generateUniqueID()
             });
             instance.nodesOnTheScreen.push(goUpOneLevel);
+            
+            //Add the molecule's output
+            output = Output.create({
+                parentMolecule: instance, 
+                x: canvas.width - 50,
+                y: canvas.height/2,
+                parent: instance,
+                name: "Output",
+                atomType: "Output",
+                uniqueID: generateUniqueID()
+            });
+            instance.nodesOnTheScreen.push(output);
         }
-        
-        //Add the molecule's output
-        output = Output.create({
-            parentMolecule: instance, 
-            x: canvas.width - 50,
-            y: canvas.height/2,
-            parent: instance,
-            name: "Output",
-            atomType: "Output",
-            uniqueID: generateUniqueID()
-        });
-        instance.nodesOnTheScreen.push(output);
-        instance.updateIO();
-        
         return instance;
     },
     
@@ -47,21 +45,6 @@ var Molecule = Atom.create({
         c.closePath();
         c.fill();
         
-    },
-    
-    updateIO: function(){
-        
-        this.children = [];
-        
-        this.nodesOnTheScreen.forEach(node => {
-            
-            if(node.type == "input"){
-                this.addIO("input", node.name, this, "geometry");
-            }
-            if(node.type == "output"){
-                this.addIO("output", node.name, this, "geometry");
-            }
-        });
     },
     
     doubleClick: function(x,y){
@@ -196,7 +179,6 @@ var UpOneLevelBtn = Atom.create({
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
-            this.parentMolecule.updateIO(); //updates the IO shown on the parent molecule
             this.parentMolecule.updateCodeBlock(); //Updates the code block of the parent molecule
             currentMolecule = this.parentMolecule.parent; //set parent this to be the currently displayed molecule
             clickProcessed = true;

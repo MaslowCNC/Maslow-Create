@@ -11,6 +11,9 @@ var Output = Atom.create({
         var instance = Atom.create.call(this, values);
         instance.addIO("input", "number or geometry", instance, "geometry");
         
+        //Add a new output to the current molecule
+        instance.parent.addIO("output", "Geometry", instance.parent, "geometry");
+        
         return instance;
     },
     draw: function() {
