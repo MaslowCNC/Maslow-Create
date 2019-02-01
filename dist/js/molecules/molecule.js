@@ -65,21 +65,17 @@ var Molecule = Atom.create({
     
     backgroundClick: function(){
         
-        this.updateCodeBlock();
-        
-        var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.codeBlock
+        var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.generateFunction()
         
         window.loadDesign(toRender,"MaslowCreate");
     },
     
-    updateCodeBlock: function(){
+    generateFunction: function(){
         //Generate the function created by this molecule
-        //FIXME the function should be named by the molecule ID number
         
         var allElements = new Array();
         
         this.nodesOnTheScreen.forEach(atom => {
-            
             if (atom.codeBlock != ""){
                 allElements.push(atom.codeBlock);
             }
@@ -89,11 +85,13 @@ var Molecule = Atom.create({
         var nodesString = CircularJSON.stringify(this, this.stripFat, 4);
         nodesString = nodesString.replace(/\n/gi, "\n    ");
         
-        this.codeBlock = "function molecule" + this.uniqueID + " () {"
+        var thisFunction = "function molecule" + this.uniqueID + " () {"
             +"\n    var containedNodes = " + nodesString + ";"
             +"\n    return [\n        " + allElements.join(",\n        ") 
             +"\n    ];"
         +"\n}"
+        
+        return thisFunction;
     },
     
     stripFat: function(name, val) {
