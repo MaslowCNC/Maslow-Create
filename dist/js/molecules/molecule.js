@@ -90,8 +90,6 @@ var Molecule = Atom.create({
     updateCodeBlock: function(){
         //Grab the code from the output object
         
-        console.log("updating molecule codeblock");
-        
         //Grab the value
         this.nodesOnTheScreen.forEach(atom => {
             if(atom.atomType == 'Output'){
@@ -101,11 +99,7 @@ var Molecule = Atom.create({
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
-            console.log("Look here:");
-            console.log(child.valueType);
-            console.log(child.type);
             if(child.valueType == 'geometry' && child.type == 'output'){
-                console.log("output value set to codeblock");
                 child.setValue(this.codeBlock);
             }
         });
