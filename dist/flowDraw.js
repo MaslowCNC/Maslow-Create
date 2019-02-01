@@ -89,7 +89,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Molecule, Input, Output, Readme,];
+var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Molecule, Input, Readme,];
 
 let currentMolecule;
 let menu;

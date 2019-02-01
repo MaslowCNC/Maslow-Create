@@ -59,7 +59,7 @@ var AttachmentPoint = {
 
     clickDown: function(x,y){
         if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
-            
+            console.log(this.value);
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = Connector.create({
                     parentMolecule: this.parentMolecule, 
@@ -508,7 +508,7 @@ var Atom = {
     },
     
     updateCodeBlock: function(){
-        //substitue the result from each input for the ~...~ section with it's name
+        //Substitue the result from each input for the ~...~ section with it's name
         
         var regex = /~(.*?)~/gi;
         this.codeBlock = this.defaultCodeBlock.replace(regex, x => {

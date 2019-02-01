@@ -8,14 +8,31 @@ var Molecule = Atom.create({
         var instance = Atom.create.call(this, values);
         instance.nodesOnTheScreen = [];
         
+        //Add the button to go up one level
         if (!instance.topLevel){
             goUpOneLevel = UpOneLevelBtn.create({
                 parentMolecule: instance, 
                 x: 50,
-                y: 50
+                y: 50,
+                parent: instance,
+                atomType: "UpOneLevelBtn",
+                uniqueID: generateUniqueID()
             });
             instance.nodesOnTheScreen.push(goUpOneLevel);
         }
+        
+        //Add the molecule's output
+        output = Output.create({
+            parentMolecule: instance, 
+            x: canvas.width - 50,
+            y: canvas.height/2,
+            parent: instance,
+            name: "Output",
+            atomType: "Output",
+            uniqueID: generateUniqueID()
+        });
+        instance.nodesOnTheScreen.push(output);
+        instance.updateIO();
         
         return instance;
     },
@@ -39,10 +56,10 @@ var Molecule = Atom.create({
         this.nodesOnTheScreen.forEach(node => {
             
             if(node.type == "input"){
-                this.addIO("input", node.name, this);
+                this.addIO("input", node.name, this, "geometry");
             }
             if(node.type == "output"){
-                this.addIO("output", node.name, this);
+                this.addIO("output", node.name, this, "geometry");
             }
         });
     },
@@ -68,6 +85,35 @@ var Molecule = Atom.create({
         var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.generateFunction()
         
         window.loadDesign(toRender,"MaslowCreate");
+    },
+    
+    updateCodeBlock: function(){
+        //Grab the code from the output object
+        
+        console.log("updating molecule codeblock");
+        
+        //Grab the value
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.atomType == 'Output'){
+                this.codeBlock = atom.codeBlock;
+            }
+        });
+        
+        //Set the output nodes with name 'geometry' to be the generated code
+        this.children.forEach(child => {
+            console.log("Look here:");
+            console.log(child.valueType);
+            console.log(child.type);
+            if(child.valueType == 'geometry' && child.type == 'output'){
+                console.log("output value set to codeblock");
+                child.setValue(this.codeBlock);
+            }
+        });
+        
+        //If this molecule is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender();
+        }
     },
     
     generateFunction: function(){
@@ -157,6 +203,7 @@ var UpOneLevelBtn = Atom.create({
         
         if (distFromClick < this.radius){
             this.parentMolecule.updateIO(); //updates the IO shown on the parent molecule
+            this.parentMolecule.updateCodeBlock(); //Updates the code block of the parent molecule
             currentMolecule = this.parentMolecule.parent; //set parent this to be the currently displayed molecule
             clickProcessed = true;
         }

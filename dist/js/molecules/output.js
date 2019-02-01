@@ -1,5 +1,6 @@
 
 var Output = Atom.create({
+    defaultCodeBlock: "~number or geometry~",
     codeBlock: "",
     type: "output",
     name: "Output",
@@ -8,7 +9,7 @@ var Output = Atom.create({
     radius: 15,
     create: function(values){
         var instance = Atom.create.call(this, values);
-        instance.addIO("input", "number or geometry", instance);
+        instance.addIO("input", "number or geometry", instance, "geometry");
         
         return instance;
     },
