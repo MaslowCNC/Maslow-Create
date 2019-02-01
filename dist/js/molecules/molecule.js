@@ -87,6 +87,17 @@ var Molecule = Atom.create({
             }
         });
         
+        //Grab values from the inputs and push them out to the input objects
+        this.children.forEach(child => {
+            if(child.valueType == 'geometry' && child.type == 'input'){
+                this.nodesOnTheScreen.forEach(atom => {
+                    if(atom.atomType == "Input" && child.name == atom.name){
+                        atom.setOutput(child.getValue());
+                    }
+                });
+            }
+        });
+        
         //If this molecule is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender();

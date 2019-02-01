@@ -279,12 +279,10 @@ function applyInheritance(object){
     
     //If the object has an atomType property implying that it is an atom and should have inheritance
     if('atomType' in object){
-        console.log("AtomType: " + object.atomType + " trying:");
         listOfPrototypes.forEach(thisPrototype => {
             
             if (object.atomType == thisPrototype.atomType){
                 Object.setPrototypeOf(object, thisPrototype)  //Give it it's inheritance
-                console.log("--Rehydrated");
             }
         }); 
     }

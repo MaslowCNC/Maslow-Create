@@ -7,10 +7,16 @@ var Input = Atom.create({
     radius: 15,
     create: function(values){
         var instance = Atom.create.call(this, values);
-        instance.addIO("output", "number or geometry", instance);
+        instance.addIO("output", "number or geometry", instance, "geometry");
+        
+        instance.name = "Input" + generateUniqueID();
+        
+        //Add a new input to the current molecule
+        instance.parent.addIO("input", instance.name, instance.parent, "geometry");
         
         return instance;
     },
+    
     updateSidebar: function(){
         //updates the sidebar to display information about this node
         
@@ -19,6 +25,7 @@ var Input = Atom.create({
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
     },
+    
     draw: function() {
         
         this.children.forEach(child => {
@@ -41,5 +48,18 @@ var Input = Atom.create({
         c.fill();
         c.closePath();
 
+    },
+    
+    setOutput: function(newOutput){
+        //Set the input's output
+        
+        //this.codeBlock = newOutput;  //This breaks the input for some reason
+        
+        //Set the output nodes with type 'geometry' to be the new value
+        this.children.forEach(child => {
+            if(child.valueType == 'geometry' && child.type == 'output'){
+                child.setValue(newOutput);
+            }
+        });
     }
 });
