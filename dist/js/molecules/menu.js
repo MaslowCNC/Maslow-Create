@@ -10,7 +10,7 @@ function placeNewNode(ev){
                 y: menu.y, 
                 parent: currentMolecule,
                 name: type.name,
-                atomType: type.name,
+                atomType: type.atomType,
                 uniqueID: generateUniqueID()
             });
             currentMolecule.nodesOnTheScreen.push(molecule);
