@@ -53,7 +53,7 @@ var Input = Atom.create({
     setOutput: function(newOutput){
         //Set the input's output
         
-        //this.codeBlock = newOutput;  //This breaks the input for some reason
+        this.codeBlock = newOutput;  //This breaks the input for some reason
         
         //Set the output nodes with type 'geometry' to be the new value
         this.children.forEach(child => {
@@ -61,5 +61,9 @@ var Input = Atom.create({
                 child.setValue(newOutput);
             }
         });
+    }, 
+    
+    updateCodeBlock: function(){
+        //This empty function handles any calls to the normal update code block function which breaks things here
     }
 });
