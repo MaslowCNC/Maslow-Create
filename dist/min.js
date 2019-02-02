@@ -55212,24 +55212,24 @@ Viewer.defaults = function () {
       fov: 45, // field of view
       angle: { x: -60, y: 0, z: -45 }, // view angle about XYZ axis
       position: { x: 0, y: 0, z: 100 }, // initial position at XYZ
-      clip: { min: 0.5, max: 1000 // rendering outside this range is clipped
+      clip: { min: 0.5, max: 4000 // rendering outside this range is clipped
       } },
     plate: {
       draw: true, // draw or not
-      size: 200, // plate size (X and Y)
+      size: 2000, // plate size (X and Y)
       // minor grid settings
       m: {
-        i: 1, // number of units between minor grid lines
+        i: 50, // number of units between minor grid lines
         color: { r: 0.8, g: 0.8, b: 0.8, a: 0.5 // color
         } },
       // major grid settings
       M: {
-        i: 10, // number of units between major grid lines
+        i: 100, // number of units between major grid lines
         color: { r: 0.5, g: 0.5, b: 0.5, a: 0.5 // color
         } }
     },
     axis: {
-      draw: false, // draw or not
+      draw: true, // draw or not
       x: {
         neg: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // color in negative direction
         pos: { r: 1.0, g: 0, b: 0, a: 0.8 // color in positive direction
@@ -55253,7 +55253,7 @@ Viewer.defaults = function () {
       outlineColor: { r: 0.0, g: 0.0, b: 0.0, a: 0.1 // default outline color
       } },
     background: {
-      color: { r: 0.93, g: 0.93, b: 0.93, a: 1.0 }
+      color: { r: .68, g: 0.68, b: 0.69, a: 1.0 }
     }
   };
 };
