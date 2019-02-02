@@ -55229,7 +55229,7 @@ Viewer.defaults = function () {
         } }
     },
     axis: {
-      draw: true, // draw or not
+      draw: false, // draw or not
       x: {
         neg: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // color in negative direction
         pos: { r: 1.0, g: 0, b: 0, a: 0.8 // color in positive direction
