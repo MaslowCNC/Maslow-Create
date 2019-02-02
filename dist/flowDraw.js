@@ -167,7 +167,6 @@ function createEditableValueListItem(list,object,key, label, resultShouldBeNumbe
             valueInBox = parseFloat(valueInBox);
         }
         object.setValue(valueInBox);
-        //object.updateSidebar();
     });
     
     //prevent the return key from being used when editing a value

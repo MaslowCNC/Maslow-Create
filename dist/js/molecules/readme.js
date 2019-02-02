@@ -32,5 +32,9 @@ var Readme = Atom.create({
         c.moveTo(this.x, this.y + 10);
         c.lineTo(this.x + 11, this.y - 10);
         c.stroke();
+    }, 
+    
+    setValue: function(newText) {
+        this.readmeText = newText;
     }
 });
