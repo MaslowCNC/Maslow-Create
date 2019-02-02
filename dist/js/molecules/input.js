@@ -50,6 +50,19 @@ var Input = Atom.create({
 
     },
     
+    setValue: function(theNewName){
+        //Called by the sidebar to set the name
+        
+        //Run through the parent molecule and find the input with the same name
+        this.parent.children.forEach(child => {
+            if (child.name == this.name){
+                console.log("match found for: " + this.name);
+                this.name = theNewName;
+                child.name = theNewName;
+            }
+        });
+    },
+    
     setOutput: function(newOutput){
         //Set the input's output
         
