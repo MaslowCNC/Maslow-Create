@@ -106,6 +106,20 @@ var Molecule = Atom.create({
         }
     },
     
+    updateSidebar: function(){
+        //Update the side bar to make it possible to change the molecule name
+        
+        var valueList = Atom.updateSidebar.call(this); //call the super function
+        
+        createEditableValueListItem(valueList,this,"name", "Name", false);
+        
+    },
+    
+    setValue: function(newName){
+        //Called by the sidebar to set the name
+        this.name = newName;
+    },
+    
     generateFunction: function(){
         //Generate the function created by this molecule
         

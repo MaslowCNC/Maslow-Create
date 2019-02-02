@@ -5,11 +5,13 @@ var Constant = Atom.create({
     atomType: "Constant",
     height: 16,
     radius: 15,
+    
     create: function(values){
         var instance = Atom.create.call(this, values);
         instance.addIO("output", "number", instance, "number");
         return instance;
     },
+    
     updateSidebar: function(){
         //updates the sidebar to display information about this node
         
@@ -21,6 +23,12 @@ var Constant = Atom.create({
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
     },
+    
+    setValue: function(newName){
+        //Called by the sidebar to set the name
+        this.name = newName;
+    },
+    
     draw: function() {
         
         this.children.forEach(child => {
