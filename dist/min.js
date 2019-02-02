@@ -53840,7 +53840,7 @@ Processor.prototype = {
       // end of zoom control
     }
 
-    this.selectdiv = this.containerdiv.parentElement.querySelector('div#selectdiv');
+    this.selectdiv = document.getElementById('selectdiv');
     if (!this.selectdiv) {
       this.selectdiv = document.createElement('div');
       this.selectdiv.id = 'selectdiv';
@@ -53875,7 +53875,7 @@ Processor.prototype = {
     };
     this.selectdiv.appendChild(element);
 
-    this.errordiv = this.containerdiv.parentElement.querySelector('div#errordiv');
+    this.errordiv = document.getElementById('errordiv');
     if (!this.errordiv) {
       this.errordiv = document.createElement('div');
       this.errordiv.id = 'errordiv';
@@ -53884,7 +53884,8 @@ Processor.prototype = {
     this.errorpre = document.createElement('pre');
     this.errordiv.appendChild(this.errorpre);
 
-    this.statusdiv = this.containerdiv.parentElement.querySelector('div#statusdiv');
+    this.statusdiv = document.getElementById('statusdiv');;
+    
     if (!this.statusdiv) {
       this.statusdiv = document.createElement('div');
       this.statusdiv.id = 'statusdiv';
@@ -53917,7 +53918,7 @@ Processor.prototype = {
     this.downloadOutputFileLink.className = 'downloadOutputFileLink'; // so we can css it
     this.statusbuttons.appendChild(this.downloadOutputFileLink);
 
-    this.parametersdiv = this.containerdiv.parentElement.querySelector('div#parametersdiv');
+    this.parametersdiv = document.getElementById('parametersdiv');
     if (!this.parametersdiv) {
       this.parametersdiv = document.createElement('div');
       this.parametersdiv.id = 'parametersdiv';
@@ -54093,7 +54094,7 @@ Processor.prototype = {
 
   setError: function setError(txt) {
     this.hasError = txt != '';
-    this.errorpre.textContent = txt;
+    this.errorpre.textContent = ""//txt; //I removed this to prevent errors from rendering on the console 
     this.enableItems();
   },
 
