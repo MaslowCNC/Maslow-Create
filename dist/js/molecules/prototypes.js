@@ -533,7 +533,7 @@ var Atom = {
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
             
-            console.log("To render: " + toRender);
+            //console.log("To render: " + toRender);
             
             window.loadDesign(toRender,"MaslowCreate");
         }

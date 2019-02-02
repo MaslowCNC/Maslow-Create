@@ -168,7 +168,7 @@ function createNewProject(){
     var description = document.getElementById('project-description').value;
     
     //Load a blank project
-    currentMolecule = Molecule.create({
+    topLevelMolecule = Molecule.create({
         x: 0, 
         y: 0, 
         topLevel: true, 
@@ -176,6 +176,8 @@ function createNewProject(){
         atomType: "Molecule",
         uniqueID: generateUniqueID()
     });
+    
+    currentMolecule = topLevelMolecule;
     
     //Create a new repo
     octokit.repos.createForAuthenticatedUser({
@@ -221,7 +223,7 @@ function saveProject(){
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(currentMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(topLevelMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
@@ -259,7 +261,8 @@ function loadProject(projectName){
         
         applyInheritance(jsonContent);
         
-        currentMolecule = jsonContent;
+        topLevelMolecule = jsonContent;
+        currentMolecule = topLevelMolecule;
         
         console.log(currentMolecule);
         

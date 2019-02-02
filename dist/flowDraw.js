@@ -91,6 +91,7 @@ window.addEventListener('keydown', event => {
 var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Molecule, Input, Readme, Rotate, Mirror];
 
 let currentMolecule;
+let topLevelMolecule;
 let menu;
 
 function init() {

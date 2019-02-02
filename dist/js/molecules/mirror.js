@@ -6,9 +6,9 @@ var Mirror = Atom.create({
     create: function(values){
         var instance = Atom.create.call(this, values);
         instance.addIO("input", "geometry", instance, "geometry");
-        instance.addIO("input", "x", instance, "geometry");
-        instance.addIO("input", "y", instance, "geometry");
-        instance.addIO("input", "z", instance, "geometry");
+        instance.addIO("input", "x", instance, "number");
+        instance.addIO("input", "y", instance, "number");
+        instance.addIO("input", "z", instance, "number");
         instance.addIO("output", "geometry", instance, "geometry");
         return instance;
     }
