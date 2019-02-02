@@ -146,10 +146,9 @@ var AttachmentPoint = {
     
     wasConnectionMade: function(x,y, connector){
         //this function returns itself if the cordinates passed in are within itself
-        if (distBetweenPoints(this.x, x, this.y, y) < this.radius){
+        if (distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
             
-            
-            if(this.connectors.length > 0 && this.type == 'input'){ //Don't accept a second connection to an input
+            if(this.connectors.length > 0){ //Don't accept a second connection to an input
                 return false;
             }
             
@@ -195,6 +194,8 @@ var Connector =  {
     color: 'black',
     atomType: "Connector",
     selected: false,
+    attachmentPoint1: null,
+    attachmentPoint2: null,
 
     create: function(values){
         var instance = Object.create(this);
@@ -228,35 +229,24 @@ var Connector =  {
 
     clickUp: function(x,y){
         
-        var connectionNode = false;
         if(this.isMoving){  //we only want to attach the connector which is currently moving
-            currentMolecule.nodesOnTheScreen.forEach(molecule => {                  //for every molecule on the screen  (should run three times)
-                molecule.children.forEach(child => {
-                    var thisConnectionValid = child.wasConnectionMade(x,y, this);
+            currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
+                molecule.children.forEach(child => {                                    //For each of their attachment points
+                    var thisConnectionValid = child.wasConnectionMade(x,y, this);       //Check to see if we made a connection
                     if(thisConnectionValid){
-                        connectionNode = thisConnectionValid;
+                        this.attachmentPoint2 = thisConnectionValid;
+                        this.propogate();                                               //Send information from one point to the other
                     }
                 });
             });
         }
         
-        //FIXME: This bit needs to be refactored, its pretty ugly as is
         
-        if(this.isMoving){
-            //if we have connected to a valid connector
-            if (connectionNode && connectionNode.type === "input" ){
-                this.attachmentPoint2 = connectionNode;
-                
-                this.propogate();//send the information
-            }
-            else{
-                //remove this connector from the stack
-                this.attachmentPoint1.connectors.pop();
-            }
+        if (this.attachmentPoint2 == null){                                 //If we have not made a connection
+            this.deleteSelf();                                              //Delete this connector
         }
         
-        this.isMoving = false;
-        
+        this.isMoving = false;                                                         //Move over 
     },
 
     clickMove: function(x,y){
@@ -276,7 +266,9 @@ var Connector =  {
     
     deleteSelf: function(){
         
-        this.attachmentPoint2.connectors = []; //free up the point to which this was attached
+        if(this.attachmentPoint2 != null){
+            this.attachmentPoint2.connectors = []; //free up the point to which this was attached
+        }
         
         this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
     },
