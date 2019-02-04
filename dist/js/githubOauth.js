@@ -207,6 +207,7 @@ function createNewProject(){
         })
     });
     
+    currentMolecule.backgroundClick();
     
     //Clear and hide the popup
     while (popup.firstChild) {
@@ -223,7 +224,7 @@ function saveProject(){
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(topLevelMolecule, null, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(CircularJSON.stringify(topLevelMolecule, topLevelMolecule.stripFat, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
@@ -263,6 +264,8 @@ function loadProject(projectName){
         
         topLevelMolecule = jsonContent;
         currentMolecule = topLevelMolecule;
+        
+        currentMolecule.backgroundClick();
         
         console.log(currentMolecule);
         

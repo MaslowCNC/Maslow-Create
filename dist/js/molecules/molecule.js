@@ -65,6 +65,8 @@ var Molecule = Atom.create({
     
     backgroundClick: function(){
         
+        this.updateSidebar();
+        
         var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.generateFunction()
         
         window.loadDesign(toRender,"MaslowCreate");
@@ -147,7 +149,7 @@ var Molecule = Atom.create({
     stripFat: function(name, val) {
         //Strips out the excess variables we don't want to store in our file
         
-        var variablesToIgnore = ["defaultOffsetX", "defaultOffsetY", "hoverOffsetX", "hoverOffsetY", "showHoverText", "hoverDetectRadius", "codeBlock"];
+        var variablesToIgnore = ["showHoverText", "hoverDetectRadius", "codeBlock", "selected", "isMoving"];
         
         if(variablesToIgnore.indexOf(name) > -1){
             return undefined;

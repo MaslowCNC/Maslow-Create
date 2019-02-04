@@ -43,7 +43,6 @@ flowCanvas.addEventListener('mousedown', event => {
     });
     
     if(!clickHandledByMolecule){
-        currentMolecule.updateSidebar();
         currentMolecule.backgroundClick();
     }
     
@@ -88,7 +87,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Molecule, Input, Readme, Rotate, Mirror];
+var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Molecule, Input, Readme, Rotate, Mirror, Union];
 
 let currentMolecule;
 let topLevelMolecule;

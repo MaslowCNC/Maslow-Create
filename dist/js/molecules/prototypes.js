@@ -373,33 +373,38 @@ var Atom = {
     },
     
     clickDown: function(x,y){
-        //returns true if something was done with the click
+        //Returns true if something was done with the click
         
         
         var clickProcessed = false;
-        
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
-        
-        if (distFromClick < this.radius){
-            this.color = this.selectedColor;
-            this.isMoving = true;
-            this.selected = true;
-            this.updateSidebar();
-            
-            this.sendToRender();
-            
-            clickProcessed = true;
-        }
-        else{
-            this.color = this.defaultColor;
-            this.selected = false;
-        }
         
         this.children.forEach(child => {
             if(child.clickDown(x,y) == true){
                 clickProcessed = true;
             }
         });
+        
+        //If none of the children processed the click
+        if(!clickProcessed){
+        
+            var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+            
+            if (distFromClick < this.radius){
+                this.color = this.selectedColor;
+                this.isMoving = true;
+                this.selected = true;
+                this.updateSidebar();
+                
+                this.sendToRender();
+                
+                clickProcessed = true;
+            }
+            else{
+                this.color = this.defaultColor;
+                this.selected = false;
+            }
+            
+        }
         
         return clickProcessed; 
     },
