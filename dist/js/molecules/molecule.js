@@ -177,38 +177,39 @@ var Molecule = Atom.create({
     },
     
     placeConnector: function(connectorObj){
-        console.log("Place connector:");
-        console.log(connectorObj);
-        
-        var connector = Connector.create({
-            parentMolecule: this,
-            atomType: "Connector"
-        });
+        var connector;
         
         this.nodesOnTheScreen.forEach(node => {
             //Find the output node
             if (node.uniqueID == connectorObj.ap1ID){
-                console.log("Ap1 id found");
+                
                 node.children.forEach(child => {
                     if(child.name == connectorObj.ap1Name && child.type == "output"){
-                        console.log("connector goes to: " + child.name);
-                        connector.attachmentPoint1 = child;
+                        
+                        connector = Connector.create({
+                            atomType: "Connector",
+                            attachmentPoint1: child,
+                            parentMolecule:  node
+                        });
                     }
                 });
             }
             //Find the input node
             if (node.uniqueID == connectorObj.ap2ID){
-                console.log("Ap2 id found");
+                
                 node.children.forEach(child => {
                     if(child.name == connectorObj.ap2Name && child.type == "input"){
-                        console.log("connector goes to: " + child.name);
                         connector.attachmentPoint2 = child;
                     }
                 });
             }
         });
         
+        //Store the connector
         connector.attachmentPoint1.connectors.push(connector);
+        
+        //Update the connection
+        connector.attachmentPoint1.parentMolecule.updateCodeBlock();
     },
     
     stripFat: function(name, val) {

@@ -282,10 +282,11 @@ function loadProject(projectName){
             topLevelMolecule.placeAtom(JSON.parse(atom));
         });
         
-       //Place the connectors
-       obj.allConnectors.forEach(connector => {
+        //Place the connectors
+        obj.allConnectors.forEach(connector => {
             topLevelMolecule.placeConnector(JSON.parse(connector));
         });
+        
         
         //Clear and hide the popup
         while (popup.firstChild) {
