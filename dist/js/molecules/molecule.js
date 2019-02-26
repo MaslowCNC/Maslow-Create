@@ -151,7 +151,28 @@ var Molecule = Atom.create({
             allConnectors: allConnectors
         }
         
-        return thisAsObject;
+        return JSON.stringify(thisAsObject, null, 4);
+    },
+    
+    deserialize: function(projectAsString){
+        
+        console.log("Raw: ");
+        console.log(projectAsString);
+        
+        moleculeObject = JSON.parse(projectAsString);
+        
+        console.log("Attempting to de serialize: ");
+        console.log(moleculeObject);
+        
+        //Place the atoms
+        moleculeObject.allAtoms.forEach(atom => {
+            this.placeAtom(JSON.parse(atom));
+        });
+        
+        //Place the connectors
+        moleculeObject.allConnectors.forEach(connector => {
+            this.placeConnector(JSON.parse(connector));
+        });
     },
     
     placeAtom: function(atomObj){
