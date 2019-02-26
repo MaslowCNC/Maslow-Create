@@ -3,19 +3,13 @@ function placeNewNode(ev){
     hidemenu();
     let clr = ev.target.id;
     
-    // availableTypes.forEach(type => {
-        // if (type.name === clr){
-            // var atom = type.create({
-                // x: menu.x, 
-                // y: menu.y, 
-                // parent: currentMolecule,
-                // name: type.name,
-                // atomType: type.atomType,
-                // uniqueID: generateUniqueID()
-            // });
-            // currentMolecule.nodesOnTheScreen.push(atom);
-        // }
-    // }); 
+    currentMolecule.placeAtom({
+        x: menu.x, 
+        y: menu.y, 
+        parent: currentMolecule,
+        atomType: clr,
+        uniqueID: generateUniqueID()
+    });
 }
 
 function showmenu(ev){
