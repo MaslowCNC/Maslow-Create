@@ -261,11 +261,9 @@ function loadProject(projectName){
         //content will be base64 encoded
         let rawFile = atob(result.data.content);
         
-        console.log(rawFile);
-        
         var obj = JSON.parse(rawFile);
         
-        console.log(obj);
+        //console.log(obj);
         
         //Load a blank project
         topLevelMolecule = Molecule.create({
@@ -279,16 +277,15 @@ function loadProject(projectName){
         
         currentMolecule = topLevelMolecule;
         
+        //Place the atoms
         obj.allAtoms.forEach(atom => {
             topLevelMolecule.placeAtom(JSON.parse(atom));
         });
         
-        // topLevelMolecule = jsonContent;
-        // currentMolecule = topLevelMolecule;
-        
-        // currentMolecule.backgroundClick();
-        
-        // console.log(currentMolecule);
+       //Place the connectors
+       obj.allConnectors.forEach(connector => {
+            topLevelMolecule.placeConnector(JSON.parse(connector));
+        });
         
         //Clear and hide the popup
         while (popup.firstChild) {

@@ -155,8 +155,8 @@ var Molecule = Atom.create({
     },
     
     placeAtom: function(atomObj){
-        console.log("would place atom: ");
-        console.log(atomObj);
+        //console.log("Place atom: ");
+        //console.log(atomObj);
         
         //Place the atom
         availableTypes.forEach(type => {
@@ -174,6 +174,41 @@ var Molecule = Atom.create({
                 this.nodesOnTheScreen.push(atom);
             }
         });
+    },
+    
+    placeConnector: function(connectorObj){
+        console.log("Place connector:");
+        console.log(connectorObj);
+        
+        var connector = Connector.create({
+            parentMolecule: this,
+            atomType: "Connector"
+        });
+        
+        this.nodesOnTheScreen.forEach(node => {
+            //Find the output node
+            if (node.uniqueID == connectorObj.ap1ID){
+                console.log("Ap1 id found");
+                node.children.forEach(child => {
+                    if(child.name == connectorObj.ap1Name && child.type == "output"){
+                        console.log("connector goes to: " + child.name);
+                        connector.attachmentPoint1 = child;
+                    }
+                });
+            }
+            //Find the input node
+            if (node.uniqueID == connectorObj.ap2ID){
+                console.log("Ap2 id found");
+                node.children.forEach(child => {
+                    if(child.name == connectorObj.ap2Name && child.type == "input"){
+                        console.log("connector goes to: " + child.name);
+                        connector.attachmentPoint2 = child;
+                    }
+                });
+            }
+        });
+        
+        connector.attachmentPoint1.connectors.push(connector);
     },
     
     stripFat: function(name, val) {
