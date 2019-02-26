@@ -67,15 +67,13 @@ var Molecule = Atom.create({
         
         this.updateSidebar();
         
-        var toRender = "function main () {\n    return molecule" + this.uniqueID + "()\n}\n\n" + this.generateFunction()
+        var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
         
         window.loadDesign(toRender,"MaslowCreate");
     },
     
     updateCodeBlock: function(){
         //Grab the code from the output object
-        
-        console.log("Molecule update code block ran");
         
         //Grab values from the inputs and push them out to the input objects
         this.children.forEach(child => {
@@ -122,28 +120,60 @@ var Molecule = Atom.create({
         this.name = newName;
     },
     
-    generateFunction: function(){
+    serialize: function(){
         //Generate the function created by this molecule
         
-        var allElements = new Array();
+        var allElementsCode = new Array();
+        var allAtoms = [];
+        var allConnectors = [];
         
         this.nodesOnTheScreen.forEach(atom => {
             if (atom.codeBlock != ""){
-                allElements.push(atom.codeBlock);
+                allElementsCode.push(atom.codeBlock);
             }
+            
+            allAtoms.push(atom.serialize());
+            
+            atom.children.forEach(attachmentPoint => {
+                if(attachmentPoint.type == "output"){
+                    attachmentPoint.connectors.forEach(connector => {
+                        allConnectors.push(connector.serialize());
+                    });
+                }
+            });
         });
         
-        var nodes =  {node1: 'test', node2: 'more test'};
-        var nodesString = CircularJSON.stringify(this, this.stripFat, 4);
-        nodesString = nodesString.replace(/\n/gi, "\n    ");
+        var thisAsObject = {
+            atomType: this.atomType,
+            name: this.name,
+            uniqueID: this.uniqueID,
+            allAtoms: allAtoms,
+            allConnectors: allConnectors
+        }
         
-        var thisFunction = "function molecule" + this.uniqueID + " () {"
-            +"\n    var containedNodes = " + nodesString + ";"
-            +"\n    return [\n        " + allElements.join(",\n        ") 
-            +"\n    ];"
-        +"\n}"
+        return thisAsObject;
+    },
+    
+    placeAtom: function(atomObj){
+        console.log("would place atom: ");
+        console.log(atomObj);
         
-        return thisFunction;
+        //Place the atom
+        availableTypes.forEach(type => {
+            if (type.atomType == atomObj.atomType){
+                var atom = type.create({
+                    parent: this,
+                    name: type.name,
+                    atomType: type.atomType,
+                    uniqueID: generateUniqueID()
+                });
+                
+                //Add all of the passed attributes into the object
+                for(var key in atomObj) atom[key]=atomObj[key];
+                
+                this.nodesOnTheScreen.push(atom);
+            }
+        });
     },
     
     stripFat: function(name, val) {

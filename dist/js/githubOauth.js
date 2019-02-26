@@ -220,11 +220,12 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    
+    return;
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
-        var content = window.btoa(CircularJSON.stringify(topLevelMolecule, topLevelMolecule.stripFat, 4)); //Convert the currentRepo object to a JSON string and then convert it to base64 encoding
+        
+        var content = window.btoa(JSON.stringify(topLevelMolecule.serialize(), null, 4)); //Convert the topLevelMolecule object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
@@ -255,57 +256,46 @@ function loadProject(projectName){
         owner: currentUser,
         repo: projectName,
         path: 'project.maslowcreate'
-    })
-    .then(result => {
+    }).then(result => {
+            
         //content will be base64 encoded
-        let jsonContent = CircularJSON.parse(atob(result.data.content));
+        let rawFile = atob(result.data.content);
         
-        applyInheritance(jsonContent);
+        console.log(rawFile);
         
-        topLevelMolecule = jsonContent;
+        var obj = JSON.parse(rawFile);
+        
+        console.log(obj);
+        
+        //Load a blank project
+        topLevelMolecule = Molecule.create({
+            x: 0, 
+            y: 0, 
+            topLevel: true, 
+            name: obj.name,
+            atomType: "Molecule",
+            uniqueID: obj.uniqueID
+        });
+        
         currentMolecule = topLevelMolecule;
         
-        currentMolecule.backgroundClick();
+        obj.allAtoms.forEach(atom => {
+            topLevelMolecule.placeAtom(JSON.parse(atom));
+        });
         
-        console.log(currentMolecule);
+        // topLevelMolecule = jsonContent;
+        // currentMolecule = topLevelMolecule;
+        
+        // currentMolecule.backgroundClick();
+        
+        // console.log(currentMolecule);
         
         //Clear and hide the popup
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild);
         }
         popup.classList.add('off');
-    })
-    
+    }) 
 }
 
-function applyInheritance(object){
-    //Takes an object and if it has an atomType attribute it is given the inheritance of that attribute
-    
-    var listOfPrototypes = availableTypes.concat([AttachmentPoint, Connector, UpOneLevelBtn, Output]); //add to the list of available prototypes
-    
-    //If the object has an atomType property implying that it is an atom and should have inheritance
-    if('atomType' in object){
-        listOfPrototypes.forEach(thisPrototype => {
-            
-            if (object.atomType == thisPrototype.atomType){
-                Object.setPrototypeOf(object, thisPrototype)  //Give it it's inheritance
-            }
-        }); 
-    }
-    
-    //If the atom contains a list of displayed nodes which might need their inheritance applied
-    if('nodesOnTheScreen' in object){
-        object.nodesOnTheScreen.forEach(node => {applyInheritance(node)});
-    }
-    
-    //If the atom contains a list of children which might need their inheritance applied
-    if('connectors' in object){
-        object.connectors.forEach(connector => {applyInheritance(connector)});
-    }
-    
-    //If the atom contains a list of connectors which might need their inheritance applied
-    if('children' in object){
-        object.children.forEach(child => {applyInheritance(child)});
-    }
-}
 

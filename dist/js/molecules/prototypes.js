@@ -273,6 +273,18 @@ var Connector =  {
         this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
     },
     
+    serialize: function(){
+        if ( this.attachmentPoint2 != null){
+            var object = {
+                ap1Name: this.attachmentPoint1.name,
+                ap2Name: this.attachmentPoint2.name,
+                ap1ID: this.attachmentPoint1.parentMolecule.uniqueID,
+                ap2ID: this.attachmentPoint2.parentMolecule.uniqueID
+            }
+            return JSON.stringify(object);
+        }
+    },
+    
     propogate: function(){
         //takes the input and passes it to the output
         this.attachmentPoint2.setValue(this.attachmentPoint1.getValue());
@@ -502,6 +514,17 @@ var Atom = {
         });
         
         this.draw()
+    },
+    
+    serialize: function(){
+        var object = {
+            atomType: this.atomType,
+            name: this.name,
+            x: this.x,
+            y: this.y,
+            uniqueID: this.uniqueID
+        }
+        return JSON.stringify(object);
     },
     
     updateCodeBlock: function(){
