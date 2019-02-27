@@ -225,7 +225,7 @@ function saveProject(){
         
         var path = "project.maslowcreate";
         
-        var content = window.btoa(JSON.stringify(topLevelMolecule.serialize(), null, 4)); //Convert the topLevelMolecule object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(JSON.stringify(topLevelMolecule.serialize(null), null, 4)); //Convert the topLevelMolecule object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
@@ -261,34 +261,26 @@ function loadProject(projectName){
         //content will be base64 encoded
         let rawFile = atob(result.data.content);
         
-        console.log(rawFile);
         
-        var obj = JSON.parse(rawFile);
-        
-        console.log(obj);
+        moleculesList = JSON.parse(rawFile).molecules;
         
         //Load a blank project
         topLevelMolecule = Molecule.create({
             x: 0, 
             y: 0, 
             topLevel: true, 
-            name: obj.name,
-            atomType: "Molecule",
-            uniqueID: obj.uniqueID
+            atomType: "Molecule"
         });
         
         currentMolecule = topLevelMolecule;
         
-        obj.allAtoms.forEach(atom => {
-            topLevelMolecule.placeAtom(JSON.parse(atom));
-        });
+        //Load the top level molecule from the file
+        topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
         
-        // topLevelMolecule = jsonContent;
-        // currentMolecule = topLevelMolecule;
+        //Load the other molecules from the file
         
-        // currentMolecule.backgroundClick();
         
-        // console.log(currentMolecule);
+        
         
         //Clear and hide the popup
         while (popup.firstChild) {
