@@ -516,7 +516,8 @@ var Atom = {
         this.draw()
     },
     
-    serialize: function(){
+    serialize: function(savedObject){
+        //savedObject is only used by Molecule type atoms
         var object = {
             atomType: this.atomType,
             name: this.name,

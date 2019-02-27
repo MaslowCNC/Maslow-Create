@@ -120,12 +120,15 @@ var Molecule = Atom.create({
         this.name = newName;
     },
     
-    serialize: function(){
+    serialize: function(savedObject){
         //Generate the function created by this molecule
+        
+        var savedObject = {molecules: []}
         
         var allElementsCode = new Array();
         var allAtoms = [];
         var allConnectors = [];
+        
         
         this.nodesOnTheScreen.forEach(atom => {
             if (atom.codeBlock != ""){
@@ -147,22 +150,25 @@ var Molecule = Atom.create({
             atomType: this.atomType,
             name: this.name,
             uniqueID: this.uniqueID,
+            topLevel: this.topLevel,
             allAtoms: allAtoms,
             allConnectors: allConnectors
         }
         
-        return JSON.stringify(thisAsObject, null, 4);
+        savedObject.molecules.push(thisAsObject);
+        
+        return JSON.stringify(savedObject, null, 4);
     },
     
-    deserialize: function(projectAsString){
-        
-        console.log("Raw: ");
-        console.log(projectAsString);
-        
-        moleculeObject = JSON.parse(projectAsString);
+    deserialize: function(moleculeObject){
         
         console.log("Attempting to de serialize: ");
         console.log(moleculeObject);
+        
+        //Grab the name and ID
+        this.uniqueID = moleculeObject.uniqueID;
+        this.name = moleculeObject.name;
+        this.topLevel = moleculeObject.topLevel;
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {

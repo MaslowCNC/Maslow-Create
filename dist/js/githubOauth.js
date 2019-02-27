@@ -220,7 +220,7 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    return;
+    
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
@@ -261,6 +261,12 @@ function loadProject(projectName){
         //content will be base64 encoded
         let rawFile = atob(result.data.content);
         
+        
+        moleculesList = JSON.parse(rawFile).molecules;
+        
+        console.log("Molecules list: ");
+        console.log(moleculesList);
+        
         //Load a blank project
         topLevelMolecule = Molecule.create({
             x: 0, 
@@ -271,8 +277,12 @@ function loadProject(projectName){
         
         currentMolecule = topLevelMolecule;
         
-        //Recursively load the project from the JSON file
-        topLevelMolecule.deserialize(rawFile);
+        //Load the top level molecule from the file
+        topLevelMolecule.deserialize(moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0]);
+        
+        //Load the other molecules from the file
+        
+        
         
         
         //Clear and hide the popup
