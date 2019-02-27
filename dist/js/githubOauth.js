@@ -220,7 +220,7 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    return;
+    
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
