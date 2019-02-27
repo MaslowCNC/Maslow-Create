@@ -193,18 +193,12 @@ var Molecule = Atom.create({
         this.name = moleculeObject.name;
         this.topLevel = moleculeObject.topLevel;
         
-        console.log("Molecule object before placing atoms:");
-        console.log(moleculeObject);
-        
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
             this.placeAtom(JSON.parse(atom), moleculeList);
         });
         
-                
-        console.log("Placing connectors for: " + moleculeObject.uniqueID);
-        console.log(moleculeObject);
-        
+        //reload the molecule object to prevent persistance issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Place the connectors
@@ -224,6 +218,11 @@ var Molecule = Atom.create({
                     atomType: type.atomType,
                     uniqueID: generateUniqueID()
                 });
+                
+                //reasign the name of the Inputs to preserve linking
+                if(atom.atomType == "Input"){
+                    atom.setValue(atomObj.name);
+                }
                 
                 //Add all of the passed attributes into the object
                 for(var key in atomObj) atom[key]=atomObj[key];
@@ -253,17 +252,12 @@ var Molecule = Atom.create({
         var cp2NotFound = true;
         var ap2;
         
-        
-        console.log("Looking for: " + connectorObj.ap1ID + " or " + connectorObj.ap2ID + " in:");
-        console.log(this.nodesOnTheScreen);
-        
         this.nodesOnTheScreen.forEach(atom => {
             //Find the output node
             
             if (atom.uniqueID == connectorObj.ap1ID){
                 atom.children.forEach(child => {
                     if(child.name == connectorObj.ap1Name && child.type == "output"){
-                        //console.log("AP1 found");
                         connector = Connector.create({
                             atomType: "Connector",
                             attachmentPoint1: child,
@@ -277,7 +271,6 @@ var Molecule = Atom.create({
             if (atom.uniqueID == connectorObj.ap2ID){
                 atom.children.forEach(child => {
                     if(child.name == connectorObj.ap2Name && child.type == "input"){
-                        //console.log("AP2 Found");
                         cp2NotFound = false;
                         ap2 = child;
                     }
