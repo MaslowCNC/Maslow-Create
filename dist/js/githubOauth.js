@@ -220,12 +220,12 @@ function createNewProject(){
 
 function saveProject(){
     //Save the current project into the github repo
-    
+    return;
     if(currentRepoName != null){
         
         var path = "project.maslowcreate";
         
-        var content = window.btoa(topLevelMolecule.serialize()); //Convert the topLevelMolecule object to a JSON string and then convert it to base64 encoding
+        var content = window.btoa(JSON.stringify(topLevelMolecule.serialize(null), null, 4)); //Convert the topLevelMolecule object to a JSON string and then convert it to base64 encoding
         
         //Get the SHA for the file
         octokit.repos.getContents({
@@ -264,9 +264,6 @@ function loadProject(projectName){
         
         moleculesList = JSON.parse(rawFile).molecules;
         
-        console.log("Molecules list: ");
-        console.log(moleculesList);
-        
         //Load a blank project
         topLevelMolecule = Molecule.create({
             x: 0, 
@@ -278,7 +275,7 @@ function loadProject(projectName){
         currentMolecule = topLevelMolecule;
         
         //Load the top level molecule from the file
-        topLevelMolecule.deserialize(moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0]);
+        topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
         
         //Load the other molecules from the file
         

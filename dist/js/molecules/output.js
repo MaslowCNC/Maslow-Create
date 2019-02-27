@@ -16,6 +16,11 @@ var Output = Atom.create({
         
         return instance;
     },
+    
+    setID: function(newID){
+        this.uniqueID = newID;
+    },
+    
     draw: function() {
         
         this.children.forEach(child => {

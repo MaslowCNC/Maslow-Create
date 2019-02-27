@@ -20,7 +20,7 @@ var Molecule = Atom.create({
             });
             instance.nodesOnTheScreen.push(goUpOneLevel);
             
-            //Add the molecule's output
+            //Add the molecule's output FIXME...this should use the place atom function
             output = Output.create({
                 parentMolecule: instance, 
                 x: canvas.width - 50,
@@ -67,9 +67,9 @@ var Molecule = Atom.create({
         
         this.updateSidebar();
         
-        var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
+        //var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
         
-        window.loadDesign(toRender,"MaslowCreate");
+        //window.loadDesign(toRender,"MaslowCreate");
     },
     
     updateCodeBlock: function(){
@@ -121,10 +121,17 @@ var Molecule = Atom.create({
     },
     
     serialize: function(savedObject){
-        //Generate the function created by this molecule
+        //Save this molecule.
         
-        var savedObject = {molecules: []}
+        //This one is a little confusing. Basically each molecule saves like an atom, but also creates a second object 
+        //record of itself in the object "savedObject" object. If this is the topLevel molecule we need to create the 
+        //savedObject object here to pass to lower levels.
         
+        if(this.topLevel == true){
+            //Create a new blank project to save to
+            savedObject = {molecules: []}
+        }
+            
         var allElementsCode = new Array();
         var allAtoms = [];
         var allConnectors = [];
@@ -135,7 +142,7 @@ var Molecule = Atom.create({
                 allElementsCode.push(atom.codeBlock);
             }
             
-            allAtoms.push(atom.serialize());
+            allAtoms.push(atom.serialize(savedObject));
             
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
@@ -155,25 +162,50 @@ var Molecule = Atom.create({
             allConnectors: allConnectors
         }
         
+        //Add an object record of this object
         savedObject.molecules.push(thisAsObject);
-        
-        return JSON.stringify(savedObject, null, 4);
+            
+        if(this.topLevel == true){
+            //If this is the top level, return the generated object
+            return savedObject;
+        }
+        else{
+            //If not, return just a placeholder for this molecule
+            var object = {
+                atomType: this.atomType,
+                name: this.name,
+                x: this.x,
+                y: this.y,
+                uniqueID: this.uniqueID
+            }
+            
+            return JSON.stringify(object);
+        }
     },
-    
-    deserialize: function(moleculeObject){
         
-        console.log("Attempting to de serialize: ");
-        console.log(moleculeObject);
+    deserialize: function(moleculeList, moleculeID){
+        
+        //Find the target molecule in the list
+        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Grab the name and ID
         this.uniqueID = moleculeObject.uniqueID;
         this.name = moleculeObject.name;
         this.topLevel = moleculeObject.topLevel;
         
+        console.log("Molecule object before placing atoms:");
+        console.log(moleculeObject);
+        
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(JSON.parse(atom));
+            this.placeAtom(JSON.parse(atom), moleculeList);
         });
+        
+                
+        console.log("Placing connectors for: " + moleculeObject.uniqueID);
+        console.log(moleculeObject);
+        
+        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Place the connectors
         moleculeObject.allConnectors.forEach(connector => {
@@ -181,11 +213,9 @@ var Molecule = Atom.create({
         });
     },
     
-    placeAtom: function(atomObj){
-        //console.log("Place atom: ");
-        //console.log(atomObj);
+    placeAtom: function(atomObj, moleculeList){
         
-        //Place the atom
+        //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
         availableTypes.forEach(type => {
             if (type.atomType == atomObj.atomType){
                 var atom = type.create({
@@ -198,58 +228,75 @@ var Molecule = Atom.create({
                 //Add all of the passed attributes into the object
                 for(var key in atomObj) atom[key]=atomObj[key];
                 
+                //If this is a molecule, deserialize it
+                if(atom.atomType == "Molecule" && moleculeList != null){
+                    atom.deserialize(moleculeList, atom.uniqueID);
+                }
+                
                 this.nodesOnTheScreen.push(atom);
             }
         });
+        
+        if(atomObj.atomType == "Output"){
+            //re-asign output ID numbers if a new one is supposed to be placed
+            this.nodesOnTheScreen.forEach(atom => {
+                if(atom.atomType == "Output"){
+                    atom.setID(atomObj.uniqueID);
+                }
+            });
+        }
     },
     
     placeConnector: function(connectorObj){
         var connector;
+        var cp1NotFound = true;
+        var cp2NotFound = true;
+        var ap2;
         
-        this.nodesOnTheScreen.forEach(node => {
+        
+        console.log("Looking for: " + connectorObj.ap1ID + " or " + connectorObj.ap2ID + " in:");
+        console.log(this.nodesOnTheScreen);
+        
+        this.nodesOnTheScreen.forEach(atom => {
             //Find the output node
-            if (node.uniqueID == connectorObj.ap1ID){
-                
-                node.children.forEach(child => {
+            
+            if (atom.uniqueID == connectorObj.ap1ID){
+                atom.children.forEach(child => {
                     if(child.name == connectorObj.ap1Name && child.type == "output"){
-                        
+                        //console.log("AP1 found");
                         connector = Connector.create({
                             atomType: "Connector",
                             attachmentPoint1: child,
-                            parentMolecule:  node
+                            parentMolecule:  atom
                         });
+                        cp1NotFound = false;
                     }
                 });
             }
             //Find the input node
-            if (node.uniqueID == connectorObj.ap2ID){
-                
-                node.children.forEach(child => {
+            if (atom.uniqueID == connectorObj.ap2ID){
+                atom.children.forEach(child => {
                     if(child.name == connectorObj.ap2Name && child.type == "input"){
-                        connector.attachmentPoint2 = child;
+                        //console.log("AP2 Found");
+                        cp2NotFound = false;
+                        ap2 = child;
                     }
                 });
             }
         });
+        
+        if(cp1NotFound || cp2NotFound){
+            console.log("Unable to create connector");
+            return;
+        }
+        
+        connector.attachmentPoint2 = ap2;
         
         //Store the connector
         connector.attachmentPoint1.connectors.push(connector);
         
         //Update the connection
         connector.attachmentPoint1.parentMolecule.updateCodeBlock();
-    },
-    
-    stripFat: function(name, val) {
-        //Strips out the excess variables we don't want to store in our file
-        
-        var variablesToIgnore = ["showHoverText", "hoverDetectRadius", "codeBlock", "selected", "isMoving"];
-        
-        if(variablesToIgnore.indexOf(name) > -1){
-            return undefined;
-        }
-        else{
-            return val;
-        }
     }
 });
 
