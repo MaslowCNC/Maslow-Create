@@ -32,8 +32,7 @@ class AttachmentPoint {
             this[key] = values[key];
         }
         
-        this.x = this.parentMolecule.x + this.offsetX;
-        this.y = this.parentMolecule.y + this.offsetY;
+        this.clickMove(0,0); 
     }
     
     draw() {
@@ -329,7 +328,7 @@ class Atom {
     }
     
     draw() {
-    
+        
         this.inputX = this.x - this.radius
         this.outputX = this.x + this.radius
         

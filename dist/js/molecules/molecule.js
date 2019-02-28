@@ -38,7 +38,7 @@ class Molecule extends Atom{
     }
     
     draw(){
-        Atom.draw.call(this); //Super call to draw the rest
+        super.draw(); //Super call to draw the rest
         
         //draw the circle in the middle
         c.beginPath();
@@ -214,7 +214,6 @@ class Molecule extends Atom{
         availableTypes.forEach(type => {
             var instance = new type;
             if (instance.atomType == newAtomObj.atomType){
-                console.log("atom type recognized");
                 var atom = new type({
                     parent: this,
                     uniqueID: generateUniqueID()
