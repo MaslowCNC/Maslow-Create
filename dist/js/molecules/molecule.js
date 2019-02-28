@@ -12,29 +12,25 @@ class Molecule extends Atom{
         this.topLevel = false; //a flag to signal if this node is the top level node
         
         //Add the button to go up one level
-        // if (!this.topLevel){
-            // goUpOneLevel = UpOneLevelBtn.create({
-                // parentMolecule: this, 
-                // x: 50,
-                // y: 50,
-                // parent: this,
-                // atomType: "UpOneLevelBtn",
-                // uniqueID: generateUniqueID()
-            // });
-            // this.nodesOnTheScreen.push(goUpOneLevel);
+        if (!this.topLevel){
+            this.placeAtom({
+                parentMolecule: this, 
+                x: 50,
+                y: 50,
+                parent: this,
+                atomType: "UpOneLevelBtn"
+            });
             
             //Add the molecule's output FIXME...this should use the place atom function
-            // output = Output.create({
-                // parentMolecule: this, 
-                // x: canvas.width - 50,
-                // y: canvas.height/2,
-                // parent: this,
-                // name: "Output",
-                // atomType: "Output",
-                // uniqueID: generateUniqueID()
-            // });
-            // this.nodesOnTheScreen.push(output);
-        // }
+            this.placeAtom({
+                parentMolecule: this, 
+                x: canvas.width - 50,
+                y: canvas.height/2,
+                parent: this,
+                name: "Output",
+                atomType: "Output"
+            });
+        }
     }
     
     draw(){
@@ -188,7 +184,7 @@ class Molecule extends Atom{
     deserialize(moleculeList, moleculeID){
         
         //Find the target molecule in the list
-        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
+        var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Grab the name and ID
         this.uniqueID = moleculeObject.uniqueID;
@@ -211,17 +207,16 @@ class Molecule extends Atom{
     
     placeAtom(newAtomObj, moleculeList){
         //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
-        availableTypes.forEach(type => {
-            var instance = new type;
-            if (instance.atomType == newAtomObj.atomType){
-                var atom = new type({
+        for(var key in availableTypes) {
+            if (availableTypes[key].atomType == newAtomObj.atomType){
+                var atom = new availableTypes[key].creator({
                     parent: this,
                     uniqueID: generateUniqueID()
                 });
                 
                 //reassign the name of the Inputs to preserve linking
                 if(atom.atomType == "Input"){
-                    atom.setValue(atomObj.name);
+                    atom.setValue(newAtomObj.name);
                 }
                 
                 //Add all of the passed attributes into the object
@@ -236,16 +231,16 @@ class Molecule extends Atom{
                 
                 this.nodesOnTheScreen.push(atom);
             }
-        });
+        }
         
-        // if(atomObj.atomType == "Output"){
+        if(newAtomObj.atomType == "Output"){
             //re-asign output ID numbers if a new one is supposed to be placed
-            // this.nodesOnTheScreen.forEach(atom => {
-                // if(atom.atomType == "Output"){
-                    // atom.setID(atomObj.uniqueID);
-                // }
-            // });
-        // }
+            this.nodesOnTheScreen.forEach(atom => {
+                if(atom.atomType == "Output"){
+                    atom.setID(newAtomObj.uniqueID);
+                }
+            });
+        }
     }
     
     placeConnector(connectorObj){
@@ -260,7 +255,7 @@ class Molecule extends Atom{
             if (atom.uniqueID == connectorObj.ap1ID){
                 atom.children.forEach(child => {
                     if(child.name == connectorObj.ap1Name && child.type == "output"){
-                        connector = Connector.create({
+                        connector = new Connector({
                             atomType: "Connector",
                             attachmentPoint1: child,
                             parentMolecule:  atom
@@ -299,13 +294,16 @@ class Molecule extends Atom{
 class UpOneLevelBtn extends Atom{
  
     constructor(values){
-        name = "Go Up One Level";
-        atomType = "UpOneLevelBtn";
-        children = [];
-        color = '#F3EFEF';
-        defaultColor = '#F3EFEF';
-        selectedColor = '#F3EFEF';
-        radius = 30;
+        
+        super(values);
+        
+        this.name = "Go Up One Level";
+        this.atomType = "UpOneLevelBtn";
+        this.children = [];
+        this.color = '#F3EFEF';
+        this.defaultColor = '#F3EFEF';
+        this.selectedColor = '#F3EFEF';
+        this.radius = 30;
     }
     
     draw() {

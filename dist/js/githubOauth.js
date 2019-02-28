@@ -265,7 +265,7 @@ function loadProject(projectName){
         moleculesList = JSON.parse(rawFile).molecules;
         
         //Load a blank project
-        topLevelMolecule = Molecule.create({
+        topLevelMolecule = new Molecule({
             x: 0, 
             y: 0, 
             topLevel: true, 

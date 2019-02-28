@@ -87,7 +87,25 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Equation, Molecule, Input, Readme, Rotate, Mirror, Union];
+var availableTypes = {
+    circle:        {creator: Circle, atomType: "Circle"},
+    rectangle:     {creator: Rectangle, atomType: "Rectangle"},
+    shirinkwrap:   {creator: ShrinkWrap, atomType: "ShrinkWrap"},
+    translate:     {creator: Translate, atomType: "Translate"},
+    extrude:       {creator: Extrude, atomType: "Extrude"},
+    scale:         {creator: Scale, atomType: "Scale"},
+    intersection:  {creator: Intersection, atomType: "Intersection"},
+    difference:    {creator: Difference, atomType: "Difference"},
+    costant:       {creator: Constant, atomType: "Constant"},
+    equation:      {creator: Equation, atomType: "Equation"},
+    molecule:      {creator: Molecule, atomType: "Molecule"},
+    input:         {creator: Input, atomType: "Input"},
+    readme:        {creator: Readme, atomType: "Readme"},
+    rotate:        {creator: Rotate, atomType: "Rotate"},
+    mirror:        {creator: Mirror, atomType: "Mirror"},
+    union:         {creator: Union, atomType: "Union"}
+}
+
 
 let currentMolecule;
 let topLevelMolecule;
@@ -108,9 +126,9 @@ function init() {
     
     //Add the search bar to the list item
     
-    availableTypes.forEach(type => {
+    for(var key in availableTypes) {
         var newElement = document.createElement("LI");
-        var instance = new type;
+        var instance = availableTypes[key];
         var text = document.createTextNode(instance.atomType);
         newElement.setAttribute("class", "menu-item");
         newElement.setAttribute("id", instance.atomType);
@@ -118,7 +136,7 @@ function init() {
         menu.appendChild(newElement); 
         
         document.getElementById(instance.atomType).addEventListener('click', placeNewNode);
-    });
+    }
 }
 
 function generateUniqueID(){

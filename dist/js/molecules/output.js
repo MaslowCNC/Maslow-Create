@@ -7,7 +7,9 @@ class Output extends Atom {
         this.addIO("input", "number or geometry", this, "geometry");
         
         //Add a new output to the current molecule
-        this.parent.addIO("output", "Geometry", this.parent, "geometry");
+        if (typeof this.parent !== 'undefined') {
+            this.parent.addIO("output", "Geometry", this.parent, "geometry");
+        }
         
         this.defaultCodeBlock = "~number or geometry~";
         this.codeBlock = "";
