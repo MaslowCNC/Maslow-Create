@@ -87,7 +87,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Circle];//, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Equation, Molecule, Input, Readme, Rotate, Mirror, Union];
+var availableTypes = [Circle, Extrude];//, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Equation, Molecule, Input, Readme, Rotate, Mirror, Union];
 
 let currentMolecule;
 let topLevelMolecule;

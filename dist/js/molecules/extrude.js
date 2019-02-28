@@ -1,13 +1,16 @@
-var Extrude = Atom.create({
-    name: "Extrude",
-    atomType: "Extrude",
-    defaultCodeBlock: "linear_extrude({ height: ~height~ }, ~geometry~)",
-    codeBlock: "",
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "geometry" , instance, "geometry");
-        instance.addIO("input", "height"   , instance, "number");
-        instance.addIO("output", "geometry", instance, "geometry");
-        return instance;
+class Extrude extends Atom{
+    
+    constructor(values){
+        
+        super(values);
+        
+        this.name = "Extrude";
+        this.atomType = "Extrude";
+        this.defaultCodeBlock = "linear_extrude({ height: ~height~ }, ~geometry~)";
+        this.codeBlock = "";
+        
+        this.addIO("input", "geometry" , this, "geometry");
+        this.addIO("input", "height"   , this, "number");
+        this.addIO("output", "geometry", this, "geometry");
     }
-});
+}

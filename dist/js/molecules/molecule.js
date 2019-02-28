@@ -210,13 +210,9 @@ class Molecule extends Atom{
     }
     
     placeAtom(newAtomObj, moleculeList){
-        console.log("entering place atom");
         //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
         availableTypes.forEach(type => {
-            console.log("Comparing:");
             var instance = new type;
-            console.log(instance.atomType);
-            console.log(newAtomObj.atomType);
             if (instance.atomType == newAtomObj.atomType){
                 console.log("atom type recognized");
                 var atom = new type({
@@ -225,9 +221,9 @@ class Molecule extends Atom{
                 });
                 
                 //reassign the name of the Inputs to preserve linking
-                // if(atom.atomType == "Input"){
-                    // atom.setValue(atomObj.name);
-                // }
+                if(atom.atomType == "Input"){
+                    atom.setValue(atomObj.name);
+                }
                 
                 //Add all of the passed attributes into the object
                 for(var key in newAtomObj) {

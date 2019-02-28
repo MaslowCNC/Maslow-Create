@@ -60,7 +60,7 @@ class AttachmentPoint {
         if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
             
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
-                var connector = Connector.create({
+                var connector = new Connector({
                     parentMolecule: this.parentMolecule, 
                     attachmentPoint1: this,
                     atomType: "Connector"
@@ -190,19 +190,19 @@ class AttachmentPoint {
 class Connector {
     constructor(values){
         
-        Object.keys(values).forEach(function(key) {
-            this.key = values[key];
-        });
-        
-        this.startX = instance.parentMolecule.outputX;
-        this.startY = instance.parentMolecule.y;
-          
         this.isMoving = true;
         this.color = 'black';
         this.atomType = "Connector";
         this.selected = false;
         this.attachmentPoint1 = null;
         this.attachmentPoint2 = null;
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
+        
+        this.startX = this.parentMolecule.outputX;
+        this.startY = this.parentMolecule.y;
     }
     
     draw(){
