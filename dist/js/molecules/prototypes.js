@@ -1,43 +1,42 @@
 
 // Node prototype objects
 
-var AttachmentPoint = {
-    
-    defaultRadius: 8,
-    expandedRadius: 14,
-    radius: 8,
-    
-    hoverDetectRadius: 8,
-    hoverOffsetX: 0,
-    hoverOffsetY: 30,
-    uniqueID: 0,
-    defaultOffsetX: 0,
-    defaultOffsetY: 0,
-    offsetX: 0,
-    offsetY: 0,
-    showHoverText: false,
-    atomType: "AttachmentPoint",
-    
-    valueType: "number", //options are number, geometry, array
-    type: "output",
-    value: 10, //The default input value when nothing is connected
-
-    create: function(values){
-        var instance = Object.create(this);
-        Object.keys(values).forEach(function(key) {
-            instance[key] = values[key];
-        });
+class AttachmentPoint {
+    constructor(values){
         
-        instance.connectors = [];
+        this.defaultRadius = 8;
+        this.expandedRadius = 14;
+        this.radius = 8;
         
-        instance.offsetX = instance.defaultOffsetX;
-        instance.offsetY = instance.defaultOffsetY;
-        instance.x = instance.parentMolecule.x + instance.offsetX;
-        instance.y = instance.parentMolecule.y + instance.offsetY;
-        return instance;
-    },
+        this.hoverDetectRadius = 8;
+        this.hoverOffsetX = 0;
+        this.hoverOffsetY = 30;
+        this.uniqueID = 0;
+        this.defaultOffsetX = 0;
+        this.defaultOffsetY = 0;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.showHoverText = false;
+        this.atomType = "AttachmentPoint";
+        
+        this.valueType = "number"; //options are number, geometry, array
+        this.type = "output";
+        this.value = 10; //The default input value when nothing is connected
+        
+        this.connectors = [];
+        
+        this.offsetX = this.defaultOffsetX;
+        this.offsetY = this.defaultOffsetY;
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
+        
+        this.x = this.parentMolecule.x + this.offsetX;
+        this.y = this.parentMolecule.y + this.offsetY;
+    }
     
-    draw: function() {
+    draw() {
         
         c.beginPath();
         c.fillStyle = this.parentMolecule.color;
@@ -55,9 +54,9 @@ var AttachmentPoint = {
         c.fill();
         c.closePath();
         
-    },
+    }
 
-    clickDown: function(x,y){
+    clickDown(x,y){
         if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
             
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
@@ -85,15 +84,15 @@ var AttachmentPoint = {
             }
             return false; //indicate that the click was not handled by this object
         }
-    },
+    }
 
-    clickUp: function(x,y){
+    clickUp(x,y){
         this.connectors.forEach(connector => {
             connector.clickUp(x, y);       
         });
-    },
+    }
 
-    clickMove: function(x,y){
+    clickMove(x,y){
         //expand if touched by mouse
         
         var distFromCursor = distBetweenPoints (this.x, x, this.y, y);
@@ -124,27 +123,27 @@ var AttachmentPoint = {
         this.connectors.forEach(connector => {
             connector.clickMove(x, y);       
         });
-    },
+    }
     
-    keyPress: function(key){
+    keyPress(key){
         this.connectors.forEach(connector => {
             connector.keyPress(key);       
         });
-    },
+    }
     
-    deleteSelf: function(){
+    deleteSelf(){
         //remove any connectors which were attached to this attachment point
         
         this.connectors.forEach(connector => {
             connector.deleteSelf();       
         });
-    },
+    }
     
-    updateSidebar: function(){
+    updateSidebar(){
         this.parent.updateSidebar();
-    },
+    }
     
-    wasConnectionMade: function(x,y, connector){
+    wasConnectionMade(x,y, connector){
         //this function returns itself if the cordinates passed in are within itself
         if (distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
             
@@ -156,13 +155,13 @@ var AttachmentPoint = {
             return this;
         }
         return false;
-    },
+    }
     
-    getValue: function(){
+    getValue(){
         return this.value;
-    },
+    }
     
-    setValue: function(newValue){
+    setValue(newValue){
         this.value = newValue;
         
         //propigate the change to linked elements if this is an output
@@ -175,9 +174,9 @@ var AttachmentPoint = {
         else{   //update the code block to reflect the new values
             this.parentMolecule.updateCodeBlock();
         }
-    },
+    }
     
-    update: function() {
+    update() {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
         this.draw()
@@ -188,28 +187,25 @@ var AttachmentPoint = {
     }
 }
 
-var Connector =  {
-    
-    isMoving: true,
-    color: 'black',
-    atomType: "Connector",
-    selected: false,
-    attachmentPoint1: null,
-    attachmentPoint2: null,
-
-    create: function(values){
-        var instance = Object.create(this);
+class Connector {
+    constructor(values){
+        
         Object.keys(values).forEach(function(key) {
-            instance[key] = values[key];
+            this.key = values[key];
         });
         
-        instance.startX = instance.parentMolecule.outputX;
-        instance.startY = instance.parentMolecule.y;
-        
-        return instance;
-    },
+        this.startX = instance.parentMolecule.outputX;
+        this.startY = instance.parentMolecule.y;
+          
+        this.isMoving = true;
+        this.color = 'black';
+        this.atomType = "Connector";
+        this.selected = false;
+        this.attachmentPoint1 = null;
+        this.attachmentPoint2 = null;
+    }
     
-    draw: function() {
+    draw(){
         
         c.beginPath();
         c.fillStyle = this.color;
@@ -225,9 +221,9 @@ var Connector =  {
         c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
         c.stroke();
         c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
-    },
+    }
 
-    clickUp: function(x,y){
+    clickUp(x,y){
         
         if(this.isMoving){  //we only want to attach the connector which is currently moving
             currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
@@ -247,33 +243,33 @@ var Connector =  {
         }
         
         this.isMoving = false;                                                         //Move over 
-    },
+    }
 
-    clickMove: function(x,y){
+    clickMove(x,y){
         if (this.isMoving == true){
             this.endX = x;
             this.endY = y;
         }
-    },
+    }
     
-    keyPress: function(key){
+    keyPress(key){
         if(this.selected){
             if (key == 'Delete'){
                 this.deleteSelf();
             }
         }
-    },
+    }
     
-    deleteSelf: function(){
+    deleteSelf(){
         
         if(this.attachmentPoint2 != null){
             this.attachmentPoint2.connectors = []; //free up the point to which this was attached
         }
         
         this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
-    },
+    }
     
-    serialize: function(){
+    serialize(){
         if ( this.attachmentPoint2 != null){
             var object = {
                 ap1Name: this.attachmentPoint1.name,
@@ -283,14 +279,14 @@ var Connector =  {
             }
             return JSON.stringify(object);
         }
-    },
+    }
     
-    propogate: function(){
+    propogate(){
         //takes the input and passes it to the output
         this.attachmentPoint2.setValue(this.attachmentPoint1.getValue());
-    },
+    }
     
-    update: function() {
+    update() {
         
         this.startX = this.attachmentPoint1.x
         this.startY = this.attachmentPoint1.y
@@ -299,42 +295,40 @@ var Connector =  {
             this.endY = this.attachmentPoint2.y;
         }
         this.draw()
-    },
+    }
     
-    
-    
-    wasConnectionMade: function(x,y, connector){
+    wasConnectionMade(x,y, connector){
         return false;
     }
 
 }
 
-var Atom = {
-    x: 0,
-    y:  0,
-    radius: 20,
-    defaultColor: '#F3EFEF',
-    selectedColor: 'green',
-    selected: false,
-    color: '#F3EFEF',
-    name: "name",
-    parentMolecule: null,
-    codeBlock: "",
-    defaultCodeBlock: "",
-    isMoving: false,
-    
-    create: function(values){
-        var instance = Object.create(this);
-        Object.keys(values).forEach(function(key) {
-            instance[key] = values[key];
-        });
+class Atom {
+
+    constructor(values){
         
-        instance.children = [];
+        for(var key in values) {
+            this.key = values[key];
+        }
         
-        return instance;
-    },
+        this.children = [];
+        
+        this.x = 0;
+        this.y = 0;
+        this.radius = 20;
+        this.defaultColor = '#F3EFEF';
+        this.selectedColor = 'green';
+        this.selected = false;
+        this.color = '#F3EFEF';
+        this.name = "name";
+        this.parentMolecule = null;
+        this.codeBlock = "";
+        this.defaultCodeBlock = "";
+        this.isMoving = false;
+        
+    }
     
-    draw: function() {
+    draw() {
     
         this.inputX = this.x - this.radius
         this.outputX = this.x + this.radius
@@ -350,9 +344,9 @@ var Atom = {
         c.fillText(this.name, this.x + this.radius, this.y-this.radius);
         c.fill();
         c.closePath();
-    },
+    }
     
-    addIO: function(type, name, target, valueType){
+    addIO(type, name, target, valueType){
         
         //compute the baseline offset from parent node
         var offset;
@@ -369,7 +363,7 @@ var Atom = {
         //multiply that number by an offset to find the new x offset
         var hoverOffsetComputed = numberOfSameTypeIO * -30;
         
-        input = AttachmentPoint.create({
+        var input = new AttachmentPoint({
             parentMolecule: target, 
             defaultOffsetX: offset, 
             defaultOffsetY: 0,
@@ -382,9 +376,9 @@ var Atom = {
             atomType: "AttachmentPoint"
         });
         target.children.push(input);
-    },
+    }
     
-    clickDown: function(x,y){
+    clickDown(x,y){
         //Returns true if something was done with the click
         
         
@@ -419,9 +413,9 @@ var Atom = {
         }
         
         return clickProcessed; 
-    },
+    }
 
-    doubleClick: function(x,y){
+    doubleClick(x,y){
         //returns true if something was done with the click
         
         
@@ -434,17 +428,17 @@ var Atom = {
         }
         
         return clickProcessed; 
-    },
+    }
 
-    clickUp: function(x,y){
+    clickUp(x,y){
         this.isMoving = false;
         
         this.children.forEach(child => {
             child.clickUp(x,y);     
         });
-    },
+    }
 
-    clickMove: function(x,y){
+    clickMove(x,y){
         if (this.isMoving == true){
             this.x = x;
             this.y = y;
@@ -453,9 +447,9 @@ var Atom = {
         this.children.forEach(child => {
             child.clickMove(x,y);       
         });
-    },
+    }
     
-    keyPress: function(key){
+    keyPress(key){
         //runs whenver a key is pressed
         if (key == 'Delete'){
             if(this.selected == true){
@@ -466,9 +460,9 @@ var Atom = {
         this.children.forEach(child => {
             child.keyPress(key);
         });
-    },
+    }
     
-    updateSidebar: function(){
+    updateSidebar(){
         //updates the sidebar to display information about this node
         
         //remove everything in the sideBar now
@@ -483,7 +477,7 @@ var Atom = {
         sideBar.appendChild(name);
         
         //Create a list element
-        valueList = document.createElement("ul");
+        var valueList = document.createElement("ul");
         sideBar.appendChild(valueList);
         valueList.setAttribute("class", "sidebar-list");
         
@@ -495,9 +489,9 @@ var Atom = {
         });
         
         return valueList;
-    },
+    }
     
-    deleteNode: function(){
+    deleteNode(){
         //deletes this node and all of it's children
         
         this.children.forEach(child => {
@@ -505,18 +499,18 @@ var Atom = {
         });
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1); //remove this node from the list
-    },
+    }
     
-    update: function() {
+    update() {
         
         this.children.forEach(child => {
             child.update();     
         });
         
         this.draw()
-    },
+    }
     
-    serialize: function(savedObject){
+    serialize(savedObject){
         //savedObject is only used by Molecule type atoms
         var object = {
             atomType: this.atomType,
@@ -525,10 +519,10 @@ var Atom = {
             y: this.y,
             uniqueID: this.uniqueID
         }
-        return JSON.stringify(object);
-    },
+        return object;
+    }
     
-    updateCodeBlock: function(){
+    updateCodeBlock(){
         //Substitue the result from each input for the ~...~ section with it's name
         
         var regex = /~(.*?)~/gi;
@@ -547,9 +541,9 @@ var Atom = {
         if (this.selected){
             this.sendToRender();
         }
-    },
+    }
     
-    sendToRender: function(){
+    sendToRender(){
         //Send code to JSCAD to render
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
@@ -563,13 +557,13 @@ var Atom = {
             var toRender = "function main () {return sphere({r: .0001, center: true})}"
             window.loadDesign(toRender,"MaslowCreate");
         }
-    }, 
+    }
     
-    findIOValue: function(ioName){
+    findIOValue(ioName){
         //find the value of an input for a given name
         
         ioName = ioName.split('~').join('');
-        ioValue = null;
+        var ioValue = null;
         
         this.children.forEach(child => {
             if(child.name == ioName && child.type == "input"){

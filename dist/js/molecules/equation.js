@@ -1,11 +1,12 @@
-var Equation = Atom.create({
+class Equation extends Atom {
     name: "Equation",
     atomType: "Equation",
     defaultCodeBlock: "",
     codeBlock: "",
     equationOptions: ["x+y", "x-y", "x*y", "cos(x)", "sin(x)", "x^y"],
     currentEquation: 0,
-    create: function(values){
+    
+    create(values){
         var instance = Atom.create.call(this, values);
         instance.addIO("input", "x", instance, "number");
         instance.addIO("input", "y", instance, "number");
@@ -13,6 +14,18 @@ var Equation = Atom.create({
         
         return instance;
     },
+    
+    serialize: function(savedObject){
+        var superSerialObject = Parent.serialize(null);
+        
+        console.log("Serialized ouput: ");
+        console.log(superSerialObject);
+        
+        
+        
+        return superSerialObject;
+    },
+        
     
     updateCodeBlock: function(){
         //A super classed version of the update codeblock default function which computes the equation values

@@ -87,14 +87,14 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Equation, Molecule, Input, Readme, Rotate, Mirror, Union];
+var availableTypes = [Circle];//, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Equation, Molecule, Input, Readme, Rotate, Mirror, Union];
 
 let currentMolecule;
 let topLevelMolecule;
 let menu;
 
 function init() {
-    currentMolecule = Molecule.create({
+    currentMolecule = new Molecule({
         x: 0, 
         y: 0, 
         topLevel: true, 
@@ -110,14 +110,15 @@ function init() {
     
     availableTypes.forEach(type => {
         var newElement = document.createElement("LI");
-        var text = document.createTextNode(type.name);
+        var instance = new type;
+        var text = document.createTextNode(instance.atomType);
         newElement.setAttribute("class", "menu-item");
-        newElement.setAttribute("id", type.name);
+        newElement.setAttribute("id", instance.atomType);
         newElement.appendChild(text); 
         menu.appendChild(newElement); 
         
-        document.getElementById(type.name).addEventListener('click', placeNewNode);
-    }); 
+        document.getElementById(instance.atomType).addEventListener('click', placeNewNode);
+    });
 }
 
 function generateUniqueID(){
