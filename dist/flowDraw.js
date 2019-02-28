@@ -87,7 +87,7 @@ window.addEventListener('keydown', event => {
 
 // Implementation
 
-var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Molecule, Input, Readme, Rotate, Mirror, Union];
+var availableTypes = [Circle, Rectangle, ShrinkWrap, Extrude, Translate, Scale, Intersection, Difference, Constant, Equation, Molecule, Input, Readme, Rotate, Mirror, Union];
 
 let currentMolecule;
 let topLevelMolecule;
@@ -176,6 +176,47 @@ function createEditableValueListItem(list,object,key, label, resultShouldBeNumbe
         }
     });
 
+}
+
+function createDropDown(list,parent,options,selectedOption){
+    var listElement = document.createElement("LI");
+    list.appendChild(listElement);
+    
+    
+    //Div which contains the entire element
+    var div = document.createElement("div");
+    listElement.appendChild(div);
+    div.setAttribute("class", "sidebar-item");
+    
+    //Left div which displays the label
+    var labelDiv = document.createElement("div");
+    div.appendChild(labelDiv);
+    var labelText = document.createTextNode("z = ");
+    labelDiv.appendChild(labelText);
+    labelDiv.setAttribute("class", "sidebar-subitem");
+    
+    
+    //Right div which is editable and displays the value
+    var valueTextDiv = document.createElement("div");
+    div.appendChild(valueTextDiv);
+    var dropDown = document.createElement("select");
+    options.forEach(option => {
+        var op = new Option();
+        op.value = options.findIndex(thisOption => thisOption === option);
+        op.text = option;
+        dropDown.options.add(op);
+    });
+    valueTextDiv.appendChild(dropDown);
+    valueTextDiv.setAttribute("class", "sidebar-subitem");
+    
+    console.log("Set to: " + selectedOption);
+    dropDown.selectedIndex = selectedOption; //display the current selection
+    
+    dropDown.addEventListener(
+        'change',
+        function() { parent.changeEquation(dropDown.value); },
+        false
+    );
 }
 
 // Animation Loop
