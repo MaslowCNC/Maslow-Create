@@ -32,7 +32,7 @@ class AttachmentPoint {
             this[key] = values[key];
         }
         
-        this.clickMove(0,0); 
+        this.clickMove(0,0); //trigger a refresh to get all the current values
     }
     
     draw() {

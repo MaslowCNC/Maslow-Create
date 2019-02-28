@@ -1,17 +1,18 @@
-var Rectangle = Atom.create({
-    name: "Rectangle",
-    atomType: "Rectangle",
-    defaultCodeBlock: "square([~length~,~width~])",
-    codeBlock: "",
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "length", instance, "number");
-        instance.addIO("input", "width", instance, "number");
-        instance.addIO("output", "geometry", instance, "geometry");
+class Rectangle extends Atom {
+
+    constructor(values){
+        super(values)
+        
+        this.addIO("input", "length", this, "number");
+        this.addIO("input", "width", this, "number");
+        this.addIO("output", "geometry", this, "geometry");
+        
+        this.name = "Rectangle";
+        this.atomType = "Rectangle";
+        this.defaultCodeBlock = "square([~length~,~width~])";
+        this.codeBlock = "";
         
         //generate the correct codeblock for this atom on creation
-        instance.updateCodeBlock();
-        
-        return instance;
+        this.updateCodeBlock();
     }
-});
+}

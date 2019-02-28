@@ -1,22 +1,28 @@
 
-var Readme = Atom.create({
-    codeBlock: "",
-    atomType: "Readme",
-    readmeText: "Readme text here",
-    type: "readme",
-    name: "README",
-    radius: 20,
-    updateSidebar: function(){
+class Readme extends Atom{
+    constructor(values){
+        super(values);
+        
+        this.codeBlock = "";
+        this.atomType = "Readme";
+        this.readmeText = "Readme text here";
+        this.type = "readme";
+        this.name = "README";
+        this.radius = 20;
+    }
+    
+    updateSidebar(){
         //updates the sidebar to display information about this node
         
-        var valueList = Atom.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar(); //call the super function
         
         createEditableValueListItem(valueList,this,"readmeText", "Notes", false);
         
-    },
-    draw: function() {
+    }
+    
+    draw() {
         
-        Atom.draw.call(this); //Super call to draw the rest
+        super.draw(); //Super call to draw the rest
         
         //draw the two slashes on the node//
         c.strokeStyle = "#949294";
@@ -32,9 +38,9 @@ var Readme = Atom.create({
         c.moveTo(this.x, this.y + 10);
         c.lineTo(this.x + 11, this.y - 10);
         c.stroke();
-    }, 
+    }
     
-    setValue: function(newText) {
+    setValue(newText) {
         this.readmeText = newText;
     }
-});
+}

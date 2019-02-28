@@ -1,21 +1,22 @@
 class Equation extends Atom {
-    name: "Equation",
-    atomType: "Equation",
-    defaultCodeBlock: "",
-    codeBlock: "",
-    equationOptions: ["x+y", "x-y", "x*y", "cos(x)", "sin(x)", "x^y"],
-    currentEquation: 0,
     
-    create(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "x", instance, "number");
-        instance.addIO("input", "y", instance, "number");
-        instance.addIO("output", "z", instance, "number");
+    constructor(values){
+        super(values);
         
-        return instance;
-    },
+        this.addIO("input", "x", this, "number");
+        this.addIO("input", "y", this, "number");
+        this.addIO("output", "z", this, "number");
+        
+        this.name = "Equation";
+        this.atomType = "Equation";
+        this.defaultCodeBlock = "";
+        this.codeBlock = "";
+        this.equationOptions = ["x+y", "x-y", "x*y", "cos(x)", "sin(x)", "x^y"];
+        this.currentEquation = 0;
+        
+    }
     
-    serialize: function(savedObject){
+    serialize(savedObject){
         var superSerialObject = Parent.serialize(null);
         
         console.log("Serialized ouput: ");
@@ -24,10 +25,9 @@ class Equation extends Atom {
         
         
         return superSerialObject;
-    },
-        
+    }
     
-    updateCodeBlock: function(){
+    updateCodeBlock(){
         //A super classed version of the update codeblock default function which computes the equation values
         var x = this.findIOValue("x");
         var y = this.findIOValue("y");
@@ -65,19 +65,19 @@ class Equation extends Atom {
                 child.setValue(z);
             }
         });
-    },
+    }
     
-    changeEquation: function(newValue){
+    changeEquation(newValue){
         this.currentEquation = parseInt(newValue);
         this.updateCodeBlock();
-    },
+    }
     
-    updateSidebar: function(){
+    updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = Atom.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar();
         
         createDropDown(valueList, this, this.equationOptions, this.currentEquation);
         
     } 
-});
+}

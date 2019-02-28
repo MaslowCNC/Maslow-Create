@@ -1,27 +1,28 @@
 
-var Output = Atom.create({
-    defaultCodeBlock: "~number or geometry~",
-    codeBlock: "",
-    type: "output",
-    name: "Output",
-    atomType: "Output",
-    height: 16,
-    radius: 15,
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "number or geometry", instance, "geometry");
+class Output extends Atom {
+    
+    constructor(values){
+        super (values)
+        
+        this.addIO("input", "number or geometry", this, "geometry");
         
         //Add a new output to the current molecule
-        instance.parent.addIO("output", "Geometry", instance.parent, "geometry");
+        this.parent.addIO("output", "Geometry", this.parent, "geometry");
         
-        return instance;
-    },
+        this.defaultCodeBlock = "~number or geometry~";
+        this.codeBlock = "";
+        this.type = "output";
+        this.name = "Output";
+        this.atomType = "Output";
+        this.height = 16;
+        this.radius = 15;
+    }
     
-    setID: function(newID){
+    setID(newID){
         this.uniqueID = newID;
-    },
+    }
     
-    draw: function() {
+    draw() {
         
         this.children.forEach(child => {
             child.draw();       
@@ -41,4 +42,4 @@ var Output = Atom.create({
         c.lineTo(this.x + this.radius, this.y + this.height/2);
         c.fill();
     }
-});
+}
