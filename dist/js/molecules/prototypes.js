@@ -511,13 +511,28 @@ class Atom {
     
     serialize(savedObject){
         //savedObject is only used by Molecule type atoms
+        
+        var ioValues = [];
+        this.children.forEach(io => {
+            if (io.valueType == "number"){
+                var saveIO = {
+                    name: io.name,
+                    ioValue: io.getValue(),
+                    ioType: io.type
+                };
+                ioValues.push(saveIO);
+            }
+        });
+        
         var object = {
             atomType: this.atomType,
             name: this.name,
             x: this.x,
             y: this.y,
-            uniqueID: this.uniqueID
+            uniqueID: this.uniqueID,
+            ioValues: ioValues
         }
+        
         return object;
     }
     
