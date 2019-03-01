@@ -16,7 +16,7 @@ class Constant extends Atom{
     updateSidebar(){
         //updates the sidebar to display information about this node
         
-        var valueList = Atom.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar(); //call the super function
         
         var output = this.children[0];
         

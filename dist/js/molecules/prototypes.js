@@ -143,7 +143,7 @@ class AttachmentPoint {
     }
     
     wasConnectionMade(x,y, connector){
-        //this function returns itself if the cordinates passed in are within itself
+        //this function returns itself if the coordinates passed in are within itself
         if (distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
             
             if(this.connectors.length > 0){ //Don't accept a second connection to an input

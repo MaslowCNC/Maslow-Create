@@ -196,7 +196,7 @@ class Molecule extends Atom{
             this.placeAtom(JSON.parse(atom), moleculeList);
         });
         
-        //reload the molecule object to prevent persistance issues
+        //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Place the connectors
@@ -284,6 +284,7 @@ class Molecule extends Atom{
         
         //Store the connector
         connector.attachmentPoint1.connectors.push(connector);
+        connector.attachmentPoint2.connectors.push(connector);
         
         //Update the connection
         connector.attachmentPoint1.parentMolecule.updateCodeBlock();
