@@ -1,13 +1,16 @@
-var Difference = Atom.create({
-    name: "Difference",
-    atomType: "Difference",
-    defaultCodeBlock: "difference(~geometry1~,~geometry2~)",
-    codeBlock: "",
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "geometry1", instance, "geometry");
-        instance.addIO("input", "geometry2", instance, "geometry");
-        instance.addIO("output", "geometry", instance, "geometry");
-        return instance;
+class Difference extends Atom{
+    
+    constructor (values){
+        
+        super(values);
+        
+        this.addIO("input", "geometry1", this, "geometry");
+        this.addIO("input", "geometry2", this, "geometry");
+        this.addIO("output", "geometry", this, "geometry");
+        
+        this.name = "Difference";
+        this.atomType = "Difference";
+        this.defaultCodeBlock = "difference(~geometry1~,~geometry2~)";
+        this.codeBlock = "";
     }
-});
+}

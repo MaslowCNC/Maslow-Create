@@ -1,32 +1,34 @@
-var Input = Atom.create({
-    codeBlock: "",
-    type: "input",
-    atomType: "Input",
-    name: "Input",
-    height: 16,
-    radius: 15,
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("output", "number or geometry", instance, "geometry");
+class Input extends Atom {
+    
+    constructor(values){
+        super (values);
         
-        instance.name = "Input" + generateUniqueID();
+        this.addIO("output", "number or geometry", this, "geometry");
+        
+        this.name = "Input" + generateUniqueID();
+        this.codeBlock = "";
+        this.type = "input";
+        this.atomType = "Input";
+        this.name = "Input";
+        this.height = 16;
+        this.radius = 15;
         
         //Add a new input to the current molecule
-        instance.parent.addIO("input", instance.name, instance.parent, "geometry");
-        
-        return instance;
-    },
+        if (typeof this.parent !== 'undefined') {
+            this.parent.addIO("input", this.name, this.parent, "geometry");
+        }
+    }
     
-    updateSidebar: function(){
+    updateSidebar(){
         //updates the sidebar to display information about this node
         
         var valueList =  Atom.updateSidebar.call(this); //call the super function
         
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
-    },
+    }
     
-    draw: function() {
+    draw() {
         
         this.children.forEach(child => {
             child.draw();       
@@ -48,9 +50,9 @@ var Input = Atom.create({
         c.fill();
         c.closePath();
 
-    },
+    }
     
-    setValue: function(theNewName){
+    setValue(theNewName){
         //Called by the sidebar to set the name
         
         //Run through the parent molecule and find the input with the same name
@@ -61,9 +63,9 @@ var Input = Atom.create({
                 child.name = theNewName;
             }
         });
-    },
+    }
     
-    setOutput: function(newOutput){
+    setOutput(newOutput){
         //Set the input's output
         
         this.codeBlock = newOutput;  //Set the code block so that clicking on the input previews what it is 
@@ -74,9 +76,9 @@ var Input = Atom.create({
                 child.setValue(newOutput);
             }
         });
-    }, 
+    } 
     
-    updateCodeBlock: function(){
+    updateCodeBlock(){
         //This empty function handles any calls to the normal update code block function which breaks things here
     }
-});
+}

@@ -1,13 +1,16 @@
-var Scale = Atom.create({
-    name: "Scale",
-    atomType: "Scale",
-    defaultCodeBlock: "~geometry~.scale(~multiple~)",
-    codeBlock: "",
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "geometry", instance, "geometry");
-        instance.addIO("input", "multiple", instance, "number");
-        instance.addIO("output", "geometry", instance, "geometry");
-        return instance;
+class Scale extends Atom{
+    
+    constructor(values){
+        
+        super(values);
+        
+        this.addIO("input", "geometry", this, "geometry");
+        this.addIO("input", "multiple", this, "number");
+        this.addIO("output", "geometry", this, "geometry");
+        
+        this.name = "Scale";
+        this.atomType = "Scale";
+        this.defaultCodeBlock = "~geometry~.scale(~multiple~)";
+        this.codeBlock = "";
     }
-});
+}

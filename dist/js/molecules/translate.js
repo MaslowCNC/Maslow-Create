@@ -1,15 +1,17 @@
-var Translate = Atom.create({
-    name: "Translate",
-    atomType: "Translate",
-    defaultCodeBlock: "~geometry~.translate([~xDist~, ~yDist~, ~zDist~])",
-    codeBlock: "",
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("input", "geometry", instance, "geometry");
-        instance.addIO("input", "xDist", instance, "number");
-        instance.addIO("input", "yDist", instance, "number");
-        instance.addIO("input", "zDist", instance, "number");
-        instance.addIO("output", "geometry", instance, "geometry");
-        return instance;
+class Translate extends Atom{
+    
+    constructor(values){
+        super(values);
+        
+        this.addIO("input", "geometry", this, "geometry");
+        this.addIO("input", "xDist", this, "number");
+        this.addIO("input", "yDist", this, "number");
+        this.addIO("input", "zDist", this, "number");
+        this.addIO("output", "geometry", this, "geometry");
+        
+        this.name = "Translate";
+        this.atomType = "Translate";
+        this.defaultCodeBlock = "~geometry~.translate([~xDist~, ~yDist~, ~zDist~])";
+        this.codeBlock = "";
     }
-});
+}

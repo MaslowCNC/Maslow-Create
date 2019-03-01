@@ -1,42 +1,40 @@
-var Molecule = Atom.create({
-    children: [], 
-    name: "Molecule",
-    atomType: "Molecule",
-    topLevel: false, //a flag to signal if this node is the top level node
-    
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.nodesOnTheScreen = [];
+class Molecule extends Atom{
+
+    constructor(values){
+        
+        super(values);
+        
+        this.nodesOnTheScreen = [];
+        
+        this.children = [];
+        this.name = "Molecule";
+        this.atomType = "Molecule";
+        this.topLevel = false; //a flag to signal if this node is the top level node
         
         //Add the button to go up one level
-        if (!instance.topLevel){
-            goUpOneLevel = UpOneLevelBtn.create({
-                parentMolecule: instance, 
+        if (!this.topLevel){
+            this.placeAtom({
+                parentMolecule: this, 
                 x: 50,
                 y: 50,
-                parent: instance,
-                atomType: "UpOneLevelBtn",
-                uniqueID: generateUniqueID()
+                parent: this,
+                atomType: "UpOneLevelBtn"
             });
-            instance.nodesOnTheScreen.push(goUpOneLevel);
             
             //Add the molecule's output FIXME...this should use the place atom function
-            output = Output.create({
-                parentMolecule: instance, 
+            this.placeAtom({
+                parentMolecule: this, 
                 x: canvas.width - 50,
                 y: canvas.height/2,
-                parent: instance,
+                parent: this,
                 name: "Output",
-                atomType: "Output",
-                uniqueID: generateUniqueID()
+                atomType: "Output"
             });
-            instance.nodesOnTheScreen.push(output);
         }
-        return instance;
-    },
+    }
     
-    draw: function(){
-        Atom.draw.call(this); //Super call to draw the rest
+    draw(){
+        super.draw(); //Super call to draw the rest
         
         //draw the circle in the middle
         c.beginPath();
@@ -45,9 +43,9 @@ var Molecule = Atom.create({
         c.closePath();
         c.fill();
         
-    },
+    }
     
-    doubleClick: function(x,y){
+    doubleClick(x,y){
         //returns true if something was done with the click
         
         
@@ -61,18 +59,18 @@ var Molecule = Atom.create({
         }
         
         return clickProcessed; 
-    },
+    }
     
-    backgroundClick: function(){
+    backgroundClick(){
         
         this.updateSidebar();
         
         //var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
         
         //window.loadDesign(toRender,"MaslowCreate");
-    },
+    }
     
-    updateCodeBlock: function(){
+    updateCodeBlock(){
         //Grab the code from the output object
         
         //Grab values from the inputs and push them out to the input objects
@@ -104,23 +102,23 @@ var Molecule = Atom.create({
         if (this.selected){
             this.sendToRender();
         }
-    },
+    }
     
-    updateSidebar: function(){
+    updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = Atom.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar.call(this); //call the super function
         
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
-    },
+    }
     
-    setValue: function(newName){
+    setValue(newName){
         //Called by the sidebar to set the name
         this.name = newName;
-    },
+    }
     
-    serialize: function(savedObject){
+    serialize(savedObject){
         //Save this molecule.
         
         //This one is a little confusing. Basically each molecule saves like an atom, but also creates a second object 
@@ -142,7 +140,7 @@ var Molecule = Atom.create({
                 allElementsCode.push(atom.codeBlock);
             }
             
-            allAtoms.push(atom.serialize(savedObject));
+            allAtoms.push(JSON.stringify(atom.serialize(savedObject)));
             
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
@@ -179,14 +177,14 @@ var Molecule = Atom.create({
                 uniqueID: this.uniqueID
             }
             
-            return JSON.stringify(object);
+            return object;
         }
-    },
+    }
         
-    deserialize: function(moleculeList, moleculeID){
+    deserialize(moleculeList, moleculeID){
         
         //Find the target molecule in the list
-        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
+        var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Grab the name and ID
         this.uniqueID = moleculeObject.uniqueID;
@@ -198,34 +196,33 @@ var Molecule = Atom.create({
             this.placeAtom(JSON.parse(atom), moleculeList);
         });
         
-        //reload the molecule object to prevent persistance issues
+        //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Place the connectors
         moleculeObject.allConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
-    },
+    }
     
-    placeAtom: function(atomObj, moleculeList){
-        
+    placeAtom(newAtomObj, moleculeList){
         //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
-        availableTypes.forEach(type => {
-            if (type.atomType == atomObj.atomType){
-                var atom = type.create({
+        for(var key in availableTypes) {
+            if (availableTypes[key].atomType == newAtomObj.atomType){
+                var atom = new availableTypes[key].creator({
                     parent: this,
-                    name: type.name,
-                    atomType: type.atomType,
                     uniqueID: generateUniqueID()
                 });
                 
-                //reasign the name of the Inputs to preserve linking
+                //reassign the name of the Inputs to preserve linking
                 if(atom.atomType == "Input"){
-                    atom.setValue(atomObj.name);
+                    atom.setValue(newAtomObj.name);
                 }
                 
                 //Add all of the passed attributes into the object
-                for(var key in atomObj) atom[key]=atomObj[key];
+                for(var key in newAtomObj) {
+                    atom[key] = newAtomObj[key];
+                }
                 
                 //If this is a molecule, deserialize it
                 if(atom.atomType == "Molecule" && moleculeList != null){
@@ -234,19 +231,19 @@ var Molecule = Atom.create({
                 
                 this.nodesOnTheScreen.push(atom);
             }
-        });
+        }
         
-        if(atomObj.atomType == "Output"){
+        if(newAtomObj.atomType == "Output"){
             //re-asign output ID numbers if a new one is supposed to be placed
             this.nodesOnTheScreen.forEach(atom => {
                 if(atom.atomType == "Output"){
-                    atom.setID(atomObj.uniqueID);
+                    atom.setID(newAtomObj.uniqueID);
                 }
             });
         }
-    },
+    }
     
-    placeConnector: function(connectorObj){
+    placeConnector(connectorObj){
         var connector;
         var cp1NotFound = true;
         var cp2NotFound = true;
@@ -258,7 +255,7 @@ var Molecule = Atom.create({
             if (atom.uniqueID == connectorObj.ap1ID){
                 atom.children.forEach(child => {
                     if(child.name == connectorObj.ap1Name && child.type == "output"){
-                        connector = Connector.create({
+                        connector = new Connector({
                             atomType: "Connector",
                             attachmentPoint1: child,
                             parentMolecule:  atom
@@ -287,28 +284,30 @@ var Molecule = Atom.create({
         
         //Store the connector
         connector.attachmentPoint1.connectors.push(connector);
+        connector.attachmentPoint2.connectors.push(connector);
         
         //Update the connection
         connector.attachmentPoint1.parentMolecule.updateCodeBlock();
     }
-});
+}
 
 
-var UpOneLevelBtn = Atom.create({
-    name: "Go Up One Level",
-    atomType: "UpOneLevelBtn",
-    children: [],
-    color: '#F3EFEF',
-    defaultColor: '#F3EFEF',
-    selectedColor: '#F3EFEF',
-    radius: 30,
+class UpOneLevelBtn extends Atom{
+ 
+    constructor(values){
+        
+        super(values);
+        
+        this.name = "Go Up One Level";
+        this.atomType = "UpOneLevelBtn";
+        this.children = [];
+        this.color = '#F3EFEF';
+        this.defaultColor = '#F3EFEF';
+        this.selectedColor = '#F3EFEF';
+        this.radius = 30;
+    }
     
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        return instance;
-    },
-    
-    draw: function() {
+    draw() {
         
         this.children.forEach(child => {
             child.draw();       
@@ -333,9 +332,9 @@ var UpOneLevelBtn = Atom.create({
         c.fill();
         c.closePath();
 
-    },
+    }
     
-    doubleClick: function(x,y){
+    doubleClick(x,y){
         //returns true if something was done with the click
         
         var clickProcessed = false;
@@ -349,4 +348,4 @@ var UpOneLevelBtn = Atom.create({
         
         return clickProcessed; 
     }
-});
+}

@@ -1,35 +1,36 @@
-var Constant = Atom.create({
-    codeBlock: "",
-    type: "constant",
-    name: "Constant",
-    atomType: "Constant",
-    height: 16,
-    radius: 15,
+class Constant extends Atom{
     
-    create: function(values){
-        var instance = Atom.create.call(this, values);
-        instance.addIO("output", "number", instance, "number");
-        return instance;
-    },
+    constructor(values){
+        super(values);
+        
+        this.addIO("output", "number", this, "number");
+        
+        this.codeBlock = "";
+        this.type = "constant";
+        this.name = "Constant";
+        this.atomType = "Constant";
+        this.height = 16;
+        this.radius = 15;
+    }
     
-    updateSidebar: function(){
+    updateSidebar(){
         //updates the sidebar to display information about this node
         
-        var valueList = Atom.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar(); //call the super function
         
         var output = this.children[0];
         
         createEditableValueListItem(valueList,output,"value", "Value", true);
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
-    },
+    }
     
-    setValue: function(newName){
+    setValue(newName){
         //Called by the sidebar to set the name
         this.name = newName;
-    },
+    }
     
-    draw: function() {
+    draw() {
         
         this.children.forEach(child => {
             child.draw();       
@@ -43,4 +44,4 @@ var Constant = Atom.create({
         c.fill();
         c.closePath();
     }
-});
+}
