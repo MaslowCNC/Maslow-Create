@@ -325,13 +325,24 @@ class Atom {
             this[key] = values[key];
         }
         
-        console.log("ioValues:");
-        console.log(this.ioValues);
+    }
+    
+    setValues(values){
+        //Assign the object to have the passed in values
         
-        if (typeof this.ioValues !== 'undefined') {
-            console.log("Found");
+        for(var key in values) {
+            this[key] = values[key];
         }
         
+        if (typeof this.ioValues !== 'undefined') {
+            this.ioValues.forEach(ioValue => { //for each saved value
+                this.children.forEach(io => {  //Find the matching IO and set it to be the saved value
+                    if(ioValue.name == io.name && io.type == "input"){
+                        io.setValue(ioValue.ioValue);
+                    }
+                });
+            });
+        }
     }
     
     draw() {
@@ -521,11 +532,10 @@ class Atom {
         
         var ioValues = [];
         this.children.forEach(io => {
-            if (io.valueType == "number"){
+            if (io.valueType == "number" && io.type == "input"){
                 var saveIO = {
                     name: io.name,
-                    ioValue: io.getValue(),
-                    ioType: io.type
+                    ioValue: io.getValue()
                 };
                 ioValues.push(saveIO);
             }
@@ -568,8 +578,6 @@ class Atom {
         //Send code to JSCAD to render
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
-            
-            //console.log("To render: " + toRender);
             
             window.loadDesign(toRender,"MaslowCreate");
         }

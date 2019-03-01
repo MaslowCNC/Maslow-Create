@@ -14,9 +14,7 @@ class Equation extends Atom {
         this.equationOptions = ["x+y", "x-y", "x*y", "cos(x)", "sin(x)", "x^y"];
         this.currentEquation = 0;
         
-        for(var key in values) {
-            this[key] = values[key];
-        }
+        this.setValues(values);
         
     }
     

@@ -10,9 +10,7 @@ class Molecule extends Atom{
         this.atomType = "Molecule";
         this.topLevel = false; //a flag to signal if this node is the top level node
         
-        for(var key in values) {
-            this[key] = values[key];
-        }
+        this.setValues(values);
         
         //Add the button to go up one level
         if (!this.topLevel){
@@ -164,7 +162,7 @@ class Molecule extends Atom{
         }
         
         //Add an object record of this object
-        console.log(this);
+        
         savedObject.molecules.push(thisAsObject);
             
         if(this.topLevel == true){

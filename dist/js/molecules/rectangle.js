@@ -15,8 +15,6 @@ class Rectangle extends Atom {
         //generate the correct codeblock for this atom on creation
         this.updateCodeBlock();
         
-        for(var key in values) {
-            this[key] = values[key];
-        }
+        this.setValues(values);
     }
 }
