@@ -9,7 +9,7 @@ function placeNewNode(ev){
         parent: currentMolecule,
         atomType: clr,
         uniqueID: generateUniqueID()
-    }, null); //null indicates that there is nothing to load from the molecule list for this one
+    }, null, availableTypes); //null indicates that there is nothing to load from the molecule list for this one
 }
 
 function showmenu(ev){

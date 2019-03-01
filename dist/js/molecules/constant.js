@@ -3,8 +3,6 @@ class Constant extends Atom{
     constructor(values){
         super(values);
         
-        this.addIO("output", "number", this, "number", 10);
-        
         this.codeBlock = "";
         this.type = "constant";
         this.name = "Constant";
@@ -13,6 +11,18 @@ class Constant extends Atom{
         this.radius = 15;
         
         this.setValues(values);
+        
+        this.addIO("output", "number", this, "number", 10);
+        
+        if (typeof this.ioValues !== 'undefined') {
+            this.ioValues.forEach(ioValue => { //for each saved value
+                this.children.forEach(io => {  //Find the matching IO and set it to be the saved value
+                    if(ioValue.name == io.name){
+                        io.setValue(ioValue.ioValue);
+                    }
+                });
+            });
+        }
     }
     
     updateSidebar(){
@@ -30,6 +40,19 @@ class Constant extends Atom{
     setValue(newName){
         //Called by the sidebar to set the name
         this.name = newName;
+    }
+    
+    serialize(values){
+        //Save the IO value to the serial stream
+        var valuesObj = super.serialize(values);
+        
+        valuesObj.ioValues = [{
+            name: "number",
+            ioValue: this.children[0].getValue()
+        }];
+        
+        return valuesObj;
+        
     }
     
     draw() {

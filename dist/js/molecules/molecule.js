@@ -20,9 +20,9 @@ class Molecule extends Atom{
                 y: 50,
                 parent: this,
                 atomType: "UpOneLevelBtn"
-            });
+            }, null, secretTypes);
             
-            //Add the molecule's output FIXME...this should use the place atom function
+            //Add the molecule's output
             this.placeAtom({
                 parentMolecule: this, 
                 x: canvas.width - 50,
@@ -30,7 +30,7 @@ class Molecule extends Atom{
                 parent: this,
                 name: "Output",
                 atomType: "Output"
-            });
+            }, null, secretTypes);
         }
     }
     
@@ -195,7 +195,7 @@ class Molecule extends Atom{
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(JSON.parse(atom), moleculeList);
+            this.placeAtom(JSON.parse(atom), moleculeList, availableTypes);
         });
         
         //reload the molecule object to prevent persistence issues
@@ -207,15 +207,16 @@ class Molecule extends Atom{
         });
     }
     
-    placeAtom(newAtomObj, moleculeList){
+    placeAtom(newAtomObj, moleculeList, typesList){
         //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
-        for(var key in availableTypes) {
-            if (availableTypes[key].atomType == newAtomObj.atomType){
+        
+        for(var key in typesList) {
+            if (typesList[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this;
-                var atom = new availableTypes[key].creator(newAtomObj);
+                var atom = new typesList[key].creator(newAtomObj);
                 
                 //reassign the name of the Inputs to preserve linking
-                if(atom.atomType == "Input"){
+                if(atom.atomType == "Input" && typeof newAtomObj.name !== 'undefined'){
                     atom.setValue(newAtomObj.name);
                 }
 
@@ -300,6 +301,8 @@ class UpOneLevelBtn extends Atom{
         this.defaultColor = '#F3EFEF';
         this.selectedColor = '#F3EFEF';
         this.radius = 30;
+        
+        this.setValues(values);
     }
     
     draw() {

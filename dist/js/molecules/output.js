@@ -4,8 +4,6 @@ class Output extends Atom {
     constructor(values){
         super (values)
         
-        this.addIO("input", "number or geometry", this, "geometry", "");
-        
         //Add a new output to the current molecule
         if (typeof this.parent !== 'undefined') {
             this.parent.addIO("output", "Geometry", this.parent, "geometry", "");
@@ -20,6 +18,8 @@ class Output extends Atom {
         this.radius = 15;
         
         this.setValues(values);
+        
+        this.addIO("input", "number or geometry", this, "geometry", "");
     }
     
     setID(newID){
