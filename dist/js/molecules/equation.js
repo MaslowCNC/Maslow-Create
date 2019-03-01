@@ -17,12 +17,10 @@ class Equation extends Atom {
     }
     
     serialize(savedObject){
-        var superSerialObject = Parent.serialize(null);
+        var superSerialObject = super.serialize(null);
         
-        console.log("Serialized ouput: ");
-        console.log(superSerialObject);
-        
-        
+        //Write the current equation to the serialized object
+        superSerialObject.currentEquation = this.currentEquation;
         
         return superSerialObject;
     }
