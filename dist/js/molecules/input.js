@@ -7,7 +7,6 @@ class Input extends Atom {
         this.codeBlock = "";
         this.type = "input";
         this.atomType = "Input";
-        this.name = "Input";
         this.height = 16;
         this.radius = 15;
         
@@ -24,7 +23,7 @@ class Input extends Atom {
     updateSidebar(){
         //updates the sidebar to display information about this node
         
-        var valueList =  Atom.updateSidebar.call(this); //call the super function
+        var valueList =  super.updateSidebar(); //call the super function
         
         createEditableValueListItem(valueList,this,"name", "Name", false);
         
@@ -60,7 +59,6 @@ class Input extends Atom {
         //Run through the parent molecule and find the input with the same name
         this.parent.children.forEach(child => {
             if (child.name == this.name){
-                console.log("match found for: " + this.name);
                 this.name = theNewName;
                 child.name = theNewName;
             }

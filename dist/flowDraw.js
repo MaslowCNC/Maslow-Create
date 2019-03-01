@@ -106,6 +106,11 @@ var availableTypes = {
     union:         {creator: Union, atomType: "Union"}
 }
 
+var secretTypes = {
+    uponelevelbtn: {creator: UpOneLevelBtn, atomType: "UpOneLevelBtn"},
+    output:        {creator: Output, atomType: "Output"}
+}
+
 
 let currentMolecule;
 let topLevelMolecule;
