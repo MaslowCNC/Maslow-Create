@@ -363,7 +363,7 @@ class Atom {
         c.closePath();
     }
     
-    addIO(type, name, target, valueType){
+    addIO(type, name, target, valueType, defaultValue){
         
         //compute the baseline offset from parent node
         var offset;
@@ -389,6 +389,7 @@ class Atom {
             type: type,
             valueType: valueType,
             name: name,
+            value: defaultValue,
             uniqueID: generateUniqueID(),
             atomType: "AttachmentPoint"
         });

@@ -3,9 +3,9 @@ class Equation extends Atom {
     constructor(values){
         super(values);
         
-        this.addIO("input", "x", this, "number");
-        this.addIO("input", "y", this, "number");
-        this.addIO("output", "z", this, "number");
+        this.addIO("input", "x", this, "number", 0);
+        this.addIO("input", "y", this, "number", 0);
+        this.addIO("output", "z", this, "number", 0);
         
         this.name = "Equation";
         this.atomType = "Equation";

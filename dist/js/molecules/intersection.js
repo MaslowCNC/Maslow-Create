@@ -4,9 +4,9 @@ class Intersection extends Atom {
         
         super(values);
         
-        this.addIO("input", "geometry1", this, "geometry");
-        this.addIO("input", "geometry2", this, "geometry");
-        this.addIO("output", "geometry", this, "geometry");
+        this.addIO("input", "geometry1", this, "geometry", "");
+        this.addIO("input", "geometry2", this, "geometry", "");
+        this.addIO("output", "geometry", this, "geometry", "");
         
         this.name = "Intersection";
         this.atomType = "Intersection";

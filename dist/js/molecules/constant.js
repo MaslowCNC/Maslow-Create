@@ -3,7 +3,7 @@ class Constant extends Atom{
     constructor(values){
         super(values);
         
-        this.addIO("output", "number", this, "number");
+        this.addIO("output", "number", this, "number", 10);
         
         this.codeBlock = "";
         this.type = "constant";
