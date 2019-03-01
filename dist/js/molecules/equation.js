@@ -14,6 +14,8 @@ class Equation extends Atom {
         this.equationOptions = ["x+y", "x-y", "x*y", "cos(x)", "sin(x)", "x^y"];
         this.currentEquation = 0;
         
+        this.setValues(values);
+        
     }
     
     serialize(savedObject){

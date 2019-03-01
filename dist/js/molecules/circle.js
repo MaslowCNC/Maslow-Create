@@ -12,6 +12,8 @@ class Circle extends Atom {
         this.addIO("input", "radius", this, "number");
         this.addIO("output", "geometry", this, "geometry");
         
+        this.setValues(values);
+        
         //generate the correct codeblock for this atom on creation
         this.updateCodeBlock();
     }

@@ -11,6 +11,8 @@ class Constant extends Atom{
         this.atomType = "Constant";
         this.height = 16;
         this.radius = 15;
+        
+        this.setValues(values);
     }
     
     updateSidebar(){

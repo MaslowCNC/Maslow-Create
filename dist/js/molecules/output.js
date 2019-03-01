@@ -18,6 +18,8 @@ class Output extends Atom {
         this.atomType = "Output";
         this.height = 16;
         this.radius = 15;
+        
+        this.setValues(values);
     }
     
     setID(newID){

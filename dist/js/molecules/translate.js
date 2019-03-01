@@ -13,5 +13,7 @@ class Translate extends Atom{
         this.atomType = "Translate";
         this.defaultCodeBlock = "~geometry~.translate([~xDist~, ~yDist~, ~zDist~])";
         this.codeBlock = "";
+        
+        this.setValues(values);
     }
 }

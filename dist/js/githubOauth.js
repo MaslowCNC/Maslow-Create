@@ -168,7 +168,7 @@ function createNewProject(){
     var description = document.getElementById('project-description').value;
     
     //Load a blank project
-    topLevelMolecule = Molecule.create({
+    topLevelMolecule = new Molecule({
         x: 0, 
         y: 0, 
         topLevel: true, 

@@ -305,11 +305,7 @@ class Connector {
 class Atom {
 
     constructor(values){
-        
-        for(var key in values) {
-            this.key = values[key];
-        }
-        
+        //Setup default values
         this.children = [];
         
         this.x = 0;
@@ -325,6 +321,28 @@ class Atom {
         this.defaultCodeBlock = "";
         this.isMoving = false;
         
+        for(var key in values) {
+            this[key] = values[key];
+        }
+        
+    }
+    
+    setValues(values){
+        //Assign the object to have the passed in values
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
+        
+        if (typeof this.ioValues !== 'undefined') {
+            this.ioValues.forEach(ioValue => { //for each saved value
+                this.children.forEach(io => {  //Find the matching IO and set it to be the saved value
+                    if(ioValue.name == io.name && io.type == "input"){
+                        io.setValue(ioValue.ioValue);
+                    }
+                });
+            });
+        }
     }
     
     draw() {
@@ -511,13 +529,27 @@ class Atom {
     
     serialize(savedObject){
         //savedObject is only used by Molecule type atoms
+        
+        var ioValues = [];
+        this.children.forEach(io => {
+            if (io.valueType == "number" && io.type == "input"){
+                var saveIO = {
+                    name: io.name,
+                    ioValue: io.getValue()
+                };
+                ioValues.push(saveIO);
+            }
+        });
+        
         var object = {
             atomType: this.atomType,
             name: this.name,
             x: this.x,
             y: this.y,
-            uniqueID: this.uniqueID
+            uniqueID: this.uniqueID,
+            ioValues: ioValues
         }
+        
         return object;
     }
     
@@ -546,8 +578,6 @@ class Atom {
         //Send code to JSCAD to render
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
-            
-            //console.log("To render: " + toRender);
             
             window.loadDesign(toRender,"MaslowCreate");
         }

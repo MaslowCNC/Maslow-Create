@@ -12,5 +12,7 @@ class Union extends Atom {
         this.atomType = "Union";
         this.defaultCodeBlock = "union(~geometry1~,~geometry2~)";
         this.codeBlock = "";
+        
+        this.setValues(values);
     }
 }

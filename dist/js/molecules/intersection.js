@@ -12,5 +12,7 @@ class Intersection extends Atom {
         this.atomType = "Intersection";
         this.defaultCodeBlock = "intersection(~geometry1~,~geometry2~)";
         this.codeBlock = "";
+        
+        this.setValues(values);
     }
 }

@@ -14,5 +14,7 @@ class Rotate extends Atom {
         this.atomType = "Rotate";
         this.defaultCodeBlock = "rotate([~x-axis degrees~,~y-axis degrees~,~z-axis degrees~],~geometry~)";
         this.codeBlock = "";
+        
+        this.setValues(values);
     }
 }
