@@ -5,11 +5,14 @@ class Molecule extends Atom{
         super(values);
         
         this.nodesOnTheScreen = [];
-        
         this.children = [];
         this.name = "Molecule";
         this.atomType = "Molecule";
         this.topLevel = false; //a flag to signal if this node is the top level node
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
         
         //Add the button to go up one level
         if (!this.topLevel){
@@ -161,6 +164,7 @@ class Molecule extends Atom{
         }
         
         //Add an object record of this object
+        console.log(this);
         savedObject.molecules.push(thisAsObject);
             
         if(this.topLevel == true){
@@ -209,21 +213,14 @@ class Molecule extends Atom{
         //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
         for(var key in availableTypes) {
             if (availableTypes[key].atomType == newAtomObj.atomType){
-                var atom = new availableTypes[key].creator({
-                    parent: this,
-                    uniqueID: generateUniqueID()
-                });
+                newAtomObj.parent = this;
+                var atom = new availableTypes[key].creator(newAtomObj);
                 
                 //reassign the name of the Inputs to preserve linking
                 if(atom.atomType == "Input"){
                     atom.setValue(newAtomObj.name);
                 }
-                
-                //Add all of the passed attributes into the object
-                for(var key in newAtomObj) {
-                    atom[key] = newAtomObj[key];
-                }
-                
+
                 //If this is a molecule, deserialize it
                 if(atom.atomType == "Molecule" && moleculeList != null){
                     atom.deserialize(moleculeList, atom.uniqueID);

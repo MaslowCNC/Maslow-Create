@@ -14,5 +14,9 @@ class Mirror extends Atom {
         this.atomType = "Mirror";
         this.defaultCodeBlock = "mirror([~x~,~y~,~z~], ~geometry~)";
         this.codeBlock = "";
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
     }
 }

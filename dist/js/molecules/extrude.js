@@ -12,5 +12,9 @@ class Extrude extends Atom{
         this.addIO("input", "geometry" , this, "geometry");
         this.addIO("input", "height"   , this, "number");
         this.addIO("output", "geometry", this, "geometry");
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
     }
 }

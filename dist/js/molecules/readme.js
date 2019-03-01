@@ -9,6 +9,10 @@ class Readme extends Atom{
         this.type = "readme";
         this.name = "README";
         this.radius = 20;
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
     }
     
     updateSidebar(){

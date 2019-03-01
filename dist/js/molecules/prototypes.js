@@ -305,11 +305,7 @@ class Connector {
 class Atom {
 
     constructor(values){
-        
-        for(var key in values) {
-            this.key = values[key];
-        }
-        
+        //Setup default values
         this.children = [];
         
         this.x = 0;
@@ -324,6 +320,17 @@ class Atom {
         this.codeBlock = "";
         this.defaultCodeBlock = "";
         this.isMoving = false;
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
+        
+        console.log("ioValues:");
+        console.log(this.ioValues);
+        
+        if (typeof this.ioValues !== 'undefined') {
+            console.log("Found");
+        }
         
     }
     

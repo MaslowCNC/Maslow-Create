@@ -11,5 +11,9 @@ class ShrinkWrap extends Atom{
         this.atomType = "ShrinkWrap";
         this.defaultCodeBlock = "hull(~2D shape 1~,~2D shape 2~)";
         this.codeBlock = "";
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
     }
 }

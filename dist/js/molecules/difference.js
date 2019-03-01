@@ -12,5 +12,9 @@ class Difference extends Atom{
         this.atomType = "Difference";
         this.defaultCodeBlock = "difference(~geometry1~,~geometry2~)";
         this.codeBlock = "";
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
     }
 }

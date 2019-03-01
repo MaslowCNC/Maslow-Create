@@ -12,5 +12,9 @@ class Scale extends Atom{
         this.atomType = "Scale";
         this.defaultCodeBlock = "~geometry~.scale(~multiple~)";
         this.codeBlock = "";
+        
+        for(var key in values) {
+            this[key] = values[key];
+        }
     }
 }

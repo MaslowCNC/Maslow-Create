@@ -13,6 +13,10 @@ class Input extends Atom {
         this.height = 16;
         this.radius = 15;
         
+        for(var key in values) {
+            this[key] = values[key];
+        }
+        
         //Add a new input to the current molecule
         if (typeof this.parent !== 'undefined') {
             this.parent.addIO("input", this.name, this.parent, "geometry");
