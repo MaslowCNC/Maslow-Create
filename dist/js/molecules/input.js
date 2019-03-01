@@ -3,8 +3,6 @@ class Input extends Atom {
     constructor(values){
         super (values);
         
-        this.addIO("output", "number or geometry", this, "geometry", "");
-        
         this.name = "Input" + generateUniqueID();
         this.codeBlock = "";
         this.type = "input";
@@ -14,6 +12,8 @@ class Input extends Atom {
         this.radius = 15;
         
         this.setValues(values);
+        
+        this.addIO("output", "number or geometry", this, "geometry", "");
         
         //Add a new input to the current molecule
         if (typeof this.parent !== 'undefined') {
