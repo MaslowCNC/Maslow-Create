@@ -57,8 +57,6 @@ class Equation extends Atom {
                 console.log(this.currentEquation);
         }
         
-        console.log("x: " + x + " y: " + y + " z: " + z);
-        
         //Set the output to be the generated value
         this.children.forEach(child => {
             if(child.type == 'output'){

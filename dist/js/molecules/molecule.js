@@ -283,7 +283,7 @@ class Molecule extends Atom{
         connector.attachmentPoint2.connectors.push(connector);
         
         //Update the connection
-        connector.attachmentPoint1.parentMolecule.updateCodeBlock();
+        connector.propogate();
     }
 }
 
