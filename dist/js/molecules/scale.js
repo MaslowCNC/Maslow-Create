@@ -4,9 +4,9 @@ class Scale extends Atom{
         
         super(values);
         
-        this.addIO("input", "geometry", this, "geometry");
-        this.addIO("input", "multiple", this, "number");
-        this.addIO("output", "geometry", this, "geometry");
+        this.addIO("input", "geometry", this, "geometry", "");
+        this.addIO("input", "multiple", this, "number", 10);
+        this.addIO("output", "geometry", this, "geometry", "");
         
         this.name = "Scale";
         this.atomType = "Scale";

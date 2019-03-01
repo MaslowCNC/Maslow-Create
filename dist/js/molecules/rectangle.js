@@ -3,9 +3,9 @@ class Rectangle extends Atom {
     constructor(values){
         super(values)
         
-        this.addIO("input", "length", this, "number");
-        this.addIO("input", "width", this, "number");
-        this.addIO("output", "geometry", this, "geometry");
+        this.addIO("input", "length", this, "number", 10);
+        this.addIO("input", "width", this, "number", 10);
+        this.addIO("output", "geometry", this, "geometry", "");
         
         this.name = "Rectangle";
         this.atomType = "Rectangle";
