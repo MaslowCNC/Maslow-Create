@@ -187,6 +187,15 @@ body {
     padding-left: 10px;
 }
 
+.sidebar_button {
+  background: #4CAF50;
+  cursor: pointer;
+  outline:none;
+}
+.sidebar_button:hover,.form button:active,.form button:focus {
+  background: #43A047;
+}
+
 .login-popup{
     width: 12rem;
     background-color: #f4f4f4;

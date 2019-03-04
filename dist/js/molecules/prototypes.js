@@ -603,4 +603,126 @@ class Atom {
         
         return ioValue;
     }
+    
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber){
+        var listElement = document.createElement("LI");
+        list.appendChild(listElement);
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement("div");
+        listElement.appendChild(div);
+        div.setAttribute("class", "sidebar-item");
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement("div");
+        div.appendChild(labelDiv);
+        var labelText = document.createTextNode(label + ":");
+        labelDiv.appendChild(labelText);
+        labelDiv.setAttribute("class", "sidebar-subitem");
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement("div");
+        div.appendChild(valueTextDiv);
+        var valueText = document.createTextNode(object[key]);
+        valueTextDiv.appendChild(valueText);
+        valueTextDiv.setAttribute("contenteditable", "true");
+        valueTextDiv.setAttribute("class", "sidebar-subitem");
+        valueTextDiv.setAttribute("id", label);
+        
+        
+        document.getElementById(label).addEventListener('focusout', event => {
+            var valueInBox = document.getElementById(label).textContent;
+            if(resultShouldBeNumber){
+                valueInBox = parseFloat(valueInBox);
+            }
+            object.setValue(valueInBox);
+        });
+        
+        //prevent the return key from being used when editing a value
+        document.getElementById(label).addEventListener('keypress', function(evt) {
+            if (evt.which === 13) {
+                evt.preventDefault();
+                document.getElementById(label).blur();  //shift focus away if someone presses enter
+            }
+        });
+
+    }
+
+    createDropDown(list,parent,options,selectedOption){
+        var listElement = document.createElement("LI");
+        list.appendChild(listElement);
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement("div");
+        listElement.appendChild(div);
+        div.setAttribute("class", "sidebar-item");
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement("div");
+        div.appendChild(labelDiv);
+        var labelText = document.createTextNode("z = ");
+        labelDiv.appendChild(labelText);
+        labelDiv.setAttribute("class", "sidebar-subitem");
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement("div");
+        div.appendChild(valueTextDiv);
+        var dropDown = document.createElement("select");
+        options.forEach(option => {
+            var op = new Option();
+            op.value = options.findIndex(thisOption => thisOption === option);
+            op.text = option;
+            dropDown.options.add(op);
+        });
+        valueTextDiv.appendChild(dropDown);
+        valueTextDiv.setAttribute("class", "sidebar-subitem");
+        
+        dropDown.selectedIndex = selectedOption; //display the current selection
+        
+        dropDown.addEventListener(
+            'change',
+            function() { parent.changeEquation(dropDown.value); },
+            false
+        );
+    }
+
+    createButton(list,parent,buttonText,functionToCall){
+        var listElement = document.createElement("LI");
+        list.appendChild(listElement);
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement("div");
+        listElement.appendChild(div);
+        div.setAttribute("class", "sidebar-item");
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement("div");
+        div.appendChild(labelDiv);
+        var labelText = document.createTextNode("");
+        labelDiv.appendChild(labelText);
+        labelDiv.setAttribute("class", "sidebar-subitem");
+        
+        
+        //Right div which is button
+        var valueTextDiv = document.createElement("div");
+        div.appendChild(valueTextDiv);
+        var button = document.createElement("button");
+        var buttonTextNode = document.createTextNode(buttonText);
+        button.setAttribute("class", "sidebar_button");
+        button.appendChild(buttonTextNode);
+        valueTextDiv.appendChild(button);
+        valueTextDiv.setAttribute("class", "sidebar-subitem");
+        
+        button.addEventListener(
+            'mousedown',
+            functionToCall,
+            false
+        );
+    }
+
 }

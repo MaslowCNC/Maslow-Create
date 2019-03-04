@@ -110,8 +110,20 @@ class Molecule extends Atom{
         
         var valueList = super.updateSidebar.call(this); //call the super function
         
-        createEditableValueListItem(valueList,this,"name", "Name", false);
+        this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
+        if(!this.topLevel){
+            this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule)
+        }
+        
+    }
+    
+    goToParentMolecule(){
+        //Go to the parent molecule if there is one
+        
+        if(!currentMolecule.topLevel){
+            currentMolecule = currentMolecule.parent; //set parent this to be the currently displayed molecule
+        }
     }
     
     setValue(newName){
