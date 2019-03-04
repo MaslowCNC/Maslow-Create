@@ -396,6 +396,17 @@ class Atom {
         target.children.push(input);
     }
     
+    removeIO(type, name, target){
+        //Remove the target IO attachment point
+        
+        this.children.forEach(io => {
+            if(io.name == name && io.type == type){
+                io.deleteSelf();
+                this.children.splice(this.children.indexOf(io),1);
+            }
+        });
+    }
+    
     clickDown(x,y){
         //Returns true if something was done with the click
         

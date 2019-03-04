@@ -53,6 +53,16 @@ class Input extends Atom {
 
     }
     
+    deleteNode() {
+        
+        //Remove this input from the parent molecule
+        if (typeof this.parent !== 'undefined') {
+            this.parent.removeIO("input", this.name, this.parent);
+        }
+        
+        super.deleteNode();
+    }
+    
     setValue(theNewName){
         //Called by the sidebar to set the name
         
