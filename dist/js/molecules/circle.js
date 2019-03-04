@@ -10,7 +10,7 @@ class Circle extends Atom {
         this.codeBlock = "";
         
         this.addIO("input", "radius", this, "number", 10);
-        this.addIO("input", "max segment size", this, "number", 1);
+        this.addIO("input", "max segment size", this, "number", 4);
         this.addIO("output", "geometry", this, "geometry", "");
         
         this.setValues(values);
