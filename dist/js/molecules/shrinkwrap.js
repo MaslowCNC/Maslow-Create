@@ -18,13 +18,29 @@ class ShrinkWrap extends Atom{
     updateCodeBlock(){
         super.updateCodeBlock();
         
-        console.log(this.howManyInputPortsAvailable() + " ports available");
+        var arrayOfChildrenString = "[ ";
+        var numberOfElements = 0;
+        this.children.forEach(io => {
+            if(io.type == "input"){
+                if(numberOfElements > 0){
+                    arrayOfChildrenString = arrayOfChildrenString + ", ";
+                }
+                numberOfElements += 1;
+                arrayOfChildrenString = arrayOfChildrenString + io.getValue();
+            }
+        });
+        arrayOfChildrenString = arrayOfChildrenString + "]";
+        
+        //Insert the generated string into the code block
+        console.log("String: ");
+        console.log(arrayOfChildrenString);
         
         if(this.howManyInputPortsAvailable() == 0){ //We need to make a new port available
             this.addIO("input", "2D shape " + generateUniqueID(), this, "geometry", "");
         }
         if(this.howManyInputPortsAvailable() >= 2){  //We need to remove the empty port
             this.deleteEmptyPort();
+            this.updateCodeBlock();
         }
     }
     
