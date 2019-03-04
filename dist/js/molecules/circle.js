@@ -22,25 +22,14 @@ class Circle extends Atom {
     updateCodeBlock(){
         //Overwrite the normal update code block to update the number of segments also
         
-        console.log("Sub update code block ran");
-        console.log(this.defaultCodeBlock);
-        
         var maximumSegmentSize = this.findIOValue("max segment size");
         var circumference  = 3.14*2*this.findIOValue("radius");
         
-        console.log("circumference: " + circumference);
-        
         var numberOfSegments = parseInt( circumference / maximumSegmentSize );
         
-        console.log("Number of segments: " + numberOfSegments);
-        
         var regex = /fn: (\d+)\}/gi;
-        
-        console.log("New default: ");
-this.defaultCodeBlock = this.defaultCodeBlock.replace(regex, "fn: " + numberOfSegments + "}");
-        console.log(this.defaultCodeBlock);
+        this.defaultCodeBlock = this.defaultCodeBlock.replace(regex, "fn: " + numberOfSegments + "}");
         
         super.updateCodeBlock();
-        
     }
 }
