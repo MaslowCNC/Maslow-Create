@@ -11,7 +11,7 @@ class Equation extends Atom {
         this.atomType = "Equation";
         this.defaultCodeBlock = "";
         this.codeBlock = "";
-        this.equationOptions = ["x+y", "x-y", "x*y", "cos(x)", "sin(x)", "x^y"];
+        this.equationOptions = ["x+y", "x-y", "x*y", "x/y", "cos(x)", "sin(x)", "x^y"];
         this.currentEquation = 0;
         
         this.setValues(values);
@@ -44,12 +44,15 @@ class Equation extends Atom {
                 z = x*y;
                 break;
             case 3:
-                z = Math.cos(x);
+                z = x/y;
                 break;
             case 4:
-                z = Math.sin(x);
+                z = Math.cos(x);
                 break;
             case 5:
+                z = Math.sin(x);
+                break;
+            case 6:
                 z = Math.pow(x,y);
                 break;
             default:
