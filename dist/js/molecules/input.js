@@ -25,7 +25,7 @@ class Input extends Atom {
         
         var valueList =  super.updateSidebar(); //call the super function
         
-        createEditableValueListItem(valueList,this,"name", "Name", false);
+        this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
     }
     
