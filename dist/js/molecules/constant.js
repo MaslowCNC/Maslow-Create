@@ -32,8 +32,8 @@ class Constant extends Atom{
         
         var output = this.children[0];
         
-        createEditableValueListItem(valueList,output,"value", "Value", true);
-        createEditableValueListItem(valueList,this,"name", "Name", false);
+        this.createEditableValueListItem(valueList,output,"value", "Value", true);
+        this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
     }
     

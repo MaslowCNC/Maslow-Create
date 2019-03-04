@@ -12,15 +12,8 @@ class Molecule extends Atom{
         
         this.setValues(values);
         
-        //Add the button to go up one level
+        //Add the output
         if (!this.topLevel){
-            this.placeAtom({
-                parentMolecule: this, 
-                x: 50,
-                y: 50,
-                parent: this,
-                atomType: "UpOneLevelBtn"
-            }, null, secretTypes);
             
             //Add the molecule's output
             this.placeAtom({
@@ -299,63 +292,3 @@ class Molecule extends Atom{
     }
 }
 
-
-class UpOneLevelBtn extends Atom{
- 
-    constructor(values){
-        
-        super(values);
-        
-        this.name = "Go Up One Level";
-        this.atomType = "UpOneLevelBtn";
-        this.children = [];
-        this.color = '#F3EFEF';
-        this.defaultColor = '#F3EFEF';
-        this.selectedColor = '#F3EFEF';
-        this.radius = 30;
-        
-        this.setValues(values);
-    }
-    
-    draw() {
-        
-        this.children.forEach(child => {
-            child.draw();       
-        });
-        
-        
-        c.fillStyle = this.color;
-        
-        c.textAlign = "start"; 
-        c.fillText(this.name, this.x, this.y-(this.radius-5));
-
-        var shaftWidth = 7;
-        
-        c.beginPath();
-        c.moveTo(this.x, this.y - this.radius/2);
-        c.lineTo(this.x + this.radius/2, this.y);
-        c.lineTo(this.x + shaftWidth, this.y);
-        c.lineTo(this.x + shaftWidth, this.y + this.radius/2);
-        c.lineTo(this.x - shaftWidth, this.y + this.radius/2);
-        c.lineTo(this.x - shaftWidth, this.y);
-        c.lineTo(this.x - this.radius/2, this.y);
-        c.fill();
-        c.closePath();
-
-    }
-    
-    doubleClick(x,y){
-        //returns true if something was done with the click
-        
-        var clickProcessed = false;
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
-        
-        if (distFromClick < this.radius){
-            this.parentMolecule.updateCodeBlock(); //Updates the code block of the parent molecule
-            currentMolecule = this.parentMolecule.parent; //set parent this to be the currently displayed molecule
-            clickProcessed = true;
-        }
-        
-        return clickProcessed; 
-    }
-}

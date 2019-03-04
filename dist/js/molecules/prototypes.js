@@ -502,7 +502,7 @@ class Atom {
         //Add options to set all of the inputs
         this.children.forEach(child => {
             if(child.type == 'input' && child.valueType != 'geometry'){
-                createEditableValueListItem(valueList,child,"value", child.name, true);
+                this.createEditableValueListItem(valueList,child,"value", child.name, true);
             }
         });
         

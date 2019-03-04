@@ -18,7 +18,7 @@ class Readme extends Atom{
         
         var valueList = super.updateSidebar(); //call the super function
         
-        createEditableValueListItem(valueList,this,"readmeText", "Notes", false);
+        this.createEditableValueListItem(valueList,this,"readmeText", "Notes", false);
         
     }
     

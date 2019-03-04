@@ -107,7 +107,6 @@ var availableTypes = {
 }
 
 var secretTypes = {
-    uponelevelbtn: {creator: UpOneLevelBtn, atomType: "UpOneLevelBtn"},
     output:        {creator: Output, atomType: "Output"}
 }
 
