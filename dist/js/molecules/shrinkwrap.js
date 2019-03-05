@@ -32,14 +32,8 @@ class ShrinkWrap extends Atom{
         arrayOfChildrenString = arrayOfChildrenString + "]";
         
         //Insert the generated string into the code block
-        console.log("String: ");
-        console.log(arrayOfChildrenString);
-        
         var regex = /\[(.+)\]/gi;
         this.codeBlock = this.codeBlock.replace(regex, arrayOfChildrenString);
-        
-        console.log("Updated Code Block: ");
-        console.log(this.codeBlock);
         
         if(this.howManyInputPortsAvailable() == 0){ //We need to make a new port available
             this.addIO("input", "2D shape " + generateUniqueID(), this, "geometry", "");
