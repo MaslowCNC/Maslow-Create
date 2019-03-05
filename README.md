@@ -1,4 +1,8 @@
-A web based CAD program for colaborative design.
+#A web based CAD program for colaborative design.
+
+![overview](https://github.com/BarbourSmith/Maslow-Create/blob/master/MaslowCreate.png)
+
+Maslow create breaks with the tradition of CAD programs which inherit from drawing programs and instead inherits from logical languages like programing. This allows it to be a CAD program which has language like features such as importing modules, version control, and colaboration.
 
 ## Getting Started
 
