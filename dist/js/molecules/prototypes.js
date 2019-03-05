@@ -36,17 +36,18 @@ class AttachmentPoint {
     }
     
     draw() {
+        var txt = this.name;
+        var textWidth = c.measureText(txt).width;
+        var bubbleColor = "#008080";
+        var scaleRadiusDown = this.radius*.7;
+        var halfRadius = this.radius*.5;
         
         if (this.showHoverText){
             if(this.type == "input"){
-   
-                var txt = this.name;
-                var textWidth = c.measureText(txt).width;
                 c.beginPath();
-                c.fillStyle = "#008080";
-                var scaleRadiusDown = this.radius*.7;
-                c.rect(this.x - textWidth - this.radius - this.radius*.5, this.y - scaleRadiusDown, textWidth + this.radius + this.radius*.5  , scaleRadiusDown*2);
-                c.arc(this.x - textWidth - this.radius - this.radius*.5, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                c.fillStyle = bubbleColor;
+                c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
+                c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
                 c.fill();
                 c.beginPath();
                 c.fillStyle = this.parentMolecule.color;
@@ -56,19 +57,16 @@ class AttachmentPoint {
                 c.closePath();
             }
             else{
-                var txt = this.name;
-                var textWidth = c.measureText(txt).width;
                 c.beginPath();
-                c.fillStyle = "#008080";
-                var scaleRadiusDown = this.radius*.7;
-                c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + this.radius*.5, scaleRadiusDown*2);
-                c.arc(this.x + textWidth + this.radius + this.radius*.5, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                c.fillStyle = bubbleColor;
+                c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
+                c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
                 c.fill();
                 c.closePath();
                 c.beginPath();
                 c.fillStyle = this.parentMolecule.color;
                 c.textAlign = "start"; 
-                c.fillText(this.name, (this.x+this.radius/2) + (this.radius + 3), this.y+2)
+                c.fillText(this.name, (this.x+halfRadius) + (this.radius + 3), this.y+2)
                 c.fill();
                 c.closePath();
             }
@@ -77,7 +75,6 @@ class AttachmentPoint {
         c.fillStyle = this.parentMolecule.color;
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         c.fill();
-        c.closePath();
         c.closePath();
         
     }
