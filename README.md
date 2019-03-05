@@ -24,4 +24,4 @@ Your canvas piece should open up automatically at http://localhost:3000 and you 
 
 Maslow Create has three main areas of the interface. Along the top of the screen is the logical flow of the design. In the lower left is a 3D rendering of the design, and in the lower right is the side bar which displays information related to the currently selected atom. If no atom is selected, then information about the open molecule is displayed.
 
-momo momo is cool 
+Mo is really really cool!
