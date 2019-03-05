@@ -36,6 +36,7 @@ class AttachmentPoint {
     }
     
     draw() {
+
         var txt = this.name;
         var textWidth = c.measureText(txt).width;
         var bubbleColor = "#008080";
@@ -46,8 +47,14 @@ class AttachmentPoint {
             if(this.type == "input"){
                 c.beginPath();
                 c.fillStyle = bubbleColor;
-                c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
-                c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                    if (this.radius == this.expandedRadius) {
+                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
+                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                }
+                    else if(this.radius == this.defaultRadius){
+                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
+                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
+                }
                 c.fill();
                 c.beginPath();
                 c.fillStyle = this.parentMolecule.color;
@@ -66,7 +73,7 @@ class AttachmentPoint {
                 c.beginPath();
                 c.fillStyle = this.parentMolecule.color;
                 c.textAlign = "start"; 
-                c.fillText(this.name, (this.x+halfRadius) + (this.radius + 3), this.y+2)
+                c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
                 c.fill();
                 c.closePath();
             }
