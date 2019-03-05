@@ -57,7 +57,7 @@ class AttachmentPoint {
                 }
                 c.fill();
                 c.beginPath();
-                c.fillStyle = this.parentMolecule.color;
+                c.fillStyle = this.parentMolecule.defaultColor;
                 c.textAlign = "end";
                 c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
                 c.fill();
@@ -71,7 +71,7 @@ class AttachmentPoint {
                 c.fill();
                 c.closePath();
                 c.beginPath();
-                c.fillStyle = this.parentMolecule.color;
+                c.fillStyle = this.parentMolecule.defaultColor;
                 c.textAlign = "start"; 
                 c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
                 c.fill();
@@ -343,7 +343,7 @@ class Atom {
         this.y = 0;
         this.radius = 20;
         this.defaultColor = '#F3EFEF';
-        this.selectedColor = 'green';
+        this.selectedColor = "#484848";
         this.selected = false;
         this.color = '#F3EFEF';
         this.name = "name";
