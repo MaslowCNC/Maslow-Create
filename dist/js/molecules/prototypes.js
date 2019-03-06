@@ -163,6 +163,7 @@ class AttachmentPoint {
         this.connectors.forEach(connector => {
             connector.deleteSelf();       
         });
+        
     }
     
     updateSidebar(){
@@ -291,6 +292,9 @@ class Connector {
         if(this.attachmentPoint2 != null){
             this.attachmentPoint2.connectors = []; //free up the point to which this was attached
         }
+        
+        
+        this.attachmentPoint2.parentMolecule.updateCodeBlock();
         
         this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
     }
