@@ -22,15 +22,18 @@ function tryLogin(){
     //test authentication
     
     octokit.users.getAuthenticated({}).then(result => {
-        loginSucessfull();
+        showProjectsToLoad();
     })
 }
 
-function loginSucessfull(){
+function showProjectsToLoad(){
     //Remove everything in the popup now
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
+    
+    console.log("login thing ran");
+    popup.classList.remove('off');
     
     //Add a title
     var titleDiv = document.createElement("DIV");
@@ -114,6 +117,7 @@ function projectClicked(projectName){
 
 function createNewProjectPopup(){
     //Clear the popup and populate the fields we will need to create the new repo
+    
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
@@ -277,11 +281,8 @@ function loadProject(projectName){
         //Load the top level molecule from the file
         topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
         
-        //Load the other molecules from the file
-        
-        
-        
-        
+        currentMolecule.backgroundClick();
+
         //Clear and hide the popup
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild);

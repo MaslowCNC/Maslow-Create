@@ -106,7 +106,10 @@ class Molecule extends Atom{
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
         if(!this.topLevel){
-            this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule)
+            this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule);
+        }
+        else{
+            this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
     }
