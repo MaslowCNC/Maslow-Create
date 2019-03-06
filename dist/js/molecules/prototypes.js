@@ -9,7 +9,7 @@ class AttachmentPoint {
         this.radius = 8;
         
         this.hoverDetectRadius = 8;
-        this.hoverOffsetX = 0;
+        this.hoverOffsetX = 8;
         this.hoverOffsetY = 30;
         this.uniqueID = 0;
         this.defaultOffsetX = 0;
@@ -82,9 +82,10 @@ class AttachmentPoint {
         c.fillStyle = this.parentMolecule.color;
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         c.fill();
-        c.closePath();
-        
+        c.closePath();  
     }
+
+     
 
     clickDown(x,y){
         if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
@@ -136,10 +137,17 @@ class AttachmentPoint {
         }
         
         
-        //If we are close to the attachment point move it to it's hover location to make it accessable
+        //If we are close to the attachment point move it to it's hover location to make it accessible
+        //Change direction of hover drop down if too close to the top.
         if (distFromCursor < this.hoverDetectRadius){
+            if (this.parentMolecule.y <= 50){
+              this.offsetY= this.hoverOffsetY*-1;
+              this.offsetX = this.hoverOffsetX;
+           }
+           else{
             this.offsetX = this.hoverOffsetX;
             this.offsetY = this.hoverOffsetY;
+           }
             this.showHoverText = true;
             this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
         }
@@ -210,7 +218,7 @@ class AttachmentPoint {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
         this.draw()
-        
+       
         this.connectors.forEach(connector => {
             connector.update();       
         });
@@ -409,14 +417,15 @@ class Atom {
         //find the number of elements of the same type already in the array 
         var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
         //multiply that number by an offset to find the new x offset
-        var hoverOffsetComputed = numberOfSameTypeIO * -30;
+        var hoverOffsetComputedY = numberOfSameTypeIO * -30;
+        var hoverOffsetComputedX = offset - numberOfSameTypeIO* -8;
         
         var input = new AttachmentPoint({
             parentMolecule: target, 
             defaultOffsetX: offset, 
             defaultOffsetY: 0,
-            hoverOffsetX: offset,
-            hoverOffsetY: hoverOffsetComputed,
+            hoverOffsetX: hoverOffsetComputedX,
+            hoverOffsetY: hoverOffsetComputedY,
             type: type,
             valueType: valueType,
             name: name,
