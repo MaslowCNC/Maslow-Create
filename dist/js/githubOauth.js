@@ -32,7 +32,6 @@ function showProjectsToLoad(){
         popup.removeChild(popup.firstChild);
     }
     
-    console.log("login thing ran");
     popup.classList.remove('off');
     
     //Add a title
