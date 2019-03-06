@@ -9,8 +9,16 @@ class ShrinkWrap extends Atom{
         this.atomType = "ShrinkWrap";
         this.defaultCodeBlock = "chain_hull([ ])";
         this.codeBlock = "";
+        this.ioValues = [];
         
         this.setValues(values);
+        
+        if (typeof this.ioValues !== 'undefined'){
+            console.log("loading IO values for shrinkwrap");
+            this.ioValues.forEach(ioValue => { //for each saved value
+                this.addIO("input", ioValue.name, this, "geometry", "");
+            });
+        }
         
         this.updateCodeBlock();
     }
@@ -35,10 +43,20 @@ class ShrinkWrap extends Atom{
         var regex = /\[(.+)\]/gi;
         this.codeBlock = this.codeBlock.replace(regex, arrayOfChildrenString);
         
+        //Check to see if any of the loaded ports have been connected to. If they have, remove them from the this.ioValues list 
+        this.children.forEach(child => {
+            this.ioValues.forEach(ioValue => {
+                if (child.name == ioValue.name && child.connectors.length > 0){
+                    this.ioValues.splice(this.ioValues.indexOf(ioValue),1); //Let's remove it from the ioValues list
+                }
+            });
+        });
+        
+        //Add or delete ports as needed
         if(this.howManyInputPortsAvailable() == 0){ //We need to make a new port available
             this.addIO("input", "2D shape " + generateUniqueID(), this, "geometry", "");
         }
-        if(this.howManyInputPortsAvailable() >= 2){  //We need to remove the empty port
+        if(this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1){  //We need to remove the empty port
             this.deleteEmptyPort();
             this.updateCodeBlock();
         }
@@ -55,13 +73,33 @@ class ShrinkWrap extends Atom{
     }
     
     deleteEmptyPort(){
-        console.log("delete empty port ran");
         this.children.forEach(io => {
             if(io.type == "input" && io.connectors.length == 0 && this.howManyInputPortsAvailable() >= 2){
                 this.removeIO("input", io.name, this);
-                console.log("removing a port");
             }
         });
+    }
+    
+    serialize(savedObject){
+        var thisAsObject = super.serialize(savedObject);
+        
+        var ioValues = [];
+        this.children.forEach(io => {
+            if (io.type == "input"){
+                var saveIO = {
+                    name: io.name,
+                    ioValue: 10
+                };
+                ioValues.push(saveIO);
+            }
+        });
+        
+        ioValues.forEach(ioValue => {
+            thisAsObject.ioValues.push(ioValue);
+        });
+        
+        return thisAsObject;
+        
     }
     
 }
