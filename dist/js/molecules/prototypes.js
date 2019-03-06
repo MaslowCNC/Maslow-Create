@@ -395,7 +395,28 @@ class Atom {
         
         c.beginPath();
         c.fillStyle = this.color;
+        //make it imposible to draw atoms too close to the edge
+        //not sure what x left margin should be because if it's too close it would cover expanded text
+        var canvasFlow = document.querySelector('#flow-canvas');
+        if (this.x<this.radius*3){
+                this.x+= this.radius*3;    
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else if (this.y<this.radius*2){
+                this.y += this.radius; 
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else if (this.x + this.radius*2 > canvasFlow.width){
+                this.x -= this.radius*2; 
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else if (this.y + this.radius*2 > canvasFlow.height){
+                this.y -= this.radius; 
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else{
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
         c.textAlign = "start"; 
         c.fillText(this.name, this.x + this.radius, this.y-this.radius);
         c.fill();
