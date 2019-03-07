@@ -7,7 +7,7 @@ class ShrinkWrap extends Atom{
         
         this.name = "Shrink Wrap";
         this.atomType = "ShrinkWrap";
-        this.defaultCodeBlock = "chain_hull([ ])";
+        this.defaultCodeBlock = "chain_hull({closed: true}, [ ])";
         this.codeBlock = "";
         this.ioValues = [];
         
