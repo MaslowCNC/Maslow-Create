@@ -294,7 +294,9 @@ class Connector {
         }
         
         
-        this.attachmentPoint2.parentMolecule.updateCodeBlock();
+        if (this.attachmentPoint2 != null) {
+            this.attachmentPoint2.parentMolecule.updateCodeBlock();
+        }
         
         this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
     }
