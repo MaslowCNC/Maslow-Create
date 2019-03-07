@@ -8,7 +8,7 @@ class GitHubMolecule extends Molecule {
         this.atomType = "GitHubMolecule";
         this.topLevel = false; //a flag to signal if this node is the top level node
         this.centerColor = "black";
-        this.projectID = 173269838;
+        this.projectID = 174292302;
         
         this.setValues(values);
         

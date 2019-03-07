@@ -13,19 +13,15 @@ class Molecule extends Atom{
         
         this.setValues(values);
         
-        //Add the output
-        if (!this.topLevel){
-            
-            //Add the molecule's output
-            this.placeAtom({
-                parentMolecule: this, 
-                x: canvas.width - 50,
-                y: canvas.height/2,
-                parent: this,
-                name: "Output",
-                atomType: "Output"
-            }, null, secretTypes);
-        }
+        //Add the molecule's output
+        this.placeAtom({
+            parentMolecule: this, 
+            x: canvas.width - 50,
+            y: canvas.height/2,
+            parent: this,
+            name: "Output",
+            atomType: "Output"
+        }, null, secretTypes);
     }
     
     draw(){
