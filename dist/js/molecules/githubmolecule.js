@@ -53,8 +53,28 @@ class GitHubMolecule extends Molecule {
                 let moleculesList =  JSON.parse(rawFile).molecules;
                 
                 this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
+                
+                this.topLevel = false;
             });
         });
+    }
+    
+    serialize(savedObject){
+        //Save this molecule.
+        
+        savedObject.molecules.push(thisAsObject);
+            
+        //Return a placeholder for this molecule
+        var object = {
+            atomType: this.atomType,
+            name: this.name,
+            x: this.x,
+            y: this.y,
+            uniqueID: this.uniqueID,
+            projectID: this.projectID
+        }
+        
+        return object;
     }
     
 }

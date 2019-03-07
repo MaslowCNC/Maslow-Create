@@ -109,6 +109,8 @@ class Molecule extends Atom{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
+        this.createButton(valueList,this,"Export To GitHub", function(){ return this.exportToGithub(this);})
+        
         return valueList;
         
     }
@@ -119,6 +121,11 @@ class Molecule extends Atom{
         if(!currentMolecule.topLevel){
             currentMolecule = currentMolecule.parent; //set parent this to be the currently displayed molecule
         }
+    }
+    
+    exportToGithub(self){
+        console.log("export this  molecule to github");
+        exportCurrentMoleculeToGithub(self);
     }
     
     setValue(newName){

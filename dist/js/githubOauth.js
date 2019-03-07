@@ -291,4 +291,44 @@ function loadProject(projectName){
     
 }
 
+function exportCurrentMoleculeToGithub(molecule){
+    console.log("export current molecule to github");
+    
+    //Get name and description
+    var name = molecule.name;
+    var description = "A stand alone molecule exported from Maslow Create";
+    
+    console.log("Name: " + name);
+    console.log(molecule);
+    
+    //Create a new repo
+    octokit.repos.createForAuthenticatedUser({
+        name: name,
+        description: description
+    }).then(result => {
+        console.log("creating new repo");
+        //Once we have created the new repo we need to create a file within it to store the project in
+        currentRepoName = result.data.name;
+        var path = "project.maslowcreate";
+        var content = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
+        octokit.repos.createFile({
+            owner: currentUser,
+            repo: currentRepoName,
+            path: path,
+            message: "initialize repo", 
+            content: content
+        })
+        
+        //Update the project topics
+        octokit.repos.replaceTopics({
+            owner: currentUser,
+            repo: currentRepoName,
+            names: ["maslowcreate-molecule"],
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
+            }
+        })
+    });
+}
+
 
