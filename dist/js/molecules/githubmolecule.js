@@ -12,8 +12,7 @@ class GitHubMolecule extends Molecule {
         
         this.setValues(values);
         
-        var moleculesList = loadProjectByID(this.projectID);
-        console.log(moleculesList);
+        this.loadProjectByID(this.projectID);
         
     }
     
@@ -29,6 +28,33 @@ class GitHubMolecule extends Molecule {
         }
         
         return clickProcessed; 
+    }
+    
+    loadProjectByID(id){
+    //Get the repo by ID
+        console.log("loading project by id");
+        octokit.request('GET /repositories/:id', {id}).then(result => {
+            
+            //Find out the owners info;
+            
+            var user     = result.data.owner.login;
+            var repoName = result.data.name;
+            
+            //Get the file contents
+            
+            octokit.repos.getContents({
+                owner: user,
+                repo: repoName,
+                path: 'project.maslowcreate'
+            }).then(result => {
+                    
+                //content will be base64 encoded
+                let rawFile = atob(result.data.content);
+                let moleculesList =  JSON.parse(rawFile).molecules;
+                
+                this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
+            });
+        });
     }
     
 }
