@@ -8,6 +8,7 @@ class Molecule extends Atom{
         this.children = [];
         this.name = "Molecule";
         this.atomType = "Molecule";
+        this.centerColor = "#949294";
         this.topLevel = false; //a flag to signal if this node is the top level node
         
         this.setValues(values);
@@ -32,7 +33,7 @@ class Molecule extends Atom{
         
         //draw the circle in the middle
         c.beginPath();
-        c.fillStyle = "#949294";
+        c.fillStyle = this.centerColor;
         c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false);
         c.closePath();
         c.fill();
@@ -101,7 +102,7 @@ class Molecule extends Atom{
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = super.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar(); //call the super function
         
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
@@ -111,6 +112,8 @@ class Molecule extends Atom{
         else{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
+        
+        return valueList;
         
     }
     
