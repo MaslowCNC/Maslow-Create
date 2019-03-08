@@ -71,7 +71,7 @@ function showProjectsToLoad(){
                     accept: 'application/vnd.github.mercy-preview+json'
                 }
             }).then(data => {
-                if(data.data.names.includes("maslowcreate")){
+                if(data.data.names.includes("maslowcreate") || data.data.names.includes("maslowcreate-molecule")){
                     addProject(repo.name);
                 }
             })

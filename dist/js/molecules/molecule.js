@@ -106,18 +106,16 @@ class Molecule extends Atom{
         
         if(!this.topLevel){
             this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule);
+            
+            this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
         else{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
-        this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
-        
         return valueList;
         
     }
-    
-    
     
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
@@ -152,6 +150,7 @@ class Molecule extends Atom{
             projectID: githubID,
             uniqueID: generateUniqueID()
         }, null, availableTypes);
+        
         
         //Then delete the old molecule which has been replaced
         this.deleteNode();
