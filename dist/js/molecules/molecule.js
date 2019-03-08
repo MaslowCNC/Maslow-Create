@@ -249,6 +249,8 @@ class Molecule extends Atom{
         moleculeObject.allConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
+        
+        this.updateCodeBlock();
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){
