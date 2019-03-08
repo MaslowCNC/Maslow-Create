@@ -306,28 +306,66 @@ function exportCurrentMoleculeToGithub(molecule){
         name: name,
         description: description
     }).then(result => {
-        console.log("creating new repo");
+        console.log("creating new repo:");
+        console.log(result);
         //Once we have created the new repo we need to create a file within it to store the project in
-        currentRepoName = result.data.name;
-        var path = "project.maslowcreate";
-        var content = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
+        var repoName = result.data.name;
+        var id       = result.data.id;
+        var path     = "project.maslowcreate";
+        var content  = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
         octokit.repos.createFile({
             owner: currentUser,
-            repo: currentRepoName,
+            repo: repoName,
             path: path,
             message: "initialize repo", 
             content: content
-        })
+        }).then(result => {
+            console.log("Created: ");
+            console.log(result);
+            
+            //Save the molecule into the newly created repo
+            
+            var path = "project.maslowcreate";
+            
+            molecule.topLevel = true; //force the molecule to export in the long form as if it were the top level molecule
+            var content = window.btoa(JSON.stringify(molecule.serialize(null), null, 4)); //Convert the passed molecule object to a JSON string and then convert it to base64 encoding
+            
+            //Get the SHA for the file
+            octokit.repos.getContents({
+                owner: currentUser,
+                repo: repoName,
+                path: path
+            }).then(result => {
+                var sha = result.data.sha
+                
+                //Save the repo to the file
+                octokit.repos.updateFile({
+                    owner: currentUser,
+                    repo: repoName,
+                    path: path,
+                    message: "export Molecule", 
+                    content: content,
+                    sha: sha
+                }).then(result => {
+                    console.log("Molecule Exported!");
+                    
+                    //Replace the existing molecule now that we just exported
+                    molecule.replaceThisMoleculeWithGithub(id);
+                })
+            })
+
+        });
         
         //Update the project topics
         octokit.repos.replaceTopics({
             owner: currentUser,
-            repo: currentRepoName,
+            repo: repoName,
             names: ["maslowcreate-molecule"],
             headers: {
                 accept: 'application/vnd.github.mercy-preview+json'
             }
         })
+        
     });
 }
 

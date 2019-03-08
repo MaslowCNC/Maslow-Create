@@ -60,10 +60,7 @@ class GitHubMolecule extends Molecule {
     }
     
     serialize(savedObject){
-        //Save this molecule.
         
-        savedObject.molecules.push(thisAsObject);
-            
         //Return a placeholder for this molecule
         var object = {
             atomType: this.atomType,

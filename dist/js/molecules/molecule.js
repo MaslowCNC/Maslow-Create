@@ -109,14 +109,18 @@ class Molecule extends Atom{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
-        this.createButton(valueList,this,"Export To GitHub", function(){ return this.exportToGithub(this);})
+        this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         
         return valueList;
         
     }
     
-    goToParentMolecule(){
+    
+    
+    goToParentMolecule(self){
         //Go to the parent molecule if there is one
+        
+        currentMolecule.updateCodeBlock();
         
         if(!currentMolecule.topLevel){
             currentMolecule = currentMolecule.parent; //set parent this to be the currently displayed molecule
@@ -126,6 +130,31 @@ class Molecule extends Atom{
     exportToGithub(self){
         console.log("export this  molecule to github");
         exportCurrentMoleculeToGithub(self);
+    }
+    
+    replaceThisMoleculeWithGithub(githubID){
+        console.log("replace ran");
+        console.log(githubID);
+        
+        //If we are currently inside the molecule go up one
+        // if (currentMolecule.uniqueID == this.uniqueID){
+            // this.goToParentMolecule(this);
+        // }
+        
+        //Create a new github molecule in the same spot
+        currentMolecule.placeAtom({
+            x: this.x, 
+            y: this.y, 
+            parent: currentMolecule,
+            name: this.name,
+            atomType: "GitHubMolecule",
+            projectID: githubID,
+            uniqueID: generateUniqueID()
+        }, null, availableTypes);
+        
+        //Then delete the old molecule which has been replaced
+        this.deleteNode();
+
     }
     
     setValue(newName){
