@@ -103,6 +103,7 @@ var availableTypes = {
     readme:        {creator: Readme, atomType: "Readme"},
     rotate:        {creator: Rotate, atomType: "Rotate"},
     mirror:        {creator: Mirror, atomType: "Mirror"},
+    githubmolecule:{creator: GitHubMolecule, atomType: "GitHubMolecule"},
     union:         {creator: Union, atomType: "Union"}
 }
 

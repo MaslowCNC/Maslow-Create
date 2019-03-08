@@ -8,23 +8,22 @@ class Molecule extends Atom{
         this.children = [];
         this.name = "Molecule";
         this.atomType = "Molecule";
+        this.centerColor = "#949294";
         this.topLevel = false; //a flag to signal if this node is the top level node
         
         this.setValues(values);
         
-        //Add the output
-        if (!this.topLevel){
-            
-            //Add the molecule's output
-            this.placeAtom({
-                parentMolecule: this, 
-                x: canvas.width - 50,
-                y: canvas.height/2,
-                parent: this,
-                name: "Output",
-                atomType: "Output"
-            }, null, secretTypes);
-        }
+        //Add the molecule's output
+        this.placeAtom({
+            parentMolecule: this, 
+            x: canvas.width - 50,
+            y: canvas.height/2,
+            parent: this,
+            name: "Output",
+            atomType: "Output"
+        }, null, secretTypes);
+        
+        this.updateCodeBlock();
     }
     
     draw(){
@@ -32,7 +31,7 @@ class Molecule extends Atom{
         
         //draw the circle in the middle
         c.beginPath();
-        c.fillStyle = "#949294";
+        c.fillStyle = this.centerColor;
         c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false);
         c.closePath();
         c.fill();
@@ -101,25 +100,61 @@ class Molecule extends Atom{
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = super.updateSidebar.call(this); //call the super function
+        var valueList = super.updateSidebar(); //call the super function
         
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
         if(!this.topLevel){
             this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule);
+            
+            this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
         else{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
+        return valueList;
+        
     }
     
-    goToParentMolecule(){
+    goToParentMolecule(self){
         //Go to the parent molecule if there is one
+        
+        currentMolecule.updateCodeBlock();
         
         if(!currentMolecule.topLevel){
             currentMolecule = currentMolecule.parent; //set parent this to be the currently displayed molecule
         }
+    }
+    
+    exportToGithub(self){
+        //Export this molecule to github
+        exportCurrentMoleculeToGithub(self);
+    }
+    
+    replaceThisMoleculeWithGithub(githubID){
+        console.log(githubID);
+        
+        //If we are currently inside the molecule targeted for replacement, go up one
+        if (currentMolecule.uniqueID == this.uniqueID){
+            currentMolecule = this.parent;
+        }
+        
+        //Create a new github molecule in the same spot
+        currentMolecule.placeAtom({
+            x: this.x, 
+            y: this.y, 
+            parent: currentMolecule,
+            name: this.name,
+            atomType: "GitHubMolecule",
+            projectID: githubID,
+            uniqueID: generateUniqueID()
+        }, null, availableTypes);
+        
+        
+        //Then delete the old molecule which has been replaced
+        this.deleteNode();
+
     }
     
     setValue(newName){
@@ -213,6 +248,8 @@ class Molecule extends Atom{
         moleculeObject.allConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
+        
+        this.updateCodeBlock();
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){

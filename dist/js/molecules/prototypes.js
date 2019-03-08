@@ -761,7 +761,7 @@ class Atom {
         
         button.addEventListener(
             'mousedown',
-            functionToCall,
+            function() { functionToCall(parent); } ,
             false
         );
     }
