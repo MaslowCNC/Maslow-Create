@@ -1,4 +1,4 @@
-# A web based CAD program for collaborative design.
+# A web based CAD program for cooperative design.
 
 ![overview](https://github.com/BarbourSmith/Maslow-Create/blob/master/MaslowCreate.png)
 
