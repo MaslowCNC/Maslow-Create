@@ -125,6 +125,8 @@ body {
 
 .menu{
     width: 12rem;
+    max-height: 9rem;
+    overflow: hidden;
     background-color: #f4f4f4;
     color: #333;
     border: 1px solid #aaa;

@@ -29,6 +29,8 @@ function showmenu(ev){
     menu.x = ev.clientX;
     menu.y = ev.clientY;
     menu.classList.remove('off');
+    
+    document.getElementById('menuInput').focus();
 }
 
 function hidemenu(ev){
@@ -37,22 +39,28 @@ function hidemenu(ev){
     menu.style.left = '-200%';
 }
 
-function searchMenu() {
-  // Declare variables
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('menuInput');
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("menuList");
-  li = ul.getElementsByTagName('li');
+function searchMenu(evt) {
+  
+    // Declare variables
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById('menuInput');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("menuList");
+    li = ul.getElementsByTagName('li');
 
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i]; //this is the link part of the list item
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) { //if the entered string matches
-      li[i].style.display = "";
-    } else {
-      li[i].style.display = "none";
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+        a = li[i]; //this is the link part of the list item
+        txtValue = a.textContent || a.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) { //if the entered string matches
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+        
+        //If enter was just pressed "click" the first element that is being displayed
+        if(evt.code == "Enter" && li[i].style.display != "none"){
+            li[i].click();
+        }
     }
-  }
 }
