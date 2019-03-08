@@ -92,7 +92,13 @@ function addProject(projectName){
     projectPicture.setAttribute("style", "height: 100%");
     project.appendChild(projectPicture);
     
-    var shortProjectName = document.createTextNode(projectName.substr(0,7)+"..");
+    var shortProjectName;
+    if(projectName.length > 9){
+        shortProjectName = document.createTextNode(projectName.substr(0,7)+"..");
+    }
+    else{
+        shortProjectName = document.createTextNode(projectName);
+    }
     project.setAttribute("class", "project");
     project.setAttribute("id", projectName);
     project.appendChild(shortProjectName); 

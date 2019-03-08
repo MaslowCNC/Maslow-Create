@@ -22,6 +22,8 @@ class Molecule extends Atom{
             name: "Output",
             atomType: "Output"
         }, null, secretTypes);
+        
+        this.updateCodeBlock();
     }
     
     draw(){
@@ -128,18 +130,17 @@ class Molecule extends Atom{
     }
     
     exportToGithub(self){
-        console.log("export this  molecule to github");
+        //Export this molecule to github
         exportCurrentMoleculeToGithub(self);
     }
     
     replaceThisMoleculeWithGithub(githubID){
-        console.log("replace ran");
         console.log(githubID);
         
-        //If we are currently inside the molecule go up one
-        // if (currentMolecule.uniqueID == this.uniqueID){
-            // this.goToParentMolecule(this);
-        // }
+        //If we are currently inside the molecule targeted for replacement, go up one
+        if (currentMolecule.uniqueID == this.uniqueID){
+            currentMolecule = this.parent;
+        }
         
         //Create a new github molecule in the same spot
         currentMolecule.placeAtom({
