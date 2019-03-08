@@ -19,9 +19,14 @@
 <body>
     
     <!-- The menu for creating a new drawing node -->
-    <ul class="menu " id="menuList">
-        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu(event)" placeholder="Search for atom..", style = "border-radius: 5px;">
-        <li class="menu-item" id="red">Select Node Type</li>
+    <ul class="menu ">
+        <div class="tab">
+            <button class="tablinks" id="defaultTab" onclick="openTab(event, 'menuList')">Local</button>
+            <button class="tablinks" onclick="openTab(event, 'menuList')">GitHub</button>
+        </div>
+        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu(event)" placeholder="Search for atom..", class = "menu_search">
+        <ul id="menuList" class = "menu_list tabcontent">
+        </ul>
     </ul>
     
     <div class = "menu off">

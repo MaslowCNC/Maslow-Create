@@ -128,6 +128,7 @@ function init() {
     
     menu = document.querySelector('.menu');
     menu.classList.add('off');
+    menuList = document.getElementById("menuList");
     
     //Add the search bar to the list item
     
@@ -138,7 +139,7 @@ function init() {
         newElement.setAttribute("class", "menu-item");
         newElement.setAttribute("id", instance.atomType);
         newElement.appendChild(text); 
-        menu.appendChild(newElement); 
+        menuList.appendChild(newElement); 
         
         document.getElementById(instance.atomType).addEventListener('click', placeNewNode);
     }

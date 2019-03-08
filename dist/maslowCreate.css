@@ -163,6 +163,53 @@ body {
     background-color: #ffffff;
 }
 
+.menu_list{
+    list-style: none;
+    float: left;
+    padding-inline-start: 0px;
+}
+
+.menu_search{
+    border-radius: 5px;
+    height: 1.6rem;
+}
+
+input.menu_search:focus {
+    outline-width: 0;
+}
+
+/* Style the tabs in the menu*/
+.tab {
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+}
+
 .sidebar-list{
     list-style: none;
 }

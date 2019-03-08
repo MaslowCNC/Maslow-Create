@@ -13,6 +13,9 @@ function placeNewNode(ev){
 }
 
 function showmenu(ev){
+    //Open the default tab
+    document.getElementById("defaultTab").click();
+    
     //stop the real right click menu
     ev.preventDefault(); 
     
@@ -20,7 +23,7 @@ function showmenu(ev){
     ul = document.getElementById("menuList");
     li = ul.getElementsByTagName('li');
     for (i = 0; i < li.length; i++) {
-        li[i].style.display = ""; //set each item to display
+        li[i].style.display = "none"; //set each item to not display
     }
     
     //show the menu
@@ -47,6 +50,8 @@ function searchMenu(evt) {
     filter = input.value.toUpperCase();
     ul = document.getElementById("menuList");
     li = ul.getElementsByTagName('li');
+    
+    console.log(li);
 
     // Loop through all list items, and hide those who don't match the search query
     for (i = 0; i < li.length; i++) {
@@ -63,4 +68,25 @@ function searchMenu(evt) {
             li[i].click();
         }
     }
+}
+
+function openTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
 }
