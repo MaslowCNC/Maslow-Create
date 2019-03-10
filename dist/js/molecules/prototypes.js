@@ -771,16 +771,30 @@ class Atom {
     createBOM(list,parent,BOMlist){
         //aBOMEntry = new bomEntry;
         
-        this.createButton(list,parent,"Add BOM Entry", this.addBOMEntry);
-        
         console.log(this.BOMlist);
+        
+        list.appendChild(document.createElement('br'));
+        list.appendChild(document.createElement('br'));
+        
+        var div = document.createElement("div");
+        div.setAttribute("style","text-align:center;");
+        list.appendChild(div);
+        var valueText = document.createTextNode("Bill Of Materials");
+        div.appendChild(valueText);
+        
+        var x = document.createElement("HR");
+        list.appendChild(x);
         
         this.BOMlist.forEach(bomItem => {
             this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
             this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
             this.createEditableValueListItem(list,bomItem,"costUSD", "Price", false)
             this.createEditableValueListItem(list,bomItem,"source", "Source", false)
+            var x = document.createElement("HR");
+            list.appendChild(x);
         });
+        
+        this.createButton(list,parent,"Add BOM Entry", this.addBOMEntry);
     }
     
     addBOMEntry(self){
