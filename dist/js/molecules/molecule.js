@@ -245,7 +245,8 @@ class Molecule extends Atom{
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Place the connectors
-        moleculeObject.allConnectors.forEach(connector => {
+        this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
+        this.savedConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
         
@@ -308,7 +309,7 @@ class Molecule extends Atom{
             //Find the input node
             if (atom.uniqueID == connectorObj.ap2ID){
                 atom.children.forEach(child => {
-                    if(child.name == connectorObj.ap2Name && child.type == "input"){
+                    if(child.name == connectorObj.ap2Name && child.type == "input" && child.connectors.length == 0){
                         cp2NotFound = false;
                         ap2 = child;
                     }

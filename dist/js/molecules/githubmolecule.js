@@ -32,7 +32,6 @@ class GitHubMolecule extends Molecule {
     
     loadProjectByID(id){
     //Get the repo by ID
-        console.log("loading project by id");
         octokit.request('GET /repositories/:id', {id}).then(result => {
             
             //Find out the owners info;
@@ -55,6 +54,11 @@ class GitHubMolecule extends Molecule {
                 this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
                 
                 this.topLevel = false;
+                
+                //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
+                this.parent.savedConnectors.forEach(connector => {
+                    this.parent.placeConnector(JSON.parse(connector));
+                });
             });
         });
     }
