@@ -31,4 +31,4 @@ class RegularPolygon extends Atom {
 
         return "polygon(" + JSON.stringify(polygon) + ")";
     }    
-}A
+}
