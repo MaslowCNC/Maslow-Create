@@ -57,6 +57,11 @@ class ShrinkWrap extends Atom{
         var regex = /^.+?\{(.+?)\}/gi;
         this.codeBlock = this.codeBlock.replace(regex, endString);
         
+        //Shrink wrap it one more time if we have solid selected
+        if(this.closedSelection == 2){
+            this.codeBlock = "chain_hull({closed: true}, [" + this.codeBlock + "])"
+        }
+        
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
@@ -138,7 +143,7 @@ class ShrinkWrap extends Atom{
         
         var valueList = super.updateSidebar();
         
-        this.createDropDown(valueList, this, ["Closed", "Open"], this.closedSelection, "End:");
+        this.createDropDown(valueList, this, ["Closed", "Open", "Solid"], this.closedSelection, "End:");
         
     } 
     
