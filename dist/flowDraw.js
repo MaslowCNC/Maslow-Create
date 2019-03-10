@@ -92,6 +92,7 @@ var availableTypes = {
     rectangle:     {creator: Rectangle, atomType: "Rectangle"},
     shirinkwrap:   {creator: ShrinkWrap, atomType: "ShrinkWrap"},
     translate:     {creator: Translate, atomType: "Translate"},
+    regularPolygon:{creator: RegularPolygon, atomType: "RegularPolygon"},
     extrude:       {creator: Extrude, atomType: "Extrude"},
     scale:         {creator: Scale, atomType: "Scale"},
     intersection:  {creator: Intersection, atomType: "Intersection"},
