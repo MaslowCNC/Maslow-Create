@@ -596,7 +596,7 @@ class Atom {
     }
     
     updateCodeBlock(){
-        //Substitue the result from each input for the ~...~ section with it's name
+        //Substitute the result from each input for the ~...~ section with it's name
         
         var regex = /~(.*?)~/gi;
         this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
@@ -691,7 +691,7 @@ class Atom {
 
     }
 
-    createDropDown(list,parent,options,selectedOption){
+    createDropDown(list,parent,options,selectedOption, description){
         var listElement = document.createElement("LI");
         list.appendChild(listElement);
         
@@ -704,7 +704,7 @@ class Atom {
         //Left div which displays the label
         var labelDiv = document.createElement("div");
         div.appendChild(labelDiv);
-        var labelText = document.createTextNode("z = ");
+        var labelText = document.createTextNode(description);
         labelDiv.appendChild(labelText);
         labelDiv.setAttribute("class", "sidebar-subitem");
         
