@@ -10,16 +10,18 @@ class RegularPolygon extends Atom {
         this.name = "RegularPolygon";
         this.atomType = "RegularPolygon";
 
-        this.defaultCodeBlock = this.computeCodeBlock();
-        this.codeBlock = ""
-        
-        //generate the correct codeblock for this atom on creation
+        // create the polygon code block
         this.updateCodeBlock();
         
         this.setValues(values);
     }
 
-    computeCodeBlock() {
+    updateCodeBlock() {
+        this.defaultCodeBlock = this.buildPolygonCodeBlock();
+        super.updateCodeBlock();
+    }
+
+    buildPolygonCodeBlock() {
         let polygon = []
         for(let i = 0; i < this.findIOValue("number of sides"); i++) {
             var angle = i * 2 * Math.PI / this.findIOValue("number of sides") - Math.PI / 2;
