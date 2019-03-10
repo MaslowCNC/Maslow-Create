@@ -298,22 +298,16 @@ function loadProject(projectName){
 }
 
 function exportCurrentMoleculeToGithub(molecule){
-    console.log("export current molecule to github");
     
     //Get name and description
     var name = molecule.name;
     var description = "A stand alone molecule exported from Maslow Create";
-    
-    console.log("Name: " + name);
-    console.log(molecule);
     
     //Create a new repo
     octokit.repos.createForAuthenticatedUser({
         name: name,
         description: description
     }).then(result => {
-        console.log("creating new repo:");
-        console.log(result);
         //Once we have created the new repo we need to create a file within it to store the project in
         var repoName = result.data.name;
         var id       = result.data.id;
@@ -326,8 +320,6 @@ function exportCurrentMoleculeToGithub(molecule){
             message: "initialize repo", 
             content: content
         }).then(result => {
-            console.log("Created: ");
-            console.log(result);
             
             //Save the molecule into the newly created repo
             
@@ -353,7 +345,7 @@ function exportCurrentMoleculeToGithub(molecule){
                     content: content,
                     sha: sha
                 }).then(result => {
-                    console.log("Molecule Exported!");
+                    console.log("Molecule Exported.");
                     
                     //Replace the existing molecule now that we just exported
                     molecule.replaceThisMoleculeWithGithub(id);

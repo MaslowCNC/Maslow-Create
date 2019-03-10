@@ -3,9 +3,6 @@ function placeNewNode(ev){
     hidemenu();
     let clr = ev.target.id;
     
-    console.log("Trying to place");
-    console.log(ev);
-    
     currentMolecule.placeAtom({
         x: menu.x, 
         y: menu.y, 
@@ -18,9 +15,6 @@ function placeNewNode(ev){
 function placeGitHubMolecule(ev){
     hidemenu();
     let clr = ev.target.id;
-    
-    console.log("Trying to place");
-    console.log(clr);
     
     currentMolecule.placeAtom({
         x: menu.x, 
@@ -65,7 +59,7 @@ function hidemenu(ev){
 function searchMenu(evt) {
   
     if(document.getElementsByClassName("tablinks active")[0].id == "localTab"){
-        console.log("local tab recognized");
+        //We are searching the local tab
         // Declare variables
         var input, filter, ul, li, a, i, txtValue;
         input = document.getElementById('menuInput');
@@ -91,10 +85,9 @@ function searchMenu(evt) {
         }
     }
     else{
-        console.log("github tab recognized");
+        //We are searching on github
         if(evt.code == "Enter"){
             input = document.getElementById('menuInput').value;
-            console.log("would search github now for: " + input);
             
             githubList = document.getElementById("githubList");
             
@@ -114,7 +107,6 @@ function searchMenu(evt) {
                 }
             }).then(result => {
                 result.data.items.forEach(item => {
-                    console.log(item);
                     if(item.topics.includes("maslowcreate-molecule")){
                     
                         var newElement = document.createElement("LI");
