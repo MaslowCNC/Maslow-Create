@@ -113,6 +113,8 @@ class Molecule extends Atom{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
+        this.createBOM(valueList,this,this.BOMlist);
+        
         return valueList;
         
     }

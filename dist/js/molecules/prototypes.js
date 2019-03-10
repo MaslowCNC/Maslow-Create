@@ -350,6 +350,7 @@ class Atom {
         this.codeBlock = "";
         this.defaultCodeBlock = "";
         this.isMoving = false;
+        this.BOMlist = [];
         
         for(var key in values) {
             this[key] = values[key];
@@ -670,22 +671,23 @@ class Atom {
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "true");
         valueTextDiv.setAttribute("class", "sidebar-subitem");
-        valueTextDiv.setAttribute("id", label);
+        var thisID = label+generateUniqueID();
+        valueTextDiv.setAttribute("id", thisID);
         
         
-        document.getElementById(label).addEventListener('focusout', event => {
-            var valueInBox = document.getElementById(label).textContent;
+        document.getElementById(thisID).addEventListener('focusout', event => {
+            var valueInBox = document.getElementById(thisID).textContent;
             if(resultShouldBeNumber){
                 valueInBox = parseFloat(valueInBox);
             }
-            object.setValue(valueInBox);
+            object.setValue(valueInBox, key);
         });
         
         //prevent the return key from being used when editing a value
-        document.getElementById(label).addEventListener('keypress', function(evt) {
+        document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
                 evt.preventDefault();
-                document.getElementById(label).blur();  //shift focus away if someone presses enter
+                document.getElementById(thisID).blur();  //shift focus away if someone presses enter
             }
         });
 
@@ -766,4 +768,26 @@ class Atom {
         );
     }
 
+    createBOM(list,parent,BOMlist){
+        //aBOMEntry = new bomEntry;
+        
+        this.createButton(list,parent,"Add BOM Entry", this.addBOMEntry);
+        
+        console.log(this.BOMlist);
+        
+        this.BOMlist.forEach(bomItem => {
+            this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
+            this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
+            this.createEditableValueListItem(list,bomItem,"costUSD", "Price", false)
+            this.createEditableValueListItem(list,bomItem,"source", "Source", false)
+        });
+    }
+    
+    addBOMEntry(self){
+        console.log("add a bom entry");
+        
+        self.BOMlist.push(new BOMEntry());
+        
+        self.updateSidebar();
+    }
 }

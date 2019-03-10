@@ -21,6 +21,7 @@
     user-select: none;
     background-color: #B0AEB0;
     color: white;
+    overflow: auto;
 }
 
 .flex-parent {
@@ -240,6 +241,8 @@ input.menu_search:focus {
   background: #4CAF50;
   cursor: pointer;
   outline:none;
+  border-radius: 0.8rem;
+  width: 200px;
 }
 .sidebar_button:hover,.form button:active,.form button:focus {
   background: #43A047;
@@ -303,4 +306,24 @@ input.menu_search:focus {
     background-color: #ffffff;
     width: 110px;
     height: 110px;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
 }
