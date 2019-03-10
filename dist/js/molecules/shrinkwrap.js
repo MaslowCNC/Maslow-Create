@@ -132,7 +132,7 @@ class ShrinkWrap extends Atom{
         });
         
         //Write the selection for if the chain is closed
-        superSerialObject.closedSelection = this.closedSelection;
+        thisAsObject.closedSelection = this.closedSelection;
         
         return thisAsObject;
         
