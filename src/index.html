@@ -21,11 +21,13 @@
     <!-- The menu for creating a new drawing node -->
     <ul class="menu ">
         <div class="tab">
-            <button class="tablinks" id="defaultTab" onclick="openTab(event, 'menuList')">Local</button>
-            <button class="tablinks" onclick="openTab(event, 'menuList')">GitHub</button>
+            <button class="tablinks" id="localTab" onclick="openTab(event, 'menuList')">Local</button>
+            <button class="tablinks" id="githubTab" onclick="openTab(event, 'githubList')">GitHub</button>
         </div>
         <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu(event)" placeholder="Search for atom..", class = "menu_search">
         <ul id="menuList" class = "menu_list tabcontent">
+        </ul>
+        <ul id="githubList" class = "menu_list tabcontent">
         </ul>
     </ul>
     
