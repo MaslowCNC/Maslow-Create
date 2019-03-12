@@ -776,7 +776,7 @@ class Atom {
         list.appendChild(document.createElement('br'));
         list.appendChild(document.createElement('br'));
         
-        var div = document.createElement("div");
+        var div = document.createElement("h3");
         div.setAttribute("style","text-align:center;");
         list.appendChild(div);
         var valueText = document.createTextNode("Bill Of Materials");
