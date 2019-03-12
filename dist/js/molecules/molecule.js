@@ -174,11 +174,6 @@ class Molecule extends Atom{
         var sortableAtomsList = this.nodesOnTheScreen;
         sortableAtomsList.sort(function(a, b){return distBetweenPoints(a.x, 0, a.y, 0)-distBetweenPoints(b.x, 0, b.y, 0)});
         
-        console.log("Before sorting: ");
-        console.log(this.nodesOnTheScreen);
-        console.log("After sorting: ");
-        console.log(sortableAtomsList);
-        
         sortableAtomsList.forEach(molecule => {
             generatedReadme = generatedReadme.concat(molecule.requestReadme());
         });
