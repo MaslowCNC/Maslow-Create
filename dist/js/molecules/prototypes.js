@@ -598,8 +598,20 @@ class Atom {
     
     requestBOM(){
         
-        var generatedBOM = this.BOMlist;
+        //Find the number of things attached to this output
+        var numberOfThisInstance = 1;
+        this.children.forEach(io => {
+            if(io.type == "output" && io.connectors.length != 0){
+                numberOfThisInstance = io.connectors.length;
+            }
+        });
+        //And scale up the total needed by that number
+        this.BOMlist.forEach(bomItem => {
+            bomItem.totalNeeded = numberOfThisInstance*bomItem.numberNeeded;
+        });
         
+        
+        var generatedBOM = this.BOMlist;
         if(this.atomType == "Molecule"){
             this.nodesOnTheScreen.forEach(molecule => {
                 generatedBOM = generatedBOM.concat(molecule.requestBOM());
@@ -837,14 +849,14 @@ class Atom {
         this.requestBOM().forEach(bomItem => {
             if(this.BOMlist.indexOf(bomItem) != -1){ //If the bom item is from this molecule
                 this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-                this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
-                this.createEditableValueListItem(list,bomItem,"costUSD", "Price", false)
+                this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", true)
+                this.createEditableValueListItem(list,bomItem,"costUSD", "Price", true)
                 this.createEditableValueListItem(list,bomItem,"source", "Source", false)
             }
             else{
                 this.createNonEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-                this.createNonEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
-                this.createNonEditableValueListItem(list,bomItem,"costUSD", "Price", false)
+                this.createNonEditableValueListItem(list,bomItem,"totalNeeded", "Number", true)
+                this.createNonEditableValueListItem(list,bomItem,"costUSD", "Price", true)
                 this.createNonEditableValueListItem(list,bomItem,"source", "Source", false)
             }
             var x = document.createElement("HR");

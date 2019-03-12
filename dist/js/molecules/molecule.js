@@ -197,6 +197,7 @@ class Molecule extends Atom{
             name: this.name,
             uniqueID: this.uniqueID,
             topLevel: this.topLevel,
+            BOMlist: this.BOMlist,
             allAtoms: allAtoms,
             allConnectors: allConnectors
         }
@@ -230,9 +231,10 @@ class Molecule extends Atom{
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Grab the name and ID
-        this.uniqueID = moleculeObject.uniqueID;
-        this.name = moleculeObject.name;
-        this.topLevel = moleculeObject.topLevel;
+        this.uniqueID  = moleculeObject.uniqueID;
+        this.name      = moleculeObject.name;
+        this.topLevel  = moleculeObject.topLevel;
+        this.BOMlist   = moleculeObject.BOMlist;
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
