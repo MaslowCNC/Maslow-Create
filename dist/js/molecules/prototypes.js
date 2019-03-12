@@ -596,6 +596,21 @@ class Atom {
         return object;
     }
     
+    requestBOM(){
+        console.log("Request BOM for: " + this.name);
+        
+        var generatedBOM = this.BOMlist;
+        
+        if(typeof this.nodesOnTheScreen != undefined){
+            console.log("Running for children");
+            this.nodesOnTheScreen.forEach(molecule => {
+                generatedBOM.concat(molecule.requestBOM());
+            });
+        }
+        
+        return generatedBOM;
+    }
+    
     updateCodeBlock(){
         //Substitute the result from each input for the ~...~ section with it's name
         
