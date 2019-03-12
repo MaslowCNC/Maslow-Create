@@ -321,8 +321,6 @@ function saveProject(){
                             path = "README.md";
                             content = "# " + result.data.name + "\n" + result.data.description + "\n";
                             
-                            console.log(topLevelMolecule.requestReadme());
-                            
                             topLevelMolecule.requestReadme().forEach(item => {
                                 content = content + item + "\n\n\n"
                             });
