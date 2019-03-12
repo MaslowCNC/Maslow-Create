@@ -272,7 +272,7 @@ function saveProject(){
                 content = bomHeader;
                 
                 topLevelMolecule.requestBOM().forEach(item => {
-                    content = content + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
+                    content = content + "\n|" + item.BOMitemName + "|" + item.totalNeeded + "|" + item.costUSD + "|" + item.source + "|";
                 });
                 
                 content = window.btoa(content);
