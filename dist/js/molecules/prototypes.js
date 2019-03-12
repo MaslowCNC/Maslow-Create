@@ -457,8 +457,6 @@ class Atom {
             parentMolecule: target, 
             defaultOffsetX: offset, 
             defaultOffsetY: 0,
-            //  hoverOffsetX: hoverOffsetComputedX,
-            // hoverOffsetY: hoverOffsetComputedY,
             type: type,
             valueType: valueType,
             name: name,
