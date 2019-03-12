@@ -9,8 +9,8 @@ class AttachmentPoint {
         this.radius = 8;
         
         this.hoverDetectRadius = 8;
-        this.hoverOffsetX = 8;
-        this.hoverOffsetY = 30;
+        this.hoverOffsetX = 0;
+        this.hoverOffsetY = 0;
         this.uniqueID = 0;
         this.defaultOffsetX = 0;
         this.defaultOffsetY = 0;
@@ -124,8 +124,10 @@ class AttachmentPoint {
     }
 
     clickMove(x,y){
-        //expand if touched by mouse
         
+      
+        //expand if touched by mouse
+
         var distFromCursor = distBetweenPoints (this.x, x, this.y, y);
         
         //If we are hovering over the attachment point, indicate that by making it big
@@ -138,13 +140,34 @@ class AttachmentPoint {
 
         //If we are close to the attachment point move it to it's hover location to make it accessible
         //Change direction of hover drop down if too close to the top.
-        if (distFromCursor < this.hoverDetectRadius /* || (distFromCursor < this.parentMolecule.radius + 20 && this.type == 'input')*/){
-           
-            this.offsetX = this.hoverOffsetX;
-            this.offsetY = this.hoverOffsetY;
+        if (distFromCursor < this.hoverDetectRadius){
+
+            
+            
+            var numAttachmentPoints= this.parentMolecule.children.length;
+            var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
+
+       
+             // if input type then offset first element down to give space for radial menu 
+            if (this.type == "output"){
+                this.offsetX = this.defaultOffsetX;
+                this.offsetY = this.defaultOffsetY;
+            }
+            else{
+                var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
+                // angle correction so that it centers menu adjusting to however many attachment points there are 
+                var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
+
+                this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius *  ( Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                this.offsetX = this.hoverOffsetX; 
+                this.offsetY = this.hoverOffsetY;  
+            
+            }
             this.showHoverText = true;
             this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
-        }
+
+            }
         else{
             this.offsetX = this.defaultOffsetX;
             this.offsetY = this.defaultOffsetY;
@@ -433,21 +456,21 @@ class Atom {
         
         //compute hover offset from parent node
         //find the number of elements of the same type already in the array 
-        var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
+        //var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
         //multiply that number by an offset to find the new x offset 
-        var hoverOffsetComputedY = 1.5 *numberOfSameTypeIO * - Math.floor(this.radius * Math.cos(0.174533 * numberOfSameTypeIO ));
-        var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.523599 *numberOfSameTypeIO));
+        //var hoverOffsetComputedY = 1.5 *numberOfSameTypeIO * - Math.floor(this.radius * Math.cos(0.174533 * numberOfSameTypeIO ));
+       // var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.523599 *numberOfSameTypeIO));
         // if input type then offset first element down to give space for radial menu 
-         if (type == "input"){
+        /* if (type == "input"){
             hoverOffsetComputedY += 35;
-        }
+        }*/
 
         var input = new AttachmentPoint({
             parentMolecule: target, 
             defaultOffsetX: offset, 
             defaultOffsetY: 0,
-            hoverOffsetX: hoverOffsetComputedX,
-            hoverOffsetY: hoverOffsetComputedY,
+            //  hoverOffsetX: hoverOffsetComputedX,
+            // hoverOffsetY: hoverOffsetComputedY,
             type: type,
             valueType: valueType,
             name: name,
