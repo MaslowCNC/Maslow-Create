@@ -319,8 +319,14 @@ function saveProject(){
                         }).then(result => {
                             
                             path = "README.md";
-                            console.log(result);
                             content = "# " + result.data.name + "\n" + result.data.description + "\n";
+                            
+                            console.log(topLevelMolecule.requestReadme());
+                            
+                            topLevelMolecule.requestReadme().forEach(item => {
+                                content = content + item + "\n\n\n"
+                            });
+                            
                             content = window.btoa(content);
                             
                             //Get the SHA for the file

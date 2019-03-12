@@ -51,4 +51,14 @@ class Readme extends Atom{
         
         return [this.readmeText];
     }
+    
+    serialize(values){
+        //Save the readme text to the serial stream
+        var valuesObj = super.serialize(values);
+        
+        valuesObj.readmeText = this.readmeText;
+        
+        return valuesObj;
+        
+    }
 }

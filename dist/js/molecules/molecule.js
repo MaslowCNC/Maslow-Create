@@ -169,8 +169,9 @@ class Molecule extends Atom{
     
     requestReadme(){
         var generatedReadme = super.requestReadme();
+        generatedReadme.push("## " + this.name);
         this.nodesOnTheScreen.forEach(molecule => {
-            generatedBOM = generatedReadme.concat(molecule.requestReadme());
+            generatedReadme = generatedReadme.concat(molecule.requestReadme());
         });
         return generatedReadme;
     }
