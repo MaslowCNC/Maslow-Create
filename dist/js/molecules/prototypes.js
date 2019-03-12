@@ -9,7 +9,7 @@ class AttachmentPoint {
         this.radius = 8;
         
         this.hoverDetectRadius = 8;
-        this.hoverOffsetX = 0;
+        this.hoverOffsetX = 8;
         this.hoverOffsetY = 30;
         this.uniqueID = 0;
         this.defaultOffsetX = 0;
@@ -36,39 +36,44 @@ class AttachmentPoint {
     }
     
     draw() {
+
+        var txt = this.name;
+        var textWidth = c.measureText(txt).width;
+        var bubbleColor = "#008080";
+        var scaleRadiusDown = this.radius*.7;
+        var halfRadius = this.radius*.5;
         
         if (this.showHoverText){
             if(this.type == "input"){
-   
-                var txt = this.name;
-                var textWidth = c.measureText(txt).width;
                 c.beginPath();
-                c.fillStyle = "#008080";
-                var scaleRadiusDown = this.radius*.7;
-                c.rect(this.x - textWidth - this.radius - this.radius*.5, this.y - scaleRadiusDown, textWidth + this.radius + this.radius*.5  , scaleRadiusDown*2);
-                c.arc(this.x - textWidth - this.radius - this.radius*.5, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                c.fillStyle = bubbleColor;
+                    if (this.radius == this.expandedRadius) {
+                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
+                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                }
+                    else if(this.radius == this.defaultRadius){
+                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
+                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
+                }
                 c.fill();
                 c.beginPath();
-                c.fillStyle = this.parentMolecule.color;
+                c.fillStyle = this.parentMolecule.defaultColor;
                 c.textAlign = "end";
                 c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
                 c.fill();
                 c.closePath();
             }
             else{
-                var txt = this.name;
-                var textWidth = c.measureText(txt).width;
                 c.beginPath();
-                c.fillStyle = "#008080";
-                var scaleRadiusDown = this.radius*.7;
-                c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + this.radius*.5, scaleRadiusDown*2);
-                c.arc(this.x + textWidth + this.radius + this.radius*.5, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                c.fillStyle = bubbleColor;
+                c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
+                c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
                 c.fill();
                 c.closePath();
                 c.beginPath();
-                c.fillStyle = this.parentMolecule.color;
+                c.fillStyle = this.parentMolecule.defaultColor;
                 c.textAlign = "start"; 
-                c.fillText(this.name, (this.x+this.radius/2) + (this.radius + 3), this.y+2)
+                c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
                 c.fill();
                 c.closePath();
             }
@@ -77,10 +82,10 @@ class AttachmentPoint {
         c.fillStyle = this.parentMolecule.color;
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         c.fill();
-        c.closePath();
-        c.closePath();
-        
+        c.closePath();  
     }
+
+     
 
     clickDown(x,y){
         if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
@@ -130,10 +135,11 @@ class AttachmentPoint {
         else{
             this.radius = this.defaultRadius;
         }
-        
-        
-        //If we are close to the attachment point move it to it's hover location to make it accessable
-        if (distFromCursor < this.hoverDetectRadius){
+
+        //If we are close to the attachment point move it to it's hover location to make it accessible
+        //Change direction of hover drop down if too close to the top.
+        if (distFromCursor < this.hoverDetectRadius /* || (distFromCursor < this.parentMolecule.radius + 20 && this.type == 'input')*/){
+           
             this.offsetX = this.hoverOffsetX;
             this.offsetY = this.hoverOffsetY;
             this.showHoverText = true;
@@ -208,7 +214,7 @@ class AttachmentPoint {
         this.x = this.parentMolecule.x + this.offsetX;
         this.y = this.parentMolecule.y + this.offsetY;
         this.draw()
-        
+       
         this.connectors.forEach(connector => {
             connector.update();       
         });
@@ -342,7 +348,7 @@ class Atom {
         this.y = 0;
         this.radius = 20;
         this.defaultColor = '#F3EFEF';
-        this.selectedColor = 'green';
+        this.selectedColor = "#484848";
         this.selected = false;
         this.color = '#F3EFEF';
         this.name = "name";
@@ -386,7 +392,28 @@ class Atom {
         
         c.beginPath();
         c.fillStyle = this.color;
+        //make it imposible to draw atoms too close to the edge
+        //not sure what x left margin should be because if it's too close it would cover expanded text
+        var canvasFlow = document.querySelector('#flow-canvas');
+        if (this.x<this.radius*3){
+                this.x+= this.radius*3;    
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else if (this.y<this.radius*2){
+                this.y += this.radius; 
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else if (this.x + this.radius*2 > canvasFlow.width){
+                this.x -= this.radius*2; 
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else if (this.y + this.radius*2 > canvasFlow.height){
+                this.y -= this.radius; 
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
+        else{
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        }
         c.textAlign = "start"; 
         c.fillText(this.name, this.x + this.radius, this.y-this.radius);
         c.fill();
@@ -407,15 +434,20 @@ class Atom {
         //compute hover offset from parent node
         //find the number of elements of the same type already in the array 
         var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
-        //multiply that number by an offset to find the new x offset
-        var hoverOffsetComputed = numberOfSameTypeIO * -30;
-        
+        //multiply that number by an offset to find the new x offset 
+        var hoverOffsetComputedY = 1.5 *numberOfSameTypeIO * - Math.floor(this.radius * Math.cos(0.174533 * numberOfSameTypeIO ));
+        var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.523599 *numberOfSameTypeIO));
+        // if input type then offset first element down to give space for radial menu 
+         if (type == "input"){
+            hoverOffsetComputedY += 35;
+        }
+
         var input = new AttachmentPoint({
             parentMolecule: target, 
             defaultOffsetX: offset, 
             defaultOffsetY: 0,
-            hoverOffsetX: offset,
-            hoverOffsetY: hoverOffsetComputed,
+            hoverOffsetX: hoverOffsetComputedX,
+            hoverOffsetY: hoverOffsetComputedY,
             type: type,
             valueType: valueType,
             name: name,
