@@ -597,17 +597,14 @@ class Atom {
     }
     
     requestBOM(){
-        console.log("Request BOM for: " + this.name);
         
         var generatedBOM = this.BOMlist;
         
-        if(typeof this.nodesOnTheScreen != undefined){
-            console.log("Running for children");
+        if(this.atomType == "Molecule"){
             this.nodesOnTheScreen.forEach(molecule => {
-                generatedBOM.concat(molecule.requestBOM());
+                generatedBOM = generatedBOM.concat(molecule.requestBOM());
             });
         }
-        
         return generatedBOM;
     }
     
@@ -707,6 +704,37 @@ class Atom {
         });
 
     }
+    
+    createNonEditableValueListItem(list,object,key, label, resultShouldBeNumber){
+        var listElement = document.createElement("LI");
+        list.appendChild(listElement);
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement("div");
+        listElement.appendChild(div);
+        div.setAttribute("class", "sidebar-item");
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement("div");
+        div.appendChild(labelDiv);
+        var labelText = document.createTextNode(label + ":");
+        labelDiv.appendChild(labelText);
+        labelDiv.setAttribute("class", "sidebar-subitem");
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement("div");
+        div.appendChild(valueTextDiv);
+        var valueText = document.createTextNode(object[key]);
+        valueTextDiv.appendChild(valueText);
+        valueTextDiv.setAttribute("contenteditable", "false");
+        valueTextDiv.setAttribute("class", "sidebar-subitem");
+        var thisID = label+generateUniqueID();
+        valueTextDiv.setAttribute("id", thisID);
+        
+
+    }
 
     createDropDown(list,parent,options,selectedOption, description){
         var listElement = document.createElement("LI");
@@ -786,7 +814,6 @@ class Atom {
     createBOM(list,parent,BOMlist){
         //aBOMEntry = new bomEntry;
         
-        console.log(this.BOMlist);
         
         list.appendChild(document.createElement('br'));
         list.appendChild(document.createElement('br'));
@@ -800,11 +827,19 @@ class Atom {
         var x = document.createElement("HR");
         list.appendChild(x);
         
-        this.BOMlist.forEach(bomItem => {
-            this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-            this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
-            this.createEditableValueListItem(list,bomItem,"costUSD", "Price", false)
-            this.createEditableValueListItem(list,bomItem,"source", "Source", false)
+        this.requestBOM().forEach(bomItem => {
+            if(this.BOMlist.indexOf(bomItem) != -1){ //If the bom item is from this molecule
+                this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
+                this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
+                this.createEditableValueListItem(list,bomItem,"costUSD", "Price", false)
+                this.createEditableValueListItem(list,bomItem,"source", "Source", false)
+            }
+            else{
+                this.createNonEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
+                this.createNonEditableValueListItem(list,bomItem,"numberNeeded", "Number", false)
+                this.createNonEditableValueListItem(list,bomItem,"costUSD", "Price", false)
+                this.createNonEditableValueListItem(list,bomItem,"source", "Source", false)
+            }
             var x = document.createElement("HR");
             list.appendChild(x);
         });

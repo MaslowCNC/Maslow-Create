@@ -115,8 +115,6 @@ class Molecule extends Atom{
         
         this.createBOM(valueList,this,this.BOMlist);
         
-        this.requestBOM();
-        
         return valueList;
         
     }
