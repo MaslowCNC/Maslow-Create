@@ -159,6 +159,27 @@ class Molecule extends Atom{
 
     }
     
+    requestBOM(){
+        var generatedBOM = super.requestBOM();
+        this.nodesOnTheScreen.forEach(molecule => {
+            generatedBOM = generatedBOM.concat(molecule.requestBOM());
+        });
+        return generatedBOM;
+    }
+    
+    requestReadme(){
+        var generatedReadme = super.requestReadme();
+        generatedReadme.push("## " + this.name);
+        
+        var sortableAtomsList = this.nodesOnTheScreen;
+        sortableAtomsList.sort(function(a, b){return distBetweenPoints(a.x, 0, a.y, 0)-distBetweenPoints(b.x, 0, b.y, 0)});
+        
+        sortableAtomsList.forEach(molecule => {
+            generatedReadme = generatedReadme.concat(molecule.requestReadme());
+        });
+        return generatedReadme;
+    }
+    
     serialize(savedObject){
         //Save this molecule.
         

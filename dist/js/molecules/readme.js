@@ -45,4 +45,20 @@ class Readme extends Atom{
     setValue(newText) {
         this.readmeText = newText;
     }
+    
+    requestReadme(){
+        //request any contributions from this atom to the readme
+        
+        return [this.readmeText];
+    }
+    
+    serialize(values){
+        //Save the readme text to the serial stream
+        var valuesObj = super.serialize(values);
+        
+        valuesObj.readmeText = this.readmeText;
+        
+        return valuesObj;
+        
+    }
 }
