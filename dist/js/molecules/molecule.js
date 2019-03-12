@@ -113,6 +113,8 @@ class Molecule extends Atom{
             this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
         }
         
+        this.createBOM(valueList,this,this.BOMlist);
+        
         return valueList;
         
     }
@@ -157,11 +159,6 @@ class Molecule extends Atom{
 
     }
     
-    setValue(newName){
-        //Called by the sidebar to set the name
-        this.name = newName;
-    }
-    
     serialize(savedObject){
         //Save this molecule.
         
@@ -200,6 +197,7 @@ class Molecule extends Atom{
             name: this.name,
             uniqueID: this.uniqueID,
             topLevel: this.topLevel,
+            BOMlist: this.BOMlist,
             allAtoms: allAtoms,
             allConnectors: allConnectors
         }
@@ -219,7 +217,8 @@ class Molecule extends Atom{
                 name: this.name,
                 x: this.x,
                 y: this.y,
-                uniqueID: this.uniqueID
+                uniqueID: this.uniqueID,
+                BOMlist: this.BOMlist
             }
             
             return object;
@@ -232,9 +231,10 @@ class Molecule extends Atom{
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
         //Grab the name and ID
-        this.uniqueID = moleculeObject.uniqueID;
-        this.name = moleculeObject.name;
-        this.topLevel = moleculeObject.topLevel;
+        this.uniqueID  = moleculeObject.uniqueID;
+        this.name      = moleculeObject.name;
+        this.topLevel  = moleculeObject.topLevel;
+        this.BOMlist   = moleculeObject.BOMlist;
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {

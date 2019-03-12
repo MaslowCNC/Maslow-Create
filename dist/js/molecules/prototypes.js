@@ -356,6 +356,7 @@ class Atom {
         this.codeBlock = "";
         this.defaultCodeBlock = "";
         this.isMoving = false;
+        this.BOMlist = [];
         
         for(var key in values) {
             this[key] = values[key];
@@ -627,6 +628,30 @@ class Atom {
         return object;
     }
     
+    requestBOM(){
+        
+        //Find the number of things attached to this output
+        var numberOfThisInstance = 1;
+        this.children.forEach(io => {
+            if(io.type == "output" && io.connectors.length != 0){
+                numberOfThisInstance = io.connectors.length;
+            }
+        });
+        //And scale up the total needed by that number
+        this.BOMlist.forEach(bomItem => {
+            bomItem.totalNeeded = numberOfThisInstance*bomItem.numberNeeded;
+        });
+        
+        
+        var generatedBOM = this.BOMlist;
+        if(this.atomType == "Molecule"){
+            this.nodesOnTheScreen.forEach(molecule => {
+                generatedBOM = generatedBOM.concat(molecule.requestBOM());
+            });
+        }
+        return generatedBOM;
+    }
+    
     updateCodeBlock(){
         //Substitute the result from each input for the ~...~ section with it's name
         
@@ -702,24 +727,63 @@ class Atom {
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "true");
         valueTextDiv.setAttribute("class", "sidebar-subitem");
-        valueTextDiv.setAttribute("id", label);
+        var thisID = label+generateUniqueID();
+        valueTextDiv.setAttribute("id", thisID);
         
         
-        document.getElementById(label).addEventListener('focusout', event => {
-            var valueInBox = document.getElementById(label).textContent;
+        document.getElementById(thisID).addEventListener('focusout', event => {
+            var valueInBox = document.getElementById(thisID).textContent;
             if(resultShouldBeNumber){
                 valueInBox = parseFloat(valueInBox);
             }
-            object.setValue(valueInBox);
+            
+            //If the target is an attachmentPoint then call the setter function
+            if(object instanceof AttachmentPoint){
+                object.setValue(valueInBox);
+            }
+            else{
+                object[key] = valueInBox;
+            }
         });
         
         //prevent the return key from being used when editing a value
-        document.getElementById(label).addEventListener('keypress', function(evt) {
+        document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
                 evt.preventDefault();
-                document.getElementById(label).blur();  //shift focus away if someone presses enter
+                document.getElementById(thisID).blur();  //shift focus away if someone presses enter
             }
         });
+
+    }
+    
+    createNonEditableValueListItem(list,object,key, label, resultShouldBeNumber){
+        var listElement = document.createElement("LI");
+        list.appendChild(listElement);
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement("div");
+        listElement.appendChild(div);
+        div.setAttribute("class", "sidebar-item");
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement("div");
+        div.appendChild(labelDiv);
+        var labelText = document.createTextNode(label + ":");
+        labelDiv.appendChild(labelText);
+        labelDiv.setAttribute("class", "sidebar-subitem");
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement("div");
+        div.appendChild(valueTextDiv);
+        var valueText = document.createTextNode(object[key]);
+        valueTextDiv.appendChild(valueText);
+        valueTextDiv.setAttribute("contenteditable", "false");
+        valueTextDiv.setAttribute("class", "sidebar-subitem");
+        var thisID = label+generateUniqueID();
+        valueTextDiv.setAttribute("id", thisID);
+        
 
     }
 
@@ -798,4 +862,47 @@ class Atom {
         );
     }
 
+    createBOM(list,parent,BOMlist){
+        //aBOMEntry = new bomEntry;
+        
+        
+        list.appendChild(document.createElement('br'));
+        list.appendChild(document.createElement('br'));
+        
+        var div = document.createElement("h3");
+        div.setAttribute("style","text-align:center;");
+        list.appendChild(div);
+        var valueText = document.createTextNode("Bill Of Materials");
+        div.appendChild(valueText);
+        
+        var x = document.createElement("HR");
+        list.appendChild(x);
+        
+        this.requestBOM().forEach(bomItem => {
+            if(this.BOMlist.indexOf(bomItem) != -1){ //If the bom item is from this molecule
+                this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
+                this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", true)
+                this.createEditableValueListItem(list,bomItem,"costUSD", "Price", true)
+                this.createEditableValueListItem(list,bomItem,"source", "Source", false)
+            }
+            else{
+                this.createNonEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
+                this.createNonEditableValueListItem(list,bomItem,"totalNeeded", "Number", true)
+                this.createNonEditableValueListItem(list,bomItem,"costUSD", "Price", true)
+                this.createNonEditableValueListItem(list,bomItem,"source", "Source", false)
+            }
+            var x = document.createElement("HR");
+            list.appendChild(x);
+        });
+        
+        this.createButton(list,parent,"Add BOM Entry", this.addBOMEntry);
+    }
+    
+    addBOMEntry(self){
+        console.log("add a bom entry");
+        
+        self.BOMlist.push(new BOMEntry());
+        
+        self.updateSidebar();
+    }
 }
