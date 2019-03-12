@@ -159,11 +159,6 @@ class Molecule extends Atom{
 
     }
     
-    setValue(newName){
-        //Called by the sidebar to set the name
-        this.name = newName;
-    }
-    
     serialize(savedObject){
         //Save this molecule.
         
@@ -221,7 +216,8 @@ class Molecule extends Atom{
                 name: this.name,
                 x: this.x,
                 y: this.y,
-                uniqueID: this.uniqueID
+                uniqueID: this.uniqueID,
+                BOMlist: this.BOMlist
             }
             
             return object;

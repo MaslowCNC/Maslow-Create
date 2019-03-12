@@ -692,7 +692,14 @@ class Atom {
             if(resultShouldBeNumber){
                 valueInBox = parseFloat(valueInBox);
             }
-            object.setValue(valueInBox, key);
+            
+            //If the target is an attachmentPoint then call the setter function
+            if(object instanceof AttachmentPoint){
+                object.setValue(valueInBox);
+            }
+            else{
+                object[key] = valueInBox;
+            }
         });
         
         //prevent the return key from being used when editing a value

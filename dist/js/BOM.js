@@ -5,7 +5,4 @@ class BOMEntry {
         this.costUSD      = 0;
         this.source       = "www.example.com";
     }
-    setValue(newValue, key){
-        this[key] = newValue;
-    }
 }
