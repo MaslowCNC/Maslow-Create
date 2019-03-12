@@ -22,15 +22,17 @@ function tryLogin(){
     //test authentication
     
     octokit.users.getAuthenticated({}).then(result => {
-        loginSucessfull();
+        showProjectsToLoad();
     })
 }
 
-function loginSucessfull(){
+function showProjectsToLoad(){
     //Remove everything in the popup now
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
+    
+    popup.classList.remove('off');
     
     //Add a title
     var titleDiv = document.createElement("DIV");
@@ -69,7 +71,7 @@ function loginSucessfull(){
                     accept: 'application/vnd.github.mercy-preview+json'
                 }
             }).then(data => {
-                if(data.data.names.includes("maslowcreate")){
+                if(data.data.names.includes("maslowcreate") || data.data.names.includes("maslowcreate-molecule")){
                     addProject(repo.name);
                 }
             })
@@ -90,7 +92,13 @@ function addProject(projectName){
     projectPicture.setAttribute("style", "height: 100%");
     project.appendChild(projectPicture);
     
-    var shortProjectName = document.createTextNode(projectName.substr(0,7)+"..");
+    var shortProjectName;
+    if(projectName.length > 9){
+        shortProjectName = document.createTextNode(projectName.substr(0,7)+"..");
+    }
+    else{
+        shortProjectName = document.createTextNode(projectName);
+    }
     project.setAttribute("class", "project");
     project.setAttribute("id", projectName);
     project.appendChild(shortProjectName); 
@@ -114,6 +122,7 @@ function projectClicked(projectName){
 
 function createNewProjectPopup(){
     //Clear the popup and populate the fields we will need to create the new repo
+    
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
@@ -277,17 +286,85 @@ function loadProject(projectName){
         //Load the top level molecule from the file
         topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
         
-        //Load the other molecules from the file
-        
-        
-        
-        
+        currentMolecule.backgroundClick();
+
         //Clear and hide the popup
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild);
         }
         popup.classList.add('off');
-    }) 
+    })
+    
+}
+
+function exportCurrentMoleculeToGithub(molecule){
+    
+    //Get name and description
+    var name = molecule.name;
+    var description = "A stand alone molecule exported from Maslow Create";
+    
+    //Create a new repo
+    octokit.repos.createForAuthenticatedUser({
+        name: name,
+        description: description
+    }).then(result => {
+        //Once we have created the new repo we need to create a file within it to store the project in
+        var repoName = result.data.name;
+        var id       = result.data.id;
+        var path     = "project.maslowcreate";
+        var content  = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
+        octokit.repos.createFile({
+            owner: currentUser,
+            repo: repoName,
+            path: path,
+            message: "initialize repo", 
+            content: content
+        }).then(result => {
+            
+            //Save the molecule into the newly created repo
+            
+            var path = "project.maslowcreate";
+            
+            molecule.topLevel = true; //force the molecule to export in the long form as if it were the top level molecule
+            var content = window.btoa(JSON.stringify(molecule.serialize(null), null, 4)); //Convert the passed molecule object to a JSON string and then convert it to base64 encoding
+            
+            //Get the SHA for the file
+            octokit.repos.getContents({
+                owner: currentUser,
+                repo: repoName,
+                path: path
+            }).then(result => {
+                var sha = result.data.sha
+                
+                //Save the repo to the file
+                octokit.repos.updateFile({
+                    owner: currentUser,
+                    repo: repoName,
+                    path: path,
+                    message: "export Molecule", 
+                    content: content,
+                    sha: sha
+                }).then(result => {
+                    console.log("Molecule Exported.");
+                    
+                    //Replace the existing molecule now that we just exported
+                    molecule.replaceThisMoleculeWithGithub(id);
+                })
+            })
+
+        });
+        
+        //Update the project topics
+        octokit.repos.replaceTopics({
+            owner: currentUser,
+            repo: repoName,
+            names: ["maslowcreate-molecule"],
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
+            }
+        })
+        
+    });
 }
 
 

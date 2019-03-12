@@ -78,7 +78,7 @@ class Equation extends Atom {
         
         var valueList = super.updateSidebar();
         
-        this.createDropDown(valueList, this, this.equationOptions, this.currentEquation);
+        this.createDropDown(valueList, this, this.equationOptions, this.currentEquation, "z = ");
         
     } 
 }

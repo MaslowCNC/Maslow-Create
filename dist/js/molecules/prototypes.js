@@ -169,6 +169,7 @@ class AttachmentPoint {
         this.connectors.forEach(connector => {
             connector.deleteSelf();       
         });
+        
     }
     
     updateSidebar(){
@@ -184,6 +185,7 @@ class AttachmentPoint {
             }
             
             this.connectors.push(connector);
+            
             return this;
         }
         return false;
@@ -293,12 +295,13 @@ class Connector {
     }
     
     deleteSelf(){
-        
+        //Free up the input to which this was attached
         if(this.attachmentPoint2 != null){
-            this.attachmentPoint2.connectors = []; //free up the point to which this was attached
+            this.attachmentPoint2.connectors = [];
         }
         
-        this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); //remove this connector from the output it is attached to
+        //Remove this connector from the output it is attached to
+        this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); 
     }
     
     serialize(){
@@ -625,7 +628,7 @@ class Atom {
     }
     
     updateCodeBlock(){
-        //Substitue the result from each input for the ~...~ section with it's name
+        //Substitute the result from each input for the ~...~ section with it's name
         
         var regex = /~(.*?)~/gi;
         this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
@@ -720,7 +723,7 @@ class Atom {
 
     }
 
-    createDropDown(list,parent,options,selectedOption){
+    createDropDown(list,parent,options,selectedOption, description){
         var listElement = document.createElement("LI");
         list.appendChild(listElement);
         
@@ -733,7 +736,7 @@ class Atom {
         //Left div which displays the label
         var labelDiv = document.createElement("div");
         div.appendChild(labelDiv);
-        var labelText = document.createTextNode("z = ");
+        var labelText = document.createTextNode(description);
         labelDiv.appendChild(labelText);
         labelDiv.setAttribute("class", "sidebar-subitem");
         
@@ -790,7 +793,7 @@ class Atom {
         
         button.addEventListener(
             'mousedown',
-            functionToCall,
+            function() { functionToCall(parent); } ,
             false
         );
     }

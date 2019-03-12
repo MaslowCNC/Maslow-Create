@@ -19,12 +19,20 @@
 <body>
     
     <!-- The menu for creating a new drawing node -->
-    <ul class="menu " id="menuList">
-        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu()" placeholder="Search for atom..">
-        <li class="menu-item" id="red">Select Node Type</li>
+    <ul class="menu ">
+        <div class="tab">
+            <button class="tablinks" id="localTab" onclick="openTab(event, 'menuList')">Local</button>
+            <button class="tablinks" id="githubTab" onclick="openTab(event, 'githubList')">GitHub</button>
+        </div>
+        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu(event)" placeholder="Search for atom..", class = "menu_search">
+        <ul id="menuList" class = "menu_list tabcontent">
+        </ul>
+        <ul id="githubList" class = "menu_list tabcontent">
+        </ul>
     </ul>
     
     <div class = "menu off">
+        <!-- This suppresses the error messages from jscad -->
         Between here
         
         <div id="errordiv"></div>
@@ -36,7 +44,7 @@
     </div>
     
     <!-- The login popup -->
-    <div class = "login-popup off" id = "projects-popup">
+    <div class = "login-popup " id = "projects-popup">
         <div class="login-page">
           <div class="form">
             <h1>Maslow Create uses GitHub to store your projects</h1>
@@ -81,6 +89,7 @@
     <script src="/js/molecules/constant.js"></script>
     <script src="/js/molecules/molecule.js"></script>
     <script src="/js/molecules/rectangle.js"></script>
+    <script src="/js/molecules/regularPolygon.js"></script>
     <script src="/js/molecules/shrinkwrap.js"></script>
     <script src="/js/molecules/circle.js"></script>
     <script src="/js/molecules/extrude.js"></script>
@@ -93,6 +102,7 @@
     <script src="/js/molecules/scale.js"></script>
     <script src="/js/molecules/intersection.js"></script>
     <script src="/js/molecules/difference.js"></script>
+    <script src="/js/molecules/githubmolecule.js"></script>
     <script src="/circular-json.js"></script>
     <script src="/js/molecules/menu.js"></script>
     <script src="/flowDraw.js"></script>

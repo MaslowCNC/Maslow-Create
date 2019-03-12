@@ -92,6 +92,7 @@ var availableTypes = {
     rectangle:     {creator: Rectangle, atomType: "Rectangle"},
     shirinkwrap:   {creator: ShrinkWrap, atomType: "ShrinkWrap"},
     translate:     {creator: Translate, atomType: "Translate"},
+    regularPolygon:{creator: RegularPolygon, atomType: "RegularPolygon"},
     extrude:       {creator: Extrude, atomType: "Extrude"},
     scale:         {creator: Scale, atomType: "Scale"},
     intersection:  {creator: Intersection, atomType: "Intersection"},
@@ -103,6 +104,7 @@ var availableTypes = {
     readme:        {creator: Readme, atomType: "Readme"},
     rotate:        {creator: Rotate, atomType: "Rotate"},
     mirror:        {creator: Mirror, atomType: "Mirror"},
+    githubmolecule:{creator: GitHubMolecule, atomType: "GitHubMolecule"},
     union:         {creator: Union, atomType: "Union"}
 }
 
@@ -127,6 +129,7 @@ function init() {
     
     menu = document.querySelector('.menu');
     menu.classList.add('off');
+    menuList = document.getElementById("menuList");
     
     //Add the search bar to the list item
     
@@ -137,7 +140,7 @@ function init() {
         newElement.setAttribute("class", "menu-item");
         newElement.setAttribute("id", instance.atomType);
         newElement.appendChild(text); 
-        menu.appendChild(newElement); 
+        menuList.appendChild(newElement); 
         
         document.getElementById(instance.atomType).addEventListener('click', placeNewNode);
     }
