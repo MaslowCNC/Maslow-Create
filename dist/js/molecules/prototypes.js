@@ -433,7 +433,7 @@ class Atom {
         var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
         //multiply that number by an offset to find the new x offset 
         var hoverOffsetComputedY = 1.5 *numberOfSameTypeIO * - Math.floor(this.radius * Math.cos(0.174533 * numberOfSameTypeIO ));
-        var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.174533* 3 *numberOfSameTypeIO));
+        var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.523599 *numberOfSameTypeIO));
         // if input type then offset first element down to give space for radial menu 
          if (type == "input"){
             hoverOffsetComputedY += 35;
