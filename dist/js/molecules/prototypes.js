@@ -158,7 +158,7 @@ class AttachmentPoint {
                 // angle correction so that it centers menu adjusting to however many attachment points there are 
                 var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
 
-                this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius *  ( Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                 this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                 this.offsetX = this.hoverOffsetX; 
                 this.offsetY = this.hoverOffsetY;  
@@ -453,18 +453,6 @@ class Atom {
         else{
             offset = target.radius;
         }
-        
-        //compute hover offset from parent node
-        //find the number of elements of the same type already in the array 
-        //var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
-        //multiply that number by an offset to find the new x offset 
-        //var hoverOffsetComputedY = 1.5 *numberOfSameTypeIO * - Math.floor(this.radius * Math.cos(0.174533 * numberOfSameTypeIO ));
-       // var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.523599 *numberOfSameTypeIO));
-        // if input type then offset first element down to give space for radial menu 
-        /* if (type == "input"){
-            hoverOffsetComputedY += 35;
-        }*/
-
         var input = new AttachmentPoint({
             parentMolecule: target, 
             defaultOffsetX: offset, 
