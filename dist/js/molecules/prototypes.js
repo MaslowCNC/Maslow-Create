@@ -135,19 +135,13 @@ class AttachmentPoint {
         else{
             this.radius = this.defaultRadius;
         }
-        
-        
+
         //If we are close to the attachment point move it to it's hover location to make it accessible
         //Change direction of hover drop down if too close to the top.
-        if (distFromCursor < this.hoverDetectRadius){
-            if (this.parentMolecule.y <= 50){
-              this.offsetY= this.hoverOffsetY*-1;
-              this.offsetX = this.hoverOffsetX;
-           }
-           else{
+        if (distFromCursor < this.hoverDetectRadius /* || (distFromCursor < this.parentMolecule.radius + 20 && this.type == 'input')*/){
+           
             this.offsetX = this.hoverOffsetX;
             this.offsetY = this.hoverOffsetY;
-           }
             this.showHoverText = true;
             this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
         }
@@ -437,10 +431,14 @@ class Atom {
         //compute hover offset from parent node
         //find the number of elements of the same type already in the array 
         var numberOfSameTypeIO = target.children.filter(child => child.type == type).length;
-        //multiply that number by an offset to find the new x offset
-        var hoverOffsetComputedY = numberOfSameTypeIO * -30;
-        var hoverOffsetComputedX = offset - numberOfSameTypeIO* -8;
-        
+        //multiply that number by an offset to find the new x offset 
+        var hoverOffsetComputedY = 1.5 *numberOfSameTypeIO * - Math.floor(this.radius * Math.cos(0.174533 * numberOfSameTypeIO ));
+        var hoverOffsetComputedX = offset - numberOfSameTypeIO * Math.floor(this.radius * Math.cos(0.174533* 3 *numberOfSameTypeIO));
+        // if input type then offset first element down to give space for radial menu 
+         if (type == "input"){
+            hoverOffsetComputedY += 35;
+        }
+
         var input = new AttachmentPoint({
             parentMolecule: target, 
             defaultOffsetX: offset, 
