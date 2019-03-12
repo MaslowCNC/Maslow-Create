@@ -45,4 +45,10 @@ class Readme extends Atom{
     setValue(newText) {
         this.readmeText = newText;
     }
+    
+    requestReadme(){
+        //request any contributions from this atom to the readme
+        
+        return [this.readmeText];
+    }
 }

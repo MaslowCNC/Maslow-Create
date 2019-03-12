@@ -159,6 +159,22 @@ class Molecule extends Atom{
 
     }
     
+    requestBOM(){
+        var generatedBOM = super.requestBOM();
+        this.nodesOnTheScreen.forEach(molecule => {
+            generatedBOM = generatedBOM.concat(molecule.requestBOM());
+        });
+        return generatedBOM;
+    }
+    
+    requestReadme(){
+        var generatedReadme = super.requestReadme();
+        this.nodesOnTheScreen.forEach(molecule => {
+            generatedBOM = generatedReadme.concat(molecule.requestReadme());
+        });
+        return generatedReadme;
+    }
+    
     serialize(savedObject){
         //Save this molecule.
         

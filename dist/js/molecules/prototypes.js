@@ -629,6 +629,8 @@ class Atom {
     }
     
     requestBOM(){
+        //Request any contributions from this atom to the BOM
+        
         
         //Find the number of things attached to this output
         var numberOfThisInstance = 1;
@@ -642,14 +644,13 @@ class Atom {
             bomItem.totalNeeded = numberOfThisInstance*bomItem.numberNeeded;
         });
         
+        return this.BOMlist;
+    }
+    
+    requestReadme(){
+        //request any contributions from this atom to the readme
         
-        var generatedBOM = this.BOMlist;
-        if(this.atomType == "Molecule"){
-            this.nodesOnTheScreen.forEach(molecule => {
-                generatedBOM = generatedBOM.concat(molecule.requestBOM());
-            });
-        }
-        return generatedBOM;
+        return [];
     }
     
     updateCodeBlock(){
