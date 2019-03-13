@@ -125,9 +125,7 @@ class AttachmentPoint {
 
     clickMove(x,y){
         
-      
         //expand if touched by mouse
-
         var distFromCursor = distBetweenPoints (this.x, x, this.y, y);
         
         //If we are hovering over the attachment point, indicate that by making it big
@@ -137,16 +135,12 @@ class AttachmentPoint {
         else{
             this.radius = this.defaultRadius;
         }
-
         //If we are close to the attachment point move it to it's hover location to make it accessible
         //Change direction of hover drop down if too close to the top.
         if (distFromCursor < this.hoverDetectRadius){
 
-            
-            
             var numAttachmentPoints= this.parentMolecule.children.length;
             var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
-
        
              // if input type then offset first element down to give space for radial menu 
             if (this.type == "output"){
@@ -162,8 +156,7 @@ class AttachmentPoint {
                 this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                 this.offsetX = this.hoverOffsetX; 
                 this.offsetY = this.hoverOffsetY;  
-            
-            }
+                 }
             this.showHoverText = true;
             this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
 
