@@ -3,10 +3,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     mode: 'development',
-    entry: './src/canvas.js',
+    entry: './src/flowDraw.js',
     output: {
         path: __dirname + '/dist/',
-        filename: './js/canvas.bundle.js'
+        filename: './js/flowDraw.bundle.js'
     },
     module: {
         rules: [
