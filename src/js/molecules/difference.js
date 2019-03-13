@@ -1,4 +1,6 @@
-class Difference extends Atom{
+import Atom from '../prototypes/atom'
+
+export default class Difference extends Atom{
     
     constructor (values){
         

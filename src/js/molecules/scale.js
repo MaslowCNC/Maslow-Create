@@ -1,4 +1,6 @@
-class Scale extends Atom{
+import Atom from '../prototypes/atom'
+
+export default class Scale extends Atom{
     
     constructor(values){
         

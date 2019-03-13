@@ -1,5 +1,7 @@
+import Atom from '../prototypes/atom'
 
-class Readme extends Atom{
+
+export default class Readme extends Atom{
     constructor(values){
         super(values);
         

@@ -1,4 +1,6 @@
-class Union extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Union extends Atom {
     
     constructor(values){
         

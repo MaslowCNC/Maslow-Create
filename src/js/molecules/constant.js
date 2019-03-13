@@ -1,4 +1,6 @@
-class Constant extends Atom{
+import Atom from '../prototypes/atom'
+
+export default class Constant extends Atom{
     
     constructor(values){
         super(values);

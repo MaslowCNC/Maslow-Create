@@ -1,4 +1,6 @@
-class Intersection extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Intersection extends Atom {
     
     constructor(values){
         

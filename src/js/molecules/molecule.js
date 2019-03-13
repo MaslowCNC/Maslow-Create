@@ -1,4 +1,7 @@
-class Molecule extends Atom{
+import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
+
+export default class Molecule extends Atom{
 
     constructor(values){
         
@@ -16,12 +19,12 @@ class Molecule extends Atom{
         //Add the molecule's output
         this.placeAtom({
             parentMolecule: this, 
-            x: canvas.width - 50,
-            y: canvas.height/2,
+            x: GlobalVariables.canvas.width - 50,
+            y: GlobalVariables.canvas.height/2,
             parent: this,
             name: "Output",
             atomType: "Output"
-        }, null, secretTypes);
+        }, null, GlobalVariables.secretTypes);
         
         this.updateCodeBlock();
     }
@@ -47,7 +50,7 @@ class Molecule extends Atom{
         var distFromClick = distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
-            currentMolecule = this; //set this to be the currently displayed molecule
+            GlobalVariables.currentMolecule = this; //set this to be the currently displayed molecule
             clickProcessed = true;
         }
         
@@ -122,10 +125,10 @@ class Molecule extends Atom{
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
         
-        currentMolecule.updateCodeBlock();
+        GlobalVariables.currentMolecule.updateCodeBlock();
         
-        if(!currentMolecule.topLevel){
-            currentMolecule = currentMolecule.parent; //set parent this to be the currently displayed molecule
+        if(!GlobalVariables.currentMolecule.topLevel){
+            GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent; //set parent this to be the currently displayed molecule
         }
     }
     
@@ -138,15 +141,15 @@ class Molecule extends Atom{
         console.log(githubID);
         
         //If we are currently inside the molecule targeted for replacement, go up one
-        if (currentMolecule.uniqueID == this.uniqueID){
-            currentMolecule = this.parent;
+        if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){
+            GlobalVariables.currentMolecule = this.parent;
         }
         
         //Create a new github molecule in the same spot
-        currentMolecule.placeAtom({
+        GlobalVariables.currentMolecule.placeAtom({
             x: this.x, 
             y: this.y, 
-            parent: currentMolecule,
+            parent: GlobalVariables.currentMolecule,
             name: this.name,
             atomType: "GitHubMolecule",
             projectID: githubID,

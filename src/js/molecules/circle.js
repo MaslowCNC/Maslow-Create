@@ -1,4 +1,6 @@
-class Circle extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Circle extends Atom {
     
     constructor(values){
         

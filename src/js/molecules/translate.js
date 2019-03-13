@@ -1,4 +1,6 @@
-class Translate extends Atom{
+import Atom from '../prototypes/atom'
+
+export default class Translate extends Atom{
     
     constructor(values){
         super(values);

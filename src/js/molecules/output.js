@@ -1,5 +1,7 @@
+import Atom from '../prototypes/atom'
 
-class Output extends Atom {
+
+export default class Output extends Atom {
     
     constructor(values){
         super (values)

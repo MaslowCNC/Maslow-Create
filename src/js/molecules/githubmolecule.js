@@ -1,4 +1,6 @@
-class GitHubMolecule extends Molecule {
+import Molecule from '../molecules/molecule'
+
+export default class GitHubMolecule extends Molecule {
     
     constructor(values){
         super(values);

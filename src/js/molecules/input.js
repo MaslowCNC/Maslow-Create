@@ -1,4 +1,6 @@
-class Input extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Input extends Atom {
     
     constructor(values){
         super (values);
