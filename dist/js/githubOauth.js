@@ -1,4 +1,4 @@
-const octokit = new Octokit()
+const octokit = new Octokit();
 var popup = document.getElementById('projects-popup');
 var currentRepoName = null;
 var currentUser = null;
@@ -8,22 +8,22 @@ var intervalTimer;
 
 function tryLogin(){
     
-    let username = document.getElementById('login-username').value;
-    let password = document.getElementById('login-password').value;
-    document.getElementById('login-password').value = "";
+    
+    // Initialize with your OAuth.io app public key
+	OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8');
+    // Use popup for oauth
+    OAuth.popup('github').then(github => {
         
-    //try to login
-    octokit.authenticate({
-        type: 'basic',
-        username: username,
-        password: password
-    })
-    
-    //test authentication
-    
-    octokit.users.getAuthenticated({}).then(result => {
-        showProjectsToLoad();
-    })
+        octokit.authenticate({
+            type: "oauth",
+            token: github.access_token
+        })
+        
+        //Test the authentication 
+        octokit.users.getAuthenticated({}).then(result => {
+            showProjectsToLoad();
+        })  
+    });
 }
 
 function showProjectsToLoad(){
