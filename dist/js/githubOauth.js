@@ -12,16 +12,14 @@ function tryLogin(){
     // Initialize with your OAuth.io app public key
 	OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8');
     // Use popup for oauth
-    // Alternative is redirect
     OAuth.popup('github').then(github => {
-        console.log('github:', github);
-        console.log(github.access_token);
         
         octokit.authenticate({
             type: "oauth",
             token: github.access_token
         })
         
+        //Test the authentication 
         octokit.users.getAuthenticated({}).then(result => {
             showProjectsToLoad();
         })  
