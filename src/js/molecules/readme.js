@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 
 export default class Readme extends Atom{
@@ -29,19 +30,19 @@ export default class Readme extends Atom{
         super.draw(); //Super call to draw the rest
         
         //draw the two slashes on the node//
-        c.strokeStyle = "#949294";
-        c.lineWidth = 3;
-        c.lineCap = "round";
+        GlobalVariables.c.strokeStyle = "#949294";
+        GlobalVariables.c.lineWidth = 3;
+        GlobalVariables.c.lineCap = "round";
         
-        c.beginPath();
-        c.moveTo(this.x - 11, this.y + 10);
-        c.lineTo(this.x, this.y - 10);
-        c.stroke();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.moveTo(this.x - 11, this.y + 10);
+        GlobalVariables.c.lineTo(this.x, this.y - 10);
+        GlobalVariables.c.stroke();
         
-        c.beginPath();
-        c.moveTo(this.x, this.y + 10);
-        c.lineTo(this.x + 11, this.y - 10);
-        c.stroke();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.moveTo(this.x, this.y + 10);
+        GlobalVariables.c.lineTo(this.x + 11, this.y - 10);
+        GlobalVariables.c.stroke();
     }
     
     setValue(newText) {

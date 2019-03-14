@@ -31,9 +31,10 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: 'src/index.html'
+            template: 'src/index.html',
+            inject: false
         })
     ],
     watch: true,
-    devtool: 'nosources-source-map'
+    devtool: 'cheap-module-source-map'
 }

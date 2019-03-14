@@ -54,34 +54,34 @@ export default class Atom {
             child.draw();       
         });
         
-        c.beginPath();
-        c.fillStyle = this.color;
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.color;
         //make it imposible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas');
         if (this.x<this.radius*3){
                 this.x+= this.radius*3;    
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else if (this.y<this.radius*2){
                 this.y += this.radius; 
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else if (this.x + this.radius*2 > canvasFlow.width){
                 this.x -= this.radius*2; 
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else if (this.y + this.radius*2 > canvasFlow.height){
                 this.y -= this.radius; 
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else{
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
-        c.textAlign = "start"; 
-        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
-        c.fill();
-        c.closePath();
+        GlobalVariables.c.textAlign = "start"; 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        GlobalVariables.c.fill();
+        GlobalVariables.c.closePath();
     }
     
     addIO(type, name, target, valueType, defaultValue){
@@ -134,7 +134,7 @@ export default class Atom {
         //If none of the children processed the click
         if(!clickProcessed){
         
-            var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+            var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
             
             if (distFromClick < this.radius){
                 this.color = this.selectedColor;
@@ -162,7 +162,7 @@ export default class Atom {
         
         var clickProcessed = false;
         
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
             clickProcessed = true;
@@ -207,19 +207,19 @@ export default class Atom {
         //updates the sidebar to display information about this node
         
         //remove everything in the sideBar now
-        while (sideBar.firstChild) {
-            sideBar.removeChild(sideBar.firstChild);
+        while (GlobalVariables.sideBar.firstChild) {
+            GlobalVariables.sideBar.removeChild(GlobalVariables.sideBar.firstChild);
         }
         
         //add the name as a title
         var name = document.createElement('h1');
         name.textContent = this.name;
         name.setAttribute("style","text-align:center;");
-        sideBar.appendChild(name);
+        GlobalVariables.sideBar.appendChild(name);
         
         //Create a list element
         var valueList = document.createElement("ul");
-        sideBar.appendChild(valueList);
+        GlobalVariables.sideBar.appendChild(valueList);
         valueList.setAttribute("class", "sidebar-list");
         
         //Add options to set all of the inputs

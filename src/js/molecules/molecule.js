@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import Connector from '../prototypes/connector'
 import GlobalVariables from '../globalvariables'
 
 export default class Molecule extends Atom{
@@ -33,11 +34,11 @@ export default class Molecule extends Atom{
         super.draw(); //Super call to draw the rest
         
         //draw the circle in the middle
-        c.beginPath();
-        c.fillStyle = this.centerColor;
-        c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false);
-        c.closePath();
-        c.fill();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.centerColor;
+        GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false);
+        GlobalVariables.c.closePath();
+        GlobalVariables.c.fill();
         
     }
     
@@ -113,7 +114,7 @@ export default class Molecule extends Atom{
             this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
         else{
-            this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
+            this.createButton(valueList,this,"Load A Different Project",GlobalVariables.gitHub.showProjectsToLoad)
         }
         
         this.createBOM(valueList,this,this.BOMlist);
@@ -154,7 +155,7 @@ export default class Molecule extends Atom{
             atomType: "GitHubMolecule",
             projectID: githubID,
             uniqueID: generateUniqueID()
-        }, null, availableTypes);
+        }, null, GlobalVariables.availableTypes);
         
         
         //Then delete the old molecule which has been replaced
@@ -262,7 +263,7 @@ export default class Molecule extends Atom{
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(JSON.parse(atom), moleculeList, availableTypes);
+            this.placeAtom(JSON.parse(atom), moleculeList, GlobalVariables.availableTypes);
         });
         
         //reload the molecule object to prevent persistence issues

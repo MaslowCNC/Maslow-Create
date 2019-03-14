@@ -59,6 +59,7 @@ class GlobalVariables{
         this.gitHub = new GitHubModule();
         
         console.log("global variables constructor ran");
+        console.trace();
     }
     
     generateUniqueID(){

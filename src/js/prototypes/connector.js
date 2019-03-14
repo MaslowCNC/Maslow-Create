@@ -1,3 +1,5 @@
+import GlobalVariables from '../globalvariables'
+
 export default class Connector {
     constructor(values){
         
@@ -18,26 +20,26 @@ export default class Connector {
     
     draw(){
         
-        c.beginPath();
-        c.fillStyle = this.color;
-        c.strokeStyle = this.color;
-        c.globalCompositeOperation = 'destination-over'; //draw under other elements;
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.color;
+        GlobalVariables.c.strokeStyle = this.color;
+        GlobalVariables.c.globalCompositeOperation = 'destination-over'; //draw under other elements;
         if(this.selected){
-            c.lineWidth = 3;
+            GlobalVariables.c.lineWidth = 3;
         }
         else{
-            c.lineWidth = 1;
+            GlobalVariables.c.lineWidth = 1;
         }
-        c.moveTo(this.startX, this.startY);
-        c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
-        c.stroke();
-        c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
+        GlobalVariables.c.moveTo(this.startX, this.startY);
+        GlobalVariables.c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
+        GlobalVariables.c.stroke();
+        GlobalVariables.c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
     }
 
     clickUp(x,y){
         
         if(this.isMoving){  //we only want to attach the connector which is currently moving
-            currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
+            GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
                 molecule.children.forEach(child => {                                    //For each of their attachment points
                     var thisConnectionValid = child.wasConnectionMade(x,y, this);       //Check to see if we made a connection
                     if(thisConnectionValid){

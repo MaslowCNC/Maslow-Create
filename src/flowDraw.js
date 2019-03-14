@@ -10,12 +10,13 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
+console.log("this is the top of flow draw");
+
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
 
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
-flowCanvas.addEventListener('contextmenu', Menu.showmenu); //redirect right clicks to show the menu
 
 flowCanvas.addEventListener('mousemove', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
@@ -50,7 +51,7 @@ flowCanvas.addEventListener('mousedown', event => {
     
     //hide the menu if it is visible
     if (!document.querySelector('.menu').contains(event.target)) {
-        hidemenu();
+        Menu.hidemenu();
     }
     
 })
@@ -67,7 +68,8 @@ flowCanvas.addEventListener('dblclick', event => {
     });
     
     if (clickHandledByMolecule == false){
-        showmenu(event);
+        console.log("double click menu open not working in flowDraw.js");
+        //showmenu(event);
     }
 })
 

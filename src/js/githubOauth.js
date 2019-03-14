@@ -1,3 +1,5 @@
+import Molecule from './molecules/molecule.js'
+import GlobalVariables from './globalvariables'
 
 export default class GitHubModule{
 
@@ -58,7 +60,7 @@ export default class GitHubModule{
         
         
         //Add the create a new project button
-        addProject("New Project");
+        this.addProject("New Project");
         
         //store the current user name for later use
         this.octokit.users.getAuthenticated({}).then(result => {
@@ -80,7 +82,7 @@ export default class GitHubModule{
                     }
                 }).then(data => {
                     if(data.data.names.includes("maslowcreate") || data.data.names.includes("maslowcreate-molecule")){
-                        addProject(repo.name);
+                        this.addProject(repo.name);
                     }
                 })
                 
@@ -189,7 +191,7 @@ export default class GitHubModule{
         var description = document.getElementById('project-description').value;
         
         //Load a blank project
-        topLevelMolecule = new Molecule({
+        GlobalVariables.topLevelMolecule = new Molecule({
             x: 0, 
             y: 0, 
             topLevel: true, 
@@ -198,7 +200,7 @@ export default class GitHubModule{
             uniqueID: generateUniqueID()
         });
         
-        currentMolecule = topLevelMolecule;
+        GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule;
         
         //Create a new repo
         this.octokit.repos.createForAuthenticatedUser({
@@ -252,7 +254,7 @@ export default class GitHubModule{
             })
         });
         
-        currentMolecule.backgroundClick();
+        GlobalVariables.currentMolecule.backgroundClick();
         
         //Clear and hide the popup
         while (this.popup.firstChild) {
@@ -269,7 +271,7 @@ export default class GitHubModule{
         if(this.currentRepoName != null){
             
             var path = "project.maslowcreate";
-            var content = window.btoa(JSON.stringify(topLevelMolecule.serialize(null), null, 4)); //Convert the topLevelMolecule object to a JSON string and then convert it to base64 encoding
+            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)); //Convert the GlobalVariables.topLevelMolecule object to a JSON string and then convert it to base64 encoding
             
             //Get the SHA for the file
             this.octokit.repos.getContents({
@@ -296,7 +298,7 @@ export default class GitHubModule{
                     path = "BillOfMaterials.md";
                     content = this.bomHeader;
                     
-                    topLevelMolecule.requestBOM().forEach(item => {
+                    GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
                         content = content + "\n|" + item.BOMitemName + "|" + item.totalNeeded + "|" + item.costUSD + "|" + item.source + "|";
                     });
                     
@@ -329,7 +331,7 @@ export default class GitHubModule{
                                 path = "README.md";
                                 content = "# " + result.data.name + "\n" + result.data.description + "\n";
                                 
-                                topLevelMolecule.requestReadme().forEach(item => {
+                                GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
                                     content = content + item + "\n\n\n"
                                 });
                                 
@@ -381,22 +383,22 @@ export default class GitHubModule{
             let rawFile = atob(result.data.content);
             
             
-            moleculesList = JSON.parse(rawFile).molecules;
+            var moleculesList = JSON.parse(rawFile).molecules;
             
             //Load a blank project
-            topLevelMolecule = new Molecule({
+            GlobalVariables.topLevelMolecule = new Molecule({
                 x: 0, 
                 y: 0, 
                 topLevel: true, 
                 atomType: "Molecule"
             });
             
-            currentMolecule = topLevelMolecule;
+            GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule;
             
             //Load the top level molecule from the file
-            topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
+            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
             
-            currentMolecule.backgroundClick();
+            GlobalVariables.currentMolecule.backgroundClick();
 
             //Clear and hide the popup
             while (this.popup.firstChild) {

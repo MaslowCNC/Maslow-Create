@@ -1,6 +1,6 @@
 import GlobalVariables from './globalvariables'
 
-export default class Menu {
+class Menu {
     constructor(){
         this.menu = document.querySelector('.menu');
         this.menu.classList.add('off');
@@ -15,67 +15,88 @@ export default class Menu {
             newElement.setAttribute("class", "menu-item");
             newElement.setAttribute("id", instance.atomType);
             newElement.appendChild(text); 
-            menuList.appendChild(newElement); 
+            this.menuList.appendChild(newElement); 
             
-            document.getElementById(instance.atomType).addEventListener('click', placeNewNode);
+            
+            //Add function to call when atom is selected
+            document.getElementById(instance.atomType).addEventListener('click', (e) => {
+               this.placeNewNode(e);
+            });
+            //Add functions to call when tabs are clicked
+            document.getElementById("localTab").addEventListener("mousedown", (e) => {
+               this.openTab(e, "menuList");
+            });
+            document.getElementById("githubTab").addEventListener("mousedown", (e) => {
+               this.openTab(e, "githubList");
+            });
+            //Add function call when background is right clicked
+            document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
+               this.showmenu(e);
+            });
+            //Add function call to search when typing
+            document.getElementById('menuInput').addEventListener('keyup', (e) => {
+               this.searchMenu(e);
+            });
         }
     }
     
     placeNewNode(ev){
-        hidemenu();
+        console.trace();
+        this.hidemenu();
         let clr = ev.target.id;
         
-        currentMolecule.placeAtom({
-            x: menu.x, 
-            y: menu.y, 
-            parent: currentMolecule,
+        GlobalVariables.currentMolecule.placeAtom({
+            x: this.menu.x, 
+            y: this.menu.y, 
+            parent: GlobalVariables.currentMolecule,
             atomType: clr,
-            uniqueID: generateUniqueID()
-        }, null, availableTypes); //null indicates that there is nothing to load from the molecule list for this one
+            uniqueID: GlobalVariables.generateUniqueID()
+        }, null, GlobalVariables.availableTypes); //null indicates that there is nothing to load from the molecule list for this one
     }
 
     placeGitHubMolecule(ev){
-        hidemenu();
+        this.hidemenu();
         let clr = ev.target.id;
         
-        currentMolecule.placeAtom({
-            x: menu.x, 
-            y: menu.y, 
-            parent: currentMolecule,
+        GlobalVariables.currentMolecule.placeAtom({
+            x: this.menu.x, 
+            y: this.menu.y, 
+            parent: GlobalVariables.currentMolecule,
             atomType: "GitHubMolecule",
             projectID: clr,
-            uniqueID: generateUniqueID()
-        }, null, availableTypes); //null indicates that there is nothing to load from the molecule list for this one
+            uniqueID: GlobalVariables.generateUniqueID()
+        }, null, GlobalVariables.availableTypes); //null indicates that there is nothing to load from the molecule list for this one
     }
 
     showmenu(ev){
         //Open the default tab
         document.getElementById("localTab").click();
+        console.log("show menu ran");
         
         //stop the real right click menu
         ev.preventDefault(); 
         
         //make sure all elements are unhidden
-        ul = document.getElementById("menuList");
-        li = ul.getElementsByTagName('li');
-        for (i = 0; i < li.length; i++) {
+        var ul = document.getElementById("menuList");
+        var li = ul.getElementsByTagName('li');
+        for (var i = 0; i < li.length; i++) {
             li[i].style.display = "none"; //set each item to not display
         }
         
         //show the menu
-        menu.style.top = `${ev.clientY - 20}px`;
-        menu.style.left = `${ev.clientX - 20}px`;
-        menu.x = ev.clientX;
-        menu.y = ev.clientY;
-        menu.classList.remove('off');
+        this.menu.style.top = `${ev.clientY - 20}px`;
+        this.menu.style.left = `${ev.clientX - 20}px`;
+        this.menu.x = ev.clientX;
+        this.menu.y = ev.clientY;
+        this.menu.classList.remove('off');
         
         document.getElementById('menuInput').focus();
     }
 
     hidemenu(ev){
-        menu.classList.add('off');
-        menu.style.top = '-200%';
-        menu.style.left = '-200%';
+        this.menu.classList.add('off');
+        this.menu.style.top = '-200%';
+        this.menu.style.left = '-200%';
     }
 
     searchMenu(evt) {
@@ -111,7 +132,7 @@ export default class Menu {
             if(evt.code == "Enter"){
                 input = document.getElementById('menuInput').value;
                 
-                githubList = document.getElementById("githubList");
+                this.githubList = document.getElementById("githubList");
                 
                 oldResults = document.getElementsByClassName("menu-item");
                 for (i = 0; i < oldResults.length; i++) {
@@ -136,7 +157,7 @@ export default class Menu {
                             newElement.setAttribute("class", "menu-item");
                             newElement.setAttribute("id", item.id);
                             newElement.appendChild(text); 
-                            githubList.appendChild(newElement); 
+                            this.githubList.appendChild(newElement); 
                             
                             document.getElementById(item.id).addEventListener('click', placeGitHubMolecule);
                         }
@@ -167,3 +188,5 @@ export default class Menu {
       evt.currentTarget.className += " active";
     }
 }
+
+export default (new Menu);
