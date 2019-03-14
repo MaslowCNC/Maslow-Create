@@ -989,6 +989,7 @@ var Menu = function () {
         key: 'placeNewNode',
         value: function placeNewNode(ev) {
             var clr = ev.target.id;
+            this.hidemenu(ev);
 
             _globalvariables2.default.currentMolecule.placeAtom({
                 x: this.menu.x,

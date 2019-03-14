@@ -43,6 +43,7 @@ class Menu {
     
     placeNewNode(ev){
         let clr = ev.target.id;
+        this.hidemenu(ev);
         
         GlobalVariables.currentMolecule.placeAtom({
             x: this.menu.x, 
