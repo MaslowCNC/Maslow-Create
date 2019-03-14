@@ -1,360 +1,7 @@
+import AttachmentPoint from './attachmentpoint'
+import GlobalVariables from '../globalvariables'
 
-// Node prototype objects
-
-class AttachmentPoint {
-    constructor(values){
- 
-        this.defaultRadius = 8;
-        this.expandedRadius = 14;
-        this.radius = 8;
-        
-        this.hoverDetectRadius = 8;
-        this.hoverOffsetX = 0;
-        this.hoverOffsetY = 0;
-        this.uniqueID = 0;
-        this.defaultOffsetX = 0;
-        this.defaultOffsetY = 0;
-        this.offsetX = 0;
-        this.offsetY = 0;
-        this.showHoverText = false;
-        this.atomType = "AttachmentPoint";
-        
-        this.valueType = "number"; //options are number, geometry, array
-        this.type = "output";
-        this.value = 10; //The default input value when nothing is connected
-        
-        this.connectors = [];
-        
-        this.offsetX = this.defaultOffsetX;
-        this.offsetY = this.defaultOffsetY;
-        
-        for(var key in values) {
-            this[key] = values[key];
-        }
-        
-        this.clickMove(0,0); //trigger a refresh to get all the current values
-    }
-    
-    draw() {
-
-        var txt = this.name;
-        var textWidth = c.measureText(txt).width;
-        var bubbleColor = "#008080";
-        var scaleRadiusDown = this.radius*.7;
-        var halfRadius = this.radius*.5;
-        
-        if (this.showHoverText){
-            if(this.type == "input"){
-                c.beginPath();
-                c.fillStyle = bubbleColor;
-                    if (this.radius == this.expandedRadius) {
-                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
-                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
-                }
-                    else if(this.radius == this.defaultRadius){
-                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
-                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
-                }
-                c.fill();
-                c.beginPath();
-                c.fillStyle = this.parentMolecule.defaultColor;
-                c.textAlign = "end";
-                c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
-                c.fill();
-                c.closePath();
-            }
-            else{
-                c.beginPath();
-                c.fillStyle = bubbleColor;
-                c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
-                c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
-                c.fill();
-                c.closePath();
-                c.beginPath();
-                c.fillStyle = this.parentMolecule.defaultColor;
-                c.textAlign = "start"; 
-                c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
-                c.fill();
-                c.closePath();
-            }
-        }
-        c.beginPath();
-        c.fillStyle = this.parentMolecule.color;
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fill();
-        c.closePath();  
-    }
-
-     
-
-    clickDown(x,y){
-        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
-            
-            if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
-                var connector = new Connector({
-                    parentMolecule: this.parentMolecule, 
-                    attachmentPoint1: this,
-                    atomType: "Connector"
-                });
-                this.connectors.push(connector);
-            }
-            
-            if(this.type == 'input'){ //connectors can only be selected by clicking on an input
-                this.connectors.forEach(connector => {     //select any connectors attached to this node
-                    connector.selected = true;
-                });
-            }
-            
-            return true; //indicate that the click was handled by this object
-        }
-        else{
-            if(this.type == 'input'){ //connectors can only be selected by clicking on an input
-                this.connectors.forEach(connector => {      //unselect any connectors attached to this node
-                    connector.selected = false;
-                });
-            }
-            return false; //indicate that the click was not handled by this object
-        }
-    }
-
-    clickUp(x,y){
-        this.connectors.forEach(connector => {
-            connector.clickUp(x, y);       
-        });
-    }
-
-    clickMove(x,y){
-        
-        //expand if touched by mouse
-        var distFromCursor = distBetweenPoints (this.x, x, this.y, y);
-        
-        //If we are hovering over the attachment point, indicate that by making it big
-        if (distFromCursor < this.defaultRadius){
-            this.radius = this.expandedRadius;
-        }
-        else{
-            this.radius = this.defaultRadius;
-        }
-        //If we are close to the attachment point move it to it's hover location to make it accessible
-        //Change direction of hover drop down if too close to the top.
-        if (distFromCursor < this.hoverDetectRadius){
-
-            var numAttachmentPoints= this.parentMolecule.children.length;
-            var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
-       
-             // if input type then offset first element down to give space for radial menu 
-            if (this.type == "output"){
-                this.offsetX = this.defaultOffsetX;
-                this.offsetY = this.defaultOffsetY;
-            }
-            else{
-                var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
-                // angle correction so that it centers menu adjusting to however many attachment points there are 
-                var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
-
-                this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                this.offsetX = this.hoverOffsetX; 
-                this.offsetY = this.hoverOffsetY;  
-                 }
-            this.showHoverText = true;
-            this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
-
-            }
-        else{
-            this.offsetX = this.defaultOffsetX;
-            this.offsetY = this.defaultOffsetY;
-            this.showHoverText = false;
-            this.hoverDetectRadius = this.defaultRadius;
-        }
-        
-        this.connectors.forEach(connector => {
-            connector.clickMove(x, y);       
-        });
-    }
-    
-    keyPress(key){
-        this.connectors.forEach(connector => {
-            connector.keyPress(key);       
-        });
-    }
-    
-    deleteSelf(){
-        //remove any connectors which were attached to this attachment point
-        
-        this.connectors.forEach(connector => {
-            connector.deleteSelf();       
-        });
-        
-    }
-    
-    updateSidebar(){
-        this.parent.updateSidebar();
-    }
-    
-    wasConnectionMade(x,y, connector){
-        //this function returns itself if the coordinates passed in are within itself
-        if (distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
-            
-            if(this.connectors.length > 0){ //Don't accept a second connection to an input
-                return false;
-            }
-            
-            this.connectors.push(connector);
-            
-            return this;
-        }
-        return false;
-    }
-    
-    getValue(){
-        return this.value;
-    }
-    
-    setValue(newValue){
-        this.value = newValue;
-        
-        //propigate the change to linked elements if this is an output
-        if (this.type == 'output'){
-            this.connectors.forEach(connector => {     //select any connectors attached to this node
-                connector.propogate();
-            });
-        }
-        //if this is an input
-        else{   //update the code block to reflect the new values
-            this.parentMolecule.updateCodeBlock();
-        }
-    }
-    
-    update() {
-        this.x = this.parentMolecule.x + this.offsetX;
-        this.y = this.parentMolecule.y + this.offsetY;
-        this.draw()
-       
-        this.connectors.forEach(connector => {
-            connector.update();       
-        });
-    }
-}
-
-class Connector {
-    constructor(values){
-        
-        this.isMoving = true;
-        this.color = 'black';
-        this.atomType = "Connector";
-        this.selected = false;
-        this.attachmentPoint1 = null;
-        this.attachmentPoint2 = null;
-        
-        for(var key in values) {
-            this[key] = values[key];
-        }
-        
-        this.startX = this.parentMolecule.outputX;
-        this.startY = this.parentMolecule.y;
-    }
-    
-    draw(){
-        
-        c.beginPath();
-        c.fillStyle = this.color;
-        c.strokeStyle = this.color;
-        c.globalCompositeOperation = 'destination-over'; //draw under other elements;
-        if(this.selected){
-            c.lineWidth = 3;
-        }
-        else{
-            c.lineWidth = 1;
-        }
-        c.moveTo(this.startX, this.startY);
-        c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY);
-        c.stroke();
-        c.globalCompositeOperation = 'source-over'; //switch back to drawing on top
-    }
-
-    clickUp(x,y){
-        
-        if(this.isMoving){  //we only want to attach the connector which is currently moving
-            currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
-                molecule.children.forEach(child => {                                    //For each of their attachment points
-                    var thisConnectionValid = child.wasConnectionMade(x,y, this);       //Check to see if we made a connection
-                    if(thisConnectionValid){
-                        this.attachmentPoint2 = thisConnectionValid;
-                        this.propogate();                                               //Send information from one point to the other
-                    }
-                });
-            });
-        }
-        
-        
-        if (this.attachmentPoint2 == null){                                 //If we have not made a connection
-            this.deleteSelf();                                              //Delete this connector
-        }
-        
-        this.isMoving = false;                                                         //Move over 
-    }
-
-    clickMove(x,y){
-        if (this.isMoving == true){
-            this.endX = x;
-            this.endY = y;
-        }
-    }
-    
-    keyPress(key){
-        if(this.selected){
-            if (key == 'Delete'){
-                this.deleteSelf();
-            }
-        }
-    }
-    
-    deleteSelf(){
-        //Free up the input to which this was attached
-        if(this.attachmentPoint2 != null){
-            this.attachmentPoint2.connectors = [];
-        }
-        
-        //Remove this connector from the output it is attached to
-        this.attachmentPoint1.connectors.splice(this.attachmentPoint1.connectors.indexOf(this),1); 
-    }
-    
-    serialize(){
-        if ( this.attachmentPoint2 != null){
-            var object = {
-                ap1Name: this.attachmentPoint1.name,
-                ap2Name: this.attachmentPoint2.name,
-                ap1ID: this.attachmentPoint1.parentMolecule.uniqueID,
-                ap2ID: this.attachmentPoint2.parentMolecule.uniqueID
-            }
-            return JSON.stringify(object);
-        }
-    }
-    
-    propogate(){
-        //takes the input and passes it to the output
-        this.attachmentPoint2.setValue(this.attachmentPoint1.getValue());
-    }
-    
-    update() {
-        
-        this.startX = this.attachmentPoint1.x
-        this.startY = this.attachmentPoint1.y
-        if (this.attachmentPoint2){  //check to see if the attachment point is defined
-            this.endX = this.attachmentPoint2.x;
-            this.endY = this.attachmentPoint2.y;
-        }
-        this.draw()
-    }
-    
-    wasConnectionMade(x,y, connector){
-        return false;
-    }
-
-}
-
-class Atom {
+export default class Atom {
 
     constructor(values){
         //Setup default values
@@ -407,34 +54,34 @@ class Atom {
             child.draw();       
         });
         
-        c.beginPath();
-        c.fillStyle = this.color;
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.color;
         //make it imposible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas');
         if (this.x<this.radius*3){
                 this.x+= this.radius*3;    
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else if (this.y<this.radius*2){
                 this.y += this.radius; 
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else if (this.x + this.radius*2 > canvasFlow.width){
                 this.x -= this.radius*2; 
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else if (this.y + this.radius*2 > canvasFlow.height){
                 this.y -= this.radius; 
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else{
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
-        c.textAlign = "start"; 
-        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
-        c.fill();
-        c.closePath();
+        GlobalVariables.c.textAlign = "start"; 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        GlobalVariables.c.fill();
+        GlobalVariables.c.closePath();
     }
     
     addIO(type, name, target, valueType, defaultValue){
@@ -455,7 +102,7 @@ class Atom {
             valueType: valueType,
             name: name,
             value: defaultValue,
-            uniqueID: generateUniqueID(),
+            uniqueID: GlobalVariables.generateUniqueID(),
             atomType: "AttachmentPoint"
         });
         target.children.push(input);
@@ -487,7 +134,7 @@ class Atom {
         //If none of the children processed the click
         if(!clickProcessed){
         
-            var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+            var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
             
             if (distFromClick < this.radius){
                 this.color = this.selectedColor;
@@ -515,7 +162,7 @@ class Atom {
         
         var clickProcessed = false;
         
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
             clickProcessed = true;
@@ -560,19 +207,19 @@ class Atom {
         //updates the sidebar to display information about this node
         
         //remove everything in the sideBar now
-        while (sideBar.firstChild) {
-            sideBar.removeChild(sideBar.firstChild);
+        while (GlobalVariables.sideBar.firstChild) {
+            GlobalVariables.sideBar.removeChild(GlobalVariables.sideBar.firstChild);
         }
         
         //add the name as a title
         var name = document.createElement('h1');
         name.textContent = this.name;
         name.setAttribute("style","text-align:center;");
-        sideBar.appendChild(name);
+        GlobalVariables.sideBar.appendChild(name);
         
         //Create a list element
         var valueList = document.createElement("ul");
-        sideBar.appendChild(valueList);
+        GlobalVariables.sideBar.appendChild(valueList);
         valueList.setAttribute("class", "sidebar-list");
         
         //Add options to set all of the inputs
@@ -730,7 +377,7 @@ class Atom {
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "true");
         valueTextDiv.setAttribute("class", "sidebar-subitem");
-        var thisID = label+generateUniqueID();
+        var thisID = label+GlobalVariables.generateUniqueID();
         valueTextDiv.setAttribute("id", thisID);
         
         
@@ -784,7 +431,7 @@ class Atom {
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "false");
         valueTextDiv.setAttribute("class", "sidebar-subitem");
-        var thisID = label+generateUniqueID();
+        var thisID = label+GlobalVariables.generateUniqueID();
         valueTextDiv.setAttribute("id", thisID);
         
 

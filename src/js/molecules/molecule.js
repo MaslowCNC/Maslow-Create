@@ -1,4 +1,8 @@
-class Molecule extends Atom{
+import Atom from '../prototypes/atom'
+import Connector from '../prototypes/connector'
+import GlobalVariables from '../globalvariables'
+
+export default class Molecule extends Atom{
 
     constructor(values){
         
@@ -16,12 +20,12 @@ class Molecule extends Atom{
         //Add the molecule's output
         this.placeAtom({
             parentMolecule: this, 
-            x: canvas.width - 50,
-            y: canvas.height/2,
+            x: GlobalVariables.canvas.width - 50,
+            y: GlobalVariables.canvas.height/2,
             parent: this,
             name: "Output",
             atomType: "Output"
-        }, null, secretTypes);
+        }, null, GlobalVariables.secretTypes);
         
         this.updateCodeBlock();
     }
@@ -30,11 +34,11 @@ class Molecule extends Atom{
         super.draw(); //Super call to draw the rest
         
         //draw the circle in the middle
-        c.beginPath();
-        c.fillStyle = this.centerColor;
-        c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false);
-        c.closePath();
-        c.fill();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.centerColor;
+        GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false);
+        GlobalVariables.c.closePath();
+        GlobalVariables.c.fill();
         
     }
     
@@ -44,10 +48,10 @@ class Molecule extends Atom{
         
         var clickProcessed = false;
         
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
-            currentMolecule = this; //set this to be the currently displayed molecule
+            GlobalVariables.currentMolecule = this; //set this to be the currently displayed molecule
             clickProcessed = true;
         }
         
@@ -110,7 +114,7 @@ class Molecule extends Atom{
             this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
         else{
-            this.createButton(valueList,this,"Load A Different Project",showProjectsToLoad)
+            this.createButton(valueList,this,"Load A Different Project",GlobalVariables.gitHub.showProjectsToLoad)
         }
         
         this.createBOM(valueList,this,this.BOMlist);
@@ -122,10 +126,10 @@ class Molecule extends Atom{
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
         
-        currentMolecule.updateCodeBlock();
+        GlobalVariables.currentMolecule.updateCodeBlock();
         
-        if(!currentMolecule.topLevel){
-            currentMolecule = currentMolecule.parent; //set parent this to be the currently displayed molecule
+        if(!GlobalVariables.currentMolecule.topLevel){
+            GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent; //set parent this to be the currently displayed molecule
         }
     }
     
@@ -138,20 +142,20 @@ class Molecule extends Atom{
         console.log(githubID);
         
         //If we are currently inside the molecule targeted for replacement, go up one
-        if (currentMolecule.uniqueID == this.uniqueID){
-            currentMolecule = this.parent;
+        if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){
+            GlobalVariables.currentMolecule = this.parent;
         }
         
         //Create a new github molecule in the same spot
-        currentMolecule.placeAtom({
+        GlobalVariables.currentMolecule.placeAtom({
             x: this.x, 
             y: this.y, 
-            parent: currentMolecule,
+            parent: GlobalVariables.currentMolecule,
             name: this.name,
             atomType: "GitHubMolecule",
             projectID: githubID,
             uniqueID: generateUniqueID()
-        }, null, availableTypes);
+        }, null, GlobalVariables.availableTypes);
         
         
         //Then delete the old molecule which has been replaced
@@ -172,7 +176,7 @@ class Molecule extends Atom{
         generatedReadme.push("## " + this.name);
         
         var sortableAtomsList = this.nodesOnTheScreen;
-        sortableAtomsList.sort(function(a, b){return distBetweenPoints(a.x, 0, a.y, 0)-distBetweenPoints(b.x, 0, b.y, 0)});
+        sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)});
         
         sortableAtomsList.forEach(molecule => {
             generatedReadme = generatedReadme.concat(molecule.requestReadme());
@@ -259,7 +263,7 @@ class Molecule extends Atom{
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(JSON.parse(atom), moleculeList, availableTypes);
+            this.placeAtom(JSON.parse(atom), moleculeList, GlobalVariables.availableTypes);
         });
         
         //reload the molecule object to prevent persistence issues

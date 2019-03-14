@@ -1,4 +1,6 @@
-class Extrude extends Atom{
+import Atom from '../prototypes/atom'
+
+export default class Extrude extends Atom{
     
     constructor(values){
         

@@ -21,10 +21,10 @@
     <!-- The menu for creating a new drawing node -->
     <ul class="menu ">
         <div class="tab">
-            <button class="tablinks" id="localTab" onclick="openTab(event, 'menuList')">Local</button>
-            <button class="tablinks" id="githubTab" onclick="openTab(event, 'githubList')">GitHub</button>
+            <button class="tablinks" id="localTab" >Local</button>
+            <button class="tablinks" id="githubTab" >GitHub</button>
         </div>
-        <input type="text" id="menuInput" onfocusout="this.value=''" onkeyup="searchMenu(event)" placeholder="Search for atom..", class = "menu_search">
+        <input type="text" id="menuInput" onfocusout="this.value=''" placeholder="Search for atom..", class = "menu_search">
         <ul id="menuList" class = "menu_list tabcontent">
         </ul>
         <ul id="githubList" class = "menu_list tabcontent">
@@ -51,7 +51,7 @@
             <br>
             <form class="login-form">
               <!--Credit to https://codepen.io/colorlib/pen/rxddKy -->
-              <button type="button" onclick="tryLogin()">Login To GitHub</button>
+              <button type="button" id = "loginButton" >Login To GitHub</button>
               <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
             </form>
           </div>
@@ -75,35 +75,10 @@
         </div>
     </div>
     
-    
-    <script src="/min.js"></script>
+    <script src="/js/min.js"></script>
     <script src="/js/octokit-rest.min.js"></script>
-    <script src="/js/githubOauth.js"></script>
     <script src="/js/oauth.js"></script>
-    <script src="/js/BOM.js"></script>
-    <script src="/js/molecules/prototypes.js"></script>
-    <script src="/js/molecules/input.js"></script>
-    <script src="/js/molecules/output.js"></script>
-    <script src="/js/molecules/constant.js"></script>
-    <script src="/js/molecules/molecule.js"></script>
-    <script src="/js/molecules/rectangle.js"></script>
-    <script src="/js/molecules/regularPolygon.js"></script>
-    <script src="/js/molecules/shrinkwrap.js"></script>
-    <script src="/js/molecules/circle.js"></script>
-    <script src="/js/molecules/extrude.js"></script>
-    <script src="/js/molecules/readme.js"></script>
-    <script src="/js/molecules/equation.js"></script>
-    <script src="/js/molecules/translate.js"></script>
-    <script src="/js/molecules/rotate.js"></script>
-    <script src="/js/molecules/union.js"></script>
-    <script src="/js/molecules/mirror.js"></script>
-    <script src="/js/molecules/scale.js"></script>
-    <script src="/js/molecules/intersection.js"></script>
-    <script src="/js/molecules/difference.js"></script>
-    <script src="/js/molecules/githubmolecule.js"></script>
-    <script src="/circular-json.js"></script>
-    <script src="/js/molecules/menu.js"></script>
-    <script src="/flowDraw.js"></script>
-    <script type="text/javascript" src="./js/canvas.bundle.js"></script>
-<script type="text/javascript" src="./js/canvas.bundle.js"></script></body>
+    <script src="/js/flowDraw.bundle.js"></script>
+    
+</body>
 </html>

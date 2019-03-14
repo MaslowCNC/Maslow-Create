@@ -1,4 +1,6 @@
-class Equation extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Equation extends Atom {
     
     constructor(values){
         super(values);
