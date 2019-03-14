@@ -35,5 +35,5 @@ module.exports = {
         })
     ],
     watch: true,
-    devtool: 'inline-source-map'
+    devtool: 'nosources-source-map'
 }

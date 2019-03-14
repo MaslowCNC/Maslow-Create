@@ -96,21 +96,9 @@ function init() {
         topLevel: true, 
         name: "Maslow Create",
         atomType: "Molecule",
-        uniqueID: generateUniqueID()
+        uniqueID: GlobalVariables.generateUniqueID()
     });
     
-}
-
-function generateUniqueID(){
-    return Math.floor(Math.random()*900000) + 100000;
-}
-
-function distBetweenPoints(x1, x2, y1, y2){
-    var a2 = Math.pow(x1 - x2, 2);
-    var b2 = Math.pow(y1 - y2, 2);
-    var dist = Math.sqrt(a2 + b2);
-    
-    return dist;
 }
 
 // Animation Loop

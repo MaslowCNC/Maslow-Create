@@ -1,4 +1,7 @@
-class AttachmentPoint {
+import Connector from './connector'
+import GlobalVariables from '../globalvariables'
+
+export default class AttachmentPoint {
     constructor(values){
  
         this.defaultRadius = 8;
@@ -35,55 +38,55 @@ class AttachmentPoint {
     draw() {
 
         var txt = this.name;
-        var textWidth = c.measureText(txt).width;
+        var textWidth = GlobalVariables.c.measureText(txt).width;
         var bubbleColor = "#008080";
         var scaleRadiusDown = this.radius*.7;
         var halfRadius = this.radius*.5;
         
         if (this.showHoverText){
             if(this.type == "input"){
-                c.beginPath();
-                c.fillStyle = bubbleColor;
+                GlobalVariables.c.beginPath();
+                GlobalVariables.c.fillStyle = bubbleColor;
                     if (this.radius == this.expandedRadius) {
-                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
-                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                    GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
+                    GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
                 }
                     else if(this.radius == this.defaultRadius){
-                    c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
-                    c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
+                    GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
+                    GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
                 }
-                c.fill();
-                c.beginPath();
-                c.fillStyle = this.parentMolecule.defaultColor;
-                c.textAlign = "end";
-                c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
-                c.fill();
-                c.closePath();
+                GlobalVariables.c.fill();
+                GlobalVariables.c.beginPath();
+                GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor;
+                GlobalVariables.c.textAlign = "end";
+                GlobalVariables.c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
+                GlobalVariables.c.fill();
+                GlobalVariables.c.closePath();
             }
             else{
-                c.beginPath();
-                c.fillStyle = bubbleColor;
-                c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
-                c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
-                c.fill();
-                c.closePath();
-                c.beginPath();
-                c.fillStyle = this.parentMolecule.defaultColor;
-                c.textAlign = "start"; 
-                c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
-                c.fill();
-                c.closePath();
+                GlobalVariables.c.beginPath();
+                GlobalVariables.c.fillStyle = bubbleColor;
+                GlobalVariables.c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
+                GlobalVariables.c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
+                GlobalVariables.c.fill();
+                GlobalVariables.c.closePath();
+                GlobalVariables.c.beginPath();
+                GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor;
+                GlobalVariables.c.textAlign = "start"; 
+                GlobalVariables.c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
+                GlobalVariables.c.fill();
+                GlobalVariables.c.closePath();
             }
         }
-        c.beginPath();
-        c.fillStyle = this.parentMolecule.color;
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fill();
-        c.closePath();  
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.parentMolecule.color;
+        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        GlobalVariables.c.fill();
+        GlobalVariables.c.closePath();  
     }
 
     clickDown(x,y){
-        if(distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+        if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
             
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = new Connector({
@@ -121,7 +124,7 @@ class AttachmentPoint {
     clickMove(x,y){
         
         //expand if touched by mouse
-        var distFromCursor = distBetweenPoints (this.x, x, this.y, y);
+        var distFromCursor = GlobalVariables.distBetweenPoints (this.x, x, this.y, y);
         
         //If we are hovering over the attachment point, indicate that by making it big
         if (distFromCursor < this.defaultRadius){
@@ -153,7 +156,7 @@ class AttachmentPoint {
                 this.offsetY = this.hoverOffsetY;  
                  }
             this.showHoverText = true;
-            this.hoverDetectRadius = this.defaultRadius + distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
+            this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
 
             }
         else{
@@ -189,7 +192,7 @@ class AttachmentPoint {
     
     wasConnectionMade(x,y, connector){
         //this function returns itself if the coordinates passed in are within itself
-        if (distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
+        if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
             
             if(this.connectors.length > 0){ //Don't accept a second connection to an input
                 return false;

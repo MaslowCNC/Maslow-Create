@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Constant extends Atom{
     
@@ -63,12 +64,12 @@ export default class Constant extends Atom{
             child.draw();       
         });
         
-        c.beginPath();
-        c.fillStyle = this.color;
-        c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
-        c.textAlign = "start"; 
-        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
-        c.fill();
-        c.closePath();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.color;
+        GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
+        GlobalVariables.c.textAlign = "start"; 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        GlobalVariables.c.fill();
+        GlobalVariables.c.closePath();
     }
 }

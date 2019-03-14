@@ -18,7 +18,9 @@ import Mirror from './molecules/mirror.js'
 import GitHubMolecule from './molecules/githubmolecule.js'
 import Output from './molecules/output.js'
 
-export default class GlobalVariables{
+import GitHubModule from './githubOauth'
+
+class GlobalVariables{
     constructor(){
         this.canvas = null
         this.c = null
@@ -53,5 +55,23 @@ export default class GlobalVariables{
         this.topLevelMolecule;
         
         this.sideBar = document.querySelector('.sideBar');
+        
+        this.gitHub = new GitHubModule();
+        
+        console.log("global variables constructor ran");
+    }
+    
+    generateUniqueID(){
+        return Math.floor(Math.random()*900000) + 100000;
+    }
+
+    distBetweenPoints(x1, x2, y1, y2){
+        var a2 = Math.pow(x1 - x2, 2);
+        var b2 = Math.pow(y1 - y2, 2);
+        var dist = Math.sqrt(a2 + b2);
+        
+        return dist;
     }
 }
+
+export default (new GlobalVariables);

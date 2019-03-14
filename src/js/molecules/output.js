@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 
 export default class Output extends Atom {
@@ -34,18 +35,18 @@ export default class Output extends Atom {
             child.draw();       
         });
         
-        c.beginPath();
-        c.fillStyle = this.color;
-        c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
-        c.textAlign = "end"; 
-        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
-        c.fill();
-        c.closePath();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.fillStyle = this.color;
+        GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height);
+        GlobalVariables.c.textAlign = "end"; 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        GlobalVariables.c.fill();
+        GlobalVariables.c.closePath();
         
-        c.beginPath();
-        c.moveTo(this.x + this.radius, this.y - this.height/2);
-        c.lineTo(this.x + this.radius + 10, this.y);
-        c.lineTo(this.x + this.radius, this.y + this.height/2);
-        c.fill();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.moveTo(this.x + this.radius, this.y - this.height/2);
+        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y);
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2);
+        GlobalVariables.c.fill();
     }
 }

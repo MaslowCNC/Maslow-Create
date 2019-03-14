@@ -1,4 +1,4 @@
-class Connector {
+export default class Connector {
     constructor(values){
         
         this.isMoving = true;

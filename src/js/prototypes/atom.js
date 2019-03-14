@@ -1,3 +1,6 @@
+import AttachmentPoint from './attachmentpoint'
+import GlobalVariables from '../globalvariables'
+
 export default class Atom {
 
     constructor(values){
@@ -99,7 +102,7 @@ export default class Atom {
             valueType: valueType,
             name: name,
             value: defaultValue,
-            uniqueID: generateUniqueID(),
+            uniqueID: GlobalVariables.generateUniqueID(),
             atomType: "AttachmentPoint"
         });
         target.children.push(input);
@@ -374,7 +377,7 @@ export default class Atom {
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "true");
         valueTextDiv.setAttribute("class", "sidebar-subitem");
-        var thisID = label+generateUniqueID();
+        var thisID = label+GlobalVariables.generateUniqueID();
         valueTextDiv.setAttribute("id", thisID);
         
         
@@ -428,7 +431,7 @@ export default class Atom {
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "false");
         valueTextDiv.setAttribute("class", "sidebar-subitem");
-        var thisID = label+generateUniqueID();
+        var thisID = label+GlobalVariables.generateUniqueID();
         valueTextDiv.setAttribute("id", thisID);
         
 
