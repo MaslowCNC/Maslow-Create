@@ -42,8 +42,6 @@ class Menu {
     }
     
     placeNewNode(ev){
-        console.trace();
-        this.hidemenu();
         let clr = ev.target.id;
         
         GlobalVariables.currentMolecule.placeAtom({
