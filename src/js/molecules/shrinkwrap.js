@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class ShrinkWrap extends Atom{
     
@@ -89,7 +90,7 @@ export default class ShrinkWrap extends Atom{
         
         //Add or delete ports as needed
         if(this.howManyInputPortsAvailable() == 0){ //We need to make a new port available
-            this.addIO("input", "2D shape " + generateUniqueID(), this, "geometry", "");
+            this.addIO("input", "2D shape " + GlobalVariables.generateUniqueID(), this, "geometry", "");
         }
         if(this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1){  //We need to remove the empty port
             this.deleteEmptyPort();

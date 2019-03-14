@@ -17,27 +17,28 @@ class Menu {
             newElement.appendChild(text); 
             this.menuList.appendChild(newElement); 
             
-            
             //Add function to call when atom is selected
             document.getElementById(instance.atomType).addEventListener('click', (e) => {
                this.placeNewNode(e);
             });
-            //Add functions to call when tabs are clicked
-            document.getElementById("localTab").addEventListener("mousedown", (e) => {
-               this.openTab(e, "menuList");
-            });
-            document.getElementById("githubTab").addEventListener("mousedown", (e) => {
-               this.openTab(e, "githubList");
-            });
-            //Add function call when background is right clicked
-            document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
-               this.showmenu(e);
-            });
-            //Add function call to search when typing
-            document.getElementById('menuInput').addEventListener('keyup', (e) => {
-               this.searchMenu(e);
-            });
+            
         }
+        
+        //Add functions to call when tabs are clicked
+        document.getElementById("localTab").addEventListener("click", (e) => {
+            this.openTab(e, "menuList");
+        });
+        document.getElementById("githubTab").addEventListener("click", (e) => {
+           this.openTab(e, "githubList");
+        });
+        //Add function call when background is right clicked
+        document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
+           this.showmenu(e);
+        });
+        //Add function call to search when typing
+        document.getElementById('menuInput').addEventListener('keyup', (e) => {
+           this.searchMenu(e);
+        });
     }
     
     placeNewNode(ev){
@@ -71,7 +72,6 @@ class Menu {
     showmenu(ev){
         //Open the default tab
         document.getElementById("localTab").click();
-        console.log("show menu ran");
         
         //stop the real right click menu
         ev.preventDefault(); 

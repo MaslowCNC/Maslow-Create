@@ -116,8 +116,6 @@ _globalvariables2.default.c = _globalvariables2.default.canvas.getContext('2d');
 _globalvariables2.default.canvas.width = innerWidth;
 _globalvariables2.default.canvas.height = innerHeight / 2;
 
-console.log("this is the top of flow draw");
-
 var lowerHalfOfScreen = document.querySelector('.flex-parent');
 lowerHalfOfScreen.setAttribute("style", "height:" + innerHeight / 2.1 + "px");
 
@@ -892,9 +890,6 @@ var GlobalVariables = function () {
         this.sideBar = document.querySelector('.sideBar');
 
         this.gitHub = new _githubOauth2.default();
-
-        console.log("global variables constructor ran");
-        console.trace();
     }
 
     _createClass(GlobalVariables, [{
@@ -969,22 +964,23 @@ var Menu = function () {
             document.getElementById(instance.atomType).addEventListener('click', function (e) {
                 _this.placeNewNode(e);
             });
-            //Add functions to call when tabs are clicked
-            document.getElementById("localTab").addEventListener("mousedown", function (e) {
-                _this.openTab(e, "menuList");
-            });
-            document.getElementById("githubTab").addEventListener("mousedown", function (e) {
-                _this.openTab(e, "githubList");
-            });
-            //Add function call when background is right clicked
-            document.getElementById('flow-canvas').addEventListener('contextmenu', function (e) {
-                _this.showmenu(e);
-            });
-            //Add function call to search when typing
-            document.getElementById('menuInput').addEventListener('keyup', function (e) {
-                _this.searchMenu(e);
-            });
         }
+
+        //Add functions to call when tabs are clicked
+        document.getElementById("localTab").addEventListener("click", function (e) {
+            _this.openTab(e, "menuList");
+        });
+        document.getElementById("githubTab").addEventListener("click", function (e) {
+            _this.openTab(e, "githubList");
+        });
+        //Add function call when background is right clicked
+        document.getElementById('flow-canvas').addEventListener('contextmenu', function (e) {
+            _this.showmenu(e);
+        });
+        //Add function call to search when typing
+        document.getElementById('menuInput').addEventListener('keyup', function (e) {
+            _this.searchMenu(e);
+        });
     }
 
     _createClass(Menu, [{
@@ -1022,7 +1018,6 @@ var Menu = function () {
         value: function showmenu(ev) {
             //Open the default tab
             document.getElementById("localTab").click();
-            console.log("show menu ran");
 
             //stop the real right click menu
             ev.preventDefault();
@@ -2077,7 +2072,7 @@ var Molecule = function (_Atom) {
 
             var clickProcessed = false;
 
-            var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+            var distFromClick = _globalvariables2.default.distBetweenPoints(x, this.x, y, this.y);
 
             if (distFromClick < this.radius) {
                 _globalvariables2.default.currentMolecule = this; //set this to be the currently displayed molecule
@@ -2212,7 +2207,7 @@ var Molecule = function (_Atom) {
 
             var sortableAtomsList = this.nodesOnTheScreen;
             sortableAtomsList.sort(function (a, b) {
-                return distBetweenPoints(a.x, 0, a.y, 0) - distBetweenPoints(b.x, 0, b.y, 0);
+                return _globalvariables2.default.distBetweenPoints(a.x, 0, a.y, 0) - _globalvariables2.default.distBetweenPoints(b.x, 0, b.y, 0);
             });
 
             sortableAtomsList.forEach(function (molecule) {
@@ -2884,6 +2879,10 @@ var _atom = __webpack_require__(/*! ../prototypes/atom */ "./src/js/prototypes/a
 
 var _atom2 = _interopRequireDefault(_atom);
 
+var _globalvariables = __webpack_require__(/*! ../globalvariables */ "./src/js/globalvariables.js");
+
+var _globalvariables2 = _interopRequireDefault(_globalvariables);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2923,7 +2922,7 @@ var ShrinkWrap = function (_Atom) {
     }
 
     _createClass(ShrinkWrap, [{
-        key: "updateCodeBlock",
+        key: 'updateCodeBlock',
         value: function updateCodeBlock() {
             var _this2 = this;
 
@@ -2990,7 +2989,7 @@ var ShrinkWrap = function (_Atom) {
             //Add or delete ports as needed
             if (this.howManyInputPortsAvailable() == 0) {
                 //We need to make a new port available
-                this.addIO("input", "2D shape " + generateUniqueID(), this, "geometry", "");
+                this.addIO("input", "2D shape " + _globalvariables2.default.generateUniqueID(), this, "geometry", "");
             }
             if (this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1) {
                 //We need to remove the empty port
@@ -2999,7 +2998,7 @@ var ShrinkWrap = function (_Atom) {
             }
         }
     }, {
-        key: "howManyInputPortsAvailable",
+        key: 'howManyInputPortsAvailable',
         value: function howManyInputPortsAvailable() {
             var portsAvailable = 0;
             this.children.forEach(function (io) {
@@ -3011,7 +3010,7 @@ var ShrinkWrap = function (_Atom) {
             return portsAvailable;
         }
     }, {
-        key: "deleteEmptyPort",
+        key: 'deleteEmptyPort',
         value: function deleteEmptyPort() {
             var _this3 = this;
 
@@ -3022,9 +3021,9 @@ var ShrinkWrap = function (_Atom) {
             });
         }
     }, {
-        key: "serialize",
+        key: 'serialize',
         value: function serialize(savedObject) {
-            var thisAsObject = _get(ShrinkWrap.prototype.__proto__ || Object.getPrototypeOf(ShrinkWrap.prototype), "serialize", this).call(this, savedObject);
+            var thisAsObject = _get(ShrinkWrap.prototype.__proto__ || Object.getPrototypeOf(ShrinkWrap.prototype), 'serialize', this).call(this, savedObject);
 
             var ioValues = [];
             this.children.forEach(function (io) {
@@ -3047,16 +3046,16 @@ var ShrinkWrap = function (_Atom) {
             return thisAsObject;
         }
     }, {
-        key: "updateSidebar",
+        key: 'updateSidebar',
         value: function updateSidebar() {
             //Update the side bar to make it possible to change the molecule name
 
-            var valueList = _get(ShrinkWrap.prototype.__proto__ || Object.getPrototypeOf(ShrinkWrap.prototype), "updateSidebar", this).call(this);
+            var valueList = _get(ShrinkWrap.prototype.__proto__ || Object.getPrototypeOf(ShrinkWrap.prototype), 'updateSidebar', this).call(this);
 
             this.createDropDown(valueList, this, ["Closed", "Open", "Solid"], this.closedSelection, "End:");
         }
     }, {
-        key: "changeEquation",
+        key: 'changeEquation',
         value: function changeEquation(newValue) {
             this.closedSelection = parseInt(newValue);
             this.updateCodeBlock();

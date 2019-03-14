@@ -48,7 +48,7 @@ export default class Molecule extends Atom{
         
         var clickProcessed = false;
         
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
             GlobalVariables.currentMolecule = this; //set this to be the currently displayed molecule
@@ -176,7 +176,7 @@ export default class Molecule extends Atom{
         generatedReadme.push("## " + this.name);
         
         var sortableAtomsList = this.nodesOnTheScreen;
-        sortableAtomsList.sort(function(a, b){return distBetweenPoints(a.x, 0, a.y, 0)-distBetweenPoints(b.x, 0, b.y, 0)});
+        sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)});
         
         sortableAtomsList.forEach(molecule => {
             generatedReadme = generatedReadme.concat(molecule.requestReadme());

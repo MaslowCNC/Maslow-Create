@@ -10,8 +10,6 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
-console.log("this is the top of flow draw");
-
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
 

@@ -57,9 +57,6 @@ class GlobalVariables{
         this.sideBar = document.querySelector('.sideBar');
         
         this.gitHub = new GitHubModule();
-        
-        console.log("global variables constructor ran");
-        console.trace();
     }
     
     generateUniqueID(){
