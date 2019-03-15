@@ -1,4 +1,6 @@
-class Intersection extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Union extends Atom {
     
     constructor(values){
         
@@ -8,9 +10,9 @@ class Intersection extends Atom {
         this.addIO("input", "geometry2", this, "geometry", "");
         this.addIO("output", "geometry", this, "geometry", "");
         
-        this.name = "Intersection";
-        this.atomType = "Intersection";
-        this.defaultCodeBlock = "intersection(~geometry1~,~geometry2~)";
+        this.name = "Union";
+        this.atomType = "Union";
+        this.defaultCodeBlock = "union(~geometry1~,~geometry2~)";
         this.codeBlock = "";
         
         this.setValues(values);

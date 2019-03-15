@@ -1,4 +1,6 @@
-class Mirror extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Mirror extends Atom {
     
     constructor(values){
         

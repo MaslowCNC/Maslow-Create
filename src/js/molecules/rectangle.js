@@ -1,4 +1,6 @@
-class Rectangle extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Rectangle extends Atom {
 
     constructor(values){
         super(values)

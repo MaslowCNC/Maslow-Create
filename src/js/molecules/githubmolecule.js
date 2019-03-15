@@ -1,4 +1,6 @@
-class GitHubMolecule extends Molecule {
+import Molecule from '../molecules/molecule'
+
+export default class GitHubMolecule extends Molecule {
     
     constructor(values){
         super(values);
@@ -78,4 +80,18 @@ class GitHubMolecule extends Molecule {
         return object;
     }
     
+    updateSidebar(){
+        //updates the sidebar to display information about this node
+        
+        //remove everything in the sideBar now
+        while (sideBar.firstChild) {
+            sideBar.removeChild(sideBar.firstChild);
+        }
+        
+        //add the name as a title
+        var name = document.createElement('h1');
+        name.textContent = this.name;
+        name.setAttribute("style","text-align:center;");
+        sideBar.appendChild(name);
+    }
 }

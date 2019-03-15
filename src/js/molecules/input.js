@@ -1,4 +1,7 @@
-class Input extends Atom {
+import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
+
+export default class Input extends Atom {
     
     constructor(values){
         super (values);
@@ -36,20 +39,20 @@ class Input extends Atom {
         });
         
         
-        c.fillStyle = this.color;
+        GlobalVariables.c.fillStyle = this.color;
         
-        c.textAlign = "start"; 
-        c.fillText(this.name, this.x + this.radius, this.y-this.radius);
+        GlobalVariables.c.textAlign = "start"; 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius);
 
         
-        c.beginPath();
-        c.moveTo(this.x - this.radius, this.y - this.height/2);
-        c.lineTo(this.x - this.radius + 10, this.y);
-        c.lineTo(this.x - this.radius, this.y + this.height/2);
-        c.lineTo(this.x + this.radius, this.y + this.height/2);
-        c.lineTo(this.x + this.radius, this.y - this.height/2);
-        c.fill();
-        c.closePath();
+        GlobalVariables.c.beginPath();
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height/2);
+        GlobalVariables.c.lineTo(this.x - this.radius + 10, this.y);
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height/2);
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2);
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2);
+        GlobalVariables.c.fill();
+        GlobalVariables.c.closePath();
 
     }
     

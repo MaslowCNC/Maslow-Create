@@ -1,6 +1,8 @@
-class Union extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Difference extends Atom{
     
-    constructor(values){
+    constructor (values){
         
         super(values);
         
@@ -8,9 +10,9 @@ class Union extends Atom {
         this.addIO("input", "geometry2", this, "geometry", "");
         this.addIO("output", "geometry", this, "geometry", "");
         
-        this.name = "Union";
-        this.atomType = "Union";
-        this.defaultCodeBlock = "union(~geometry1~,~geometry2~)";
+        this.name = "Difference";
+        this.atomType = "Difference";
+        this.defaultCodeBlock = "difference(~geometry1~,~geometry2~)";
         this.codeBlock = "";
         
         this.setValues(values);

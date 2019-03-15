@@ -1,4 +1,6 @@
-class Rotate extends Atom {
+import Atom from '../prototypes/atom'
+
+export default class Rotate extends Atom {
     
     constructor(values){
         

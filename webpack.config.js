@@ -3,10 +3,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     mode: 'development',
-    entry: './src/canvas.js',
+    entry: './src/flowDraw.js',
     output: {
         path: __dirname + '/dist/',
-        filename: './js/canvas.bundle.js'
+        filename: './js/flowDraw.bundle.js'
     },
     module: {
         rules: [
@@ -31,9 +31,10 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: 'src/index.html'
+            template: 'src/index.html',
+            inject: false
         })
     ],
     watch: true,
-    devtool: 'source-map'
+    devtool: 'cheap-module-source-map'
 }
