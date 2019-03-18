@@ -218,6 +218,36 @@ animate();
 
 /***/ }),
 
+/***/ "./src/js/BOM.js":
+/*!***********************!*\
+  !*** ./src/js/BOM.js ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BOMEntry = function BOMEntry() {
+    _classCallCheck(this, BOMEntry);
+
+    this.BOMitemName = "name";
+    this.numberNeeded = 0;
+    this.costUSD = 0;
+    this.source = "www.example.com";
+    this.totalNeeded = this.numberNeeded; //Scaled by the number of this instance
+};
+
+exports.default = BOMEntry;
+
+/***/ }),
+
 /***/ "./src/js/githubOauth.js":
 /*!*******************************!*\
   !*** ./src/js/githubOauth.js ***!
@@ -1002,6 +1032,7 @@ var Menu = function () {
     }, {
         key: 'placeGitHubMolecule',
         value: function placeGitHubMolecule(ev) {
+
             this.hidemenu();
             var clr = ev.target.id;
 
@@ -1084,33 +1115,31 @@ var Menu = function () {
 
                     this.githubList = document.getElementById("githubList");
 
-                    oldResults = document.getElementsByClassName("menu-item");
+                    var oldResults = document.getElementsByClassName("menu-item");
                     for (i = 0; i < oldResults.length; i++) {
                         oldResults[i].style.display = "none";
                     }
 
-                    octokit.search.repos({
-                        q: input,
+                    _globalvariables2.default.gitHub.octokit.search.repos({ //FIXME: This should be a function exported from the GitHub objects
+                        q: input + ' topic:maslowcreate-molecule',
                         sort: "stars",
                         per_page: 100,
-                        topic: "maslowcreate-molecule",
                         page: 1,
                         headers: {
                             accept: 'application/vnd.github.mercy-preview+json'
                         }
                     }).then(function (result) {
                         result.data.items.forEach(function (item) {
-                            if (item.topics.includes("maslowcreate-molecule")) {
+                            var newElement = document.createElement("LI");
+                            var text = document.createTextNode(item.name);
+                            newElement.setAttribute("class", "menu-item");
+                            newElement.setAttribute("id", item.id);
+                            newElement.appendChild(text);
+                            _this2.githubList.appendChild(newElement);
 
-                                var newElement = document.createElement("LI");
-                                var text = document.createTextNode(item.name);
-                                newElement.setAttribute("class", "menu-item");
-                                newElement.setAttribute("id", item.id);
-                                newElement.appendChild(text);
-                                _this2.githubList.appendChild(newElement);
-
-                                document.getElementById(item.id).addEventListener('click', placeGitHubMolecule);
-                            }
+                            document.getElementById(item.id).addEventListener('click', function (e) {
+                                _this2.placeGitHubMolecule(e);
+                            });
                         });
                     });
                 }
@@ -1137,6 +1166,9 @@ var Menu = function () {
             // Show the current tab, and add an "active" class to the button that opened the tab
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
+
+            //Click on the search bar so that when you start typing it shows updateCommands
+            document.getElementById('menuInput').focus();
         }
     }]);
 
@@ -1606,6 +1638,10 @@ var _molecule = __webpack_require__(/*! ../molecules/molecule */ "./src/js/molec
 
 var _molecule2 = _interopRequireDefault(_molecule);
 
+var _globalvariables = __webpack_require__(/*! ../globalvariables */ "./src/js/globalvariables.js");
+
+var _globalvariables2 = _interopRequireDefault(_globalvariables);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1636,7 +1672,7 @@ var GitHubMolecule = function (_Molecule) {
     }
 
     _createClass(GitHubMolecule, [{
-        key: "doubleClick",
+        key: 'doubleClick',
         value: function doubleClick(x, y) {
             //Prevent you from being able to double click into a github molecule
 
@@ -1651,12 +1687,12 @@ var GitHubMolecule = function (_Molecule) {
             return clickProcessed;
         }
     }, {
-        key: "loadProjectByID",
+        key: 'loadProjectByID',
         value: function loadProjectByID(id) {
             var _this2 = this;
 
             //Get the repo by ID
-            octokit.request('GET /repositories/:id', { id: id }).then(function (result) {
+            _globalvariables2.default.gitHub.octokit.request('GET /repositories/:id', { id: id }).then(function (result) {
 
                 //Find out the owners info;
 
@@ -1665,7 +1701,7 @@ var GitHubMolecule = function (_Molecule) {
 
                 //Get the file contents
 
-                octokit.repos.getContents({
+                _globalvariables2.default.gitHub.octokit.repos.getContents({
                     owner: user,
                     repo: repoName,
                     path: 'project.maslowcreate'
@@ -1689,7 +1725,7 @@ var GitHubMolecule = function (_Molecule) {
             });
         }
     }, {
-        key: "serialize",
+        key: 'serialize',
         value: function serialize(savedObject) {
 
             //Return a placeholder for this molecule
@@ -1705,9 +1741,11 @@ var GitHubMolecule = function (_Molecule) {
             return object;
         }
     }, {
-        key: "updateSidebar",
+        key: 'updateSidebar',
         value: function updateSidebar() {
             //updates the sidebar to display information about this node
+
+            var sideBar = document.querySelector('.sideBar');
 
             //remove everything in the sideBar now
             while (sideBar.firstChild) {
@@ -1771,7 +1809,7 @@ var Input = function (_Atom) {
 
         var _this = _possibleConstructorReturn(this, (Input.__proto__ || Object.getPrototypeOf(Input)).call(this, values));
 
-        _this.name = "Input" + generateUniqueID();
+        _this.name = "Input" + _globalvariables2.default.generateUniqueID();
         _this.codeBlock = "";
         _this.type = "input";
         _this.atomType = "Input";
@@ -1779,6 +1817,8 @@ var Input = function (_Atom) {
         _this.radius = 15;
 
         _this.setValues(values);
+
+        _this.oldName = _this.name;
 
         _this.addIO("output", "number or geometry", _this, "geometry", "");
 
@@ -1801,6 +1841,11 @@ var Input = function (_Atom) {
     }, {
         key: 'draw',
         value: function draw() {
+
+            //Check if the name has been updated
+            if (this.name != this.oldName) {
+                this.updateParentName();
+            }
 
             this.children.forEach(function (child) {
                 child.draw();
@@ -1832,19 +1877,20 @@ var Input = function (_Atom) {
             _get(Input.prototype.__proto__ || Object.getPrototypeOf(Input.prototype), 'deleteNode', this).call(this);
         }
     }, {
-        key: 'setValue',
-        value: function setValue(theNewName) {
+        key: 'updateParentName',
+        value: function updateParentName() {
             var _this2 = this;
 
-            //Called by the sidebar to set the name
-
+            //Callled when the name has changed to updated the name of the parent molecule IO
+            console.log("updating parent names");
             //Run through the parent molecule and find the input with the same name
             this.parent.children.forEach(function (child) {
-                if (child.name == _this2.name) {
-                    _this2.name = theNewName;
-                    child.name = theNewName;
+                if (child.name == _this2.oldName) {
+                    console.log("matching parent IO found for: " + _this2.oldName);
+                    child.name = _this2.name;
                 }
             });
+            this.oldName = this.name;
         }
     }, {
         key: 'setOutput',
@@ -2143,7 +2189,9 @@ var Molecule = function (_Atom) {
 
                 this.createButton(valueList, this, "Export To GitHub", this.exportToGithub);
             } else {
-                this.createButton(valueList, this, "Load A Different Project", _globalvariables2.default.gitHub.showProjectsToLoad);
+                this.createButton(valueList, this, "Load A Different Project", function (e) {
+                    _globalvariables2.default.gitHub.showProjectsToLoad();
+                });
             }
 
             this.createBOM(valueList, this, this.BOMlist);
@@ -2165,7 +2213,7 @@ var Molecule = function (_Atom) {
         key: 'exportToGithub',
         value: function exportToGithub(self) {
             //Export this molecule to github
-            exportCurrentMoleculeToGithub(self);
+            _globalvariables2.default.gitHub.exportCurrentMoleculeToGithub(self);
         }
     }, {
         key: 'replaceThisMoleculeWithGithub',
@@ -2185,7 +2233,7 @@ var Molecule = function (_Atom) {
                 name: this.name,
                 atomType: "GitHubMolecule",
                 projectID: githubID,
-                uniqueID: generateUniqueID()
+                uniqueID: _globalvariables2.default.generateUniqueID()
             }, null, _globalvariables2.default.availableTypes);
 
             //Then delete the old molecule which has been replaced
@@ -2326,7 +2374,8 @@ var Molecule = function (_Atom) {
 
                     //reassign the name of the Inputs to preserve linking
                     if (atom.atomType == "Input" && typeof newAtomObj.name !== 'undefined') {
-                        atom.setValue(newAtomObj.name);
+                        atom.name = newAtomObj.name;
+                        atom.draw(); //The poling happens in draw :roll_eyes:
                     }
 
                     //If this is a molecule, deserialize it
@@ -3204,6 +3253,10 @@ var _globalvariables = __webpack_require__(/*! ../globalvariables */ "./src/js/g
 
 var _globalvariables2 = _interopRequireDefault(_globalvariables);
 
+var _BOM = __webpack_require__(/*! ../BOM */ "./src/js/BOM.js");
+
+var _BOM2 = _interopRequireDefault(_BOM);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3773,7 +3826,7 @@ var Atom = function () {
         value: function addBOMEntry(self) {
             console.log("add a bom entry");
 
-            self.BOMlist.push(new BOMEntry());
+            self.BOMlist.push(new _BOM2.default());
 
             self.updateSidebar();
         }

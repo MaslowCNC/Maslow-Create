@@ -55,6 +55,7 @@ class Menu {
     }
 
     placeGitHubMolecule(ev){
+        
         this.hidemenu();
         let clr = ev.target.id;
         
@@ -133,33 +134,31 @@ class Menu {
                 
                 this.githubList = document.getElementById("githubList");
                 
-                oldResults = document.getElementsByClassName("menu-item");
+                var oldResults = document.getElementsByClassName("menu-item");
                 for (i = 0; i < oldResults.length; i++) {
                     oldResults[i].style.display = "none";
                 }
                 
-                octokit.search.repos({
-                    q: input,
+                GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+                    q: input + ' topic:maslowcreate-molecule',
                     sort: "stars",
                     per_page: 100,
-                    topic: "maslowcreate-molecule",
                     page: 1,
                     headers: {
                         accept: 'application/vnd.github.mercy-preview+json'
                     }
                 }).then(result => {
                     result.data.items.forEach(item => {
-                        if(item.topics.includes("maslowcreate-molecule")){
+                        var newElement = document.createElement("LI");
+                        var text = document.createTextNode(item.name);
+                        newElement.setAttribute("class", "menu-item");
+                        newElement.setAttribute("id", item.id);
+                        newElement.appendChild(text); 
+                        this.githubList.appendChild(newElement); 
                         
-                            var newElement = document.createElement("LI");
-                            var text = document.createTextNode(item.name);
-                            newElement.setAttribute("class", "menu-item");
-                            newElement.setAttribute("id", item.id);
-                            newElement.appendChild(text); 
-                            this.githubList.appendChild(newElement); 
-                            
-                            document.getElementById(item.id).addEventListener('click', placeGitHubMolecule);
-                        }
+                        document.getElementById(item.id).addEventListener('click', (e) => {
+                           this.placeGitHubMolecule(e);
+                        });
                     });
                 })
             }
@@ -185,6 +184,9 @@ class Menu {
       // Show the current tab, and add an "active" class to the button that opened the tab
       document.getElementById(tabName).style.display = "block";
       evt.currentTarget.className += " active";
+      
+      //Click on the search bar so that when you start typing it shows updateCommands
+      document.getElementById('menuInput').focus();
     }
 }
 
