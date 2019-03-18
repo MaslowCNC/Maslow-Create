@@ -55,6 +55,7 @@ class Menu {
     }
 
     placeGitHubMolecule(ev){
+        console.log("place molecule ran");
         this.hidemenu();
         let clr = ev.target.id;
         
@@ -139,7 +140,7 @@ class Menu {
                 }
                 
                 GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
-                    q: 'topic:react',
+                    q: input + ' topic:maslowcreate-molecule',
                     sort: "stars",
                     per_page: 100,
                     page: 1,
@@ -150,17 +151,14 @@ class Menu {
                     console.log("Search results: ");
                     console.log(result);
                     result.data.items.forEach(item => {
-                        if(item.topics.includes("maslowcreate-molecule")){
+                        var newElement = document.createElement("LI");
+                        var text = document.createTextNode(item.name);
+                        newElement.setAttribute("class", "menu-item");
+                        newElement.setAttribute("id", item.id);
+                        newElement.appendChild(text); 
+                        this.githubList.appendChild(newElement); 
                         
-                            var newElement = document.createElement("LI");
-                            var text = document.createTextNode(item.name);
-                            newElement.setAttribute("class", "menu-item");
-                            newElement.setAttribute("id", item.id);
-                            newElement.appendChild(text); 
-                            this.githubList.appendChild(newElement); 
-                            
-                            document.getElementById(item.id).addEventListener('click', placeGitHubMolecule);
-                        }
+                        document.getElementById(item.id).addEventListener('click', this.placeGitHubMolecule);
                     });
                 })
             }
@@ -186,6 +184,10 @@ class Menu {
       // Show the current tab, and add an "active" class to the button that opened the tab
       document.getElementById(tabName).style.display = "block";
       evt.currentTarget.className += " active";
+      
+      //Click on the search bar so that when you start typing it shows updateCommands
+      console.log(document.getElementById('menuInput'));
+      document.getElementById('menuInput').focus();
     }
 }
 
