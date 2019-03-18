@@ -133,21 +133,22 @@ class Menu {
                 
                 this.githubList = document.getElementById("githubList");
                 
-                oldResults = document.getElementsByClassName("menu-item");
+                var oldResults = document.getElementsByClassName("menu-item");
                 for (i = 0; i < oldResults.length; i++) {
                     oldResults[i].style.display = "none";
                 }
                 
-                octokit.search.repos({
-                    q: input,
+                GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+                    q: 'topic:react',
                     sort: "stars",
                     per_page: 100,
-                    topic: "maslowcreate-molecule",
                     page: 1,
                     headers: {
                         accept: 'application/vnd.github.mercy-preview+json'
                     }
                 }).then(result => {
+                    console.log("Search results: ");
+                    console.log(result);
                     result.data.items.forEach(item => {
                         if(item.topics.includes("maslowcreate-molecule")){
                         

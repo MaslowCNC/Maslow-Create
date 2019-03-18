@@ -1084,21 +1084,22 @@ var Menu = function () {
 
                     this.githubList = document.getElementById("githubList");
 
-                    oldResults = document.getElementsByClassName("menu-item");
+                    var oldResults = document.getElementsByClassName("menu-item");
                     for (i = 0; i < oldResults.length; i++) {
                         oldResults[i].style.display = "none";
                     }
 
-                    octokit.search.repos({
-                        q: input,
+                    _globalvariables2.default.gitHub.octokit.search.repos({ //FIXME: This should be a function exported from the GitHub objects
+                        q: 'topic:react',
                         sort: "stars",
                         per_page: 100,
-                        topic: "maslowcreate-molecule",
                         page: 1,
                         headers: {
                             accept: 'application/vnd.github.mercy-preview+json'
                         }
                     }).then(function (result) {
+                        console.log("Search results: ");
+                        console.log(result);
                         result.data.items.forEach(function (item) {
                             if (item.topics.includes("maslowcreate-molecule")) {
 
@@ -1606,6 +1607,10 @@ var _molecule = __webpack_require__(/*! ../molecules/molecule */ "./src/js/molec
 
 var _molecule2 = _interopRequireDefault(_molecule);
 
+var _globalvariables = __webpack_require__(/*! ../globalvariables */ "./src/js/globalvariables.js");
+
+var _globalvariables2 = _interopRequireDefault(_globalvariables);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1636,7 +1641,7 @@ var GitHubMolecule = function (_Molecule) {
     }
 
     _createClass(GitHubMolecule, [{
-        key: "doubleClick",
+        key: 'doubleClick',
         value: function doubleClick(x, y) {
             //Prevent you from being able to double click into a github molecule
 
@@ -1651,12 +1656,12 @@ var GitHubMolecule = function (_Molecule) {
             return clickProcessed;
         }
     }, {
-        key: "loadProjectByID",
+        key: 'loadProjectByID',
         value: function loadProjectByID(id) {
             var _this2 = this;
 
             //Get the repo by ID
-            octokit.request('GET /repositories/:id', { id: id }).then(function (result) {
+            _globalvariables2.default.gitHub.octokit.request('GET /repositories/:id', { id: id }).then(function (result) {
 
                 //Find out the owners info;
 
@@ -1665,7 +1670,7 @@ var GitHubMolecule = function (_Molecule) {
 
                 //Get the file contents
 
-                octokit.repos.getContents({
+                _globalvariables2.default.gitHub.octokit.repos.getContents({
                     owner: user,
                     repo: repoName,
                     path: 'project.maslowcreate'
@@ -1689,7 +1694,7 @@ var GitHubMolecule = function (_Molecule) {
             });
         }
     }, {
-        key: "serialize",
+        key: 'serialize',
         value: function serialize(savedObject) {
 
             //Return a placeholder for this molecule
@@ -1705,9 +1710,11 @@ var GitHubMolecule = function (_Molecule) {
             return object;
         }
     }, {
-        key: "updateSidebar",
+        key: 'updateSidebar',
         value: function updateSidebar() {
             //updates the sidebar to display information about this node
+
+            var sideBar = document.querySelector('.sideBar');
 
             //remove everything in the sideBar now
             while (sideBar.firstChild) {
@@ -1771,7 +1778,7 @@ var Input = function (_Atom) {
 
         var _this = _possibleConstructorReturn(this, (Input.__proto__ || Object.getPrototypeOf(Input)).call(this, values));
 
-        _this.name = "Input" + generateUniqueID();
+        _this.name = "Input" + _globalvariables2.default.generateUniqueID();
         _this.codeBlock = "";
         _this.type = "input";
         _this.atomType = "Input";
@@ -2165,7 +2172,7 @@ var Molecule = function (_Atom) {
         key: 'exportToGithub',
         value: function exportToGithub(self) {
             //Export this molecule to github
-            exportCurrentMoleculeToGithub(self);
+            _globalvariables2.default.gitHub.exportCurrentMoleculeToGithub(self);
         }
     }, {
         key: 'replaceThisMoleculeWithGithub',
@@ -2185,7 +2192,7 @@ var Molecule = function (_Atom) {
                 name: this.name,
                 atomType: "GitHubMolecule",
                 projectID: githubID,
-                uniqueID: generateUniqueID()
+                uniqueID: _globalvariables2.default.generateUniqueID()
             }, null, _globalvariables2.default.availableTypes);
 
             //Then delete the old molecule which has been replaced

@@ -135,7 +135,7 @@ export default class Molecule extends Atom{
     
     exportToGithub(self){
         //Export this molecule to github
-        exportCurrentMoleculeToGithub(self);
+        GlobalVariables.gitHub.exportCurrentMoleculeToGithub(self);
     }
     
     replaceThisMoleculeWithGithub(githubID){
@@ -154,7 +154,7 @@ export default class Molecule extends Atom{
             name: this.name,
             atomType: "GitHubMolecule",
             projectID: githubID,
-            uniqueID: generateUniqueID()
+            uniqueID: GlobalVariables.generateUniqueID()
         }, null, GlobalVariables.availableTypes);
         
         

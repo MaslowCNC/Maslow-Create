@@ -6,7 +6,7 @@ export default class Input extends Atom {
     constructor(values){
         super (values);
         
-        this.name = "Input" + generateUniqueID();
+        this.name = "Input" + GlobalVariables.generateUniqueID();
         this.codeBlock = "";
         this.type = "input";
         this.atomType = "Input";
