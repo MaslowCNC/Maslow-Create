@@ -1,5 +1,6 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
+import BOMEntry from '../BOM'
 
 export default class Atom {
 

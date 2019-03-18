@@ -55,7 +55,7 @@ class Menu {
     }
 
     placeGitHubMolecule(ev){
-        console.log("place molecule ran");
+        
         this.hidemenu();
         let clr = ev.target.id;
         
@@ -148,8 +148,6 @@ class Menu {
                         accept: 'application/vnd.github.mercy-preview+json'
                     }
                 }).then(result => {
-                    console.log("Search results: ");
-                    console.log(result);
                     result.data.items.forEach(item => {
                         var newElement = document.createElement("LI");
                         var text = document.createTextNode(item.name);
@@ -158,7 +156,9 @@ class Menu {
                         newElement.appendChild(text); 
                         this.githubList.appendChild(newElement); 
                         
-                        document.getElementById(item.id).addEventListener('click', this.placeGitHubMolecule);
+                        document.getElementById(item.id).addEventListener('click', (e) => {
+                           this.placeGitHubMolecule(e);
+                        });
                     });
                 })
             }
@@ -186,7 +186,6 @@ class Menu {
       evt.currentTarget.className += " active";
       
       //Click on the search bar so that when you start typing it shows updateCommands
-      console.log(document.getElementById('menuInput'));
       document.getElementById('menuInput').focus();
     }
 }

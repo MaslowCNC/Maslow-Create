@@ -114,7 +114,9 @@ export default class Molecule extends Atom{
             this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
         else{
-            this.createButton(valueList,this,"Load A Different Project",GlobalVariables.gitHub.showProjectsToLoad)
+            this.createButton(valueList,this,"Load A Different Project",(e) => {
+               GlobalVariables.gitHub.showProjectsToLoad();
+            });
         }
         
         this.createBOM(valueList,this,this.BOMlist);
@@ -288,7 +290,8 @@ export default class Molecule extends Atom{
                 
                 //reassign the name of the Inputs to preserve linking
                 if(atom.atomType == "Input" && typeof newAtomObj.name !== 'undefined'){
-                    atom.setValue(newAtomObj.name);
+                    atom.name = newAtomObj.name;
+                    atom.draw(); //The poling happens in draw :roll_eyes:
                 }
 
                 //If this is a molecule, deserialize it

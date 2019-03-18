@@ -218,6 +218,36 @@ animate();
 
 /***/ }),
 
+/***/ "./src/js/BOM.js":
+/*!***********************!*\
+  !*** ./src/js/BOM.js ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BOMEntry = function BOMEntry() {
+    _classCallCheck(this, BOMEntry);
+
+    this.BOMitemName = "name";
+    this.numberNeeded = 0;
+    this.costUSD = 0;
+    this.source = "www.example.com";
+    this.totalNeeded = this.numberNeeded; //Scaled by the number of this instance
+};
+
+exports.default = BOMEntry;
+
+/***/ }),
+
 /***/ "./src/js/githubOauth.js":
 /*!*******************************!*\
   !*** ./src/js/githubOauth.js ***!
@@ -1002,7 +1032,7 @@ var Menu = function () {
     }, {
         key: 'placeGitHubMolecule',
         value: function placeGitHubMolecule(ev) {
-            console.log("place molecule ran");
+
             this.hidemenu();
             var clr = ev.target.id;
 
@@ -1099,8 +1129,6 @@ var Menu = function () {
                             accept: 'application/vnd.github.mercy-preview+json'
                         }
                     }).then(function (result) {
-                        console.log("Search results: ");
-                        console.log(result);
                         result.data.items.forEach(function (item) {
                             var newElement = document.createElement("LI");
                             var text = document.createTextNode(item.name);
@@ -1109,7 +1137,9 @@ var Menu = function () {
                             newElement.appendChild(text);
                             _this2.githubList.appendChild(newElement);
 
-                            document.getElementById(item.id).addEventListener('click', _this2.placeGitHubMolecule);
+                            document.getElementById(item.id).addEventListener('click', function (e) {
+                                _this2.placeGitHubMolecule(e);
+                            });
                         });
                     });
                 }
@@ -1138,7 +1168,6 @@ var Menu = function () {
             evt.currentTarget.className += " active";
 
             //Click on the search bar so that when you start typing it shows updateCommands
-            console.log(document.getElementById('menuInput'));
             document.getElementById('menuInput').focus();
         }
     }]);
@@ -1789,6 +1818,8 @@ var Input = function (_Atom) {
 
         _this.setValues(values);
 
+        _this.oldName = _this.name;
+
         _this.addIO("output", "number or geometry", _this, "geometry", "");
 
         //Add a new input to the current molecule
@@ -1810,6 +1841,11 @@ var Input = function (_Atom) {
     }, {
         key: 'draw',
         value: function draw() {
+
+            //Check if the name has been updated
+            if (this.name != this.oldName) {
+                this.updateParentName();
+            }
 
             this.children.forEach(function (child) {
                 child.draw();
@@ -1841,19 +1877,20 @@ var Input = function (_Atom) {
             _get(Input.prototype.__proto__ || Object.getPrototypeOf(Input.prototype), 'deleteNode', this).call(this);
         }
     }, {
-        key: 'setValue',
-        value: function setValue(theNewName) {
+        key: 'updateParentName',
+        value: function updateParentName() {
             var _this2 = this;
 
-            //Called by the sidebar to set the name
-
+            //Callled when the name has changed to updated the name of the parent molecule IO
+            console.log("updating parent names");
             //Run through the parent molecule and find the input with the same name
             this.parent.children.forEach(function (child) {
-                if (child.name == _this2.name) {
-                    _this2.name = theNewName;
-                    child.name = theNewName;
+                if (child.name == _this2.oldName) {
+                    console.log("matching parent IO found for: " + _this2.oldName);
+                    child.name = _this2.name;
                 }
             });
+            this.oldName = this.name;
         }
     }, {
         key: 'setOutput',
@@ -2152,7 +2189,9 @@ var Molecule = function (_Atom) {
 
                 this.createButton(valueList, this, "Export To GitHub", this.exportToGithub);
             } else {
-                this.createButton(valueList, this, "Load A Different Project", _globalvariables2.default.gitHub.showProjectsToLoad);
+                this.createButton(valueList, this, "Load A Different Project", function (e) {
+                    _globalvariables2.default.gitHub.showProjectsToLoad();
+                });
             }
 
             this.createBOM(valueList, this, this.BOMlist);
@@ -2335,7 +2374,8 @@ var Molecule = function (_Atom) {
 
                     //reassign the name of the Inputs to preserve linking
                     if (atom.atomType == "Input" && typeof newAtomObj.name !== 'undefined') {
-                        atom.setValue(newAtomObj.name);
+                        atom.name = newAtomObj.name;
+                        atom.draw(); //The poling happens in draw :roll_eyes:
                     }
 
                     //If this is a molecule, deserialize it
@@ -3213,6 +3253,10 @@ var _globalvariables = __webpack_require__(/*! ../globalvariables */ "./src/js/g
 
 var _globalvariables2 = _interopRequireDefault(_globalvariables);
 
+var _BOM = __webpack_require__(/*! ../BOM */ "./src/js/BOM.js");
+
+var _BOM2 = _interopRequireDefault(_BOM);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3782,7 +3826,7 @@ var Atom = function () {
         value: function addBOMEntry(self) {
             console.log("add a bom entry");
 
-            self.BOMlist.push(new BOMEntry());
+            self.BOMlist.push(new _BOM2.default());
 
             self.updateSidebar();
         }

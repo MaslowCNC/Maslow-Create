@@ -15,6 +15,8 @@ export default class Input extends Atom {
         
         this.setValues(values);
         
+        this.oldName = this.name;
+        
         this.addIO("output", "number or geometry", this, "geometry", "");
         
         //Add a new input to the current molecule
@@ -33,6 +35,9 @@ export default class Input extends Atom {
     }
     
     draw() {
+        
+        //Check if the name has been updated
+        if(this.name != this.oldName){this.updateParentName();}
         
         this.children.forEach(child => {
             child.draw();       
@@ -66,16 +71,17 @@ export default class Input extends Atom {
         super.deleteNode();
     }
     
-    setValue(theNewName){
-        //Called by the sidebar to set the name
-        
+    updateParentName(){
+        //Callled when the name has changed to updated the name of the parent molecule IO
+        console.log("updating parent names");
         //Run through the parent molecule and find the input with the same name
         this.parent.children.forEach(child => {
-            if (child.name == this.name){
-                this.name = theNewName;
-                child.name = theNewName;
+            if (child.name == this.oldName){
+                console.log("matching parent IO found for: " + this.oldName);
+                child.name = this.name;
             }
         });
+        this.oldName = this.name;
     }
     
     setOutput(newOutput){
