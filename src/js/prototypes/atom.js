@@ -328,13 +328,11 @@ export default class Atom {
         //Send code to JSCAD to render
         if (this.codeBlock != ""){
             var toRender = "function main () {return " + this.codeBlock + "}"
-            console.log("sending to render: ");
-            console.log(toRender);
+            
             window.loadDesign(toRender,"MaslowCreate");
         }
         //Send something invisible just to wipe the rendering
         else{
-            console.log("sending the tiny sphere to render");
             var toRender = "function main () {return sphere({r: .0001, center: true})}"
             window.loadDesign(toRender,"MaslowCreate");
         }
