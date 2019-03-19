@@ -1,4 +1,5 @@
 import Molecule from '../molecules/molecule'
+import GlobalVariables from '../globalvariables'
 
 export default class GitHubMolecule extends Molecule {
     
@@ -34,7 +35,7 @@ export default class GitHubMolecule extends Molecule {
     
     loadProjectByID(id){
     //Get the repo by ID
-        octokit.request('GET /repositories/:id', {id}).then(result => {
+        GlobalVariables.gitHub.octokit.request('GET /repositories/:id', {id}).then(result => {
             
             //Find out the owners info;
             
@@ -43,7 +44,7 @@ export default class GitHubMolecule extends Molecule {
             
             //Get the file contents
             
-            octokit.repos.getContents({
+            GlobalVariables.gitHub.octokit.repos.getContents({
                 owner: user,
                 repo: repoName,
                 path: 'project.maslowcreate'
@@ -82,6 +83,8 @@ export default class GitHubMolecule extends Molecule {
     
     updateSidebar(){
         //updates the sidebar to display information about this node
+        
+        var sideBar = document.querySelector('.sideBar');
         
         //remove everything in the sideBar now
         while (sideBar.firstChild) {

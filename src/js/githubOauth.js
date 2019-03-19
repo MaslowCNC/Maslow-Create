@@ -65,30 +65,38 @@ export default class GitHubModule{
         //store the current user name for later use
         this.octokit.users.getAuthenticated({}).then(result => {
             this.currentUser = result.data.login;
+        }).then(result => {
+        
+            var query = 'user:' + this.currentUser + ' topic:maslowcreate';
+            this.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+                q: query,
+                sort: "stars",
+                per_page: 100,
+                page: 1,
+                headers: {
+                    accept: 'application/vnd.github.mercy-preview+json'
+                }
+            }).then(result => {
+                result.data.items.forEach(repo => {
+                    this.addProject(repo.name);
+                });
+            }); 
+            
+            var query = 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
+            this.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+                q: query,
+                sort: "stars",
+                per_page: 100,
+                page: 1,
+                headers: {
+                    accept: 'application/vnd.github.mercy-preview+json'
+                }
+            }).then(result => {
+                result.data.items.forEach(repo => {
+                    this.addProject(repo.name);
+                });
+            }); 
         });
-        
-        //List all of the repos that a user is the owner of
-        this.octokit.repos.list({
-          affiliation: 'owner',
-        }).then(({data, headers, status}) => {
-            data.forEach(repo => {
-                
-                //Check to see if this is a maslow create project
-                this.octokit.repos.listTopics({
-                    owner: repo.owner.login, 
-                    repo: repo.name,
-                    headers: {
-                        accept: 'application/vnd.github.mercy-preview+json'
-                    }
-                }).then(data => {
-                    if(data.data.names.includes("maslowcreate") || data.data.names.includes("maslowcreate-molecule")){
-                        this.addProject(repo.name);
-                    }
-                })
-                
-            });
-        })
-        
     }
 
     addProject(projectName){

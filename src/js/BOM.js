@@ -1,4 +1,4 @@
-class BOMEntry {
+export default class BOMEntry {
     constructor(){
         this.BOMitemName  = "name";
         this.numberNeeded = 0;
