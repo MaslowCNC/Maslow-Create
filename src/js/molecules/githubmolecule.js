@@ -97,10 +97,24 @@ export default class GitHubMolecule extends Molecule {
             sideBar.removeChild(sideBar.firstChild);
         }
         
+        var valueList = document.createElement("ul");
+        sideBar.appendChild(valueList);
+        valueList.setAttribute("class", "sidebar-list");
+        
         //add the name as a title
         var name = document.createElement('h1');
         name.textContent = this.name;
         name.setAttribute("style","text-align:center;");
-        sideBar.appendChild(name);
+        valueList.appendChild(name);
+        
+        //Add options to set all of the inputs
+        this.children.forEach(child => {
+            if(child.type == 'input' && child.valueType != 'geometry'){
+                console.log("creating an editiable io");
+                this.createEditableValueListItem(valueList,child,"value", child.name, true);
+            }
+        });
+        
+        this.createBOM(valueList,this,this.BOMlist);
     }
 }
