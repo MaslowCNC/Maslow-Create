@@ -62,9 +62,12 @@ export default class Molecule extends Atom{
         
         this.updateSidebar();
         
-        //var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
-        
-        //window.loadDesign(toRender,"MaslowCreate");
+        //Find the output and send it's contents to the renderer
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.atomType == 'Output'){
+                atom.sendToRender();
+            }
+        });
     }
     
     updateCodeBlock(){
@@ -72,9 +75,10 @@ export default class Molecule extends Atom{
         
         //Grab values from the inputs and push them out to the input objects
         this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'input'){
+            if(child.type == 'input'){
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == "Input" && child.name == atom.name){
+                        console.log("Calling setOutput with: " + child.getValue());
                         atom.setOutput(child.getValue());
                     }
                 });
@@ -113,9 +117,13 @@ export default class Molecule extends Atom{
             
             this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
-        else{
+        else{ //If we are the top level molecule and not in run mode
             this.createButton(valueList,this,"Load A Different Project",(e) => {
                GlobalVariables.gitHub.showProjectsToLoad();
+            });
+            
+            this.createButton(valueList,this,"Share This Project",(e) => {
+               GlobalVariables.gitHub.shareOpenedProject();
             });
         }
         
@@ -141,7 +149,6 @@ export default class Molecule extends Atom{
     }
     
     replaceThisMoleculeWithGithub(githubID){
-        console.log(githubID);
         
         //If we are currently inside the molecule targeted for replacement, go up one
         if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){

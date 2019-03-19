@@ -211,7 +211,6 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue;
-        
         //propigate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node

@@ -17,11 +17,11 @@ export default class Input extends Atom {
         
         this.oldName = this.name;
         
-        this.addIO("output", "number or geometry", this, "geometry", "");
+        this.addIO("output", "number or geometry", this, "number or geometry", 10);
         
         //Add a new input to the current molecule
         if (typeof this.parent !== 'undefined') {
-            this.parent.addIO("input", this.name, this.parent, "geometry", "");
+            this.parent.addIO("input", this.name, this.parent, "number or geometry", 10);
         }
     }
     
@@ -91,7 +91,7 @@ export default class Input extends Atom {
         
         //Set the output nodes with type 'geometry' to be the new value
         this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
+            if(child.type == 'output'){
                 child.setValue(newOutput);
             }
         });
