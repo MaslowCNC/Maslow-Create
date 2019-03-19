@@ -54,6 +54,8 @@ class GlobalVariables{
         this.currentMolecule;
         this.topLevelMolecule;
         
+        this.runMode = false;
+        
         this.sideBar = document.querySelector('.sideBar');
         
         this.gitHub = new GitHubModule();

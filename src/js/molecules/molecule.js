@@ -106,14 +106,16 @@ export default class Molecule extends Atom{
         
         var valueList = super.updateSidebar(); //call the super function
         
-        this.createEditableValueListItem(valueList,this,"name", "Name", false);
+        if(!GlobalVariables.runMode){
+            this.createEditableValueListItem(valueList,this,"name", "Name", false);
+        }
         
         if(!this.topLevel){
             this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule);
             
             this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
-        else{
+        else if(!GlobalVariables.runMode){ //If we are the top level molecule and not in run mode
             this.createButton(valueList,this,"Load A Different Project",(e) => {
                GlobalVariables.gitHub.showProjectsToLoad();
             });

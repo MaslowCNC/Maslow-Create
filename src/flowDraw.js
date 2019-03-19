@@ -13,6 +13,9 @@ GlobalVariables.canvas.height = innerHeight/2
 let lowerHalfOfScreen = document.getElementById('lowerHalf');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
 
+var url = window.location.href;
+GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
+
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
 
@@ -99,6 +102,7 @@ function init() {
         uniqueID: GlobalVariables.generateUniqueID()
     });
     GlobalVariables.currentMolecule.backgroundClick();
+
 }
 
 // Animation Loop
