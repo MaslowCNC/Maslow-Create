@@ -10,7 +10,7 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
-let lowerHalfOfScreen = document.querySelector('.flex-parent');
+let lowerHalfOfScreen = document.getElementById('lowerHalf');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
 
 // Event Listeners
@@ -98,7 +98,7 @@ function init() {
         atomType: "Molecule",
         uniqueID: GlobalVariables.generateUniqueID()
     });
-    
+    GlobalVariables.currentMolecule.backgroundClick();
 }
 
 // Animation Loop
