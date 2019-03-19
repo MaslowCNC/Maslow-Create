@@ -91,7 +91,7 @@ export default class Input extends Atom {
         
         //Set the output nodes with type 'geometry' to be the new value
         this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
+            if(child.type == 'output'){
                 child.setValue(newOutput);
             }
         });

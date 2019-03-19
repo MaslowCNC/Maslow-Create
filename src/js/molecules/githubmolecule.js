@@ -11,7 +11,7 @@ export default class GitHubMolecule extends Molecule {
         this.atomType = "GitHubMolecule";
         this.topLevel = false; //a flag to signal if this node is the top level node
         this.centerColor = "black";
-        this.projectID = 174292302;
+        this.projectID = 0;
         
         this.setValues(values);
         
@@ -35,8 +35,6 @@ export default class GitHubMolecule extends Molecule {
     
     loadProjectByID(id){
     //Get the repo by ID
-        console.log("called with: " + id);
-        console.trace();
         GlobalVariables.gitHub.octokit.request('GET /repositories/:id', {id}).then(result => {
             
             //Find out the owners info;
@@ -87,6 +85,13 @@ export default class GitHubMolecule extends Molecule {
         return object;
     }
     
+    updateCodeBlock(){
+        super.updateCodeBlock();
+        if(this.name != "Molecule"){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can't handle calls right away
+            this.backgroundClick();
+        }
+    }
+    
     updateSidebar(){
         //updates the sidebar to display information about this node
         
@@ -110,7 +115,6 @@ export default class GitHubMolecule extends Molecule {
         //Add options to set all of the inputs
         this.children.forEach(child => {
             if(child.type == 'input' && child.valueType != 'geometry'){
-                console.log("creating an editiable io");
                 this.createEditableValueListItem(valueList,child,"value", child.name, true);
             }
         });

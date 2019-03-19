@@ -198,7 +198,6 @@ export default class GitHubModule{
             repo: this.currentRepoName
         }).then(result => {
             var ID = result.data.id;
-            console.log("ID: " + ID);
             window.open('/run?'+ID);
         });
     }

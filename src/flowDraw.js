@@ -106,7 +106,6 @@ function init() {
     }
     else{
         var ID = window.location.href.split('?')[1];
-        console.log(ID);
         //Have the current molecule load it
         if(typeof ID != undefined){
             GlobalVariables.currentMolecule = new GitHubMolecule({
