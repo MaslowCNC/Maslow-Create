@@ -178,7 +178,9 @@ export default class GitHubModule{
         //Add the button
         var createButton = document.createElement("button");
         createButton.setAttribute("type", "button");
-        createButton.setAttribute("onclick", "this.createNewProject()");
+        createButton.addEventListener('click', (e) => {
+           this.createNewProject();
+        });
         var buttonText = document.createTextNode("Create Project");
         createButton.appendChild(buttonText);
         form.appendChild(createButton);
@@ -205,7 +207,7 @@ export default class GitHubModule{
             topLevel: true, 
             name: name,
             atomType: "Molecule",
-            uniqueID: generateUniqueID()
+            uniqueID: GlobalVariables.generateUniqueID()
         });
         
         GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule;
