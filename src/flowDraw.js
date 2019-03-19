@@ -114,8 +114,6 @@ function init() {
             });
         }
     }
-    GlobalVariables.currentMolecule.backgroundClick();
-
 }
 
 // Animation Loop

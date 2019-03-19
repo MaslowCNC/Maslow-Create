@@ -62,9 +62,13 @@ export default class Molecule extends Atom{
         
         this.updateSidebar();
         
-        //var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
-        
-        //window.loadDesign(toRender,"MaslowCreate");
+        //Find the output and send it's contents to the renderer
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.atomType == 'Output'){
+                console.log(atom);
+                atom.sendToRender();
+            }
+        });
     }
     
     updateCodeBlock(){
