@@ -189,7 +189,20 @@ export default class GitHubModule{
         this.popup.appendChild(createNewProjectDiv);
 
     }
-
+    
+    shareOpenedProject(){
+        alert("A page with a shareable url to this project will open in a new window. Share the link to that page with anyone you would like to share the project with.");
+            
+        this.octokit.repos.get({
+            owner: this.currentUser,
+            repo: this.currentRepoName
+        }).then(result => {
+            var ID = result.data.id;
+            console.log("ID: " + ID);
+            window.open('/run?'+ID);
+        });
+    }
+    
     createNewProject(){
         
         if(typeof this.intervalTimer != undefined){

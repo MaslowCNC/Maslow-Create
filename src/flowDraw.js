@@ -3,6 +3,7 @@
 import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
+import GitHubMolecule from './js/molecules/githubmolecule.js'
 
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -93,14 +94,26 @@ window.addEventListener('keydown', event => {
 // Implementation
 
 function init() {
-    GlobalVariables.currentMolecule = new Molecule({
-        x: 0, 
-        y: 0, 
-        topLevel: true, 
-        name: "Maslow Create",
-        atomType: "Molecule",
-        uniqueID: GlobalVariables.generateUniqueID()
-    });
+    if(!GlobalVariables.runMode){ //If we are in CAD mode load an empty project as a placeholder
+        GlobalVariables.currentMolecule = new Molecule({
+            x: 0, 
+            y: 0, 
+            topLevel: true, 
+            name: "Maslow Create",
+            atomType: "Molecule",
+            uniqueID: GlobalVariables.generateUniqueID()
+        });
+    }
+    else{
+        var ID = window.location.href.split('?')[1];
+        console.log(ID);
+        //Have the current molecule load it
+        if(typeof ID != undefined){
+            GlobalVariables.currentMolecule = new GitHubMolecule({
+                projectID: ID
+            });
+        }
+    }
     GlobalVariables.currentMolecule.backgroundClick();
 
 }

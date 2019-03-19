@@ -35,6 +35,8 @@ export default class GitHubMolecule extends Molecule {
     
     loadProjectByID(id){
     //Get the repo by ID
+        console.log("called with: " + id);
+        console.trace();
         GlobalVariables.gitHub.octokit.request('GET /repositories/:id', {id}).then(result => {
             
             //Find out the owners info;
@@ -59,9 +61,13 @@ export default class GitHubMolecule extends Molecule {
                 this.topLevel = false;
                 
                 //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
-                this.parent.savedConnectors.forEach(connector => {
-                    this.parent.placeConnector(JSON.parse(connector));
-                });
+                if(typeof this.parent !== 'undefined'){
+                    this.parent.savedConnectors.forEach(connector => {
+                        this.parent.placeConnector(JSON.parse(connector));
+                    });
+                }
+                
+                GlobalVariables.currentMolecule.backgroundClick();
             });
         });
     }

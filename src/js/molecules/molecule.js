@@ -119,6 +119,10 @@ export default class Molecule extends Atom{
             this.createButton(valueList,this,"Load A Different Project",(e) => {
                GlobalVariables.gitHub.showProjectsToLoad();
             });
+            
+            this.createButton(valueList,this,"Share This Project",(e) => {
+               GlobalVariables.gitHub.shareOpenedProject();
+            });
         }
         
         this.createBOM(valueList,this,this.BOMlist);
