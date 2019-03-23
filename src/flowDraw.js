@@ -29,8 +29,15 @@ window.addEventListener('resize', event => {
     var bounds = GlobalVariables.canvas.getBoundingClientRect();
     GlobalVariables.canvas.width = bounds.width;
     GlobalVariables.canvas.height = bounds.height; 
-
+    GlobalVariables.scaleFactorXY =  GlobalVariables.canvas.width/1400;
+    GlobalVariables.scaleFactorR =  GlobalVariables.canvas.width/1400;
+    console.log("scaleFactorXY," + GlobalVariables.scaleFactorXY);
+    console.log("scaleFactorR," + GlobalVariables.scaleFactorR);
+    
+    
 })
+
+
 
 flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down
