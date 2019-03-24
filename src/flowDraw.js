@@ -11,7 +11,9 @@ GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
-lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
+lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+let upperHalfOfScreen = document.querySelector('#flow-canvas');
+upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2.2+"px");
 
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
@@ -29,8 +31,15 @@ window.addEventListener('resize', event => {
     var bounds = GlobalVariables.canvas.getBoundingClientRect();
     GlobalVariables.canvas.width = bounds.width;
     GlobalVariables.canvas.height = bounds.height; 
-
+    GlobalVariables.scaleFactorXY =  GlobalVariables.canvas.width/1400;
+    GlobalVariables.scaleFactorR =  GlobalVariables.canvas.width/1400;
+    console.log("scaleFactorXY," + GlobalVariables.scaleFactorXY);
+    console.log("scaleFactorR," + GlobalVariables.scaleFactorR);
+    
+    
 })
+
+
 
 flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down

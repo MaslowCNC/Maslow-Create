@@ -8,24 +8,44 @@
   color: Black;
   font-weight: bold;
   font-family: Helvetica, Arial, Sans;
-  flex: 2;
+  flex: 5;
+}
+
+.row-flex{
+  display: flex;
+  flex-direction: column;
+}
+
+#flow-canvas{
+ flex-shrink: 2; 
 }
 
 .sideBar {
-    flex: 1;
+    flex: 3;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    background-color: #B0AEB0;
+    background-color: #484848 ;
     color: white;
     overflow: auto;
+    padding:0px;
+    padding-right:10px;
+    margin-right:10px;
+   -webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
+    -moz-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
+    box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
 }
 
 .flex-parent {
+  flex-basis:1;
+  flex-shrink: 2; 
   display: flex;
+  width:100%;
+  max-height: width/3;
+
 }
 
 #header {
