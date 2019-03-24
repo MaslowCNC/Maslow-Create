@@ -44,14 +44,16 @@ export default class GitHubModule{
         }
         
         this.popup.classList.remove('off');
+        this.popup.setAttribute("style", "text-align: center");
         
         var tabButtons = document.createElement("DIV");
         tabButtons.setAttribute("class", "tab");
+        tabButtons.setAttribute("style", "display: inline-block;");
         this.popup.appendChild(tabButtons);
         
         var yoursButton = document.createElement("button");
         yoursButton.setAttribute("class", "tablinks");
-        yoursButton.appendChild(document.createTextNode("Search Your Projects"));
+        yoursButton.appendChild(document.createTextNode("Your Projects"));
         yoursButton.style.fontSize = "xx-large";
         yoursButton.setAttribute("id", "yoursButton");
         yoursButton.addEventListener("click", (e) => {
@@ -61,7 +63,7 @@ export default class GitHubModule{
         
         var githubButton = document.createElement("button");
         githubButton.setAttribute("class", "tablinks");
-        githubButton.appendChild(document.createTextNode("Search Community Projects"));
+        githubButton.appendChild(document.createTextNode("All Projects"));
         githubButton.style.fontSize = "xx-large";
         githubButton.setAttribute("id", "githubButton");
         githubButton.addEventListener("click", (e) => {
@@ -69,10 +71,13 @@ export default class GitHubModule{
         });
         tabButtons.appendChild(githubButton);
         
+        this.popup.appendChild(document.createElement("br"));
+        
         var searchBar = document.createElement("input");
         searchBar.setAttribute("type", "text");
         searchBar.setAttribute("placeholder", "Search for project..");
         searchBar.setAttribute("class", "menu_search");
+        searchBar.setAttribute("id", "project_search");
         searchBar.setAttribute("style", "width: 50%");
         this.popup.appendChild(searchBar);
         searchBar.addEventListener('keyup', (e) => {
@@ -89,14 +94,10 @@ export default class GitHubModule{
         this.addProject("New Project");
         
         yoursButton.click()
-        
-        this.loadProjectsBySearch({key: "Enter"}, "");
     }
     
     loadProjectsBySearch(ev, searchString){
         
-        console.log("search called with:");
-        console.log(searchString);
         if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
@@ -105,10 +106,13 @@ export default class GitHubModule{
             
             //Load projects
             var query;
+            var owned;
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+                owned = true;
                 query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate';
             }
             else{
+                owned = false;
                 query = searchString + ' topic:maslowcreate';
             }
             this.octokit.search.repos({
@@ -121,15 +125,17 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    this.addProject(repo.name);
+                    this.addProject(repo.name, repo.id, owned);
                 });
             }); 
             
             //Load molecules
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+                owned = true;
                 query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
             }
             else{
+                owned = false;
                 query = searchString + ' topic:maslowcreate-molecule';
             }
             this.octokit.search.repos({
@@ -142,13 +148,13 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    this.addProject(repo.name);
+                    this.addProject(repo.name, repo.id, owned);
                 });
             }); 
         } 
     }
     
-    addProject(projectName){
+    addProject(projectName, id, owned){
         //create a project element to display
         
         var project = document.createElement("DIV");
@@ -172,24 +178,26 @@ export default class GitHubModule{
         this.projectsSpaceDiv.appendChild(project); 
         
         document.getElementById(projectName).addEventListener('click', event => {
-            this.projectClicked(projectName);
+            this.projectClicked(projectName, id, owned);
         })
 
     }
 
-    projectClicked(projectName){
+    projectClicked(projectName, projectID, owned){
         //runs when you click on one of the projects
         if(projectName == "New Project"){
             this.createNewProjectPopup();
         }
-        else{
+        else if(owned){
             this.loadProject(projectName);
+        }
+        else{
+            window.open('/run?'+projectID);
         }
     }
     
     openTab(evt, tabName) {
-        
-      console.log("open tab ran");
+      
       // Declare all variables
       var i, tabcontent, tablinks;
 
@@ -211,6 +219,9 @@ export default class GitHubModule{
       
       //Click on the search bar so that when you start typing it shows updateCommands
       document.getElementById('menuInput').focus();
+      
+      
+      this.loadProjectsBySearch({key: "Enter"}, document.getElementById("project_search").value);
     }
     
     createNewProjectPopup(){
@@ -462,7 +473,7 @@ export default class GitHubModule{
     loadProject(projectName){
         
         if(typeof this.intervalTimer != undefined){
-            clearInterval(this.intervalTimer); //Turn of auto saving
+            clearInterval(this.intervalTimer); //Turn off auto saving
         }
         
         this.currentRepoName = projectName;
