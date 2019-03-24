@@ -44,15 +44,29 @@ export default class GitHubModule{
         
         this.popup.classList.remove('off');
         
-        //Add a title
-        var titleDiv = document.createElement("DIV");
-        titleDiv.setAttribute("style", "width: 100%");
-        titleDiv.setAttribute("style", "padding: 30px");
-        var title = document.createElement("H1");
-        title.appendChild(document.createTextNode("Projects:"));
-        titleDiv.appendChild(title);
-        this.popup.appendChild(titleDiv);
-        this.popup.appendChild(document.createElement("br"));
+        var tabButtons = document.createElement("DIV");
+        tabButtons.setAttribute("class", "tab");
+        this.popup.appendChild(tabButtons);
+        
+        var yoursButton = document.createElement("button");
+        yoursButton.setAttribute("class", "tablinks");
+        yoursButton.appendChild(document.createTextNode("Search Your Projects"));
+        yoursButton.style.fontSize = "xx-large";
+        tabButtons.appendChild(yoursButton);
+        
+        var githubButton = document.createElement("button");
+        githubButton.setAttribute("class", "tablinks");
+        githubButton.appendChild(document.createTextNode("Search Community Projects"));
+        githubButton.style.fontSize = "xx-large";
+        tabButtons.appendChild(githubButton);
+        
+        var searchBar = document.createElement("input");
+        searchBar.setAttribute("type", "text");
+        searchBar.setAttribute("placeholder", "Search for project..");
+        searchBar.setAttribute("class", "menu_search");
+        searchBar.setAttribute("style", "width: 80%");
+        this.popup.appendChild(searchBar);
+        
         
         var projectsSpaceDiv = document.createElement("DIV");
         projectsSpaceDiv.setAttribute("class", "float-left-div{");
