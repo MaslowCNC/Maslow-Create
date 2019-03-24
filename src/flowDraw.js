@@ -11,7 +11,9 @@ GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
-lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
+lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+let upperHalfOfScreen = document.querySelector('#flow-canvas');
+upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2.2+"px");
 
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
