@@ -31,8 +31,9 @@ export default class GitHubModule{
             
             //Test the authentication 
             this.octokit.users.getAuthenticated({}).then(result => {
+                this.currentUser = result.data.login;
                 this.showProjectsToLoad();
-            })  
+            });
         });
     }
 
@@ -52,37 +53,65 @@ export default class GitHubModule{
         yoursButton.setAttribute("class", "tablinks");
         yoursButton.appendChild(document.createTextNode("Search Your Projects"));
         yoursButton.style.fontSize = "xx-large";
+        yoursButton.setAttribute("id", "yoursButton");
+        yoursButton.addEventListener("click", (e) => {
+            this.openTab(e, "yoursButton");
+        });
         tabButtons.appendChild(yoursButton);
         
         var githubButton = document.createElement("button");
         githubButton.setAttribute("class", "tablinks");
         githubButton.appendChild(document.createTextNode("Search Community Projects"));
         githubButton.style.fontSize = "xx-large";
+        githubButton.setAttribute("id", "githubButton");
+        githubButton.addEventListener("click", (e) => {
+            this.openTab(e, "githubButton");
+        });
         tabButtons.appendChild(githubButton);
         
         var searchBar = document.createElement("input");
         searchBar.setAttribute("type", "text");
         searchBar.setAttribute("placeholder", "Search for project..");
         searchBar.setAttribute("class", "menu_search");
-        searchBar.setAttribute("style", "width: 80%");
+        searchBar.setAttribute("style", "width: 50%");
         this.popup.appendChild(searchBar);
+        searchBar.addEventListener('keyup', (e) => {
+           this.loadProjectsBySearch(e, searchBar.value);
+        });
         
         
-        var projectsSpaceDiv = document.createElement("DIV");
-        projectsSpaceDiv.setAttribute("class", "float-left-div{");
-        this.popup.appendChild(projectsSpaceDiv);
+        this.projectsSpaceDiv = document.createElement("DIV");
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div{");
+        this.popup.appendChild(this.projectsSpaceDiv);
         
         
         //Add the create a new project button
         this.addProject("New Project");
         
-        //store the current user name for later use
-        this.octokit.users.getAuthenticated({}).then(result => {
-            this.currentUser = result.data.login;
-        }).then(result => {
+        yoursButton.click()
         
-            var query = 'user:' + this.currentUser + ' topic:maslowcreate';
-            this.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+        this.loadProjectsBySearch({key: "Enter"}, "");
+    }
+    
+    loadProjectsBySearch(ev, searchString){
+        
+        console.log("search called with:");
+        console.log(searchString);
+        if(ev.key == "Enter"){
+            //Remove projects shown now
+            while (this.projectsSpaceDiv.firstChild) {
+                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild);
+            }
+            
+            //Load projects
+            var query;
+            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+                query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate';
+            }
+            else{
+                query = searchString + ' topic:maslowcreate';
+            }
+            this.octokit.search.repos({
                 q: query,
                 sort: "stars",
                 per_page: 100,
@@ -96,8 +125,14 @@ export default class GitHubModule{
                 });
             }); 
             
-            var query = 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
-            this.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+            //Load molecules
+            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+                query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
+            }
+            else{
+                query = searchString + ' topic:maslowcreate-molecule';
+            }
+            this.octokit.search.repos({
                 q: query,
                 sort: "stars",
                 per_page: 100,
@@ -110,9 +145,9 @@ export default class GitHubModule{
                     this.addProject(repo.name);
                 });
             }); 
-        });
+        } 
     }
-
+    
     addProject(projectName){
         //create a project element to display
         
@@ -134,7 +169,7 @@ export default class GitHubModule{
         project.setAttribute("class", "project");
         project.setAttribute("id", projectName);
         project.appendChild(shortProjectName); 
-        this.popup.appendChild(project); 
+        this.projectsSpaceDiv.appendChild(project); 
         
         document.getElementById(projectName).addEventListener('click', event => {
             this.projectClicked(projectName);
@@ -151,7 +186,33 @@ export default class GitHubModule{
             this.loadProject(projectName);
         }
     }
+    
+    openTab(evt, tabName) {
+        
+      console.log("open tab ran");
+      // Declare all variables
+      var i, tabcontent, tablinks;
 
+      // Get all elements with class="tabcontent" and hide them
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+      
+      //Click on the search bar so that when you start typing it shows updateCommands
+      document.getElementById('menuInput').focus();
+    }
+    
     createNewProjectPopup(){
         //Clear the popup and populate the fields we will need to create the new repo
         
