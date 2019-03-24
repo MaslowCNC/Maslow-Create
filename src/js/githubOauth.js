@@ -31,8 +31,9 @@ export default class GitHubModule{
             
             //Test the authentication 
             this.octokit.users.getAuthenticated({}).then(result => {
+                this.currentUser = result.data.login;
                 this.showProjectsToLoad();
-            })  
+            });
         });
     }
 
@@ -43,32 +44,78 @@ export default class GitHubModule{
         }
         
         this.popup.classList.remove('off');
+        this.popup.setAttribute("style", "text-align: center");
         
-        //Add a title
-        var titleDiv = document.createElement("DIV");
-        titleDiv.setAttribute("style", "width: 100%");
-        titleDiv.setAttribute("style", "padding: 30px");
-        var title = document.createElement("H1");
-        title.appendChild(document.createTextNode("Projects:"));
-        titleDiv.appendChild(title);
-        this.popup.appendChild(titleDiv);
+        var tabButtons = document.createElement("DIV");
+        tabButtons.setAttribute("class", "tab");
+        tabButtons.setAttribute("style", "display: inline-block;");
+        this.popup.appendChild(tabButtons);
+        
+        var yoursButton = document.createElement("button");
+        yoursButton.setAttribute("class", "tablinks");
+        yoursButton.appendChild(document.createTextNode("Your Projects"));
+        yoursButton.style.fontSize = "xx-large";
+        yoursButton.setAttribute("id", "yoursButton");
+        yoursButton.addEventListener("click", (e) => {
+            this.openTab(e, "yoursButton");
+        });
+        tabButtons.appendChild(yoursButton);
+        
+        var githubButton = document.createElement("button");
+        githubButton.setAttribute("class", "tablinks");
+        githubButton.appendChild(document.createTextNode("All Projects"));
+        githubButton.style.fontSize = "xx-large";
+        githubButton.setAttribute("id", "githubButton");
+        githubButton.addEventListener("click", (e) => {
+            this.openTab(e, "githubButton");
+        });
+        tabButtons.appendChild(githubButton);
+        
         this.popup.appendChild(document.createElement("br"));
         
-        var projectsSpaceDiv = document.createElement("DIV");
-        projectsSpaceDiv.setAttribute("class", "float-left-div{");
-        this.popup.appendChild(projectsSpaceDiv);
+        var searchBar = document.createElement("input");
+        searchBar.setAttribute("type", "text");
+        searchBar.setAttribute("placeholder", "Search for project..");
+        searchBar.setAttribute("class", "menu_search");
+        searchBar.setAttribute("id", "project_search");
+        searchBar.setAttribute("style", "width: 50%");
+        this.popup.appendChild(searchBar);
+        searchBar.addEventListener('keyup', (e) => {
+           this.loadProjectsBySearch(e, searchBar.value);
+        });
+        
+        
+        this.projectsSpaceDiv = document.createElement("DIV");
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div{");
+        this.popup.appendChild(this.projectsSpaceDiv);
         
         
         //Add the create a new project button
         this.addProject("New Project");
         
-        //store the current user name for later use
-        this.octokit.users.getAuthenticated({}).then(result => {
-            this.currentUser = result.data.login;
-        }).then(result => {
+        yoursButton.click()
+    }
+    
+    loadProjectsBySearch(ev, searchString){
         
-            var query = 'user:' + this.currentUser + ' topic:maslowcreate';
-            this.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+        if(ev.key == "Enter"){
+            //Remove projects shown now
+            while (this.projectsSpaceDiv.firstChild) {
+                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild);
+            }
+            
+            //Load projects
+            var query;
+            var owned;
+            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+                owned = true;
+                query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate';
+            }
+            else{
+                owned = false;
+                query = searchString + ' topic:maslowcreate';
+            }
+            this.octokit.search.repos({
                 q: query,
                 sort: "stars",
                 per_page: 100,
@@ -78,12 +125,20 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    this.addProject(repo.name);
+                    this.addProject(repo.name, repo.id, owned);
                 });
             }); 
             
-            var query = 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
-            this.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
+            //Load molecules
+            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+                owned = true;
+                query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
+            }
+            else{
+                owned = false;
+                query = searchString + ' topic:maslowcreate-molecule';
+            }
+            this.octokit.search.repos({
                 q: query,
                 sort: "stars",
                 per_page: 100,
@@ -93,13 +148,13 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    this.addProject(repo.name);
+                    this.addProject(repo.name, repo.id, owned);
                 });
             }); 
-        });
+        } 
     }
-
-    addProject(projectName){
+    
+    addProject(projectName, id, owned){
         //create a project element to display
         
         var project = document.createElement("DIV");
@@ -120,24 +175,55 @@ export default class GitHubModule{
         project.setAttribute("class", "project");
         project.setAttribute("id", projectName);
         project.appendChild(shortProjectName); 
-        this.popup.appendChild(project); 
+        this.projectsSpaceDiv.appendChild(project); 
         
         document.getElementById(projectName).addEventListener('click', event => {
-            this.projectClicked(projectName);
+            this.projectClicked(projectName, id, owned);
         })
 
     }
 
-    projectClicked(projectName){
+    projectClicked(projectName, projectID, owned){
         //runs when you click on one of the projects
         if(projectName == "New Project"){
             this.createNewProjectPopup();
         }
-        else{
+        else if(owned){
             this.loadProject(projectName);
         }
+        else{
+            window.open('/run?'+projectID);
+        }
     }
+    
+    openTab(evt, tabName) {
+      
+      // Declare all variables
+      var i, tabcontent, tablinks;
 
+      // Get all elements with class="tabcontent" and hide them
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+      
+      //Click on the search bar so that when you start typing it shows updateCommands
+      document.getElementById('menuInput').focus();
+      
+      
+      this.loadProjectsBySearch({key: "Enter"}, document.getElementById("project_search").value);
+    }
+    
     createNewProjectPopup(){
         //Clear the popup and populate the fields we will need to create the new repo
         
@@ -387,7 +473,7 @@ export default class GitHubModule{
     loadProject(projectName){
         
         if(typeof this.intervalTimer != undefined){
-            clearInterval(this.intervalTimer); //Turn of auto saving
+            clearInterval(this.intervalTimer); //Turn off auto saving
         }
         
         this.currentRepoName = projectName;
