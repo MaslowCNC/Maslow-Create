@@ -114,6 +114,16 @@ export default class GitHubModule{
                 owned = false;
                 query = searchString + ' topic:maslowcreate';
             }
+            
+            //Figure out how many repos this user has, search will throw an error if they have 0;
+            this.octokit.repos.list({
+                affiliation: 'owner',
+            }).then(({data, headers, status}) => {
+                if(data.length == 0){                   //If the user has no repos at all, the search will fail so we want to spawn a popup here and clone the example
+                    this.cloneExampleProjectPopup();
+                }
+            });
+            
             this.octokit.search.repos({
                 q: query,
                 sort: "stars",
@@ -126,8 +136,16 @@ export default class GitHubModule{
                 result.data.items.forEach(repo => {
                     this.addProject(repo.name, repo.id, owned);
                 });
+                if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
+                    this.cloneExampleProjectPopup();
+                }
             }); 
         } 
+    }
+    
+    cloneExampleProjectPopup(){
+        console.log("would clone example project popup");
+        this.forkByID(177732883); //This is the ID of the example project
     }
     
     addProject(projectName, id, owned){
