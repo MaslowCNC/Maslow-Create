@@ -324,6 +324,10 @@ export default class GitHubModule{
                         
                         var _this = this;
                         this.intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
+                        
+                        
+                        //Trigger a save of the project
+                        this.saveProject();
                     });
                 });
             });
