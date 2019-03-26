@@ -109,7 +109,7 @@ export default class GitHubModule{
             var owned;
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true;
-                query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate';
+                query = searchString + ' ' + 'fork:true user:' + this.currentUser + ' topic:maslowcreate';
             }
             else{
                 owned = false;
@@ -132,7 +132,7 @@ export default class GitHubModule{
             //Load molecules
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true;
-                query = searchString + ' ' + 'user:' + this.currentUser + ' topic:maslowcreate-molecule';
+                query = searchString + ' ' + 'fork:true user:' + this.currentUser + ' topic:maslowcreate-molecule';
             }
             else{
                 owned = false;
