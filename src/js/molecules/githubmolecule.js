@@ -119,6 +119,10 @@ export default class GitHubMolecule extends Molecule {
             }
         });
         
+        this.createButton(valueList,this,"Create A Copy",(e) => {
+           GlobalVariables.gitHub.forkByID(this.projectID);
+        });
+        
         this.createBOM(valueList,this,this.BOMlist);
     }
 }
