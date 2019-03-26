@@ -114,6 +114,16 @@ export default class GitHubModule{
                 owned = false;
                 query = searchString + ' topic:maslowcreate';
             }
+            
+            //Figure out how many repos this user has, search will throw an error if they have 0;
+            this.octokit.repos.list({
+                affiliation: 'owner',
+            }).then(({data, headers, status}) => {
+                if(data.length == 0){                   //If the user has no repos at all, the search will fail so we want to spawn a popup here and clone the example
+                    this.cloneExampleProjectPopup();
+                }
+            });
+            
             this.octokit.search.repos({
                 q: query,
                 sort: "stars",
@@ -126,8 +136,16 @@ export default class GitHubModule{
                 result.data.items.forEach(repo => {
                     this.addProject(repo.name, repo.id, owned);
                 });
+                if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
+                    this.cloneExampleProjectPopup();
+                }
             }); 
         } 
+    }
+    
+    cloneExampleProjectPopup(){
+        console.log("would clone example project popup");
+        this.forkByID(177732883); //This is the ID of the example project
     }
     
     addProject(projectName, id, owned){
@@ -604,7 +622,7 @@ export default class GitHubModule{
                             accept: 'application/vnd.github.mercy-preview+json'
                         }
                     }).then(result => {
-                        
+                        var repoName = result.data.name;
                         //Manually copy over the topics which are lost in forking
                         this.octokit.repos.replaceTopics({
                             owner: result.data.owner.login,
@@ -614,17 +632,39 @@ export default class GitHubModule{
                                 accept: 'application/vnd.github.mercy-preview+json'
                             }
                         }).then(result => {
-                            alert("A copy of this project has been created in your account and will now be available under your projects");
+                            
+                            
+                            //Remove everything in the this.popup now
+                            while (this.popup.firstChild) {
+                                this.popup.removeChild(this.popup.firstChild);
+                            }
+                            
+                            this.popup.classList.remove('off');
+                            this.popup.setAttribute("style", "text-align: center");
+
+                            var subButtonDiv = document.createElement('div');
+                            subButtonDiv.setAttribute("class", "form");
+                            
+                             //Add a title
+                            var titleDiv = document.createElement("DIV");
+                            var title = document.createElement("H3");
+                            title.appendChild(document.createTextNode("A copy of the project '" + repoName + "' has been copied and added to your projects. You can view it by clicking the button below."));
+                            subButtonDiv.appendChild(title);
+                            subButtonDiv.appendChild(document.createElement("br"));
+                            
+                            var form = document.createElement("form");
+                            subButtonDiv.appendChild(form);
+                            var button = document.createElement("button");
+                            button.appendChild(document.createTextNode("View Projects"));
+                            button.addEventListener("click", (e) => {
+                                window.location.href = '/';
+                            });
+                            form.appendChild(button);
+                            this.popup.appendChild(subButtonDiv);
                         });
                     });
                 });
             });
         });
-        
-        //Fork the project
-        
-        //Send an alert that the project is now available under your projects
-        
-        //Redirect the page
     }
 }
