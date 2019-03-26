@@ -606,8 +606,6 @@ export default class GitHubModule{
                 //Find out the information of who owns the project we are trying to fork
                 var user     = result.data.owner.login;
                 var repoName = result.data.name;
-                console.log("User: " + user);
-                console.log("Repo Name: " + repoName);
                 
                 this.octokit.repos.listTopics({
                     owner: user, 
@@ -617,7 +615,6 @@ export default class GitHubModule{
                     }
                 }).then(result => {
                     var topics = result.data.names;
-                    console.log("Got topics: " + topics);
                     
                     //Create a fork of the project with the found user name and repo name under your account
                     this.octokit.repos.createFork({
@@ -627,8 +624,6 @@ export default class GitHubModule{
                             accept: 'application/vnd.github.mercy-preview+json'
                         }
                     }).then(result => {
-                        console.log("Fork created!:");
-                        console.log(result);
                         
                         //Manually copy over the topics which are lost in forking
                         this.octokit.repos.replaceTopics({
