@@ -312,7 +312,7 @@ export default class GitHubModule{
             //Once we have created the new repo we need to create a file within it to store the project in
             this.currentRepoName = result.data.name;
             var path = "project.maslowcreate";
-            var content = window.btoa("init"); // create a file with just the word "init" in it and base64 encode it
+            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)); // create a file with the new molecule in it and base64 encode it
             this.octokit.repos.createFile({
                 owner: this.currentUser,
                 repo: this.currentRepoName,
@@ -342,10 +342,6 @@ export default class GitHubModule{
                         
                         var _this = this;
                         this.intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
-                        
-                        
-                        //Trigger a save of the project
-                        this.saveProject();
                     });
                 });
             });
