@@ -108,34 +108,11 @@ export default class GitHubModule{
             var owned;
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true;
-                query = searchString + ' ' + 'fork:true user:' + this.currentUser + ' topic:maslowcreate-project';
+                query = searchString + ' ' + 'fork:true user:' + this.currentUser + ' topic:maslowcreate';
             }
             else{
                 owned = false;
-                query = searchString + ' topic:maslowcreate-project';
-            }
-            this.octokit.search.repos({
-                q: query,
-                sort: "stars",
-                per_page: 100,
-                page: 1,
-                headers: {
-                    accept: 'application/vnd.github.mercy-preview+json'
-                }
-            }).then(result => {
-                result.data.items.forEach(repo => {
-                    this.addProject(repo.name, repo.id, owned);
-                });
-            }); 
-            
-            //Load molecules
-            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
-                owned = true;
-                query = searchString + ' ' + 'fork:true user:' + this.currentUser + ' topic:maslowcreate-molecule';
-            }
-            else{
-                owned = false;
-                query = searchString + ' topic:maslowcreate-molecule';
+                query = searchString + ' topic:maslowcreate';
             }
             this.octokit.search.repos({
                 q: query,
