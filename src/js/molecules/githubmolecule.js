@@ -119,9 +119,15 @@ export default class GitHubMolecule extends Molecule {
             }
         });
         
-        this.createButton(valueList,this,"Create A Copy",(e) => {
-           GlobalVariables.gitHub.forkByID(this.projectID);
-        });
+        if(GlobalVariables.runMode){ //If the molecule is displaying in run mode
+            this.createButton(valueList,this,"Create A Copy",(e) => {
+               GlobalVariables.gitHub.forkByID(this.projectID);
+            });
+            
+            this.createButton(valueList,this,"Your Projects",(e) => {
+               window.location.href = '/';
+            });
+        }
         
         this.createBOM(valueList,this,this.BOMlist);
     }
