@@ -100,6 +100,9 @@ export default class GitHubModule{
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild);
             }
             
+            //Add the create a new project button
+            this.addProject("New Project");
+            
             //Load projects
             var query;
             var owned;
