@@ -19,7 +19,7 @@ export default class GitHubModule{
     }
 
     tryLogin(){
-        // Initialize with your OAuth.io app public key
+        // Initialize with OAuth.io app public key
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8');
         // Use popup for oauth
         OAuth.popup('github').then(github => {
@@ -587,4 +587,69 @@ export default class GitHubModule{
         });
     }
 
+    forkByID(id){
+        
+        //Authenticate - Initialize with OAuth.io app public key
+        OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8');
+        // Use popup for oauth
+        OAuth.popup('github').then(github => {
+            
+            this.octokit.authenticate({
+                type: "oauth",
+                token: github.access_token,
+                headers: {
+                    accept: 'application/vnd.github.mercy-preview+json'
+                }
+            })
+            
+            this.octokit.request('GET /repositories/:id', {id}).then(result => {
+                //Find out the information of who owns the project we are trying to fork
+                var user     = result.data.owner.login;
+                var repoName = result.data.name;
+                console.log("User: " + user);
+                console.log("Repo Name: " + repoName);
+                
+                this.octokit.repos.listTopics({
+                    owner: user, 
+                    repo: repoName,
+                    headers: {
+                        accept: 'application/vnd.github.mercy-preview+json'
+                    }
+                }).then(result => {
+                    var topics = result.data.names;
+                    console.log("Got topics: " + topics);
+                    
+                    //Create a fork of the project with the found user name and repo name under your account
+                    this.octokit.repos.createFork({
+                        owner: user, 
+                        repo: repoName,
+                        headers: {
+                            accept: 'application/vnd.github.mercy-preview+json'
+                        }
+                    }).then(result => {
+                        console.log("Fork created!:");
+                        console.log(result);
+                        
+                        //Manually copy over the topics which are lost in forking
+                        this.octokit.repos.replaceTopics({
+                            owner: result.data.owner.login,
+                            repo: result.data.name,
+                            names: topics,
+                            headers: {
+                                accept: 'application/vnd.github.mercy-preview+json'
+                            }
+                        }).then(result => {
+                            alert("A copy of this project has been created in your account and will now be available under your projects");
+                        });
+                    });
+                });
+            });
+        });
+        
+        //Fork the project
+        
+        //Send an alert that the project is now available under your projects
+        
+        //Redirect the page
+    }
 }
