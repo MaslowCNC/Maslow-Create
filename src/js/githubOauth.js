@@ -89,15 +89,11 @@ export default class GitHubModule{
         this.projectsSpaceDiv.setAttribute("class", "float-left-div{");
         this.popup.appendChild(this.projectsSpaceDiv);
         
-        
-        //Add the create a new project button
-        this.addProject("New Project");
-        
         yoursButton.click()
     }
     
     loadProjectsBySearch(ev, searchString){
-        
+
         if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
@@ -117,29 +113,6 @@ export default class GitHubModule{
             else{
                 owned = false;
                 query = searchString + ' topic:maslowcreate';
-            }
-            this.octokit.search.repos({
-                q: query,
-                sort: "stars",
-                per_page: 100,
-                page: 1,
-                headers: {
-                    accept: 'application/vnd.github.mercy-preview+json'
-                }
-            }).then(result => {
-                result.data.items.forEach(repo => {
-                    this.addProject(repo.name, repo.id, owned);
-                });
-            }); 
-            
-            //Load molecules
-            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
-                owned = true;
-                query = searchString + ' ' + 'fork:true user:' + this.currentUser + ' topic:maslowcreate-molecule';
-            }
-            else{
-                owned = false;
-                query = searchString + ' topic:maslowcreate-molecule';
             }
             this.octokit.search.repos({
                 q: query,
@@ -359,7 +332,7 @@ export default class GitHubModule{
             this.octokit.repos.replaceTopics({
                 owner: this.currentUser,
                 repo: this.currentRepoName,
-                names: ["maslowcreate"],
+                names: ["maslowcreate", "maslowcreate-project"],
                 headers: {
                     accept: 'application/vnd.github.mercy-preview+json'
                 }
@@ -581,7 +554,7 @@ export default class GitHubModule{
             this.octokit.repos.replaceTopics({
                 owner: this.currentUser,
                 repo: repoName,
-                names: ["maslowcreate-molecule"],
+                names: ["maslowcreate", "maslowcreate-molecule"],
                 headers: {
                     accept: 'application/vnd.github.mercy-preview+json'
                 }
