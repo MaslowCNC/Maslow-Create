@@ -282,6 +282,17 @@ export default class GitHubModule{
         });
     }
     
+    openGitHubPage(){
+        //Open the github page for the current project in a new tab
+        this.octokit.repos.get({
+            owner: this.currentUser,
+            repo: this.currentRepoName
+        }).then(result => {
+            var url = result.data.html_url;
+            window.open(url);
+        });
+    }
+    
     createNewProject(){
         
         if(typeof this.intervalTimer != undefined){
