@@ -129,6 +129,6 @@ export default class GitHubMolecule extends Molecule {
             });
         }
         
-        this.createBOM(valueList,this,this.BOMlist);
+        this.displaySimpleBOM(valueList);
     }
 }
