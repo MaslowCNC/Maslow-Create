@@ -52,8 +52,6 @@ export default class BillOfMaterials extends Atom{
     }
     
     createBOM(list,parent,BOMlist){
-        //aBOMEntry = new bomEntry;
-        
         
         list.appendChild(document.createElement('br'));
         list.appendChild(document.createElement('br'));
