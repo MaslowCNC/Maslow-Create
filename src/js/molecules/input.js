@@ -34,7 +34,6 @@ export default class Input extends Atom {
         
         this.parent.children.forEach(child => {
             if (child.name == this.name){
-                console.log("matching parent IO found for: " + this.name);
                 this.createEditableValueListItem(valueList,child,"value", "Value", true);
             }
         });
