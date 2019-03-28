@@ -207,6 +207,19 @@ export default class Atom {
     updateSidebar(){
         //updates the sidebar to display information about this node
         
+        var valueList = this.initializeSideBar();
+        
+        //Add options to set all of the inputs
+        this.children.forEach(child => {
+            if(child.type == 'input' && child.valueType != 'geometry'){
+                this.createEditableValueListItem(valueList,child,"value", child.name, true);
+            }
+        });
+        
+        return valueList;
+    }
+    
+    initializeSideBar(){
         //remove everything in the sideBar now
         while (GlobalVariables.sideBar.firstChild) {
             GlobalVariables.sideBar.removeChild(GlobalVariables.sideBar.firstChild);
@@ -222,13 +235,6 @@ export default class Atom {
         var valueList = document.createElement("ul");
         GlobalVariables.sideBar.appendChild(valueList);
         valueList.setAttribute("class", "sidebar-list");
-        
-        //Add options to set all of the inputs
-        this.children.forEach(child => {
-            if(child.type == 'input' && child.valueType != 'geometry'){
-                this.createEditableValueListItem(valueList,child,"value", child.name, true);
-            }
-        });
         
         return valueList;
     }
