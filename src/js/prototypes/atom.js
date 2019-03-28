@@ -57,6 +57,7 @@ export default class Atom {
         
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.color;
+        GlobalVariables.c.font = "10px Work Sans";
         //make it imposible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas');

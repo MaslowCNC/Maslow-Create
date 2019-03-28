@@ -13,6 +13,7 @@ import Equation from './molecules/equation.js'
 import Molecule from './molecules/molecule.js'
 import Input from './molecules/input.js'
 import Readme from './molecules/readme.js'
+import BillOfMaterials from './molecules/BOM.js'
 import Rotate from './molecules/rotate.js'
 import Mirror from './molecules/mirror.js'
 import GitHubMolecule from './molecules/githubmolecule.js'
@@ -26,24 +27,25 @@ class GlobalVariables{
         this.c = null
         
         this.availableTypes = {
-            circle:        {creator: Circle, atomType: "Circle"},
-            rectangle:     {creator: Rectangle, atomType: "Rectangle"},
-            shirinkwrap:   {creator: ShrinkWrap, atomType: "ShrinkWrap"},
-            translate:     {creator: Translate, atomType: "Translate"},
-            regularPolygon:{creator: RegularPolygon, atomType: "RegularPolygon"},
-            extrude:       {creator: Extrude, atomType: "Extrude"},
-            scale:         {creator: Scale, atomType: "Scale"},
-            intersection:  {creator: Intersection, atomType: "Intersection"},
-            difference:    {creator: Difference, atomType: "Difference"},
-            costant:       {creator: Constant, atomType: "Constant"},
-            equation:      {creator: Equation, atomType: "Equation"},
-            molecule:      {creator: Molecule, atomType: "Molecule"},
-            input:         {creator: Input, atomType: "Input"},
-            readme:        {creator: Readme, atomType: "Readme"},
-            rotate:        {creator: Rotate, atomType: "Rotate"},
-            mirror:        {creator: Mirror, atomType: "Mirror"},
-            githubmolecule:{creator: GitHubMolecule, atomType: "GitHubMolecule"},
-            union:         {creator: Union, atomType: "Union"}
+            circle:             {creator: Circle, atomType: "Circle"},
+            rectangle:          {creator: Rectangle, atomType: "Rectangle"},
+            shirinkwrap:        {creator: ShrinkWrap, atomType: "ShrinkWrap"},
+            translate:          {creator: Translate, atomType: "Translate"},
+            regularPolygon:     {creator: RegularPolygon, atomType: "RegularPolygon"},
+            extrude:            {creator: Extrude, atomType: "Extrude"},
+            scale:              {creator: Scale, atomType: "Scale"},
+            intersection:       {creator: Intersection, atomType: "Intersection"},
+            difference:         {creator: Difference, atomType: "Difference"},
+            costant:            {creator: Constant, atomType: "Constant"},
+            equation:           {creator: Equation, atomType: "Equation"},
+            molecule:           {creator: Molecule, atomType: "Molecule"},
+            input:              {creator: Input, atomType: "Input"},
+            readme:             {creator: Readme, atomType: "Readme"},
+            billOfMaterials:    {creator: BillOfMaterials, atomType: "Bill Of Materials"},
+            rotate:             {creator: Rotate, atomType: "Rotate"},
+            mirror:             {creator: Mirror, atomType: "Mirror"},
+            githubmolecule:     {creator: GitHubMolecule, atomType: "GitHubMolecule"},
+            union:              {creator: Union, atomType: "Union"}
         }
 
         this.secretTypes = {
