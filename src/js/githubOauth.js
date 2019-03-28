@@ -409,7 +409,7 @@ export default class GitHubModule{
                     content = this.bomHeader;
                     
                     GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
-                        content = content + "\n|" + item.BOMitemName + "|" + item.totalNeeded + "|" + item.costUSD + "|" + item.source + "|";
+                        content = content + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
                     });
                     
                     content = window.btoa(content);
