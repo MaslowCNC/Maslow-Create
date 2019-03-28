@@ -78,7 +78,6 @@ export default class Molecule extends Atom{
             if(child.type == 'input'){
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == "Input" && child.name == atom.name){
-                        console.log("Calling setOutput with: " + child.getValue());
                         atom.setOutput(child.getValue());
                     }
                 });
@@ -108,9 +107,7 @@ export default class Molecule extends Atom{
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = super.updateSidebar(); //call the super function
-        
-        this.createEditableValueListItem(valueList,this,"name", "Name", false);
+        var valueList = super.initializeSideBar(); 
         
         if(!this.topLevel){
             this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule);
@@ -131,7 +128,19 @@ export default class Molecule extends Atom{
             });
         }
         
-        this.createBOM(valueList,this,this.BOMlist);
+        this.createEditableValueListItem(valueList,this,"name", "Name", false);
+        
+        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
+            //Add options to set all of the inputs
+            this.children.forEach(child => {
+                if(child.type == 'input' && child.valueType != 'geometry'){
+                    this.createEditableValueListItem(valueList,child,"value", child.name, true);
+                }
+            });
+        }
+        
+                
+        //this.createBOM(valueList,this,this.BOMlist);
         
         return valueList;
         
