@@ -1,6 +1,5 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
-import BOMEntry from '../BOM'
 
 export default class Atom {
 
@@ -20,7 +19,6 @@ export default class Atom {
         this.codeBlock = "";
         this.defaultCodeBlock = "";
         this.isMoving = false;
-        this.BOMlist = [];
         
         for(var key in values) {
             this[key] = values[key];
@@ -279,30 +277,15 @@ export default class Atom {
             x: this.x,
             y: this.y,
             uniqueID: this.uniqueID,
-            ioValues: ioValues,
-            BOMlist: this.BOMlist
+            ioValues: ioValues
         }
         
         return object;
     }
     
     requestBOM(){
-        //Request any contributions from this atom to the BOM
-        
-        
-        //Find the number of things attached to this output
-        var numberOfThisInstance = 1;
-        this.children.forEach(io => {
-            if(io.type == "output" && io.connectors.length != 0){
-                numberOfThisInstance = io.connectors.length;
-            }
-        });
-        //And scale up the total needed by that number
-        this.BOMlist.forEach(bomItem => {
-            bomItem.totalNeeded = numberOfThisInstance*bomItem.numberNeeded;
-        });
-        
-        return this.BOMlist;
+        //Placeholder
+        return [];
     }
     
     requestReadme(){
@@ -521,47 +504,4 @@ export default class Atom {
         );
     }
 
-    createBOM(list,parent,BOMlist){
-        //aBOMEntry = new bomEntry;
-        
-        
-        list.appendChild(document.createElement('br'));
-        list.appendChild(document.createElement('br'));
-        
-        var div = document.createElement("h3");
-        div.setAttribute("style","text-align:center;");
-        list.appendChild(div);
-        var valueText = document.createTextNode("Bill Of Materials");
-        div.appendChild(valueText);
-        
-        var x = document.createElement("HR");
-        list.appendChild(x);
-        
-        this.requestBOM().forEach(bomItem => {
-            if(this.BOMlist.indexOf(bomItem) != -1){ //If the bom item is from this molecule
-                this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-                this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", true)
-                this.createEditableValueListItem(list,bomItem,"costUSD", "Price", true)
-                this.createEditableValueListItem(list,bomItem,"source", "Source", false)
-            }
-            else{
-                this.createNonEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-                this.createNonEditableValueListItem(list,bomItem,"totalNeeded", "Number", true)
-                this.createNonEditableValueListItem(list,bomItem,"costUSD", "Price", true)
-                this.createNonEditableValueListItem(list,bomItem,"source", "Source", false)
-            }
-            var x = document.createElement("HR");
-            list.appendChild(x);
-        });
-        
-        this.createButton(list,parent,"Add BOM Entry", this.addBOMEntry);
-    }
-    
-    addBOMEntry(self){
-        console.log("add a bom entry");
-        
-        self.BOMlist.push(new BOMEntry());
-        
-        self.updateSidebar();
-    }
 }
