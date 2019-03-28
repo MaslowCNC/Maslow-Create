@@ -39,6 +39,7 @@ export default class AttachmentPoint {
 
         var txt = this.name;
         var textWidth = GlobalVariables.c.measureText(txt).width;
+        GlobalVariables.c.font = "10px Work Sans";
         var bubbleColor = "#008080";
         var scaleRadiusDown = this.radius*.7;
         var halfRadius = this.radius*.5;
