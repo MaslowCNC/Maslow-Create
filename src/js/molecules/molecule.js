@@ -140,11 +140,30 @@ export default class Molecule extends Atom{
         }
         
                 
-        //this.createBOM(valueList,this,this.BOMlist);
+        this.displaySimpleBOM(valueList);
         
         return valueList;
         
     }
+    
+    displaySimpleBOM(list){
+        list.appendChild(document.createElement('br'));
+        list.appendChild(document.createElement('br'));
+        
+        var div = document.createElement("h3");
+        div.setAttribute("style","text-align:center;");
+        list.appendChild(div);
+        var valueText = document.createTextNode("Bill Of Materials");
+        div.appendChild(valueText);
+        
+        var x = document.createElement("HR");
+        list.appendChild(x);
+        
+        this.requestBOM().forEach(bomEntry => {
+            this.createNonEditableValueListItem(list,bomEntry,"numberNeeded", bomEntry.BOMitemName, false)
+        });
+    }
+        
     
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
