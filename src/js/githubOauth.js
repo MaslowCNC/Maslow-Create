@@ -402,7 +402,7 @@ export default class GitHubModule{
                     content: content,
                     sha: sha
                 }).then(result => {
-                    
+                    console.log("Project saved");
                     //Then update the BOM file
                     
                     path = "BillOfMaterials.md";

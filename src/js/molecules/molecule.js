@@ -205,22 +205,18 @@ export default class Molecule extends Atom{
         //savedObject object here to pass to lower levels.
         
         if(this.topLevel == true){
-            //Create a new blank project to save to
+            //If this is the top level create a new blank project to save to FIXME: It would be cleaner if this function were just called with the object when called from the top level
             savedObject = {molecules: []}
         }
             
-        var allElementsCode = new Array();
-        var allAtoms = [];
-        var allConnectors = [];
+        var allAtoms = []; //An array of all the atoms containted in this molecule
+        var allConnectors = []; //An array of all the connectors contained in this molelcule
         
         
         this.nodesOnTheScreen.forEach(atom => {
-            if (atom.codeBlock != ""){
-                allElementsCode.push(atom.codeBlock);
-            }
-            
+            //Store a represnetation of the atom
             allAtoms.push(JSON.stringify(atom.serialize(savedObject)));
-            
+            //Store a representation of the atom's connectors
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
                     attachmentPoint.connectors.forEach(connector => {
@@ -240,26 +236,16 @@ export default class Molecule extends Atom{
             allConnectors: allConnectors
         }
         
-        //Add an object record of this object
-        
+        //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject);
             
         if(this.topLevel == true){
-            //If this is the top level, return the generated object
+            //If this is the top level, return the complete file to be saved
             return savedObject;
         }
         else{
-            //If not, return just a placeholder for this molecule
-            var object = {
-                atomType: this.atomType,
-                name: this.name,
-                x: this.x,
-                y: this.y,
-                uniqueID: this.uniqueID,
-                BOMlist: this.BOMlist
-            }
-            
-            return object;
+            //If not, return a placeholder for this molecule
+            return super.serialize(savedObject);
         }
     }
         
@@ -287,6 +273,8 @@ export default class Molecule extends Atom{
         this.savedConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
+        
+        this.setValues([]);//Call set values with an empty list to trigger loading of IO values from memory
         
         this.updateCodeBlock();
     }
