@@ -257,7 +257,7 @@ export default class Atom {
         
         var ioValues = [];
         this.children.forEach(io => {
-            if (io.valueType == "number" && io.type == "input"){
+            if (typeof io.getValue() == "number" && io.type == "input"){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
@@ -272,7 +272,8 @@ export default class Atom {
             x: this.x,
             y: this.y,
             uniqueID: this.uniqueID,
-            ioValues: ioValues
+            ioValues: ioValues,
+            BOMlist: this.BOMlist
         }
         
         return object;

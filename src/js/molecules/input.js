@@ -32,6 +32,11 @@ export default class Input extends Atom {
         
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
+        this.parent.children.forEach(child => {
+            if (child.name == this.name){
+                this.createEditableValueListItem(valueList,child,"value", "Value", true);
+            }
+        });
     }
     
     draw() {

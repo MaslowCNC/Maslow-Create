@@ -205,22 +205,18 @@ export default class Molecule extends Atom{
         //savedObject object here to pass to lower levels.
         
         if(this.topLevel == true){
-            //Create a new blank project to save to
+            //If this is the top level create a new blank project to save to FIXME: It would be cleaner if this function were just called with the object when called from the top level
             savedObject = {molecules: []}
         }
             
-        var allElementsCode = new Array();
-        var allAtoms = [];
-        var allConnectors = [];
+        var allAtoms = []; //An array of all the atoms containted in this molecule
+        var allConnectors = []; //An array of all the connectors contained in this molelcule
         
         
         this.nodesOnTheScreen.forEach(atom => {
-            if (atom.codeBlock != ""){
-                allElementsCode.push(atom.codeBlock);
-            }
-            
+            //Store a represnetation of the atom
             allAtoms.push(JSON.stringify(atom.serialize(savedObject)));
-            
+            //Store a representation of the atom's connectors
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
                     attachmentPoint.connectors.forEach(connector => {
@@ -230,36 +226,21 @@ export default class Molecule extends Atom{
             });
         });
         
-        var thisAsObject = {
-            atomType: this.atomType,
-            name: this.name,
-            uniqueID: this.uniqueID,
-            topLevel: this.topLevel,
-            BOMlist: this.BOMlist,
-            allAtoms: allAtoms,
-            allConnectors: allConnectors
-        }
+        var thisAsObject = super.serialize(savedObject)
+        thisAsObject.topLevel = this.topLevel;
+        thisAsObject.allAtoms = allAtoms;
+        thisAsObject.allConnectors = allConnectors;
         
-        //Add an object record of this object
-        
+        //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject);
             
         if(this.topLevel == true){
-            //If this is the top level, return the generated object
+            //If this is the top level, return the complete file to be saved
             return savedObject;
         }
         else{
-            //If not, return just a placeholder for this molecule
-            var object = {
-                atomType: this.atomType,
-                name: this.name,
-                x: this.x,
-                y: this.y,
-                uniqueID: this.uniqueID,
-                BOMlist: this.BOMlist
-            }
-            
-            return object;
+            //If not, return a placeholder for this molecule
+            return super.serialize(savedObject);
         }
     }
         
@@ -268,11 +249,7 @@ export default class Molecule extends Atom{
         //Find the target molecule in the list
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
-        //Grab the name and ID
-        this.uniqueID  = moleculeObject.uniqueID;
-        this.name      = moleculeObject.name;
-        this.topLevel  = moleculeObject.topLevel;
-        this.BOMlist   = moleculeObject.BOMlist;
+        this.setValues(moleculeObject); //Grab the values of everything from the passed object
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
@@ -282,11 +259,13 @@ export default class Molecule extends Atom{
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
-        //Place the connectors
+        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
         this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
+        
+        this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
         
         this.updateCodeBlock();
     }
