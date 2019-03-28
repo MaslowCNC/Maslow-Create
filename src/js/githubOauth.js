@@ -662,6 +662,7 @@ export default class GitHubModule{
                             var form = document.createElement("form");
                             subButtonDiv.appendChild(form);
                             var button = document.createElement("button");
+                            button.setAttribute("type", "button");
                             button.appendChild(document.createTextNode("View Projects"));
                             button.addEventListener("click", (e) => {
                                 window.location.href = '/';
