@@ -272,7 +272,8 @@ export default class Atom {
             x: this.x,
             y: this.y,
             uniqueID: this.uniqueID,
-            ioValues: ioValues
+            ioValues: ioValues,
+            BOMlist: this.BOMlist
         }
         
         return object;

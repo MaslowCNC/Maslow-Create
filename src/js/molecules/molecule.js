@@ -226,15 +226,10 @@ export default class Molecule extends Atom{
             });
         });
         
-        var thisAsObject = {
-            atomType: this.atomType,
-            name: this.name,
-            uniqueID: this.uniqueID,
-            topLevel: this.topLevel,
-            BOMlist: this.BOMlist,
-            allAtoms: allAtoms,
-            allConnectors: allConnectors
-        }
+        var thisAsObject = super.serialize(savedObject)
+        thisAsObject.topLevel = this.topLevel;
+        thisAsObject.allAtoms = allAtoms;
+        thisAsObject.allConnectors = allConnectors;
         
         //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject);
@@ -254,11 +249,7 @@ export default class Molecule extends Atom{
         //Find the target molecule in the list
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
-        //Grab the name and ID
-        this.uniqueID  = moleculeObject.uniqueID;
-        this.name      = moleculeObject.name;
-        this.topLevel  = moleculeObject.topLevel;
-        this.BOMlist   = moleculeObject.BOMlist;
+        this.setValues(moleculeObject); //Grab the values of everything from the passed object
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
@@ -268,13 +259,13 @@ export default class Molecule extends Atom{
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
-        //Place the connectors
+        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
         this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
         
-        this.setValues([]);//Call set values with an empty list to trigger loading of IO values from memory
+        this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
         
         this.updateCodeBlock();
     }
