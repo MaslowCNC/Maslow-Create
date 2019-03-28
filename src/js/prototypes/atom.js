@@ -257,7 +257,7 @@ export default class Atom {
         
         var ioValues = [];
         this.children.forEach(io => {
-            if (io.valueType != "geometry" && io.type == "input"){
+            if (typeof io.getValue() == "number" && io.type == "input"){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
