@@ -192,7 +192,7 @@ export default class Atom {
     
     keyPress(key){
         //runs whenver a key is pressed
-        if (key == 'Delete'){
+        if (['Delete', 'Backspace'].includes(key)){
             if(this.selected == true){
                 this.deleteNode();
             }
@@ -390,7 +390,7 @@ export default class Atom {
         
         //prevent the return key from being used when editing a value
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
-            if (evt.which === 13) {
+            if ([8, 13, 46].includes(evt.which)) {
                 evt.preventDefault();
                 document.getElementById(thisID).blur();  //shift focus away if someone presses enter
             }
