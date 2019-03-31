@@ -91,6 +91,9 @@ export default class Atom {
         GlobalVariables.c.textAlign = "start"; 
         GlobalVariables.c.fillText(this.name, this.scaledX + this.scaledRadius, this.scaledY- this.scaledRadius);
         GlobalVariables.c.fill();
+        GlobalVariables.c.strokeStyle = "#484848";
+        GlobalVariables.c.lineWidth = 1;
+        GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();
         GlobalVariables.scaleFactorXY=1;
 

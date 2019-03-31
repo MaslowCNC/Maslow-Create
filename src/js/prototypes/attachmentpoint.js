@@ -85,8 +85,11 @@ export default class AttachmentPoint {
         }
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
+        GlobalVariables.c.strokeStyle = "#484848";
+        GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         GlobalVariables.c.fill();
+        GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();  
 
             if (this.defaultRadius != this.radius){
