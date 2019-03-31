@@ -163,14 +163,18 @@ export default class AttachmentPoint {
             //this.offsetY = this.defaultOffsetY;
             }
             else{
-                var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
-                // angle correction so that it centers menu adjusting to however many attachment points there are 
-                var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
 
-                this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.scaledRadius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                this.offsetX = this.hoverOffsetX; 
-                this.offsetY = this.hoverOffsetY;  
+                if (numAttachmentPoints > 2){
+                   
+                    var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
+                    // angle correction so that it centers menu adjusting to however many attachment points there are 
+                    var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
+
+                    this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.scaledRadius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    this.offsetX = this.hoverOffsetX; 
+                    this.offsetY = this.hoverOffsetY;  
+                     }
                  }
             this.showHoverText = true;
             this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
