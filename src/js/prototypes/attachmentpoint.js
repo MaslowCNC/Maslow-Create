@@ -5,7 +5,7 @@ export default class AttachmentPoint {
     constructor(values){
  
         this.defaultRadius = 8;
-        this.expandedRadius = 14;
+        this.expandedRadius = false;
         this.radius = 8;
         
         this.hoverDetectRadius = 8;
@@ -40,6 +40,10 @@ export default class AttachmentPoint {
         this.defaultRadius = this.radius;
         this.radius = this.parentMolecule.scaledRadius/2.2;
         this.hoverDetectRadius = this.parentMolecule.scaledRadius;
+
+    if (this.expandedRadius == true){
+            this.radius = this.parentMolecule.scaledRadius/1.6;
+        }
 
         var txt = this.name;
         var textWidth = GlobalVariables.c.measureText(txt).width;
@@ -146,28 +150,22 @@ export default class AttachmentPoint {
         //If we are hovering over the attachment point, indicate that by making it big
         if (distFromCursor < this.defaultRadius){
 
-           this.expandedRadius = this.parentMolecule.scaledRadius;
-           this.radius = this.expandedRadius;
+           this.expandedRadius = true;
+           console.log("what");
         }
         else{
-            this.radius = this.defaultRadius;
+            this.expandedRadius = false;
         }
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        //Change direction of hover drop down if too close to the top.
-        if (distFromCursor < 50){
+        if (distFromCursor < this.parentMolecule.radius*2){
 
             var numAttachmentPoints= this.parentMolecule.children.length;
             var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
        
              // if input type then offset first element down to give space for radial menu 
-            if (this.type == "output"){
+            if (this.type == "input"){
               
-            //this.offsetX = this.defaultOffsetX;
-            //this.offsetY = this.defaultOffsetY;
-            }
-            else{
-
-                if (numAttachmentPoints > 2){
+                 if (numAttachmentPoints > 2){
                    
                     var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
                     // angle correction so that it centers menu adjusting to however many attachment points there are 
@@ -178,7 +176,8 @@ export default class AttachmentPoint {
                     this.offsetX = this.hoverOffsetX; 
                     this.offsetY = this.hoverOffsetY;  
                      }
-                 }
+            }
+            
             this.showHoverText = true;
             this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
 
