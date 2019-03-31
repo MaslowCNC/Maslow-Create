@@ -56,8 +56,8 @@ export default class Atom {
         this.scaledY = GlobalVariables.scaleFactorXY * this.y;
         this.scaledRadius = GlobalVariables.scaleFactorR * this.radius;
 
-        this.inputX = this.scaledX - this.scaledRadius
-        this.outputX = this.scaledX + this.scaledRadius
+        this.inputX = this.scaledX - this.scaledRadius;
+        this.outputX = this.scaledX + this.scaledRadius;
         
         this.children.forEach(child => {
             child.draw();       
@@ -69,20 +69,28 @@ export default class Atom {
         //make it imposible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas');
-        if (this.scaledX<this.scaledRadius*3){
-                this.scaledX+= this.scaledRadius*3;    
+        if (this.scaledX < this.scaledRadius*3){
+                this.scaledX+= this.scaledRadius*3; 
+                //for attachment point draw adjustment
+                this.x = this.scaledRadius*3;    
                 GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
         }
         else if (this.scaledY<this.scaledRadius*2){
                 this.scaledY += this.scaledRadius; 
+                  //for attachment point draw adjustment
+                this.y += this.scaledRadius; 
                 GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
         }
         else if (this.scaledX + this.scaledRadius*2 > canvasFlow.width){
                 this.scaledX -= this.scaledRadius*2; 
+                  //for attachment point draw adjustment
+                this.x -= this.scaledRadius*2; 
                 GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
         }
         else if (this.scaledY+ this.scaledRadius*2 > canvasFlow.height){
                 this.scaledY-= this.scaledRadius; 
+                  //for attachment point draw adjustment
+                this.y -= this.scaledRadius; 
                 GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
         }
         else{

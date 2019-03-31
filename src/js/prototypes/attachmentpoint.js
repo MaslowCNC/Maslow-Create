@@ -19,6 +19,7 @@ export default class AttachmentPoint {
         this.showHoverText = false;
         this.atomType = "AttachmentPoint";
         
+        
         this.valueType = "number"; //options are number, geometry, array
         this.type = "output";
         this.value = 10; //The default input value when nothing is connected
@@ -37,16 +38,21 @@ export default class AttachmentPoint {
     
     draw() {
 
+        //this.x = this.scaledX;
+        //this.y = this.scaledY;
+
+
         this.defaultRadius = this.radius;
         this.radius = this.parentMolecule.scaledRadius/2.2;
         this.hoverDetectRadius = this.parentMolecule.scaledRadius;
+
 
     if (this.expandedRadius == true){
             this.radius = this.parentMolecule.scaledRadius/1.6;
         }
 
         var txt = this.name;
-        var textWidth = GlobalVariables.c.measureText(txt).width;
+        var textWidth = GlobalVariables.c.measureText(txt).width + 2;
         var bubbleColor = "#008080";
         var scaleRadiusDown = this.radius*.7;
         var halfRadius = this.radius*.5;
