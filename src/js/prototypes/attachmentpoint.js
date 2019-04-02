@@ -184,8 +184,18 @@ export default class AttachmentPoint {
                     var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
                     // angle correction so that it centers menu adjusting to however many attachment points there are 
                     var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
-
-                    this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    //fixes shrinkwrap attachment point location when adding io
+                        if (this.parentMolecule.name == "Shrink Wrap"){
+                            anglePerIO = 2.26893/*130 deg*// numAttachmentPoints;
+                            angleCorrection = anglePerIO * (numAttachmentPoints /* -1 correction + 1 for "output" IO */);
+                            console.log("Shrink Wrap");
+                        }
+                        if (numAttachmentPoints > 4){
+                            this.hoverOffsetY = Math.round( 1.8* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));   
+                        }
+                        else{
+                            this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                        }
                     this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.scaledRadius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                     this.offsetX = this.hoverOffsetX; 
                     this.offsetY = this.hoverOffsetY;  
