@@ -171,7 +171,7 @@ export default class AttachmentPoint {
             this.expandedRadius = false;
         }
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromCursor < this.parentMolecule.radius*2){
+        if (distFromCursor < this.parentMolecule.scaledRadius*3){
 
             var numAttachmentPoints= this.parentMolecule.children.length;
             var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
