@@ -26,9 +26,6 @@ flowCanvas.addEventListener('mousemove', event => {
 
 window.addEventListener('resize', event => {
     
-    console.log("resize");
-    GlobalVariables.resize = true;
-    
     var bounds = GlobalVariables.canvas.getBoundingClientRect();
     GlobalVariables.canvas.width = bounds.width;
     GlobalVariables.canvas.height = bounds.height; 

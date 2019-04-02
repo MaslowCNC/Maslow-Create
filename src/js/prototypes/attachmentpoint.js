@@ -38,9 +38,6 @@ export default class AttachmentPoint {
     
     draw() {
 
-    
-
-
         this.defaultRadius = this.radius;
         this.radius = this.parentMolecule.scaledRadius/2.2;
         this.hoverDetectRadius = this.parentMolecule.scaledRadius;

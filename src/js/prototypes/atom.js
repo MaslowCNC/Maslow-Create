@@ -103,8 +103,6 @@ export default class Atom {
         GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();
-       // GlobalVariables.scaleFactorXY=1;
-
 
     }
     
