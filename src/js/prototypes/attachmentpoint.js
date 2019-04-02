@@ -5,7 +5,7 @@ export default class AttachmentPoint {
     constructor(values){
  
         this.defaultRadius = 8;
-        this.expandedRadius = 14;
+        this.expandedRadius = false;
         this.radius = 8;
         
         this.hoverDetectRadius = 8;
@@ -18,6 +18,7 @@ export default class AttachmentPoint {
         this.offsetY = 0;
         this.showHoverText = false;
         this.atomType = "AttachmentPoint";
+        
         
         this.valueType = "number"; //options are number, geometry, array
         this.type = "output";
@@ -37,14 +38,25 @@ export default class AttachmentPoint {
     
     draw() {
 
+        this.defaultRadius = this.radius;
+        this.radius = this.parentMolecule.scaledRadius/2.2;
+        this.hoverDetectRadius = this.parentMolecule.scaledRadius;
+
+
+    if (this.expandedRadius == true){
+            this.radius = this.parentMolecule.scaledRadius/1.6;
+        }
+
         var txt = this.name;
         var textWidth = GlobalVariables.c.measureText(txt).width;
         GlobalVariables.c.font = "10px Work Sans";
+
         var bubbleColor = "#008080";
         var scaleRadiusDown = this.radius*.7;
         var halfRadius = this.radius*.5;
+
         
-        if (this.showHoverText){
+      if (this.showHoverText){
             if(this.type == "input"){
                 GlobalVariables.c.beginPath();
                 GlobalVariables.c.fillStyle = bubbleColor;
@@ -81,9 +93,21 @@ export default class AttachmentPoint {
         }
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
+        GlobalVariables.c.strokeStyle = "#484848";
+        GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         GlobalVariables.c.fill();
+        GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();  
+
+            if (this.defaultRadius != this.radius){
+                     if (this.type == "output"){     
+                        this.offsetX = this.parentMolecule.scaledRadius;
+                         }
+                    else{
+                         this.offsetX = -1* this.parentMolecule.scaledRadius;
+                         }
+            }
     }
 
     clickDown(x,y){
@@ -129,42 +153,50 @@ export default class AttachmentPoint {
         
         //If we are hovering over the attachment point, indicate that by making it big
         if (distFromCursor < this.defaultRadius){
-            this.radius = this.expandedRadius;
+
+           this.expandedRadius = true;
+           console.log("what");
         }
         else{
-            this.radius = this.defaultRadius;
+            this.expandedRadius = false;
         }
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        //Change direction of hover drop down if too close to the top.
-        if (distFromCursor < this.hoverDetectRadius){
+        if (distFromCursor < this.parentMolecule.radius*2){
 
             var numAttachmentPoints= this.parentMolecule.children.length;
             var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
        
              // if input type then offset first element down to give space for radial menu 
-            if (this.type == "output"){
-                this.offsetX = this.defaultOffsetX;
-                this.offsetY = this.defaultOffsetY;
-            }
-            else{
-                var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
-                // angle correction so that it centers menu adjusting to however many attachment points there are 
-                var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
+            if (this.type == "input"){
+              
+                 if (numAttachmentPoints > 2){
+                   
+                    var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
+                    // angle correction so that it centers menu adjusting to however many attachment points there are 
+                    var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
 
-                this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                this.offsetX = this.hoverOffsetX; 
-                this.offsetY = this.hoverOffsetY;  
-                 }
+                    this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.scaledRadius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    this.offsetX = this.hoverOffsetX; 
+                    this.offsetY = this.hoverOffsetY;  
+                     }
+            }
+            
             this.showHoverText = true;
-            this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.defaultOffsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
+            this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
 
             }
         else{
-            this.offsetX = this.defaultOffsetX;
-            this.offsetY = this.defaultOffsetY;
-            this.showHoverText = false;
-            this.hoverDetectRadius = this.defaultRadius;
+            if (this.type == "output"){
+              
+                    this.offsetX = this.parentMolecule.scaledRadius;
+            }
+           
+            else{   this.offsetX = -1* this.parentMolecule.scaledRadius;
+                    this.offsetY = this.defaultOffsetY;
+                    this.showHoverText = false;
+                    this.hoverDetectRadius = this.defaultRadius;
+             }
         }
         
         this.connectors.forEach(connector => {
@@ -225,8 +257,8 @@ export default class AttachmentPoint {
     }
     
     update() {
-        this.x = this.parentMolecule.x + this.offsetX;
-        this.y = this.parentMolecule.y + this.offsetY;
+        this.x = this.parentMolecule.scaledX + this.offsetX;
+        this.y = this.parentMolecule.scaledY + this.offsetY;
         this.draw()
        
         this.connectors.forEach(connector => {

@@ -25,6 +25,9 @@ class GlobalVariables{
     constructor(){
         this.canvas = null
         this.c = null
+        this.scaleFactorXY = 1;
+        this.scaleFactorR = 1;
+      
         
         this.availableTypes = {
             circle:             {creator: Circle, atomType: "Circle"},
@@ -61,6 +64,8 @@ class GlobalVariables{
         this.sideBar = document.querySelector('.sideBar');
         
         this.gitHub = new GitHubModule();
+
+
     }
     
     generateUniqueID(){

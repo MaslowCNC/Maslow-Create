@@ -11,8 +11,10 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
-let lowerHalfOfScreen = document.getElementById('lowerHalf');
-lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2.1+"px");
+let lowerHalfOfScreen = document.querySelector('.flex-parent');
+lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+let upperHalfOfScreen = document.querySelector('#flow-canvas');
+upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
 
 var url = window.location.href;
 GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
@@ -24,17 +26,22 @@ flowCanvas.addEventListener('mousemove', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickMove(event.clientX,event.clientY);        
     });
-})
+});
 
 window.addEventListener('resize', event => {
-    
-    console.log("resize");
     
     var bounds = GlobalVariables.canvas.getBoundingClientRect();
     GlobalVariables.canvas.width = bounds.width;
     GlobalVariables.canvas.height = bounds.height; 
+    //reset screen parameters 
+    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+    upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
 
-})
+    GlobalVariables.scaleFactorXY =  GlobalVariables.canvas.width/1000;
+    GlobalVariables.scaleFactorR =  GlobalVariables.canvas.width/1200;
+
+    });
+
 
 flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down
@@ -56,7 +63,7 @@ flowCanvas.addEventListener('mousedown', event => {
         Menu.hidemenu();
     }
     
-})
+});
 
 flowCanvas.addEventListener('dblclick', event => {
     //every time the mouse button goes down
@@ -73,14 +80,14 @@ flowCanvas.addEventListener('dblclick', event => {
         console.log("double click menu open not working in flowDraw.js");
         //showmenu(event);
     }
-})
+});
 
 flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY);      
     });
-})
+});
 
 window.addEventListener('keydown', event => {
     //every time the mouse button goes up
@@ -88,7 +95,7 @@ window.addEventListener('keydown', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyPress(event.key);      
     });
-})
+});
 
 
 // Implementation
