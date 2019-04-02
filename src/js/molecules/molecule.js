@@ -62,9 +62,12 @@ export default class Molecule extends Atom{
         
         this.updateSidebar();
         
-        //var toRender = "function main () {\n    return molecule" + this.uniqueID + ".code()\n}\n\n" + this.serialize()
-        
-        //window.loadDesign(toRender,"MaslowCreate");
+        //Find the output and send it's contents to the renderer
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.atomType == 'Output'){
+                atom.sendToRender();
+            }
+        });
     }
     
     updateCodeBlock(){
@@ -72,7 +75,7 @@ export default class Molecule extends Atom{
         
         //Grab values from the inputs and push them out to the input objects
         this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'input'){
+            if(child.type == 'input'){
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == "Input" && child.name == atom.name){
                         atom.setOutput(child.getValue());
@@ -104,26 +107,63 @@ export default class Molecule extends Atom{
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = super.updateSidebar(); //call the super function
-        
-        this.createEditableValueListItem(valueList,this,"name", "Name", false);
+        var valueList = super.initializeSideBar(); 
         
         if(!this.topLevel){
             this.createButton(valueList,this,"Go To Parent",this.goToParentMolecule);
             
             this.createButton(valueList,this,"Export To GitHub", this.exportToGithub)
         }
-        else{
+        else{ //If we are the top level molecule and not in run mode
             this.createButton(valueList,this,"Load A Different Project",(e) => {
                GlobalVariables.gitHub.showProjectsToLoad();
             });
+            
+            this.createButton(valueList,this,"Share This Project",(e) => {
+               GlobalVariables.gitHub.shareOpenedProject();
+            });
+            
+            this.createButton(valueList,this,"GitHub",(e) => {
+               GlobalVariables.gitHub.openGitHubPage();
+            });
         }
         
-        this.createBOM(valueList,this,this.BOMlist);
+        this.createEditableValueListItem(valueList,this,"name", "Name", false);
+        
+        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
+            //Add options to set all of the inputs
+            this.children.forEach(child => {
+                if(child.type == 'input' && child.valueType != 'geometry'){
+                    this.createEditableValueListItem(valueList,child,"value", child.name, true);
+                }
+            });
+        }
+        
+                
+        this.displaySimpleBOM(valueList);
         
         return valueList;
         
     }
+    
+    displaySimpleBOM(list){
+        list.appendChild(document.createElement('br'));
+        list.appendChild(document.createElement('br'));
+        
+        var div = document.createElement("h3");
+        div.setAttribute("style","text-align:center;");
+        list.appendChild(div);
+        var valueText = document.createTextNode("Bill Of Materials");
+        div.appendChild(valueText);
+        
+        var x = document.createElement("HR");
+        list.appendChild(x);
+        
+        this.requestBOM().forEach(bomEntry => {
+            this.createNonEditableValueListItem(list,bomEntry,"numberNeeded", bomEntry.BOMitemName, false)
+        });
+    }
+        
     
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
@@ -141,7 +181,6 @@ export default class Molecule extends Atom{
     }
     
     replaceThisMoleculeWithGithub(githubID){
-        console.log(githubID);
         
         //If we are currently inside the molecule targeted for replacement, go up one
         if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){
@@ -194,22 +233,18 @@ export default class Molecule extends Atom{
         //savedObject object here to pass to lower levels.
         
         if(this.topLevel == true){
-            //Create a new blank project to save to
+            //If this is the top level create a new blank project to save to FIXME: It would be cleaner if this function were just called with the object when called from the top level
             savedObject = {molecules: []}
         }
             
-        var allElementsCode = new Array();
-        var allAtoms = [];
-        var allConnectors = [];
+        var allAtoms = []; //An array of all the atoms containted in this molecule
+        var allConnectors = []; //An array of all the connectors contained in this molelcule
         
         
         this.nodesOnTheScreen.forEach(atom => {
-            if (atom.codeBlock != ""){
-                allElementsCode.push(atom.codeBlock);
-            }
-            
+            //Store a represnetation of the atom
             allAtoms.push(JSON.stringify(atom.serialize(savedObject)));
-            
+            //Store a representation of the atom's connectors
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
                     attachmentPoint.connectors.forEach(connector => {
@@ -219,36 +254,21 @@ export default class Molecule extends Atom{
             });
         });
         
-        var thisAsObject = {
-            atomType: this.atomType,
-            name: this.name,
-            uniqueID: this.uniqueID,
-            topLevel: this.topLevel,
-            BOMlist: this.BOMlist,
-            allAtoms: allAtoms,
-            allConnectors: allConnectors
-        }
+        var thisAsObject = super.serialize(savedObject)
+        thisAsObject.topLevel = this.topLevel;
+        thisAsObject.allAtoms = allAtoms;
+        thisAsObject.allConnectors = allConnectors;
         
-        //Add an object record of this object
-        
+        //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject);
             
         if(this.topLevel == true){
-            //If this is the top level, return the generated object
+            //If this is the top level, return the complete file to be saved
             return savedObject;
         }
         else{
-            //If not, return just a placeholder for this molecule
-            var object = {
-                atomType: this.atomType,
-                name: this.name,
-                x: this.x,
-                y: this.y,
-                uniqueID: this.uniqueID,
-                BOMlist: this.BOMlist
-            }
-            
-            return object;
+            //If not, return a placeholder for this molecule
+            return super.serialize(savedObject);
         }
     }
         
@@ -257,11 +277,7 @@ export default class Molecule extends Atom{
         //Find the target molecule in the list
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
-        //Grab the name and ID
-        this.uniqueID  = moleculeObject.uniqueID;
-        this.name      = moleculeObject.name;
-        this.topLevel  = moleculeObject.topLevel;
-        this.BOMlist   = moleculeObject.BOMlist;
+        this.setValues(moleculeObject); //Grab the values of everything from the passed object
         
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
@@ -271,11 +287,13 @@ export default class Molecule extends Atom{
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
         
-        //Place the connectors
+        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
         this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
             this.placeConnector(JSON.parse(connector));
         });
+        
+        this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
         
         this.updateCodeBlock();
     }

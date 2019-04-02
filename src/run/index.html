@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maslow Create</title>
+    <title>Maslow Create - Share</title>
     <style>
         body {
             margin: 0;
+            height: 100vh;
         }
     </style>
     
-	<link rel="stylesheet" href="maslowCreate.css" type="text/css">
-	<link rel="stylesheet" href="login.css" type="text/css">
+	<link rel="stylesheet" href="../maslowCreate.css" type="text/css">
+	<link rel="stylesheet" href="../login.css" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css">
     <link rel="icon" href="https://www.maslowcnc.com/favicon.ico">
  	
 </head>
-<body>
+<body style="min-height: 100vh;">
     
     <!-- The menu for creating a new drawing node -->
     <ul class="menu ">
@@ -33,19 +34,17 @@
     
     <div class = "menu off">
         <!-- This suppresses the error messages from jscad -->
-        Between here
-        
         <div id="errordiv"></div>
         <div id="statusdiv"></div>
         <div id="parametersdiv"></div>
         <div id="selectdiv"></div>
-        
-        And here
+          <!-- Draw the canvas for creating the design -->
+          <canvas id = "flow-canvas" style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
     </div>
     
     <!-- The login popup -->
-    <div class = "login-popup " id = "projects-popup">
-        <div class="login-page">
+    <div class = "login-popup off" id = "projects-popup">
+        <div class="login-page" id = "lowerHalf">
           <div class="form">
             <h1>Maslow Create uses GitHub to store your projects</h1>
             <br>
@@ -58,27 +57,26 @@
         </div>
     </div>
     
-    <!-- Draw the canvas for creating the design -->
-    <canvas id = "flow-canvas" style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
     
-    <div class='parent flex-parent' id = "lowerHalf">
-        
-        <!-- setup display of the errors as required by OpenJSCAD.js -->
-        <div class="jscad-container"> 
-            <!-- setup display of the viewer, i.e. canvas -->
-            <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
-        </div>
-        
+    
+    <div class='parent flex-parent' style="height: 100vh;">
         
         <div class="sideBar">
             Maslow Create
         </div>
+        
+        <!-- setup display of the errors as required by OpenJSCAD.js -->
+        <div class="jscad-container" > 
+            <!-- setup display of the viewer, i.e. canvas -->
+            <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
+        </div>
+
     </div>
     
-    <script src="/js/min.js"></script>
-    <script src="/js/octokit-rest.min.js"></script>
-    <script src="/js/oauth.js"></script>
-    <script src="/js/flowDraw.bundle.js"></script>
+    <script src="../js/min.js"></script>
+    <script src="../js/octokit-rest.min.js"></script>
+    <script src="../js/oauth.js"></script>
+    <script src="../js/flowDraw.bundle.js"></script>
     
 </body>
 </html>

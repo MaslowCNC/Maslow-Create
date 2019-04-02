@@ -1,6 +1,5 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
-import BOMEntry from '../BOM'
 
 export default class Atom {
 
@@ -20,11 +19,10 @@ export default class Atom {
         this.codeBlock = "";
         this.defaultCodeBlock = "";
         this.isMoving = false;
-        this.BOMlist = [];
         this.scaledX = 0;
         this.scaledY = 0;
         this.scaledRadius = this.radius;
-        
+
         for(var key in values) {
             this[key] = values[key];
         }
@@ -65,6 +63,7 @@ export default class Atom {
       
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.color;
+        GlobalVariables.c.font = "10px Work Sans";
 
         //make it imposible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
@@ -214,9 +213,10 @@ export default class Atom {
     }
     
     keyPress(key){
-        //runs whenver a key is pressed
-        if (key == 'Delete'){
-            if(this.selected == true){
+        //runs whenever a key is pressed
+        if (['Delete', 'Backspace'].includes(key)){
+            if(this.selected == true && document.getElementsByTagName("BODY")[0] == document.activeElement){
+                //If this atom is selected AND the body is active (meaning we are not typing in a text box)
                 this.deleteNode();
             }
         }
@@ -229,6 +229,19 @@ export default class Atom {
     updateSidebar(){
         //updates the sidebar to display information about this node
         
+        var valueList = this.initializeSideBar();
+        
+        //Add options to set all of the inputs
+        this.children.forEach(child => {
+            if(child.type == 'input' && child.valueType != 'geometry'){
+                this.createEditableValueListItem(valueList,child,"value", child.name, true);
+            }
+        });
+        
+        return valueList;
+    }
+    
+    initializeSideBar(){
         //remove everything in the sideBar now
         while (GlobalVariables.sideBar.firstChild) {
             GlobalVariables.sideBar.removeChild(GlobalVariables.sideBar.firstChild);
@@ -244,13 +257,6 @@ export default class Atom {
         var valueList = document.createElement("ul");
         GlobalVariables.sideBar.appendChild(valueList);
         valueList.setAttribute("class", "sidebar-list");
-        
-        //Add options to set all of the inputs
-        this.children.forEach(child => {
-            if(child.type == 'input' && child.valueType != 'geometry'){
-                this.createEditableValueListItem(valueList,child,"value", child.name, true);
-            }
-        });
         
         return valueList;
     }
@@ -279,7 +285,7 @@ export default class Atom {
         
         var ioValues = [];
         this.children.forEach(io => {
-            if (io.valueType == "number" && io.type == "input"){
+            if (typeof io.getValue() == "number" && io.type == "input"){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
@@ -301,22 +307,8 @@ export default class Atom {
     }
     
     requestBOM(){
-        //Request any contributions from this atom to the BOM
-        
-        
-        //Find the number of things attached to this output
-        var numberOfThisInstance = 1;
-        this.children.forEach(io => {
-            if(io.type == "output" && io.connectors.length != 0){
-                numberOfThisInstance = io.connectors.length;
-            }
-        });
-        //And scale up the total needed by that number
-        this.BOMlist.forEach(bomItem => {
-            bomItem.totalNeeded = numberOfThisInstance*bomItem.numberNeeded;
-        });
-        
-        return this.BOMlist;
+        //Placeholder
+        return [];
     }
     
     requestReadme(){
@@ -535,47 +527,4 @@ export default class Atom {
         );
     }
 
-    createBOM(list,parent,BOMlist){
-        //aBOMEntry = new bomEntry;
-        
-        
-        list.appendChild(document.createElement('br'));
-        list.appendChild(document.createElement('br'));
-        
-        var div = document.createElement("h3");
-        div.setAttribute("style","text-align:center;");
-        list.appendChild(div);
-        var valueText = document.createTextNode("Bill Of Materials");
-        div.appendChild(valueText);
-        
-        var x = document.createElement("HR");
-        list.appendChild(x);
-        
-        this.requestBOM().forEach(bomItem => {
-            if(this.BOMlist.indexOf(bomItem) != -1){ //If the bom item is from this molecule
-                this.createEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-                this.createEditableValueListItem(list,bomItem,"numberNeeded", "Number", true)
-                this.createEditableValueListItem(list,bomItem,"costUSD", "Price", true)
-                this.createEditableValueListItem(list,bomItem,"source", "Source", false)
-            }
-            else{
-                this.createNonEditableValueListItem(list,bomItem,"BOMitemName", "Item", false)
-                this.createNonEditableValueListItem(list,bomItem,"totalNeeded", "Number", true)
-                this.createNonEditableValueListItem(list,bomItem,"costUSD", "Price", true)
-                this.createNonEditableValueListItem(list,bomItem,"source", "Source", false)
-            }
-            var x = document.createElement("HR");
-            list.appendChild(x);
-        });
-        
-        this.createButton(list,parent,"Add BOM Entry", this.addBOMEntry);
-    }
-    
-    addBOMEntry(self){
-        console.log("add a bom entry");
-        
-        self.BOMlist.push(new BOMEntry());
-        
-        self.updateSidebar();
-    }
 }

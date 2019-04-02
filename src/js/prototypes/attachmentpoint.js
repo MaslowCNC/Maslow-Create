@@ -48,7 +48,9 @@ export default class AttachmentPoint {
         }
 
         var txt = this.name;
-        var textWidth = GlobalVariables.c.measureText(txt).width + 2;
+        var textWidth = GlobalVariables.c.measureText(txt).width;
+        GlobalVariables.c.font = "10px Work Sans";
+
         var bubbleColor = "#008080";
         var scaleRadiusDown = this.radius*.7;
         var halfRadius = this.radius*.5;
@@ -242,7 +244,6 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue;
-        
         //propigate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node
