@@ -38,8 +38,7 @@ export default class AttachmentPoint {
     
     draw() {
 
-        //this.x = this.scaledX;
-        //this.y = this.scaledY;
+    
 
 
         this.defaultRadius = this.radius;
@@ -260,8 +259,8 @@ export default class AttachmentPoint {
     }
     
     update() {
-        this.x = this.parentMolecule.x + this.offsetX;
-        this.y = this.parentMolecule.y + this.offsetY;
+        this.x = this.parentMolecule.scaledX + this.offsetX;
+        this.y = this.parentMolecule.scaledY + this.offsetY;
         this.draw()
        
         this.connectors.forEach(connector => {
