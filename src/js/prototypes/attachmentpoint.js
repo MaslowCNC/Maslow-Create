@@ -60,7 +60,13 @@ export default class AttachmentPoint {
       if (this.showHoverText){
             if(this.type == "input"){
                 GlobalVariables.c.beginPath();
+
+                    if (this.name === "geometry"){
+                 GlobalVariables.c.fillStyle = "#484848";   
+                }
+                    else{
                 GlobalVariables.c.fillStyle = bubbleColor;
+                }
                     if (this.radius == this.expandedRadius) {
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
@@ -82,7 +88,17 @@ export default class AttachmentPoint {
             else{
 
                 GlobalVariables.c.beginPath();
+                    if (this.name === "geometry"){
+                 GlobalVariables.c.fillStyle = "#484848";   
+                }
+                    else{
                 GlobalVariables.c.fillStyle = bubbleColor;
+                }
+                if(this.parentMolecule.type == "constant"){
+                                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
+                                this.y= this.parentMolecule.y;
+                     }   
+
                 GlobalVariables.c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
                 GlobalVariables.c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
                 GlobalVariables.c.fill();
@@ -100,10 +116,14 @@ export default class AttachmentPoint {
                                 this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
                                 this.y= this.parentMolecule.y;
                             }
+        if(this.parentMolecule.type == "constant"){
+                                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
+                                this.y= this.parentMolecule.y;
+                     }                    
 
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
-        GlobalVariables.c.strokeStyle = "#484848";
+        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor;
         GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         GlobalVariables.c.fill();
