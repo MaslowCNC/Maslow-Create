@@ -18,4 +18,13 @@ export default class Translate extends Atom{
         
         this.setValues(values);
     }
+    
+    updateCodeBlock(){
+        //Overwrite the normal update code block to update the number of segments also
+        
+        // this.codeBlock = this.findIOValue("geometry").extrude({ height: 1 })
+        this.codeBlock = this.findIOValue("geometry").translate([this.findIOValue("xDist"), this.findIOValue("yDist"), this.findIOValue("zDist")])
+        
+        super.updateCodeBlock();
+    }
 }

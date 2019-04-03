@@ -65,7 +65,6 @@
     
     <script src="/js/octokit-rest.min.js"></script>
     <script src="/js/oauth.js"></script>
-    <script src="/js/flowDraw.bundle.js"></script>
     
     <!-- ThreeJS -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
@@ -74,131 +73,8 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
     
-    <!-- Here we want to create a new script which will generate a threejs canvas with a sphere in it -->
-    <script type="module">
-        console.log("begining the script in the html file");
-        import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
-        
-        //Create a new jsxcad canvas here by copying from my PR
-        
-        let datasets = [];
-        let camera;
-        let controls;
-        let scene;
-        let renderer;
-        let stats;
-        let mesh;
-        let gui;
-        let targetDiv = document.getElementById("viewerContext");
-        
-        init();
-        
-        watchFile('window', drawOnWindow);
-        
-        api.writeStl({ path: 'window' },api.sphere());
-        
-        function init() {
-            console.log("init ran");
-            
-            camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
-            [camera.position.x, camera.position.y, camera.position.z] = [0, 0, 16];
-            //
-            controls = new THREE.TrackballControls(camera, targetDiv);
-            controls.rotateSpeed = 4.0;
-            controls.zoomSpeed = 4.0;
-            controls.panSpeed = 2.0;
-            controls.noZoom = false;
-            controls.noPan = false;
-            controls.staticMoving = true;
-            controls.dynamicDampingFactor = 0.1;
-            controls.keys = [65, 83, 68];
-            controls.addEventListener('change', () => { render(); });
-            //
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xB0AEB0);
-            scene.add(camera);
-            //
-            var ambientLight = new THREE.AmbientLight(0x222222);
-            scene.add(ambientLight);
-            // var light1 = new THREE.PointLight(0xffffff, 0, 1);
-            // camera.add(light1);
-            var light2 = new THREE.DirectionalLight(0xffffff, 1);
-            light2.position.set(1, 1, 1);
-            camera.add(light2);
-            // scene.add( light2 );
-
-            //
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            targetDiv.appendChild(renderer.domElement);
-            //
-            //
-            gui = new dat.GUI({ autoPlace: false });
-            targetDiv.appendChild(gui.domElement);
-            targetDiv.threeScreen = this;
-            // gui.add( material, 'wireframe' );
-            //
-            window.addEventListener('resize', () => { onWindowResize(); }, false);
-
-            onWindowResize();
-            animate();
-        }
-        function onWindowResize() {
-            camera.aspect = targetDiv.clientWidth / targetDiv.clientHeight;
-            camera.updateProjectionMatrix();
-            controls.handleResize();
-            renderer.setSize(targetDiv.clientWidth, targetDiv.clientHeight);
-        }
-        function animate() {
-          requestAnimationFrame( animate );
-          render();
-          controls.update();
-        }
-        function render() {
-          renderer.render( scene, camera );
-        }
-        
-        const makeMaterial = (material) => {
-            switch (material) {
-              case 'metal':
-                return new THREE.MeshStandardMaterial({
-                         color: 0x779aac,
-                         emissive: 0x7090a0,
-                         roughness: 0.65,
-                         metalness: 0.99,
-                       });
-              default:
-                return new THREE.MeshNormalMaterial();
-            }
-        }
-        
-        function drawOnWindow({ data }) {
-            console.log("Draw on window function ran");
-            console.log(data);
-            
-            // Delete any previous dataset in the window.
-            for (const { controller, mesh } of datasets) {
-                if (controller) {
-                  gui.remove(controller);
-                }
-                scene.remove(mesh);
-            }
-            // Build new datasets from the written data, and display them.
-            datasets = trianglesToThreejsDatasets({}, ...data);
-            for (const dataset of datasets) {
-                let geometry = new THREE.BufferGeometry();
-                let { properties = {}, indices, positions, normals } = dataset;
-                let { material, tags = [] } = properties;
-                geometry.setIndex( indices );
-                geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-                geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
-                let threeMaterial = new THREE.MeshNormalMaterial();
-                dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
-                scene.add(dataset.mesh);
-            }
-        }
-
-    </script>
+    
+    <script src="/js/flowDraw.bundle.js"></script>
     
 </body>
 </html>

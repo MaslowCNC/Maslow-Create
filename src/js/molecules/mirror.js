@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Mirror extends Atom {
     
@@ -14,9 +15,15 @@ export default class Mirror extends Atom {
         
         this.name = "Mirror";
         this.atomType = "Mirror";
-        this.defaultCodeBlock = "mirror([~x~,~y~,~z~], ~geometry~)";
-        this.codeBlock = "";
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        console.log("Api: ");
+        console.log(GlobalVariables.api);
+        this.codeBlock = GlobalVariables.api.sphere();
+        
+        super.updateCodeBlock();
     }
 }

@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Rectangle extends Atom {
 
@@ -18,5 +19,13 @@ export default class Rectangle extends Atom {
         this.updateCodeBlock();
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        //Overwrite the normal update code block to update the number of segments also
+        
+        this.codeBlock = GlobalVariables.api.square([this.findIOValue("x length"),this.findIOValue("y length")]);
+        
+        super.updateCodeBlock();
     }
 }

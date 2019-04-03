@@ -16,8 +16,7 @@ export default class Atom {
         this.color = '#F3EFEF';
         this.name = "name";
         this.parentMolecule = null;
-        this.codeBlock = "";
-        this.defaultCodeBlock = "";
+        this.codeBlock = null;
         this.isMoving = false;
         this.scaledX = 0;
         this.scaledY = 0;
@@ -320,10 +319,10 @@ export default class Atom {
     updateCodeBlock(){
         //Substitute the result from each input for the ~...~ section with it's name
         
-        var regex = /~(.*?)~/gi;
-        this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
-            return this.findIOValue(x);
-        });
+        // var regex = /~(.*?)~/gi;
+        // this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
+            // return this.findIOValue(x);
+        // });
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
@@ -340,16 +339,8 @@ export default class Atom {
     
     sendToRender(){
         //Send code to JSCAD to render
-        if (this.codeBlock != ""){
-            var toRender = "function main () {return " + this.codeBlock + "}"
-            
-            window.loadDesign(toRender,"MaslowCreate");
-        }
-        //Send something invisible just to wipe the rendering
-        else{
-            var toRender = "function main () {return sphere({r: .0001, center: true})}"
-            window.loadDesign(toRender,"MaslowCreate");
-        }
+        
+        GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
     }
     
     findIOValue(ioName){

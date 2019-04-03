@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Rotate extends Atom {
     
@@ -18,5 +19,12 @@ export default class Rotate extends Atom {
         this.codeBlock = "";
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = GlobalVariables.api.rotate([this.findIOValue("x-axis degrees"), this.findIOValue("y-axis degrees"), this.findIOValue("z-axis degrees")], this.findIOValue("geometry"));
+        
+        super.updateCodeBlock();
     }
 }
