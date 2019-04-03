@@ -75,10 +75,17 @@
         </div>
     </div>
     
-    <script src="/js/min.js"></script>
     <script src="/js/octokit-rest.min.js"></script>
     <script src="/js/oauth.js"></script>
     <script src="/js/flowDraw.bundle.js"></script>
+    
+    <!-- Here we want to create a new script which will generate a threejs canvas with a sphere in it -->
+    <script type="module">
+        console.log("begining the script in the html file");
+        import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
+        
+    
+    </script>
     
 </body>
 </html>
