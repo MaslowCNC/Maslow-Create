@@ -142,8 +142,7 @@ function init() {
     //
     //
     gui = new dat.GUI({ autoPlace: false });
-    targetDiv.appendChild(gui.domElement);
-    targetDiv.threeScreen = this;
+    //targetDiv.appendChild(gui.domElement);
     // gui.add( material, 'wireframe' );
     //
     window.addEventListener('resize', () => { onWindowResize(); }, false);
@@ -153,10 +152,10 @@ function init() {
 }
 
 function onWindowResize() {
-    camera.aspect = targetDiv.clientWidth / targetDiv.clientHeight;
+    camera.aspect = targetDiv.clientWidth / (targetDiv.clientHeight - 1);
     camera.updateProjectionMatrix();
     controls.handleResize();
-    renderer.setSize(targetDiv.clientWidth, targetDiv.clientHeight);
+    renderer.setSize(targetDiv.clientWidth, targetDiv.clientHeight - 1);
     
     var bounds = GlobalVariables.canvas.getBoundingClientRect();
     GlobalVariables.canvas.width = bounds.width;
