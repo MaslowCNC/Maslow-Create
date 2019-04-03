@@ -89,15 +89,14 @@
         let stats;
         let mesh;
         let gui;
+        let targetDiv = document.getElementById("viewerContext");
         
         init();
-        //animate();
+        api.writeStl({ path: 'window' },api.sphere());
+        
         function init() {
             console.log("init ran");
-            let targetDiv = document.getElementById("viewerContext");
-            console.log("Target div: ");
-            console.log(targetDiv);
-
+            
             camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
             [camera.position.x, camera.position.y, camera.position.z] = [0, 0, 16];
             //
@@ -130,22 +129,32 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             targetDiv.appendChild(renderer.domElement);
             //
-            // stats = new Stats();
-            // document.getElementById('viewer').appendChild(stats.dom);
             //
             gui = new dat.GUI({ autoPlace: false });
             targetDiv.appendChild(gui.domElement);
             targetDiv.threeScreen = this;
             // gui.add( material, 'wireframe' );
             //
-            //window.addEventListener('resize', () => { onWindowResize(); }, false);
+            window.addEventListener('resize', () => { onWindowResize(); }, false);
 
-            //onWindowResize();
+            onWindowResize();
+            animate();
+        }
+        function onWindowResize() {
+            camera.aspect = targetDiv.clientWidth / targetDiv.clientHeight;
+            camera.updateProjectionMatrix();
+            controls.handleResize();
+            renderer.setSize(targetDiv.clientWidth, targetDiv.clientHeight);
+        }
+        function animate() {
+          requestAnimationFrame( animate );
+          render();
+          controls.update();
+        }
+        function render() {
+          renderer.render( scene, camera );
         }
         
-        //Put a sphere in it
-        
-        //Add a watcher
     
     </script>
     
