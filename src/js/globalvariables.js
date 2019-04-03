@@ -15,9 +15,9 @@ import Input from './molecules/input.js'
 import Readme from './molecules/readme.js'
 import BillOfMaterials from './molecules/BOM.js'
 import Rotate from './molecules/rotate.js'
-import Mirror from './molecules/mirror.js'
 import GitHubMolecule from './molecules/githubmolecule.js'
 import Output from './molecules/output.js'
+import Stretch from './molecules/stretch.js'
 
 import GitHubModule from './githubOauth'
 
@@ -46,9 +46,9 @@ class GlobalVariables{
             readme:             {creator: Readme, atomType: "Readme"},
             billOfMaterials:    {creator: BillOfMaterials, atomType: "Bill Of Materials"},
             rotate:             {creator: Rotate, atomType: "Rotate"},
-            mirror:             {creator: Mirror, atomType: "Mirror"},
             githubmolecule:     {creator: GitHubMolecule, atomType: "GitHubMolecule"},
-            union:              {creator: Union, atomType: "Union"}
+            union:              {creator: Union, atomType: "Union"},
+            stretch:            {creator: Stretch, atomType: "Stretch"}
         }
 
         this.secretTypes = {

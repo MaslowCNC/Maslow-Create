@@ -1,7 +1,7 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
-export default class Mirror extends Atom {
+export default class Stretch extends Atom {
     
     constructor(values){
         
@@ -13,16 +13,15 @@ export default class Mirror extends Atom {
         this.addIO("input", "z", this, "number", 0);
         this.addIO("output", "geometry", this, "geometry", "");
         
-        this.name = "Mirror";
-        this.atomType = "Mirror";
+        this.name = "Stretch";
+        this.atomType = "Stretch";
         
         this.setValues(values);
     }
     
     updateCodeBlock(){
-        console.log("Api: ");
-        console.log(GlobalVariables.api);
-        this.codeBlock = GlobalVariables.api.sphere();
+        
+        this.codeBlock = this.findIOValue("geometry").scale([this.findIOValue("x"),this.findIOValue("y"),this.findIOValue("z")]);
         
         super.updateCodeBlock();
     }

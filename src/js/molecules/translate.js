@@ -13,16 +13,12 @@ export default class Translate extends Atom{
         
         this.name = "Translate";
         this.atomType = "Translate";
-        this.defaultCodeBlock = "~geometry~.translate([~xDist~, ~yDist~, ~zDist~])";
-        this.codeBlock = "";
         
         this.setValues(values);
     }
     
     updateCodeBlock(){
-        //Overwrite the normal update code block to update the number of segments also
         
-        // this.codeBlock = this.findIOValue("geometry").extrude({ height: 1 })
         this.codeBlock = this.findIOValue("geometry").translate([this.findIOValue("xDist"), this.findIOValue("yDist"), this.findIOValue("zDist")])
         
         super.updateCodeBlock();

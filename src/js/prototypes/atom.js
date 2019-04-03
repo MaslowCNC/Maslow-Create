@@ -317,12 +317,6 @@ export default class Atom {
     }
     
     updateCodeBlock(){
-        //Substitute the result from each input for the ~...~ section with it's name
-        
-        // var regex = /~(.*?)~/gi;
-        // this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
-            // return this.findIOValue(x);
-        // });
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
@@ -338,7 +332,7 @@ export default class Atom {
     }
     
     sendToRender(){
-        //Send code to JSCAD to render
+        //Send code to JSxCAD to render
         
         GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
     }

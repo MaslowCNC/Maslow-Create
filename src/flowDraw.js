@@ -184,8 +184,6 @@ const makeMaterial = (material) => {
 }
 
 function drawOnWindow({ data }) {
-    console.log("Draw on window function ran");
-    console.log(data);
     
     // Delete any previous dataset in the window.
     for (const { controller, mesh } of datasets) {
@@ -204,8 +202,8 @@ function drawOnWindow({ data }) {
         geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
         geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
         let threeMaterial = new THREE.MeshStandardMaterial({
-                 color: 0x779aac,
-                 emissive: 0x7090a0,
+                 color: 0x5f6670,
+                 emissive: 0x5f6670,
                  roughness: 0.65,
                  metalness: 0.40,
                });
