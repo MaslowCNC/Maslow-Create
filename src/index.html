@@ -24,27 +24,15 @@
             <button class="tablinks" id="localTab" >Local</button>
             <button class="tablinks" id="githubTab" >GitHub</button>
         </div>
-        <input type="text" id="menuInput" onfocusout="this.value=''" placeholder="Search for atom..", class = "menu_search">
+        <input type="text" id="menuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search">
         <ul id="menuList" class = "menu_list tabcontent">
         </ul>
         <ul id="githubList" class = "menu_list tabcontent">
         </ul>
     </ul>
     
-    <div class = "menu off">
-        <!-- This suppresses the error messages from jscad -->
-        Between here
-        
-        <div id="errordiv"></div>
-        <div id="statusdiv"></div>
-        <div id="parametersdiv"></div>
-        <div id="selectdiv"></div>
-        
-        And here
-    </div>
-    
     <!-- The login popup -->
-    <div class = "login-popup " id = "projects-popup">
+    <div class = "login-popup off" id = "projects-popup">
         <div class="login-page">
           <div class="form">
             <h1>Maslow Create uses GitHub to store your projects</h1>
@@ -79,11 +67,85 @@
     <script src="/js/oauth.js"></script>
     <script src="/js/flowDraw.bundle.js"></script>
     
+    <!-- ThreeJS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
+    
     <!-- Here we want to create a new script which will generate a threejs canvas with a sphere in it -->
     <script type="module">
         console.log("begining the script in the html file");
         import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
         
+        //Create a new jsxcad canvas here by copying from my PR
+        
+        let datasets = [];
+        let camera;
+        let controls;
+        let scene;
+        let renderer;
+        let stats;
+        let mesh;
+        let gui;
+        
+        init();
+        //animate();
+        function init() {
+            console.log("init ran");
+            let targetDiv = document.getElementById("viewerContext");
+            console.log("Target div: ");
+            console.log(targetDiv);
+
+            camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
+            [camera.position.x, camera.position.y, camera.position.z] = [0, 0, 16];
+            //
+            controls = new THREE.TrackballControls(camera, targetDiv);
+            controls.rotateSpeed = 4.0;
+            controls.zoomSpeed = 4.0;
+            controls.panSpeed = 2.0;
+            controls.noZoom = false;
+            controls.noPan = false;
+            controls.staticMoving = true;
+            controls.dynamicDampingFactor = 0.1;
+            controls.keys = [65, 83, 68];
+            controls.addEventListener('change', () => { render(); });
+            //
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xB0AEB0);
+            scene.add(camera);
+            //
+            var ambientLight = new THREE.AmbientLight(0x222222);
+            scene.add(ambientLight);
+            // var light1 = new THREE.PointLight(0xffffff, 0, 1);
+            // camera.add(light1);
+            var light2 = new THREE.DirectionalLight(0xffffff, 1);
+            light2.position.set(1, 1, 1);
+            camera.add(light2);
+            // scene.add( light2 );
+
+            //
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            targetDiv.appendChild(renderer.domElement);
+            //
+            // stats = new Stats();
+            // document.getElementById('viewer').appendChild(stats.dom);
+            //
+            gui = new dat.GUI({ autoPlace: false });
+            targetDiv.appendChild(gui.domElement);
+            targetDiv.threeScreen = this;
+            // gui.add( material, 'wireframe' );
+            //
+            //window.addEventListener('resize', () => { onWindowResize(); }, false);
+
+            //onWindowResize();
+        }
+        
+        //Put a sphere in it
+        
+        //Add a watcher
     
     </script>
     
