@@ -333,8 +333,14 @@ export default class Atom {
     
     sendToRender(){
         //Send code to JSxCAD to render
-        
-        GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
+        try {
+            GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
+        }
+        catch(err) {
+            console.log("Oh no can't render that");
+            //console.log(err);
+            GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1));
+        }
     }
     
     findIOValue(ioName){
