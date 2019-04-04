@@ -140,9 +140,9 @@ class Menu {
                 }
                 
                 GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
-                    q: input + ' topic:maslowcreate-molecule',
+                    q: input + ' topic:maslowcreate',
                     sort: "stars",
-                    per_page: 100,
+                    per_page: 10,
                     page: 1,
                     headers: {
                         accept: 'application/vnd.github.mercy-preview+json'
