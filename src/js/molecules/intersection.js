@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Intersection extends Atom {
     
@@ -12,9 +13,14 @@ export default class Intersection extends Atom {
         
         this.name = "Intersection";
         this.atomType = "Intersection";
-        this.defaultCodeBlock = "intersection(~geometry1~,~geometry2~)";
-        this.codeBlock = "";
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = GlobalVariables.api.intersection(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+        
+        super.updateCodeBlock();
     }
 }

@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Rectangle extends Atom {
 
@@ -11,12 +12,16 @@ export default class Rectangle extends Atom {
         
         this.name = "Rectangle";
         this.atomType = "Rectangle";
-        this.defaultCodeBlock = "square([~x length~,~y length~])";
-        this.codeBlock = "";
         
-        //generate the correct codeblock for this atom on creation
         this.updateCodeBlock();
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = GlobalVariables.api.square([this.findIOValue("x length"),this.findIOValue("y length")]);
+        
+        super.updateCodeBlock();
     }
 }

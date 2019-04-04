@@ -12,9 +12,14 @@ export default class Scale extends Atom{
         
         this.name = "Scale";
         this.atomType = "Scale";
-        this.defaultCodeBlock = "~geometry~.scale(~multiple~)";
-        this.codeBlock = "";
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = this.findIOValue("geometry").scale(this.findIOValue("multiple"));
+        
+        super.updateCodeBlock();
     }
 }

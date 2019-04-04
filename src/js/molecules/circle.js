@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Circle extends Atom {
     
@@ -8,11 +9,9 @@ export default class Circle extends Atom {
         
         this.name = "Circle";
         this.atomType = "Circle";
-        this.defaultCodeBlock = "circle({r: ~radius~, center: true, fn: 25})";
-        this.codeBlock = "";
         
         this.addIO("input", "radius", this, "number", 10);
-        this.addIO("input", "max segment size", this, "number", 4);
+        this.addIO("input", "max segment size", this, "number", 1);
         this.addIO("output", "geometry", this, "geometry", "");
         
         this.setValues(values);
@@ -26,11 +25,9 @@ export default class Circle extends Atom {
         
         var maximumSegmentSize = this.findIOValue("max segment size");
         var circumference  = 3.14*2*this.findIOValue("radius");
-        
         var numberOfSegments = parseInt( circumference / maximumSegmentSize );
         
-        var regex = /fn: (\d+)\}/gi;
-        this.defaultCodeBlock = this.defaultCodeBlock.replace(regex, "fn: " + numberOfSegments + "}");
+        this.codeBlock = GlobalVariables.api.circle({r: this.findIOValue("radius"), center: true, fn: numberOfSegments});
         
         super.updateCodeBlock();
     }
