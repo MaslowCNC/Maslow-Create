@@ -10,8 +10,6 @@ export default class ShrinkWrap extends Atom{
         
         this.name = "Shrink Wrap";
         this.atomType = "ShrinkWrap";
-        this.defaultCodeBlock = "chain_hull({closed: false}, [ ])";
-        this.codeBlock = "";
         this.ioValues = [];
         this.closedSelection = 0;
         
@@ -28,44 +26,10 @@ export default class ShrinkWrap extends Atom{
     
     updateCodeBlock(){
         
-        this.codeBlock = this.defaultCodeBlock;
+        console.log(GlobalVariables.api);
+        this.codeBlock = GlobalVariables.api.hull(GlobalVariables.api.cube().translate([4,4,1]), GlobalVariables.api.sphere());
         
-        //Generate the code block string
-        var arrayOfChildrenString = "[ ";
-        var numberOfElements = 0;
-        this.children.forEach(io => {
-            if(io.type == "input"){
-                if(numberOfElements > 0){
-                    arrayOfChildrenString = arrayOfChildrenString + ", ";
-                }
-                numberOfElements += 1;
-                arrayOfChildrenString = arrayOfChildrenString + io.getValue();
-            }
-        });
-        arrayOfChildrenString = arrayOfChildrenString + "]";
-        
-        //Insert the generated string into the code block
-        var regex = /\[(.+)\]/gi;
-        this.codeBlock = this.codeBlock.replace(regex, arrayOfChildrenString);
-        
-        //Add the text for open or closed
-        var endString;
-        if(this.closedSelection == 0){ //closed
-            endString = "chain_hull({closed: true}";
-        }
-        else{
-            endString = "chain_hull({closed: false}";
-        }
-        
-        var regex = /^.+?\{(.+?)\}/gi;
-        this.codeBlock = this.codeBlock.replace(regex, endString);
-        
-        //Shrink wrap it one more time if we have solid selected
-        if(this.closedSelection == 2){
-            this.codeBlock = "chain_hull({closed: true}, [" + this.codeBlock + "])"
-        }
-        
-        //Set the output nodes with name 'geometry' to be the generated code
+        //Set the output nodes with name 'geometry' to be the generated output
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
                 child.setValue(this.codeBlock);
