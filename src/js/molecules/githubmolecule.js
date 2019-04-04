@@ -55,7 +55,7 @@ export default class GitHubMolecule extends Molecule {
                 let moleculesList =  JSON.parse(rawFile).molecules;
                 
                 //Preserve values which will be overwritten by the deserialize process
-                var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType};
+                var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel = this.topLevel};
                 
                 this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
                 
