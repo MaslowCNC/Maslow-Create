@@ -24,7 +24,7 @@ export default class GitHubMolecule extends Molecule {
         
         var clickProcessed = false;
         
-        var distFromClick = distBetweenPoints(x, this.x, y, this.y);
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
         
         if (distFromClick < this.radius){
             clickProcessed = true;
@@ -54,9 +54,12 @@ export default class GitHubMolecule extends Molecule {
                 let rawFile = atob(result.data.content);
                 let moleculesList =  JSON.parse(rawFile).molecules;
                 
+                //Preserve values which will be overwritten by the deserialize process
+                var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType};
+                
                 this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
                 
-                this.topLevel = false;
+                this.setValues(preservedValues);
                 
                 //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
                 if(typeof this.parent !== 'undefined'){
