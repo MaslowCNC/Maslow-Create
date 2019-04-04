@@ -18,7 +18,10 @@ export default class Extrude extends Atom{
     
     updateCodeBlock(){
         
-        this.codeBlock = this.findIOValue("geometry").extrude({ height: 1 })
+        try{
+            this.codeBlock = this.findIOValue("geometry").extrude({ height: this.findIOValue("height") });
+        }
+        catch(err){}
         
         super.updateCodeBlock();
     }
