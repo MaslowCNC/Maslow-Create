@@ -26,8 +26,16 @@ export default class ShrinkWrap extends Atom{
     
     updateCodeBlock(){
         
-        console.log(GlobalVariables.api);
-        this.codeBlock = GlobalVariables.api.hull(GlobalVariables.api.cube().translate([4,4,1]), GlobalVariables.api.sphere());
+        var inputs = [];
+        this.children.forEach( io => {
+            if(io.connectors.length > 0){
+                inputs.push(io.getValue());
+            }
+        });
+        
+        if(inputs.length > 0){
+            this.codeBlock = GlobalVariables.api.hull.apply(null, inputs);
+        }
         
         //Set the output nodes with name 'geometry' to be the generated output
         this.children.forEach(child => {
