@@ -97,9 +97,9 @@ export default class AttachmentPoint {
         }
 
         if(this.parentMolecule.type == "output"){
-                                this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
-                                this.y= this.parentMolecule.y;
-                            }
+            this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
+            this.y= this.parentMolecule.y;
+        }
 
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
@@ -111,13 +111,13 @@ export default class AttachmentPoint {
         GlobalVariables.c.closePath();  
 
         if (this.defaultRadius != this.radius){
-                    if (this.type == "output"){     
-                        this.offsetX = this.parentMolecule.scaledRadius;
-                         }
-                    else{
-                        this.offsetX = -1* this.parentMolecule.scaledRadius;
-                         }
+            if (this.type == "output"){     
+                this.offsetX = this.parentMolecule.scaledRadius;
             }
+            else{
+                this.offsetX = -1* this.parentMolecule.scaledRadius;
+            }
+        }
     }
 
     clickDown(x,y, clickProcessed){
@@ -256,7 +256,7 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue;
-        //propigate the change to linked elements if this is an output
+        //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node
                 connector.propogate();

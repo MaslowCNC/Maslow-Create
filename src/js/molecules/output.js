@@ -12,8 +12,7 @@ export default class Output extends Atom {
             this.parent.addIO("output", "Geometry", this.parent, "geometry", "");
         }
         
-        this.defaultCodeBlock = "~number or geometry~";
-        this.codeBlock = "";
+        this.codeBlock = null;
         this.type = "output";
         this.name = "Output";
         this.atomType = "Output";
@@ -23,6 +22,13 @@ export default class Output extends Atom {
         this.setValues(values);
         
         this.addIO("input", "number or geometry", this, "geometry", "");
+    }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = this.findIOValue("number or geometry");
+        
+        super.updateCodeBlock();
     }
     
     setID(newID){
