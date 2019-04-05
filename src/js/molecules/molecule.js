@@ -1,6 +1,7 @@
 import Atom from '../prototypes/atom'
 import Connector from '../prototypes/connector'
 import GlobalVariables from '../globalvariables'
+import { readFileSync } from '../JSxCAD.js';
 
 export default class Molecule extends Atom{
 
@@ -130,6 +131,8 @@ export default class Molecule extends Atom{
         
         this.createButton(valueList,this,"Download STL",(e) => {
            console.log("Download STL button clicked");
+           const blob = new Blob([readFileSync('window').translator()], {type: "text/plain;charset=utf-8"});
+           saveAs(blob, this.name+'.stl');
         });
         
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
