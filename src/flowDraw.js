@@ -184,8 +184,8 @@ const makeMaterial = (material) => {
     }
 }
 
-function drawOnWindow({ data }) {
-    
+function drawOnWindow(file) {
+    const { data } = file;
     // Delete any previous dataset in the window.
     for (const { controller, mesh } of datasets) {
         if (controller) {
