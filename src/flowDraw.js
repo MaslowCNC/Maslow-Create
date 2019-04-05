@@ -32,12 +32,10 @@ flowCanvas.addEventListener('mousedown', event => {
     
     var clickHandledByMolecule = false;
     
-    GlobalVariables.currentMolecule.nodesOnTheScreen.some(molecule => {
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         
         if (molecule.clickDown(event.clientX,event.clientY) == true){
             clickHandledByMolecule = true;
-            console.log("clicked");
-            return true;
         }
 
     });

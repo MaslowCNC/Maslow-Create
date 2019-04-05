@@ -139,38 +139,27 @@ export default class Atom {
         });
     }
     
-    clickDown(x,y){
+    clickDown(x,y, clickProcessed){
         //Returns true if something was done with the click
         
-        
-        var clickProcessed = false;
-        
         this.children.forEach(child => {
-            if(child.clickDown(x,y) == true){
+            if(child.clickDown(x,y, clickProcessed) == true){
                 clickProcessed = true;
             }
         });
         
-        //If none of the children processed the click
-        if(!clickProcessed){
-        
-            var distFromClick = GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY);
-            
-            if (distFromClick < this.scaledRadius){
-                this.color = this.selectedColor;
-                this.isMoving = true;
-                this.selected = true;
-                this.updateSidebar();
-                
-                this.sendToRender();
-                
-                clickProcessed = true;
-            }
-            else{
-                this.color = this.defaultColor;
-                this.selected = false;
-            }
-            
+        //If none of the children processed the click see if the atom should, if not clicked, then deselect
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY) < this.scaledRadius){
+            this.color = this.selectedColor;
+            this.isMoving = true;
+            this.selected = true;
+            this.updateSidebar();
+            this.sendToRender();
+            clickProcessed = true;
+        }
+        else{
+            this.color = this.defaultColor;
+            this.selected = false;
         }
         
         return clickProcessed; 
