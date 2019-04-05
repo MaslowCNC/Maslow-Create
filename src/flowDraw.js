@@ -230,8 +230,6 @@ function animate() {
     controls.update();
 }
 
-//Create a new jsxcad canvas here by copying from my PR
-        
 let datasets = [];
 let camera;
 let controls;

@@ -128,6 +128,10 @@ export default class Molecule extends Atom{
             });
         }
         
+        this.createButton(valueList,this,"Download STL",(e) => {
+           console.log("Download STL button clicked");
+        });
+        
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
