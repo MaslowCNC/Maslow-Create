@@ -41,9 +41,8 @@ export default class AttachmentPoint {
         this.defaultRadius = this.radius;
         this.radius = this.parentMolecule.scaledRadius/2.2;
         this.hoverDetectRadius = this.parentMolecule.scaledRadius;
-    
 
-    if (this.expandedRadius == true){
+        if (this.expandedRadius){
             this.radius = this.parentMolecule.scaledRadius/1.6;
         }
 
@@ -75,7 +74,11 @@ export default class AttachmentPoint {
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
                 }
-                            
+                 
+                 if(this.parentMolecule.children.length < 2){
+                                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
+                                this.y= this.parentMolecule.y;
+                     }            
 
                 GlobalVariables.c.fill();
                 GlobalVariables.c.beginPath();
@@ -88,15 +91,17 @@ export default class AttachmentPoint {
             else{
 
                 GlobalVariables.c.beginPath();
+                    
                     if (this.name === "geometry"){
-                 GlobalVariables.c.fillStyle = "#484848";   
+                 GlobalVariables.c.fillStyle = this.parentMolecule.selectedColor;   
                 }
                     else{
                 GlobalVariables.c.fillStyle = bubbleColor;
                 }
-                if(this.parentMolecule.type == "constant"){
-                                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
-                                this.y= this.parentMolecule.y;
+                
+                 if(this.parentMolecule.children.length < 2){
+                        this.x= this.parentMolecule.x + this.parentMolecule.scaledRadius;
+                        this.y= this.parentMolecule.y;
                      }   
 
                 GlobalVariables.c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
@@ -112,14 +117,10 @@ export default class AttachmentPoint {
             }
         }
 
-        if(this.parentMolecule.type == "output"){
+       /* if(this.parentMolecule.children.length < 2){
                                 this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
                                 this.y= this.parentMolecule.y;
-                            }
-        if(this.parentMolecule.type == "constant"){
-                                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
-                                this.y= this.parentMolecule.y;
-                     }                    
+                            } */             
 
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
@@ -129,15 +130,6 @@ export default class AttachmentPoint {
         GlobalVariables.c.fill();
         GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();  
-
-        if (this.defaultRadius != this.radius){
-                    if (this.type == "output"){     
-                        this.offsetX = this.parentMolecule.scaledRadius;
-                         }
-                    else{
-                        this.offsetX = -1* this.parentMolecule.scaledRadius;
-                         }
-            }
     }
 
     clickDown(x,y){
