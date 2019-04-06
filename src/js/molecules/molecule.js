@@ -1,6 +1,7 @@
 import Atom from '../prototypes/atom'
 import Connector from '../prototypes/connector'
 import GlobalVariables from '../globalvariables'
+import { readFileSync } from '../JSxCAD.js';
 
 export default class Molecule extends Atom{
 
@@ -128,6 +129,11 @@ export default class Molecule extends Atom{
             });
         }
         
+        this.createButton(valueList,this,"Download STL",(e) => {
+           const blob = new Blob([readFileSync('window').translator()], {type: "text/plain;charset=utf-8"});
+           saveAs(blob, this.name+'.stl');
+        });
+        
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
         
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
@@ -163,8 +169,7 @@ export default class Molecule extends Atom{
             this.createNonEditableValueListItem(list,bomEntry,"numberNeeded", bomEntry.BOMitemName, false)
         });
     }
-        
-    
+
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
         
@@ -274,28 +279,35 @@ export default class Molecule extends Atom{
         
     deserialize(moleculeList, moleculeID){
         
-        //Find the target molecule in the list
-        var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
-        
-        this.setValues(moleculeObject); //Grab the values of everything from the passed object
-        
-        //Place the atoms
-        moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(JSON.parse(atom), moleculeList, GlobalVariables.availableTypes);
-        });
-        
-        //reload the molecule object to prevent persistence issues
-        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
-        
-        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
-        this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
-        this.savedConnectors.forEach(connector => {
-            this.placeConnector(JSON.parse(connector));
-        });
-        
-        this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
-        
-        this.updateCodeBlock();
+        try{
+            //Find the target molecule in the list
+            var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
+            
+            this.setValues(moleculeObject); //Grab the values of everything from the passed object
+            
+            //Place the atoms
+            moleculeObject.allAtoms.forEach(atom => {
+                this.placeAtom(JSON.parse(atom), moleculeList, GlobalVariables.availableTypes);
+            });
+            
+            //reload the molecule object to prevent persistence issues
+            moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
+            
+            //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
+            this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
+            this.savedConnectors.forEach(connector => {
+                this.placeConnector(JSON.parse(connector));
+            });
+            
+            this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
+            
+            this.updateCodeBlock();
+        }
+        catch(err){
+            console.log("Unable to load molecule: ");
+            console.log(moleculeObject);
+            console.log(err);
+        }
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){
@@ -337,31 +349,35 @@ export default class Molecule extends Atom{
         var cp2NotFound = true;
         var ap2;
         
-        this.nodesOnTheScreen.forEach(atom => {
-            //Find the output node
-            
-            if (atom.uniqueID == connectorObj.ap1ID){
-                atom.children.forEach(child => {
-                    if(child.name == connectorObj.ap1Name && child.type == "output"){
-                        connector = new Connector({
-                            atomType: "Connector",
-                            attachmentPoint1: child,
-                            parentMolecule:  atom
-                        });
-                        cp1NotFound = false;
-                    }
-                });
-            }
-            //Find the input node
-            if (atom.uniqueID == connectorObj.ap2ID){
-                atom.children.forEach(child => {
-                    if(child.name == connectorObj.ap2Name && child.type == "input" && child.connectors.length == 0){
-                        cp2NotFound = false;
-                        ap2 = child;
-                    }
-                });
-            }
-        });
+        try{
+            this.nodesOnTheScreen.forEach(atom => {
+                //Find the output node
+                if (atom.uniqueID == connectorObj.ap1ID){
+                    atom.children.forEach(child => {
+                        if(child.name == connectorObj.ap1Name && child.type == "output"){
+                            connector = new Connector({
+                                atomType: "Connector",
+                                attachmentPoint1: child,
+                                parentMolecule:  atom
+                            });
+                            cp1NotFound = false;
+                        }
+                    });
+                }
+                //Find the input node
+                if (atom.uniqueID == connectorObj.ap2ID){
+                    atom.children.forEach(child => {
+                        if(child.name == connectorObj.ap2Name && child.type == "input" && child.connectors.length == 0){
+                            cp2NotFound = false;
+                            ap2 = child;
+                        }
+                    });
+                }
+            });
+        }
+        catch(err){
+            console.log("Unable to create connector");
+        }
         
         if(cp1NotFound || cp2NotFound){
             console.log("Unable to create connector");

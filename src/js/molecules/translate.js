@@ -13,9 +13,16 @@ export default class Translate extends Atom{
         
         this.name = "Translate";
         this.atomType = "Translate";
-        this.defaultCodeBlock = "~geometry~.translate([~xDist~, ~yDist~, ~zDist~])";
-        this.codeBlock = "";
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        try{
+            this.codeBlock = this.findIOValue("geometry").translate([this.findIOValue("xDist"), this.findIOValue("yDist"), this.findIOValue("zDist")])
+        }catch(err){}
+        
+        super.updateCodeBlock();
     }
 }

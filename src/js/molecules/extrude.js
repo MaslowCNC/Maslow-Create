@@ -8,13 +8,21 @@ export default class Extrude extends Atom{
         
         this.name = "Extrude";
         this.atomType = "Extrude";
-        this.defaultCodeBlock = "linear_extrude({ height: ~height~ }, ~geometry~)";
-        this.codeBlock = "";
         
         this.addIO("input", "geometry" , this, "geometry", "");
         this.addIO("input", "height"   , this, "number", 10);
         this.addIO("output", "geometry", this, "geometry", "");
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        try{
+            this.codeBlock = this.findIOValue("geometry").extrude({ height: this.findIOValue("height") });
+        }
+        catch(err){}
+        
+        super.updateCodeBlock();
     }
 }

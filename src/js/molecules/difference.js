@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Difference extends Atom{
     
@@ -12,9 +13,14 @@ export default class Difference extends Atom{
         
         this.name = "Difference";
         this.atomType = "Difference";
-        this.defaultCodeBlock = "difference(~geometry1~,~geometry2~)";
-        this.codeBlock = "";
         
         this.setValues(values);
+    }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = GlobalVariables.api.difference(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+        
+        super.updateCodeBlock();
     }
 }

@@ -117,10 +117,15 @@ export default class AttachmentPoint {
             }
         }
 
-       /* if(this.parentMolecule.children.length < 2){
+        if(this.parentMolecule.type == "output"){
+            this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
+            this.y= this.parentMolecule.y;
+              /* if(this.parentMolecule.children.length < 2){
                                 this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
                                 this.y= this.parentMolecule.y;
-                            } */             
+                            } */  
+        }
+
 
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
@@ -130,10 +135,19 @@ export default class AttachmentPoint {
         GlobalVariables.c.fill();
         GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();  
+
+        if (this.defaultRadius != this.radius){
+            if (this.type == "output"){     
+                this.offsetX = this.parentMolecule.scaledRadius;
+            }
+            else{
+                this.offsetX = -1* this.parentMolecule.scaledRadius;
+            }
+        }
     }
 
-    clickDown(x,y){
-        if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius){
+    clickDown(x,y, clickProcessed){
+        if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius && !clickProcessed){
             
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = new Connector({
@@ -278,7 +292,7 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue;
-        //propigate the change to linked elements if this is an output
+        //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node
                 connector.propogate();

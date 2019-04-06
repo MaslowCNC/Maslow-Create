@@ -17,8 +17,7 @@ export default class Atom {
         this.color = '#F3EFEF';
         this.name = "name";
         this.parentMolecule = null;
-        this.codeBlock = "";
-        this.defaultCodeBlock = "";
+        this.codeBlock = null;
         this.isMoving = false;
         this.scaledX = 0;
         this.scaledY = 0;
@@ -141,40 +140,29 @@ export default class Atom {
         });
     }
     
-    clickDown(x,y){
+    clickDown(x,y, clickProcessed){
         //Returns true if something was done with the click
         
-        
-        var clickProcessed = false;
-        
         this.children.forEach(child => {
-            if(child.clickDown(x,y) == true){
+            if(child.clickDown(x,y, clickProcessed) == true){
                 clickProcessed = true;
             }
         });
         
-        //If none of the children processed the click
-        if(!clickProcessed){
-        
-            var distFromClick = GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY);
-            
-            if (distFromClick < this.scaledRadius){
-                this.color = this.selectedColor;
-                this.strokeColor = this.defaultColor;
-                this.isMoving = true;
-                this.selected = true;
-                this.updateSidebar();
-                
-                this.sendToRender();
-                
-                clickProcessed = true;
-            }
-            else{
-                this.color = this.defaultColor;
-                this.strokeColor = this.selectedColor;
-                this.selected = false;
-            }
-            
+        //If none of the children processed the click see if the atom should, if not clicked, then deselect
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY) < this.scaledRadius){
+            this.color = this.selectedColor;
+            this.isMoving = true;
+            this.selected = true;
+             this.strokeColor = this.defaultColor;
+            this.updateSidebar();
+            this.sendToRender();
+            clickProcessed = true;
+        }
+        else{
+            this.color = this.defaultColor;
+            this.strokeColor = this.selectedColor;
+            this.selected = false;
         }
         
         return clickProcessed; 
@@ -321,12 +309,6 @@ export default class Atom {
     }
     
     updateCodeBlock(){
-        //Substitute the result from each input for the ~...~ section with it's name
-        
-        var regex = /~(.*?)~/gi;
-        this.codeBlock = this.defaultCodeBlock.replace(regex, x => {
-            return this.findIOValue(x);
-        });
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
@@ -342,16 +324,14 @@ export default class Atom {
     }
     
     sendToRender(){
-        //Send code to JSCAD to render
-        if (this.codeBlock != ""){
-            var toRender = "function main () {return " + this.codeBlock + "}"
-            
-            window.loadDesign(toRender,"MaslowCreate");
+        //Send code to JSxCAD to render
+        try {
+            GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
         }
-        //Send something invisible just to wipe the rendering
-        else{
-            var toRender = "function main () {return sphere({r: .0001, center: true})}"
-            window.loadDesign(toRender,"MaslowCreate");
+        catch(err) {
+            console.log("Oh no can't render that");
+            //console.log(err);
+            GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1));
         }
     }
     

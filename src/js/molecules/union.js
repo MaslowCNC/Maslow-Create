@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Union extends Atom {
     
@@ -12,9 +13,15 @@ export default class Union extends Atom {
         
         this.name = "Union";
         this.atomType = "Union";
-        this.defaultCodeBlock = "union(~geometry1~,~geometry2~)";
-        this.codeBlock = "";
         
         this.setValues(values);
     }
+    
+    updateCodeBlock(){
+        
+        this.codeBlock = GlobalVariables.api.union(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+        
+        super.updateCodeBlock();
+    }
+    
 }
