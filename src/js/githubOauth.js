@@ -1,5 +1,6 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables'
+import { readFileSync } from './JSxCAD.js';
 
 export default class GitHubModule{
 
@@ -465,6 +466,7 @@ export default class GitHubModule{
                                         sha: sha
                                     }).then(result => {
                                         console.log("README updated");
+                                        this.saveStl();
                                     });
                                 });
                             });
@@ -474,7 +476,69 @@ export default class GitHubModule{
             });
         }
     }
-
+    
+    saveStl(){
+        const ref = 'heads/master'
+        const owner = this.currentUser;
+        const repo = this.currentRepoName;
+        //Get sha for tree
+        this.octokit.git.getRef({
+            owner: owner, 
+            repo: repo, 
+            ref: ref
+        }).then(result => {
+            const shaLatestCommit = result.data.object.sha;
+            this.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
+                const shaBaseTree = result.data.sha;
+                const fileName = "project.stl";
+                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
+                const content = window.btoa(readFileSync('github').translator());
+                
+                this.octokit.git.createBlob({
+                owner: owner, 
+                repo: repo, 
+                content: content, 
+                encoding: "base64"
+                }).then(result => {
+                    const blobSha = result.data.sha;
+                    
+                    this.octokit.git.createTree({
+                        owner: owner, 
+                        repo: repo, 
+                        tree: [{
+                            path: fileName,
+                            mode: "100644",
+                            type: "blob",
+                            sha: blobSha
+                        }], 
+                        base_tree: shaBaseTree
+                    }).then(result => {
+                        const commitMessage = "commit from new method";
+                        const shaNewTree = result.data.sha;
+                        this.octokit.git.createCommit({
+                            owner: owner, 
+                            repo: repo, 
+                            message: commitMessage, 
+                            tree: shaNewTree, 
+                            parents: [shaLatestCommit]
+                        }).then(result => {
+                            const shaNewCommit = result.data.sha;
+                            this.octokit.git.updateRef({
+                                owner: owner, 
+                                repo: repo, 
+                                ref: ref, 
+                                sha: shaNewCommit,
+                                force: true
+                            }).then(result => {
+                                console.log("Stl File Saved");
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+    
     loadProject(projectName){
         
         if(typeof this.intervalTimer != undefined){
