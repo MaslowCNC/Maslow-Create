@@ -1,5 +1,6 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables'
+import { readFileSync } from './JSxCAD.js';
 
 export default class GitHubModule{
 
@@ -476,7 +477,6 @@ export default class GitHubModule{
     }
     
     fullSaveProject(){
-        console.log("full save project from within github thing");
         const ref = 'heads/master'
         const owner = this.currentUser;
         const repo = this.currentRepoName;
@@ -486,15 +486,11 @@ export default class GitHubModule{
             repo: repo, 
             ref: ref
         }).then(result => {
-            console.log("ref found:");
-            console.log(result);
-            const sha_latest_commit = result.data.object.sha;
-            this.octokit.repos.getCommit({owner:owner, repo:repo, sha:sha_latest_commit}).then(result => {
-                console.log("commit: ");
-                console.log(result);
-                const sha_base_tree = result.data.sha;
-                const fileName = "test.txt";
-                const content = window.btoa("This is some test text");
+            const shaLatestCommit = result.data.object.sha;
+            this.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
+                const shaBaseTree = result.data.sha;
+                const fileName = "project.stl";
+                const content = window.btoa(readFileSync('window').translator());
                 
                 this.octokit.git.createBlob({
                 owner: owner, 
@@ -502,8 +498,6 @@ export default class GitHubModule{
                 content: content, 
                 encoding: "base64"
                 }).then(result => {
-                    console.log("blob results: ");
-                    console.log(result);
                     const blobSha = result.data.sha;
                     
                     this.octokit.git.createTree({
@@ -515,39 +509,31 @@ export default class GitHubModule{
                             type: "blob",
                             sha: blobSha
                         }], 
-                        base_tree: sha_base_tree
+                        base_tree: shaBaseTree
                     }).then(result => {
                         const commitMessage = "commit from new method";
-                        const sha_new_tree = result.data.sha;
-                        console.log("Created tree: ");
-                        console.log(result);
+                        const shaNewTree = result.data.sha;
                         this.octokit.git.createCommit({
                             owner: owner, 
                             repo: repo, 
                             message: commitMessage, 
-                            tree: sha_new_tree, 
-                            parents: [sha_latest_commit]
+                            tree: shaNewTree, 
+                            parents: [shaLatestCommit]
                         }).then(result => {
-                            console.log("Commit created");
-                            console.log(result);
-                            const sha_new_commit = result.data.sha;
+                            const shaNewCommit = result.data.sha;
                             this.octokit.git.updateRef({
                                 owner: owner, 
                                 repo: repo, 
                                 ref: ref, 
-                                sha: sha_new_commit
+                                sha: shaNewCommit
                             }).then(result => {
-                                console.log("Reference updated");
-                            })
-                        })
-
+                                console.log("File committed successfully");
+                            });
+                        });
                     });
                 });
             });
         });
-        //Create blob
-        
-        //
     }
     
     loadProject(projectName){
