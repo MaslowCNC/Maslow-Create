@@ -491,7 +491,8 @@ export default class GitHubModule{
             this.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
                 const shaBaseTree = result.data.sha;
                 const fileName = "project.stl";
-                const content = window.btoa(readFileSync('window').translator());
+                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
+                const content = window.btoa(readFileSync('github').translator());
                 
                 this.octokit.git.createBlob({
                 owner: owner, 
