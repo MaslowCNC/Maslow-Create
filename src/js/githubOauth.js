@@ -474,7 +474,82 @@ export default class GitHubModule{
             });
         }
     }
+    
+    fullSaveProject(){
+        console.log("full save project from within github thing");
+        const ref = 'heads/master'
+        const owner = this.currentUser;
+        const repo = this.currentRepoName;
+        //Get sha for tree
+        this.octokit.git.getRef({
+            owner: owner, 
+            repo: repo, 
+            ref: ref
+        }).then(result => {
+            console.log("ref found:");
+            console.log(result);
+            const sha_latest_commit = result.data.object.sha;
+            this.octokit.repos.getCommit({owner:owner, repo:repo, sha:sha_latest_commit}).then(result => {
+                console.log("commit: ");
+                console.log(result);
+                const sha_base_tree = result.data.sha;
+                const fileName = "test.txt";
+                const content = window.btoa("This is some test text");
+                
+                this.octokit.git.createBlob({
+                owner: owner, 
+                repo: repo, 
+                content: content, 
+                encoding: "base64"
+                }).then(result => {
+                    console.log("blob results: ");
+                    console.log(result);
+                    const blobSha = result.data.sha;
+                    
+                    this.octokit.git.createTree({
+                        owner: owner, 
+                        repo: repo, 
+                        tree: [{
+                            path: fileName,
+                            mode: "100644",
+                            type: "blob",
+                            sha: blobSha
+                        }], 
+                        base_tree: sha_base_tree
+                    }).then(result => {
+                        const commitMessage = "commit from new method";
+                        const sha_new_tree = result.data.sha;
+                        console.log("Created tree: ");
+                        console.log(result);
+                        this.octokit.git.createCommit({
+                            owner: owner, 
+                            repo: repo, 
+                            message: commitMessage, 
+                            tree: sha_new_tree, 
+                            parents: [sha_latest_commit]
+                        }).then(result => {
+                            console.log("Commit created");
+                            console.log(result);
+                            const sha_new_commit = result.data.sha;
+                            this.octokit.git.updateRef({
+                                owner: owner, 
+                                repo: repo, 
+                                ref: ref, 
+                                sha: sha_new_commit
+                            }).then(result => {
+                                console.log("Reference updated");
+                            })
+                        })
 
+                    });
+                });
+            });
+        });
+        //Create blob
+        
+        //
+    }
+    
     loadProject(projectName){
         
         if(typeof this.intervalTimer != undefined){
