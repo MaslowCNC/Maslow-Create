@@ -128,9 +128,6 @@ export default class Molecule extends Atom{
                GlobalVariables.gitHub.openGitHubPage();
             });
             
-            this.createButton(valueList,this,"Full Save",(e) => {
-               GlobalVariables.gitHub.fullSaveProject();
-            });
         }
         
         this.createButton(valueList,this,"Download STL",(e) => {

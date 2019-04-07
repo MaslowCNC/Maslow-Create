@@ -466,6 +466,7 @@ export default class GitHubModule{
                                         sha: sha
                                     }).then(result => {
                                         console.log("README updated");
+                                        this.saveStl();
                                     });
                                 });
                             });
@@ -476,7 +477,7 @@ export default class GitHubModule{
         }
     }
     
-    fullSaveProject(){
+    saveStl(){
         const ref = 'heads/master'
         const owner = this.currentUser;
         const repo = this.currentRepoName;
@@ -525,9 +526,10 @@ export default class GitHubModule{
                                 owner: owner, 
                                 repo: repo, 
                                 ref: ref, 
-                                sha: shaNewCommit
+                                sha: shaNewCommit,
+                                force: true
                             }).then(result => {
-                                console.log("File committed successfully");
+                                console.log("Stl File Saved");
                             });
                         });
                     });
