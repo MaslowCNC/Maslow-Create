@@ -135,8 +135,6 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    console.log("Repo: ");
-                    console.log(repo);
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true";
                     this.addProject(repo.name, repo.id, owned, thumbnailPath);
                 });
@@ -387,8 +385,6 @@ export default class GitHubModule{
         //Save the current project into the github repo
         if(this.currentRepoName != null){
             
-            console.log("Commiting");
-            
             GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
             const stlContent = readFileSync('github');
             
@@ -422,112 +418,7 @@ export default class GitHubModule{
                 },
                 commit: 'Autosave'
               }
-            })
-            
-            console.log("After commit call");
-            
-            return true;
-            
-            var path = "project.maslowcreate";
-            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)); //Convert the GlobalVariables.topLevelMolecule object to a JSON string and then convert it to base64 encoding
-            
-            //Get the SHA for the file
-            this.octokit.repos.getContents({
-                owner: this.currentUser,
-                repo: this.currentRepoName,
-                path: path
-            }).then(thisRepo => {
-                var sha = thisRepo.data.sha
-                
-                //Save the repo to the file
-                this.octokit.repos.updateFile({
-                    owner: this.currentUser,
-                    repo: this.currentRepoName,
-                    path: path,
-                    message: "autosave", 
-                    content: content,
-                    sha: sha
-                }).then(result => {
-                    console.log("Project saved");
-                    //Then update the BOM file
-                    
-                    path = "BillOfMaterials.md";
-                    content = this.bomHeader;
-                    
-                    GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
-                        content = content + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
-                    });
-                    
-                    content = window.btoa(content);
-                    
-                    //Get the SHA for the file
-                    this.octokit.repos.getContents({
-                        owner: this.currentUser,
-                        repo: this.currentRepoName,
-                        path: path
-                    }).then(result => {
-                        var sha = result.data.sha
-                        
-                        //Save the BOM to the file
-                        this.octokit.repos.updateFile({
-                            owner: this.currentUser,
-                            repo: this.currentRepoName,
-                            path: path,
-                            message: "update Bom", 
-                            content: content,
-                            sha: sha
-                        }).then(result => {
-                            console.log("BOM updated");
-                            
-                            this.octokit.repos.get({
-                                owner: this.currentUser, 
-                                repo: this.currentRepoName
-                            }).then(result => {
-                                
-                                path = "README.md";
-                                content = "# " + result.data.name + "\n" + result.data.description + "\n\n![](/project.svg)\n\n";
-                                
-                                GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
-                                    content = content + item + "\n\n\n"
-                                });
-                                
-                                content = window.btoa(content);
-                                
-                                //Get the SHA for the file
-                                this.octokit.repos.getContents({
-                                    owner: this.currentUser,
-                                    repo: this.currentRepoName,
-                                    path: path
-                                }).then(result => {
-                                    var sha = result.data.sha
-                                    
-                                    //Save the README to the file
-                                    this.octokit.repos.updateFile({
-                                        owner: this.currentUser,
-                                        repo: this.currentRepoName,
-                                        path: path,
-                                        message: "update Readme", 
-                                        content: content,
-                                        sha: sha
-                                    }).then(result => {
-                                        console.log("README updated");
-                                        
-                                        //Save a stl representation of the project
-                                        GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
-                                        const content = window.btoa(readFileSync('github'));
-                                        this.writeFileToCurrentRepo("project.stl",content, this).then(result => {
-                                            const project = GlobalVariables.topLevelMolecule.codeBlock;
-                                            GlobalVariables.api.writeSvg({ path: 'github' }, project);
-                                            const contentSvg = window.btoa(readFileSync('github'));
-                                            this.writeFileToCurrentRepo("project.svg",contentSvg, this);
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+            }); 
         }
     }
     
@@ -547,7 +438,7 @@ export default class GitHubModule{
       })
       let latestCommitSha = response.data[0].sha
       const treeSha = response.data[0].commit.tree.sha
-      console.log("after list commits");
+      
       response = await octokit.git.createTree({
         owner,
         repo,
@@ -570,82 +461,17 @@ export default class GitHubModule{
         parents: [latestCommitSha]
       })
       latestCommitSha = response.data.sha
-      console.log("after create commit");
+      
       await octokit.git.updateRef({
         owner,
         repo,
         sha: latestCommitSha,
-        ref: `heads/master`
+        ref: `heads/master`,
+        force: true
       })
       
-      console.log("At end of file commit call");
+      console.log("Project saved");
 
-    }
-    
-    writeFileToCurrentRepo(path, content, this_){
-        return new Promise(function(resolve, reject) {
-            const ref = 'heads/master'
-            const owner = this_.currentUser;
-            const repo = this_.currentRepoName;
-            //Get sha for tree
-            this_.octokit.git.getRef({
-                owner: owner, 
-                repo: repo, 
-                ref: ref
-            }).then(result => {
-                const shaLatestCommit = result.data.object.sha;
-                console.log("Using SHA: " + shaLatestCommit);
-                this_.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
-                    const shaBaseTree = result.data.sha;
-                    
-                    this_.octokit.git.createBlob({
-                    owner: owner, 
-                    repo: repo, 
-                    content: content, 
-                    encoding: "base64"
-                    }).then(result => {
-                        const blobSha = result.data.sha;
-                        
-                        this_.octokit.git.createTree({
-                            owner: owner, 
-                            repo: repo, 
-                            tree: [{
-                                path: path,
-                                mode: "100644",
-                                type: "blob",
-                                sha: blobSha
-                            }], 
-                            base_tree: shaBaseTree
-                        }).then(result => {
-                            const commitMessage = "commit from new method";
-                            const shaNewTree = result.data.sha;
-                            this_.octokit.git.createCommit({
-                                owner: owner, 
-                                repo: repo, 
-                                message: commitMessage, 
-                                tree: shaNewTree, 
-                                parents: [shaLatestCommit]
-                            }).then(result => {
-                                const shaNewCommit = result.data.sha;
-                                console.log("Set to: " + shaNewCommit);
-                                this_.octokit.git.updateRef({
-                                    owner: owner, 
-                                    repo: repo, 
-                                    ref: ref, 
-                                    sha: shaNewCommit,
-                                    force: true
-                                }).then(result => {
-                                    console.log("sha set result: ");
-                                    console.log(result);
-                                    console.log(path + " Saved");
-                                    resolve();
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
     }
     
     loadProject(projectName){
