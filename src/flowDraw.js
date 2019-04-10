@@ -2,7 +2,7 @@ import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './js/JSxCAD.js';
+import { api, readFileSync, solidToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './js/JSxCAD.js';
 
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -187,7 +187,7 @@ const makeMaterial = (material) => {
     }
 }
 
-function drawOnWindow(file) {
+function drawOnWindow(file, { solids }) {
     const { data } = file;
     // Delete any previous dataset in the window.
     for (const { controller, mesh } of datasets) {
@@ -197,7 +197,7 @@ function drawOnWindow(file) {
         scene.remove(mesh);
     }
     // Build new datasets from the written data, and display them.
-    datasets = trianglesToThreejsDatasets({}, ...data);
+    datasets = solidToThreejsDatasets({}, ...solids);
     for (const dataset of datasets) {
         let geometry = new THREE.BufferGeometry();
         let { properties = {}, indices, positions, normals } = dataset;

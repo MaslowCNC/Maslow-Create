@@ -466,7 +466,11 @@ export default class GitHubModule{
                                         sha: sha
                                     }).then(result => {
                                         console.log("README updated");
-                                        this.writeFileToCurrentRepo();
+                                        
+                                        //Save a stl representation of the project
+                                        GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
+                                        const content = window.btoa(readFileSync('github'));
+                                        this.writeFileToCurrentRepo("project.stl",content);
                                     });
                                 });
                             });
@@ -490,9 +494,6 @@ export default class GitHubModule{
             const shaLatestCommit = result.data.object.sha;
             this.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
                 const shaBaseTree = result.data.sha;
-                const fileName = "project.stl";
-                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
-                const content = window.btoa(readFileSync('github').translator());
                 
                 this.octokit.git.createBlob({
                 owner: owner, 
@@ -506,7 +507,7 @@ export default class GitHubModule{
                         owner: owner, 
                         repo: repo, 
                         tree: [{
-                            path: fileName,
+                            path: path,
                             mode: "100644",
                             type: "blob",
                             sha: blobSha

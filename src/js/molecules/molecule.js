@@ -131,7 +131,7 @@ export default class Molecule extends Atom{
         }
         
         this.createButton(valueList,this,"Download STL",(e) => {
-           const blob = new Blob([readFileSync('window').translator()], {type: "text/plain;charset=utf-8"});
+           const blob = new Blob([readFileSync('window')], {type: "text/plain;charset=utf-8"});
            saveAs(blob, this.name+'.stl');
         });
         
