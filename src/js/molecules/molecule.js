@@ -63,12 +63,7 @@ export default class Molecule extends Atom{
         
         this.updateSidebar();
         
-        //Find the output and send it's contents to the renderer
-        this.nodesOnTheScreen.forEach(atom => {
-            if(atom.atomType == 'Output'){
-                atom.sendToRender();
-            }
-        });
+        this.sendToRender();
     }
     
     updateCodeBlock(){

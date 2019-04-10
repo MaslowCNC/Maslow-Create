@@ -27,6 +27,7 @@ export default class Output extends Atom {
     updateCodeBlock(){
         
         this.codeBlock = this.findIOValue("number or geometry");
+        this.parent.codeBlock = this.codeBlock;
         
         super.updateCodeBlock();
     }

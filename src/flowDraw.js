@@ -113,7 +113,7 @@ function init() {
     
     //Add the JSXCAD window
     camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
-    [camera.position.x, camera.position.y, camera.position.z] = [0, 0, 50];
+    [camera.position.x, camera.position.y, camera.position.z] = [0, -30, 50];
     //
     controls = new THREE.TrackballControls(camera, targetDiv);
     controls.rotateSpeed = 4.0;

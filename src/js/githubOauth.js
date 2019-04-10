@@ -388,7 +388,7 @@ export default class GitHubModule{
             GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
             const stlContent = readFileSync('github');
             
-            const project = GlobalVariables.topLevelMolecule.codeBlock;
+            const project = GlobalVariables.topLevelMolecule.codeBlock.rotate([90,0,0]);
             GlobalVariables.api.writeSvg({ path: 'github' }, project);
             const contentSvg = readFileSync('github');
             
