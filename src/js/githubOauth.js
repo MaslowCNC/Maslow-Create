@@ -102,7 +102,7 @@ export default class GitHubModule{
             }
             
             //Add the create a new project button
-            this.addProject("New Project");
+            this.addProject("New Project", null, true, "newProject.svg");
             
             //Load projects
             var query;
@@ -135,7 +135,10 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    this.addProject(repo.name, repo.id, owned);
+                    console.log("Repo: ");
+                    console.log(repo);
+                    const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true";
+                    this.addProject(repo.name, repo.id, owned, thumbnailPath);
                 });
                 if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
                     this.cloneExampleProjectPopup();
@@ -149,13 +152,13 @@ export default class GitHubModule{
         this.forkByID(177732883); //This is the ID of the example project
     }
     
-    addProject(projectName, id, owned){
+    addProject(projectName, id, owned, thumbnailPath){
         //create a project element to display
         
         var project = document.createElement("DIV");
         
         var projectPicture = document.createElement("IMG");
-        projectPicture.setAttribute("src", "testPicture.png");
+        projectPicture.setAttribute("src", thumbnailPath);
         projectPicture.setAttribute("style", "width: 100%");
         projectPicture.setAttribute("style", "height: 100%");
         project.appendChild(projectPicture);
@@ -531,6 +534,7 @@ export default class GitHubModule{
                                 parents: [shaLatestCommit]
                             }).then(result => {
                                 const shaNewCommit = result.data.sha;
+                                console.log("Set to: " + shaNewCommit);
                                 this_.octokit.git.updateRef({
                                     owner: owner, 
                                     repo: repo, 
@@ -538,6 +542,8 @@ export default class GitHubModule{
                                     sha: shaNewCommit,
                                     force: true
                                 }).then(result => {
+                                    console.log("sha set result: ");
+                                    console.log(result.data.object.sha);
                                     console.log(path + " Saved");
                                     resolve();
                                 });
