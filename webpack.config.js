@@ -1,10 +1,12 @@
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
+require("babel-core/register");
+require("babel-polyfill");
 
 module.exports = {
     mode: 'development',
-    entry: './src/flowDraw.js',
+    entry: ['babel-polyfill', './src/flowDraw.js'],
     output: {
         path: __dirname + '/dist/',
         filename: './js/flowDraw.bundle.js'
