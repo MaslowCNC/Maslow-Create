@@ -543,7 +543,7 @@ export default class GitHubModule{
                                     force: true
                                 }).then(result => {
                                     console.log("sha set result: ");
-                                    console.log(result.data.object.sha);
+                                    console.log(result);
                                     console.log(path + " Saved");
                                     resolve();
                                 });
