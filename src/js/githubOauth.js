@@ -396,6 +396,18 @@ export default class GitHubModule{
             GlobalVariables.api.writeSvg({ path: 'github' }, project);
             const contentSvg = readFileSync('github');
             
+            var bomContent = this.bomHeader;
+            GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
+                bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
+            });
+            
+            var readmeContent = "# " + this.currentRepoName + "\n\n![](/project.svg)\n\n";
+            GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
+                readmeContent = readmeContent + item + "\n\n\n"
+            });
+            
+            const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4);
+            
             this.createCommit(this.octokit,{
               owner: this.currentUser,
               repo: this.currentRepoName,
@@ -403,7 +415,10 @@ export default class GitHubModule{
               changes: {
                 files: {
                   'project.stl': stlContent,
-                  'project.svg': contentSvg
+                  'project.svg': contentSvg,
+                  'BillOfMaterials.md': bomContent,
+                  'README.md': readmeContent,
+                  'project.maslowcreate': projectContent
                 },
                 commit: 'Autosave'
               }
