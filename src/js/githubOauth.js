@@ -440,7 +440,7 @@ export default class GitHubModule{
                             }).then(result => {
                                 
                                 path = "README.md";
-                                content = "# " + result.data.name + "\n" + result.data.description + "\n";
+                                content = "# " + result.data.name + "\n" + result.data.description + "\n\n![](/project.svg)\n\n";
                                 
                                 GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
                                     content = content + item + "\n\n\n"
@@ -470,7 +470,12 @@ export default class GitHubModule{
                                         //Save a stl representation of the project
                                         GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
                                         const content = window.btoa(readFileSync('github'));
-                                        this.writeFileToCurrentRepo("project.stl",content);
+                                        this.writeFileToCurrentRepo("project.stl",content, this).then(result => {
+                                            const project = GlobalVariables.topLevelMolecule.codeBlock;
+                                            GlobalVariables.api.writeSvg({ path: 'github' }, project);
+                                            const contentSvg = window.btoa(readFileSync('github'));
+                                            this.writeFileToCurrentRepo("project.svg",contentSvg, this);
+                                        });
                                     });
                                 });
                             });
@@ -481,57 +486,61 @@ export default class GitHubModule{
         }
     }
     
-    writeFileToCurrentRepo(path, content){
-        const ref = 'heads/master'
-        const owner = this.currentUser;
-        const repo = this.currentRepoName;
-        //Get sha for tree
-        this.octokit.git.getRef({
-            owner: owner, 
-            repo: repo, 
-            ref: ref
-        }).then(result => {
-            const shaLatestCommit = result.data.object.sha;
-            this.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
-                const shaBaseTree = result.data.sha;
-                
-                this.octokit.git.createBlob({
+    writeFileToCurrentRepo(path, content, this_){
+        return new Promise(function(resolve, reject) {
+            const ref = 'heads/master'
+            const owner = this_.currentUser;
+            const repo = this_.currentRepoName;
+            //Get sha for tree
+            this_.octokit.git.getRef({
                 owner: owner, 
                 repo: repo, 
-                content: content, 
-                encoding: "base64"
-                }).then(result => {
-                    const blobSha = result.data.sha;
+                ref: ref
+            }).then(result => {
+                const shaLatestCommit = result.data.object.sha;
+                console.log("Using SHA: " + shaLatestCommit);
+                this_.octokit.repos.getCommit({owner:owner, repo:repo, sha:shaLatestCommit}).then(result => {
+                    const shaBaseTree = result.data.sha;
                     
-                    this.octokit.git.createTree({
-                        owner: owner, 
-                        repo: repo, 
-                        tree: [{
-                            path: path,
-                            mode: "100644",
-                            type: "blob",
-                            sha: blobSha
-                        }], 
-                        base_tree: shaBaseTree
+                    this_.octokit.git.createBlob({
+                    owner: owner, 
+                    repo: repo, 
+                    content: content, 
+                    encoding: "base64"
                     }).then(result => {
-                        const commitMessage = "commit from new method";
-                        const shaNewTree = result.data.sha;
-                        this.octokit.git.createCommit({
+                        const blobSha = result.data.sha;
+                        
+                        this_.octokit.git.createTree({
                             owner: owner, 
                             repo: repo, 
-                            message: commitMessage, 
-                            tree: shaNewTree, 
-                            parents: [shaLatestCommit]
+                            tree: [{
+                                path: path,
+                                mode: "100644",
+                                type: "blob",
+                                sha: blobSha
+                            }], 
+                            base_tree: shaBaseTree
                         }).then(result => {
-                            const shaNewCommit = result.data.sha;
-                            this.octokit.git.updateRef({
+                            const commitMessage = "commit from new method";
+                            const shaNewTree = result.data.sha;
+                            this_.octokit.git.createCommit({
                                 owner: owner, 
                                 repo: repo, 
-                                ref: ref, 
-                                sha: shaNewCommit,
-                                force: true
+                                message: commitMessage, 
+                                tree: shaNewTree, 
+                                parents: [shaLatestCommit]
                             }).then(result => {
-                                console.log("Stl File Saved");
+                                const shaNewCommit = result.data.sha;
+                                this_.octokit.git.updateRef({
+                                    owner: owner, 
+                                    repo: repo, 
+                                    ref: ref, 
+                                    sha: shaNewCommit,
+                                    force: true
+                                }).then(result => {
+                                    console.log(path + " Saved");
+                                    resolve();
+                                });
                             });
                         });
                     });
