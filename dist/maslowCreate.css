@@ -202,15 +202,17 @@ input.menu_search:focus {
 
 /* Style the tabs in the menu*/
 .tab {
+  padding-top:5px;
+  padding-bottom:5px;
   overflow: hidden;
   background-color: #f1f1f1;
 }
 
 /* Style the buttons that are used to open the tab content */
 .tab button {
-  background-color: inherit;
+  background-color: none;
   float: left;
-  border: none;
+  border: 2px white solid;
   outline: none;
   cursor: pointer;
   padding: 14px 16px;
@@ -234,9 +236,11 @@ input.menu_search:focus {
 
 .sidebar-list{
     list-style: none;
+    padding:10px;
 }
 
 .sidebar-item{
+    text-align:center;
     height: 1.5rem;
     line-height: 1.5rem;
     font-size: 1rem;
@@ -246,27 +250,34 @@ input.menu_search:focus {
 }
 
 .sidebar-item:hover,
-
 .sidebar-item:active{
     color: #000;
     font-weight: 500;
     background-color: #ffffff;
-}
+} 
 
 .sidebar-subitem{
-    display:inline-block;
+    margin:auto;
     padding-left: 10px;
 }
 
 .sidebar_button {
-  background: #4CAF50;
+  display:block;
+  margin:auto;
+  background: rgba(255, 255, 255, 0.3);
   cursor: pointer;
   outline:none;
+  border: 2px white solid;
   border-radius: 0.8rem;
-  width: 200px;
+  width: 100%;
+  padding-bottom:3px;
 }
 .sidebar_button:hover,.form button:active,.form button:focus {
-  background: #43A047;
+  background: none; 
+}
+.sidebar_button:hover{
+  background: white; 
+  border: 2px (0, 0, 0, 0.8) solid;
 }
 
 .login-popup{
