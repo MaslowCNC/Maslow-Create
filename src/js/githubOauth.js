@@ -466,7 +466,7 @@ export default class GitHubModule{
                                         sha: sha
                                     }).then(result => {
                                         console.log("README updated");
-                                        this.saveStl();
+                                        this.writeFileToCurrentRepo();
                                     });
                                 });
                             });
@@ -477,7 +477,7 @@ export default class GitHubModule{
         }
     }
     
-    saveStl(){
+    writeFileToCurrentRepo(path, content){
         const ref = 'heads/master'
         const owner = this.currentUser;
         const repo = this.currentRepoName;
