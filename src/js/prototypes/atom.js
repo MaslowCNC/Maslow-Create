@@ -12,6 +12,7 @@ export default class Atom {
         this.radius = 20;
         this.defaultColor = '#F3EFEF';
         this.selectedColor = "#484848";
+        this.strokeColor = "#484848";
         this.selected = false;
         this.color = '#F3EFEF';
         this.name = "name";
@@ -97,7 +98,7 @@ export default class Atom {
         GlobalVariables.c.textAlign = "start"; 
         GlobalVariables.c.fillText(this.name, this.scaledX + this.scaledRadius, this.scaledY- this.scaledRadius);
         GlobalVariables.c.fill();
-        GlobalVariables.c.strokeStyle = "#484848";
+        GlobalVariables.c.strokeStyle = this.strokeColor;
         GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();
@@ -153,12 +154,14 @@ export default class Atom {
             this.color = this.selectedColor;
             this.isMoving = true;
             this.selected = true;
+             this.strokeColor = this.defaultColor;
             this.updateSidebar();
             this.sendToRender();
             clickProcessed = true;
         }
         else{
             this.color = this.defaultColor;
+            this.strokeColor = this.selectedColor;
             this.selected = false;
         }
         

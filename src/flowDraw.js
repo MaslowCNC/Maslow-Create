@@ -14,6 +14,8 @@ let lowerHalfOfScreen = document.querySelector('.flex-parent');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
 let upperHalfOfScreen = document.querySelector('#flow-canvas');
 upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+let viewer = document.querySelector('.jscad-container');
+viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
 var url = window.location.href;
 GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
@@ -165,6 +167,7 @@ function onWindowResize() {
     //reset screen parameters 
     lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
     upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+    viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
     GlobalVariables.scaleFactorXY =  GlobalVariables.canvas.width/1000;
     GlobalVariables.scaleFactorR =  GlobalVariables.canvas.width/1200;

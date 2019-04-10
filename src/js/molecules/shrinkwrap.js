@@ -12,6 +12,7 @@ export default class ShrinkWrap extends Atom{
         this.atomType = "ShrinkWrap";
         this.ioValues = [];
         this.closedSelection = 0;
+        this.addedIO = false;
         
         this.setValues(values);
         
@@ -63,6 +64,7 @@ export default class ShrinkWrap extends Atom{
         //Add or delete ports as needed
         if(this.howManyInputPortsAvailable() == 0){ //We need to make a new port available
             this.addIO("input", "2D shape " + GlobalVariables.generateUniqueID(), this, "geometry", "");
+            this.addedIO = true;
         }
         if(this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1){  //We need to remove the empty port
             this.deleteEmptyPort();

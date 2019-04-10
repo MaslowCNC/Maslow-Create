@@ -41,11 +41,22 @@ export default class AttachmentPoint {
         this.defaultRadius = this.radius;
         this.radius = this.parentMolecule.scaledRadius/2.2;
         this.hoverDetectRadius = this.parentMolecule.scaledRadius;
-    
 
-    if (this.expandedRadius == true){
+        if (this.expandedRadius){
             this.radius = this.parentMolecule.scaledRadius/1.6;
         }
+
+        //
+
+        if(this.parentMolecule.children.length < 2 && this.type == "input"){
+                this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
+                this.y= this.parentMolecule.y;
+                this.oneStartMolecule = true;
+                     }    
+        else if(this.parentMolecule.children.length < 2 && this.type == "output"){
+                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
+                this.y= this.parentMolecule.y;
+                     }                 
 
 
         var txt = this.name;
@@ -59,8 +70,16 @@ export default class AttachmentPoint {
         
       if (this.showHoverText){
             if(this.type == "input"){
+               
+
                 GlobalVariables.c.beginPath();
+
+                    if (this.name === "geometry"){
+                 GlobalVariables.c.fillStyle = this.parentMolecule.selectedColor;   
+                }
+                    else{
                 GlobalVariables.c.fillStyle = bubbleColor;
+                }
                     if (this.radius == this.expandedRadius) {
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
@@ -69,8 +88,7 @@ export default class AttachmentPoint {
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
                 }
-                            
-
+            
                 GlobalVariables.c.fill();
                 GlobalVariables.c.beginPath();
                 GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor;
@@ -82,7 +100,14 @@ export default class AttachmentPoint {
             else{
 
                 GlobalVariables.c.beginPath();
+                    
+                    if (this.name === "geometry"){
+                 GlobalVariables.c.fillStyle = this.parentMolecule.selectedColor;   
+                }
+                    else{
                 GlobalVariables.c.fillStyle = bubbleColor;
+                }
+
                 GlobalVariables.c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2);
                 GlobalVariables.c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
                 GlobalVariables.c.fill();
@@ -94,16 +119,13 @@ export default class AttachmentPoint {
                 GlobalVariables.c.fill();
                 GlobalVariables.c.closePath();
             }
+
         }
 
-        if(this.parentMolecule.type == "output"){
-            this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
-            this.y= this.parentMolecule.y;
-        }
-
+        
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
-        GlobalVariables.c.strokeStyle = "#484848";
+        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor;
         GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         GlobalVariables.c.fill();
@@ -184,8 +206,18 @@ export default class AttachmentPoint {
                     var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
                     // angle correction so that it centers menu adjusting to however many attachment points there are 
                     var angleCorrection = anglePerIO * (numAttachmentPoints - 2 /* -1 correction + 1 for "output" IO */);
-
-                    this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    //fixes shrinkwrap attachment point location when adding io
+                        if (this.parentMolecule.addedIO){
+                            anglePerIO = 2.26893/*130 deg*// numAttachmentPoints;
+                            angleCorrection = anglePerIO * (numAttachmentPoints /* -1 correction + 1 for "output" IO */);
+                        }
+                       
+                        if (numAttachmentPoints > 4){
+                            this.hoverOffsetY = Math.round( 1.8* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));   
+                        }
+                        else{
+                            this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                        }
                     this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.scaledRadius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                     this.offsetX = this.hoverOffsetX; 
                     this.offsetY = this.hoverOffsetY;  
