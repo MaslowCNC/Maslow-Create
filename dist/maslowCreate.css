@@ -9,6 +9,7 @@
   font-weight: bold;
   font-family: Helvetica, Arial, Sans;
   flex: 5;
+  
 }
 
 .row-flex{
@@ -17,7 +18,7 @@
 }
 
 #flow-canvas{
- flex-shrink: 2; 
+  flex-shrink: 2; 
 }
 
 .sideBar {
@@ -31,7 +32,7 @@
     background-color: #484848 ;
     color: white;
     overflow: auto;
-    padding:0px;
+    padding:10px;
     padding-right:10px;
     margin-right:10px;
    -webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
