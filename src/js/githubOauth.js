@@ -389,16 +389,23 @@ export default class GitHubModule{
             
             console.log("Commiting");
             
+            GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
+            const stlContent = readFileSync('github');
+            
+            const project = GlobalVariables.topLevelMolecule.codeBlock;
+            GlobalVariables.api.writeSvg({ path: 'github' }, project);
+            const contentSvg = readFileSync('github');
+            
             this.createCommit(this.octokit,{
               owner: this.currentUser,
               repo: this.currentRepoName,
               base: 'master', /* optional: defaults to default branch */
               changes: {
                 files: {
-                  'commitedFile1.txt': 'Content for file1',
-                  'commitedFile2.txt': 'Content for file2'
+                  'project.stl': stlContent,
+                  'project.svg': contentSvg
                 },
-                commit: 'updating files in repo'
+                commit: 'Autosave'
               }
             })
             
