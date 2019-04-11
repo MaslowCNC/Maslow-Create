@@ -24,16 +24,18 @@ export default class Gcode extends Atom {
     
     updateCodeBlock(){
         //Generate a .svg file
-        const slice = GlobalVariables.api.crossSection({},this.findIOValue("geometry"));
+        const input = this.findIOValue("geometry");
+        const slice = GlobalVariables.api.crossSection({},input);
         GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice);
         const stlContent = readFileSync('makeSVG');
         
-        console.log(this.findIOValue("geometry"));
+        const bounds = input.getBounds();
+        const partThickness = bounds[1][2]-bounds[0][2];
         
         //convert that to gcode
         this.codeBlock = this.svg2gcode(stlContent, {
             passes: this.findIOValue("passes"),
-            materialWidth: -10,
+            materialWidth: -1*partThickness,
             bitWidth: this.findIOValue("tool size")
         });
         
@@ -56,7 +58,6 @@ export default class Gcode extends Atom {
       settings.passes = settings.passes || 1;
       settings.materialWidth = settings.materialWidth || 6;
       settings.passWidth = settings.materialWidth/settings.passes;
-      console.log("Pass width set to: " + settings.passWidth);
       settings.scale = settings.scale || 1;
       settings.cutZ = settings.cutZ || 0; // cut z
       settings.safeZ = settings.safeZ || 10;   // safe z
@@ -123,10 +124,6 @@ export default class Gcode extends Atom {
           'F' + settings.seekRate
         ].join(' '));
         
-        console.log("Here:");
-        console.log(settings.passWidth);
-        console.log(settings.materialWidth);
-        
         for (var p = settings.passWidth; p>=settings.materialWidth; p+=settings.passWidth) {
 
           // begin the cut by dropping the tool to the work
@@ -187,7 +184,7 @@ export default class Gcode extends Atom {
       gcode.push('G21');
 
       // go home
-      gcode.push('G1 Z0 F300');
+      gcode.push('G1 Z' + settings.safeZ + ' F300');
       gcode.push('G1 X0 Y0 F800');
 
       return gcode.join('\n');
