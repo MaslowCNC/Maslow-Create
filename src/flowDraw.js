@@ -169,8 +169,8 @@ function onWindowResize() {
     upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
     viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
-    GlobalVariables.scaleFactorXY =  GlobalVariables.canvas.width/1000;
-    GlobalVariables.scaleFactorR =  GlobalVariables.canvas.width/1200;
+    GlobalVariables.scaleFactorXY =  1;
+    GlobalVariables.scaleFactorR =  1;
 }
 
 const makeMaterial = (material) => {
