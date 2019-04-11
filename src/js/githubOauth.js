@@ -146,7 +146,6 @@ export default class GitHubModule{
     }
     
     cloneExampleProjectPopup(){
-        console.log("would clone example project popup");
         this.forkByID(177732883); //This is the ID of the example project
     }
     
