@@ -12,6 +12,8 @@ export default class Gcode extends Atom {
         this.atomType = "Gcode";
         
         this.addIO("input", "geometry", this, "geometry", GlobalVariables.api.sphere());
+        this.addIO("input", "tool size", this, "number", 5.35);
+        this.addIO("input", "passes", this, "number", 6);
         this.addIO("output", "gcode", this, "geometry", "");
         
         this.setValues(values);
@@ -26,11 +28,13 @@ export default class Gcode extends Atom {
         GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice);
         const stlContent = readFileSync('makeSVG');
         
+        console.log(this.findIOValue("geometry"));
+        
         //convert that to gcode
         this.codeBlock = this.svg2gcode(stlContent, {
-            passes: 4,
+            passes: this.findIOValue("passes"),
             materialWidth: -10,
-            bitWidth: 5.35
+            bitWidth: this.findIOValue("tool size")
         });
         
         super.updateCodeBlock();
