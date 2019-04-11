@@ -9,7 +9,7 @@ export default class Code extends Atom {
         
         this.name = "Code";
         this.atomType = "Code";
-        this.code = "//Add an input\nthis.addIO('input', 'geometry', this, 'geometry', 10);\n\n//Read back from the input\nthis.findIOValue('radius');\n\n//Set the output\nthis.codeBlock = sphere(10);";
+        this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.codeBlock = 10;";
         
         this.addIO("output", "geometry", this, "geometry", "");
         
@@ -21,16 +21,17 @@ export default class Code extends Atom {
     
     updateCodeBlock(){
         //This should pull and run the code in the editor
-        console.log("updating code block");
+        
+        //reset the IOs to the default state
         
         const code = new Function('$',
-                                  `const { ${Object.keys(GlobalVariables.api).join(', ')} } = $;\n\n` + 
+                                  `const { ${Object.keys({...GlobalVariables.api, ...{This: this}}).join(', ')} } = $;\n\n` + 
                                   this.code);
-        console.log("Code: " + code);
-        const result = code(GlobalVariables.api);
-        
-        console.log("result");
-        console.log(result);
+        try{
+            const result = code({...GlobalVariables.api, ...{This: this}});
+        }catch(err){
+            console.log(err);
+        }
         
         super.updateCodeBlock();
     }
@@ -71,5 +72,15 @@ export default class Code extends Atom {
             });
             form.appendChild(button);
         });
+    }
+    
+    serialize(values){
+        //Save the readme text to the serial stream
+        var valuesObj = super.serialize(values);
+        
+        valuesObj.code = this.code;
+        
+        return valuesObj;
+        
     }
 }
