@@ -239,6 +239,16 @@ input.menu_search:focus {
     padding:10px;
 }
 
+.sidebar-item-no-hover{
+    text-align:center;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 1rem;
+    font-weight: 100;
+    padding: 0 1rem;
+    cursor: pointer;
+}
+
 .sidebar-item{
     text-align:center;
     height: 1.5rem;
@@ -257,7 +267,7 @@ input.menu_search:focus {
 } 
 
 .sidebar-subitem{
-    margin:auto;
+    display:inline-block;
     padding-left: 10px;
 }
 

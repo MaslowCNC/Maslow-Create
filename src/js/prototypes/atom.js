@@ -483,14 +483,7 @@ export default class Atom {
         //Div which contains the entire element
         var div = document.createElement("div");
         listElement.appendChild(div);
-        div.setAttribute("class", "sidebar-item");
-        
-        //Left div which displays the label
-        var labelDiv = document.createElement("div");
-        div.appendChild(labelDiv);
-        var labelText = document.createTextNode("");
-        labelDiv.appendChild(labelText);
-        labelDiv.setAttribute("class", "sidebar-subitem");
+        div.setAttribute("class", "sidebar-item-no-hover");
         
         
         //Right div which is button
