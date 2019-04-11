@@ -252,7 +252,7 @@ export default class Molecule extends Atom{
         
         this.nodesOnTheScreen.forEach(atom => {
             //Store a represnetation of the atom
-            allAtoms.push(JSON.stringify(atom.serialize(savedObject)));
+            allAtoms.push(atom.serialize(savedObject));
             //Store a representation of the atom's connectors
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
@@ -291,7 +291,7 @@ export default class Molecule extends Atom{
             
             //Place the atoms
             moleculeObject.allAtoms.forEach(atom => {
-                this.placeAtom(JSON.parse(atom), moleculeList, GlobalVariables.availableTypes);
+                this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes);
             });
             
             //reload the molecule object to prevent persistence issues
@@ -300,7 +300,7 @@ export default class Molecule extends Atom{
             //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
             this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
             this.savedConnectors.forEach(connector => {
-                this.placeConnector(JSON.parse(connector));
+                this.placeConnector(connector);
             });
             
             this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory

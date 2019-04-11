@@ -91,7 +91,7 @@ export default class Connector {
                 ap1ID: this.attachmentPoint1.parentMolecule.uniqueID,
                 ap2ID: this.attachmentPoint2.parentMolecule.uniqueID
             }
-            return JSON.stringify(object);
+            return object;
         }
     }
     
