@@ -131,7 +131,7 @@ export default class Molecule extends Atom{
         });
         
         this.createButton(valueList,this,"Download SVG",(e) => {
-            const slice = GlobalVariables.api.crossSection({},GlobalVariables.topLevelMolecule.codeBlock);
+            const slice = GlobalVariables.api.crossSection({},this.codeBlock);
             GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice);
             const stlContent = readFileSync('makeSVG');
             const blob = new Blob([stlContent], {type: "text/plain;charset=utf-8"});
