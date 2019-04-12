@@ -19,6 +19,7 @@ import GitHubMolecule from './molecules/githubmolecule.js'
 import Output from './molecules/output.js'
 import Stretch from './molecules/stretch.js'
 import Gcode from './molecules/gcode.js'
+import Code from './molecules/code.js'
 
 import GitHubModule from './githubOauth'
 
@@ -50,7 +51,8 @@ class GlobalVariables{
             githubmolecule:     {creator: GitHubMolecule, atomType: "GitHubMolecule"},
             union:              {creator: Union, atomType: "Union"},
             stretch:            {creator: Stretch, atomType: "Stretch"},
-            gcode:              {creator: Gcode, atomType: "Gcode"}
+            gcode:              {creator: Gcode, atomType: "Gcode"},
+            code:               {creator: Code, atomType: "Code"}
         }
 
         this.secretTypes = {
