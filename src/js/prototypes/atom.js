@@ -107,26 +107,29 @@ export default class Atom {
     
     addIO(type, name, target, valueType, defaultValue){
         
-        //compute the baseline offset from parent node
-        var offset;
-        if (type == "input"){
-            offset = -1* target.scaledRadius;
+        if(target.children.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't an IO with the same type and name
+            //compute the baseline offset from parent node
+            var offset;
+            if (type == "input"){
+                offset = -1* target.scaledRadius;
+            }
+            else{
+                offset = target.scaledRadius;
+            }
+            var input = new AttachmentPoint({
+                parentMolecule: target,
+                defaultOffsetX: offset,
+                defaultOffsetY: 0,
+                type: type,
+                valueType: valueType,
+                name: name,
+                value: defaultValue,
+                uniqueID: GlobalVariables.generateUniqueID(),
+                atomType: "AttachmentPoint"
+            });
+            
+            target.children.push(input);
         }
-        else{
-            offset = target.scaledRadius;
-        }
-        var input = new AttachmentPoint({
-            parentMolecule: target, 
-            defaultOffsetX: offset, 
-            defaultOffsetY: 0,
-            type: type,
-            valueType: valueType,
-            name: name,
-            value: defaultValue,
-            uniqueID: GlobalVariables.generateUniqueID(),
-            atomType: "AttachmentPoint"
-        });
-        target.children.push(input);
     }
     
     removeIO(type, name, target){
