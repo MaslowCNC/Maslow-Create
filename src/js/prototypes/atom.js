@@ -107,7 +107,7 @@ export default class Atom {
     
     addIO(type, name, target, valueType, defaultValue){
         
-        if(target.children.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't an IO with the same type and name
+        if(target.children.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
             var offset;
             if (type == "input"){
