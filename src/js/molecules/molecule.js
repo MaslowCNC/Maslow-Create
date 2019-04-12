@@ -283,7 +283,7 @@ export default class Molecule extends Atom{
         
     deserialize(moleculeList, moleculeID){
         
-        try{
+        // try{
             //Find the target molecule in the list
             var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
             
@@ -306,12 +306,12 @@ export default class Molecule extends Atom{
             this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
             
             this.updateCodeBlock();
-        }
-        catch(err){
-            console.log("Unable to load molecule: ");
-            console.log(moleculeObject);
-            console.log(err);
-        }
+        // }
+        // catch(err){
+            // console.log("Unable to load molecule: ");
+            // console.log(moleculeObject);
+            // console.log(err);
+        // }
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){
