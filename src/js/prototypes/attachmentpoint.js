@@ -39,22 +39,22 @@ export default class AttachmentPoint {
     draw() {
 
         this.defaultRadius = this.radius;
-        this.radius = this.parentMolecule.scaledRadius/2.2;
-        this.hoverDetectRadius = this.parentMolecule.scaledRadius;
+        this.radius = this.parentMolecule.radius/2.2;
+        this.hoverDetectRadius = this.parentMolecule.radius;
 
         if (this.expandedRadius){
-            this.radius = this.parentMolecule.scaledRadius/1.6;
+            this.radius = this.parentMolecule.radius/1.6;
         }
 
         //
 
         if(this.parentMolecule.children.length < 2 && this.type == "input"){
-                this.x= this.parentMolecule.x-this.parentMolecule.scaledRadius;
+                this.x= this.parentMolecule.x-this.parentMolecule.radius;
                 this.y= this.parentMolecule.y;
                 this.oneStartMolecule = true;
                      }    
         else if(this.parentMolecule.children.length < 2 && this.type == "output"){
-                this.x= this.parentMolecule.x+this.parentMolecule.scaledRadius;
+                this.x= this.parentMolecule.x+this.parentMolecule.radius;
                 this.y= this.parentMolecule.y;
                      }                 
 
@@ -80,11 +80,7 @@ export default class AttachmentPoint {
                     else{
                 GlobalVariables.c.fillStyle = bubbleColor;
                 }
-                    if (this.radius == this.expandedRadius) {
-                    GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius , scaleRadiusDown*2);
-                    GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false);
-                }
-                    else if(this.radius == this.defaultRadius){
+                    if(this.radius == this.defaultRadius){
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2);   
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false);
                 }
@@ -134,10 +130,10 @@ export default class AttachmentPoint {
 
         if (this.defaultRadius != this.radius){
             if (this.type == "output"){     
-                this.offsetX = this.parentMolecule.scaledRadius;
+                this.offsetX = this.parentMolecule.radius;
             }
             else{
-                this.offsetX = -1* this.parentMolecule.scaledRadius;
+                this.offsetX = -1* this.parentMolecule.radius;
             }
         }
     }
@@ -183,6 +179,7 @@ export default class AttachmentPoint {
         //expand if touched by mouse
         var distFromCursor = GlobalVariables.distBetweenPoints (this.x, x, this.y, y);
         
+        console.log("dist +" + distFromCursor);
         //If we are hovering over the attachment point, indicate that by making it big
         if (distFromCursor < this.defaultRadius){
 
@@ -193,7 +190,7 @@ export default class AttachmentPoint {
             this.expandedRadius = false;
         }
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromCursor < this.parentMolecule.scaledRadius*3){
+        if (distFromCursor < this.parentMolecule.radius*3){
 
             var numAttachmentPoints= this.parentMolecule.children.length;
             var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
@@ -213,12 +210,12 @@ export default class AttachmentPoint {
                         }
                        
                         if (numAttachmentPoints > 4){
-                            this.hoverOffsetY = Math.round( 1.8* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));   
+                            this.hoverOffsetY = Math.round( 1.8* this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));   
                         }
                         else{
-                            this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.scaledRadius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                            this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                         }
-                    this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.scaledRadius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+                    this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                     this.offsetX = this.hoverOffsetX; 
                     this.offsetY = this.hoverOffsetY;  
                      }
@@ -231,12 +228,12 @@ export default class AttachmentPoint {
         else{
             if (this.type == "output"){
               
-                    this.offsetX = this.parentMolecule.scaledRadius;
+                    this.offsetX = this.parentMolecule.radius;
                     this.showHoverText = false;
                     this.hoverDetectRadius = this.defaultRadius;
             }
            
-            else{   this.offsetX = -1* this.parentMolecule.scaledRadius;
+            else{   this.offsetX = -1* this.parentMolecule.radius;
                     this.offsetY = this.defaultOffsetY;
                     this.showHoverText = false;
                     this.hoverDetectRadius = this.defaultRadius;
@@ -301,8 +298,8 @@ export default class AttachmentPoint {
     }
     
     update() {
-        this.x = this.parentMolecule.scaledX + this.offsetX;
-        this.y = this.parentMolecule.scaledY + this.offsetY;
+        this.x = this.parentMolecule.x + this.offsetX;
+        this.y = this.parentMolecule.y + this.offsetY;
         this.draw()
        
         this.connectors.forEach(connector => {

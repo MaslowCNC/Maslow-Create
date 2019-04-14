@@ -25,8 +25,7 @@ class GlobalVariables{
     constructor(){
         this.canvas = null
         this.c = null
-        this.scaleFactorXY = 1;
-        this.scaleFactorR = 1;
+        this.scale1 = 1; 
       
         
         this.availableTypes = {
