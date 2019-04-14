@@ -18,6 +18,7 @@
 }
 
 #flow-canvas{
+  margin-top: 0;
   flex-shrink: 2; 
 }
 
@@ -249,17 +250,44 @@ input.menu_search:focus {
     cursor: pointer;
 }
 
-.sidebar-item:hover,
-.sidebar-item:active{
+.sidebar-editable-div{
+    text-align:left;
+}
+
+.label-item:hover,
+.editing-item:hover
+.laber-item:active
+.editing-item:active{
     color: #000;
     font-weight: 500;
     background-color: #ffffff;
 } 
 
 .sidebar-subitem{
+    display:block;
     margin:auto;
     padding-left: 10px;
 }
+
+.label-item{
+  display:inline-block;
+  font-size:1.1rem;
+  margin-top:15px;
+  margin-left:0;
+  margin-right: 5px;
+  
+}
+
+
+.editing-item{
+  display:inline-block;
+  padding-bottom:5px;
+  width:30%;
+  border: 1px solid transparent;
+  border-top: none;
+  border-bottom: 1px solid black;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.39), 0 -1px 1px #FFF, 0 1px 0 #FFF;
+  }
 
 .sidebar_button {
   display:block;
