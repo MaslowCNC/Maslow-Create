@@ -57,7 +57,7 @@ export default class Atom {
         GlobalVariables.c.fillStyle = this.color;
         GlobalVariables.c.font = "10px Work Sans";
 
-        //make it imposible to draw atoms too close to the edge
+        //make it impossible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas');
         if (this.x < this.radius*3){
@@ -98,26 +98,29 @@ export default class Atom {
     
     addIO(type, name, target, valueType, defaultValue){
         
-        //compute the baseline offset from parent node
-        var offset;
-        if (type == "input"){
-            offset = -1* target.scaledRadius;
+        if(target.children.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
+            //compute the baseline offset from parent node
+            var offset;
+            if (type == "input"){
+                offset = -1* target.scaledRadius;
+            }
+            else{
+                offset = target.scaledRadius;
+            }
+            var input = new AttachmentPoint({
+                parentMolecule: target,
+                defaultOffsetX: offset,
+                defaultOffsetY: 0,
+                type: type,
+                valueType: valueType,
+                name: name,
+                value: defaultValue,
+                uniqueID: GlobalVariables.generateUniqueID(),
+                atomType: "AttachmentPoint"
+            });
+            
+            target.children.push(input);
         }
-        else{
-            offset = target.scaledRadius;
-        }
-        var input = new AttachmentPoint({
-            parentMolecule: target, 
-            defaultOffsetX: offset, 
-            defaultOffsetY: 0,
-            type: type,
-            valueType: valueType,
-            name: name,
-            value: defaultValue,
-            uniqueID: GlobalVariables.generateUniqueID(),
-            atomType: "AttachmentPoint"
-        });
-        target.children.push(input);
     }
     
     removeIO(type, name, target){
@@ -473,14 +476,7 @@ export default class Atom {
         //Div which contains the entire element
         var div = document.createElement("div");
         listElement.appendChild(div);
-        div.setAttribute("class", "sidebar-item");
-        
-        //Left div which displays the label
-        var labelDiv = document.createElement("div");
-        div.appendChild(labelDiv);
-        var labelText = document.createTextNode("");
-        labelDiv.appendChild(labelText);
-        labelDiv.setAttribute("class", "sidebar-subitem");
+        div.setAttribute("class", "sidebar-item-no-hover");
         
         
         //Right div which is button
