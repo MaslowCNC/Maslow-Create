@@ -234,7 +234,7 @@ export default class Atom {
         //add the name as a title
         var name = document.createElement('h1');
         name.textContent = this.name;
-        name.setAttribute("style","text-align:center;");
+        name.setAttribute("class","doc-title");
         GlobalVariables.sideBar.appendChild(name);
         
         //Create a list element

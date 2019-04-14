@@ -85,6 +85,18 @@ body {
     background: #B0AEB0; 
 }
 
+#atom-size{
+  position:absolute;
+  top:5px;
+  padding:5px;
+  border-radius:5px;
+  float: left;
+  margin-left:10px;
+  background:#484848;
+  color: white;
+  font-size:.6rem; 
+}
+
 #parametersdiv {
   margin: 0px; /* not inherited */
   padding: 0px;
@@ -163,6 +175,13 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.doc-title{
+  font-size: 1.3rem;
+  padding:10px;
+  margin:0;
+  text-align: left;
 }
 
 .menu.off{
@@ -264,6 +283,11 @@ input.menu_search:focus {
     text-align:left;
     padding-bottom:10px;
 }
+.sidebar-editable-div:hover{
+  background-color: #ffffff;
+  color: #000;
+}
+
 
 .label-item:hover,
 .editing-item:hover
@@ -282,7 +306,6 @@ input.menu_search:focus {
 .label-item{
   display:inline-block;
   font-size:1.1rem;
-  margin-top:15px;
   margin-left:0;
   margin-right: 5px;
   text-transform: capitalize

@@ -43,7 +43,7 @@ export default class Output extends Atom {
         });
 
 
-        this.height= this.radius +2;
+        this.height= this.radius;
         
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.color;
