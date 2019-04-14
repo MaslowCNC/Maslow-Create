@@ -63,12 +63,7 @@ export default class Molecule extends Atom{
         
         this.updateSidebar();
         
-        //Find the output and send it's contents to the renderer
-        this.nodesOnTheScreen.forEach(atom => {
-            if(atom.atomType == 'Output'){
-                atom.sendToRender();
-            }
-        });
+        this.sendToRender();
     }
     
     updateCodeBlock(){
@@ -127,11 +122,20 @@ export default class Molecule extends Atom{
             this.createButton(valueList,this,"GitHub",(e) => {
                GlobalVariables.gitHub.openGitHubPage();
             });
+            
         }
         
         this.createButton(valueList,this,"Download STL",(e) => {
-           const blob = new Blob([readFileSync('window').translator()], {type: "text/plain;charset=utf-8"});
-           saveAs(blob, this.name+'.stl');
+            const blob = new Blob([readFileSync('window')], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, this.name+'.stl');
+        });
+        
+        this.createButton(valueList,this,"Download SVG",(e) => {
+            const slice = GlobalVariables.api.crossSection({},this.codeBlock);
+            GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice);
+            const stlContent = readFileSync('makeSVG');
+            const blob = new Blob([stlContent], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, this.name+'.svg');
         });
         
         this.createEditableValueListItem(valueList,this,"name", "Name", false);
@@ -248,7 +252,7 @@ export default class Molecule extends Atom{
         
         this.nodesOnTheScreen.forEach(atom => {
             //Store a represnetation of the atom
-            allAtoms.push(JSON.stringify(atom.serialize(savedObject)));
+            allAtoms.push(atom.serialize(savedObject));
             //Store a representation of the atom's connectors
             atom.children.forEach(attachmentPoint => {
                 if(attachmentPoint.type == "output"){
@@ -279,7 +283,7 @@ export default class Molecule extends Atom{
         
     deserialize(moleculeList, moleculeID){
         
-        try{
+        // try{
             //Find the target molecule in the list
             var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID;})[0];
             
@@ -287,7 +291,7 @@ export default class Molecule extends Atom{
             
             //Place the atoms
             moleculeObject.allAtoms.forEach(atom => {
-                this.placeAtom(JSON.parse(atom), moleculeList, GlobalVariables.availableTypes);
+                this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes);
             });
             
             //reload the molecule object to prevent persistence issues
@@ -296,18 +300,18 @@ export default class Molecule extends Atom{
             //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
             this.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
             this.savedConnectors.forEach(connector => {
-                this.placeConnector(JSON.parse(connector));
+                this.placeConnector(connector);
             });
             
             this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
             
             this.updateCodeBlock();
-        }
-        catch(err){
-            console.log("Unable to load molecule: ");
-            console.log(moleculeObject);
-            console.log(err);
-        }
+        // }
+        // catch(err){
+            // console.log("Unable to load molecule: ");
+            // console.log(moleculeObject);
+            // console.log(err);
+        // }
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){

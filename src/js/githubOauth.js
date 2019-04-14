@@ -1,5 +1,6 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables'
+import { readFileSync } from './JSxCAD.js';
 
 export default class GitHubModule{
 
@@ -101,7 +102,7 @@ export default class GitHubModule{
             }
             
             //Add the create a new project button
-            this.addProject("New Project");
+            this.addProject("New Project", null, true, "newProject.svg");
             
             //Load projects
             var query;
@@ -134,7 +135,8 @@ export default class GitHubModule{
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    this.addProject(repo.name, repo.id, owned);
+                    const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true";
+                    this.addProject(repo.name, repo.id, owned, thumbnailPath);
                 });
                 if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
                     this.cloneExampleProjectPopup();
@@ -144,17 +146,16 @@ export default class GitHubModule{
     }
     
     cloneExampleProjectPopup(){
-        console.log("would clone example project popup");
         this.forkByID(177732883); //This is the ID of the example project
     }
     
-    addProject(projectName, id, owned){
+    addProject(projectName, id, owned, thumbnailPath){
         //create a project element to display
         
         var project = document.createElement("DIV");
         
         var projectPicture = document.createElement("IMG");
-        projectPicture.setAttribute("src", "testPicture.png");
+        projectPicture.setAttribute("src", thumbnailPath);
         projectPicture.setAttribute("style", "width: 100%");
         projectPicture.setAttribute("style", "height: 100%");
         project.appendChild(projectPicture);
@@ -382,99 +383,96 @@ export default class GitHubModule{
     saveProject(){
         //Save the current project into the github repo
         if(this.currentRepoName != null){
-            var path = "project.maslowcreate";
-            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)); //Convert the GlobalVariables.topLevelMolecule object to a JSON string and then convert it to base64 encoding
             
-            //Get the SHA for the file
-            this.octokit.repos.getContents({
-                owner: this.currentUser,
-                repo: this.currentRepoName,
-                path: path
-            }).then(thisRepo => {
-                var sha = thisRepo.data.sha
-                
-                //Save the repo to the file
-                this.octokit.repos.updateFile({
-                    owner: this.currentUser,
-                    repo: this.currentRepoName,
-                    path: path,
-                    message: "autosave", 
-                    content: content,
-                    sha: sha
-                }).then(result => {
-                    console.log("Project saved");
-                    //Then update the BOM file
-                    
-                    path = "BillOfMaterials.md";
-                    content = this.bomHeader;
-                    
-                    GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
-                        content = content + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
-                    });
-                    
-                    content = window.btoa(content);
-                    
-                    //Get the SHA for the file
-                    this.octokit.repos.getContents({
-                        owner: this.currentUser,
-                        repo: this.currentRepoName,
-                        path: path
-                    }).then(result => {
-                        var sha = result.data.sha
-                        
-                        //Save the BOM to the file
-                        this.octokit.repos.updateFile({
-                            owner: this.currentUser,
-                            repo: this.currentRepoName,
-                            path: path,
-                            message: "update Bom", 
-                            content: content,
-                            sha: sha
-                        }).then(result => {
-                            console.log("BOM updated");
-                            
-                            this.octokit.repos.get({
-                                owner: this.currentUser, 
-                                repo: this.currentRepoName
-                            }).then(result => {
-                                
-                                path = "README.md";
-                                content = "# " + result.data.name + "\n" + result.data.description + "\n";
-                                
-                                GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
-                                    content = content + item + "\n\n\n"
-                                });
-                                
-                                content = window.btoa(content);
-                                
-                                //Get the SHA for the file
-                                this.octokit.repos.getContents({
-                                    owner: this.currentUser,
-                                    repo: this.currentRepoName,
-                                    path: path
-                                }).then(result => {
-                                    var sha = result.data.sha
-                                    
-                                    //Save the README to the file
-                                    this.octokit.repos.updateFile({
-                                        owner: this.currentUser,
-                                        repo: this.currentRepoName,
-                                        path: path,
-                                        message: "update Readme", 
-                                        content: content,
-                                        sha: sha
-                                    }).then(result => {
-                                        console.log("README updated");
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
+            GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
+            const stlContent = readFileSync('github');
+            
+            const project = GlobalVariables.topLevelMolecule.codeBlock.rotate([90,0,0]);
+            GlobalVariables.api.writeSvg({ path: 'github' }, project);
+            const contentSvg = readFileSync('github');
+            
+            var bomContent = this.bomHeader;
+            GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
+                bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
             });
+            
+            var readmeContent = "# " + this.currentRepoName + "\n\n![](/project.svg)\n\n";
+            GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
+                readmeContent = readmeContent + item + "\n\n\n"
+            });
+            
+            const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4);
+            
+            this.createCommit(this.octokit,{
+              owner: this.currentUser,
+              repo: this.currentRepoName,
+              base: 'master', /* optional: defaults to default branch */
+              changes: {
+                files: {
+                  'project.stl': stlContent,
+                  'project.svg': contentSvg,
+                  'BillOfMaterials.md': bomContent,
+                  'README.md': readmeContent,
+                  'project.maslowcreate': projectContent
+                },
+                commit: 'Autosave'
+              }
+            }); 
         }
     }
+    
+    async createCommit (octokit, { owner, repo, base, changes }) {
+      let response;
 
+      if (!base) {
+        response = await octokit.repos.get({ owner, repo })
+        base = response.data.default_branch
+      }
+
+      response = await octokit.repos.listCommits({
+        owner,
+        repo,
+        sha: base,
+        per_page: 1
+      })
+      let latestCommitSha = response.data[0].sha
+      const treeSha = response.data[0].commit.tree.sha
+      
+      response = await octokit.git.createTree({
+        owner,
+        repo,
+        base_tree: treeSha,
+        tree: Object.keys(changes.files).map(path => {
+          return {
+            path,
+            mode: '100644',
+            content: changes.files[path]
+          }
+        })
+      })
+      const newTreeSha = response.data.sha
+
+      response = await octokit.git.createCommit({
+        owner,
+        repo,
+        message: changes.commit,
+        tree: newTreeSha,
+        parents: [latestCommitSha]
+      })
+      latestCommitSha = response.data.sha
+      
+      await octokit.git.updateRef({
+        owner,
+        repo,
+        sha: latestCommitSha,
+        ref: `heads/master`,
+        force: true
+      })
+      
+      console.log("Project saved");
+
+    }
+    
     loadProject(projectName){
         
         if(typeof this.intervalTimer != undefined){

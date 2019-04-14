@@ -2,7 +2,7 @@ import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './js/JSxCAD.js';
+import { api, readFileSync, solidToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './js/JSxCAD.js';
 
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -113,7 +113,7 @@ function init() {
     
     //Add the JSXCAD window
     camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
-    [camera.position.x, camera.position.y, camera.position.z] = [0, 0, 50];
+    [camera.position.x, camera.position.y, camera.position.z] = [0, -30, 50];
     //
     controls = new THREE.TrackballControls(camera, targetDiv);
     controls.rotateSpeed = 4.0;
@@ -169,8 +169,8 @@ function onWindowResize() {
     upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
     viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
-    GlobalVariables.scaleFactorXY =  GlobalVariables.canvas.width/1000;
-    GlobalVariables.scaleFactorR =  GlobalVariables.canvas.width/1200;
+    GlobalVariables.scaleFactorXY =  1;
+    GlobalVariables.scaleFactorR =  1;
 }
 
 const makeMaterial = (material) => {
@@ -187,7 +187,7 @@ const makeMaterial = (material) => {
     }
 }
 
-function drawOnWindow(file) {
+function drawOnWindow(file, { solids }) {
     const { data } = file;
     // Delete any previous dataset in the window.
     for (const { controller, mesh } of datasets) {
@@ -197,7 +197,7 @@ function drawOnWindow(file) {
         scene.remove(mesh);
     }
     // Build new datasets from the written data, and display them.
-    datasets = trianglesToThreejsDatasets({}, ...data);
+    datasets = solidToThreejsDatasets({}, ...solids);
     for (const dataset of datasets) {
         let geometry = new THREE.BufferGeometry();
         let { properties = {}, indices, positions, normals } = dataset;
