@@ -9,6 +9,8 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
+let originalWidth=GlobalVariables.canvas.width;
+let originalHeight=GlobalVariables.canvas.height;
 
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
 lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
@@ -20,12 +22,22 @@ viewer.setAttribute("style","width:"+innerWidth/2+"px");
 var url = window.location.href;
 GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
 
+/*
+document.getElementById("myslider").addEventListener("change", event =>{
+    GlobalVariables.scale1= document.getElementById("myslider").value/100;
+    console.log(GlobalVariables.c);
+    console.log("scale +" + GlobalVariables.scale1);
+});*/
+
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
 
 flowCanvas.addEventListener('mousemove', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.clickMove(event.clientX,event.clientY);        
+
+        molecule.clickMove(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1);   
+         console.log("y +" + event.clientY);  
+         console.log("scale2 +" + GlobalVariables.scale1);   
     });
 });
 
@@ -36,7 +48,7 @@ flowCanvas.addEventListener('mousedown', event => {
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         
-        if (molecule.clickDown(event.clientX,event.clientY, clickHandledByMolecule) == true){
+        if (molecule.clickDown(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
             clickHandledByMolecule = true;
         }
 
@@ -59,7 +71,7 @@ flowCanvas.addEventListener('dblclick', event => {
     var clickHandledByMolecule = false;
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (molecule.doubleClick(event.clientX,event.clientY) == true){
+        if (molecule.doubleClick(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
             clickHandledByMolecule = true;
         }
     });
@@ -73,7 +85,7 @@ flowCanvas.addEventListener('dblclick', event => {
 flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.clickUp(event.clientX,event.clientY);      
+        molecule.clickUp(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1);      
     });
 });
 
@@ -169,8 +181,7 @@ function onWindowResize() {
     upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
     viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
-    GlobalVariables.scaleFactorXY =  1;
-    GlobalVariables.scaleFactorR =  1;
+    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth;   
 }
 
 const makeMaterial = (material) => {
@@ -224,11 +235,13 @@ function render() {
 function animate() {
     requestAnimationFrame(animate);
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height);
-    
+    GlobalVariables.c.scale(GlobalVariables.scale1,GlobalVariables.scale1);
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.update();
+
     });
-    
+    GlobalVariables.c.setTransform(1,0,0,1,0,0);
+
     render();
     controls.update();
 }
