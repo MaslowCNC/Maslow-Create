@@ -19,7 +19,9 @@ export default class Union extends Atom {
     
     updateCodeBlock(){
         
-        this.codeBlock = GlobalVariables.api.union(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+        try{
+            this.codeBlock = GlobalVariables.api.union(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+        }catch(err){}
         
         super.updateCodeBlock();
     }
