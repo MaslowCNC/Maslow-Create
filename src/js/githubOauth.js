@@ -156,9 +156,9 @@ export default class GitHubModule{
         
         var projectPicture = document.createElement("IMG");
         projectPicture.setAttribute("src", thumbnailPath);
-        projectPicture.setAttribute("style", "width: 100%");
-        projectPicture.setAttribute("style", "height: 100%");
+        projectPicture.setAttribute("style", "width: 100%; height: 100%;");
         project.appendChild(projectPicture);
+        project.appendChild(document.createElement("BR"));
         
         var shortProjectName;
         if(projectName.length > 9){
