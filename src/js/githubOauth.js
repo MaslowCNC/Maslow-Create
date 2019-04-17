@@ -516,7 +516,24 @@ export default function GitHubModule(){
         })
         
     }
-
+    
+    this.getProjectByID = async function(id){
+        let result = await octokit.request('GET /repositories/:id', {id});
+            
+        //Find out the owners info;
+        var user     = result.data.owner.login;
+        var repoName = result.data.name;
+        
+        //Get the file contents
+        result = await octokit.repos.getContents({
+            owner: user,
+            repo: repoName,
+            path: 'project.maslowcreate'
+        })
+        
+        return result;
+    }
+    
     this.exportCurrentMoleculeToGithub = function(molecule){
         
         //Get name and description
