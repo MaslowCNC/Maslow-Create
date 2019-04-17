@@ -16,7 +16,6 @@ export default function GitHubModule(){
        this.tryLogin();
     });
     
-
     this.tryLogin = function(){
         // Initialize with OAuth.io app public key
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8');
@@ -589,13 +588,12 @@ export default function GitHubModule(){
     }
 
     this.starProject = function(id){
-        console.log("commanded to star: " + id);
         //Authenticate - Initialize with OAuth.io app public key
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8');
         // Use popup for oauth
         OAuth.popup('github').then(github => {
             
-            this.octokit.authenticate({
+            octokit.authenticate({
                 type: "oauth",
                 token: github.access_token,
                 headers: {
@@ -603,7 +601,7 @@ export default function GitHubModule(){
                 }
             })
             
-            this.octokit.request('GET /repositories/:id', {id}).then(result => {
+            octokit.request('GET /repositories/:id', {id}).then(result => {
                 //Find out the information of who owns the project we are trying to fork
                 var user     = result.data.owner.login;
                 var repoName = result.data.name;
