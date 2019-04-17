@@ -10,15 +10,21 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 
+
+var url = window.location.href;
+GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
+
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
-lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+if(!GlobalVariables.runMode){
+    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+}else{
+    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight+"px");
+}
 let upperHalfOfScreen = document.querySelector('#flow-canvas');
 upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
 let viewer = document.querySelector('.jscad-container');
 viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
-var url = window.location.href;
-GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
 
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
@@ -165,7 +171,11 @@ function onWindowResize() {
     GlobalVariables.canvas.width = bounds.width;
     GlobalVariables.canvas.height = bounds.height; 
     //reset screen parameters 
-    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+    if(!GlobalVariables.runMode){
+        lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+    }else{
+        lowerHalfOfScreen.setAttribute("style","height:"+innerHeight+"px");
+    }
     upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
     viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
