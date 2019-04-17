@@ -132,6 +132,11 @@ export default class GitHubMolecule extends Molecule {
             });
         }
         
+        this.createButton(valueList,this,"Star This Project",(e) => {
+           //Star the project
+           GlobalVariables.gitHub.starProject(this.projectID)
+        });
+        
         this.displaySimpleBOM(valueList);
     }
 }
