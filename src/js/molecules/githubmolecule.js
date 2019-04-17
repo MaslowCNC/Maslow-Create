@@ -88,8 +88,8 @@ export default class GitHubMolecule extends Molecule {
         return object;
     }
     
-    updateCodeBlock(){
-        super.updateCodeBlock();
+    updateValue(){
+        super.updateValue();
         if(this.name != "Molecule"){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can't handle calls right away
             this.backgroundClick();
         }

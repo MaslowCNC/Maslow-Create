@@ -17,12 +17,12 @@ export default class Intersection extends Atom {
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         try{
-            this.codeBlock = GlobalVariables.api.intersection(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+            this.value = GlobalVariables.api.intersection(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
         }catch(err){}
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

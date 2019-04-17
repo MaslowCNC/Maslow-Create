@@ -17,12 +17,12 @@ export default class Translate extends Atom{
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         try{
-            this.codeBlock = this.findIOValue("geometry").translate([this.findIOValue("xDist"), this.findIOValue("yDist"), this.findIOValue("zDist")])
+            this.value = this.findIOValue("geometry").translate([this.findIOValue("xDist"), this.findIOValue("yDist"), this.findIOValue("zDist")])
         }catch(err){}
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

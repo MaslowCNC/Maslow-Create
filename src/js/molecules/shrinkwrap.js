@@ -22,10 +22,10 @@ export default class ShrinkWrap extends Atom{
             });
         }
         
-        this.updateCodeBlock();
+        this.updateValue();
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         var inputs = [];
         this.children.forEach( io => {
@@ -35,13 +35,13 @@ export default class ShrinkWrap extends Atom{
         });
         
         if(inputs.length > 0){
-            this.codeBlock = GlobalVariables.api.hull.apply(null, inputs);
+            this.value = GlobalVariables.api.hull.apply(null, inputs);
         }
         
         //Set the output nodes with name 'geometry' to be the generated output
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.codeBlock);
+                child.setValue(this.value);
             }
         });
         
@@ -68,7 +68,7 @@ export default class ShrinkWrap extends Atom{
         }
         if(this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1){  //We need to remove the empty port
             this.deleteEmptyPort();
-            this.updateCodeBlock();
+            this.updateValue();
         }
     }
     
@@ -126,6 +126,6 @@ export default class ShrinkWrap extends Atom{
     
     changeEquation(newValue){
         this.closedSelection = parseInt(newValue);
-        this.updateCodeBlock();
+        this.updateValue();
     }
 }

@@ -6,7 +6,7 @@ export default class Constant extends Atom{
     constructor(values){
         super(values);
         
-        this.codeBlock = "";
+        this.value = "";
         this.type = "constant";
         this.name = "Constant";
         this.atomType = "Constant";

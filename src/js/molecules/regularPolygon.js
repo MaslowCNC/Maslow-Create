@@ -13,17 +13,17 @@ export default class RegularPolygon extends Atom {
         this.atomType = "RegularPolygon";
 
         // create the polygon code block
-        this.updateCodeBlock();
+        this.updateValue();
         
         this.setValues(values);
     }
 
-    updateCodeBlock() {
-        this.defaultCodeBlock = this.buildPolygonCodeBlock();
-        super.updateCodeBlock();
+    updateValue() {
+        this.defaultValue = this.buildPolygonValue();
+        super.updateValue();
     }
 
-    buildPolygonCodeBlock() {
+    buildPolygonValue() {
         let polygon = []
         for(let i = 0; i < this.findIOValue("number of sides"); i++) {
             var angle = i * 2 * Math.PI / this.findIOValue("number of sides") - Math.PI / 2;

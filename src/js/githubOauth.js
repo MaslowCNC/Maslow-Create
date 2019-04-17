@@ -384,10 +384,10 @@ export default class GitHubModule{
         //Save the current project into the github repo
         if(this.currentRepoName != null){
             
-            GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.codeBlock);
+            GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.value);
             const stlContent = readFileSync('github');
             
-            const project = GlobalVariables.topLevelMolecule.codeBlock.rotate([90,0,0]);
+            const project = GlobalVariables.topLevelMolecule.value.rotate([90,0,0]);
             GlobalVariables.api.writeSvg({ path: 'github' }, project);
             const contentSvg = readFileSync('github');
             

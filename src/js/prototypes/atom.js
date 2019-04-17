@@ -17,7 +17,7 @@ export default class Atom {
         this.color = '#F3EFEF';
         this.name = "name";
         this.parentMolecule = null;
-        this.codeBlock = null;
+        this.value = null;
         this.isMoving = false;
         this.scaledX = 0;
         this.scaledY = 0;
@@ -311,12 +311,12 @@ export default class Atom {
         return [];
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.codeBlock);
+                child.setValue(this.value);
             }
         });
         
@@ -329,7 +329,7 @@ export default class Atom {
     sendToRender(){
         //Send code to JSxCAD to render
         try {
-            GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
+            GlobalVariables.api.writeStl({ path: 'window' },this.value);
         }
         catch(err) {
             console.log("Oh no can't render that");
