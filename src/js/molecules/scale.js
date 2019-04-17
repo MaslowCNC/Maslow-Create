@@ -16,10 +16,10 @@ export default class Scale extends Atom{
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
-        this.codeBlock = this.findIOValue("geometry").scale(this.findIOValue("multiple"));
+        this.value = this.findIOValue("geometry").scale(this.findIOValue("multiple"));
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

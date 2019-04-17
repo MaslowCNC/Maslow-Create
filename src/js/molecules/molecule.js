@@ -28,7 +28,7 @@ export default class Molecule extends Atom{
             atomType: "Output"
         }, null, GlobalVariables.secretTypes);
         
-        this.updateCodeBlock();
+        this.updateValue();
     }
     
     draw(){
@@ -66,7 +66,7 @@ export default class Molecule extends Atom{
         this.sendToRender();
     }
     
-    updateCodeBlock(){
+    updateValue(){
         //Grab the code from the output object
         
         //Grab values from the inputs and push them out to the input objects
@@ -83,14 +83,14 @@ export default class Molecule extends Atom{
         //Grab the value from the Molecule's output and set it to be the molecule's code block so that clicking on the molecule will display what it is outputting
         this.nodesOnTheScreen.forEach(atom => {
             if(atom.atomType == 'Output'){
-                this.codeBlock = atom.codeBlock;
+                this.value = atom.value;
             }
         });
         
         //Set the output nodes with type 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.codeBlock);
+                child.setValue(this.value);
             }
         });
         
@@ -131,7 +131,7 @@ export default class Molecule extends Atom{
         });
         
         this.createButton(valueList,this,"Download SVG",(e) => {
-            const slice = GlobalVariables.api.crossSection({},this.codeBlock);
+            const slice = GlobalVariables.api.crossSection({},this.value);
             GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice);
             const stlContent = readFileSync('makeSVG');
             const blob = new Blob([stlContent], {type: "text/plain;charset=utf-8"});
@@ -177,7 +177,7 @@ export default class Molecule extends Atom{
     goToParentMolecule(self){
         //Go to the parent molecule if there is one
         
-        GlobalVariables.currentMolecule.updateCodeBlock();
+        GlobalVariables.currentMolecule.updateValue();
         
         if(!GlobalVariables.currentMolecule.topLevel){
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent; //set parent this to be the currently displayed molecule
@@ -305,7 +305,7 @@ export default class Molecule extends Atom{
             
             this.setValues([]);//Call set values again with an empty list to trigger loading of IO values from memory
             
-            this.updateCodeBlock();
+            this.updateValue();
         // }
         // catch(err){
             // console.log("Unable to load molecule: ");

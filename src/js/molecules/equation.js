@@ -11,8 +11,8 @@ export default class Equation extends Atom {
         
         this.name = "Equation";
         this.atomType = "Equation";
-        this.defaultCodeBlock = "";
-        this.codeBlock = "";
+        this.defaultValue = "";
+        this.value = "";
         this.equationOptions = ["x+y", "x-y", "x*y", "x/y", "cos(x)", "sin(x)", "x^y"];
         this.currentEquation = 0;
         
@@ -29,7 +29,7 @@ export default class Equation extends Atom {
         return superSerialObject;
     }
     
-    updateCodeBlock(){
+    updateValue(){
         //A super classed version of the update codeblock default function which computes the equation values
         var x = this.findIOValue("x");
         var y = this.findIOValue("y");
@@ -72,7 +72,7 @@ export default class Equation extends Atom {
     
     changeEquation(newValue){
         this.currentEquation = parseInt(newValue);
-        this.updateCodeBlock();
+        this.updateValue();
     }
     
     updateSidebar(){

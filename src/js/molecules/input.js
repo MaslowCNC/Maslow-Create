@@ -7,7 +7,7 @@ export default class Input extends Atom {
         super (values);
         
         this.name = "Input" + GlobalVariables.generateUniqueID();
-        this.codeBlock = "";
+        this.value = "";
         this.type = "input";
         this.atomType = "Input";
         this.height = 16;
@@ -92,7 +92,7 @@ export default class Input extends Atom {
     setOutput(newOutput){
         //Set the input's output
         
-        this.codeBlock = newOutput;  //Set the code block so that clicking on the input previews what it is 
+        this.value = newOutput;  //Set the code block so that clicking on the input previews what it is 
         
         //Set the output nodes with type 'geometry' to be the new value
         this.children.forEach(child => {
@@ -102,7 +102,7 @@ export default class Input extends Atom {
         });
     } 
     
-    updateCodeBlock(){
+    updateValue(){
         //This empty function handles any calls to the normal update code block function which breaks things here
     }
 }
