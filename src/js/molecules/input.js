@@ -40,6 +40,8 @@ export default class Input extends Atom {
     }
     
     draw() {
+        this.scaledX = GlobalVariables.scaleFactorXY * this.x;
+        this.scaledY = GlobalVariables.scaleFactorXY * this.y;
         
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName();}

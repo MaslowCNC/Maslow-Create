@@ -38,6 +38,9 @@ export default class Output extends Atom {
     
     draw() {
         
+        this.scaledX = GlobalVariables.scaleFactorXY * this.x;
+        this.scaledY = GlobalVariables.scaleFactorXY * this.y;
+        
         this.children.forEach(child => {
             child.draw();       
         });

@@ -381,11 +381,16 @@ export default function GitHubModule(){
         //Save the current project into the github repo
         if(currentRepoName != null){
             
-            GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.value);
+            try{
+                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.value);
+                GlobalVariables.api.writeSvg({ path: 'github' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]));
+            }
+            catch(err){
+                console.log("Unable to generate .stl and .svg files");
+                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.api.sphere());
+                GlobalVariables.api.writeSvg({ path: 'github' }, GlobalVariables.api.sphere());
+            }
             const stlContent = readFileSync('github');
-            
-            const project = GlobalVariables.topLevelMolecule.value.rotate([90,0,0]);
-            GlobalVariables.api.writeSvg({ path: 'github' }, project);
             const contentSvg = readFileSync('github');
             
             var bomContent = bomHeader;

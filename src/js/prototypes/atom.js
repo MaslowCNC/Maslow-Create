@@ -17,7 +17,7 @@ export default class Atom {
         this.color = '#F3EFEF';
         this.name = "name";
         this.parentMolecule = null;
-        this.value = null;
+        this.value = GlobalVariables.api.sphere();
         this.isMoving = false;
         this.scaledX = 0;
         this.scaledY = 0;
@@ -48,8 +48,6 @@ export default class Atom {
     }
     
     draw() {
-
-        
         this.scaledX = GlobalVariables.scaleFactorXY * this.x;
         this.scaledY = GlobalVariables.scaleFactorXY * this.y;
         this.scaledRadius = GlobalVariables.scaleFactorR * this.radius;
@@ -157,7 +155,7 @@ export default class Atom {
             this.color = this.selectedColor;
             this.isMoving = true;
             this.selected = true;
-             this.strokeColor = this.defaultColor;
+            this.strokeColor = this.defaultColor;
             this.updateSidebar();
             this.sendToRender();
             clickProcessed = true;

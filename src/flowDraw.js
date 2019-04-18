@@ -14,6 +14,8 @@ GlobalVariables.canvas.height = innerHeight/2
 var url = window.location.href;
 GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
 
+GlobalVariables.api = api;
+
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
 if(!GlobalVariables.runMode){
     lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
@@ -114,8 +116,6 @@ function init() {
             });
         }
     }
-    
-    GlobalVariables.api = api;
     
     //Add the JSXCAD window
     camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
