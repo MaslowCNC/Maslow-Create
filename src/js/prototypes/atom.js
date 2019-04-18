@@ -150,7 +150,6 @@ export default class Atom {
             }
         });
         
-        console.log(this.name + ": " + this.scaledX + ", " +this.scaledY);
         //If none of the children processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY) < this.scaledRadius){
             this.color = this.selectedColor;
