@@ -382,16 +382,16 @@ export default function GitHubModule(){
         if(currentRepoName != null){
             
             try{
-                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.topLevelMolecule.value);
-                GlobalVariables.api.writeSvg({ path: 'github' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]));
+                GlobalVariables.api.writeStl({ path: 'githubStl' },GlobalVariables.topLevelMolecule.value);
+                GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]));
             }
             catch(err){
                 console.log("Unable to generate .stl and .svg files");
-                GlobalVariables.api.writeStl({ path: 'github' },GlobalVariables.api.sphere());
-                GlobalVariables.api.writeSvg({ path: 'github' }, GlobalVariables.api.sphere());
+                GlobalVariables.api.writeStl({ path: 'githubStl' },GlobalVariables.api.sphere(10));
+                GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.api.sphere(10));
             }
-            const stlContent = readFileSync('github');
-            const contentSvg = readFileSync('github');
+            const stlContent = readFileSync('githubStl');
+            const contentSvg = readFileSync('githubSvg');
             
             var bomContent = bomHeader;
             GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {

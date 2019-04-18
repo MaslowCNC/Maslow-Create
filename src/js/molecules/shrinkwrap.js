@@ -29,7 +29,7 @@ export default class ShrinkWrap extends Atom{
         
         var inputs = [];
         this.children.forEach( io => {
-            if(io.connectors.length > 0){
+            if(io.connectors.length > 0 && io.type == "input"){
                 inputs.push(io.getValue());
             }
         });
@@ -114,15 +114,6 @@ export default class ShrinkWrap extends Atom{
         return thisAsObject;
         
     }
-    
-    updateSidebar(){
-        //Update the side bar to make it possible to change the molecule name
-        
-        var valueList = super.updateSidebar();
-        
-        this.createDropDown(valueList, this, ["Closed", "Open", "Solid"], this.closedSelection, "End:");
-        
-    } 
     
     changeEquation(newValue){
         this.closedSelection = parseInt(newValue);
