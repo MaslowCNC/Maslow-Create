@@ -46,12 +46,9 @@ export default class AttachmentPoint {
             this.radius = this.parentMolecule.radius/1.6;
         }
 
-        //
-
         if(this.parentMolecule.children.length < 2 && this.type == "input"){
                 this.x= this.parentMolecule.x-this.parentMolecule.radius;
                 this.y= this.parentMolecule.y;
-                this.oneStartMolecule = true;
                      }    
         else if(this.parentMolecule.children.length < 2 && this.type == "output"){
                 this.x= this.parentMolecule.x+this.parentMolecule.radius;
@@ -71,7 +68,6 @@ export default class AttachmentPoint {
       if (this.showHoverText){
             if(this.type == "input"){
                
-
                 GlobalVariables.c.beginPath();
 
                     if (this.name === "geometry"){
@@ -117,8 +113,7 @@ export default class AttachmentPoint {
             }
 
         }
-
-        
+ 
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.parentMolecule.color;
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor;
@@ -180,15 +175,6 @@ export default class AttachmentPoint {
         var distFromCursor = GlobalVariables.distBetweenPoints (this.x, x, this.y, y);
         var distFromCursorParent = GlobalVariables.distBetweenPoints (this.parentMolecule.x -this.parentMolecule.radius, x, this.parentMolecule.y, y); 
         console.log("dist +" + distFromCursor);
-        //If we are hovering over the attachment point, indicate that by making it big
-        if (distFromCursor < this.defaultRadius){
-
-           this.expandedRadius = true;
-        
-        }
-        else{
-            this.expandedRadius = false;
-        }
         //If we are close to the attachment point move it to it's hover location to make it accessible
         if (distFromCursor < this.parentMolecule.radius*3){
 
@@ -196,9 +182,7 @@ export default class AttachmentPoint {
             var attachmentPointNumber = this.parentMolecule.children.indexOf(this);  
        
              // if input type then offset first element down to give space for radial menu 
-            if (this.type == "input"){
-              
-                 if (numAttachmentPoints > 2){
+            if (this.type == "input" && numAttachmentPoints > 2){
                    
                     var anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
                     // angle correction so that it centers menu adjusting to however many attachment points there are 
@@ -221,47 +205,56 @@ export default class AttachmentPoint {
                     var yDistance = (this.hoverOffsetY) - this.offsetY;
                     var distance = Math.sqrt(xDistance * xDistance + yDistance * yDistance);
                      
-                     if (distance < 1 || distFromCursorParent<10 ){
+                     if (distance < 1 || distFromCursorParent<10 || distFromCursor< this.radius*3.5){
                        this.offsetX = this.hoverOffsetX; 
                        this.offsetY = this.hoverOffsetY;
 
-                          if (distFromCursor<this.radius*3){
+                          if (distFromCursor<this.radius*1.5){  
+                           this.expandedRadius = true; //If we are hovering over the attachment point, indicate that by making it big
                            this.parentMolecule.children.forEach(child => {
                            child.offsetX = child.hoverOffsetX;
                            child.offsetY = child.hoverOffsetY;
                            child.showHoverText = true;
-                           });
-                         }
+                           console.log("true");
+                           console.log(distFromCursor);
+                                });
+                            }
+                          else { this.expandedRadius = false;}  
                      } 
                      else if (distance > 1){
-                        this.offsetX += this.hoverOffsetX/ distFromCursorParent/3; 
-                        this.offsetY += this.hoverOffsetY/ distFromCursorParent/3; 
-                     }
+                        this.offsetX += this.hoverOffsetX/ distFromCursorParent/1.5; 
+                        this.offsetY += this.hoverOffsetY/ distFromCursorParent/1.5; 
                 }
             }
+
             else if (this.type == "output"){
-               this.offsetX = this.parentMolecule.radius;
+               if(distFromCursor<this.radius*1.5){
+                this.expandedRadius = true;
+               }
+               else {
+                this.expandedRadius = false;
+               }
+                this.offsetX = this.parentMolecule.radius;
             }
             
             this.showHoverText = true;
-            //this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
-
+            this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
                 
             }
 
         else{
-            if (this.type == "output"){
-              
+            if (this.type == "input")
+                {   this.offsetX = -1* this.parentMolecule.radius;
+                    this.offsetY = this.defaultOffsetY;
+                    this.showHoverText = false;
+                    this.hoverDetectRadius = this.defaultRadius;
+                    
+             }
+            else if (this.type == "output"){
                     this.offsetX = this.parentMolecule.radius;
                     this.showHoverText = false;
                     this.hoverDetectRadius = this.defaultRadius;
             }
-           
-            else{   this.offsetX = -1* this.parentMolecule.radius;
-                    this.offsetY = this.defaultOffsetY;
-                    this.showHoverText = false;
-                    this.hoverDetectRadius = this.defaultRadius;
-             }
         }
         
         this.connectors.forEach(connector => {
