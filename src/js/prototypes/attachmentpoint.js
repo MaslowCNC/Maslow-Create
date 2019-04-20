@@ -178,7 +178,7 @@ export default class AttachmentPoint {
         
         //expand if touched by mouse
         var distFromCursor = GlobalVariables.distBetweenPoints (this.x, x, this.y, y);
-        
+        var distFromCursorParent = GlobalVariables.distBetweenPoints (this.parentMolecule.x -this.parentMolecule.radius, x, this.parentMolecule.y, y); 
         console.log("dist +" + distFromCursor);
         //If we are hovering over the attachment point, indicate that by making it big
         if (distFromCursor < this.defaultRadius){
@@ -216,15 +216,39 @@ export default class AttachmentPoint {
                             this.hoverOffsetY = Math.round( 1.5* this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
                         }
                     this.hoverOffsetX = -Math.round(1.5* this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
-                    this.offsetX = this.hoverOffsetX; 
-                    this.offsetY = this.hoverOffsetY;  
+                    
+                    var xDistance = (this.hoverOffsetX) - this.offsetX;
+                    var yDistance = (this.hoverOffsetY) - this.offsetY;
+                    var distance = Math.sqrt(xDistance * xDistance + yDistance * yDistance);
+                     
+                     if (distance < 1 || distFromCursorParent<10 ){
+                       this.offsetX = this.hoverOffsetX; 
+                       this.offsetY = this.hoverOffsetY;
+
+                          if (distFromCursor<this.radius*3){
+                           this.parentMolecule.children.forEach(child => {
+                           child.offsetX = child.hoverOffsetX;
+                           child.offsetY = child.hoverOffsetY;
+                           child.showHoverText = true;
+                           });
+                         }
+                     } 
+                     else if (distance > 1){
+                        this.offsetX += this.hoverOffsetX/ distFromCursorParent/3; 
+                        this.offsetY += this.hoverOffsetY/ distFromCursorParent/3; 
                      }
+                }
+            }
+            else if (this.type == "output"){
+               this.offsetX = this.parentMolecule.radius;
             }
             
             this.showHoverText = true;
-            this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
+            //this.hoverDetectRadius = this.defaultRadius + GlobalVariables.distBetweenPoints (this.offsetX, this.hoverOffsetX, this.defaultOffsetY, this.hoverOffsetY); 
 
+                
             }
+
         else{
             if (this.type == "output"){
               
@@ -243,7 +267,8 @@ export default class AttachmentPoint {
         this.connectors.forEach(connector => {
             connector.clickMove(x, y);       
         });
-    }
+     }
+    
     
     keyPress(key){
         this.connectors.forEach(connector => {
