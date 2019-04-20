@@ -33,9 +33,7 @@ let flowCanvas = document.getElementById('flow-canvas');
 flowCanvas.addEventListener('mousemove', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
 
-        molecule.clickMove(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1);   
-         console.log("y +" + event.clientY);  
-         console.log("scale2 +" + GlobalVariables.scale1);   
+        molecule.clickMove(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1);    
     });
 });
 

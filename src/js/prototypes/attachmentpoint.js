@@ -174,7 +174,6 @@ export default class AttachmentPoint {
         //expand if touched by mouse
         var distFromCursor = GlobalVariables.distBetweenPoints (this.x, x, this.y, y);
         var distFromCursorParent = GlobalVariables.distBetweenPoints (this.parentMolecule.x -this.parentMolecule.radius, x, this.parentMolecule.y, y); 
-        console.log("dist +" + distFromCursor);
         //If we are close to the attachment point move it to it's hover location to make it accessible
         if (distFromCursor < this.parentMolecule.radius*3){
 
@@ -209,17 +208,17 @@ export default class AttachmentPoint {
                        this.offsetX = this.hoverOffsetX; 
                        this.offsetY = this.hoverOffsetY;
 
-                          if (distFromCursor<this.radius*1.5){  
+                          if (distFromCursor < this.radius*1.5){  
                            this.expandedRadius = true; //If we are hovering over the attachment point, indicate that by making it big
                            this.parentMolecule.children.forEach(child => {
                            child.offsetX = child.hoverOffsetX;
                            child.offsetY = child.hoverOffsetY;
                            child.showHoverText = true;
-                           console.log("true");
-                           console.log(distFromCursor);
                                 });
                             }
-                          else { this.expandedRadius = false;}  
+                          else { 
+                           this.expandedRadius = false;
+                          }  
                      } 
                      else if (distance > 1){
                         this.offsetX += this.hoverOffsetX/ distFromCursorParent/1.5; 
@@ -228,7 +227,7 @@ export default class AttachmentPoint {
             }
 
             else if (this.type == "output"){
-               if(distFromCursor<this.radius*1.5){
+               if(distFromCursor < this.radius*1.5){
                 this.expandedRadius = true;
                }
                else {
