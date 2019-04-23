@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class RegularPolygon extends Atom {
 
@@ -18,21 +19,9 @@ export default class RegularPolygon extends Atom {
         this.setValues(values);
     }
 
-    updateValue() {
-        this.defaultValue = this.buildPolygonValue();
+    updateValue(){
+        this.value = GlobalVariables.api.circle({r: this.findIOValue("radius"), center: true, fn: this.findIOValue("number of sides")});
+        
         super.updateValue();
-    }
-
-    buildPolygonValue() {
-        let polygon = []
-        for(let i = 0; i < this.findIOValue("number of sides"); i++) {
-            var angle = i * 2 * Math.PI / this.findIOValue("number of sides") - Math.PI / 2;
-            polygon.push([
-                this.findIOValue("radius") * Math.cos(angle),
-                this.findIOValue("radius") * Math.sin(angle)
-            ])
-        }
-
-        return "polygon(" + JSON.stringify(polygon) + ")";
-    }    
+    }  
 }
