@@ -21,7 +21,10 @@ export default class Rotate extends Atom {
     
     updateValue(){
         
+        try{
         this.value = GlobalVariables.api.rotate([this.findIOValue("x-axis degrees"), this.findIOValue("y-axis degrees"), this.findIOValue("z-axis degrees")], this.findIOValue("geometry"));
+        }
+        catch(err){}
         
         super.updateValue();
     }
