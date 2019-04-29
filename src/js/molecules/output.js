@@ -45,9 +45,8 @@ export default class Output extends Atom {
             child.draw();       
         });
 
-        //fix on right edge of screen so it doesn't dissapear when window resizes
-        this.x= GlobalVariables.canvas.width - 30;
-        this.height= this.radius +2;
+
+        this.height= this.radius;
         
         GlobalVariables.c.beginPath();
         GlobalVariables.c.fillStyle = this.color;

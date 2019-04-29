@@ -19,9 +19,9 @@ export default class Atom {
         this.parentMolecule = null;
         this.value = GlobalVariables.api.sphere();
         this.isMoving = false;
-        this.scaledX = 0;
-        this.scaledY = 0;
-        this.scaledRadius = this.radius;
+        this.x = 0;
+        this.y = 0;
+        
 
         for(var key in values) {
             this[key] = values[key];
@@ -47,14 +47,7 @@ export default class Atom {
         }
     }
     
-    draw() {
-        this.scaledX = GlobalVariables.scaleFactorXY * this.x;
-        this.scaledY = GlobalVariables.scaleFactorXY * this.y;
-        this.scaledRadius = GlobalVariables.scaleFactorR * this.radius;
-
-        this.inputX = this.scaledX - this.scaledRadius;
-        this.outputX = this.scaledX + this.scaledRadius;
-        
+    draw() {   
         this.children.forEach(child => {
             child.draw();       
         });
@@ -66,41 +59,40 @@ export default class Atom {
         //make it impossible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas');
-        if (this.scaledX < this.scaledRadius*3){
-                this.scaledX+= this.scaledRadius*3; 
+        if (this.x < this.radius*3){
+                this.x+= this.radius*3; 
                 //for attachment point draw adjustment
-                this.x = this.scaledRadius*3;    
-                GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
+                this.x = this.radius*3;    
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
-        else if (this.scaledY<this.scaledRadius*2){
-                this.scaledY += this.scaledRadius; 
+        else if (this.y<this.radius*2){
+                this.y += this.radius; 
                   //for attachment point draw adjustment
-                this.y += this.scaledRadius; 
-                GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
+                this.y += this.radius; 
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
-        else if (this.scaledX + this.scaledRadius*2 > canvasFlow.width){
-                this.scaledX -= this.scaledRadius*2; 
+        else if (this.x + this.radius*2 > canvasFlow.width/GlobalVariables.scale1){
+                this.x -= this.radius*2; 
                   //for attachment point draw adjustment
-                this.x -= this.scaledRadius*2; 
-                GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
+                this.x -= this.radius*2; 
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
-        else if (this.scaledY+ this.scaledRadius*2 > canvasFlow.height){
-                this.scaledY-= this.scaledRadius; 
+        else if (this.y+ this.radius*2 > canvasFlow.height/GlobalVariables.scale1){
+                this.y-= this.radius; 
                   //for attachment point draw adjustment
-                this.y -= this.scaledRadius; 
-                GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
+                this.y -= this.radius; 
+                GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         else{
-        GlobalVariables.c.arc(this.scaledX, this.scaledY, this.scaledRadius, 0, Math.PI * 2, false);
+        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         }
         GlobalVariables.c.textAlign = "start"; 
-        GlobalVariables.c.fillText(this.name, this.scaledX + this.scaledRadius, this.scaledY- this.scaledRadius);
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius);
         GlobalVariables.c.fill();
         GlobalVariables.c.strokeStyle = this.strokeColor;
         GlobalVariables.c.lineWidth = 1;
         GlobalVariables.c.stroke();
         GlobalVariables.c.closePath();
-
     }
     
     addIO(type, name, target, valueType, defaultValue){
@@ -151,7 +143,7 @@ export default class Atom {
         });
         
         //If none of the children processed the click see if the atom should, if not clicked, then deselect
-        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY) < this.scaledRadius){
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
             this.color = this.selectedColor;
             this.isMoving = true;
             this.selected = true;
@@ -175,9 +167,9 @@ export default class Atom {
         
         var clickProcessed = false;
         
-        var distFromClick = GlobalVariables.distBetweenPoints(x, this.scaledX, y, this.scaledY);
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y);
         
-        if (distFromClick < this.scaledX){
+        if (distFromClick < this.x){
             clickProcessed = true;
         }
         
@@ -194,7 +186,6 @@ export default class Atom {
 
     clickMove(x,y){
         if (this.isMoving == true){
-            GlobalVariables.scaleFactorXY=1;
             this.x = x;
             this.y = y;
         }
@@ -242,7 +233,7 @@ export default class Atom {
         //add the name as a title
         var name = document.createElement('h1');
         name.textContent = this.name;
-        name.setAttribute("style","text-align:center;");
+        name.setAttribute("class","doc-title");
         GlobalVariables.sideBar.appendChild(name);
         
         //Create a list element
@@ -359,14 +350,14 @@ export default class Atom {
         //Div which contains the entire element
         var div = document.createElement("div");
         listElement.appendChild(div);
-        div.setAttribute("class", "sidebar-item");
+        div.setAttribute("class", "sidebar-item sidebar-editable-div");
         
         //Left div which displays the label
         var labelDiv = document.createElement("div");
         div.appendChild(labelDiv);
         var labelText = document.createTextNode(label + ":");
         labelDiv.appendChild(labelText);
-        labelDiv.setAttribute("class", "sidebar-subitem");
+        labelDiv.setAttribute("class", "sidebar-subitem label-item");
         
         
         //Right div which is editable and displays the value
@@ -375,7 +366,7 @@ export default class Atom {
         var valueText = document.createTextNode(object[key]);
         valueTextDiv.appendChild(valueText);
         valueTextDiv.setAttribute("contenteditable", "true");
-        valueTextDiv.setAttribute("class", "sidebar-subitem");
+        valueTextDiv.setAttribute("class", "sidebar-subitem editing-item");
         var thisID = label+GlobalVariables.generateUniqueID();
         valueTextDiv.setAttribute("id", thisID);
         
