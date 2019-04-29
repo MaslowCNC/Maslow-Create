@@ -265,7 +265,7 @@ export default class AttachmentPoint {
         }
         //if this is an input
         else{   //update the code block to reflect the new values
-            this.parentMolecule.updateCodeBlock();
+            this.parentMolecule.updateValue();
         }
     }
     

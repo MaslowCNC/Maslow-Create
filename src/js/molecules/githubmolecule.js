@@ -35,41 +35,27 @@ export default class GitHubMolecule extends Molecule {
     
     loadProjectByID(id){
     //Get the repo by ID
-        GlobalVariables.gitHub.octokit.request('GET /repositories/:id', {id}).then(result => {
-            
-            //Find out the owners info;
-            
-            var user     = result.data.owner.login;
-            var repoName = result.data.name;
-            
-            //Get the file contents
-            
-            GlobalVariables.gitHub.octokit.repos.getContents({
-                owner: user,
-                repo: repoName,
-                path: 'project.maslowcreate'
-            }).then(result => {
+        GlobalVariables.gitHub.getProjectByID(id).then(result => {
                     
-                //content will be base64 encoded
-                let rawFile = atob(result.data.content);
-                let moleculesList =  JSON.parse(rawFile).molecules;
-                
-                //Preserve values which will be overwritten by the deserialize process
-                var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel};
-                
-                this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
-                
-                this.setValues(preservedValues);
-                
-                //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
-                if(typeof this.parent !== 'undefined'){
-                    this.parent.savedConnectors.forEach(connector => {
-                        this.parent.placeConnector(JSON.parse(connector));
-                    });
-                }
-                
-                GlobalVariables.currentMolecule.backgroundClick();
-            });
+            //content will be base64 encoded
+            let rawFile = atob(result.data.content);
+            let moleculesList =  JSON.parse(rawFile).molecules;
+            
+            //Preserve values which will be overwritten by the deserialize process
+            var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel};
+            
+            this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true; })[0].uniqueID);
+            
+            this.setValues(preservedValues);
+            
+            //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
+            if(typeof this.parent !== 'undefined'){
+                this.parent.savedConnectors.forEach(connector => {
+                    this.parent.placeConnector(JSON.parse(connector));
+                });
+            }
+            
+            GlobalVariables.currentMolecule.backgroundClick();
         });
     }
     
@@ -88,8 +74,8 @@ export default class GitHubMolecule extends Molecule {
         return object;
     }
     
-    updateCodeBlock(){
-        super.updateCodeBlock();
+    updateValue(){
+        super.updateValue();
         if(this.name != "Molecule"){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can't handle calls right away
             this.backgroundClick();
         }
@@ -131,6 +117,11 @@ export default class GitHubMolecule extends Molecule {
                window.location.href = '/';
             });
         }
+        
+        this.createButton(valueList,this,"Star This Project",(e) => {
+           //Star the project
+           GlobalVariables.gitHub.starProject(this.projectID)
+        });
         
         this.displaySimpleBOM(valueList);
     }

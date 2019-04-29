@@ -13,15 +13,15 @@ export default class Rectangle extends Atom {
         this.name = "Rectangle";
         this.atomType = "Rectangle";
         
-        this.updateCodeBlock();
+        this.updateValue();
         
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
-        this.codeBlock = GlobalVariables.api.square([this.findIOValue("x length"),this.findIOValue("y length")]);
+        this.value = GlobalVariables.api.square([this.findIOValue("x length"),this.findIOValue("y length")]);
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

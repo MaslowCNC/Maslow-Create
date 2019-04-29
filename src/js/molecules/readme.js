@@ -6,7 +6,7 @@ export default class Readme extends Atom{
     constructor(values){
         super(values);
         
-        this.codeBlock = "";
+        this.value = "";
         this.atomType = "Readme";
         this.readmeText = "Readme text here";
         this.type = "readme";

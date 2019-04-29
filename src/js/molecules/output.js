@@ -12,7 +12,7 @@ export default class Output extends Atom {
             this.parent.addIO("output", "Geometry", this.parent, "geometry", "");
         }
         
-        this.codeBlock = null;
+        this.value = null;
         this.type = "output";
         this.name = "Output";
         this.atomType = "Output";
@@ -24,12 +24,12 @@ export default class Output extends Atom {
         this.addIO("input", "number or geometry", this, "geometry", "");
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
-        this.codeBlock = this.findIOValue("number or geometry");
-        this.parent.codeBlock = this.codeBlock;
+        this.value = this.findIOValue("number or geometry");
+        this.parent.value = this.value;
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
     
     setID(newID){
@@ -37,6 +37,9 @@ export default class Output extends Atom {
     }
     
     draw() {
+        
+        this.scaledX = GlobalVariables.scaleFactorXY * this.x;
+        this.scaledY = GlobalVariables.scaleFactorXY * this.y;
         
         this.children.forEach(child => {
             child.draw();       

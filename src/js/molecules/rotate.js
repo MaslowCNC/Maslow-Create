@@ -15,16 +15,17 @@ export default class Rotate extends Atom {
         
         this.name = "Rotate";
         this.atomType = "Rotate";
-        this.defaultCodeBlock = "rotate([~x-axis degrees~,~y-axis degrees~,~z-axis degrees~],~geometry~)";
-        this.codeBlock = "";
         
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
-        this.codeBlock = GlobalVariables.api.rotate([this.findIOValue("x-axis degrees"), this.findIOValue("y-axis degrees"), this.findIOValue("z-axis degrees")], this.findIOValue("geometry"));
+        try{
+        this.value = GlobalVariables.api.rotate([this.findIOValue("x-axis degrees"), this.findIOValue("y-axis degrees"), this.findIOValue("z-axis degrees")], this.findIOValue("geometry"));
+        }
+        catch(err){}
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

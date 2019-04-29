@@ -19,10 +19,10 @@ export default class Gcode extends Atom {
         this.setValues(values);
         
         //generate the correct codeblock for this atom on creation
-        this.updateCodeBlock();
+        this.updateValue();
     }
     
-    updateCodeBlock(){
+    updateValue(){
         //Generate a .svg file
         const input = this.findIOValue("geometry");
         const slice = GlobalVariables.api.crossSection({},input);
@@ -33,20 +33,20 @@ export default class Gcode extends Atom {
         const partThickness = bounds[1][2]-bounds[0][2];
         
         //convert that to gcode
-        this.codeBlock = this.svg2gcode(stlContent, {
+        this.value = this.svg2gcode(stlContent, {
             passes: this.findIOValue("passes"),
             materialWidth: -1*partThickness,
             bitWidth: this.findIOValue("tool size")
         });
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
     
     updateSidebar(){
         var valueList =  super.updateSidebar(); 
         
         this.createButton(valueList,this,"Download Gcode",(e) => {
-            const blob = new Blob([this.codeBlock], {type: "text/plain;charset=utf-8"});
+            const blob = new Blob([this.value], {type: "text/plain;charset=utf-8"});
             saveAs(blob, GlobalVariables.topLevelMolecule.name+'.nc');
         });
     }

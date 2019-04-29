@@ -17,7 +17,7 @@ export default class Atom {
         this.color = '#F3EFEF';
         this.name = "name";
         this.parentMolecule = null;
-        this.codeBlock = null;
+        this.value = GlobalVariables.api.sphere();
         this.isMoving = false;
         this.x = 0;
         this.y = 0;
@@ -47,8 +47,7 @@ export default class Atom {
         }
     }
     
-    draw() {
-        
+    draw() {   
         this.children.forEach(child => {
             child.draw();       
         });
@@ -148,7 +147,7 @@ export default class Atom {
             this.color = this.selectedColor;
             this.isMoving = true;
             this.selected = true;
-             this.strokeColor = this.defaultColor;
+            this.strokeColor = this.defaultColor;
             this.updateSidebar();
             this.sendToRender();
             clickProcessed = true;
@@ -301,12 +300,12 @@ export default class Atom {
         return [];
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.codeBlock);
+                child.setValue(this.value);
             }
         });
         
@@ -319,7 +318,7 @@ export default class Atom {
     sendToRender(){
         //Send code to JSxCAD to render
         try {
-            GlobalVariables.api.writeStl({ path: 'window' },this.codeBlock);
+            GlobalVariables.api.writeStl({ path: 'window' },this.value);
         }
         catch(err) {
             console.log("Oh no can't render that");
