@@ -19,10 +19,10 @@ export default class Stretch extends Atom {
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
-        this.codeBlock = this.findIOValue("geometry").scale([this.findIOValue("x"),this.findIOValue("y"),this.findIOValue("z")]);
+        this.value = this.findIOValue("geometry").scale([this.findIOValue("x"),this.findIOValue("y"),this.findIOValue("z")]);
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

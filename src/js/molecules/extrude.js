@@ -16,13 +16,13 @@ export default class Extrude extends Atom{
         this.setValues(values);
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         try{
-            this.codeBlock = this.findIOValue("geometry").extrude({ height: this.findIOValue("height") });
+            this.value = this.findIOValue("geometry").extrude({ height: this.findIOValue("height") });
         }
         catch(err){}
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
 }

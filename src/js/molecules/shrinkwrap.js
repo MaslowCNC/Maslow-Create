@@ -22,26 +22,26 @@ export default class ShrinkWrap extends Atom{
             });
         }
         
-        this.updateCodeBlock();
+        this.updateValue();
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         var inputs = [];
         this.children.forEach( io => {
-            if(io.connectors.length > 0){
+            if(io.connectors.length > 0 && io.type == "input"){
                 inputs.push(io.getValue());
             }
         });
         
         if(inputs.length > 0){
-            this.codeBlock = GlobalVariables.api.hull.apply(null, inputs);
+            this.value = GlobalVariables.api.hull.apply(null, inputs);
         }
         
         //Set the output nodes with name 'geometry' to be the generated output
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.codeBlock);
+                child.setValue(this.value);
             }
         });
         
@@ -68,7 +68,7 @@ export default class ShrinkWrap extends Atom{
         }
         if(this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1){  //We need to remove the empty port
             this.deleteEmptyPort();
-            this.updateCodeBlock();
+            this.updateValue();
         }
     }
     
@@ -115,17 +115,8 @@ export default class ShrinkWrap extends Atom{
         
     }
     
-    updateSidebar(){
-        //Update the side bar to make it possible to change the molecule name
-        
-        var valueList = super.updateSidebar();
-        
-        this.createDropDown(valueList, this, ["Closed", "Open", "Solid"], this.closedSelection, "End:");
-        
-    } 
-    
     changeEquation(newValue){
         this.closedSelection = parseInt(newValue);
-        this.updateCodeBlock();
+        this.updateValue();
     }
 }

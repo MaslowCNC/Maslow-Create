@@ -9,17 +9,17 @@ export default class Code extends Atom {
         
         this.name = "Code";
         this.atomType = "Code";
-        this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.codeBlock = 10;";
+        this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.value = 10;";
         
         this.addIO("output", "geometry", this, "geometry", "");
         
         this.setValues(values);
         
         //generate the correct codeblock for this atom on creation
-        this.updateCodeBlock();
+        this.updateValue();
     }
     
-    updateCodeBlock(){
+    updateValue(){
         //This should pull and run the code in the editor
         
         //reset the IOs to the default state
@@ -33,7 +33,7 @@ export default class Code extends Atom {
             console.log(err);
         }
         
-        super.updateCodeBlock();
+        super.updateValue();
     }
     
     updateSidebar(){
@@ -67,7 +67,7 @@ export default class Code extends Atom {
             button.appendChild(document.createTextNode("Save Code"));
             button.addEventListener("click", (e) => {
                 this.code = codeMirror.getDoc().getValue('\n');
-                this.updateCodeBlock();
+                this.updateValue();
                 popup.classList.add('off');
             });
             form.appendChild(button);

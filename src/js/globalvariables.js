@@ -2,6 +2,7 @@ import Circle from './molecules/circle.js'
 import Rectangle from './molecules/rectangle.js'
 import ShrinkWrap from './molecules/shrinkwrap.js'
 import Translate from './molecules/translate.js'
+import Tag from './molecules/tag.js'
 import RegularPolygon from './molecules/regularpolygon.js'
 import Extrude from './molecules/extrude.js'
 import Scale from './molecules/scale.js'
@@ -35,6 +36,7 @@ class GlobalVariables{
             rectangle:          {creator: Rectangle, atomType: "Rectangle"},
             shirinkwrap:        {creator: ShrinkWrap, atomType: "ShrinkWrap"},
             translate:          {creator: Translate, atomType: "Translate"},
+            tag:                {creator: Tag, atomType: "Tag"},
             regularPolygon:     {creator: RegularPolygon, atomType: "RegularPolygon"},
             extrude:            {creator: Extrude, atomType: "Extrude"},
             scale:              {creator: Scale, atomType: "Scale"},

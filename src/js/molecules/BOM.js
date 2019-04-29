@@ -7,7 +7,7 @@ export default class BillOfMaterials extends Atom{
     constructor(values){
         super(values);
         
-        this.codeBlock = "";
+        this.value = "";
         this.atomType = "Bill Of Materials";
         this.type = "billOfMaterials";
         this.name = "Bill Of Materials";

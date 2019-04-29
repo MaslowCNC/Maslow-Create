@@ -12,15 +12,23 @@ GlobalVariables.canvas.height = innerHeight/2
 let originalWidth=GlobalVariables.canvas.width;
 let originalHeight=GlobalVariables.canvas.height;
 
+
+var url = window.location.href;
+GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
+
+GlobalVariables.api = api;
+
 let lowerHalfOfScreen = document.querySelector('.flex-parent');
-lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+if(!GlobalVariables.runMode){
+    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+}else{
+    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight+"px");
+}
 let upperHalfOfScreen = document.querySelector('#flow-canvas');
 upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
 let viewer = document.querySelector('.jscad-container');
 viewer.setAttribute("style","width:"+innerWidth/2+"px");
 
-var url = window.location.href;
-GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
 
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
@@ -112,10 +120,8 @@ function init() {
         }
     }
     
-    GlobalVariables.api = api;
-    
     //Add the JSXCAD window
-    camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
+    camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
     [camera.position.x, camera.position.y, camera.position.z] = [0, -30, 50];
     //
     controls = new THREE.TrackballControls(camera, targetDiv);
@@ -168,7 +174,11 @@ function onWindowResize() {
     GlobalVariables.canvas.width = bounds.width;
     GlobalVariables.canvas.height = bounds.height; 
     //reset screen parameters 
-    lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+    if(!GlobalVariables.runMode){
+        lowerHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
+    }else{
+        lowerHalfOfScreen.setAttribute("style","height:"+innerHeight+"px");
+    }
     upperHalfOfScreen.setAttribute("style","height:"+innerHeight/2+"px");
     viewer.setAttribute("style","width:"+innerWidth/2+"px");
 

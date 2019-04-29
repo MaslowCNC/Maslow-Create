@@ -1,24 +1,25 @@
 import Atom from '../prototypes/atom'
 
-export default class Scale extends Atom{
+export default class Tag extends Atom{
     
     constructor(values){
-        
         super(values);
         
         this.addIO("input", "geometry", this, "geometry", "");
-        this.addIO("input", "multiple", this, "number", 10);
+        this.addIO("input", "tag", this, "string", "cutList");
         this.addIO("output", "geometry", this, "geometry", "");
         
-        this.name = "Scale";
-        this.atomType = "Scale";
+        this.name = "Add Tag";
+        this.atomType = "Tag";
         
         this.setValues(values);
     }
     
     updateValue(){
         
-        this.value = this.findIOValue("geometry").scale(this.findIOValue("multiple"));
+        try{
+            this.value = this.findIOValue("geometry").as(this.findIOValue("tag"))
+        }catch(err){console.log("Unable to add tag")}
         
         super.updateValue();
     }
