@@ -22,11 +22,6 @@ viewer.setAttribute("style","width:"+innerWidth/2+"px");
 var url = window.location.href;
 GlobalVariables.runMode = url.includes("run"); //Check if we are using the run mode based on url
 
-
-document.getElementById("myslider").addEventListener("change", event =>{
-    GlobalVariables.scale1= document.getElementById("myslider").value/80;
-});
-
 // Event Listeners
 let flowCanvas = document.getElementById('flow-canvas');
 

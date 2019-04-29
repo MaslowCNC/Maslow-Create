@@ -44,10 +44,10 @@ class Menu {
     placeNewNode(ev){
         let clr = ev.target.id;
         this.hidemenu(ev);
-        
+        const invertScale = 1 / GlobalVariables.scale1;
         GlobalVariables.currentMolecule.placeAtom({
-            x: this.menu.x, 
-            y: this.menu.y, 
+            x: this.menu.x * invertScale, 
+            y: this.menu.y * invertScale, 
             parent: GlobalVariables.currentMolecule,
             atomType: clr,
             uniqueID: GlobalVariables.generateUniqueID()
@@ -58,10 +58,11 @@ class Menu {
         
         this.hidemenu();
         let clr = ev.target.id;
+        const invertScale = 1 / GlobalVariables.scale1;
         
         GlobalVariables.currentMolecule.placeAtom({
-            x: this.menu.x, 
-            y: this.menu.y, 
+            x: this.menu.x * invertScale, 
+            y: this.menu.y * invertScale, 
             parent: GlobalVariables.currentMolecule,
             atomType: "GitHubMolecule",
             projectID: clr,

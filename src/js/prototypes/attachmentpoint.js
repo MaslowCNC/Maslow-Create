@@ -212,10 +212,8 @@ export default class AttachmentPoint {
         const angleCorrection = -Math.PI/2 - anglePerIO;
         this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))); 
         this.hoverOffsetX = Math.round(1.5 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection)));
-        this.offsetX = this.hoverOffsetX; 
-        this.offsetY = this.hoverOffsetY;
-        console.log("anglePerIO " + anglePerIO);
-        console.log("attachNum " + attachmentPointNumber);
+        this.offsetX = this.hoverOffsetX; //+ this.hoverOffsetX /(cursorDistance); 
+        this.offsetY = this.hoverOffsetY; //+ this.hoverOffsetY /(cursorDistance);
     }
     
     
