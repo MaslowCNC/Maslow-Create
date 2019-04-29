@@ -205,16 +205,17 @@ export default class AttachmentPoint {
     }
 
     expandOut(cursorDistance){
-        console.log("expandOut");
-        const numAttachmentPoints= this.parentMolecule.children.length;
-        const attachmentPointNumber = this.parentMolecule.children.indexOf(this); 
-        const anglePerIO = 2.0944/ numAttachmentPoints; //120 deg/num
+        const inputList = this.parentMolecule.children.filter(input => input.type == "input");
+        const attachmentPointNumber = inputList.indexOf(this); 
+        const anglePerIO = (Math.PI) / (inputList.length + 1);
         // angle correction so that it centers menu adjusting to however many attachment points there are 
-        const angleCorrection = anglePerIO * (numAttachmentPoints - 2); /* -1 correction + 1 for "output" IO */
-        this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin(-angleCorrection + anglePerIO * 2 * attachmentPointNumber))); 
-        this.hoverOffsetX = -Math.round(1.5 * this.parentMolecule.radius * (Math.cos(-angleCorrection + anglePerIO * 2 * attachmentPointNumber)));
+        const angleCorrection = -Math.PI/2 - anglePerIO;
+        this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))); 
+        this.hoverOffsetX = Math.round(1.5 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection)));
         this.offsetX = this.hoverOffsetX; 
         this.offsetY = this.hoverOffsetY;
+        console.log("anglePerIO " + anglePerIO);
+        console.log("attachNum " + attachmentPointNumber);
     }
     
     
