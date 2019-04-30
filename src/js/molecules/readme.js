@@ -4,64 +4,64 @@ import GlobalVariables from '../globalvariables'
 
 export default class Readme extends Atom{
     constructor(values){
-        super(values);
+        super(values)
         
-        this.value = "";
-        this.atomType = "Readme";
-        this.readmeText = "Readme text here";
-        this.type = "readme";
-        this.name = "README";
-        this.radius = 20;
+        this.value = ''
+        this.atomType = 'Readme'
+        this.readmeText = 'Readme text here'
+        this.type = 'readme'
+        this.name = 'README'
+        this.radius = 20
         
-        this.setValues(values);
+        this.setValues(values)
     }
     
     updateSidebar(){
         //updates the sidebar to display information about this node
         
-        var valueList = super.updateSidebar(); //call the super function
+        var valueList = super.updateSidebar() //call the super function
         
-        this.createEditableValueListItem(valueList,this,"readmeText", "Notes", false);
+        this.createEditableValueListItem(valueList,this,'readmeText', 'Notes', false)
         
     }
     
     draw() {
         
-        super.draw(); //Super call to draw the rest
+        super.draw() //Super call to draw the rest
         
         //draw the two slashes on the node//
-        GlobalVariables.c.strokeStyle = "#949294";
-        GlobalVariables.c.lineWidth = 3;
-        GlobalVariables.c.lineCap = "round";
+        GlobalVariables.c.strokeStyle = '#949294'
+        GlobalVariables.c.lineWidth = 3
+        GlobalVariables.c.lineCap = 'round'
         
-        GlobalVariables.c.beginPath();
-        GlobalVariables.c.moveTo(this.x - 11, this.y + 10);
-        GlobalVariables.c.lineTo(this.x, this.y - 10);
-        GlobalVariables.c.stroke();
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.moveTo(this.x - 11, this.y + 10)
+        GlobalVariables.c.lineTo(this.x, this.y - 10)
+        GlobalVariables.c.stroke()
         
-        GlobalVariables.c.beginPath();
-        GlobalVariables.c.moveTo(this.x, this.y + 10);
-        GlobalVariables.c.lineTo(this.x + 11, this.y - 10);
-        GlobalVariables.c.stroke();
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.moveTo(this.x, this.y + 10)
+        GlobalVariables.c.lineTo(this.x + 11, this.y - 10)
+        GlobalVariables.c.stroke()
     }
     
     setValue(newText) {
-        this.readmeText = newText;
+        this.readmeText = newText
     }
     
     requestReadme(){
         //request any contributions from this atom to the readme
         
-        return [this.readmeText];
+        return [this.readmeText]
     }
     
     serialize(values){
         //Save the readme text to the serial stream
-        var valuesObj = super.serialize(values);
+        var valuesObj = super.serialize(values)
         
-        valuesObj.readmeText = this.readmeText;
+        valuesObj.readmeText = this.readmeText
         
-        return valuesObj;
+        return valuesObj
         
     }
 }
