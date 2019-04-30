@@ -5,24 +5,24 @@ export default class Stretch extends Atom {
     
     constructor(values){
         
-        super(values);
+        super(values)
         
-        this.addIO("input", "geometry", this, "geometry", "");
-        this.addIO("input", "x", this, "number", 1);
-        this.addIO("input", "y", this, "number", 1);
-        this.addIO("input", "z", this, "number", 1);
-        this.addIO("output", "geometry", this, "geometry", "");
+        this.addIO('input', 'geometry', this, 'geometry', '')
+        this.addIO('input', 'x', this, 'number', 1)
+        this.addIO('input', 'y', this, 'number', 1)
+        this.addIO('input', 'z', this, 'number', 1)
+        this.addIO('output', 'geometry', this, 'geometry', '')
         
-        this.name = "Stretch";
-        this.atomType = "Stretch";
+        this.name = 'Stretch'
+        this.atomType = 'Stretch'
         
-        this.setValues(values);
+        this.setValues(values)
     }
     
     updateValue(){
         
-        this.value = this.findIOValue("geometry").scale([this.findIOValue("x"),this.findIOValue("y"),this.findIOValue("z")]);
+        this.value = this.findIOValue('geometry').scale([this.findIOValue('x'),this.findIOValue('y'),this.findIOValue('z')])
         
-        super.updateValue();
+        super.updateValue()
     }
 }
