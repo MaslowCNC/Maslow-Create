@@ -1,8 +1,8 @@
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
-require("babel-core/register");
-require("babel-polyfill");
+require('babel-core/register')
+require('babel-polyfill')
 
 module.exports = {
     mode: 'development',

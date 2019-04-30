@@ -4,22 +4,22 @@ export default class Scale extends Atom{
     
     constructor(values){
         
-        super(values);
+        super(values)
         
-        this.addIO("input", "geometry", this, "geometry", "");
-        this.addIO("input", "multiple", this, "number", 10);
-        this.addIO("output", "geometry", this, "geometry", "");
+        this.addIO('input', 'geometry', this, 'geometry', '')
+        this.addIO('input', 'multiple', this, 'number', 10)
+        this.addIO('output', 'geometry', this, 'geometry', '')
         
-        this.name = "Scale";
-        this.atomType = "Scale";
+        this.name = 'Scale'
+        this.atomType = 'Scale'
         
-        this.setValues(values);
+        this.setValues(values)
     }
     
     updateValue(){
         
-        this.value = this.findIOValue("geometry").scale(this.findIOValue("multiple"));
+        this.value = this.findIOValue('geometry').scale(this.findIOValue('multiple'))
         
-        super.updateValue();
+        super.updateValue()
     }
 }
