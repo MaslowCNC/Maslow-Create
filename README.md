@@ -1,5 +1,8 @@
 # A web based CAD program for cooperative design.
 
+[![Build Status](https://travis-ci.org/BarbourSmith/Maslow-Create.svg?branch=master)](https://travis-ci.org/BarbourSmith/Maslow-Create)
+
+
 ![overview](https://github.com/BarbourSmith/Maslow-Create/blob/master/MaslowCreate.png)
 
 Maslow create breaks with the tradition of CAD programs which inherit from drawing programs and instead inherits from logical languages like programing. This allows it to be a CAD program which has language like features such as importing modules, version control, and colaboration.
@@ -11,10 +14,6 @@ Maslow create breaks with the tradition of CAD programs which inherit from drawi
         git clone https://github.com/BarbourSmith/Maslow-Create.git
 
 2.  Install dependencies:
-
-        yarn
-
-    or
 
         npm install
 
