@@ -213,10 +213,11 @@ export default class AttachmentPoint {
         this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))); 
         this.hoverOffsetX = Math.round(1.5 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection)));
         this.offsetX = Math.max( this.offsetX, this.hoverOffsetX);
+        cursorDistance = Math.max( cursorDistance, 30);
         this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY);
         this.offsetY = Math.max( this.offsetY, this.hoverOffsetY);
-        this.offsetX += this.hoverOffsetX * .15; 
-        this.offsetY += this.hoverOffsetY * .15;
+        this.offsetX = this.hoverOffsetX * 30/cursorDistance; 
+        this.offsetY = this.hoverOffsetY * 30/cursorDistance;
     }
     
     
