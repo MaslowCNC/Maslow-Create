@@ -226,19 +226,20 @@ export default class Atom {
     
     initializeSideBar(){
         //remove everything in the sideBar now
-        while (GlobalVariables.sideBar.firstChild) {
-            GlobalVariables.sideBar.removeChild(GlobalVariables.sideBar.firstChild)
+        let sideBar = document.querySelector('.sideBar');
+        while (sideBar.firstChild) {
+            sideBar.removeChild(sideBar.firstChild)
         }
         
         //add the name as a title
         var name = document.createElement('h1')
         name.textContent = this.name
         name.setAttribute('class','doc-title')
-        GlobalVariables.sideBar.appendChild(name)
+        sideBar.appendChild(name)
         
         //Create a list element
         var valueList = document.createElement('ul')
-        GlobalVariables.sideBar.appendChild(valueList)
+        sideBar.appendChild(valueList)
         valueList.setAttribute('class', 'sidebar-list')
         
         return valueList
