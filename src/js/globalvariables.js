@@ -66,8 +66,6 @@ class GlobalVariables{
         
         this.runMode = false
         
-        this.sideBar = document.querySelector('.sideBar')
-        
         this.gitHub = new GitHubModule()
 
 
