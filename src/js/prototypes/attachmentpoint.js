@@ -209,11 +209,16 @@ export default class AttachmentPoint {
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
-        const angleCorrection = -Math.PI/2 - anglePerIO
-        this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))) 
-        this.hoverOffsetX = Math.round(1.5 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection)))
-        this.offsetX = this.hoverOffsetX //+ this.hoverOffsetX /(cursorDistance); 
-        this.offsetY = this.hoverOffsetY //+ this.hoverOffsetY /(cursorDistance);
+        const angleCorrection = -Math.PI/2 - anglePerIO;
+        this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))); 
+        this.hoverOffsetX = Math.round(1.5 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection)));
+        this.offsetX = Math.max( this.offsetX, this.hoverOffsetX);
+        cursorDistance = Math.max( cursorDistance, 30);
+        this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY);
+        this.offsetY = Math.max( this.offsetY, this.hoverOffsetY);
+        this.offsetX = this.hoverOffsetX * 30/cursorDistance; 
+        this.offsetY = this.hoverOffsetY * 30/cursorDistance;
+
     }
     
     
