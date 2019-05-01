@@ -29,8 +29,6 @@ class GlobalVariables{
         this.canvas = null
         this.c = null
         this.scale1 = 1 
-      
-        
         this.availableTypes = {
             circle:             {creator: Circle, atomType: 'Circle'},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
@@ -55,20 +53,13 @@ class GlobalVariables{
             gcode:              {creator: Gcode, atomType: 'Gcode'},
             code:               {creator: Code, atomType: 'Code'}
         }
-
         this.secretTypes = {
             output:        {creator: Output, atomType: 'Output'}
         }
-
-
         this.currentMolecule
         this.topLevelMolecule
-        
         this.runMode = false
-        
         this.gitHub = new GitHubModule()
-
-
     }
     
     generateUniqueID(){
