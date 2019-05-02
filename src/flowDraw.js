@@ -4,7 +4,7 @@ import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import { api, solidToThreejsDatasets, watchFile} from './js/JSxCAD.js'
 import * as THREE from 'three'
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
 
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -193,7 +193,7 @@ function drawOnWindow(file, { solids }) {
     datasets = solidToThreejsDatasets({}, ...solids)
     for (const dataset of datasets) {
         let geometry = new THREE.BufferGeometry()
-        let { properties = {}, indices, positions, normals } = dataset
+        let { indices, positions, normals } = dataset
         geometry.setIndex( indices )
         geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3))
         geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3))

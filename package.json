@@ -13,13 +13,18 @@
   "license": "ISC",
   "dependencies": {
     "@jscad/csg": "^0.7.0",
+    "@octokit/rest": "^16.25.1",
     "circular-json": "^0.5.9",
+    "codemirror": "^5.46.0",
     "gsap": "^2.0.1",
+    "oauthio-web": "^0.6.2",
+    "octokit": "^1.0.0-hello-world",
     "three": "^0.104.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-regenerator": "^7.4.3",
     "babel-core": "^6.26.3",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^7.1.5",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
