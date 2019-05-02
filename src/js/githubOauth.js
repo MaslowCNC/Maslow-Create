@@ -19,19 +19,25 @@ export default function GitHubModule(){
     })
     
     this.tryLogin = function(){
+        
+        const Octokit2 = require("@octokit/rest")
+        var octokit2 = new Octokit2({auth: "75bb9e27face2668082d71627781cf72fd010669"})
+        octokit2.users.getAuthenticated().then(result => {
+            console.log(result.data.login)
+        })
+        
         // Initialize with OAuth.io app public key
-        console.log(OAuth);
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
         // Use popup for oauth
         OAuth.popup('github').then(github => {
-            
+            console.log(github.access_token)
             octokit = new Octokit({auth: github.access_token})
             
             //Test the authentication 
-            octokit.users.getAuthenticated({}).then(result => {
+            octokit.users.getAuthenticated().then(result => {
                 currentUser = result.data.login
                 console.log("got to show projects");
-                this.showProjectsToLoad()
+            this.showProjectsToLoad()
             })
         })
     }

@@ -18,7 +18,6 @@
     "codemirror": "^5.46.0",
     "gsap": "^2.0.1",
     "oauthio-web": "^0.6.2",
-    "octokit": "^1.0.0-hello-world",
     "three": "^0.104.0"
   },
   "devDependencies": {
