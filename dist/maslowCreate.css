@@ -85,18 +85,6 @@ body {
     background: #B0AEB0; 
 }
 
-#atom-size{
-  position:absolute;
-  top:5px;
-  padding:5px;
-  border-radius:5px;
-  float: left;
-  margin-left:10px;
-  background:#484848;
-  color: white;
-  font-size:.6rem; 
-}
-
 #parametersdiv {
   margin: 0px; /* not inherited */
   padding: 0px;
@@ -393,6 +381,7 @@ input.menu_search:focus {
     boarder: 1px solid black;
     display: inline-block;
     padding: 10px;
+    font-weight:bold;
 }
 
 .project:hover{

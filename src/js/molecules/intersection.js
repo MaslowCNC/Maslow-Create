@@ -5,24 +5,24 @@ export default class Intersection extends Atom {
     
     constructor(values){
         
-        super(values);
+        super(values)
         
-        this.addIO("input", "geometry1", this, "geometry", "");
-        this.addIO("input", "geometry2", this, "geometry", "");
-        this.addIO("output", "geometry", this, "geometry", "");
+        this.addIO('input', 'geometry1', this, 'geometry', '')
+        this.addIO('input', 'geometry2', this, 'geometry', '')
+        this.addIO('output', 'geometry', this, 'geometry', '')
         
-        this.name = "Intersection";
-        this.atomType = "Intersection";
+        this.name = 'Intersection'
+        this.atomType = 'Intersection'
         
-        this.setValues(values);
+        this.setValues(values)
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         try{
-            this.codeBlock = GlobalVariables.api.intersection(this.findIOValue("geometry1"), this.findIOValue("geometry2"));
+            this.value = GlobalVariables.api.intersection(this.findIOValue('geometry1'), this.findIOValue('geometry2'))
         }catch(err){}
         
-        super.updateCodeBlock();
+        super.updateValue()
     }
 }

@@ -4,25 +4,25 @@ export default class Extrude extends Atom{
     
     constructor(values){
         
-        super(values);
+        super(values)
         
-        this.name = "Extrude";
-        this.atomType = "Extrude";
+        this.name = 'Extrude'
+        this.atomType = 'Extrude'
         
-        this.addIO("input", "geometry" , this, "geometry", "");
-        this.addIO("input", "height"   , this, "number", 10);
-        this.addIO("output", "geometry", this, "geometry", "");
+        this.addIO('input', 'geometry' , this, 'geometry', '')
+        this.addIO('input', 'height'   , this, 'number', 10)
+        this.addIO('output', 'geometry', this, 'geometry', '')
         
-        this.setValues(values);
+        this.setValues(values)
     }
     
-    updateCodeBlock(){
+    updateValue(){
         
         try{
-            this.codeBlock = this.findIOValue("geometry").extrude({ height: this.findIOValue("height") });
+            this.value = this.findIOValue('geometry').extrude({ height: this.findIOValue('height') })
         }
         catch(err){}
         
-        super.updateCodeBlock();
+        super.updateValue()
     }
 }
