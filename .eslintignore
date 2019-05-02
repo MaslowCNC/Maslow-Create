@@ -10,3 +10,4 @@ dist/js/octokit-rest.min.js
 dist/js/SVGReader.js
 dist/js/vec2.js
 src/js/JSxCAD.js
+src/js/FileSaver.js

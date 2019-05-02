@@ -195,6 +195,7 @@ function drawOnWindow(file, { solids }) {
     datasets = solidToThreejsDatasets({}, ...solids)
     for (const dataset of datasets) {
         let geometry = new THREE.BufferGeometry()
+        let { properties = {}, indices, positions, normals } = dataset
         geometry.setIndex( indices )
         geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3))
         geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3))

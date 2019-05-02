@@ -1,6 +1,7 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 import { readFileSync } from '../JSxCAD.js'
+import saveAs from '../FileSaver'
 
 export default class Gcode extends Atom {
     
