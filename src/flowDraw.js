@@ -2,7 +2,7 @@ import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import { api, readFileSync, solidToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './js/JSxCAD.js'
+import { api, solidToThreejsDatasets, watchFile} from './js/JSxCAD.js'
 
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -10,8 +10,6 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 let originalWidth=GlobalVariables.canvas.width
-let originalHeight=GlobalVariables.canvas.height
-
 
 var url = window.location.href
 GlobalVariables.runMode = url.includes('run') //Check if we are using the run mode based on url
@@ -76,7 +74,7 @@ flowCanvas.addEventListener('dblclick', event => {
     })
     
     if (clickHandledByMolecule == false){
-        console.log('double click menu open not working in flowDraw.js')
+        console.warn('double click menu open not working in flowDraw.js')
         //showmenu(event);
     }
 })
@@ -185,22 +183,7 @@ function onWindowResize() {
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth   
 }
 
-const makeMaterial = (material) => {
-    switch (material) {
-    case 'metal':
-        return new THREE.MeshStandardMaterial({
-            color: 0x779aac,
-            emissive: 0x7090a0,
-            roughness: 0.65,
-            metalness: 0.99,
-        })
-    default:
-        return new THREE.MeshNormalMaterial()
-    }
-}
-
 function drawOnWindow(file, { solids }) {
-    const { data } = file
     // Delete any previous dataset in the window.
     for (const { controller, mesh } of datasets) {
         if (controller) {
@@ -213,7 +196,6 @@ function drawOnWindow(file, { solids }) {
     for (const dataset of datasets) {
         let geometry = new THREE.BufferGeometry()
         let { properties = {}, indices, positions, normals } = dataset
-        let { material, tags = [] } = properties
         geometry.setIndex( indices )
         geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3))
         geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3))
@@ -252,8 +234,6 @@ let camera
 let controls
 let scene
 let renderer
-let stats
-let mesh
 let gui
 let targetDiv = document.getElementById('viewerContext')
 

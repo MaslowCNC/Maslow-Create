@@ -2,6 +2,7 @@ import Atom from '../prototypes/atom'
 import Connector from '../prototypes/connector'
 import GlobalVariables from '../globalvariables'
 import { readFileSync } from '../JSxCAD.js'
+import saveAs from '../FileSaver'
 
 export default class Molecule extends Atom{
 
@@ -111,26 +112,26 @@ export default class Molecule extends Atom{
             this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
         }
         else{ //If we are the top level molecule and not in run mode
-            this.createButton(valueList,this,'Load A Different Project',(e) => {
+            this.createButton(valueList,this,'Load A Different Project',() => {
                 GlobalVariables.gitHub.showProjectsToLoad()
             })
             
-            this.createButton(valueList,this,'Share This Project',(e) => {
+            this.createButton(valueList,this,'Share This Project',() => {
                 GlobalVariables.gitHub.shareOpenedProject()
             })
             
-            this.createButton(valueList,this,'GitHub',(e) => {
+            this.createButton(valueList,this,'GitHub',() => {
                 GlobalVariables.gitHub.openGitHubPage()
             })
             
         }
         
-        this.createButton(valueList,this,'Download STL',(e) => {
+        this.createButton(valueList,this,'Download STL',() => {
             const blob = new Blob([readFileSync('window')], {type: 'text/plain;charset=utf-8'})
             saveAs(blob, this.name+'.stl')
         })
         
-        this.createButton(valueList,this,'Download SVG',(e) => {
+        this.createButton(valueList,this,'Download SVG',() => {
             const slice = GlobalVariables.api.crossSection({},this.value)
             GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice)
             const stlContent = readFileSync('makeSVG')
@@ -180,7 +181,7 @@ export default class Molecule extends Atom{
         }
     }
 
-    goToParentMolecule(self){
+    goToParentMolecule(){
         //Go to the parent molecule if there is one
         
         GlobalVariables.currentMolecule.updateValue()
@@ -386,11 +387,11 @@ export default class Molecule extends Atom{
             })
         }
         catch(err){
-            console.log('Unable to create connector')
+            console.warn('Unable to create connector')
         }
         
         if(cp1NotFound || cp2NotFound){
-            console.log('Unable to create connector')
+            console.warn('Unable to create connector')
             return
         }
         

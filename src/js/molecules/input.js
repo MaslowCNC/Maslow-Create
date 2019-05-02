@@ -80,11 +80,9 @@ export default class Input extends Atom {
     
     updateParentName(){
         //Callled when the name has changed to updated the name of the parent molecule IO
-        console.log('updating parent names')
         //Run through the parent molecule and find the input with the same name
         this.parent.children.forEach(child => {
             if (child.name == this.oldName){
-                console.log('matching parent IO found for: ' + this.oldName)
                 child.name = this.name
             }
         })
