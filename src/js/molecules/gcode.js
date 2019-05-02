@@ -2,6 +2,7 @@ import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 import { readFileSync } from '../JSxCAD.js'
 import saveAs from '../FileSaver'
+import SVGReader from '../SVGReader'
 
 export default class Gcode extends Atom {
     
@@ -125,7 +126,7 @@ export default class Gcode extends Atom {
                 'F' + settings.seekRate
             ].join(' '))
         
-            for (var p = settings.passWidth; p>=settings.materialWidth; p+=settings.passWidth) {
+            for (var p = -settings.passWidth; p<=settings.materialWidth; p+=settings.passWidth) {
 
                 // begin the cut by dropping the tool to the work
                 gcode.push(['G1',

@@ -33,7 +33,7 @@
 */
 
 
-SVGReader = {
+export default {
 
     boundarys : {},
     // output path flattened (world coords)

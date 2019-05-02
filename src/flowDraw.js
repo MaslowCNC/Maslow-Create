@@ -3,6 +3,8 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import { api, solidToThreejsDatasets, watchFile} from './js/JSxCAD.js'
+import * as THREE from 'three'
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -122,7 +124,7 @@ function init() {
     camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
     [camera.position.x, camera.position.y, camera.position.z] = [0, -30, 50]
     //
-    controls = new THREE.TrackballControls(camera, targetDiv)
+    controls = new TrackballControls(camera, targetDiv)
     controls.rotateSpeed = 4.0
     controls.zoomSpeed = 4.0
     controls.panSpeed = 2.0
@@ -151,10 +153,6 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio)
     targetDiv.appendChild(renderer.domElement)
     //
-    //
-    gui = new dat.GUI({ autoPlace: false })
-    //targetDiv.appendChild(gui.domElement);
-    // gui.add( material, 'wireframe' );
     //
     window.addEventListener('resize', () => { onWindowResize() }, false)
 

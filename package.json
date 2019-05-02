@@ -14,7 +14,8 @@
   "dependencies": {
     "@jscad/csg": "^0.7.0",
     "circular-json": "^0.5.9",
-    "gsap": "^2.0.1"
+    "gsap": "^2.0.1",
+    "three": "^0.104.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-regenerator": "^7.4.3",
