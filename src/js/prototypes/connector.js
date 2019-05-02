@@ -110,9 +110,5 @@ export default class Connector {
         }
         this.draw()
     }
-    
-    wasConnectionMade(x,y, connector){
-        return false
-    }
 
 }

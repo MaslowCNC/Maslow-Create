@@ -24,7 +24,9 @@ export default class Rotate extends Atom {
         try{
             this.value = GlobalVariables.api.rotate([this.findIOValue('x-axis degrees'), this.findIOValue('y-axis degrees'), this.findIOValue('z-axis degrees')], this.findIOValue('geometry'))
         }
-        catch(err){}
+        catch(err){
+            console.warn("Error. Couldn't render")
+        }
         
         super.updateValue()
     }

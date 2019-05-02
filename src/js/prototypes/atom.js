@@ -125,10 +125,10 @@ export default class Atom {
     removeIO(type, name, target){
         //Remove the target IO attachment point
         
-        this.children.forEach(io => {
+        target.children.forEach(io => {
             if(io.name == name && io.type == type){
                 io.deleteSelf()
-                this.children.splice(this.children.indexOf(io),1)
+                target.children.splice(target.children.indexOf(io),1)
             }
         })
     }
@@ -226,7 +226,7 @@ export default class Atom {
     
     initializeSideBar(){
         //remove everything in the sideBar now
-        let sideBar = document.querySelector('.sideBar');
+        let sideBar = document.querySelector('.sideBar')
         while (sideBar.firstChild) {
             sideBar.removeChild(sideBar.firstChild)
         }
@@ -264,8 +264,7 @@ export default class Atom {
         this.draw()
     }
     
-    serialize(savedObject){
-        //savedObject is only used by Molecule type atoms
+    serialize(){
         
         var ioValues = []
         this.children.forEach(io => {
@@ -322,8 +321,6 @@ export default class Atom {
             GlobalVariables.api.writeStl({ path: 'window' },this.value)
         }
         catch(err) {
-            console.log('Oh no can\'t render that')
-            //console.log(err);
             GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1))
         }
     }
@@ -372,7 +369,7 @@ export default class Atom {
         valueTextDiv.setAttribute('id', thisID)
         
         
-        document.getElementById(thisID).addEventListener('focusout', event => {
+        document.getElementById(thisID).addEventListener('focusout', () => {
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
                 valueInBox = parseFloat(valueInBox)
@@ -397,7 +394,7 @@ export default class Atom {
 
     }
     
-    createNonEditableValueListItem(list,object,key, label, resultShouldBeNumber){
+    createNonEditableValueListItem(list,object,key, label){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         

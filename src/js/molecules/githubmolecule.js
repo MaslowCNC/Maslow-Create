@@ -59,7 +59,7 @@ export default class GitHubMolecule extends Molecule {
         })
     }
     
-    serialize(savedObject){
+    serialize(){
         
         //Return a placeholder for this molecule
         var object = {
@@ -109,16 +109,16 @@ export default class GitHubMolecule extends Molecule {
         })
         
         if(GlobalVariables.runMode){ //If the molecule is displaying in run mode
-            this.createButton(valueList,this,'Create A Copy',(e) => {
+            this.createButton(valueList,this,'Create A Copy',() => {
                 GlobalVariables.gitHub.forkByID(this.projectID)
             })
             
-            this.createButton(valueList,this,'Your Projects',(e) => {
+            this.createButton(valueList,this,'Your Projects',() => {
                 window.location.href = '/'
             })
         }
         
-        this.createButton(valueList,this,'Star This Project',(e) => {
+        this.createButton(valueList,this,'Star This Project',() => {
             //Star the project
             GlobalVariables.gitHub.starProject(this.projectID)
         })

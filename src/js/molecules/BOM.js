@@ -51,7 +51,7 @@ export default class BillOfMaterials extends Atom{
         return this.BOMlist
     }
     
-    createBOM(list,parent,BOMlist){
+    createBOM(list,parent){
         
         list.appendChild(document.createElement('br'))
         list.appendChild(document.createElement('br'))
@@ -74,13 +74,12 @@ export default class BillOfMaterials extends Atom{
             list.appendChild(x)
         })
         
-        this.createButton(list,parent,'Add BOM Entry',(e) => {
+        this.createButton(list,parent,'Add BOM Entry',() => {
             this.addBOMEntry()
         })
     }
     
     addBOMEntry(){
-        console.log('add bom entry ran')
         this.BOMlist.push(new BOMEntry())
         
         this.updateSidebar()

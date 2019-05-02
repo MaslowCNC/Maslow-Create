@@ -45,7 +45,7 @@ export default class Gcode extends Atom {
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
-        this.createButton(valueList,this,'Download Gcode',(e) => {
+        this.createButton(valueList,this,'Download Gcode',() => {
             const blob = new Blob([this.value], {type: 'text/plain;charset=utf-8'})
             saveAs(blob, GlobalVariables.topLevelMolecule.name+'.nc')
         })

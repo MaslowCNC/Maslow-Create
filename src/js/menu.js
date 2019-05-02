@@ -94,7 +94,7 @@ class Menu {
         document.getElementById('menuInput').focus()
     }
 
-    hidemenu(ev){
+    hidemenu(){
         this.menu.classList.add('off')
         this.menu.style.top = '-200%'
         this.menu.style.left = '-200%'

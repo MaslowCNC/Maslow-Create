@@ -19,7 +19,9 @@ export default class Tag extends Atom{
         
         try{
             this.value = this.findIOValue('geometry').as(this.findIOValue('tag'))
-        }catch(err){console.log('Unable to add tag')}
+        }catch(err){
+            console.warn('Unable to add tag')
+        }
         
         super.updateValue()
     }
