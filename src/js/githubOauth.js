@@ -1,7 +1,7 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables'
 import { OAuth } from 'oauthio-web'
-import { readFileSync } from './JSxCAD.js'
+import { readFileSync } from './lib/JSxCAD.js'
 
 export default function GitHubModule(){
     
@@ -24,14 +24,12 @@ export default function GitHubModule(){
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
         // Use popup for oauth
         OAuth.popup('github').then(github => {
-            console.log(github.access_token)
             octokit = new Octokit({auth: github.access_token})
             
             //Test the authentication 
             octokit.users.getAuthenticated().then(result => {
                 currentUser = result.data.login
-                console.log("got to show projects");
-            this.showProjectsToLoad()
+                this.showProjectsToLoad()
             })
         })
     }

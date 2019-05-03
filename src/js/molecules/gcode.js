@@ -1,8 +1,8 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
-import { readFileSync } from '../JSxCAD.js'
-import saveAs from '../FileSaver'
-import SVGReader from '../SVGReader'
+import { readFileSync } from '../lib/JSxCAD.js'
+import saveAs from '../lib/FileSaver'
+import SVGReader from '../lib/SVGReader'
 
 export default class Gcode extends Atom {
     

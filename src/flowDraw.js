@@ -2,7 +2,7 @@ import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import { api, solidToThreejsDatasets, watchFile} from './js/JSxCAD.js'
+import { api, solidToThreejsDatasets, watchFile} from './js/lib/JSxCAD.js'
 import * as THREE from 'three'
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
 
