@@ -1,12 +1,11 @@
-
 import GlobalVariables from './globalvariables'
-import { api, solidToThreejsDatasets, watchFile} from './JSxCAD.js'
+//import { api, solidToThreejsDatasets, watchFile} from './JSxCAD.js'
 
 export default class Display {
 
     constructor(){
-        GlobalVariables.api = api
-        
+        GlobalVariables.api = require('@jsxcad/api-v1')
+        this.convert = require('@jsxcad/convert-threejs')
         this.datasets = []
         this.camera
         this.controls
@@ -49,7 +48,7 @@ export default class Display {
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
         
-        watchFile('window', (file, { solids }) => {this.updateDisplayData(solids)})
+        //watchFile('window', (file, { solids }) => {this.updateDisplayData(solids)})
         
         
         window.addEventListener('resize', () => { this.onWindowResize() }, false)
@@ -71,33 +70,67 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        //this.renderWorker.postMessage(shape);
+        try{
+            this.updateDisplayData(this.convert.toThreejsGeometry(shape.toDisjointGeometry()));
+        }catch(err){
+            console.warn("can't display that")
+            console.warn(err)
+        }
     }
     
-    updateDisplayData(solids){
+    updateDisplayData(threejsGeometry){
         // Delete any previous dataset in the window.
         for (const { mesh } of this.datasets) {
-            this.scene.remove(mesh)
+            this.scene.remove(mesh);
         }
         
-        // display the returned data
-        this.datasets = solidToThreejsDatasets({}, ...solids)
-        for (const dataset of this.datasets) {
-            let geometry = new THREE.BufferGeometry()
-            let { properties = {}, indices, positions, normals } = dataset
-            let { material, tags = [] } = properties
-            geometry.setIndex( indices )
-            geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3))
-            geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3))
-            let threeMaterial = new THREE.MeshStandardMaterial({
-                color: 0x5f6670,
-                emissive: 0x5f6670,
-                roughness: 0.65,
-                metalness: 0.40,
-            })
-            dataset.mesh = new THREE.Mesh(geometry, threeMaterial)
-            this.scene.add(dataset.mesh)
-        }
+        // Build new datasets from the written data, and display them.
+        this.datasets = [];
+        
+        let threeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5f6670,
+            roughness: 0.65,
+            metalness: 0.40
+        })
+        
+        const walk = (geometry) => {
+            if (geometry.assembly) {
+              geometry.assembly.forEach(walk);
+            } else if (geometry.threejsSegments) {
+              const segments = geometry.threejsSegments;
+              const dataset = {};
+              const threejsGeometry = new THREE.Geometry();
+              const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+              for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+                threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+              }
+              dataset.mesh = new THREE.LineSegments(threejsGeometry, threeMaterial);
+              this.scene.add(dataset.mesh);
+              this.datasets.push(dataset);
+            } else if (geometry.threejsSolid) {
+              const { positions, normals } = geometry.threejsSolid;
+              const dataset = {};
+              const threejsGeometry = new THREE.BufferGeometry();
+              threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+              threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+              const material = new THREE.MeshNormalMaterial();
+              dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial);
+              this.scene.add(dataset.mesh);
+              this.datasets.push(dataset);
+            } else if (geometry.threejsSurface) {
+              const { positions, normals } = geometry.threejsSurface;
+              const dataset = {};
+              const threejsGeometry = new THREE.BufferGeometry();
+              threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+              threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+              const material = new THREE.MeshNormalMaterial();
+              dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial);
+              this.scene.add(dataset.mesh);
+              this.datasets.push(dataset);
+            }
+          };
+
+        walk(threejsGeometry);
     }
     
     onWindowResize() {

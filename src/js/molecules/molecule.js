@@ -1,7 +1,6 @@
 import Atom from '../prototypes/atom'
 import Connector from '../prototypes/connector'
 import GlobalVariables from '../globalvariables'
-import { readFileSync } from '../JSxCAD.js'
 import saveAs from '../FileSaver'
 
 export default class Molecule extends Atom{
