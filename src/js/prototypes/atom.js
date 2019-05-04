@@ -59,28 +59,20 @@ export default class Atom {
         //make it impossible to draw atoms too close to the edge
         //not sure what x left margin should be because if it's too close it would cover expanded text
         var canvasFlow = document.querySelector('#flow-canvas')
-        if (this.x < this.radius*3){
-            this.x+= this.radius*3 
-            //for attachment point draw adjustment
-            this.x = this.radius*3    
+        if (this.x < this.radius){
+            this.x = this.radius
             GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
-        else if (this.y<this.radius*2){
-            this.y += this.radius 
-            //for attachment point draw adjustment
-            this.y += this.radius 
+        else if (this.y<this.radius){
+            this.y = this.radius 
             GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
-        else if (this.x + this.radius*2 > canvasFlow.width/GlobalVariables.scale1){
-            this.x -= this.radius*2 
-            //for attachment point draw adjustment
-            this.x -= this.radius*2 
+        else if (this.x + this.radius > canvasFlow.width/GlobalVariables.scale1){
+            this.x = canvasFlow.width/GlobalVariables.scale1 - this.radius
             GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
-        else if (this.y+ this.radius*2 > canvasFlow.height/GlobalVariables.scale1){
-            this.y-= this.radius 
-            //for attachment point draw adjustment
-            this.y -= this.radius 
+        else if (this.y + this.radius > canvasFlow.height/GlobalVariables.scale1){
+            this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
             GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else{
