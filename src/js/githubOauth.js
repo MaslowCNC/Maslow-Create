@@ -1,6 +1,5 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables'
-import { readFileSync } from './JSxCAD.js';
 
 export default function GitHubModule(){
     
@@ -350,7 +349,7 @@ export default function GitHubModule(){
                         console.log("Readme created");
                         
                         var _this = this;
-                        intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
+                        intervalTimer = setInterval(function() { _this.saveProject(); }, 3000000); //Save the project regularly
                     });
                 });
             });
@@ -517,7 +516,7 @@ export default function GitHubModule(){
             popup.classList.add('off');
             
             var _this = this;
-            intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
+            intervalTimer = setInterval(function() { _this.saveProject(); }, 3000000); //Save the project regularly
         })
         
     }

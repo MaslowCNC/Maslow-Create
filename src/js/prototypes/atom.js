@@ -317,12 +317,13 @@ export default class Atom {
     
     sendToRender(){
         //Send code to JSxCAD to render
-        try {
-            GlobalVariables.api.writeStl({ path: 'window' },this.value)
-        }
-        catch(err) {
-            GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1))
-        }
+        GlobalVariables.display.writeToDisplay(this.value);
+        // try {
+            // GlobalVariables.api.writeStl({ path: 'window' },this.value)
+        // }
+        // catch(err) {
+            // GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1))
+        // }
     }
     
     findIOValue(ioName){
