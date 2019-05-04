@@ -155,6 +155,7 @@ function animate() {
     GlobalVariables.c.setTransform(1,0,0,1,0,0)
 
     GlobalVariables.display.render()
+    GlobalVariables.display.controls.update()
 }
 
 init()
