@@ -71,13 +71,10 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        console.log("writing to the display");
         //this.renderWorker.postMessage(shape);
     }
     
     updateDisplayData(solids){
-        console.log("Would update display data");
-        console.log(solids);
         // Delete any previous dataset in the window.
         for (const { mesh } of this.datasets) {
             this.scene.remove(mesh)
