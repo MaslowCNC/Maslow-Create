@@ -349,7 +349,7 @@ export default function GitHubModule(){
                         console.log("Readme created");
                         
                         var _this = this;
-                        intervalTimer = setInterval(function() { _this.saveProject(); }, 3000000); //Save the project regularly
+                        intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
                     });
                 });
             });
@@ -382,7 +382,10 @@ export default function GitHubModule(){
             
             try{
                 GlobalVariables.api.writeStl({ path: 'githubStl' },GlobalVariables.topLevelMolecule.value);
-                GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]));
+                GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0])).then( returnValue => {
+                    console.log("Return value: ")
+                    console.log(returnValue)
+                })
             }
             catch(err){
                 console.log("Unable to generate .stl and .svg files");
@@ -516,7 +519,7 @@ export default function GitHubModule(){
             popup.classList.add('off');
             
             var _this = this;
-            intervalTimer = setInterval(function() { _this.saveProject(); }, 3000000); //Save the project regularly
+            intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
         })
         
     }
