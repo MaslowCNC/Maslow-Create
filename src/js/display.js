@@ -88,19 +88,48 @@ export default class Display {
             this.scene.remove(this.scene.children[0]); 
         }
         
-        let geometry = new THREE.BufferGeometry()
-        let { positions, normals } = threejsGeometry.threejsSolid
-        
-        geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3))
-        geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3))
         let threeMaterial = new THREE.MeshStandardMaterial({
             color: 0x5f6670,
             emissive: 0x5f6670,
             roughness: 0.65,
             metalness: 0.40,
         })
-        let mesh = new THREE.Mesh(geometry, threeMaterial)
-        this.scene.add(mesh)
+        
+        const walk = (geometry) => {
+            if (geometry.assembly) {
+              geometry.assembly.forEach(walk);
+            } else if (geometry.threejsSegments) {
+              const segments = geometry.threejsSegments;
+              const dataset = {};
+              const threejsGeometry = new THREE.Geometry();
+              const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+              for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+                threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+              }
+              const mesh = new THREE.LineSegments(threejsGeometry, material);
+              this.scene.add(mesh);
+            } else if (geometry.threejsSolid) {
+              const { positions, normals } = geometry.threejsSolid;
+              const dataset = {};
+              const threejsGeometry = new THREE.BufferGeometry();
+              threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+              threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+              const material = new THREE.MeshNormalMaterial();
+              const mesh = new THREE.Mesh(threejsGeometry, material);
+              this.scene.add(mesh);
+            } else if (geometry.threejsSurface) {
+              const { positions, normals } = geometry.threejsSurface;
+              const dataset = {};
+              const threejsGeometry = new THREE.BufferGeometry();
+              threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+              threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+              const material = new THREE.MeshNormalMaterial();
+              const mesh = new THREE.Mesh(threejsGeometry, material);
+              this.scene.add(mesh);
+            }
+          };
+
+        walk(threejsGeometry);
     }
     
     onWindowResize() {
