@@ -12,8 +12,6 @@ export default function GitHubModule(){
     var intervalTimer;
     var convertSVG = require('@jsxcad/convert-svg')
     var convertSTL = require('@jsxcad/convert-stl')
-    console.log("Convert stl: ");
-    console.log(convertSTL);
     
     document.getElementById("loginButton").addEventListener("mousedown", (e) => {
        this.tryLogin();
@@ -353,7 +351,7 @@ export default function GitHubModule(){
                         console.log("Readme created");
                         
                         var _this = this;
-                        intervalTimer = setInterval(function() { _this.saveProject(); }, 10000); //Save the project regularly
+                        intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
                     });
                 });
             });
@@ -520,7 +518,7 @@ export default function GitHubModule(){
             popup.classList.add('off');
             
             var _this = this;
-            intervalTimer = setInterval(function() { _this.saveProject(); }, 10000); //Save the project regularly
+            intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
         })
         
     }
