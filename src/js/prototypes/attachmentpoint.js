@@ -257,7 +257,6 @@ export default class AttachmentPoint {
     }
 
     setDefault(){
-        console.log("setDefaultran\n\n\n")
         this.setValue(this.defaultValue)
        
     }
