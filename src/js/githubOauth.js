@@ -388,13 +388,12 @@ export default function GitHubModule(){
                 // GlobalVariables.api.writeStl({ path: 'githubStl' },GlobalVariables.topLevelMolecule.value);
                 // GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]))
             console.log(GlobalVariables.topLevelMolecule.value)
-            const disjoint = GlobalVariables.topLevelMolecule.value.toDisjointGeometry()
-            console.log("Disjoint: ")
-            console.log(disjoint);
             
-            convertSTL.toStla({}, disjoint).then( stlContent => {
-                console.log("STL Generated ");
-                convertSVG.toSvg({}, disjoint).then( contentSvg => {
+            convertSTL.toStla({}, GlobalVariables.topLevelMolecule.value.toDisjointGeometry()).then( stlContent => {
+                const crossSection = GlobalVariables.topLevelMolecule.value.crossSection()
+                console.log("crossSection: ");
+                console.log(crossSection);
+                convertSVG.toSvg({}, crossSection).then( contentSvg => {
                     console.log("Svg generated ");
                     console.log(contentSvg);
             
