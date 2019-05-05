@@ -129,6 +129,7 @@ export default class Atom {
                 valueType: valueType,
                 name: name,
                 value: defaultValue,
+                defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint'
             })
@@ -343,13 +344,13 @@ export default class Atom {
     
     sendToRender(){
         //Send code to JSxCAD to render
-        GlobalVariables.display.writeToDisplay(this.value);
-        // try {
-            // GlobalVariables.api.writeStl({ path: 'window' },this.value)
-        // }
-        // catch(err) {
-            // GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1))
-        // }
+        try{
+            GlobalVariables.display.writeToDisplay(this.value);
+        }
+        catch(err){
+            this.setAlert(err);    
+        }
+
     }
     
     findIOValue(ioName){
