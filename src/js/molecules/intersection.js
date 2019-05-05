@@ -21,7 +21,9 @@ export default class Intersection extends Atom {
         
         try{
             this.value = GlobalVariables.api.intersection(this.findIOValue('geometry1'), this.findIOValue('geometry2'))
-        }catch(err){}
+        }catch(err){
+            console.warn("Error. Couldn't render")
+        }
         
         super.updateValue()
     }

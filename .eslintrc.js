@@ -9,7 +9,9 @@ module.exports = {
     },
     rules: {
         indent: ['error', 4],
-        semi: ['error', 'never']
+        semi: ['error', 'never'],
+        "no-console": ["error", { allow: ["warn", "error"] }]
+
     },
     globals: {
         module: true,

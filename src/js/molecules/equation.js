@@ -20,7 +20,7 @@ export default class Equation extends Atom {
         
     }
     
-    serialize(savedObject){
+    serialize(){
         var superSerialObject = super.serialize(null)
         
         //Write the current equation to the serialized object
@@ -57,9 +57,6 @@ export default class Equation extends Atom {
         case 6:
             z = Math.pow(x,y)
             break
-        default:
-            console.log('no options found')
-            console.log(this.currentEquation)
         }
         
         //Set the output to be the generated value

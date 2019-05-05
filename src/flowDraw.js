@@ -2,21 +2,18 @@ import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import { api, readFileSync, solidToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './js/JSxCAD.js'
+import Display from './js/display.js'
 
+GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 let originalWidth=GlobalVariables.canvas.width
-let originalHeight=GlobalVariables.canvas.height
-
 
 var url = window.location.href
 GlobalVariables.runMode = url.includes('run') //Check if we are using the run mode based on url
-
-GlobalVariables.api = api
 
 let lowerHalfOfScreen = document.querySelector('.flex-parent')
 if(!GlobalVariables.runMode){
@@ -76,7 +73,7 @@ flowCanvas.addEventListener('dblclick', event => {
     })
     
     if (clickHandledByMolecule == false){
-        console.log('double click menu open not working in flowDraw.js')
+        console.warn('double click menu open not working in flowDraw.js')
         //showmenu(event);
     }
 })
@@ -120,55 +117,14 @@ function init() {
         }
     }
     
-    //Add the JSXCAD window
-    camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
-    [camera.position.x, camera.position.y, camera.position.z] = [0, -30, 50]
-    //
-    controls = new THREE.TrackballControls(camera, targetDiv)
-    controls.rotateSpeed = 4.0
-    controls.zoomSpeed = 4.0
-    controls.panSpeed = 2.0
-    controls.noZoom = false
-    controls.noPan = false
-    controls.staticMoving = true
-    controls.dynamicDampingFactor = 0.1
-    controls.keys = [65, 83, 68]
-    controls.addEventListener('change', () => { render() })
-    //
-    scene = new THREE.Scene()
-    scene.background = new THREE.Color(0xB0AEB0)
-    scene.add(camera)
-    //
-    var ambientLight = new THREE.AmbientLight(0x222222)
-    scene.add(ambientLight)
-    // var light1 = new THREE.PointLight(0xffffff, 0, 1);
-    // camera.add(light1);
-    var light2 = new THREE.DirectionalLight(0xffffff, 1)
-    light2.position.set(1, 1, 1)
-    camera.add(light2)
-    // scene.add( light2 );
-
-    //
-    renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setPixelRatio(window.devicePixelRatio)
-    targetDiv.appendChild(renderer.domElement)
-    //
-    //
-    gui = new dat.GUI({ autoPlace: false })
-    //targetDiv.appendChild(gui.domElement);
-    // gui.add( material, 'wireframe' );
-    //
     window.addEventListener('resize', () => { onWindowResize() }, false)
 
     onWindowResize()
+    GlobalVariables.display.onWindowResize()
     animate()
 }
 
 function onWindowResize() {
-    camera.aspect = targetDiv.clientWidth / (targetDiv.clientHeight - 1)
-    camera.updateProjectionMatrix()
-    controls.handleResize()
-    renderer.setSize(targetDiv.clientWidth, targetDiv.clientHeight - 1)
     
     var bounds = GlobalVariables.canvas.getBoundingClientRect()
     GlobalVariables.canvas.width = bounds.width
@@ -185,52 +141,7 @@ function onWindowResize() {
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth   
 }
 
-const makeMaterial = (material) => {
-    switch (material) {
-    case 'metal':
-        return new THREE.MeshStandardMaterial({
-            color: 0x779aac,
-            emissive: 0x7090a0,
-            roughness: 0.65,
-            metalness: 0.99,
-        })
-    default:
-        return new THREE.MeshNormalMaterial()
-    }
-}
 
-function drawOnWindow(file, { solids }) {
-    const { data } = file
-    // Delete any previous dataset in the window.
-    for (const { controller, mesh } of datasets) {
-        if (controller) {
-            gui.remove(controller)
-        }
-        scene.remove(mesh)
-    }
-    // Build new datasets from the written data, and display them.
-    datasets = solidToThreejsDatasets({}, ...solids)
-    for (const dataset of datasets) {
-        let geometry = new THREE.BufferGeometry()
-        let { properties = {}, indices, positions, normals } = dataset
-        let { material, tags = [] } = properties
-        geometry.setIndex( indices )
-        geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3))
-        geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3))
-        let threeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x5f6670,
-            emissive: 0x5f6670,
-            roughness: 0.65,
-            metalness: 0.40,
-        })
-        dataset.mesh = new THREE.Mesh(geometry, threeMaterial)
-        scene.add(dataset.mesh)
-    }
-}
-
-function render() {
-    renderer.render( scene, camera )
-}
 
 // Animation Loop
 function animate() {
@@ -243,23 +154,9 @@ function animate() {
     })
     GlobalVariables.c.setTransform(1,0,0,1,0,0)
 
-    render()
-    controls.update()
+    GlobalVariables.display.render()
+    GlobalVariables.display.controls.update()
 }
 
-let datasets = []
-let camera
-let controls
-let scene
-let renderer
-let stats
-let mesh
-let gui
-let targetDiv = document.getElementById('viewerContext')
-
 init()
-
-watchFile('window', drawOnWindow)
-
-//api.writeStl({ path: 'window' },api.sphere());
 

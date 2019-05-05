@@ -1,6 +1,5 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables'
-import { readFileSync } from './JSxCAD.js';
 
 export default function GitHubModule(){
     
@@ -383,7 +382,10 @@ export default function GitHubModule(){
             
             try{
                 GlobalVariables.api.writeStl({ path: 'githubStl' },GlobalVariables.topLevelMolecule.value);
-                GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]));
+                GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0])).then( returnValue => {
+                    console.log("Return value: ")
+                    console.log(returnValue)
+                })
             }
             catch(err){
                 console.log("Unable to generate .stl and .svg files");

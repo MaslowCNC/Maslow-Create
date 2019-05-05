@@ -41,6 +41,10 @@ module.exports = {
             { from: 'src/run/index.html', to: 'run/index.html' }
         ]),
     ],
+    node: {
+        esm: 'empty',
+        fs: 'empty'
+    },
     watch: true,
     devtool: 'cheap-module-source-map'
 }

@@ -6,14 +6,17 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ignore-path .gitignore ."
+    "lint": "eslint --ignore-path .eslintignore ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@jscad/csg": "^0.7.0",
+    "@jsxcad/api-v1": "0.0.58",
+    "@jsxcad/convert-threejs": "0.0.58",
     "circular-json": "^0.5.9",
+    "esm": "^3.2.22",
     "gsap": "^2.0.1"
   },
   "devDependencies": {
