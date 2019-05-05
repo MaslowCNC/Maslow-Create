@@ -15,7 +15,18 @@ export default class BillOfMaterials extends Atom{
         
         this.BOMlist = []
         
+        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('output', 'geometry', this, 'geometry', null)
+        
         this.setValues(values)
+    }
+    
+    updateValue(){
+        //Overwrite the normal update code block to update the number of segments also
+        
+        this.value = this.findIOValue('geometry')
+        
+        super.updateValue()
     }
     
     updateSidebar(){
