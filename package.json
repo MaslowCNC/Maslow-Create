@@ -14,6 +14,8 @@
   "dependencies": {
     "@jscad/csg": "^0.7.0",
     "@jsxcad/api-v1": "0.0.58",
+    "@jsxcad/convert-stl": "0.0.63",
+    "@jsxcad/convert-svg": "0.0.63",
     "@jsxcad/convert-threejs": "0.0.58",
     "circular-json": "^0.5.9",
     "esm": "^3.2.22",
