@@ -59,20 +59,15 @@ export default class Constant extends Atom{
     }
     
     draw() {
-
-        this.scaledX = GlobalVariables.scaleFactorXY * this.x
-        this.scaledY = GlobalVariables.scaleFactorXY * this.y
-
-
         this.children.forEach(child => {
             child.draw()       
         })
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.color
-        GlobalVariables.c.rect(this.scaledX - this.radius, this.scaledY - this.height/2, 2*this.radius, this.height)
+        GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height)
         GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, this.scaledX + this.radius, this.scaledY-this.radius)
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }
