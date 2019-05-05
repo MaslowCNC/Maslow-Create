@@ -353,7 +353,7 @@ export default function GitHubModule(){
                         console.log("Readme created");
                         
                         var _this = this;
-                        intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
+                        intervalTimer = setInterval(function() { _this.saveProject(); }, 10000); //Save the project regularly
                     });
                 });
             });
@@ -383,19 +383,16 @@ export default function GitHubModule(){
     this.saveProject = function(){
         //Save the current project into the github repo
         if(currentRepoName != null){
+            var shape = null
+            if(GlobalVariables.topLevelMolecule.value == null){
+                shape = GlobalVariables.api.sphere();
+            }else{
+                shape = GlobalVariables.topLevelMolecule.value
+            }
             
-            // try{
-                // GlobalVariables.api.writeStl({ path: 'githubStl' },GlobalVariables.topLevelMolecule.value);
-                // GlobalVariables.api.writeSvg({ path: 'githubSvg' }, GlobalVariables.topLevelMolecule.value.rotate([90,0,0]))
-            console.log(GlobalVariables.topLevelMolecule.value)
-            
-            convertSTL.toStla({}, GlobalVariables.topLevelMolecule.value.toDisjointGeometry()).then( stlContent => {
-                const crossSection = GlobalVariables.topLevelMolecule.value.crossSection()
-                console.log("crossSection: ");
-                console.log(crossSection);
+            convertSTL.toStla({}, shape.toDisjointGeometry()).then( stlContent => {
+                const crossSection = shape.rotate([90,0,0]).crossSection().toDisjointGeometry()
                 convertSVG.toSvg({}, crossSection).then( contentSvg => {
-                    console.log("Svg generated ");
-                    console.log(contentSvg);
             
                     var bomContent = bomHeader;
                     GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
@@ -523,7 +520,7 @@ export default function GitHubModule(){
             popup.classList.add('off');
             
             var _this = this;
-            intervalTimer = setInterval(function() { _this.saveProject(); }, 30000); //Save the project regularly
+            intervalTimer = setInterval(function() { _this.saveProject(); }, 10000); //Save the project regularly
         })
         
     }
