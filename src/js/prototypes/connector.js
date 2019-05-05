@@ -67,7 +67,7 @@ export default class Connector {
     
     keyPress(key){
         if(this.selected){
-            if (key == 'Delete'){
+            if (['Delete', 'Backspace'].includes(key)){
                 this.deleteSelf()
             }
         }
