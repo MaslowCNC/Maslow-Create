@@ -21,6 +21,7 @@ export default class Atom {
         this.isMoving = false
         this.x = 0
         this.y = 0
+        this.alertMessage = ''
         
 
         for(var key in values) {
@@ -85,6 +86,28 @@ export default class Atom {
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
+       
+        //Draw Alert block  
+        GlobalVariables.c.beginPath()
+        const padding = 10
+        GlobalVariables.c.fillStyle = 'red'
+        GlobalVariables.c.rect(
+            this.x + this.radius - padding/2, 
+            this.y - this.radius + padding/2, 
+            GlobalVariables.c.measureText(this.alertMessage).width + padding, 
+            - (parseInt(GlobalVariables.c.font) + padding))
+        GlobalVariables.c.fill()
+        GlobalVariables.c.strokeStyle = 'black'
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = 'black'
+        GlobalVariables.c.fillText(this.alertMessage, this.x + this.radius, this.y - this.radius) 
+        GlobalVariables.c.closePath()
+        
+
     }
     
     addIO(type, name, target, valueType, defaultValue){
@@ -123,6 +146,17 @@ export default class Atom {
                 target.children.splice(target.children.indexOf(io),1)
             }
         })
+    }
+
+    setAlert(message){
+        this.color = 'orange'
+        this.alertMessage = message
+
+    }
+
+    clearAlert(){
+        this.color = this.defaultColor
+        this.alertMessage = ''
     }
     
     clickDown(x,y, clickProcessed){

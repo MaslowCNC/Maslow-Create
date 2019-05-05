@@ -22,7 +22,8 @@ export default class Translate extends Atom{
         try{
             this.value = this.findIOValue('geometry').translate([this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')])
         }catch(err){
-             console.warn("Error. Couldn't render")
+            this.setAlert(err)
+            console.warn("Error. Couldn't render")
         }
         
         super.updateValue()
