@@ -18,10 +18,9 @@ export default class Translate extends Atom{
     }
     
     updateValue(){
-        
         try{
-            this.value = this.findIOValue('geometry').translate([this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')])
             this.clearAlert()
+            this.value = this.findIOValue('geometry').translate([this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')])
         }catch(err){
             this.setAlert(err)
         }

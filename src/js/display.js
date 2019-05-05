@@ -70,12 +70,7 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        try{
-            this.updateDisplayData(this.convert.toThreejsGeometry(shape.toDisjointGeometry()));
-        }catch(err){
-            console.warn("can't display that")
-            console.warn(err)
-        }
+      this.updateDisplayData(this.convert.toThreejsGeometry(shape.toDisjointGeometry()));
     }
     
     updateDisplayData(threejsGeometry){

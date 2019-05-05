@@ -77,6 +77,7 @@ export default class Connector {
         //Free up the input to which this was attached
         if(this.attachmentPoint2 != null){
             this.attachmentPoint2.connectors = []
+            this.attachmentPoint2.setDefault()
         }
         
         //Remove this connector from the output it is attached to

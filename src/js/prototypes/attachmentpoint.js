@@ -22,7 +22,7 @@ export default class AttachmentPoint {
         
         this.valueType = 'number' //options are number, geometry, array
         this.type = 'output'
-        this.value = 10 //The default input value when nothing is connected
+        this.value = 10
         
         this.connectors = []
         
@@ -254,6 +254,12 @@ export default class AttachmentPoint {
             return this
         }
         return false
+    }
+
+    setDefault(){
+        console.log("setDefaultran\n\n\n")
+        this.setValue(this.defaultValue)
+       
     }
     
     getValue(){
