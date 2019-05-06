@@ -20,9 +20,10 @@ export default class Union extends Atom {
     updateValue(){
         
         try{
+            this.clearAlert()
             this.value = GlobalVariables.api.union(this.findIOValue('geometry1'), this.findIOValue('geometry2'))
         }catch(err){
-            console.warn("Error. Couldn't render")
+            this.setAlert(err)
         }
         
         super.updateValue()

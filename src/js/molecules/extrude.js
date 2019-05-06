@@ -19,10 +19,11 @@ export default class Extrude extends Atom{
     updateValue(){
         
         try{
+            this.clearAlert()
             this.value = this.findIOValue('geometry').extrude({ height: this.findIOValue('height') })
         }
         catch(err){
-            console.warn("Error. Couldn't render")
+            this.setAlert(err)
         }
         
         super.updateValue()
