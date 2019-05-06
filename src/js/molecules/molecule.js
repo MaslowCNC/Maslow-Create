@@ -273,6 +273,7 @@ export default class Molecule extends Atom{
         thisAsObject.topLevel = this.topLevel
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
+        thisAsObject.fileTypeVersion = 1
         
         //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject)
