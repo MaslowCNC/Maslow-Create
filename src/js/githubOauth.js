@@ -393,6 +393,8 @@ export default function GitHubModule(){
                 convertSVG.toSvg({}, crossSection).then( contentSvg => {
             
                     var bomContent = bomHeader;
+                    console.log("Generating BOM: ");
+                    console.log(GlobalVariables.topLevelMolecule.value);
                     GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
                         bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
                     });

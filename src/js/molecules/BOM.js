@@ -28,8 +28,6 @@ export default class AddBOMTag extends Atom{
         
         try{
             this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMlist[0]))
-            console.log("Value set to: ");
-            console.log(this.value);
             this.clearAlert()
         }catch(err){
             this.setAlert(err)
