@@ -1,3 +1,4 @@
+import Assembly from './molecules/assembly.js'
 import Circle from './molecules/circle.js'
 import Rectangle from './molecules/rectangle.js'
 import ShrinkWrap from './molecules/shrinkwrap.js'
@@ -30,6 +31,7 @@ class GlobalVariables{
         this.c = null
         this.scale1 = 1 
         this.availableTypes = {
+            assembly:           {creator: Assembly, atomType: 'Assembly'},
             circle:             {creator: Circle, atomType: 'Circle'},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap'},
