@@ -1,5 +1,6 @@
-import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
+import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
 
 export default class ShrinkWrap extends Atom{
     
@@ -51,44 +52,9 @@ export default class ShrinkWrap extends Atom{
         }
         
         //Delete or add ports as needed
-        
-        //Check to see if any of the loaded ports have been connected to. If they have, remove them from the this.ioValues list 
-        this.children.forEach(child => {
-            this.ioValues.forEach(ioValue => {
-                if (child.name == ioValue.name && child.connectors.length > 0){
-                    this.ioValues.splice(this.ioValues.indexOf(ioValue),1) //Let's remove it from the ioValues list
-                }
-            })
-        })
-        
-        //Add or delete ports as needed
-        if(this.howManyInputPortsAvailable() == 0){ //We need to make a new port available
-            this.addIO('input', '2D shape ' + GlobalVariables.generateUniqueID(), this, 'geometry', '')
-            this.addedIO = true
-        }
-        if(this.howManyInputPortsAvailable() >= 2 && this.ioValues.length <= 1){  //We need to remove the empty port
-            this.deleteEmptyPort()
-            this.updateValue()
-        }
+        addOrDeletePorts(this)
     }
     
-    howManyInputPortsAvailable(){
-        var portsAvailable = 0
-        this.children.forEach(io => {
-            if(io.type == 'input' && io.connectors.length == 0){   //if this port is available
-                portsAvailable = portsAvailable + 1  //Add one to the count
-            }
-        })
-        return portsAvailable
-    }
-    
-    deleteEmptyPort(){
-        this.children.forEach(io => {
-            if(io.type == 'input' && io.connectors.length == 0 && this.howManyInputPortsAvailable() >= 2){
-                this.removeIO('input', io.name, this)
-            }
-        })
-    }
     
     serialize(savedObject){
         var thisAsObject = super.serialize(savedObject)
@@ -115,8 +81,4 @@ export default class ShrinkWrap extends Atom{
         
     }
     
-    changeEquation(newValue){
-        this.closedSelection = parseInt(newValue)
-        this.updateValue()
-    }
 }
