@@ -3,14 +3,14 @@ import GlobalVariables from '../globalvariables'
 import BOMEntry from '../BOM'
 
 
-export default class BillOfMaterials extends Atom{
+export default class AddBOMTag extends Atom{
     constructor(values){
         super(values)
         
         this.value = ''
-        this.atomType = 'Bill Of Materials'
-        this.type = 'billOfMaterials'
-        this.name = 'Bill Of Materials'
+        this.atomType = 'Add BOM Tag'
+        this.type = 'addBOMTag'
+        this.name = 'Add BOM Tag'
         this.radius = 20
         
         this.BOMlist = []
@@ -19,12 +19,21 @@ export default class BillOfMaterials extends Atom{
         this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
+        
+        this.addBOMEntry();
     }
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
         
-        this.value = this.findIOValue('geometry')
+        try{
+            this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMlist[0]))
+            console.log("Value set to: ");
+            console.log(this.value);
+            this.clearAlert()
+        }catch(err){
+            this.setAlert(err)
+        }
         
         super.updateValue()
     }
@@ -83,10 +92,6 @@ export default class BillOfMaterials extends Atom{
             this.createEditableValueListItem(list,bomItem,'source', 'Source', false)
             var x = document.createElement('HR')
             list.appendChild(x)
-        })
-        
-        this.createButton(list,parent,'Add BOM Entry',() => {
-            this.addBOMEntry()
         })
     }
     
