@@ -14,7 +14,7 @@ export default function GitHubModule(){
     var convertSVG = require('@jsxcad/convert-svg')
     var convertSTL = require('@jsxcad/convert-stl')
     
-    document.getElementById("loginButton").addEventListener("mousedown", (e) => {
+    document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
     })
     
@@ -118,7 +118,7 @@ export default function GitHubModule(){
             //Figure out how many repos this user has, search will throw an error if they have 0;
             octokit.repos.list({
                 affiliation: 'owner',
-            }).then(({data, headers, status}) => {
+            }).then(({data}) => {
                 if(data.length == 0){                   //If the user has no repos at all, the search will fail so we want to spawn a popup here and clone the example
                     this.cloneExampleProjectPopup()
                 }
@@ -171,7 +171,7 @@ export default function GitHubModule(){
         project.appendChild(shortProjectName) 
         this.projectsSpaceDiv.appendChild(project) 
         
-        document.getElementById(projectName).addEventListener('click', event => {
+        document.getElementById(projectName).addEventListener('click', () => {
             this.projectClicked(projectName, id, owned)
         })
 
@@ -258,7 +258,7 @@ export default function GitHubModule(){
         //Add the button
         var createButton = document.createElement("button")
         createButton.setAttribute("type", "button")
-        createButton.addEventListener('click', (e) => {
+        createButton.addEventListener('click', () => {
             this.createNewProject()
         })
         var buttonText = document.createTextNode("Create Project")
@@ -330,7 +330,7 @@ export default function GitHubModule(){
                 path: path,
                 message: "initialize repo", 
                 content: content
-            }).then(result => {
+            }).then(() => {
                 //Then create the BOM file
                 content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
                 octokit.repos.createFile({
@@ -339,7 +339,7 @@ export default function GitHubModule(){
                     path: "BillOfMaterials.md",
                     message: "initialize BOM", 
                     content: content
-                }).then(result => {
+                }).then(() => {
                     //Then create the README file
                     content = window.btoa("readme init") // create a file with just the word "init" in it and base64 encode it
                     octokit.repos.createFile({
@@ -348,11 +348,8 @@ export default function GitHubModule(){
                         path: "README.md",
                         message: "initialize README", 
                         content: content
-                    }).then(result => {
-                        console.log("Readme created")
-                        
-                        var _this = this
-                        intervalTimer = setInterval(function() { _this.saveProject() }, 30000) //Save the project regularly
+                    }).then(() => {
+                        intervalTimer = setInterval(() => { this.saveProject() }, 30000) //Save the project regularly
                     })
                 })
             })
@@ -394,10 +391,7 @@ export default function GitHubModule(){
                 convertSVG.toSvg({}, crossSection).then( contentSvg => {
             
                     var bomContent = bomHeader
-                    console.log(GlobalVariables.topLevelMolecule.value)
-                    
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
-                    
                     bomItems.forEach(item => {
                         bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|"
                     })
@@ -477,7 +471,7 @@ export default function GitHubModule(){
             force: true
         })
       
-        console.log("Project saved")
+        console.warn("Project saved")
 
     }
     
@@ -567,7 +561,7 @@ export default function GitHubModule(){
                 path: path,
                 message: "initialize repo", 
                 content: content
-            }).then(result => {
+            }).then(() => {
                 
                 //Save the molecule into the newly created repo
                 
@@ -592,9 +586,7 @@ export default function GitHubModule(){
                         message: "export Molecule", 
                         content: content,
                         sha: sha
-                    }).then(result => {
-                        console.log("Molecule Exported.")
-                        
+                    }).then(() => {
                         //Replace the existing molecule now that we just exported
                         molecule.replaceThisMoleculeWithGithub(id)
                     })
@@ -687,7 +679,7 @@ export default function GitHubModule(){
                             headers: {
                                 accept: 'application/vnd.github.mercy-preview+json'
                             }
-                        }).then(result => {
+                        }).then(() => {
                             
                             
                             //Remove everything in the popup now
@@ -702,7 +694,6 @@ export default function GitHubModule(){
                             subButtonDiv.setAttribute("class", "form")
                             
                             //Add a title
-                            var titleDiv = document.createElement("DIV")
                             var title = document.createElement("H3")
                             title.appendChild(document.createTextNode("A copy of the project '" + repoName + "' has been copied and added to your projects. You can view it by clicking the button below."))
                             subButtonDiv.appendChild(title)
@@ -713,7 +704,7 @@ export default function GitHubModule(){
                             var button = document.createElement("button")
                             button.setAttribute("type", "button")
                             button.appendChild(document.createTextNode("View Projects"))
-                            button.addEventListener("click", (e) => {
+                            button.addEventListener("click", () => {
                                 window.location.href = '/'
                             })
                             form.appendChild(button)

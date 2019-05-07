@@ -28,9 +28,9 @@ export default class Code extends Atom {
             `const { ${Object.keys({...GlobalVariables.api, ...{This: this}}).join(', ')} } = $;\n\n` + 
                                   this.code)
         try{
-            const result = code({...GlobalVariables.api, ...{This: this}})
+            code({...GlobalVariables.api, ...{This: this}})
         }catch(err){
-            console.log(err)
+            console.warn(err)
         }
         
         super.updateValue()
@@ -39,7 +39,7 @@ export default class Code extends Atom {
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
-        this.createButton(valueList,this,"Edit Code",(e) => {
+        this.createButton(valueList,this,"Edit Code",() => {
             //Remove everything in the popup now
             const popup = document.getElementById('projects-popup')
             while (popup.firstChild) {
@@ -65,7 +65,7 @@ export default class Code extends Atom {
             var button = document.createElement("button")
             button.setAttribute("type", "button")
             button.appendChild(document.createTextNode("Save Code"))
-            button.addEventListener("click", (e) => {
+            button.addEventListener("click", () => {
                 this.code = codeMirror.getDoc().getValue('\n')
                 this.updateValue()
                 popup.classList.add('off')
