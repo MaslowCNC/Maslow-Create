@@ -316,11 +316,6 @@ export default class Atom {
         return object
     }
     
-    requestBOM(){
-        //Placeholder
-        return []
-    }
-    
     requestReadme(){
         //request any contributions from this atom to the readme
         
@@ -368,7 +363,7 @@ export default class Atom {
         return ioValue
     }
     
-    createEditableValueListItem(list,object,key, label, resultShouldBeNumber){
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         
@@ -409,6 +404,7 @@ export default class Atom {
             }
             else{
                 object[key] = valueInBox
+                callBack(valueInBox)
             }
         })
         

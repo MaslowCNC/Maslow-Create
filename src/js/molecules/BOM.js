@@ -25,7 +25,6 @@ export default class AddBOMTag extends Atom{
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
-        
         try{
             this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMlist[0]))
             this.clearAlert()
@@ -63,12 +62,7 @@ export default class AddBOMTag extends Atom{
         
         return [this.readmeText]
     }
-    
-    requestBOM(){
-        //Placeholder
-        return this.BOMlist
-    }
-    
+   
     createBOM(list,parent){
         
         list.appendChild(document.createElement('br'))
@@ -84,10 +78,10 @@ export default class AddBOMTag extends Atom{
         list.appendChild(x)
         
         this.BOMlist.forEach(bomItem => {
-            this.createEditableValueListItem(list,bomItem,'BOMitemName', 'Item', false)
-            this.createEditableValueListItem(list,bomItem,'numberNeeded', 'Number', true)
-            this.createEditableValueListItem(list,bomItem,'costUSD', 'Price', true)
-            this.createEditableValueListItem(list,bomItem,'source', 'Source', false)
+            this.createEditableValueListItem(list,bomItem,'BOMitemName', 'Item', false, () => this.updateValue())
+            this.createEditableValueListItem(list,bomItem,'numberNeeded', 'Number', true, () => this.updateValue())
+            this.createEditableValueListItem(list,bomItem,'costUSD', 'Price', true, () => this.updateValue())
+            this.createEditableValueListItem(list,bomItem,'source', 'Source', false,() => this.updateValue())
             var x = document.createElement('HR')
             list.appendChild(x)
         })
