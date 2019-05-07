@@ -6,7 +6,8 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ignore-path .eslintignore ."
+    "lint": "eslint --ignore-path .eslintignore .",
+    "doc": "./node_modules/.bin/esdoc"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,8 @@
     "browser-sync": "^2.24.4",
     "browser-sync-webpack-plugin": "^2.2.2",
     "copy-webpack-plugin": "^5.0.1",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^5.16.0",
     "eslint-config-strongloop": "^2.1.0",
     "html-webpack-plugin": "^3.2.0",

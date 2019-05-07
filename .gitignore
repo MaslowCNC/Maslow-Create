@@ -4,3 +4,4 @@ dist/js/flowDraw.bundle.js
 dist/js/flowDraw.bundle.js.map
 package-lock.json
 dist/run/index.html
+dist/documentation/*
