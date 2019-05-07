@@ -1,6 +1,7 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
 import { extractBomTags } from './BOM.js'
+import { OAuth } from 'oauthio-web'
 
 export default function GitHubModule(){
     
