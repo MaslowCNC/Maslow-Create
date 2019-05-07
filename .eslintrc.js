@@ -5,7 +5,11 @@ module.exports = {
     },
     extends: 'eslint:recommended',
     parserOptions: {
-        sourceType: 'module'
+        sourceType: 'module',
+        "ecmaVersion": 2017,
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        }
     },
     rules: {
         indent: ['error', 4],

@@ -1,14 +1,4 @@
-export class BOMEntry {
-    constructor(){
-        this.BOMitemName  = 'name'
-        this.numberNeeded = 0
-        this.costUSD      = 0
-        this.source       = 'www.example.com'
-        this.totalNeeded  = this.numberNeeded //Scaled by the number of this instance
-    }
-}
-
-export const extractBomTags = (geometry) => {
+export default const extractBomTags = (geometry) => {
     var bomItems = []
     const walk = (geometry) => {
         if (geometry.assembly) {

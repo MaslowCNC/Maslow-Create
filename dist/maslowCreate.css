@@ -296,12 +296,19 @@ input.menu_search:focus {
   
 }
 
+.noediting-item{
+  display:inline-block;
+  padding-bottom:5px;
+  min-width: 10px;
+  border-radius: 5px;
+ }
+
 .editing-item{
   display:inline-block;
   padding-bottom:5px;
   min-width: 10px;
   border-radius: 5px;
-  }
+ }
 
 .editing-item:hover{
   background-color: #ffffff;

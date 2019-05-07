@@ -2,9 +2,9 @@
  * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
  */
 
-import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
-import BOMEntry from '../BOM'
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
+import {BOMEntry} from '../BOM.js'
 
 
 export default class AddBOMTag extends Atom{
@@ -46,7 +46,7 @@ export default class AddBOMTag extends Atom{
         
         var valueList = super.updateSidebar() //call the super function
         
-        this.createBOM(valueList, this)
+        this.createBOM(valueList)
     }
     
     draw() {
@@ -69,7 +69,7 @@ export default class AddBOMTag extends Atom{
         return [this.readmeText]
     }
    
-    createBOM(list,parent){
+    createBOM(list){
         
         list.appendChild(document.createElement('br'))
         list.appendChild(document.createElement('br'))

@@ -92,7 +92,6 @@ export default class Display {
                 const segments = geometry.threejsSegments
                 const dataset = {}
                 const threejsGeometry = new THREE.Geometry()
-                const material = new THREE.LineBasicMaterial({ color: 0xff0000 })
                 for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
                     threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ))
                 }
@@ -105,7 +104,6 @@ export default class Display {
                 const threejsGeometry = new THREE.BufferGeometry()
                 threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
                 threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-                const material = new THREE.MeshNormalMaterial()
                 dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
@@ -115,7 +113,6 @@ export default class Display {
                 const threejsGeometry = new THREE.BufferGeometry()
                 threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
                 threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-                const material = new THREE.MeshNormalMaterial()
                 dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
