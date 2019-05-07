@@ -1,5 +1,5 @@
-import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
 
 export default class Code extends Atom {
     

@@ -1,6 +1,7 @@
-import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
-import saveAs from '../FileSaver'
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
+import saveAs from '../lib/FileSaver.js'
+import SVGReader from '../lib/SVGReader.js'
 
 export default class Gcode extends Atom {
     

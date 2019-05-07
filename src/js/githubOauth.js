@@ -2,8 +2,10 @@ import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
 import { extractBomTags } from './BOM.js'
 import { OAuth } from 'oauthio-web'
+import octokit from './lib/octokit-rest.min.js'
 
 export default function GitHubModule(){
+    console.log(octokit)
     
     var octokit = new Octokit()
     var popup = document.getElementById('projects-popup')
