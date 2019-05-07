@@ -162,21 +162,21 @@ export default class Molecule extends Atom{
         
         // if(bomList.length > 0){
         
-            // list.appendChild(document.createElement('br'))
-            // list.appendChild(document.createElement('br'))
+        // list.appendChild(document.createElement('br'))
+        // list.appendChild(document.createElement('br'))
             
-            // var div = document.createElement('h3')
-            // div.setAttribute('style','text-align:center;')
-            // list.appendChild(div)
-            // var valueText = document.createTextNode('Bill Of Materials')
-            // div.appendChild(valueText)
+        // var div = document.createElement('h3')
+        // div.setAttribute('style','text-align:center;')
+        // list.appendChild(div)
+        // var valueText = document.createTextNode('Bill Of Materials')
+        // div.appendChild(valueText)
             
-            // var x = document.createElement('HR')
-            // list.appendChild(x)
+        // var x = document.createElement('HR')
+        // list.appendChild(x)
             
-            // bomList.forEach(bomEntry => {
-                // this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
-            // })
+        // bomList.forEach(bomEntry => {
+        // this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
+        // })
         // }
     }
 

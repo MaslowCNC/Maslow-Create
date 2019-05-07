@@ -1,8 +1,7 @@
 dist/js/oauth.js
 node_modules
 .ds_store
-dist/js/flowDraw.bundle.js
-dist/js/flowDraw.bundle.js.map
+dist/*
 package-lock.json
 dist/run/index.html
 dist/js/FileSaver.js

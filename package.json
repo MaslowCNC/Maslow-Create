@@ -20,7 +20,8 @@
     "@jsxcad/convert-threejs": "0.0.58",
     "circular-json": "^0.5.9",
     "esm": "^3.2.22",
-    "gsap": "^2.0.1"
+    "gsap": "^2.0.1",
+    "three": "^0.104.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-regenerator": "^7.4.3",
