@@ -36,7 +36,12 @@ export default class ShrinkWrap extends Atom{
         })
         
         if(inputs.length > 0){
-            this.value = GlobalVariables.api.hull.apply(null, inputs)
+            try{
+                this.clearAlert()
+                this.value = GlobalVariables.api.hull.apply(null, inputs)
+            }catch(err){
+                this.setAlert(err)
+            }
         }
         
         //Set the output nodes with name 'geometry' to be the generated output

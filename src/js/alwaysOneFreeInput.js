@@ -13,7 +13,7 @@ const howManyInputPortsAvailable = function(target){
 const deleteEmptyPort = function(target){
     target.children.forEach(io => {
         if(io.type == 'input' && io.connectors.length == 0 && howManyInputPortsAvailable(target) >= 2){
-            target.removeIO('input', io.name, this)
+            target.removeIO('input', io.name, target)
         }
     })
 }

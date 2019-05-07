@@ -393,7 +393,37 @@ export default function GitHubModule(){
                 convertSVG.toSvg({}, crossSection).then( contentSvg => {
             
                     var bomContent = bomHeader;
-                    GlobalVariables.topLevelMolecule.requestBOM().forEach(item => {
+                    console.log("Generating BOM: ");
+                    console.log(GlobalVariables.topLevelMolecule.value);
+                    
+                    var bomItems = []
+                    const extractBomTags = (geometry) => {
+                        const walk = (geometry) => {
+                            if (geometry.assembly) {
+                                geometry.assembly.forEach(walk);
+                            }
+                            else if (geometry.lazyGeometry) {
+                                walk(geometry.lazyGeometry);
+                            }
+                            else if (geometry.geometry) {
+                                walk(geometry.geometry);
+                            }
+                            else if (geometry.geometry) {
+                                walk(geometry.geometry);
+                            }
+                            else if(geometry.tags){
+                                geometry.tags.forEach(tag => {
+                                    if(tag.substring(0,6) == '{"BOMi'){
+                                        bomItems.push(JSON.parse(tag))
+                                    }
+                                })
+                            }
+                        };
+                        walk(geometry);
+                    };
+                    extractBomTags(GlobalVariables.topLevelMolecule.value);
+                    
+                    bomItems.forEach(item => {
                         bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
                     });
                     
