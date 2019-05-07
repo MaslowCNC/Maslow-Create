@@ -2,18 +2,16 @@ import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
 
-export default class ShrinkWrap extends Atom{
+export default class Assembly extends Atom{
     
     constructor(values){
         super(values)
         
         this.addIO('output', 'geometry', this, 'geometry', '')
         
-        this.name = 'Shrink Wrap'
-        this.atomType = 'ShrinkWrap'
+        this.name = 'Assembly'
+        this.atomType = 'Assembly'
         this.ioValues = []
-        this.closedSelection = 0
-        this.addedIO = false
         
         this.setValues(values)
         
@@ -36,7 +34,7 @@ export default class ShrinkWrap extends Atom{
         })
         
         if(inputs.length > 0){
-            this.value = GlobalVariables.api.hull.apply(null, inputs)
+            this.value = GlobalVariables.api.assemble(...inputs)
         }
         
         //Set the output nodes with name 'geometry' to be the generated output
@@ -55,7 +53,6 @@ export default class ShrinkWrap extends Atom{
         addOrDeletePorts(this)
     }
     
-    
     serialize(savedObject){
         var thisAsObject = super.serialize(savedObject)
         
@@ -73,9 +70,6 @@ export default class ShrinkWrap extends Atom{
         ioValues.forEach(ioValue => {
             thisAsObject.ioValues.push(ioValue)
         })
-        
-        //Write the selection for if the chain is closed
-        thisAsObject.closedSelection = this.closedSelection
         
         return thisAsObject
         
