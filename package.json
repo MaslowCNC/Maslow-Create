@@ -18,6 +18,7 @@
     "@jsxcad/convert-stl": "0.0.63",
     "@jsxcad/convert-svg": "0.0.63",
     "@jsxcad/convert-threejs": "0.0.58",
+    "@octokit/rest": "^16.25.0",
     "circular-json": "^0.5.9",
     "esm": "^3.2.22",
     "gsap": "^2.0.1",

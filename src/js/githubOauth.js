@@ -5,8 +5,7 @@ import { OAuth } from 'oauthio-web'
 import octokit from './lib/octokit-rest.min.js'
 
 export default function GitHubModule(){
-    console.log(octokit)
-    
+    const Octokit = require('@octokit/rest')
     var octokit = new Octokit()
     var popup = document.getElementById('projects-popup')
     var currentRepoName = null
