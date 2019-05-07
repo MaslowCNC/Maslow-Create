@@ -127,16 +127,20 @@ export default class Molecule extends Atom{
         }
         
         this.createButton(valueList,this,'Download STL',() => {
-        const blob = new Blob([readFileSync('window')], {type: 'text/plain;charset=utf-8'})
-        saveAs(blob, this.name+'.stl')
+            const convertSTL = require('@jsxcad/convert-stl')
+            convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent => {
+                const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
+                saveAs(blob, this.name+'.stl')
+            })
         })
         
         this.createButton(valueList,this,'Download SVG',() => {
-        const slice = GlobalVariables.api.crossSection({},this.value)
-        GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice)
-        const stlContent = readFileSync('makeSVG')
-        const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
-        saveAs(blob, this.name+'.svg')
+            const convertSVG = require('@jsxcad/convert-svg')
+            const slice = GlobalVariables.api.crossSection({},this.value)
+            GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice)
+            const stlContent = readFileSync('makeSVG')
+            const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
+            saveAs(blob, this.name+'.svg')
         })
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
@@ -159,8 +163,6 @@ export default class Molecule extends Atom{
     
     displaySimpleBOM(list){
         var bomList = extractBomTags(this.value)
-        console.log("Bom List: ")
-        console.log(bomList)
         
         if(bomList.length > 0){
         
