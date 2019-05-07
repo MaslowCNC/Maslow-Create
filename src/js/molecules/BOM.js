@@ -21,20 +21,18 @@ export default class AddBOMTag extends Atom{
         this.name = 'Add BOM Tag'
         this.radius = 20
         
-        this.BOMlist = []
+        this.BOMitem = new BOMEntry()
         
         this.addIO('input', 'geometry', this, 'geometry', null)
         this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
-        
-        this.addBOMEntry();
     }
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
         try{
-            this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMlist[0]))
+            this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMitem))
             this.clearAlert()
         }catch(err){
             this.setAlert(err)
@@ -48,7 +46,7 @@ export default class AddBOMTag extends Atom{
         
         var valueList = super.updateSidebar() //call the super function
         
-        this.createBOM(valueList, this, this.BOMlist)
+        this.createBOM(valueList, this)
     }
     
     draw() {
@@ -79,33 +77,26 @@ export default class AddBOMTag extends Atom{
         var div = document.createElement('h3')
         div.setAttribute('style','text-align:center;')
         list.appendChild(div)
-        var valueText = document.createTextNode('Bill Of Materials')
+        var valueText = document.createTextNode('Bill Of Materials Entry')
         div.appendChild(valueText)
         
         var x = document.createElement('HR')
         list.appendChild(x)
         
-        this.BOMlist.forEach(bomItem => {
-            this.createEditableValueListItem(list,bomItem,'BOMitemName', 'Item', false, () => this.updateValue())
-            this.createEditableValueListItem(list,bomItem,'numberNeeded', 'Number', true, () => this.updateValue())
-            this.createEditableValueListItem(list,bomItem,'costUSD', 'Price', true, () => this.updateValue())
-            this.createEditableValueListItem(list,bomItem,'source', 'Source', false,() => this.updateValue())
-            var x = document.createElement('HR')
-            list.appendChild(x)
-        })
+        this.createEditableValueListItem(list,this.BOMitem,'BOMitemName', 'Item', false, () => this.updateValue())
+        this.createEditableValueListItem(list,this.BOMitem,'numberNeeded', 'Number', true, () => this.updateValue())
+        this.createEditableValueListItem(list,this.BOMitem,'costUSD', 'Price', true, () => this.updateValue())
+        this.createEditableValueListItem(list,this.BOMitem,'source', 'Source', false,() => this.updateValue())
+        x = document.createElement('HR')
+        list.appendChild(x)
     }
     
-    addBOMEntry(){
-        this.BOMlist.push(new BOMEntry())
-        
-        this.updateSidebar()
-    }
     
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)
         
-        valuesObj.BOMlist = this.BOMlist
+        valuesObj.BOMitem = this.BOMitem
         
         return valuesObj
         
