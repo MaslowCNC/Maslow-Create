@@ -48,10 +48,6 @@ export default class Display {
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
         
-        //watchFile('window', (file, { solids }) => {this.updateDisplayData(solids)})
-        
-        
-        window.addEventListener('resize', () => { this.onWindowResize() }, false)
         this.onWindowResize()
     }
     

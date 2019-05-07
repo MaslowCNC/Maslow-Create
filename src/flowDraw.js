@@ -120,7 +120,6 @@ function init() {
     window.addEventListener('resize', () => { onWindowResize() }, false)
 
     onWindowResize()
-    GlobalVariables.display.onWindowResize()
     animate()
 }
 
@@ -138,7 +137,9 @@ function onWindowResize() {
     upperHalfOfScreen.setAttribute('style','height:'+innerHeight/2+'px')
     viewer.setAttribute('style','width:'+innerWidth/2+'px')
 
-    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth   
+    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+
+    GlobalVariables.display.onWindowResize()    
 }
 
 
