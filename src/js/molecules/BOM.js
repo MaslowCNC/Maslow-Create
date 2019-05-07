@@ -1,9 +1,17 @@
+/**
+ * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
+ */
+
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 import BOMEntry from '../BOM'
 
 
 export default class AddBOMTag extends Atom{
+    /**
+    * The constructor function.
+    * @param {object} values An array of values passed in which will be assigned to the class as this.x
+    */ 
     constructor(values){
         super(values)
         
