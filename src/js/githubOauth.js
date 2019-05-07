@@ -393,7 +393,6 @@ export default function GitHubModule(){
                 convertSVG.toSvg({}, crossSection).then( contentSvg => {
             
                     var bomContent = bomHeader;
-                    console.log("Generating BOM: ");
                     console.log(GlobalVariables.topLevelMolecule.value);
                     
                     var bomItems = []

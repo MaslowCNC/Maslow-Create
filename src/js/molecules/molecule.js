@@ -158,26 +158,26 @@ export default class Molecule extends Atom{
     
     displaySimpleBOM(list){
         
-        var bomList = this.requestBOM()
+        // var bomList = this.requestBOM()
         
-        if(bomList.length > 0){
+        // if(bomList.length > 0){
         
-            list.appendChild(document.createElement('br'))
-            list.appendChild(document.createElement('br'))
+            // list.appendChild(document.createElement('br'))
+            // list.appendChild(document.createElement('br'))
             
-            var div = document.createElement('h3')
-            div.setAttribute('style','text-align:center;')
-            list.appendChild(div)
-            var valueText = document.createTextNode('Bill Of Materials')
-            div.appendChild(valueText)
+            // var div = document.createElement('h3')
+            // div.setAttribute('style','text-align:center;')
+            // list.appendChild(div)
+            // var valueText = document.createTextNode('Bill Of Materials')
+            // div.appendChild(valueText)
             
-            var x = document.createElement('HR')
-            list.appendChild(x)
+            // var x = document.createElement('HR')
+            // list.appendChild(x)
             
-            bomList.forEach(bomEntry => {
-                this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
-            })
-        }
+            // bomList.forEach(bomEntry => {
+                // this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
+            // })
+        // }
     }
 
     goToParentMolecule(){
@@ -217,14 +217,6 @@ export default class Molecule extends Atom{
         //Then delete the old molecule which has been replaced
         this.deleteNode()
 
-    }
-    
-    requestBOM(){
-        var generatedBOM = super.requestBOM()
-        this.nodesOnTheScreen.forEach(molecule => {
-            generatedBOM = generatedBOM.concat(molecule.requestBOM())
-        })
-        return generatedBOM
     }
     
     requestReadme(){
