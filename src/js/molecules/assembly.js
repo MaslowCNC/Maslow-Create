@@ -26,7 +26,6 @@ export default class Assembly extends Atom{
     
     updateValue(){
         this.processing = true
-        GlobalVariables.drawAllMolecules()
         
         var inputs = []
         this.children.forEach( io => {
@@ -34,6 +33,20 @@ export default class Assembly extends Atom{
                 inputs.push(io.getValue())
             }
         })
+        
+        var thread = require('thread-js')
+        var worker = thread()
+        worker.require('https://unpkg.com/@jsxcad/api-v1-bundle@0.0.73/dist/main?module')
+        worker.run(function () {
+            //const wrapped = this.inputs.map(x => x * 2)
+            return 10
+        }, { inputs: inputs }).then(function (result) {
+            console.log("From thread: ")
+            console.log(result)
+            //this.value = result
+            worker.kill()
+        })
+        
         
         if(inputs.length > 0){
             try{
