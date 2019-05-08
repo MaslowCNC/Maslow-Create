@@ -1,6 +1,7 @@
 # A web based CAD program for cooperative design.
 
 [![Build Status](https://travis-ci.org/BarbourSmith/Maslow-Create.svg?branch=master)](https://travis-ci.org/BarbourSmith/Maslow-Create)
+[![Build Status](https://barboursmith.github.io/Maslow-Create/documentation/badge.svg)](https://barboursmith.github.io/Maslow-Create/documentation/)
 
 
 ![overview](https://github.com/BarbourSmith/Maslow-Create/blob/master/MaslowCreate.png)
