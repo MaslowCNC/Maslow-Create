@@ -162,7 +162,10 @@ export default class Molecule extends Atom{
     }
     
     displaySimpleBOM(list){
-        var bomList = extractBomTags(this.value)
+        var bomList = []
+        try{
+            bomList = extractBomTags(this.value)
+        }catch(err){console.warn(err)}
         
         if(bomList.length > 0){
         

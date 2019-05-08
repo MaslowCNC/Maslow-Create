@@ -1,3 +1,4 @@
+
 /**
   SVG parser for the Lasersaur.
   Converts SVG DOM to a flat collection of paths.
@@ -32,6 +33,7 @@
     * check for out of bounds geometry
 */
 
+import Vec2 from './vec2.js'
 
 export default {
 

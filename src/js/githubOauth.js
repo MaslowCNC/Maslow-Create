@@ -2,7 +2,6 @@ import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
 import { extractBomTags } from './BOM.js'
 import { OAuth } from 'oauthio-web'
-import octokit from './lib/octokit-rest.min.js'
 
 export default function GitHubModule(){
     const Octokit = require('@octokit/rest')
