@@ -46,8 +46,6 @@ export default class Gcode extends Atom {
                 super.updateValue()
             })
         }catch(err){
-            console.log("Error set: ");
-            console.log(err)
             this.setAlert(err)
         }
     }
@@ -138,7 +136,7 @@ export default class Gcode extends Atom {
                 'F' + settings.seekRate
             ].join(' '))
         
-            for (var p = settings.passWidth; p>=settings.materialWidth; p+=settings.passWidth) {
+            for (var p = settings.passWidth; p>=settings.materialWidth; p-=-1*settings.passWidth) {
 
                 // begin the cut by dropping the tool to the work
                 gcode.push(['G1',
