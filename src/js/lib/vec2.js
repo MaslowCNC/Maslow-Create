@@ -2,7 +2,7 @@
 // ### Common / Math / Vec2
 
 // A 2D column vector
-function Vec2(x, y) {
+export default function Vec2(x, y) {
     if (x) {
         this.x = x
     }

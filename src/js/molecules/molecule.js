@@ -1,7 +1,7 @@
 import Atom from '../prototypes/atom.js'
 import Connector from '../prototypes/connector.js'
 import GlobalVariables from '../globalvariables.js'
-import saveAs from '../FileSaver.js'
+import saveAs from '../lib/FileSaver.js'
 import { extractBomTags } from '../BOM.js'
 
 export default class Molecule extends Atom{
@@ -162,7 +162,10 @@ export default class Molecule extends Atom{
     }
     
     displaySimpleBOM(list){
-        var bomList = extractBomTags(this.value)
+        var bomList = []
+        try{
+            bomList = extractBomTags(this.value)
+        }catch(err){console.warn(err)}
         
         if(bomList.length > 0){
         
