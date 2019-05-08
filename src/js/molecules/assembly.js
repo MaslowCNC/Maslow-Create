@@ -36,7 +36,7 @@ export default class Assembly extends Atom{
         
         var thread = require('thread-js')
         var worker = thread()
-        worker.require('https://unpkg.com/@jsxcad/api-v1-bundle@0.0.73/dist/main?module')
+        worker.require("/BOM.js")
         worker.run(function () {
             //const wrapped = this.inputs.map(x => x * 2)
             return 10
