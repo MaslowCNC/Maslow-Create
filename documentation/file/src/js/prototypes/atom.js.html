@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/js/prototypes/atom.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/js/prototypes/atom.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import AttachmentPoint from &apos;./attachmentpoint&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
+
+export default class Atom {
+
+    constructor(values){
+        //Setup default values
+        this.children = []
+        
+        this.x = 0
+        this.y = 0
+        this.radius = 20
+        this.defaultColor = &apos;#F3EFEF&apos;
+        this.selectedColor = &apos;#484848&apos;
+        this.strokeColor = &apos;#484848&apos;
+        this.selected = false
+        this.color = &apos;#F3EFEF&apos;
+        this.name = &apos;name&apos;
+        this.parentMolecule = null
+        this.value = GlobalVariables.api.sphere()
+        this.isMoving = false
+        this.x = 0
+        this.y = 0
+        this.alertMessage = &apos;&apos;
+        
+
+        for(var key in values) {
+            this[key] = values[key]
+        }
+        
+    }
+    
+    setValues(values){
+        //Assign the object to have the passed in values
+        
+        for(var key in values) {
+            this[key] = values[key]
+        }
+        
+        if (typeof this.ioValues !== &apos;undefined&apos;) {
+            this.ioValues.forEach(ioValue =&gt; { //for each saved value
+                this.children.forEach(io =&gt; {  //Find the matching IO and set it to be the saved value
+                    if(ioValue.name == io.name &amp;&amp; io.type == &apos;input&apos;){
+                        io.setValue(ioValue.ioValue)
+                    }
+                })
+            })
+        }
+    }
+    
+    draw() {   
+        this.children.forEach(child =&gt; {
+            child.draw()       
+        })
+      
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = this.color
+        GlobalVariables.c.font = &apos;10px Work Sans&apos;
+
+        //make it impossible to draw atoms too close to the edge
+        //not sure what x left margin should be because if it&apos;s too close it would cover expanded text
+        var canvasFlow = document.querySelector(&apos;#flow-canvas&apos;)
+        if (this.x &lt; this.radius){
+            this.x = this.radius
+            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        }
+        else if (this.y&lt;this.radius){
+            this.y = this.radius 
+            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        }
+        else if (this.x + this.radius &gt; canvasFlow.width/GlobalVariables.scale1){
+            this.x = canvasFlow.width/GlobalVariables.scale1 - this.radius
+            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        }
+        else if (this.y + this.radius &gt; canvasFlow.height/GlobalVariables.scale1){
+            this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
+            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        }
+        else{
+            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        }
+        GlobalVariables.c.textAlign = &apos;start&apos; 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.strokeStyle = this.strokeColor
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+      
+        if (this.alertMessage.length &gt; 0){
+            //Draw Alert block  
+            GlobalVariables.c.beginPath()
+            const padding = 10
+            GlobalVariables.c.fillStyle = &apos;red&apos;
+            GlobalVariables.c.rect(
+                this.x + this.radius - padding/2, 
+                this.y - this.radius + padding/2, 
+                GlobalVariables.c.measureText(this.alertMessage).width + padding, 
+                - (parseInt(GlobalVariables.c.font) + padding))
+            GlobalVariables.c.fill()
+            GlobalVariables.c.strokeStyle = &apos;black&apos;
+            GlobalVariables.c.lineWidth = 1
+            GlobalVariables.c.stroke()
+            GlobalVariables.c.closePath()
+
+            GlobalVariables.c.beginPath()
+            GlobalVariables.c.fillStyle = &apos;black&apos;
+            GlobalVariables.c.fillText(this.alertMessage, this.x + this.radius, this.y - this.radius) 
+            GlobalVariables.c.closePath()
+        }
+    }
+    
+    addIO(type, name, target, valueType, defaultValue){
+        
+        if(target.children.find(o =&gt; (o.name === name &amp;&amp; o.type === type))== undefined){ //Check to make sure there isn&apos;t already an IO with the same type and name
+            //compute the baseline offset from parent node
+            var offset
+            if (type == &apos;input&apos;){
+                offset = -1* target.scaledRadius
+            }
+            else{
+                offset = target.scaledRadius
+            }
+            var input = new AttachmentPoint({
+                parentMolecule: target,
+                defaultOffsetX: offset,
+                defaultOffsetY: 0,
+                type: type,
+                valueType: valueType,
+                name: name,
+                value: defaultValue,
+                defaultValue: defaultValue,
+                uniqueID: GlobalVariables.generateUniqueID(),
+                atomType: &apos;AttachmentPoint&apos;
+            })
+            
+            target.children.push(input)
+        }
+    }
+    
+    removeIO(type, name, target){
+        //Remove the target IO attachment point
+        
+        target.children.forEach(io =&gt; {
+            if(io.name == name &amp;&amp; io.type == type){
+                io.deleteSelf()
+                target.children.splice(target.children.indexOf(io),1)
+            }
+        })
+    }
+
+    setAlert(message){
+        this.color = &apos;orange&apos;
+        this.alertMessage = String(message)
+
+    }
+
+    clearAlert(){
+        this.color = this.defaultColor
+        this.alertMessage = &apos;&apos;
+    }
+    
+    clickDown(x,y, clickProcessed){
+        //Returns true if something was done with the click
+        
+        this.children.forEach(child =&gt; {
+            if(child.clickDown(x,y, clickProcessed) == true){
+                clickProcessed = true
+            }
+        })
+        
+        //If none of the children processed the click see if the atom should, if not clicked, then deselect
+        if(!clickProcessed &amp;&amp; GlobalVariables.distBetweenPoints(x, this.x, y, this.y) &lt; this.radius){
+            this.color = this.selectedColor
+            this.isMoving = true
+            this.selected = true
+            this.strokeColor = this.defaultColor
+            this.updateSidebar()
+            this.sendToRender()
+            clickProcessed = true
+        }
+        else{
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+            this.selected = false
+        }
+        
+        return clickProcessed 
+    }
+
+    doubleClick(x,y){
+        //returns true if something was done with the click
+        
+        
+        var clickProcessed = false
+        
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        
+        if (distFromClick &lt; this.x){
+            clickProcessed = true
+        }
+        
+        return clickProcessed 
+    }
+
+    clickUp(x,y){
+        this.isMoving = false
+        
+        this.children.forEach(child =&gt; {
+            child.clickUp(x,y)     
+        })
+    }
+
+    clickMove(x,y){
+        if (this.isMoving == true){
+            this.x = x
+            this.y = y
+        }
+        
+        this.children.forEach(child =&gt; {
+            child.clickMove(x,y)       
+        })
+    }
+    
+    keyPress(key){
+        //runs whenever a key is pressed
+        if ([&apos;Delete&apos;, &apos;Backspace&apos;].includes(key)){
+            if(this.selected == true &amp;&amp; document.getElementsByTagName(&apos;BODY&apos;)[0] == document.activeElement){
+                //If this atom is selected AND the body is active (meaning we are not typing in a text box)
+                this.deleteNode()
+            }
+        }
+        
+        this.children.forEach(child =&gt; {
+            child.keyPress(key)
+        })
+    }
+    
+    updateSidebar(){
+        //updates the sidebar to display information about this node
+        
+        var valueList = this.initializeSideBar()
+        
+        //Add options to set all of the inputs
+        this.children.forEach(child =&gt; {
+            if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
+                this.createEditableValueListItem(valueList,child,&apos;value&apos;, child.name, true)
+            }
+        })
+        
+        return valueList
+    }
+    
+    initializeSideBar(){
+        //remove everything in the sideBar now
+        let sideBar = document.querySelector(&apos;.sideBar&apos;)
+        while (sideBar.firstChild) {
+            sideBar.removeChild(sideBar.firstChild)
+        }
+        
+        //add the name as a title
+        var name = document.createElement(&apos;h1&apos;)
+        name.textContent = this.name
+        name.setAttribute(&apos;class&apos;,&apos;doc-title&apos;)
+        sideBar.appendChild(name)
+        
+        //Create a list element
+        var valueList = document.createElement(&apos;ul&apos;)
+        sideBar.appendChild(valueList)
+        valueList.setAttribute(&apos;class&apos;, &apos;sidebar-list&apos;)
+        
+        return valueList
+    }
+    
+    deleteNode(){
+        //deletes this node and all of it&apos;s children
+        
+        this.children.forEach(child =&gt; {
+            child.deleteSelf()       
+        })
+        
+        this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
+        
+        GlobalVariables.currentMolecule.backgroundClick()
+    }
+    
+    update() {
+        
+        this.children.forEach(child =&gt; {
+            child.update()     
+        })
+        
+        this.draw()
+    }
+    
+    serialize(){
+        
+        var ioValues = []
+        this.children.forEach(io =&gt; {
+            if (typeof io.getValue() == &apos;number&apos; &amp;&amp; io.type == &apos;input&apos;){
+                var saveIO = {
+                    name: io.name,
+                    ioValue: io.getValue()
+                }
+                ioValues.push(saveIO)
+            }
+        })
+        
+        var object = {
+            atomType: this.atomType,
+            name: this.name,
+            x: this.x,
+            y: this.y,
+            uniqueID: this.uniqueID,
+            ioValues: ioValues
+        }
+        
+        return object
+    }
+    
+    requestReadme(){
+        //request any contributions from this atom to the readme
+        
+        return []
+    }
+    
+    updateValue(){
+        
+        //Set the output nodes with name &apos;geometry&apos; to be the generated code
+        this.children.forEach(child =&gt; {
+            if(child.valueType == &apos;geometry&apos; &amp;&amp; child.type == &apos;output&apos;){
+                child.setValue(this.value)
+            }
+        })
+        
+        //If this molecule is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender()
+        }
+    }
+    
+    sendToRender(){
+        //Send code to JSxCAD to render
+        try{
+            GlobalVariables.display.writeToDisplay(this.value)
+        }
+        catch(err){
+            this.setAlert(err)    
+        }
+
+    }
+    
+    findIOValue(ioName){
+        //find the value of an input for a given name
+        
+        ioName = ioName.split(&apos;~&apos;).join(&apos;&apos;)
+        var ioValue = null
+        
+        this.children.forEach(child =&gt; {
+            if(child.name == ioName &amp;&amp; child.type == &apos;input&apos;){
+                ioValue = child.getValue()
+            }
+        })
+        
+        return ioValue
+    }
+    
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
+        var listElement = document.createElement(&apos;LI&apos;)
+        list.appendChild(listElement)
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement(&apos;div&apos;)
+        listElement.appendChild(div)
+        div.setAttribute(&apos;class&apos;, &apos;sidebar-item sidebar-editable-div&apos;)
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(labelDiv)
+        var labelText = document.createTextNode(label + &apos;:&apos;)
+        labelDiv.appendChild(labelText)
+        labelDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem label-item&apos;)
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(valueTextDiv)
+        var valueText = document.createTextNode(object[key])
+        valueTextDiv.appendChild(valueText)
+        valueTextDiv.setAttribute(&apos;contenteditable&apos;, &apos;true&apos;)
+        valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem editing-item&apos;)
+        var thisID = label+GlobalVariables.generateUniqueID()
+        valueTextDiv.setAttribute(&apos;id&apos;, thisID)
+        
+        
+        document.getElementById(thisID).addEventListener(&apos;focusout&apos;, () =&gt; {
+            var valueInBox = document.getElementById(thisID).textContent
+            if(resultShouldBeNumber){
+                valueInBox = parseFloat(valueInBox)
+            }
+            
+            //If the target is an attachmentPoint then call the setter function
+            if(object instanceof AttachmentPoint){
+                object.setValue(valueInBox)
+            }
+            else{
+                object[key] = valueInBox
+                callBack(valueInBox)
+            }
+        })
+        
+        //prevent the return key from being used when editing a value
+        document.getElementById(thisID).addEventListener(&apos;keypress&apos;, function(evt) {
+            if (evt.which === 13) {
+                evt.preventDefault()
+                document.getElementById(thisID).blur()  //shift focus away if someone presses enter
+            }
+        })
+
+    }
+    
+    createNonEditableValueListItem(list,object,key, label){
+        var listElement = document.createElement(&apos;LI&apos;)
+        list.appendChild(listElement)
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement(&apos;div&apos;)
+        listElement.appendChild(div)
+        div.setAttribute(&apos;class&apos;, &apos;sidebar-item sidebar-editable-div&apos;)
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(labelDiv)
+        var labelText = document.createTextNode(label + &apos;:&apos;)
+        labelDiv.appendChild(labelText)
+        labelDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem label-item&apos;)
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(valueTextDiv)
+        var valueText = document.createTextNode(object[key])
+        valueTextDiv.appendChild(valueText)
+        valueTextDiv.setAttribute(&apos;contenteditable&apos;, &apos;false&apos;)
+        valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem noediting-item&apos;)
+        var thisID = label+GlobalVariables.generateUniqueID()
+        valueTextDiv.setAttribute(&apos;id&apos;, thisID)
+        
+
+    }
+
+    createDropDown(list,parent,options,selectedOption, description){
+        var listElement = document.createElement(&apos;LI&apos;)
+        list.appendChild(listElement)
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement(&apos;div&apos;)
+        listElement.appendChild(div)
+        div.setAttribute(&apos;class&apos;, &apos;sidebar-item&apos;)
+        
+        //Left div which displays the label
+        var labelDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(labelDiv)
+        var labelText = document.createTextNode(description)
+        labelDiv.appendChild(labelText)
+        labelDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem&apos;)
+        
+        
+        //Right div which is editable and displays the value
+        var valueTextDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(valueTextDiv)
+        var dropDown = document.createElement(&apos;select&apos;)
+        options.forEach(option =&gt; {
+            var op = new Option()
+            op.value = options.findIndex(thisOption =&gt; thisOption === option)
+            op.text = option
+            dropDown.options.add(op)
+        })
+        valueTextDiv.appendChild(dropDown)
+        valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem&apos;)
+        
+        dropDown.selectedIndex = selectedOption //display the current selection
+        
+        dropDown.addEventListener(
+            &apos;change&apos;,
+            function() { parent.changeEquation(dropDown.value) },
+            false
+        )
+    }
+
+    createButton(list,parent,buttonText,functionToCall){
+        var listElement = document.createElement(&apos;LI&apos;)
+        list.appendChild(listElement)
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement(&apos;div&apos;)
+        listElement.appendChild(div)
+        div.setAttribute(&apos;class&apos;, &apos;sidebar-item-no-hover&apos;)
+        
+        
+        //Right div which is button
+        var valueTextDiv = document.createElement(&apos;div&apos;)
+        div.appendChild(valueTextDiv)
+        var button = document.createElement(&apos;button&apos;)
+        var buttonTextNode = document.createTextNode(buttonText)
+        button.setAttribute(&apos;class&apos;, &apos;sidebar_button&apos;)
+        button.appendChild(buttonTextNode)
+        valueTextDiv.appendChild(button)
+        valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem&apos;)
+        
+        button.addEventListener(
+            &apos;mousedown&apos;,
+            function() { functionToCall(parent) } ,
+            false
+        )
+    }
+
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

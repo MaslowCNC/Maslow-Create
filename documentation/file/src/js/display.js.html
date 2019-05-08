@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/js/display.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/js/display.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./globalvariables&apos;
+import * as THREE from &apos;three&apos;
+import { TrackballControls } from &apos;three/examples/jsm/controls/TrackballControls.js&apos;
+
+export default class Display {
+
+    constructor(){
+        GlobalVariables.api = require(&apos;@jsxcad/api-v1&apos;)
+        this.convert = require(&apos;@jsxcad/convert-threejs&apos;)
+        this.datasets = []
+        this.camera
+        this.controls
+        this.scene
+        this.renderer
+        this.stats
+        this.mesh
+        this.gui
+        this.targetDiv = document.getElementById(&apos;viewerContext&apos;)
+        
+        //Add the JSXCAD window
+        this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
+        [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, -30, 50]
+        //
+        this.controls = new TrackballControls(this.camera, this.targetDiv)
+        this.controls.rotateSpeed = 4.0
+        this.controls.zoomSpeed = 4.0
+        this.controls.panSpeed = 2.0
+        this.controls.noZoom = false
+        this.controls.noPan = false
+        this.controls.staticMoving = true
+        this.controls.dynamicDampingFactor = 0.1
+        this.controls.keys = [65, 83, 68]
+        this.controls.addEventListener(&apos;change&apos;, () =&gt; { this.render() })
+        //
+        this.scene = new THREE.Scene()
+        this.scene.background = new THREE.Color(0xB0AEB0)
+        this.scene.add(this.camera)
+        //
+        var ambientLight = new THREE.AmbientLight(0x222222)
+        this.scene.add(ambientLight)
+        // var light1 = new THREE.PointLight(0xffffff, 0, 1);
+        // camera.add(light1);
+        var light2 = new THREE.DirectionalLight(0xffffff, 1)
+        light2.position.set(1, 1, 1)
+        this.camera.add(light2)
+
+        //
+        this.renderer = new THREE.WebGLRenderer({ antialias: true })
+        this.renderer.setPixelRatio(window.devicePixelRatio)
+        this.targetDiv.appendChild(this.renderer.domElement)
+        
+        this.onWindowResize()
+    }
+    
+    makeMaterial(material){
+        switch (material) {
+        case &apos;metal&apos;:
+            return new THREE.MeshStandardMaterial({
+                color: 0x779aac,
+                emissive: 0x7090a0,
+                roughness: 0.65,
+                metalness: 0.99,
+            })
+        default:
+            return new THREE.MeshNormalMaterial()
+        }
+    }
+    
+    writeToDisplay(shape){
+        this.updateDisplayData(this.convert.toThreejsGeometry(shape.toDisjointGeometry()))
+    }
+    
+    updateDisplayData(threejsGeometry){
+        // Delete any previous dataset in the window.
+        for (const { mesh } of this.datasets) {
+            this.scene.remove(mesh)
+        }
+        
+        // Build new datasets from the written data, and display them.
+        this.datasets = []
+        
+        let threeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5f6670,
+            roughness: 0.65,
+            metalness: 0.40
+        })
+        
+        const walk = (geometry) =&gt; {
+            if (geometry.assembly) {
+                geometry.assembly.forEach(walk)
+            } else if (geometry.threejsSegments) {
+                const segments = geometry.threejsSegments
+                const dataset = {}
+                const threejsGeometry = new THREE.Geometry()
+                for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+                    threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ))
+                }
+                dataset.mesh = new THREE.LineSegments(threejsGeometry, threeMaterial)
+                this.scene.add(dataset.mesh)
+                this.datasets.push(dataset)
+            } else if (geometry.threejsSolid) {
+                const { positions, normals } = geometry.threejsSolid
+                const dataset = {}
+                const threejsGeometry = new THREE.BufferGeometry()
+                threejsGeometry.addAttribute(&apos;position&apos;, new THREE.Float32BufferAttribute(positions, 3))
+                threejsGeometry.addAttribute(&apos;normal&apos;, new THREE.Float32BufferAttribute(normals, 3))
+                dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial)
+                this.scene.add(dataset.mesh)
+                this.datasets.push(dataset)
+            } else if (geometry.threejsSurface) {
+                const { positions, normals } = geometry.threejsSurface
+                const dataset = {}
+                const threejsGeometry = new THREE.BufferGeometry()
+                threejsGeometry.addAttribute(&apos;position&apos;, new THREE.Float32BufferAttribute(positions, 3))
+                threejsGeometry.addAttribute(&apos;normal&apos;, new THREE.Float32BufferAttribute(normals, 3))
+                dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial)
+                this.scene.add(dataset.mesh)
+                this.datasets.push(dataset)
+            }
+        }
+
+        walk(threejsGeometry)
+    }
+    
+    onWindowResize() {
+        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight - 1)
+        this.camera.updateProjectionMatrix()
+        this.controls.handleResize()
+        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight - 1)
+    }
+    
+    render() {
+        this.renderer.render( this.scene, this.camera )
+    }
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

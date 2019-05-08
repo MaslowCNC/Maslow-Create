@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/js/molecules/gcode.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/gcode.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
+import saveAs from &apos;../lib/FileSaver.js&apos;
+import SVGReader from &apos;../lib/SVGReader.js&apos;
+
+export default class Gcode extends Atom {
+    
+    constructor(values){
+        
+        super(values)
+        
+        this.name = &apos;Gcode&apos;
+        this.atomType = &apos;Gcode&apos;
+        
+        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, GlobalVariables.api.sphere())
+        this.addIO(&apos;input&apos;, &apos;tool size&apos;, this, &apos;number&apos;, 5.35)
+        this.addIO(&apos;input&apos;, &apos;passes&apos;, this, &apos;number&apos;, 6)
+        this.addIO(&apos;output&apos;, &apos;gcode&apos;, this, &apos;geometry&apos;, &apos;&apos;)
+        
+        this.setValues(values)
+        
+        //generate the correct codeblock for this atom on creation
+        this.updateValue()
+    }
+    
+    updateValue(){
+        //Generate a .svg file
+        try{
+            this.clearAlert()
+            const input = this.findIOValue(&apos;geometry&apos;)
+            
+            const crossSection = input.crossSection().toDisjointGeometry()
+            
+            const bounds = input.measureBoundingBox()
+            const partThickness = bounds[1][2]-bounds[0][2]
+            const convertSVG = require(&apos;@jsxcad/convert-svg&apos;)
+            convertSVG.toSvg({}, crossSection).then( contentSvg =&gt; {
+            
+                //convert that to gcode
+                this.value = this.svg2gcode(contentSvg, {
+                    passes: this.findIOValue(&apos;passes&apos;),
+                    materialWidth: -1*partThickness,
+                    bitWidth: this.findIOValue(&apos;tool size&apos;)
+                })
+                
+                super.updateValue()
+            })
+        }catch(err){
+            this.setAlert(err)
+        }
+    }
+    
+    updateSidebar(){
+        var valueList =  super.updateSidebar() 
+        
+        this.createButton(valueList,this,&apos;Download Gcode&apos;,() =&gt; {
+            const blob = new Blob([this.value], {type: &apos;text/plain;charset=utf-8&apos;})
+            saveAs(blob, GlobalVariables.topLevelMolecule.name+&apos;.nc&apos;)
+        })
+    }
+    
+    sendToRender(){
+        //Supress the normal send to render behavior
+    }
+    
+    svg2gcode(svg, settings) {
+        // clean off any preceding whitespace
+        svg = svg.replace(/^[\n\r \t]/gm, &apos;&apos;)
+        settings = settings || {}
+        settings.passes = settings.passes || 1
+        settings.materialWidth = settings.materialWidth || 6
+        settings.passWidth = settings.materialWidth/settings.passes
+        settings.scale = settings.scale || 1
+        settings.cutZ = settings.cutZ || 0 // cut z
+        settings.safeZ = settings.safeZ || 10   // safe z
+        settings.feedRate = settings.feedRate || 1400
+        settings.seekRate = settings.seekRate || 1100
+        settings.bitWidth = settings.bitWidth || 1 // in mm
+
+        var
+            scale=function(val) {
+                return val * settings.scale
+            },
+            paths = SVGReader.parse(svg, {}).allcolors,
+            gcode,
+            path
+
+        var idx = paths.length
+        while(idx--) {
+            var subidx = paths[idx].length
+            var bounds = { x : Infinity , y : Infinity, x2 : -Infinity, y2: -Infinity, area : 0}
+
+            // find lower and upper bounds
+            while(subidx--) {
+                if (paths[idx][subidx][0] &lt; bounds.x) {
+                    bounds.x = paths[idx][subidx][0]
+                }
+
+                if (paths[idx][subidx][1] &lt; bounds.y) {
+                    bounds.y = paths[idx][subidx][0]
+                }
+
+                if (paths[idx][subidx][0] &gt; bounds.x2) {
+                    bounds.x2 = paths[idx][subidx][0]
+                }
+                if (paths[idx][subidx][1] &gt; bounds.y2) {
+                    bounds.y2 = paths[idx][subidx][0]
+                }
+            }
+
+            // calculate area
+            bounds.area = (1 + bounds.x2 - bounds.x) * (1 + bounds.y2-bounds.y)
+            paths[idx].bounds = bounds
+        }
+
+        // cut the inside parts first
+        paths.sort(function(a, b) {
+        // sort by area
+            return (a.bounds.area &lt; b.bounds.area) ? -1 : 1
+        })
+
+        gcode = [
+            &apos;G90&apos;,
+            &apos;G1 Z&apos; + settings.safeZ,
+            &apos;G82&apos;,
+            &apos;M4&apos;
+        ]
+
+        for (var pathIdx = 0, pathLength = paths.length; pathIdx &lt; pathLength; pathIdx++) {
+            path = paths[pathIdx]
+
+            // seek to index 0
+            gcode.push([&apos;G1&apos;,
+                &apos;X&apos; + scale(path[0].x),
+                &apos;Y&apos; + scale(path[0].y),
+                &apos;F&apos; + settings.seekRate
+            ].join(&apos; &apos;))
+        
+            for (var p = settings.passWidth; p&gt;=settings.materialWidth; p-=-1*settings.passWidth) {
+
+                // begin the cut by dropping the tool to the work
+                gcode.push([&apos;G1&apos;,
+                    &apos;Z&apos; + (settings.cutZ + p),
+                    &apos;F&apos; + &apos;200&apos;
+                ].join(&apos; &apos;))
+
+                // keep track of the current path being cut, as we may need to reverse it
+                var localPath = []
+                for (var segmentIdx=0, segmentLength = path.length; segmentIdx&lt;segmentLength; segmentIdx++) {
+                    var segment = path[segmentIdx]
+
+                    var localSegment = [&apos;G1&apos;,
+                        &apos;X&apos; + scale(segment.x),
+                        &apos;Y&apos; + scale(segment.y),
+                        &apos;F&apos; + settings.feedRate
+                    ].join(&apos; &apos;)
+
+                    // feed through the material
+                    gcode.push(localSegment)
+                    localPath.push(localSegment)
+
+                    // if the path is not closed, reverse it, drop to the next cut depth and cut
+                    // this handles lines
+                    if (segmentIdx === segmentLength - 1 &amp;&amp;
+                (segment.x !== path[0].x || segment.y !== path[0].y))
+                    {
+
+                        p+=settings.passWidth
+                        if (p&lt;settings.materialWidth) {
+                            // begin the cut by dropping the tool to the work
+                            gcode.push([&apos;G1&apos;,
+                                &apos;Z&apos; + (settings.cutZ + p),
+                                &apos;F&apos; + &apos;200&apos;
+                            ].join(&apos; &apos;))
+
+                            Array.prototype.push.apply(gcode, localPath.reverse())
+                        }
+                    }
+                }
+            }
+
+            // go safe
+            gcode.push([&apos;G1&apos;,
+                &apos;Z&apos; + settings.safeZ,
+                &apos;F&apos; + &apos;300&apos;
+            ].join(&apos; &apos;))
+        }
+
+        // just wait there for a second
+        gcode.push(&apos;G4 P1&apos;)
+
+        // turn off the spindle
+        gcode.push(&apos;M5&apos;)
+      
+        // Set machine to mm mode
+        gcode.push(&apos;G21&apos;)
+
+        // go home
+        gcode.push(&apos;G1 Z&apos; + settings.safeZ + &apos; F300&apos;)
+        gcode.push(&apos;G1 X0 Y0 F800&apos;)
+
+        return gcode.join(&apos;\n&apos;)
+    }
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

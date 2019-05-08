@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/js/githubOauth.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/js/githubOauth.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Molecule from &apos;./molecules/molecule.js&apos;
+import GlobalVariables from &apos;./globalvariables.js&apos;
+import { extractBomTags } from &apos;./BOM.js&apos;
+import { OAuth } from &apos;oauthio-web&apos;
+
+export default function GitHubModule(){
+    const Octokit = require(&apos;@octokit/rest&apos;)
+    var octokit = new Octokit()
+    var popup = document.getElementById(&apos;projects-popup&apos;)
+    var currentRepoName = null
+    var currentUser = null
+    var bomHeader = &quot;###### Note: Do not edit this file directly, it is automatically generated from the CAD model \n# Bill Of Materials \n |Part|Number Needed|Price|Source| \n |----|----------|-----|-----|&quot;
+
+    var intervalTimer
+    var convertSVG = require(&apos;@jsxcad/convert-svg&apos;)
+    var convertSTL = require(&apos;@jsxcad/convert-stl&apos;)
+    
+    document.getElementById(&quot;loginButton&quot;).addEventListener(&quot;mousedown&quot;, () =&gt; {
+        this.tryLogin()
+    })
+    
+    this.tryLogin = function(){
+        // Initialize with OAuth.io app public key
+        OAuth.initialize(&apos;BYP9iFpD7aTV9SDhnalvhZ4fwD8&apos;)
+        // Use popup for oauth
+        OAuth.popup(&apos;github&apos;).then(github =&gt; {
+            
+            octokit.authenticate({
+                type: &quot;oauth&quot;,
+                token: github.access_token
+            })
+            
+            //Test the authentication 
+            octokit.users.getAuthenticated({}).then(result =&gt; {
+                currentUser = result.data.login
+                this.showProjectsToLoad()
+            })
+        })
+    }
+
+    this.showProjectsToLoad = function(){
+        //Remove everything in the popup now
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        
+        popup.classList.remove(&apos;off&apos;)
+        popup.setAttribute(&quot;style&quot;, &quot;text-align: center&quot;)
+        
+        var tabButtons = document.createElement(&quot;DIV&quot;)
+        tabButtons.setAttribute(&quot;class&quot;, &quot;tab&quot;)
+        tabButtons.setAttribute(&quot;style&quot;, &quot;display: inline-block;&quot;)
+        popup.appendChild(tabButtons)
+        
+        var yoursButton = document.createElement(&quot;button&quot;)
+        yoursButton.setAttribute(&quot;class&quot;, &quot;tablinks&quot;)
+        yoursButton.appendChild(document.createTextNode(&quot;Your Projects&quot;))
+        yoursButton.style.fontSize = &quot;xx-large&quot;
+        yoursButton.setAttribute(&quot;id&quot;, &quot;yoursButton&quot;)
+        yoursButton.addEventListener(&quot;click&quot;, (e) =&gt; {
+            this.openTab(e, &quot;yoursButton&quot;)
+        })
+        tabButtons.appendChild(yoursButton)
+        
+        var githubButton = document.createElement(&quot;button&quot;)
+        githubButton.setAttribute(&quot;class&quot;, &quot;tablinks&quot;)
+        githubButton.appendChild(document.createTextNode(&quot;All Projects&quot;))
+        githubButton.style.fontSize = &quot;xx-large&quot;
+        githubButton.setAttribute(&quot;id&quot;, &quot;githubButton&quot;)
+        githubButton.addEventListener(&quot;click&quot;, (e) =&gt; {
+            this.openTab(e, &quot;githubButton&quot;)
+        })
+        tabButtons.appendChild(githubButton)
+        
+        popup.appendChild(document.createElement(&quot;br&quot;))
+        
+        var searchBar = document.createElement(&quot;input&quot;)
+        searchBar.setAttribute(&quot;type&quot;, &quot;text&quot;)
+        searchBar.setAttribute(&quot;placeholder&quot;, &quot;Search for project..&quot;)
+        searchBar.setAttribute(&quot;class&quot;, &quot;menu_search&quot;)
+        searchBar.setAttribute(&quot;id&quot;, &quot;project_search&quot;)
+        searchBar.setAttribute(&quot;style&quot;, &quot;width: 50%&quot;)
+        popup.appendChild(searchBar)
+        searchBar.addEventListener(&apos;keyup&apos;, (e) =&gt; {
+            this.loadProjectsBySearch(e, searchBar.value)
+        })
+        
+        
+        this.projectsSpaceDiv = document.createElement(&quot;DIV&quot;)
+        this.projectsSpaceDiv.setAttribute(&quot;class&quot;, &quot;float-left-div{&quot;)
+        popup.appendChild(this.projectsSpaceDiv)
+        
+        yoursButton.click()
+    }
+    
+    this.loadProjectsBySearch = function(ev, searchString){
+
+        if(ev.key == &quot;Enter&quot;){
+            //Remove projects shown now
+            while (this.projectsSpaceDiv.firstChild) {
+                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+            }
+            
+            //Add the create a new project button
+            this.addProject(&quot;New Project&quot;, null, true, &quot;newProject.svg&quot;)
+            
+            //Load projects
+            var query
+            var owned
+            if(document.getElementsByClassName(&quot;tablinks active&quot;)[0].id == &quot;yoursButton&quot;){
+                owned = true
+                query = searchString + &apos; &apos; + &apos;fork:true user:&apos; + currentUser + &apos; topic:maslowcreate&apos;
+            }
+            else{
+                owned = false
+                query = searchString + &apos; topic:maslowcreate&apos;
+            }
+            
+            //Figure out how many repos this user has, search will throw an error if they have 0;
+            octokit.repos.list({
+                affiliation: &apos;owner&apos;,
+            }).then(({data}) =&gt; {
+                if(data.length == 0){                   //If the user has no repos at all, the search will fail so we want to spawn a popup here and clone the example
+                    this.cloneExampleProjectPopup()
+                }
+            })
+            
+            octokit.search.repos({
+                q: query,
+                sort: &quot;stars&quot;,
+                per_page: 100,
+                page: 1,
+                headers: {
+                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                }
+            }).then(result =&gt; {
+                result.data.items.forEach(repo =&gt; {
+                    const thumbnailPath = &quot;https://raw.githubusercontent.com/&quot;+repo.full_name+&quot;/master/project.svg?sanitize=true&quot;
+                    this.addProject(repo.name, repo.id, owned, thumbnailPath)
+                })
+                if(result.data.items.length == 0 &amp;&amp; searchString == &apos;&apos;){ //If the empty search returned no results on loading
+                    this.cloneExampleProjectPopup()
+                }
+            }) 
+        } 
+    }
+    
+    this.cloneExampleProjectPopup = function(){
+        this.forkByID(177732883) //This is the ID of the example project
+    }
+    
+    this.addProject = function(projectName, id, owned, thumbnailPath){
+        //create a project element to display
+        
+        var project = document.createElement(&quot;DIV&quot;)
+        
+        var projectPicture = document.createElement(&quot;IMG&quot;)
+        projectPicture.setAttribute(&quot;src&quot;, thumbnailPath)
+        projectPicture.setAttribute(&quot;style&quot;, &quot;width: 100%; height: 100%;&quot;)
+        project.appendChild(projectPicture)
+        project.appendChild(document.createElement(&quot;BR&quot;))
+        
+        var shortProjectName
+        if(projectName.length &gt; 9){
+            shortProjectName = document.createTextNode(projectName.substr(0,7)+&quot;..&quot;)
+        }
+        else{
+            shortProjectName = document.createTextNode(projectName)
+        }
+        project.setAttribute(&quot;class&quot;, &quot;project&quot;)
+        project.setAttribute(&quot;id&quot;, projectName)
+        project.appendChild(shortProjectName) 
+        this.projectsSpaceDiv.appendChild(project) 
+        
+        document.getElementById(projectName).addEventListener(&apos;click&apos;, () =&gt; {
+            this.projectClicked(projectName, id, owned)
+        })
+
+    }
+
+    this.projectClicked = function(projectName, projectID, owned){
+        //runs when you click on one of the projects
+        if(projectName == &quot;New Project&quot;){
+            this.createNewProjectPopup()
+        }
+        else if(owned){
+            this.loadProject(projectName)
+        }
+        else{
+            window.open(&apos;/run?&apos;+projectID)
+        }
+    }
+    
+    this.openTab = function(evt, tabName) {
+      
+        // Declare all variables
+        var i, tabcontent, tablinks
+
+        // Get all elements with class=&quot;tabcontent&quot; and hide them
+        tabcontent = document.getElementsByClassName(&quot;tabcontent&quot;)
+        for (i = 0; i &lt; tabcontent.length; i++) {
+            tabcontent[i].style.display = &quot;none&quot;
+        }
+
+        // Get all elements with class=&quot;tablinks&quot; and remove the class &quot;active&quot;
+        tablinks = document.getElementsByClassName(&quot;tablinks&quot;)
+        for (i = 0; i &lt; tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(&quot; active&quot;, &quot;&quot;)
+        }
+
+        // Show the current tab, and add an &quot;active&quot; class to the button that opened the tab
+        document.getElementById(tabName).style.display = &quot;block&quot;
+        evt.currentTarget.className += &quot; active&quot;
+      
+        //Click on the search bar so that when you start typing it shows updateCommands
+        document.getElementById(&apos;menuInput&apos;).focus()
+      
+      
+        this.loadProjectsBySearch({key: &quot;Enter&quot;}, document.getElementById(&quot;project_search&quot;).value)
+    }
+    
+    this.createNewProjectPopup = function(){
+        //Clear the popup and populate the fields we will need to create the new repo
+        
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        
+        //Project name
+        // &lt;div class=&quot;form&quot;&gt;
+        var createNewProjectDiv = document.createElement(&quot;DIV&quot;)
+        createNewProjectDiv.setAttribute(&quot;class&quot;, &quot;form&quot;)
+        
+        //Add a title
+        var header = document.createElement(&quot;H1&quot;)
+        var title = document.createTextNode(&quot;Create a new project&quot;)
+        header.appendChild(title)
+        createNewProjectDiv.appendChild(header)
+        
+        //Create the form object
+        var form = document.createElement(&quot;form&quot;)
+        form.setAttribute(&quot;class&quot;, &quot;login-form&quot;)
+        createNewProjectDiv.appendChild(form)
+        
+        //Create the name field
+        var name = document.createElement(&quot;input&quot;)
+        name.setAttribute(&quot;id&quot;,&quot;project-name&quot;)
+        name.setAttribute(&quot;type&quot;,&quot;text&quot;)
+        name.setAttribute(&quot;placeholder&quot;,&quot;Project name&quot;)
+        form.appendChild(name)
+        
+        //Add the description field
+        var description = document.createElement(&quot;input&quot;)
+        description.setAttribute(&quot;id&quot;, &quot;project-description&quot;)
+        description.setAttribute(&quot;type&quot;, &quot;text&quot;)
+        description.setAttribute(&quot;placeholder&quot;, &quot;Project description&quot;)
+        form.appendChild(description)
+        
+        //Add the button
+        var createButton = document.createElement(&quot;button&quot;)
+        createButton.setAttribute(&quot;type&quot;, &quot;button&quot;)
+        createButton.addEventListener(&apos;click&apos;, () =&gt; {
+            this.createNewProject()
+        })
+        var buttonText = document.createTextNode(&quot;Create Project&quot;)
+        createButton.appendChild(buttonText)
+        form.appendChild(createButton)
+        
+
+        popup.appendChild(createNewProjectDiv)
+
+    }
+    
+    this.shareOpenedProject = function(){
+        alert(&quot;A page with a shareable url to this project will open in a new window. Share the link to that page with anyone you would like to share the project with.&quot;)
+            
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result =&gt; {
+            var ID = result.data.id
+            window.open(&apos;/run?&apos;+ID)
+        })
+    }
+    
+    this.openGitHubPage = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result =&gt; {
+            var url = result.data.html_url
+            window.open(url)
+        })
+    }
+    
+    this.createNewProject = function(){
+        
+        if(typeof intervalTimer != undefined){
+            clearInterval(intervalTimer) //Turn of auto saving
+        }
+        
+        //Get name and description
+        var name = document.getElementById(&apos;project-name&apos;).value
+        var description = document.getElementById(&apos;project-description&apos;).value
+        
+        //Load a blank project
+        GlobalVariables.topLevelMolecule = new Molecule({
+            x: 0, 
+            y: 0, 
+            topLevel: true, 
+            name: name,
+            atomType: &quot;Molecule&quot;,
+            uniqueID: GlobalVariables.generateUniqueID()
+        })
+        
+        GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule
+        
+        //Create a new repo
+        octokit.repos.createForAuthenticatedUser({
+            name: name,
+            description: description
+        }).then(result =&gt; {
+            //Once we have created the new repo we need to create a file within it to store the project in
+            currentRepoName = result.data.name
+            var path = &quot;project.maslowcreate&quot;
+            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)) // create a file with the new molecule in it and base64 encode it
+            octokit.repos.createFile({
+                owner: currentUser,
+                repo: currentRepoName,
+                path: path,
+                message: &quot;initialize repo&quot;, 
+                content: content
+            }).then(() =&gt; {
+                //Then create the BOM file
+                content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
+                octokit.repos.createFile({
+                    owner: currentUser,
+                    repo: currentRepoName,
+                    path: &quot;BillOfMaterials.md&quot;,
+                    message: &quot;initialize BOM&quot;, 
+                    content: content
+                }).then(() =&gt; {
+                    //Then create the README file
+                    content = window.btoa(&quot;readme init&quot;) // create a file with just the word &quot;init&quot; in it and base64 encode it
+                    octokit.repos.createFile({
+                        owner: currentUser,
+                        repo: currentRepoName,
+                        path: &quot;README.md&quot;,
+                        message: &quot;initialize README&quot;, 
+                        content: content
+                    }).then(() =&gt; {
+                        intervalTimer = setInterval(() =&gt; { this.saveProject() }, 30000) //Save the project regularly
+                    })
+                })
+            })
+            
+            //Update the project topics
+            octokit.repos.replaceTopics({
+                owner: currentUser,
+                repo: currentRepoName,
+                names: [&quot;maslowcreate&quot;, &quot;maslowcreate-project&quot;],
+                headers: {
+                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                }
+            })
+        })
+        
+        GlobalVariables.currentMolecule.backgroundClick()
+        
+        //Clear and hide the popup
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        popup.classList.add(&apos;off&apos;)
+        
+        
+    }
+
+    this.saveProject = function(){
+        //Save the current project into the github repo
+        if(currentRepoName != null){
+            var shape = null
+            if(GlobalVariables.topLevelMolecule.value == null){
+                shape = GlobalVariables.api.sphere()
+            }else{
+                shape = GlobalVariables.topLevelMolecule.value
+            }
+            
+            convertSTL.toStla({}, shape.toDisjointGeometry()).then( stlContent =&gt; {
+                const crossSection = shape.rotate([90,0,0]).crossSection().toDisjointGeometry()
+                convertSVG.toSvg({}, crossSection).then( contentSvg =&gt; {
+            
+                    var bomContent = bomHeader
+                    const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
+                    bomItems.forEach(item =&gt; {
+                        bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|&quot; + item.costUSD + &quot;|&quot; + item.source + &quot;|&quot;
+                    })
+                    
+                    var readmeContent = &quot;# &quot; + currentRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
+                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
+                        readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+                    })
+                    
+                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
+                    
+                    this.createCommit(octokit,{
+                        owner: currentUser,
+                        repo: currentRepoName,
+                        base: &apos;master&apos;, /* optional: defaults to default branch */
+                        changes: {
+                            files: {
+                                &apos;project.stl&apos;: stlContent,
+                                &apos;project.svg&apos;: contentSvg,
+                                &apos;BillOfMaterials.md&apos;: bomContent,
+                                &apos;README.md&apos;: readmeContent,
+                                &apos;project.maslowcreate&apos;: projectContent
+                            },
+                            commit: &apos;Autosave&apos;
+                        }
+                    }) 
+                })
+            })
+        }
+    }
+    
+    this.createCommit = async function(octokit, { owner, repo, base, changes }) {
+        let response
+
+        if (!base) {
+            response = await octokit.repos.get({ owner, repo })
+            base = response.data.default_branch
+        }
+
+        response = await octokit.repos.listCommits({
+            owner,
+            repo,
+            sha: base,
+            per_page: 1
+        })
+        let latestCommitSha = response.data[0].sha
+        const treeSha = response.data[0].commit.tree.sha
+      
+        response = await octokit.git.createTree({
+            owner,
+            repo,
+            base_tree: treeSha,
+            tree: Object.keys(changes.files).map(path =&gt; {
+                return {
+                    path,
+                    mode: &apos;100644&apos;,
+                    content: changes.files[path]
+                }
+            })
+        })
+        const newTreeSha = response.data.sha
+
+        response = await octokit.git.createCommit({
+            owner,
+            repo,
+            message: changes.commit,
+            tree: newTreeSha,
+            parents: [latestCommitSha]
+        })
+        latestCommitSha = response.data.sha
+      
+        await octokit.git.updateRef({
+            owner,
+            repo,
+            sha: latestCommitSha,
+            ref: `heads/master`,
+            force: true
+        })
+      
+        console.warn(&quot;Project saved&quot;)
+
+    }
+    
+    this.loadProject = function(projectName){
+        
+        if(typeof intervalTimer != undefined){
+            clearInterval(intervalTimer) //Turn off auto saving
+        }
+        
+        currentRepoName = projectName
+        
+        octokit.repos.getContents({
+            owner: currentUser,
+            repo: projectName,
+            path: &apos;project.maslowcreate&apos;
+        }).then(result =&gt; {
+                
+            //content will be base64 encoded
+            let rawFile = atob(result.data.content)
+            
+            
+            var moleculesList = JSON.parse(rawFile).molecules
+            
+            //Load a blank project
+            GlobalVariables.topLevelMolecule = new Molecule({
+                x: 0, 
+                y: 0, 
+                topLevel: true, 
+                atomType: &quot;Molecule&quot;
+            })
+            
+            GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule
+            
+            //Load the top level molecule from the file
+            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) =&gt; { return molecule.topLevel == true })[0].uniqueID)
+            
+            GlobalVariables.currentMolecule.backgroundClick()
+
+            //Clear and hide the popup
+            while (popup.firstChild) {
+                popup.removeChild(popup.firstChild)
+            }
+            popup.classList.add(&apos;off&apos;)
+            
+            var _this = this
+            intervalTimer = setInterval(function() { _this.saveProject() }, 30000) //Save the project regularly
+        })
+        
+    }
+    
+    this.getProjectByID = async function(id){
+        let result = await octokit.request(&apos;GET /repositories/:id&apos;, {id})
+            
+        //Find out the owners info;
+        var user     = result.data.owner.login
+        var repoName = result.data.name
+        
+        //Get the file contents
+        result = await octokit.repos.getContents({
+            owner: user,
+            repo: repoName,
+            path: &apos;project.maslowcreate&apos;
+        })
+        
+        return result
+    }
+    
+    this.exportCurrentMoleculeToGithub = function(molecule){
+        
+        //Get name and description
+        var name = molecule.name
+        var description = &quot;A stand alone molecule exported from Maslow Create&quot;
+        
+        //Create a new repo
+        octokit.repos.createForAuthenticatedUser({
+            name: name,
+            description: description
+        }).then(result =&gt; {
+            //Once we have created the new repo we need to create a file within it to store the project in
+            var repoName = result.data.name
+            var id       = result.data.id
+            var path     = &quot;project.maslowcreate&quot;
+            var content  = window.btoa(&quot;init&quot;) // create a file with just the word &quot;init&quot; in it and base64 encode it
+            octokit.repos.createFile({
+                owner: currentUser,
+                repo: repoName,
+                path: path,
+                message: &quot;initialize repo&quot;, 
+                content: content
+            }).then(() =&gt; {
+                
+                //Save the molecule into the newly created repo
+                
+                var path = &quot;project.maslowcreate&quot;
+                
+                molecule.topLevel = true //force the molecule to export in the long form as if it were the top level molecule
+                var content = window.btoa(JSON.stringify(molecule.serialize(null), null, 4)) //Convert the passed molecule object to a JSON string and then convert it to base64 encoding
+                
+                //Get the SHA for the file
+                octokit.repos.getContents({
+                    owner: currentUser,
+                    repo: repoName,
+                    path: path
+                }).then(result =&gt; {
+                    var sha = result.data.sha
+                    
+                    //Save the repo to the file
+                    octokit.repos.updateFile({
+                        owner: currentUser,
+                        repo: repoName,
+                        path: path,
+                        message: &quot;export Molecule&quot;, 
+                        content: content,
+                        sha: sha
+                    }).then(() =&gt; {
+                        //Replace the existing molecule now that we just exported
+                        molecule.replaceThisMoleculeWithGithub(id)
+                    })
+                })
+
+            })
+            
+            //Update the project topics
+            octokit.repos.replaceTopics({
+                owner: currentUser,
+                repo: repoName,
+                names: [&quot;maslowcreate&quot;, &quot;maslowcreate-molecule&quot;],
+                headers: {
+                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                }
+            })
+            
+        })
+    }
+
+    this.starProject = function(id){
+        //Authenticate - Initialize with OAuth.io app public key
+        OAuth.initialize(&apos;BYP9iFpD7aTV9SDhnalvhZ4fwD8&apos;)
+        // Use popup for oauth
+        OAuth.popup(&apos;github&apos;).then(github =&gt; {
+            
+            octokit.authenticate({
+                type: &quot;oauth&quot;,
+                token: github.access_token,
+                headers: {
+                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                }
+            })
+            
+            octokit.request(&apos;GET /repositories/:id&apos;, {id}).then(result =&gt; {
+                //Find out the information of who owns the project we are trying to fork
+                var user     = result.data.owner.login
+                var repoName = result.data.name
+                this.octokit.activity.starRepo({
+                    owner: user,
+                    repo: repoName
+                })
+            })
+        })
+    }
+    
+    this.forkByID = function(id){
+        
+        //Authenticate - Initialize with OAuth.io app public key
+        OAuth.initialize(&apos;BYP9iFpD7aTV9SDhnalvhZ4fwD8&apos;)
+        // Use popup for oauth
+        OAuth.popup(&apos;github&apos;).then(github =&gt; {
+            
+            octokit.authenticate({
+                type: &quot;oauth&quot;,
+                token: github.access_token,
+                headers: {
+                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                }
+            })
+            
+            octokit.request(&apos;GET /repositories/:id&apos;, {id}).then(result =&gt; {
+                //Find out the information of who owns the project we are trying to fork
+                var user     = result.data.owner.login
+                var repoName = result.data.name
+                
+                octokit.repos.listTopics({
+                    owner: user, 
+                    repo: repoName,
+                    headers: {
+                        accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                    }
+                }).then(result =&gt; {
+                    var topics = result.data.names
+                    
+                    //Create a fork of the project with the found user name and repo name under your account
+                    octokit.repos.createFork({
+                        owner: user, 
+                        repo: repoName,
+                        headers: {
+                            accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                        }
+                    }).then(result =&gt; {
+                        var repoName = result.data.name
+                        //Manually copy over the topics which are lost in forking
+                        octokit.repos.replaceTopics({
+                            owner: result.data.owner.login,
+                            repo: result.data.name,
+                            names: topics,
+                            headers: {
+                                accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                            }
+                        }).then(() =&gt; {
+                            
+                            
+                            //Remove everything in the popup now
+                            while (popup.firstChild) {
+                                popup.removeChild(popup.firstChild)
+                            }
+                            
+                            popup.classList.remove(&apos;off&apos;)
+                            popup.setAttribute(&quot;style&quot;, &quot;text-align: center&quot;)
+
+                            var subButtonDiv = document.createElement(&apos;div&apos;)
+                            subButtonDiv.setAttribute(&quot;class&quot;, &quot;form&quot;)
+                            
+                            //Add a title
+                            var title = document.createElement(&quot;H3&quot;)
+                            title.appendChild(document.createTextNode(&quot;A copy of the project &apos;&quot; + repoName + &quot;&apos; has been copied and added to your projects. You can view it by clicking the button below.&quot;))
+                            subButtonDiv.appendChild(title)
+                            subButtonDiv.appendChild(document.createElement(&quot;br&quot;))
+                            
+                            var form = document.createElement(&quot;form&quot;)
+                            subButtonDiv.appendChild(form)
+                            var button = document.createElement(&quot;button&quot;)
+                            button.setAttribute(&quot;type&quot;, &quot;button&quot;)
+                            button.appendChild(document.createTextNode(&quot;View Projects&quot;))
+                            button.addEventListener(&quot;click&quot;, () =&gt; {
+                                window.location.href = &apos;/&apos;
+                            })
+                            form.appendChild(button)
+                            popup.appendChild(subButtonDiv)
+                        })
+                    })
+                })
+            })
+        })
+    }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

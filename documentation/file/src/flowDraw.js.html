@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/flowDraw.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/flowDraw.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Menu from &apos;./js/menu&apos;
+import GlobalVariables from &apos;./js/globalvariables&apos;
+import Molecule from &apos;./js/molecules/molecule.js&apos;
+import GitHubMolecule from &apos;./js/molecules/githubmolecule.js&apos;
+import Display from &apos;./js/display.js&apos;
+
+GlobalVariables.display = new Display()
+GlobalVariables.canvas = document.querySelector(&apos;canvas&apos;)
+GlobalVariables.c = GlobalVariables.canvas.getContext(&apos;2d&apos;)
+
+GlobalVariables.canvas.width = innerWidth
+GlobalVariables.canvas.height = innerHeight/2
+let originalWidth=GlobalVariables.canvas.width
+
+var url = window.location.href
+GlobalVariables.runMode = url.includes(&apos;run&apos;) //Check if we are using the run mode based on url
+
+let lowerHalfOfScreen = document.querySelector(&apos;.flex-parent&apos;)
+if(!GlobalVariables.runMode){
+    lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+}else{
+    lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
+}
+let upperHalfOfScreen = document.querySelector(&apos;#flow-canvas&apos;)
+upperHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+let viewer = document.querySelector(&apos;.jscad-container&apos;)
+viewer.setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
+
+
+// Event Listeners
+let flowCanvas = document.getElementById(&apos;flow-canvas&apos;)
+
+flowCanvas.addEventListener(&apos;mousemove&apos;, event =&gt; {
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
+
+        molecule.clickMove(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1)    
+    })
+})
+
+flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
+    //every time the mouse button goes down
+    
+    var clickHandledByMolecule = false
+    
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
+        
+        if (molecule.clickDown(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
+            clickHandledByMolecule = true
+        }
+
+    })
+    
+    if(!clickHandledByMolecule){
+        GlobalVariables.currentMolecule.backgroundClick()
+    }
+    
+    //hide the menu if it is visible
+    if (!document.querySelector(&apos;.menu&apos;).contains(event.target)) {
+        Menu.hidemenu()
+    }
+    
+})
+
+flowCanvas.addEventListener(&apos;dblclick&apos;, event =&gt; {
+    //every time the mouse button goes down
+    
+    var clickHandledByMolecule = false
+    
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
+        if (molecule.doubleClick(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
+            clickHandledByMolecule = true
+        }
+    })
+    
+    if (clickHandledByMolecule == false){
+        console.warn(&apos;double click menu open not working in flowDraw.js&apos;)
+        //showmenu(event);
+    }
+})
+
+flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
+    //every time the mouse button goes up
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
+        molecule.clickUp(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1)      
+    })
+})
+
+window.addEventListener(&apos;keydown&apos;, event =&gt; {
+    //every time the mouse button goes up
+    
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
+        molecule.keyPress(event.key)      
+    })
+})
+
+
+// Implementation
+
+function init() {
+    if(!GlobalVariables.runMode){ //If we are in CAD mode load an empty project as a placeholder
+        GlobalVariables.currentMolecule = new Molecule({
+            x: 0, 
+            y: 0, 
+            topLevel: true, 
+            name: &apos;Maslow Create&apos;,
+            atomType: &apos;Molecule&apos;,
+            uniqueID: GlobalVariables.generateUniqueID()
+        })
+    }
+    else{
+        var ID = window.location.href.split(&apos;?&apos;)[1]
+        //Have the current molecule load it
+        if(typeof ID != undefined){
+            GlobalVariables.currentMolecule = new GitHubMolecule({
+                projectID: ID
+            })
+        }
+    }
+    
+    window.addEventListener(&apos;resize&apos;, () =&gt; { onWindowResize() }, false)
+
+    onWindowResize()
+    animate()
+}
+
+function onWindowResize() {
+    
+    var bounds = GlobalVariables.canvas.getBoundingClientRect()
+    GlobalVariables.canvas.width = bounds.width
+    GlobalVariables.canvas.height = bounds.height 
+    //reset screen parameters 
+    if(!GlobalVariables.runMode){
+        lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+    }else{
+        lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
+    }
+    upperHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+    viewer.setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
+
+    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+
+    GlobalVariables.display.onWindowResize()    
+}
+
+
+
+// Animation Loop
+function animate() {
+    requestAnimationFrame(animate)
+    GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
+    GlobalVariables.c.scale(GlobalVariables.scale1,GlobalVariables.scale1)
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
+        molecule.update()
+
+    })
+    GlobalVariables.c.setTransform(1,0,0,1,0,0)
+
+    GlobalVariables.display.render()
+    GlobalVariables.display.controls.update()
+}
+
+init()
+
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

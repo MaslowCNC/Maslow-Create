@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/js/molecules/molecule.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/molecule.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
+import Connector from &apos;../prototypes/connector.js&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
+import saveAs from &apos;../lib/FileSaver.js&apos;
+import { extractBomTags } from &apos;../BOM.js&apos;
+
+export default class Molecule extends Atom{
+
+    constructor(values){
+        
+        super(values)
+        
+        this.nodesOnTheScreen = []
+        this.children = []
+        this.name = &apos;Molecule&apos;
+        this.atomType = &apos;Molecule&apos;
+        this.centerColor = &apos;#949294&apos;
+        this.topLevel = false //a flag to signal if this node is the top level node
+        
+        this.setValues(values)
+        
+        //Add the molecule&apos;s output
+        this.placeAtom({
+            parentMolecule: this, 
+            x: GlobalVariables.canvas.width - 50,
+            y: GlobalVariables.canvas.height/2,
+            parent: this,
+            name: &apos;Output&apos;,
+            atomType: &apos;Output&apos;
+        }, null, GlobalVariables.secretTypes)
+        
+        this.updateValue()
+    }
+    
+    draw(){
+        super.draw() //Super call to draw the rest
+        
+        //draw the circle in the middle
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = this.centerColor
+        GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false)
+        GlobalVariables.c.closePath()
+        GlobalVariables.c.fill()
+        
+    }
+    
+    doubleClick(x,y){
+        //returns true if something was done with the click
+        
+        
+        var clickProcessed = false
+        
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        
+        if (distFromClick &lt; this.radius){
+            GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
+            clickProcessed = true
+        }
+        
+        return clickProcessed 
+    }
+    
+    backgroundClick(){
+        
+        this.updateSidebar()
+        
+        this.sendToRender()
+    }
+    
+    updateValue(){
+        //Grab the code from the output object
+        
+        //Grab values from the inputs and push them out to the input objects
+        this.children.forEach(child =&gt; {
+            if(child.type == &apos;input&apos;){
+                this.nodesOnTheScreen.forEach(atom =&gt; {
+                    if(atom.atomType == &apos;Input&apos; &amp;&amp; child.name == atom.name){
+                        atom.setOutput(child.getValue())
+                    }
+                })
+            }
+        })
+        
+        //Grab the value from the Molecule&apos;s output and set it to be the molecule&apos;s code block so that clicking on the molecule will display what it is outputting
+        this.nodesOnTheScreen.forEach(atom =&gt; {
+            if(atom.atomType == &apos;Output&apos;){
+                this.value = atom.value
+            }
+        })
+        
+        //Set the output nodes with type &apos;geometry&apos; to be the generated code
+        this.children.forEach(child =&gt; {
+            if(child.valueType == &apos;geometry&apos; &amp;&amp; child.type == &apos;output&apos;){
+                child.setValue(this.value)
+            }
+        })
+        
+        //If this molecule is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender()
+        }
+    }
+    
+    updateSidebar(){
+        //Update the side bar to make it possible to change the molecule name
+        
+        var valueList = super.initializeSideBar() 
+        
+        if(!this.topLevel){
+            this.createButton(valueList,this,&apos;Go To Parent&apos;,this.goToParentMolecule)
+            
+            this.createButton(valueList,this,&apos;Export To GitHub&apos;, this.exportToGithub)
+        }
+        else{ //If we are the top level molecule and not in run mode
+            this.createButton(valueList,this,&apos;Load A Different Project&apos;,() =&gt; {
+                GlobalVariables.gitHub.showProjectsToLoad()
+            })
+            
+            this.createButton(valueList,this,&apos;Share This Project&apos;,() =&gt; {
+                GlobalVariables.gitHub.shareOpenedProject()
+            })
+            
+            this.createButton(valueList,this,&apos;GitHub&apos;,() =&gt; {
+                GlobalVariables.gitHub.openGitHubPage()
+            })
+            
+        }
+        
+        this.createButton(valueList,this,&apos;Download STL&apos;,() =&gt; {
+            const convertSTL = require(&apos;@jsxcad/convert-stl&apos;)
+            convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent =&gt; {
+                const blob = new Blob([stlContent], {type: &apos;text/plain;charset=utf-8&apos;})
+                saveAs(blob, this.name+&apos;.stl&apos;)
+            })
+        })
+        
+        this.createButton(valueList,this,&apos;Download SVG&apos;,() =&gt; {
+            const convertSVG = require(&apos;@jsxcad/convert-svg&apos;)
+            const crossSection = this.value.crossSection().toDisjointGeometry()
+            convertSVG.toSvg({}, crossSection).then( contentSvg =&gt; {
+                const blob = new Blob([contentSvg], {type: &apos;text/plain;charset=utf-8&apos;})
+                saveAs(blob, this.name+&apos;.svg&apos;)
+            })
+        })
+        
+        this.createEditableValueListItem(valueList,this,&apos;name&apos;, &apos;Name&apos;, false)
+        
+        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
+            //Add options to set all of the inputs
+            this.children.forEach(child =&gt; {
+                if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
+                    this.createEditableValueListItem(valueList,child,&apos;value&apos;, child.name, true)
+                }
+            })
+        }
+        
+                
+        this.displaySimpleBOM(valueList)
+        
+        return valueList
+        
+    }
+    
+    displaySimpleBOM(list){
+        var bomList = []
+        try{
+            bomList = extractBomTags(this.value)
+        }catch(err){console.warn(err)}
+        
+        if(bomList.length &gt; 0){
+        
+            list.appendChild(document.createElement(&apos;br&apos;))
+            list.appendChild(document.createElement(&apos;br&apos;))
+            
+            var div = document.createElement(&apos;h3&apos;)
+            div.setAttribute(&apos;style&apos;,&apos;text-align:center;&apos;)
+            list.appendChild(div)
+            var valueText = document.createTextNode(&apos;Bill Of Materials&apos;)
+            div.appendChild(valueText)
+            
+            var x = document.createElement(&apos;HR&apos;)
+            list.appendChild(x)
+            
+            bomList.forEach(bomEntry =&gt; {
+                this.createNonEditableValueListItem(list,bomEntry,&apos;numberNeeded&apos;, bomEntry.BOMitemName, false)
+            })
+        }
+    }
+
+    goToParentMolecule(){
+        //Go to the parent molecule if there is one
+        
+        GlobalVariables.currentMolecule.updateValue()
+        
+        if(!GlobalVariables.currentMolecule.topLevel){
+            GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
+        }
+    }
+    
+    exportToGithub(self){
+        //Export this molecule to github
+        GlobalVariables.gitHub.exportCurrentMoleculeToGithub(self)
+    }
+    
+    replaceThisMoleculeWithGithub(githubID){
+        
+        //If we are currently inside the molecule targeted for replacement, go up one
+        if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){
+            GlobalVariables.currentMolecule = this.parent
+        }
+        
+        //Create a new github molecule in the same spot
+        GlobalVariables.currentMolecule.placeAtom({
+            x: this.x, 
+            y: this.y, 
+            parent: GlobalVariables.currentMolecule,
+            name: this.name,
+            atomType: &apos;GitHubMolecule&apos;,
+            projectID: githubID,
+            uniqueID: GlobalVariables.generateUniqueID()
+        }, null, GlobalVariables.availableTypes)
+        
+        
+        //Then delete the old molecule which has been replaced
+        this.deleteNode()
+
+    }
+    
+    requestReadme(){
+        var generatedReadme = super.requestReadme()
+        generatedReadme.push(&apos;## &apos; + this.name)
+        
+        var sortableAtomsList = this.nodesOnTheScreen
+        sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)})
+        
+        sortableAtomsList.forEach(molecule =&gt; {
+            generatedReadme = generatedReadme.concat(molecule.requestReadme())
+        })
+        return generatedReadme
+    }
+    
+    serialize(savedObject){
+        //Save this molecule.
+        
+        //This one is a little confusing. Basically each molecule saves like an atom, but also creates a second object 
+        //record of itself in the object &quot;savedObject&quot; object. If this is the topLevel molecule we need to create the 
+        //savedObject object here to pass to lower levels.
+        
+        if(this.topLevel == true){
+            //If this is the top level create a new blank project to save to FIXME: It would be cleaner if this function were just called with the object when called from the top level
+            savedObject = {molecules: []}
+        }
+            
+        var allAtoms = [] //An array of all the atoms containted in this molecule
+        var allConnectors = [] //An array of all the connectors contained in this molelcule
+        
+        
+        this.nodesOnTheScreen.forEach(atom =&gt; {
+            //Store a represnetation of the atom
+            allAtoms.push(atom.serialize(savedObject))
+            //Store a representation of the atom&apos;s connectors
+            atom.children.forEach(attachmentPoint =&gt; {
+                if(attachmentPoint.type == &apos;output&apos;){
+                    attachmentPoint.connectors.forEach(connector =&gt; {
+                        allConnectors.push(connector.serialize())
+                    })
+                }
+            })
+        })
+        
+        var thisAsObject = super.serialize(savedObject)
+        thisAsObject.topLevel = this.topLevel
+        thisAsObject.allAtoms = allAtoms
+        thisAsObject.allConnectors = allConnectors
+        thisAsObject.fileTypeVersion = 1
+        
+        //Add a JSON representation of this object to the file being saved
+        savedObject.molecules.push(thisAsObject)
+            
+        if(this.topLevel == true){
+            //If this is the top level, return the complete file to be saved
+            return savedObject
+        }
+        else{
+            //If not, return a placeholder for this molecule
+            return super.serialize(savedObject)
+        }
+    }
+        
+    deserialize(moleculeList, moleculeID){
+        
+        // try{
+        //Find the target molecule in the list
+        var moleculeObject = moleculeList.filter((molecule) =&gt; { return molecule.uniqueID == moleculeID})[0]
+            
+        this.setValues(moleculeObject) //Grab the values of everything from the passed object
+            
+        //Place the atoms
+        moleculeObject.allAtoms.forEach(atom =&gt; {
+            this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+        })
+            
+        //reload the molecule object to prevent persistence issues
+        moleculeObject = moleculeList.filter((molecule) =&gt; { return molecule.uniqueID == moleculeID})[0]
+            
+        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
+        this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
+        this.savedConnectors.forEach(connector =&gt; {
+            this.placeConnector(connector)
+        })
+            
+        this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
+            
+        this.updateValue()
+        // }
+        // catch(err){
+        // console.log(&quot;Unable to load molecule: &quot;);
+        // console.log(moleculeObject);
+        // console.log(err);
+        // }
+    }
+    
+    placeAtom(newAtomObj, moleculeList, typesList){
+        //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
+        
+        for(var key in typesList) {
+            if (typesList[key].atomType == newAtomObj.atomType){
+                newAtomObj.parent = this
+                var atom = new typesList[key].creator(newAtomObj)
+                
+                //reassign the name of the Inputs to preserve linking
+                if(atom.atomType == &apos;Input&apos; &amp;&amp; typeof newAtomObj.name !== &apos;undefined&apos;){
+                    atom.name = newAtomObj.name
+                    atom.draw() //The poling happens in draw :roll_eyes:
+                }
+
+                //If this is a molecule, deserialize it
+                if(atom.atomType == &apos;Molecule&apos; &amp;&amp; moleculeList != null){
+                    atom.deserialize(moleculeList, atom.uniqueID)
+                }
+                
+                this.nodesOnTheScreen.push(atom)
+            }
+        }
+        
+        if(newAtomObj.atomType == &apos;Output&apos;){
+            //re-asign output ID numbers if a new one is supposed to be placed
+            this.nodesOnTheScreen.forEach(atom =&gt; {
+                if(atom.atomType == &apos;Output&apos;){
+                    atom.setID(newAtomObj.uniqueID)
+                }
+            })
+        }
+    }
+    
+    placeConnector(connectorObj){
+        var connector
+        var cp1NotFound = true
+        var cp2NotFound = true
+        var ap2
+        
+        try{
+            this.nodesOnTheScreen.forEach(atom =&gt; {
+                //Find the output node
+                if (atom.uniqueID == connectorObj.ap1ID){
+                    atom.children.forEach(child =&gt; {
+                        if(child.name == connectorObj.ap1Name &amp;&amp; child.type == &apos;output&apos;){
+                            connector = new Connector({
+                                atomType: &apos;Connector&apos;,
+                                attachmentPoint1: child,
+                                parentMolecule:  atom
+                            })
+                            cp1NotFound = false
+                        }
+                    })
+                }
+                //Find the input node
+                if (atom.uniqueID == connectorObj.ap2ID){
+                    atom.children.forEach(child =&gt; {
+                        if(child.name == connectorObj.ap2Name &amp;&amp; child.type == &apos;input&apos; &amp;&amp; child.connectors.length == 0){
+                            cp2NotFound = false
+                            ap2 = child
+                        }
+                    })
+                }
+            })
+        }
+        catch(err){
+            console.warn(&apos;Unable to create connector&apos;)
+        }
+        
+        if(cp1NotFound || cp2NotFound){
+            console.warn(&apos;Unable to create connector&apos;)
+            return
+        }
+        
+        connector.attachmentPoint2 = ap2
+        
+        //Store the connector
+        connector.attachmentPoint1.connectors.push(connector)
+        connector.attachmentPoint2.connectors.push(connector)
+        
+        //Update the connection
+        connector.propogate()
+    }
+}
+
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
