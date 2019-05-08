@@ -22,6 +22,7 @@ export default class Atom {
         this.x = 0
         this.y = 0
         this.alertMessage = ''
+        this.processing = false
         
 
         for(var key in values) {
@@ -53,8 +54,13 @@ export default class Atom {
             child.draw()       
         })
       
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+            console.log("drawing blue");
+        }else{
+            GlobalVariables.c.fillStyle = this.color
+        }
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.font = '10px Work Sans'
 
         //make it impossible to draw atoms too close to the edge
@@ -62,23 +68,17 @@ export default class Atom {
         var canvasFlow = document.querySelector('#flow-canvas')
         if (this.x < this.radius){
             this.x = this.radius
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else if (this.y<this.radius){
             this.y = this.radius 
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else if (this.x + this.radius > canvasFlow.width/GlobalVariables.scale1){
             this.x = canvasFlow.width/GlobalVariables.scale1 - this.radius
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else if (this.y + this.radius > canvasFlow.height/GlobalVariables.scale1){
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
-        else{
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        }
+        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()

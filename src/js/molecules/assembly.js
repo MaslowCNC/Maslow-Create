@@ -25,6 +25,8 @@ export default class Assembly extends Atom{
     }
     
     updateValue(){
+        this.processing = true
+        GlobalVariables.drawAllMolecules()
         
         var inputs = []
         this.children.forEach( io => {
@@ -56,6 +58,9 @@ export default class Assembly extends Atom{
         
         //Delete or add ports as needed
         addOrDeletePorts(this)
+        
+        this.processing = false
+        console.log("finish");
     }
     
     serialize(savedObject){
