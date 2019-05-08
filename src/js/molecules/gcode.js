@@ -1,6 +1,7 @@
-import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
-import saveAs from '../FileSaver'
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
+import saveAs from '../lib/FileSaver.js'
+import SVGReader from '../lib/SVGReader.js'
 
 export default class Gcode extends Atom {
     
@@ -24,22 +25,29 @@ export default class Gcode extends Atom {
     
     updateValue(){
         //Generate a .svg file
-        const input = this.findIOValue('geometry')
-        const slice = GlobalVariables.api.crossSection({},input)
-        GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice)
-        const stlContent = readFileSync('makeSVG')
-        
-        const bounds = input.getBounds()
-        const partThickness = bounds[1][2]-bounds[0][2]
-        
-        //convert that to gcode
-        this.value = this.svg2gcode(stlContent, {
-            passes: this.findIOValue('passes'),
-            materialWidth: -1*partThickness,
-            bitWidth: this.findIOValue('tool size')
-        })
-        
-        super.updateValue()
+        try{
+            this.clearAlert()
+            const input = this.findIOValue('geometry')
+            
+            const crossSection = input.crossSection().toDisjointGeometry()
+            
+            const bounds = input.measureBoundingBox()
+            const partThickness = bounds[1][2]-bounds[0][2]
+            const convertSVG = require('@jsxcad/convert-svg')
+            convertSVG.toSvg({}, crossSection).then( contentSvg => {
+            
+                //convert that to gcode
+                this.value = this.svg2gcode(contentSvg, {
+                    passes: this.findIOValue('passes'),
+                    materialWidth: -1*partThickness,
+                    bitWidth: this.findIOValue('tool size')
+                })
+                
+                super.updateValue()
+            })
+        }catch(err){
+            this.setAlert(err)
+        }
     }
     
     updateSidebar(){
@@ -49,6 +57,10 @@ export default class Gcode extends Atom {
             const blob = new Blob([this.value], {type: 'text/plain;charset=utf-8'})
             saveAs(blob, GlobalVariables.topLevelMolecule.name+'.nc')
         })
+    }
+    
+    sendToRender(){
+        //Supress the normal send to render behavior
     }
     
     svg2gcode(svg, settings) {
@@ -124,7 +136,7 @@ export default class Gcode extends Atom {
                 'F' + settings.seekRate
             ].join(' '))
         
-            for (var p = settings.passWidth; p>=settings.materialWidth; p+=settings.passWidth) {
+            for (var p = settings.passWidth; p>=settings.materialWidth; p-=-1*settings.passWidth) {
 
                 // begin the cut by dropping the tool to the work
                 gcode.push(['G1',

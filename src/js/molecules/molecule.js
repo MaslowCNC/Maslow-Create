@@ -1,7 +1,8 @@
-import Atom from '../prototypes/atom'
-import Connector from '../prototypes/connector'
-import GlobalVariables from '../globalvariables'
-import saveAs from '../FileSaver'
+import Atom from '../prototypes/atom.js'
+import Connector from '../prototypes/connector.js'
+import GlobalVariables from '../globalvariables.js'
+import saveAs from '../lib/FileSaver.js'
+import { extractBomTags } from '../BOM.js'
 
 export default class Molecule extends Atom{
 
@@ -126,16 +127,20 @@ export default class Molecule extends Atom{
         }
         
         this.createButton(valueList,this,'Download STL',() => {
-            const blob = new Blob([readFileSync('window')], {type: 'text/plain;charset=utf-8'})
-            saveAs(blob, this.name+'.stl')
+            const convertSTL = require('@jsxcad/convert-stl')
+            convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent => {
+                const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
+                saveAs(blob, this.name+'.stl')
+            })
         })
         
         this.createButton(valueList,this,'Download SVG',() => {
-            const slice = GlobalVariables.api.crossSection({},this.value)
-            GlobalVariables.api.writeSvg({ path: 'makeSVG' }, slice)
-            const stlContent = readFileSync('makeSVG')
-            const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
-            saveAs(blob, this.name+'.svg')
+            const convertSVG = require('@jsxcad/convert-svg')
+            const crossSection = this.value.crossSection().toDisjointGeometry()
+            convertSVG.toSvg({}, crossSection).then( contentSvg => {
+                const blob = new Blob([contentSvg], {type: 'text/plain;charset=utf-8'})
+                saveAs(blob, this.name+'.svg')
+            })
         })
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
@@ -157,8 +162,10 @@ export default class Molecule extends Atom{
     }
     
     displaySimpleBOM(list){
-        
-        var bomList = this.requestBOM()
+        var bomList = []
+        try{
+            bomList = extractBomTags(this.value)
+        }catch(err){console.warn(err)}
         
         if(bomList.length > 0){
         
@@ -219,14 +226,6 @@ export default class Molecule extends Atom{
 
     }
     
-    requestBOM(){
-        var generatedBOM = super.requestBOM()
-        this.nodesOnTheScreen.forEach(molecule => {
-            generatedBOM = generatedBOM.concat(molecule.requestBOM())
-        })
-        return generatedBOM
-    }
-    
     requestReadme(){
         var generatedReadme = super.requestReadme()
         generatedReadme.push('## ' + this.name)
@@ -273,6 +272,7 @@ export default class Molecule extends Atom{
         thisAsObject.topLevel = this.topLevel
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
+        thisAsObject.fileTypeVersion = 1
         
         //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject)

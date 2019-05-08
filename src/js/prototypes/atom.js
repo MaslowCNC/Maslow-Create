@@ -21,6 +21,7 @@ export default class Atom {
         this.isMoving = false
         this.x = 0
         this.y = 0
+        this.alertMessage = ''
         
 
         for(var key in values) {
@@ -85,6 +86,28 @@ export default class Atom {
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
+      
+        if (this.alertMessage.length > 0){
+            //Draw Alert block  
+            GlobalVariables.c.beginPath()
+            const padding = 10
+            GlobalVariables.c.fillStyle = 'red'
+            GlobalVariables.c.rect(
+                this.x + this.radius - padding/2, 
+                this.y - this.radius + padding/2, 
+                GlobalVariables.c.measureText(this.alertMessage).width + padding, 
+                - (parseInt(GlobalVariables.c.font) + padding))
+            GlobalVariables.c.fill()
+            GlobalVariables.c.strokeStyle = 'black'
+            GlobalVariables.c.lineWidth = 1
+            GlobalVariables.c.stroke()
+            GlobalVariables.c.closePath()
+
+            GlobalVariables.c.beginPath()
+            GlobalVariables.c.fillStyle = 'black'
+            GlobalVariables.c.fillText(this.alertMessage, this.x + this.radius, this.y - this.radius) 
+            GlobalVariables.c.closePath()
+        }
     }
     
     addIO(type, name, target, valueType, defaultValue){
@@ -106,6 +129,7 @@ export default class Atom {
                 valueType: valueType,
                 name: name,
                 value: defaultValue,
+                defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint'
             })
@@ -123,6 +147,17 @@ export default class Atom {
                 target.children.splice(target.children.indexOf(io),1)
             }
         })
+    }
+
+    setAlert(message){
+        this.color = 'orange'
+        this.alertMessage = String(message)
+
+    }
+
+    clearAlert(){
+        this.color = this.defaultColor
+        this.alertMessage = ''
     }
     
     clickDown(x,y, clickProcessed){
@@ -245,6 +280,8 @@ export default class Atom {
         })
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
+        
+        GlobalVariables.currentMolecule.backgroundClick()
     }
     
     update() {
@@ -281,11 +318,6 @@ export default class Atom {
         return object
     }
     
-    requestBOM(){
-        //Placeholder
-        return []
-    }
-    
     requestReadme(){
         //request any contributions from this atom to the readme
         
@@ -309,13 +341,13 @@ export default class Atom {
     
     sendToRender(){
         //Send code to JSxCAD to render
-        GlobalVariables.display.writeToDisplay(this.value);
-        // try {
-            // GlobalVariables.api.writeStl({ path: 'window' },this.value)
-        // }
-        // catch(err) {
-            // GlobalVariables.api.writeStl({ path: 'window' },GlobalVariables.api.sphere(.1))
-        // }
+        try{
+            GlobalVariables.display.writeToDisplay(this.value)
+        }
+        catch(err){
+            this.setAlert(err)    
+        }
+
     }
     
     findIOValue(ioName){
@@ -333,7 +365,7 @@ export default class Atom {
         return ioValue
     }
     
-    createEditableValueListItem(list,object,key, label, resultShouldBeNumber){
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         
@@ -374,6 +406,7 @@ export default class Atom {
             }
             else{
                 object[key] = valueInBox
+                callBack(valueInBox)
             }
         })
         
@@ -395,14 +428,14 @@ export default class Atom {
         //Div which contains the entire element
         var div = document.createElement('div')
         listElement.appendChild(div)
-        div.setAttribute('class', 'sidebar-item')
+        div.setAttribute('class', 'sidebar-item sidebar-editable-div')
         
         //Left div which displays the label
         var labelDiv = document.createElement('div')
         div.appendChild(labelDiv)
         var labelText = document.createTextNode(label + ':')
         labelDiv.appendChild(labelText)
-        labelDiv.setAttribute('class', 'sidebar-subitem')
+        labelDiv.setAttribute('class', 'sidebar-subitem label-item')
         
         
         //Right div which is editable and displays the value
@@ -411,7 +444,7 @@ export default class Atom {
         var valueText = document.createTextNode(object[key])
         valueTextDiv.appendChild(valueText)
         valueTextDiv.setAttribute('contenteditable', 'false')
-        valueTextDiv.setAttribute('class', 'sidebar-subitem')
+        valueTextDiv.setAttribute('class', 'sidebar-subitem noediting-item')
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         

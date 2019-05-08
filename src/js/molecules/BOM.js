@@ -1,21 +1,44 @@
-import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
-import BOMEntry from '../BOM'
+/**
+ * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
+ */
+
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
+import {BOMEntry} from '../BOM.js'
 
 
-export default class BillOfMaterials extends Atom{
+export default class AddBOMTag extends Atom{
+    /**
+    * The constructor function.
+    * @param {object} values An array of values passed in which will be assigned to the class as this.x
+    */ 
     constructor(values){
         super(values)
         
         this.value = ''
-        this.atomType = 'Bill Of Materials'
-        this.type = 'billOfMaterials'
-        this.name = 'Bill Of Materials'
+        this.atomType = 'Add BOM Tag'
+        this.type = 'addBOMTag'
+        this.name = 'Add BOM Tag'
         this.radius = 20
         
-        this.BOMlist = []
+        this.BOMitem = new BOMEntry()
+        
+        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
+    }
+    
+    updateValue(){
+        //Overwrite the normal update code block to update the number of segments also
+        try{
+            this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMitem))
+            this.clearAlert()
+        }catch(err){
+            this.setAlert(err)
+        }
+        
+        super.updateValue()
     }
     
     updateSidebar(){
@@ -23,7 +46,7 @@ export default class BillOfMaterials extends Atom{
         
         var valueList = super.updateSidebar() //call the super function
         
-        this.createBOM(valueList, this, this.BOMlist)
+        this.createBOM(valueList)
     }
     
     draw() {
@@ -45,13 +68,8 @@ export default class BillOfMaterials extends Atom{
         
         return [this.readmeText]
     }
-    
-    requestBOM(){
-        //Placeholder
-        return this.BOMlist
-    }
-    
-    createBOM(list,parent){
+   
+    createBOM(list){
         
         list.appendChild(document.createElement('br'))
         list.appendChild(document.createElement('br'))
@@ -59,37 +77,26 @@ export default class BillOfMaterials extends Atom{
         var div = document.createElement('h3')
         div.setAttribute('style','text-align:center;')
         list.appendChild(div)
-        var valueText = document.createTextNode('Bill Of Materials')
+        var valueText = document.createTextNode('Bill Of Materials Entry')
         div.appendChild(valueText)
         
         var x = document.createElement('HR')
         list.appendChild(x)
         
-        this.BOMlist.forEach(bomItem => {
-            this.createEditableValueListItem(list,bomItem,'BOMitemName', 'Item', false)
-            this.createEditableValueListItem(list,bomItem,'numberNeeded', 'Number', true)
-            this.createEditableValueListItem(list,bomItem,'costUSD', 'Price', true)
-            this.createEditableValueListItem(list,bomItem,'source', 'Source', false)
-            var x = document.createElement('HR')
-            list.appendChild(x)
-        })
-        
-        this.createButton(list,parent,'Add BOM Entry',() => {
-            this.addBOMEntry()
-        })
+        this.createEditableValueListItem(list,this.BOMitem,'BOMitemName', 'Item', false, () => this.updateValue())
+        this.createEditableValueListItem(list,this.BOMitem,'numberNeeded', 'Number', true, () => this.updateValue())
+        this.createEditableValueListItem(list,this.BOMitem,'costUSD', 'Price', true, () => this.updateValue())
+        this.createEditableValueListItem(list,this.BOMitem,'source', 'Source', false,() => this.updateValue())
+        x = document.createElement('HR')
+        list.appendChild(x)
     }
     
-    addBOMEntry(){
-        this.BOMlist.push(new BOMEntry())
-        
-        this.updateSidebar()
-    }
     
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)
         
-        valuesObj.BOMlist = this.BOMlist
+        valuesObj.BOMitem = this.BOMitem
         
         return valuesObj
         
