@@ -50,6 +50,34 @@ export default class Display {
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
+
+        this.targetDiv.addEventListener('mousedown', event => {
+
+            let sideBar = document.querySelector('.sideBar')
+            while (sideBar.firstChild) {
+                sideBar.removeChild(sideBar.firstChild)
+            }
+            
+            //add the name as a title
+            var name = document.createElement('h1')
+            name.textContent = "3D View"
+            name.setAttribute('class','doc-title')
+            sideBar.appendChild(name)
+
+            var gridCheck = document.createElement('input')
+            sideBar.appendChild(gridCheck)
+            gridCheck.setAttribute('type', 'checkbox')
+            gridCheck.setAttribute('id', 'gridCheck')
+            var gridCheckLabel = document.createElement('label')
+            sideBar.appendChild(gridCheckLabel)
+            gridCheckLabel.setAttribute('for', 'gridCheck')
+            gridCheckLabel.textContent= "Grid"
+
+            gridCheck.addEventListener('change', event => {
+                console.log(event.target.checked)
+            })
+            
+        })
     }
     
     makeMaterial(material){
