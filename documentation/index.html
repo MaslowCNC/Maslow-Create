@@ -69,10 +69,62 @@
 </div>
 </nav>
 
-<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="a-web-based-cad-program-for-cooperative-design-">A web based CAD program for cooperative design.</h1><p><a href="https://travis-ci.org/BarbourSmith/Maslow-Create"><img src="https://travis-ci.org/BarbourSmith/Maslow-Create.svg?branch=master" alt="Build Status"></a></p>
-<p><img src="https://github.com/BarbourSmith/Maslow-Create/blob/master/MaslowCreate.png" alt="overview"></p>
+<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="a-web-based-cad-program-for-cooperative-design-">A web based CAD program for cooperative design.</h1><p><a href="https://travis-ci.org/BarbourSmith/Maslow-Create"><img src="https://travis-ci.org/BarbourSmith/Maslow-Create.svg?branch=master" alt="Build Status"></a>
+<a href="https://maslowcreate.org/documentation/"><img src="https://maslowcreate.org/documentation/badge.svg" alt="Build Status"></a></p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/MaslowCreate.png" alt="overview"></p>
 <p>Maslow create breaks with the tradition of CAD programs which inherit from drawing programs and instead inherits from logical languages like programing. This allows it to be a CAD program which has language like features such as importing modules, version control, and colaboration.</p>
-<h2 id="getting-started">Getting Started</h2><ol>
+<h1 id="use">Use</h1><p>A 3D model within Maslow Create is composed of interconnected nodes called Atoms and Molecules. An atom is an operation you can perform on a shape (ie translate it in space). A molecule can contain any number of atoms in a configuration (ie generate a table leg). Think of Atoms as the built in functions of a programing language and molecules as the functions you create.</p>
+<p>You can place a new atom by right clicking anywhere within the flow canvas area and entering an atom name in the search bar.</p>
+<p>Currently Maslow Create supports the folowing atoms:</p>
+<h3 id="assembly">Assembly</h3><p>The assembly atom allows multiple shapes to be combigned into one unit called an assembly. The order in which atoms are combigned matters because where shapes intersect shapes earlier in the order subtract from shapes later in the order. For example if you have a bolt which needs to create a hole in a part you should assemble first the part and then the bolt.</p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Assembly.PNG" alt="assembly"></p>
+<h3 id="add-bom-tag">Add BOM Tag</h3><p>The Add BOM Tag atom tags a part with a bill of materials item. This item will appear in the project bill of materials one time each time the tagged part appears in the final shape. For example if you have a table leg which needs four bolts, and the final model has four table legs the bolt will automatically appear in the final bill of materials 16 times.</p>
+<p>{picture of tag}
+{picture of BOM file}</p>
+<h3 id="circle">Circle</h3><p>The circle atom creates a circle shape. Circle shapes are commonly extruded to create cylinders.</p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Circle.PNG" alt="circle"></p>
+<h3 id="code">Code</h3><p>The code atom allows you to enter arbitrary <a href="https://jsxcad.js.org/">jsxcad</a> code. Please note that parts of this interface are likely to change in the near future.</p>
+<h3 id="constant">Constant</h3><p>The constant atom defines a constant number which can be used to control multiple inputs.</p>
+<p>{picture of constant controling multiple inputs}</p>
+<h3 id="difference">Difference</h3><p>The difference atom subtracts one shape from another.</p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Difference.PNG" alt="difference"></p>
+<h3 id="equation">Equation</h3><p>The equation Atom lets you perform basic math operations on numbers produced by constants.</p>
+<p>{Show equation doing something}</p>
+<h3 id="extrude">Extrude</h3><p>The extrude atom takes a 2D shape and makes it 3D.</p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Extrude.PNG" alt="extrude"></p>
+<h3 id="gcode">Gcode</h3><p>The gcode atom generates gcode to cut the input shape.</p>
+<p><img src="https://github.com/BarbourSmith/Maslow-Create/blob/master/images/Gcode1.PNG" alt="Gcode1">
+<img src="https://github.com/BarbourSmith/Maslow-Create/blob/master/images/Gcode2.PNG" alt="Gcode2"></p>
+<h3 id="github">GitHub</h3><p>The GitHub atom type is not directly available. By clicking on the GitHub tab when placing a new Atom you can search for and add any other Maslow Create project to your project.</p>
+<h3 id="input">Input</h3><p>The input atom lets you define which variables are inputs to your program. They function similar to constants, however when you share your project, the person on the other end will have the ability to change the values of the inputs. Inputs placed within a molecule will add inputs to that molecule up one level.</p>
+<p>{picture of project being shared}</p>
+<h3 id="intersection">Intersection</h3><p>The intersection atom computes the area of intersection of two shapes and creates a new shape out of that area.</p>
+<p>{picture of intersection}</p>
+<h3 id="molecule">Molecule</h3><p>The molecule atom can contain any number of atoms in a useful configuration. To add inputs to the molecule, place an input atom within it.</p>
+<p>{picture of molecule}</p>
+<h3 id="output">Output</h3><p>The output atom cannot be directly placed, however each molecule has one output which cannot be delted. Connect a shape to the output of a molecule to make that shape available one level up. The output of the top level molecule is the output of the project.</p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Output.PNG" alt="output"></p>
+<h3 id="readme">README</h3><p>The README atom provides notes to the next person reading the project. The text of the readme input is added to the readme page of the project (similar to this page you are reading now).</p>
+<p>{Show readme atom}</p>
+<h3 id="rectangle">Rectangle</h3><p>The rectangle atom creates a rectangle shape. Rectangles are commonly extruded to make a 3D shape.</p>
+<p>{show picture of rectangle}</p>
+<h3 id="regular-polygon">Regular Polygon</h3><p>The regular polygon atom creates a regular polygon shape. Regular polygons are regularly extruded to create a 3D shape.</p>
+<p><img src="https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/RegularPolygon.PNG" alt="regular polygon"></p>
+<h3 id="rotate">Rotate</h3><p>The rotate atom rotates a shape along any of it&apos;s three axis.</p>
+<p>{picture of rotate}</p>
+<h3 id="scale">Scale</h3><p>The scale atom scales a shape evenly in all directions.</p>
+<p>{picture of scale}</p>
+<h3 id="shrinkwrap">Shrinkwrap</h3><p>The shrinkwrap atom combines multiple shapes into a single shape as if they had been shrinkwrapped. This is useful for creating shapes which would be dificult to create in other ways.</p>
+<p>{picture of shrinkwrap}</p>
+<h3 id="stretch">Stretch</h3><p>The stretch atom stretches a shape along any of its axis.</p>
+<p>{picture of stretch}</p>
+<h3 id="tag">Tag</h3><p>The tag atom adds a tag to a part which can be later used to retrieve that part from an assembly.</p>
+<h3 id="translate">Translate</h3><p>The translate atom moves a 3D shape in 3D space or a 2D shape in 2D space.</p>
+<p>{picture of translate}</p>
+<h3 id="union">Union</h3><p>The union atom combines multiple shapes into a single shape.</p>
+<p>{picture of union}</p>
+<h1 id="development">Development</h1><p>You can read the complete documentation at <a href="https://maslowcreate.org/documentation/">https://maslowcreate.org/documentation/</a></p>
+<h2 id="how-to-setup">How To Setup</h2><ol>
 <li><p>Clone the repo:</p>
 <pre><code><code class="source-code prettyprint">git clone https://github.com/BarbourSmith/Maslow-Create.git</code>
 </code></pre></li>

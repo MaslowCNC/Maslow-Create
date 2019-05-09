@@ -193,6 +193,7 @@ export default class Gcode extends Atom {
 
         gcode = [
             &apos;G90&apos;,
+            &apos;G21&apos;,
             &apos;G1 Z&apos; + settings.safeZ,
             &apos;G82&apos;,
             &apos;M4&apos;
@@ -263,9 +264,6 @@ export default class Gcode extends Atom {
 
         // turn off the spindle
         gcode.push(&apos;M5&apos;)
-      
-        // Set machine to mm mode
-        gcode.push(&apos;G21&apos;)
 
         // go home
         gcode.push(&apos;G1 Z&apos; + settings.safeZ + &apos; F300&apos;)
