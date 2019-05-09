@@ -4,7 +4,7 @@
 [![Build Status](https://maslowcreate.org/documentation/badge.svg)](https://maslowcreate.org/documentation/)
 
 
-![overview](https://github.com/BarbourSmith/Maslow-Create/blob/master/MaslowCreate.png)
+![overview](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/MaslowCreate.png)
 
 Maslow create breaks with the tradition of CAD programs which inherit from drawing programs and instead inherits from logical languages like programing. This allows it to be a CAD program which has language like features such as importing modules, version control, and colaboration.
 
@@ -20,7 +20,7 @@ Currently Maslow Create supports the folowing atoms:
 
 The assembly atom allows multiple shapes to be combigned into one unit called an assembly. The order in which atoms are combigned matters because where shapes intersect shapes earlier in the order subtract from shapes later in the order. For example if you have a bolt which needs to create a hole in a part you should assemble first the part and then the bolt.
 
-{picture of a rectangle and cylinder assembled}
+![assembly](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Assembly.PNG)
 
 ### Add BOM Tag
 
@@ -33,7 +33,7 @@ The Add BOM Tag atom tags a part with a bill of materials item. This item will a
 
 The circle atom creates a circle shape. Circle shapes are commonly extruded to create cylinders.
 
-{picture of circle}
+![circle](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Circle.PNG)
 
 ### Code
 
@@ -49,7 +49,7 @@ The constant atom defines a constant number which can be used to control multipl
 
 The difference atom subtracts one shape from another.
 
-{Picture of difference in action}
+![difference](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Difference.PNG)
 
 ### Equation 
 
@@ -61,14 +61,14 @@ The equation Atom lets you perform basic math operations on numbers produced by 
 
 The extrude atom takes a 2D shape and makes it 3D.
 
-{Picture of extrude in action}
+![extrude](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Extrude.PNG)
 
 ### Gcode
 
 The gcode atom generates gcode to cut the input shape.
 
-{Picture of gcode shape}
-{Picture of generated gcode}
+![Gcode1](https://github.com/BarbourSmith/Maslow-Create/blob/master/images/Gcode1.PNG)
+![Gcode2](https://github.com/BarbourSmith/Maslow-Create/blob/master/images/Gcode2.PNG)
 
 ### GitHub
 
@@ -96,7 +96,7 @@ The molecule atom can contain any number of atoms in a useful configuration. To 
 
 The output atom cannot be directly placed, however each molecule has one output which cannot be delted. Connect a shape to the output of a molecule to make that shape available one level up. The output of the top level molecule is the output of the project.
 
-{picture of something connected to output}
+![output](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/Output.PNG)
 
 ### README
 
@@ -113,6 +113,8 @@ The rectangle atom creates a rectangle shape. Rectangles are commonly extruded t
 ### Regular Polygon
 
 The regular polygon atom creates a regular polygon shape. Regular polygons are regularly extruded to create a 3D shape.
+
+![regular polygon](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/images/RegularPolygon.PNG)
 
 ### Rotate
 
