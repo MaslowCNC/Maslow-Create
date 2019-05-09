@@ -46,7 +46,7 @@ export default class Display {
 
         // Sets initial plane and mesh
         var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00} )
+        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
         planeMaterial.wireframe = true
         planeMaterial.transparent = true 
         planeMaterial.opacity = 0.2
