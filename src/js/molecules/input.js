@@ -59,7 +59,7 @@ export default class Input extends Atom {
         GlobalVariables.c.closePath()
         GlobalVariables.c.stroke()
 
-         this.children.forEach(child => {
+        this.children.forEach(child => {
             child.draw()       
         })
         
