@@ -44,6 +44,16 @@ export default class Display {
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
+        var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60 );
+        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00} )
+        planeMaterial.wireframe = true
+        
+        planeMaterial.transparent = true 
+        planeMaterial.opacity = 0.2
+        var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+        plane.receiveShadow = true;
+        this.scene.add( plane );
+
         //
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
