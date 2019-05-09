@@ -37,29 +37,29 @@ export default class Output extends Atom {
     }
     
     draw() {
+
+        this.height= this.radius
         
-        this.scaledX = GlobalVariables.scaleFactorXY * this.x
-        this.scaledY = GlobalVariables.scaleFactorXY * this.y
-        
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.textAlign = 'end' 
+        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineTo(this.x - this.radius + 2*this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height/2)
+        GlobalVariables.c.fillStyle = this.color
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.closePath()
+        GlobalVariables.c.fill()
+        GlobalVariables.c.stroke()
+
         this.children.forEach(child => {
             child.draw()       
         })
 
-
-        this.height= this.radius
         
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillStyle = this.color
-        GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height)
-        GlobalVariables.c.textAlign = 'end' 
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        GlobalVariables.c.fill()
-        GlobalVariables.c.closePath()
-        
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x + this.radius, this.y - this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.fill()
     }
 }
