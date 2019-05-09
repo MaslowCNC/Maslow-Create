@@ -8,12 +8,59 @@
 
 Maslow create breaks with the tradition of CAD programs which inherit from drawing programs and instead inherits from logical languages like programing. This allows it to be a CAD program which has language like features such as importing modules, version control, and colaboration.
 
-## Use
+# Use
 
 A 3D model within Maslow Create is composed of interconnected nodes called Atoms and Molecules. An atom is an operation you can perform on a shape (ie translate it in space). A molecule can contain any number of atoms in a configuration (ie generate a table leg). Think of Atoms as the built in functions of a programing language and molecules as the functions you create.
 
 Currently Maslow Create supports the folowing atoms:
 
+### Assembly 
+
+### Add BOM Tag
+
+### Circle
+
+### Code
+
+### Constant
+
+### Difference
+
+### Equation 
+
+### Extrude 
+
+### Gcode
+
+### GitHub
+
+### Input
+
+### Intersection
+
+### Molecule
+
+### Output
+
+### Readme
+
+### Rectangle
+
+### Regular Polygon
+
+### Rotate
+
+### Scale
+
+### Shrinkwrap
+
+### Stretch
+
+### Tag
+
+### Translate
+
+### Union
 
 
 # Development
