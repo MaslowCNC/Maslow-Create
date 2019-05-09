@@ -58,8 +58,6 @@ export default class Display {
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
-        
-        this.onWindowResize()
     }
     
     makeMaterial(material){
