@@ -165,7 +165,9 @@ export default class Molecule extends Atom{
         var bomList = []
         try{
             bomList = extractBomTags(this.value)
-        }catch(err){console.warn(err)}
+        }catch(err){
+            this.setAlert("Unable to read BOM")
+        }
         
         if(bomList.length > 0){
         
@@ -288,8 +290,6 @@ export default class Molecule extends Atom{
     }
         
     deserialize(moleculeList, moleculeID){
-        
-        // try{
         //Find the target molecule in the list
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
@@ -297,27 +297,29 @@ export default class Molecule extends Atom{
             
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            setTimeout(() => {
+                this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            }, 0)
         })
-            
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
         //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
         this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
-            this.placeConnector(connector)
+            setTimeout(() => {
+                this.placeConnector(connector)
+            }, 0)
         })
-            
-        this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
-            
-        this.updateValue()
-        // }
-        // catch(err){
-        // console.log("Unable to load molecule: ");
-        // console.log(moleculeObject);
-        // console.log(err);
-        // }
+        
+        setTimeout(() => {
+            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
+        },0)
+        
+        setTimeout(() => {
+            this.updateValue()
+        },0)
+        
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){
