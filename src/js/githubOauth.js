@@ -515,7 +515,9 @@ export default function GitHubModule(){
             //Load the top level molecule from the file
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
-            GlobalVariables.currentMolecule.backgroundClick()
+            setTimeout(() => {
+                GlobalVariables.currentMolecule.backgroundClick()
+            },0)
             
             var _this = this
             intervalTimer = setInterval(function() { _this.saveProject() }, 30000) //Save the project regularly
