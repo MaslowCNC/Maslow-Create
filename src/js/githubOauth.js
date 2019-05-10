@@ -482,40 +482,40 @@ export default function GitHubModule(){
             clearInterval(intervalTimer) //Turn off auto saving
         }
         
+        //Clear and hide the popup
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        popup.classList.add('off')
+        
         currentRepoName = projectName
+        
+        //Load a blank project
+        GlobalVariables.topLevelMolecule = new Molecule({
+            x: 0, 
+            y: 0, 
+            topLevel: true, 
+            atomType: "Molecule"
+        })
+        
+        GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule
         
         octokit.repos.getContents({
             owner: currentUser,
             repo: projectName,
             path: 'project.maslowcreate'
         }).then(result => {
-                
+            
             //content will be base64 encoded
             let rawFile = atob(result.data.content)
             
             
             var moleculesList = JSON.parse(rawFile).molecules
             
-            //Load a blank project
-            GlobalVariables.topLevelMolecule = new Molecule({
-                x: 0, 
-                y: 0, 
-                topLevel: true, 
-                atomType: "Molecule"
-            })
-            
-            GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule
-            
             //Load the top level molecule from the file
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
             GlobalVariables.currentMolecule.backgroundClick()
-
-            //Clear and hide the popup
-            while (popup.firstChild) {
-                popup.removeChild(popup.firstChild)
-            }
-            popup.classList.add('off')
             
             var _this = this
             intervalTimer = setInterval(function() { _this.saveProject() }, 30000) //Save the project regularly
