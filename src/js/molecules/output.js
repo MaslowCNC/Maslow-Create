@@ -17,7 +17,7 @@ export default class Output extends Atom {
         this.name = 'Output'
         this.atomType = 'Output'
         this.height = 16
-        this.radius = 15
+        this.radius = 20
         
         this.setValues(values)
         
@@ -53,8 +53,21 @@ export default class Output extends Atom {
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.closePath()
+        //GlobalVariables.c.fill()
+        //GlobalVariables.c.stroke()
+       
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.moveTo(this.x + this.radius - this.radius*2, this.y - this.height)
+        GlobalVariables.c.lineTo(this.x + this.radius -5, this.y)
+        GlobalVariables.c.lineTo(this.x + this.radius - this.radius*2, this.y + this.height)
+        GlobalVariables.c.lineTo(this.x + this.radius - this.radius*2, this.y - this.height)
+        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
+        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.lineJoin = "round"
         GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
 
         this.children.forEach(child => {
             child.draw()       

@@ -59,6 +59,12 @@ export default class Input extends Atom {
         GlobalVariables.c.closePath()
         GlobalVariables.c.stroke()
 
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.arc(this.x,this.y,this.radius,1.2*Math.PI,1*Math.PI);
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
+
         this.children.forEach(child => {
             child.draw()       
         })
