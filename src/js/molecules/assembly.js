@@ -35,11 +35,10 @@ export default class Assembly extends Atom{
         })
         
         var thread = require('thread-js')
-        var worker = thread()
-        worker.require("/BOM.js")
+        var worker = thread({require: '/JSxCAD.js'})
         worker.run(function () {
             //const wrapped = this.inputs.map(x => x * 2)
-            return 10
+            return 12
         }, { inputs: inputs }).then(function (result) {
             console.log("From thread: ")
             console.log(result)
