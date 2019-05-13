@@ -25,6 +25,7 @@ export default class Assembly extends Atom{
     }
     
     updateValue(){
+        this.processing = true
         
         var inputs = []
         this.children.forEach( io => {
@@ -33,26 +34,40 @@ export default class Assembly extends Atom{
             }
         })
         
-        if(inputs.length > 0){
-            try{
-                this.clearAlert()
-                this.value = GlobalVariables.api.assemble(...inputs)
-            }catch(err){
-                this.setAlert(err)
-            }
+        const computeValue = async () => {
+            const values = inputs.map(x => {
+                return x.toLazyGeometry().toGeometry()
+            })
+            return await GlobalVariables.ask({values: values, key: "assemble"})
         }
-        
-        //Set the output nodes with name 'geometry' to be the generated output
-        this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.value)
+
+        computeValue().then(result => {
+            this.value = GlobalVariables.api.Shape.fromGeometry(result)
+            
+            //Set the output nodes with name 'geometry' to be the generated output
+            this.children.forEach(child => {
+                if(child.valueType == 'geometry' && child.type == 'output'){
+                    child.setValue(this.value)
+                }
+            })
+            
+            //If this molecule is selected, send the updated value to the renderer
+            if (this.selected){
+                this.sendToRender()
             }
+            
+            this.processing = false
         })
         
-        //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
-            this.sendToRender()
-        }
+        
+        // if(inputs.length > 0){
+        // try{
+        // this.clearAlert()
+        // this.value = GlobalVariables.api.assemble(...inputs)
+        // }catch(err){
+        // this.setAlert(err)
+        // }
+        // }
         
         //Delete or add ports as needed
         addOrDeletePorts(this)

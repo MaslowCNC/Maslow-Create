@@ -25,6 +25,8 @@ import Code from './molecules/code.js'
 
 import GitHubModule from './githubOauth'
 
+import { createService } from './lib/service.js'
+
 class GlobalVariables{
     constructor(){
         this.canvas = null
@@ -62,6 +64,11 @@ class GlobalVariables{
         this.topLevelMolecule
         this.runMode = false
         this.gitHub = new GitHubModule()
+        
+        const agent = async ({ question }) => `Secret ${question}`
+        createService({ webWorker: './webworker.js', agent }).then(result => {
+            this.ask = result.ask
+        })
     }
     
     generateUniqueID(){

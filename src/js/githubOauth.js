@@ -350,7 +350,7 @@ export default function GitHubModule(){
                         message: "initialize README", 
                         content: content
                     }).then(() => {
-                        intervalTimer = setInterval(() => { this.saveProject() }, 30000) //Save the project regularly
+                        intervalTimer = setInterval(() => { this.saveProject() }, 60000) //Save the project regularly
                     })
                 })
             })
@@ -520,7 +520,7 @@ export default function GitHubModule(){
             },0)
             
             var _this = this
-            intervalTimer = setInterval(function() { _this.saveProject() }, 30000) //Save the project regularly
+            intervalTimer = setInterval(function() { _this.saveProject() }, 60000) //Save the project regularly
         })
         
     }
