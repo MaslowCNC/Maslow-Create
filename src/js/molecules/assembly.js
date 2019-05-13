@@ -38,20 +38,33 @@ export default class Assembly extends Atom{
         const run = async () => {
             const agent = async ({ ask, question }) => `Secret ${question}`;
             const { ask } = await createService({ webWorker: './webworker.js', agent });
-            console.log(JSON.stringify(await ask('Hello')));
+            const values = inputs.map(x => {
+                console.log(GlobalVariables.api)
+                return x.toLazyGeometry().toGeometry()
+            })
+           return await ask({values: values, key: "assemble"})
         }
 
-        run().then(_ => console.log("Done"));
+        run().then(result => {
+            console.log("Result: ")
+            console.log(result)
+            
+            var output = GlobalVariables.api.Shape.fromGeometry(result)
+            console.log("Output: ")
+            console.log(output)
+            
+            this.value = output
+        })
         
         
-        if(inputs.length > 0){
-            try{
-                this.clearAlert()
-                this.value = GlobalVariables.api.assemble(...inputs)
-            }catch(err){
-                this.setAlert(err)
-            }
-        }
+        // if(inputs.length > 0){
+            // try{
+                // this.clearAlert()
+                // this.value = GlobalVariables.api.assemble(...inputs)
+            // }catch(err){
+                // this.setAlert(err)
+            // }
+        // }
         
         //Set the output nodes with name 'geometry' to be the generated output
         this.children.forEach(child => {
@@ -69,7 +82,6 @@ export default class Assembly extends Atom{
         addOrDeletePorts(this)
         
         this.processing = false
-        console.log("finish");
     }
     
     serialize(savedObject){

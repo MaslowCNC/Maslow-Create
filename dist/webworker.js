@@ -597,8 +597,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @returns {Number} dot product of a and b
    */
 
-  const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
-
   /**
    * Creates a new vec2 from the point given.
    * Missing ranks are implicitly zero.
@@ -3722,9 +3720,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const transform$2 = (matrix, path) =>
     path.map((point, index) => (point === null) ? null : transform(matrix, point));
-
-  const translate = (vector, path) => transform$2(fromTranslation(vector), path);
-  const scale$1 = (vector, path) => transform$2(fromScaling(vector), path);
 
   const isTriangle = (path) => isClosed(path) && path.length === 3;
 
@@ -7221,32 +7216,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const transform$3 = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
 
-  const translate$1 = (vector, polygons) => transform$3(fromTranslation(vector), polygons);
-
-  /**
-   * Construct a regular unit polygon of a given edge count.
-   * Note: radius and length must not conflict.
-   *
-   * @param {Object} [options] - options for construction
-   * @param {Integer} [options.edges=32] - how many edges the polygon has.
-   * @returns {PointArray} Array of points along the path of the circle in CCW winding.
-   *
-   * @example
-   * const circlePoints = regularPolygon({ edges: 32 })
-   *
-   * @example
-   * const squarePoints = regularPolygon({ edges: 4 })
-   * })
-   */
-  const buildRegularPolygon = ({ edges = 32 }) => {
-    let points = [];
-    for (let i = 0; i < edges; i++) {
-      let radians = 2 * Math.PI * i / edges;
-      let point = fromAngleRadians(radians);
-      points.push(point);
-    }
-    return points;
-  };
+  const translate = (vector, polygons) => transform$3(fromTranslation(vector), polygons);
 
   const extrudeLinear = ({ height = 1 }, polygons) => {
     const extruded = [];
@@ -7276,23 +7246,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return extruded;
   };
 
-  /**
-   * Construct a regular unit prism of a given edge count.
-   * Note: radius and length must not conflict.
-   *
-   * @param {Object} [options] - options for construction
-   * @param {Integer} [options.edges=32] - how many edges the polygon has.
-   * @returns {PointArray} Array of points along the path of the circle in CCW winding.
-   *
-   * @example
-   * const circlePoints = regularPolygon({ edges: 32 })
-   */
-
-  const buildRegularPrism = ({ edges = 32 }) =>
-    extrudeLinear({ height: 1 }, [buildRegularPolygon({ edges: edges })]);
-
   const transform$4 = (matrix, points) => points.map(point => transform(matrix, point));
-  const translate$2 = ([x = 0, y = 0, z = 0], points) => transform$4(fromTranslation([x, y, z]), points);
 
   var subtract_1 = subtract$1;
 
@@ -7696,7 +7650,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       return Math.sqrt(x*x + y*y + z*z)
   }
 
-  var scale_1 = scale$2;
+  var scale_1 = scale$1;
 
   /**
    * Scales a vec3 by a scalar number
@@ -7706,7 +7660,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {Number} b amount to scale the vector by
    * @returns {vec3} out
    */
-  function scale$2(out, a, b) {
+  function scale$1(out, a, b) {
       out[0] = a[0] * b;
       out[1] = a[1] * b;
       out[2] = a[2] * b;
@@ -12945,23 +12899,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   module.exports = exports['default'];
   });
 
-  var QuickHull = unwrapExports(QuickHull_1);
-
-  const buildConvexHull = (options = {}, points) => {
-    const hull = new QuickHull(points, { skipTriangulation: true });
-    hull.build();
-    return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));
-  };
-
-  const buildConvexMinkowskiSum = (options = {}, aPoints, bPoints) => {
-    const summedPoints = [];
-    for (const aPoint of aPoints) {
-      for (const summedPoint of translate$2(aPoint, bPoints)) {
-        summedPoints.push(summedPoint);
-      }
-    }
-    return summedPoints;
-  };
+  unwrapExports(QuickHull_1);
 
   const flip$3 = (points) => points;
 
@@ -12998,30 +12936,11 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @returns {Paths} the transformed paths.
    */
 
-  const toPoints = (options = {}, paths) => {
-    const points = [];
-    eachPoint$1(options, point => points.push(point), paths);
-    return points;
-  };
-
   const transform$5 = (matrix, paths) => paths.map(path => transform$2(matrix, path));
 
   // FIX: Deduplication.
 
   const union = (...pathsets) => [].concat(...pathsets);
-
-  const buildRingSphere = ({ resolution = 20 }) => {
-    const paths = [];
-    // Trace out latitudinal rings.
-    for (let slice = 0; slice <= resolution; slice++) {
-      let angle = Math.PI * 2.0 * slice / resolution;
-      let height = Math.sin(angle);
-      let radius = Math.cos(angle);
-      paths.push(translate([0, 0, height], scale$1([radius, radius, radius], buildRegularPolygon({ edges: resolution }))));
-    }
-    // Hull the rings to form a sphere.
-    return buildConvexHull({}, toPoints({}, paths));
-  };
 
   var cache = {
       '1': bezier1
@@ -16716,7 +16635,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     const polygons = canonicalize$2(toPolygons$1(geometry));
     const min = measureBoundingBox(polygons)[0];
     // TODO: Add transform and translate support to polygons.
-    const shiftedPolygons = canonicalize$2(translate$1(negate(min), polygons));
+    const shiftedPolygons = canonicalize$2(translate(negate(min), polygons));
     const [width, height] = measureBoundingBox(shiftedPolygons)[1];
 
     return [
@@ -22574,12 +22493,12 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.measureBoundingBox = method$1;
 
-  const translate$3 = ([x = 0, y = 0, z = 0], shape) => {
+  const translate$1 = ([x = 0, y = 0, z = 0], shape) => {
     return shape.transform(fromTranslation([x, y, z]));
   };
 
   const method$2 = function (vector) {
-    return translate$3(vector, this);
+    return translate$1(vector, this);
   };
 
   Shape.prototype.translate = method$2;
@@ -22587,39 +22506,16 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$2(shape);
     let center = scale(0.5, add(minPoint, maxPoint));
-    return translate$3(negate(center), shape);
+    return translate$1(negate(center), shape);
   };
 
   const method$3 = function () { return center(this); };
 
   Shape.prototype.center = method$3;
 
-  const assertEmpty = (value) => {
-    if (value.length === undefined) {
-      throw Error(`Has no length: ${value}`);
-    }
-    if (value.length !== 0) {
-      throw Error(`Is not empty: ${value}`);
-    }
-    return true;
-  };
-
   const assertNumber = (value) => {
     if (typeof value !== 'number') {
       throw Error(`Not a number: ${value}`);
-    }
-    return true;
-  };
-
-  const assertNumberTriple = (value) => {
-    if (value.length === undefined) {
-      throw Error(`Has no length: ${value}`);
-    }
-    if (value.length !== 3) {
-      throw Error(`Is not a triple: ${value}`);
-    }
-    for (const v of value) {
-      assertNumber(v);
     }
     return true;
   };
@@ -22636,139 +22532,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.crossSection = method$4;
 
-  // TODO: Generalize for more operands?
-  const minkowski = (a, b) => {
-    const aPoints = [];
-    const bPoints = [];
-    a.eachPoint({}, point => aPoints.push(point));
-    b.eachPoint({}, point => bPoints.push(point));
-    return Shape.fromPolygonsToSolid(buildConvexHull({}, buildConvexMinkowskiSum({}, aPoints, bPoints)));
-  };
-
-  // Dispatch mechanism.
-  // TODO: Move this somewhere else.
-
-  const chain = (name, ...dispatches) => {
-    return (...params) => {
-      for (const dispatch of dispatches) {
-        // For each signature
-        let operation;
-        try {
-          // Try to decode it into an operation.
-          operation = dispatch(...params);
-        } catch (e) {
-          continue;
-        }
-        return operation();
-      }
-      throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
-    };
-  };
-
   // Geometry construction.
 
   const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
-
-  // Note: We can't call this while bootstrapping, but we could memoize the result afterward.
-  const unitCube = () => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 }))
-      .rotateZ(45)
-      .scale([edgeScale, edgeScale, 1]);
-
-  const centerMaybe = ({ size, center }, shape) => {
-    if (center) {
-      return shape;
-    } else {
-      if (typeof size === 'number') {
-        return shape.translate([size / 2, size / 2, size / 2]);
-      } else {
-        return shape.translate([size[0] / 2, size[1] / 2, size[2] / 2]);
-      }
-    }
-  };
-
-  // Cube Interfaces.
-
-  // cube()
-  const cubeDefault = (...rest) => {
-    assertEmpty(rest);
-    return () => unitCube().translate([0.5, 0.5, 0.5]);
-  };
-
-  // cube(10)
-  const cubeSide = (size, ...rest) => {
-    assertEmpty(rest);
-    assertNumber(size);
-    return () => unitCube().scale(size).translate([size / 2, size / 2, size / 2]);
-  };
-
-  // cube({ radius, roundRadius, resolution })
-  const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, ...rest) => {
-    assertEmpty(rest);
-    assertNumber(roundRadius);
-    assertNumber(resolution);
-    return () => minkowski(unitCube().scale(radius - roundRadius * 2),
-                           Shape.fromPolygonsToSolid(buildRingSphere({ resolution })).scale(roundRadius));
-  };
-
-  // cube({ center: [0, 0, 0], radius: 1 })
-  const cubeCenterRadius = ({ center, radius }, ...rest) => {
-    assertEmpty(rest);
-    assertNumberTriple(center);
-    // PROVE: That radius makes sense when used like this.
-    assertNumber(radius);
-    return () => unitCube().scale(radius).translate(center);
-  };
-
-  // cube({ radius: 1 })
-  const cubeRadius = ({ radius }, ...rest) => {
-    assertEmpty(rest);
-    // PROVE: That radius makes sense when used like this.
-    assertNumber(radius);
-    return () => unitCube().scale(radius).translate([radius / 2, radius / 2, radius / 2]);
-  };
-
-  // cube({ corner1: [4, 4, 4], corner2: [5, 4, 2] });
-  const cubeCorner = ({ corner1, corner2 }, ...rest) => {
-    assertEmpty(rest);
-    assertNumberTriple(corner1);
-    assertNumberTriple(corner2);
-    const [c1x, c1y, c1z] = corner1;
-    const [c2x, c2y, c2z] = corner2;
-    const length = c2x - c1x;
-    const width = c2y - c1y;
-    const height = c2z - c1z;
-    const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
-    return () => unitCube().scale([length, width, height]).translate(center);
-  };
-
-  // cube({size: [1,2,3], center: false });
-  const cubeSizesCenter = ({ size, center = false }, ...rest) => {
-    assertEmpty(rest);
-    const [length, width, height] = size;
-    assertNumber(length);
-    assertNumber(width);
-    assertNumber(height);
-    return () => centerMaybe({ size, center }, unitCube().scale([length, width, height]));
-  };
-
-  // cube({ size: 1, center: false });
-  const cubeSizeCenter = ({ size, center = false }, ...rest) => {
-    assertEmpty(rest);
-    assertNumber(size);
-    return () => centerMaybe({ size, center }, unitCube().scale(size));
-  };
-
-  // Cube Operation
-
-  const cube = chain('cube',
-                            cubeDefault,
-                            cubeSide,
-                            cubeRoundRadiusResolution,
-                            cubeCenterRadius,
-                            cubeRadius,
-                            cubeCorner,
-                            cubeSizesCenter,
-                            cubeSizeCenter);
 
   const difference$5 = (...params) => differenceLazily(...params);
 
@@ -23490,7 +23256,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.rotateZ = method$b;
 
-  const scale$3 = (factor, shape) => {
+  const scale$2 = (factor, shape) => {
     if (factor.length) {
       const [x = 1, y = 1, z = 1] = factor;
       return shape.transform(fromScaling([x, y, z]));
@@ -23500,7 +23266,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const method$c = function (factor) { return scale$3(factor, this); };
+  const method$c = function (factor) { return scale$2(factor, this); };
 
   Shape.prototype.scale = method$c;
 
@@ -74021,7 +73787,25 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const say = (message) => postMessage(message);
   // const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
-  const agent = async ({ ask, question }) => cube().toGeometry();
+  const agent = async ({ ask, question }) => {
+      var {key, values} = question;
+      switch(key){
+          case "assemble":
+              values = values.map(Shape.fromGeometry);
+              console.log("test");
+              return assemble$1(...values).toLazyGeometry().toGeometry()
+              break
+          case "extrude":
+              return "Extrude seen"
+              break
+          case "translate":
+              return "Translate seen"
+              break
+          default:
+              return -1
+      }
+      //return api.cube()
+  };
   const { hear } = conversation({ agent, say });
   onmessage = ({ data }) => hear(data);
   if (onmessage === undefined) throw Error('die');
