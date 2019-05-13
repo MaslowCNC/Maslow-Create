@@ -73792,8 +73792,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       switch(key){
           case "assemble":
               values = values.map(Shape.fromGeometry);
-              console.log("test");
-              return assemble$1(...values).toLazyGeometry().toGeometry()
+              console.log(assemble$1(...values));
+              return assemble$1(...values).toDisjointGeometry()
               break
           case "extrude":
               return "Extrude seen"
@@ -73804,8 +73804,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
           default:
               return -1
       }
-      //return api.cube()
   };
+
   const { hear } = conversation({ agent, say });
   onmessage = ({ data }) => hear(data);
   if (onmessage === undefined) throw Error('die');

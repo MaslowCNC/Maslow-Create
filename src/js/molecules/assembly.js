@@ -1,7 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
-import { createService } from '../lib/service.js';
 
 export default class Assembly extends Atom{
     
@@ -27,6 +26,7 @@ export default class Assembly extends Atom{
     
     updateValue(){
         this.processing = true
+        console.log("compute assembly");
         
         var inputs = []
         this.children.forEach( io => {
@@ -36,24 +36,31 @@ export default class Assembly extends Atom{
         })
         
         const run = async () => {
-            const agent = async ({ ask, question }) => `Secret ${question}`;
-            const { ask } = await createService({ webWorker: './webworker.js', agent });
             const values = inputs.map(x => {
                 console.log(GlobalVariables.api)
                 return x.toLazyGeometry().toGeometry()
             })
-           return await ask({values: values, key: "assemble"})
+           return await GlobalVariables.ask({values: values, key: "assemble"})
         }
 
         run().then(result => {
-            console.log("Result: ")
-            console.log(result)
+            this.value = GlobalVariables.api.Shape.fromGeometry(result)
+            console.log("Value: ");
+            console.log(this.value);
             
-            var output = GlobalVariables.api.Shape.fromGeometry(result)
-            console.log("Output: ")
-            console.log(output)
+            //Set the output nodes with name 'geometry' to be the generated output
+            this.children.forEach(child => {
+                if(child.valueType == 'geometry' && child.type == 'output'){
+                    child.setValue(this.value)
+                }
+            })
             
-            this.value = output
+            //If this molecule is selected, send the updated value to the renderer
+            if (this.selected){
+                this.sendToRender()
+            }
+            
+            this.processing = false
         })
         
         
@@ -66,22 +73,8 @@ export default class Assembly extends Atom{
             // }
         // }
         
-        //Set the output nodes with name 'geometry' to be the generated output
-        this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.value)
-            }
-        })
-        
-        //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
-            this.sendToRender()
-        }
-        
         //Delete or add ports as needed
         addOrDeletePorts(this)
-        
-        this.processing = false
     }
     
     serialize(savedObject){
