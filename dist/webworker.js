@@ -73792,7 +73792,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       switch(key){
           case "assemble":
               values = values.map(Shape.fromGeometry);
-              console.log(assemble$1(...values));
               return assemble$1(...values).toDisjointGeometry()
               break
           case "extrude":
@@ -73801,6 +73800,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
           case "translate":
               return "Translate seen"
               break
+          case "render":
+              return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
           default:
               return -1
       }
