@@ -1,6 +1,7 @@
 import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
+import { createService } from '../lib/service.js';
 
 export default class Assembly extends Atom{
     
@@ -34,17 +35,13 @@ export default class Assembly extends Atom{
             }
         })
         
-        var thread = require('thread-js')
-        var worker = thread({require: '/JSxCAD.js'})
-        worker.run(function () {
-            //const wrapped = this.inputs.map(x => x * 2)
-            return 12
-        }, { inputs: inputs }).then(function (result) {
-            console.log("From thread: ")
-            console.log(result)
-            //this.value = result
-            worker.kill()
-        })
+        const run = async () => {
+            const agent = async ({ ask, question }) => `Secret ${question}`;
+            const { ask } = await createService({ webWorker: './webworker.js', agent });
+            console.log(JSON.stringify(await ask('Hello')));
+        }
+
+        run().then(_ => console.log("Done"));
         
         
         if(inputs.length > 0){
