@@ -26,7 +26,6 @@ export default class Assembly extends Atom{
     
     updateValue(){
         this.processing = true
-        console.log("compute assembly");
         
         var inputs = []
         this.children.forEach( io => {
@@ -35,18 +34,15 @@ export default class Assembly extends Atom{
             }
         })
         
-        const run = async () => {
+        const computeValue = async () => {
             const values = inputs.map(x => {
-                console.log(GlobalVariables.api)
                 return x.toLazyGeometry().toGeometry()
             })
-           return await GlobalVariables.ask({values: values, key: "assemble"})
+            return await GlobalVariables.ask({values: values, key: "assemble"})
         }
 
-        run().then(result => {
+        computeValue().then(result => {
             this.value = GlobalVariables.api.Shape.fromGeometry(result)
-            console.log("Value: ");
-            console.log(this.value);
             
             //Set the output nodes with name 'geometry' to be the generated output
             this.children.forEach(child => {
@@ -65,12 +61,12 @@ export default class Assembly extends Atom{
         
         
         // if(inputs.length > 0){
-            // try{
-                // this.clearAlert()
-                // this.value = GlobalVariables.api.assemble(...inputs)
-            // }catch(err){
-                // this.setAlert(err)
-            // }
+        // try{
+        // this.clearAlert()
+        // this.value = GlobalVariables.api.assemble(...inputs)
+        // }catch(err){
+        // this.setAlert(err)
+        // }
         // }
         
         //Delete or add ports as needed

@@ -56,7 +56,6 @@ export default class Atom {
       
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
-            console.log("drawing blue");
         }else{
             GlobalVariables.c.fillStyle = this.color
         }

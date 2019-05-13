@@ -24,7 +24,6 @@
     "esm": "^3.2.22",
     "gsap": "^2.0.1",
     "oauthio-web": "^0.6.2",
-    "thread-js": "^0.1.16",
     "three": "^0.104.0"
   },
   "devDependencies": {
