@@ -73806,6 +73806,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   break
               case "union":
                   return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+                  break
+              case "stretch":
+                  return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
+                  break
+              case "scale":
+                  return Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry()
+                  break
               default:
                   return -1
           }
