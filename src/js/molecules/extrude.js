@@ -18,24 +18,10 @@ export default class Extrude extends Atom{
     }
     
     updateValue(){
-        this.processing = true
-        
-        const computeValue = async () => {
-            try{
-                const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('height')]
-                return await GlobalVariables.ask({values: values, key: "extrude"})
-            }
-            catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        this.clearAlert()
-        
-        computeValue().then(result => {
-            this.value = GlobalVariables.api.Shape.fromGeometry(result)
-            this.processing = false
-            super.updateValue()
-        })
+        try{
+            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('height')]
+            
+            this.basicThreadValueProcessing(values, "extrude")
+        }catch(err){this.setAlert(err)}
     }
 }

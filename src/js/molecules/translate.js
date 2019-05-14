@@ -19,24 +19,10 @@ export default class Translate extends Atom{
     }
     
     updateValue(){
-        this.processing = true
-        
-        const computeValue = async () => {
-            try{
-                const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
-                return await GlobalVariables.ask({values: values, key: "translate"})
-            }
-            catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        this.clearAlert()
-        
-        computeValue().then(result => {
-            this.value = GlobalVariables.api.Shape.fromGeometry(result)
-            this.processing = false
-            super.updateValue()
-        })
+        try{
+            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
+            
+            this.basicThreadValueProcessing(values, "translate")
+        }catch(err){this.setAlert(err)}
     }
 }

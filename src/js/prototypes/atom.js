@@ -346,7 +346,7 @@ export default class Atom {
         
         const computeValue = async (values, key) => {
             try{
-                return await GlobalVariables.ask({values: values, key: "union"})
+                return await GlobalVariables.ask({values: values, key: key})
             }
             catch(err){
                 this.setAlert(err)
