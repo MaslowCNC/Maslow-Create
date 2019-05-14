@@ -24,30 +24,37 @@ export default class Gcode extends Atom {
     }
     
     updateValue(){
-        //Generate a .svg file
-        try{
-            this.clearAlert()
-            const input = this.findIOValue('geometry')
-            
-            const crossSection = input.crossSection().toDisjointGeometry()
-            
-            const bounds = input.measureBoundingBox()
-            const partThickness = bounds[1][2]-bounds[0][2]
-            const convertSVG = require('@jsxcad/convert-svg')
-            convertSVG.toSvg({}, crossSection).then( contentSvg => {
-            
+        this.processing = true
+        
+        const computeSvg = async (values, key) => {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
+        }
+        
+        const input = this.findIOValue('geometry')
+        
+        computeSvg([input.toLazyGeometry().toGeometry()], "svg").then(result => {
+            if (result != -1 ){
+                
+                const bounds = input.measureBoundingBox()
+                const partThickness = bounds[1][2]-bounds[0][2]
+                
                 //convert that to gcode
-                this.value = this.svg2gcode(contentSvg, {
+                this.value = this.svg2gcode(result, {
                     passes: this.findIOValue('passes'),
                     materialWidth: -1*partThickness,
                     bitWidth: this.findIOValue('tool size')
                 })
                 
-                super.updateValue()
-            })
-        }catch(err){
-            this.setAlert(err)
-        }
+            }else{
+                this.setAlert("Unable to compute")
+            }
+            this.processing = false
+        })
     }
     
     updateSidebar(){
