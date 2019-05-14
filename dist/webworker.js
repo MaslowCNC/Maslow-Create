@@ -73795,6 +73795,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   values = values.map(Shape.fromGeometry);
                   return assemble$1(...values).toDisjointGeometry()
                   break
+              case "rotate":
+                  return rotate([values[1], values[2], values[3]], Shape.fromGeometry(values[0])).toDisjointGeometry()
+                  break
               case "extrude":
                   return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
                   break
