@@ -12899,7 +12899,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   module.exports = exports['default'];
   });
 
-  unwrapExports(QuickHull_1);
+  var QuickHull = unwrapExports(QuickHull_1);
+
+  const buildConvexHull = (options = {}, points) => {
+    const hull = new QuickHull(points, { skipTriangulation: true });
+    hull.build();
+    return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));
+  };
 
   const flip$3 = (points) => points;
 
@@ -22577,6 +22583,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const method$6 = function (options) { return extrude(options, this); };
 
   Shape.prototype.extrude = method$6;
+
+  const hull = (...geometries) => {
+    // FIX: Support z0Surface hulling.
+    const points = [];
+    geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));
+    return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
+  };
 
   const intersection$5 = (...params) => intersectionLazily(...params);
 
@@ -73795,6 +73808,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   values = values.map(Shape.fromGeometry);
                   return assemble$1(...values).toDisjointGeometry()
                   break
+              case "hull":
+                  values = values.map(Shape.fromGeometry);
+                  return hull(...values).toDisjointGeometry()
+                  break
               case "rotate":
                   return rotate([values[1], values[2], values[3]], Shape.fromGeometry(values[0])).toDisjointGeometry()
                   break
@@ -73810,6 +73827,12 @@ define("./webworker.js",['require'], function (require) { 'use strict';
               case "union":
                   return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
                   break
+              case "intersection":
+                  return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+                  break
+              case "difference":
+                  return difference$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+                  break
               case "stretch":
                   return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
                   break
@@ -73821,7 +73844,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
           }
       }
       catch(err){
-          return err
+          console.log(err);
+          return -1
       }
   };
 

@@ -18,13 +18,10 @@ export default class Difference extends Atom{
     }
     
     updateValue(){
-        
         try{
-            this.value = GlobalVariables.api.difference(this.findIOValue('geometry1'), this.findIOValue('geometry2'))
-        }catch(err){
-            console.warn("Error. Couldn't render")
-        }
-        
-        super.updateValue()
+            const values = [this.findIOValue('geometry1').toLazyGeometry().toGeometry(), this.findIOValue('geometry2').toLazyGeometry().toGeometry()]
+            
+            this.basicThreadValueProcessing(values, "difference")
+        }catch(err){this.setAlert(err)}
     }
 }

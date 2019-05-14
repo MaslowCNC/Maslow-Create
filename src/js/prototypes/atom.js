@@ -356,9 +356,13 @@ export default class Atom {
         this.clearAlert()
         
         computeValue(values, key).then(result => {
-            this.value = GlobalVariables.api.Shape.fromGeometry(result)
+            if (result != -1 ){
+                this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                this.displayAndPropogate()
+            }else{
+                this.setAlert("Unable to compute")
+            }
             this.processing = false
-            this.displayAndPropogate()
         })
     }
     
