@@ -73796,7 +73796,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   return assemble$1(...values).toDisjointGeometry()
                   break
               case "extrude":
-                  return "Extrude seen"
+                  return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
                   break
               case "translate":
                   return Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry()

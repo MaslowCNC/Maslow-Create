@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 export default class Extrude extends Atom{
     
@@ -17,15 +18,24 @@ export default class Extrude extends Atom{
     }
     
     updateValue(){
+        this.processing = true
         
-        try{
-            this.clearAlert()
-            this.value = this.findIOValue('geometry').extrude({ height: this.findIOValue('height') })
-        }
-        catch(err){
-            this.setAlert(err)
+        const computeValue = async () => {
+            try{
+                const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('height')]
+                return await GlobalVariables.ask({values: values, key: "extrude"})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
         }
         
-        super.updateValue()
+        this.clearAlert()
+        
+        computeValue().then(result => {
+            this.value = GlobalVariables.api.Shape.fromGeometry(result)
+            this.processing = false
+            super.updateValue()
+        })
     }
 }
