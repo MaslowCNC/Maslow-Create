@@ -31,18 +31,12 @@ export default class Translate extends Atom{
             }
         }
         
-        try{
-            this.clearAlert()
-            
-            computeValue().then(result => {
-                this.value = GlobalVariables.api.Shape.fromGeometry(result)
-                this.processing = false
-                super.updateValue()
-            })
-        }
-        catch(err){
+        this.clearAlert()
+        
+        computeValue().then(result => {
+            this.value = GlobalVariables.api.Shape.fromGeometry(result)
             this.processing = false
-            this.setAlert(err)
-        }
+            super.updateValue()
+        })
     }
 }
