@@ -73804,6 +73804,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
               case "render":
                   return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
                   break
+              case "union":
+                  return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
               default:
                   return -1
           }
