@@ -26,48 +26,44 @@ export default class Assembly extends Atom{
     
     updateValue(){
         this.processing = true
-        
-        var inputs = []
-        this.children.forEach( io => {
-            if(io.connectors.length > 0 && io.type == 'input'){
-                inputs.push(io.getValue())
-            }
-        })
-        
-        const computeValue = async () => {
-            const values = inputs.map(x => {
-                return x.toLazyGeometry().toGeometry()
-            })
-            return await GlobalVariables.ask({values: values, key: "assemble"})
-        }
-
-        computeValue().then(result => {
-            this.value = GlobalVariables.api.Shape.fromGeometry(result)
-            
-            //Set the output nodes with name 'geometry' to be the generated output
-            this.children.forEach(child => {
-                if(child.valueType == 'geometry' && child.type == 'output'){
-                    child.setValue(this.value)
+        try{
+            this.clearAlert()
+            var inputs = []
+            this.children.forEach( io => {
+                if(io.connectors.length > 0 && io.type == 'input'){
+                    inputs.push(io.getValue())
                 }
             })
             
-            //If this molecule is selected, send the updated value to the renderer
-            if (this.selected){
-                this.sendToRender()
+            const computeValue = async () => {
+                const values = inputs.map(x => {
+                    return x.toLazyGeometry().toGeometry()
+                })
+                return await GlobalVariables.ask({values: values, key: "assemble"})
             }
-            
-            this.processing = false
-        })
+
+            computeValue().then(result => {
+                this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                
+                //Set the output nodes with name 'geometry' to be the generated output
+                this.children.forEach(child => {
+                    if(child.valueType == 'geometry' && child.type == 'output'){
+                        child.setValue(this.value)
+                    }
+                })
+                
+                //If this molecule is selected, send the updated value to the renderer
+                if (this.selected){
+                    this.sendToRender()
+                }
+                
+                this.processing = false
+            })
         
-        
-        // if(inputs.length > 0){
-        // try{
-        // this.clearAlert()
-        // this.value = GlobalVariables.api.assemble(...inputs)
-        // }catch(err){
-        // this.setAlert(err)
-        // }
-        // }
+        }
+        catch(err){
+            this.setAlert(err)
+        }
         
         //Delete or add ports as needed
         addOrDeletePorts(this)

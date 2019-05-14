@@ -75,13 +75,18 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        const computeValue = async () => {
-            return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: "render"})
-        }
+        try{
+            const computeValue = async () => {
+                return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: "render"})
+            }
 
-        computeValue().then(result => {
-            this.updateDisplayData(result)
-        })
+            computeValue().then(result => {
+                this.updateDisplayData(result)
+            })
+        }
+        catch(err){
+            return err
+        }
     }
     
     updateDisplayData(threejsGeometry){
@@ -132,7 +137,6 @@ export default class Display {
                 this.datasets.push(dataset)
             }
         }
-
         walk(threejsGeometry)
     }
     
