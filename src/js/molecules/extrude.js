@@ -37,13 +37,5 @@ export default class Extrude extends Atom{
             this.processing = false
             super.updateValue()
         })
-        
-        // try{
-        // this.clearAlert()
-        // this.value = .extrude({ height:  })
-        // }
-        // catch(err){
-        // this.setAlert(err)
-        // }
     }
 }
