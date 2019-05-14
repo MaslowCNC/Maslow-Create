@@ -73789,21 +73789,27 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   // const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
   const agent = async ({ ask, question }) => {
       var {key, values} = question;
-      switch(key){
-          case "assemble":
-              values = values.map(Shape.fromGeometry);
-              return assemble$1(...values).toDisjointGeometry()
-              break
-          case "extrude":
-              return "Extrude seen"
-              break
-          case "translate":
-              return "Translate seen"
-              break
-          case "render":
-              return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
-          default:
-              return -1
+      try{
+          switch(key){
+              case "assemble":
+                  values = values.map(Shape.fromGeometry);
+                  return assemble$1(...values).toDisjointGeometry()
+                  break
+              case "extrude":
+                  return "Extrude seen"
+                  break
+              case "translate":
+                  return Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry()
+                  break
+              case "render":
+                  return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
+                  break
+              default:
+                  return -1
+          }
+      }
+      catch(err){
+          return err
       }
   };
 

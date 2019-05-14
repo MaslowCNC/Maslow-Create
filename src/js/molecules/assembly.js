@@ -45,21 +45,19 @@ export default class Assembly extends Atom{
             computeValue().then(result => {
                 this.value = GlobalVariables.api.Shape.fromGeometry(result)
                 
+                //If this molecule is selected, send the updated value to the renderer
+                if (this.selected){
+                    this.sendToRender()
+                }
+                
                 //Set the output nodes with name 'geometry' to be the generated output
                 this.children.forEach(child => {
                     if(child.valueType == 'geometry' && child.type == 'output'){
                         child.setValue(this.value)
                     }
                 })
-                
-                //If this molecule is selected, send the updated value to the renderer
-                if (this.selected){
-                    this.sendToRender()
-                }
-                
                 this.processing = false
             })
-        
         }
         catch(err){
             this.setAlert(err)

@@ -325,17 +325,17 @@ export default class Atom {
     
     updateValue(){
         
+        //If this molecule is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender()
+        }
+        
         //Set the output nodes with name 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
                 child.setValue(this.value)
             }
         })
-        
-        //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
-            this.sendToRender()
-        }
     }
     
     sendToRender(){

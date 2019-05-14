@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 export default class Translate extends Atom{
     
@@ -18,13 +19,30 @@ export default class Translate extends Atom{
     }
     
     updateValue(){
-        try{
-            this.clearAlert()
-            this.value = this.findIOValue('geometry').translate([this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')])
-        }catch(err){
-            this.setAlert(err)
+        this.processing = true
+        
+        const computeValue = async () => {
+            try{
+                const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
+                return await GlobalVariables.ask({values: values, key: "translate"})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
         }
         
-        super.updateValue()
+        try{
+            this.clearAlert()
+            
+            computeValue().then(result => {
+                this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                this.processing = false
+                super.updateValue()
+            })
+        }
+        catch(err){
+            this.processing = false
+            this.setAlert(err)
+        }
     }
 }
