@@ -62,7 +62,7 @@ export default class Display {
         
         this.onWindowResize()
 
-        this.targetDiv.addEventListener('mousedown', event => {
+        this.targetDiv.addEventListener('mousedown', () => {
 
             let sideBar = document.querySelector('.sideBar')
             while (sideBar.firstChild) {
