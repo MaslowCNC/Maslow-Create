@@ -38,7 +38,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -71,7 +75,6 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/shrinkwrap.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
-import GlobalVariables from &apos;../globalvariables.js&apos;
 import { addOrDeletePorts } from &apos;../alwaysOneFreeInput.js&apos;
 
 export default class ShrinkWrap extends Atom{
@@ -100,33 +103,19 @@ export default class ShrinkWrap extends Atom{
     
     updateValue(){
         
-        var inputs = []
-        this.children.forEach( io =&gt; {
-            if(io.connectors.length &gt; 0 &amp;&amp; io.type == &apos;input&apos;){
-                inputs.push(io.getValue())
-            }
-        })
-        
-        if(inputs.length &gt; 0){
-            try{
-                this.clearAlert()
-                this.value = GlobalVariables.api.hull.apply(null, inputs)
-            }catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        //Set the output nodes with name &apos;geometry&apos; to be the generated output
-        this.children.forEach(child =&gt; {
-            if(child.valueType == &apos;geometry&apos; &amp;&amp; child.type == &apos;output&apos;){
-                child.setValue(this.value)
-            }
-        })
-        
-        //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
-            this.sendToRender()
-        }
+        try{
+            var inputs = []
+            this.children.forEach( io =&gt; {
+                if(io.connectors.length &gt; 0 &amp;&amp; io.type == &apos;input&apos;){
+                    inputs.push(io.getValue())
+                }
+            })
+            const values = inputs.map(x =&gt; {
+                return x.toLazyGeometry().toGeometry()
+            })
+            
+            this.basicThreadValueProcessing(values, &quot;hull&quot;)
+        }catch(err){this.setAlert(err)}
         
         //Delete or add ports as needed
         addOrDeletePorts(this)

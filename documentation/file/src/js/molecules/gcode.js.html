@@ -38,7 +38,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -96,30 +100,37 @@ export default class Gcode extends Atom {
     }
     
     updateValue(){
-        //Generate a .svg file
-        try{
-            this.clearAlert()
-            const input = this.findIOValue(&apos;geometry&apos;)
-            
-            const crossSection = input.crossSection().toDisjointGeometry()
-            
-            const bounds = input.measureBoundingBox()
-            const partThickness = bounds[1][2]-bounds[0][2]
-            const convertSVG = require(&apos;@jsxcad/convert-svg&apos;)
-            convertSVG.toSvg({}, crossSection).then( contentSvg =&gt; {
-            
-                //convert that to gcode
-                this.value = this.svg2gcode(contentSvg, {
-                    passes: this.findIOValue(&apos;passes&apos;),
-                    materialWidth: -1*partThickness,
-                    bitWidth: this.findIOValue(&apos;tool size&apos;)
-                })
-                
-                super.updateValue()
-            })
-        }catch(err){
-            this.setAlert(err)
+        this.processing = true
+        this.clearAlert()
+        
+        const computeSvg = async (values, key) =&gt; {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }catch(err){this.setAlert(err)}
         }
+        
+        const input = this.findIOValue(&apos;geometry&apos;)
+        
+        try{
+            computeSvg([input.toLazyGeometry().toGeometry()], &quot;svg&quot;).then(result =&gt; {
+                if (result != -1 ){
+                    
+                    const bounds = input.measureBoundingBox()
+                    const partThickness = bounds[1][2]-bounds[0][2]
+                    
+                    //convert that to gcode
+                    this.value = this.svg2gcode(result, {
+                        passes: this.findIOValue(&apos;passes&apos;),
+                        materialWidth: -1*partThickness,
+                        bitWidth: this.findIOValue(&apos;tool size&apos;)
+                    })
+                    
+                }else{
+                    this.setAlert(&quot;Unable to compute&quot;)
+                }
+                this.processing = false
+            })
+        }catch(err){this.setAlert(err)}
     }
     
     updateSidebar(){

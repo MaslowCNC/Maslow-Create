@@ -38,7 +38,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -212,7 +216,8 @@ export default class AttachmentPoint {
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 
                     attachmentPoint1: this,
-                    atomType: &apos;Connector&apos;
+                    atomType: &apos;Connector&apos;,
+                    isMoving: true
                 })
                 this.connectors.push(connector)
             }
@@ -293,7 +298,6 @@ export default class AttachmentPoint {
 
     }
     
-    
     keyPress(key){
         this.connectors.forEach(connector =&gt; {
             connector.keyPress(key)       
@@ -313,21 +317,26 @@ export default class AttachmentPoint {
         this.parent.updateSidebar()
     }
     
-    wasConnectionMade(x,y, connector){
+    wasConnectionMade(x,y){
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) &lt; this.radius &amp;&amp; this.type == &apos;input&apos;){  //If we have released the mouse here and this is an input...
-            
+        
             if(this.connectors.length &gt; 0){ //Don&apos;t accept a second connection to an input
                 return false
             }
-            
-            this.connectors.push(connector)
-            
-            return this
+            else{
+                return true
+            }
         }
-        return false
+        else{
+            return false
+        }
     }
 
+    attach(connector){
+        this.connectors.push(connector)
+    }
+    
     setDefault(){
         this.setValue(this.defaultValue)
        

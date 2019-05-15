@@ -38,7 +38,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -94,6 +98,7 @@ export default class Atom {
         this.x = 0
         this.y = 0
         this.alertMessage = &apos;&apos;
+        this.processing = false
         
 
         for(var key in values) {
@@ -125,8 +130,12 @@ export default class Atom {
             child.draw()       
         })
       
+        if(this.processing){
+            GlobalVariables.c.fillStyle = &apos;blue&apos;
+        }else{
+            GlobalVariables.c.fillStyle = this.color
+        }
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.font = &apos;10px Work Sans&apos;
 
         //make it impossible to draw atoms too close to the edge
@@ -134,23 +143,17 @@ export default class Atom {
         var canvasFlow = document.querySelector(&apos;#flow-canvas&apos;)
         if (this.x &lt; this.radius){
             this.x = this.radius
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else if (this.y&lt;this.radius){
             this.y = this.radius 
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else if (this.x + this.radius &gt; canvasFlow.width/GlobalVariables.scale1){
             this.x = canvasFlow.width/GlobalVariables.scale1 - this.radius
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
         else if (this.y + this.radius &gt; canvasFlow.height/GlobalVariables.scale1){
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         }
-        else{
-            GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        }
+        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = &apos;start&apos; 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()
@@ -397,6 +400,14 @@ export default class Atom {
     }
     
     updateValue(){
+        this.displayAndPropogate()
+    }
+    
+    displayAndPropogate(){
+        //If this molecule is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender()
+        }
         
         //Set the output nodes with name &apos;geometry&apos; to be the generated code
         this.children.forEach(child =&gt; {
@@ -404,11 +415,30 @@ export default class Atom {
                 child.setValue(this.value)
             }
         })
+    }
+    
+    basicThreadValueProcessing(values, key){
+        this.processing = true
+        this.clearAlert()
         
-        //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
-            this.sendToRender()
+        const computeValue = async (values, key) =&gt; {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
         }
+        
+        computeValue(values, key).then(result =&gt; {
+            if (result != -1 ){
+                this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                this.displayAndPropogate()
+            }else{
+                this.setAlert(&quot;Unable to compute&quot;)
+            }
+            this.processing = false
+        })
     }
     
     sendToRender(){

@@ -38,7 +38,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -116,20 +120,58 @@ export default class Display {
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
+
         // Sets initial plane and mesh
         var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
         var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
         planeMaterial.wireframe = true
         planeMaterial.transparent = true 
         planeMaterial.opacity = 0.2
-        var plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        plane.receiveShadow = true
-        this.scene.add( plane )
+        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
+        this.plane.receiveShadow = true
+        this.scene.add( this.plane )
 
         //
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
+        
+        this.onWindowResize()
+
+        this.targetDiv.addEventListener(&apos;mousedown&apos;, () =&gt; {
+
+            let sideBar = document.querySelector(&apos;.sideBar&apos;)
+            while (sideBar.firstChild) {
+                sideBar.removeChild(sideBar.firstChild)
+            }
+            
+            //add the name as a title
+            var name = document.createElement(&apos;h1&apos;)
+            name.textContent = &quot;3D View&quot;
+            name.setAttribute(&apos;class&apos;,&apos;doc-title&apos;)
+            sideBar.appendChild(name)
+
+            var gridCheck = document.createElement(&apos;input&apos;)
+            sideBar.appendChild(gridCheck)
+            gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+            gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+            gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+            var gridCheckLabel = document.createElement(&apos;label&apos;)
+            sideBar.appendChild(gridCheckLabel)
+            gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
+            gridCheckLabel.textContent= &quot;Grid&quot;
+
+            gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
+                if(event.target.checked){
+                    this.scene.add( this.plane )
+                }
+                else{
+                    this.scene.remove(this.plane)
+                }
+            })
+            
+        })
+
     }
     
     makeMaterial(material){
@@ -147,7 +189,19 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        this.updateDisplayData(this.convert.toThreejsGeometry(shape.toDisjointGeometry()))
+        if(shape != null){
+            const computeValue = async () =&gt; {
+                try {
+                    return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: &quot;render&quot;})
+                } catch(err) {
+                    return -1
+                }
+            }
+
+            computeValue().then(result =&gt; {
+                this.updateDisplayData(result)
+            })
+        }
     }
     
     updateDisplayData(threejsGeometry){
@@ -198,7 +252,6 @@ export default class Display {
                 this.datasets.push(dataset)
             }
         }
-
         walk(threejsGeometry)
     }
     
