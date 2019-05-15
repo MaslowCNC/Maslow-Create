@@ -324,7 +324,10 @@ export default class Atom {
     }
     
     updateValue(){
-        
+        this.displayAndPropogate()
+    }
+    
+    displayAndPropogate(){
         //If this molecule is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
@@ -335,6 +338,30 @@ export default class Atom {
             if(child.valueType == 'geometry' && child.type == 'output'){
                 child.setValue(this.value)
             }
+        })
+    }
+    
+    basicThreadValueProcessing(values, key){
+        this.processing = true
+        this.clearAlert()
+        
+        const computeValue = async (values, key) => {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
+        }
+        
+        computeValue(values, key).then(result => {
+            if (result != -1 ){
+                this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                this.displayAndPropogate()
+            }else{
+                this.setAlert("Unable to compute")
+            }
+            this.processing = false
         })
     }
     

@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom.js'
-import GlobalVariables from '../globalvariables.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
 
 export default class Assembly extends Atom{
@@ -25,43 +24,19 @@ export default class Assembly extends Atom{
     }
     
     updateValue(){
-        this.processing = true
         try{
-            this.clearAlert()
             var inputs = []
             this.children.forEach( io => {
                 if(io.connectors.length > 0 && io.type == 'input'){
                     inputs.push(io.getValue())
                 }
             })
-            
-            const computeValue = async () => {
-                const values = inputs.map(x => {
-                    return x.toLazyGeometry().toGeometry()
-                })
-                return await GlobalVariables.ask({values: values, key: "assemble"})
-            }
-
-            computeValue().then(result => {
-                this.value = GlobalVariables.api.Shape.fromGeometry(result)
-                
-                //If this molecule is selected, send the updated value to the renderer
-                if (this.selected){
-                    this.sendToRender()
-                }
-                
-                //Set the output nodes with name 'geometry' to be the generated output
-                this.children.forEach(child => {
-                    if(child.valueType == 'geometry' && child.type == 'output'){
-                        child.setValue(this.value)
-                    }
-                })
-                this.processing = false
+            const values = inputs.map(x => {
+                return x.toLazyGeometry().toGeometry()
             })
-        }
-        catch(err){
-            this.setAlert(err)
-        }
+            
+            this.basicThreadValueProcessing(values, "assemble")
+        }catch(err){this.setAlert(err)}
         
         //Delete or add ports as needed
         addOrDeletePorts(this)

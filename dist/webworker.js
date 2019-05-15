@@ -12899,7 +12899,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   module.exports = exports['default'];
   });
 
-  unwrapExports(QuickHull_1);
+  var QuickHull = unwrapExports(QuickHull_1);
+
+  const buildConvexHull = (options = {}, points) => {
+    const hull = new QuickHull(points, { skipTriangulation: true });
+    hull.build();
+    return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));
+  };
 
   const flip$3 = (points) => points;
 
@@ -22577,6 +22583,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const method$6 = function (options) { return extrude(options, this); };
 
   Shape.prototype.extrude = method$6;
+
+  const hull = (...geometries) => {
+    // FIX: Support z0Surface hulling.
+    const points = [];
+    geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));
+    return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
+  };
 
   const intersection$5 = (...params) => intersectionLazily(...params);
 
@@ -73783,6 +73796,9764 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * the api uses.
    */
 
+  // radians = degrees * PI / 180
+
+  // TODO: Clean this up.
+
+  // degrees = radians * 180 / PI
+
+  const spatialResolution$1 = 1e5;
+
+  // Quantize values for use in spatial coordinates, and so on, even if the usual quantizeForSpace is disabled.
+  const reallyQuantizeForSpace$1 = (value) => (Math.round(value * spatialResolution$1) / spatialResolution$1);
+
+  /**
+   * Adds two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
+   *
+   * @param {mat4} a The first matrix.
+   * @param {mat4} b The second matrix.
+   * @returns {Boolean} True if the matrices are equal, false otherwise.
+   */
+
+  /**
+   * Creates a matrix from a vector scaling
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.scale(dest, dest, vec);
+   *
+   * @param {vec3} v Scaling vector
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from a vector translation
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.translate(dest, dest, vec);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {vec3} v Translation vector
+   * @returns {mat4} out
+   */
+  const fromTranslation$1 = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+
+  /**
+   * Create a new mat4 with the given values
+   *
+   * @param {Number} m00 Component in column 0, row 0 position (index 0)
+   * @param {Number} m01 Component in column 0, row 1 position (index 1)
+   * @param {Number} m02 Component in column 0, row 2 position (index 2)
+   * @param {Number} m03 Component in column 0, row 3 position (index 3)
+   * @param {Number} m10 Component in column 1, row 0 position (index 4)
+   * @param {Number} m11 Component in column 1, row 1 position (index 5)
+   * @param {Number} m12 Component in column 1, row 2 position (index 6)
+   * @param {Number} m13 Component in column 1, row 3 position (index 7)
+   * @param {Number} m20 Component in column 2, row 0 position (index 8)
+   * @param {Number} m21 Component in column 2, row 1 position (index 9)
+   * @param {Number} m22 Component in column 2, row 2 position (index 10)
+   * @param {Number} m23 Component in column 2, row 3 position (index 11)
+   * @param {Number} m30 Component in column 3, row 0 position (index 12)
+   * @param {Number} m31 Component in column 3, row 1 position (index 13)
+   * @param {Number} m32 Component in column 3, row 2 position (index 14)
+   * @param {Number} m33 Component in column 3, row 3 position (index 15)
+   * @returns {mat4} A new mat4
+   */
+
+  /**
+   * Creates a matrix from the given angle around the X axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateX(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from the given angle around the Y axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateY(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from the given angle around the Z axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateZ(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Set a mat4 to the identity matrix
+   *
+   * @returns {mat4} out
+   */
+
+  /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec3} [out] - receiving vector
+   * @param {vec3} vec - given value
+   * @returns {vec3} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec3's
+   *
+   * @param {vec3} a the first vector to add
+   * @param {vec3} b the second vector to add
+   * @returns {vec3} the added vectors
+   */
+  const add$3 = ([ax, ay, az], [bx, by, bz]) => [(ax + bx), (ay + by), (az + bz)];
+
+  /**
+   * Calculates the dot product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+  const dot$2 = ([ax, ay, az], [bx, by, bz]) => (ax * bx) + (ay * by) + (az * bz);
+
+  /**
+   * Scales a vec3 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec3} vector the vector to scale
+   * @returns {vec3} out
+   */
+
+  const canonicalize$5 = ([x = 0, y = 0, z = 0]) => [reallyQuantizeForSpace$1(x), reallyQuantizeForSpace$1(y), reallyQuantizeForSpace$1(z)];
+
+  /**
+   * Computes the cross product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const cross$2 = ([ax, ay, az], [bx, by, bz]) => [ay * bz - az * by,
+                                                        az * bx - ax * bz,
+                                                        ax * by - ay * bx];
+
+  /**
+   * Calculates the euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  const equals$3 = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);
+
+  /**
+   * Creates a new vec3 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @param {Number} z Z component
+   * @returns {vec3} a new 3D vector
+   */
+
+  /** create a vec3 from a single scalar value
+   * all components of the resulting vec3 have the value of the
+   * input scalar
+   * @param  {Float} scalar
+   * @returns {Vec3}
+   */
+  const fromScalar$1 = (scalar) => [scalar, scalar, scalar];
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @param {Number} z Z component
+   * @returns {vec3} a new 3D vector
+   */
+
+  // extend to a 3D vector by adding a z coordinate:
+
+  /**
+   * Calculates the length of a vec3
+   *
+   * @param {vec3} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+  const length$3 = ([x = 0, y = 0, z = 0]) => Math.sqrt((x * x) + (y * y) + (z * z));
+
+  /**
+   * Performs a linear interpolation between two vec3's
+   *
+   * @param {Number} t interpolant (0.0 to 1.0) applied between the two inputs
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Returns the maximum of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const max$1 = ([ax, ay, az], [bx, by, bz]) => [Math.max(ax, bx),
+                                                      Math.max(ay, by),
+                                                      Math.max(az, bz)];
+
+  /**
+   * Returns the minimum of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const min$1 = ([ax, ay, az], [bx, by, bz]) => [Math.min(ax, bx),
+                                                      Math.min(ay, by),
+                                                      Math.min(az, bz)];
+
+  /**
+   * Multiplies two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const multiply$3 = ([ax, ay, az], [bx, by, bz]) => [(ax * bx), (ay * by), (az * bz)];
+
+  /**
+   * Negates the components of a vec3
+   *
+   * @param {vec3} a vector to negate
+   * @returns {vec3} out
+   */
+  const negate$1 = ([x, y, z]) => [-x, -y, -z];
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [(ax - bx), (ay - by), (az - bz)];
+
+  /**
+   * Calculates the squared euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+  const squaredDistance$2 = ([ax, ay, az], [bx, by, bz]) => {
+    const x = bx - ax;
+    const y = by - ay;
+    const z = bz - az;
+    return (x * x) + (y * y) + (z * z);
+  };
+
+  /**
+   * Calculates the squared length of a vec3
+   *
+   * @param {vec3} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Transforms the vec3 with a mat4.
+   * 4th vector component is implicitly '1'
+   * @param {[[<vec3>], <mat4> , <vec3>]} params
+   * @param {mat4} params[1] matrix matrix to transform with
+   * @param {vec3} params[2] vector the vector to transform
+   * @returns {vec3} out
+   */
+  const transform$8 = (matrix, [x = 0, y = 0, z = 0]) => {
+    let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
+    w = w || 1.0;
+    return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
+            (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
+            (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w];
+  };
+
+  /**
+   * Calculates the unit vector of the given vector
+   *
+   * @param {vec3} vector - the base vector for calculations
+   * @returns {vec3} unit vector of the given vector
+   */
+  const unit$1 = (vector) => {
+    const [x, y, z] = vector;
+    const magnitude = length$3(vector);
+    return [x / magnitude,
+            y / magnitude,
+            z / magnitude];
+  };
+
+  /**
+   * determine whether the input matrix is a mirroring transformation
+   *
+   * @param {mat4} mat the input matrix
+   * @returns {boolean} output
+   */
+  const isMirroring$1 = (mat) => {
+    const u = [mat[0], mat[4], mat[8]];
+    const v = [mat[1], mat[5], mat[9]];
+    const w = [mat[2], mat[6], mat[10]];
+
+    // for a true orthogonal, non-mirrored base, u.cross(v) == w
+    // If they have an opposite direction then we are mirroring
+    const mirrorvalue = dot$2(cross$2(u, v), w);
+    const ismirror = (mirrorvalue < 0);
+    return ismirror;
+  };
+
+  /**
+   * m the mat4 by the dimensions in the given vec3
+   * create an affine matrix for mirroring into an arbitrary plane:
+   *
+   * @param {vec3} v the vec3 to mirror the matrix by
+   * @param {mat4} a the matrix to mirror
+   * @returns {mat4} out
+   */
+
+  /**
+   * Create an affine matrix for mirroring onto an arbitrary plane
+   *
+   * @param {vec4} plane to mirror the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Multiplies two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec2} vec - given value
+   * @returns {vec2} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  // y=sin, x=cos
+
+  /**
+   * Computes the cross product (3D) of two vectors
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec3} cross product
+   */
+
+  /**
+   * Calculates the euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the dot product of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+
+  /**
+   * Creates a new vec2 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec2} a new 2D vector
+   */
+
+  /** Create a vec2 from a single scalar value
+   * @param  {Float} scalar
+   * @returns {Vec2} a new vec2
+   */
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   * Any missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec3} a new 2D vector
+   */
+
+  /**
+   * Calculates the length of a vec2
+   *
+   * @param {vec2} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+
+  /**
+   * Performs a linear interpolation between two vec2's
+   *
+   * @param {Number} t interpolation amount between the two inputs
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the maximum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the minimum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Multiplies two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Negates the components of a vec2
+   *
+   * @param {vec2} a vector to negate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Rotates a vec2 by an angle
+   *
+   * @param {Number} angle the angle of rotation (in radians)
+   * @param {vec2} vector the vector to rotate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Normalize the given vector.
+   *
+   * @param {vec2} a vector to normalize
+   * @returns {vec2} normalized (unit) vector
+   */
+
+  /**
+   * Scales a vec2 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec2} vector the vector to scale
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the squared euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+
+  /**
+   * Calculates the squared length of a vec2
+   *
+   * @param {vec2} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Transforms the vec2 with a mat4
+   * 3rd vector component is implicitly '0'
+   * 4th vector component is implicitly '1'
+   *
+   * @param {mat4} matrix matrix to transform with
+   * @param {vec2} vector the vector to transform
+   * @returns {vec2} out
+   */
+
+  /**
+   * Subtracts matrix b from matrix a
+   *
+   * @param {mat4} out the receiving matrix
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
+  //[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
+  //[5]   	Name	   ::=   	NameStartChar (NameChar)*
+  var nameStartChar$1 = /[A-Z_a-z\xC0-\xD6\xD8-\xF6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/;//\u10000-\uEFFFF
+  var nameChar$1 = new RegExp("[\\-\\.0-9"+nameStartChar$1.source.slice(1,-1)+"\\u00B7\\u0300-\\u036F\\u203F-\\u2040]");
+  var tagNamePattern$1 = new RegExp('^'+nameStartChar$1.source+nameChar$1.source+'*(?:\:'+nameStartChar$1.source+nameChar$1.source+'*)?$');
+  //var tagNamePattern = /^[a-zA-Z_][\w\-\.]*(?:\:[a-zA-Z_][\w\-\.]*)?$/
+  //var handlers = 'resolveEntity,getExternalSubset,characters,endDocument,endElement,endPrefixMapping,ignorableWhitespace,processingInstruction,setDocumentLocator,skippedEntity,startDocument,startElement,startPrefixMapping,notationDecl,unparsedEntityDecl,error,fatalError,warning,attributeDecl,elementDecl,externalEntityDecl,internalEntityDecl,comment,endCDATA,endDTD,endEntity,startCDATA,startDTD,startEntity'.split(',')
+
+  //S_TAG,	S_ATTR,	S_EQ,	S_ATTR_NOQUOT_VALUE
+  //S_ATTR_SPACE,	S_ATTR_END,	S_TAG_SPACE, S_TAG_CLOSE
+  var S_TAG$1 = 0;//tag name offerring
+  var S_ATTR$1 = 1;//attr name offerring 
+  var S_ATTR_SPACE$1=2;//attr name end and space offer
+  var S_EQ$1 = 3;//=space?
+  var S_ATTR_NOQUOT_VALUE$1 = 4;//attr value(no quot value only)
+  var S_ATTR_END$1 = 5;//attr value end and no space(quot end)
+  var S_TAG_SPACE$1 = 6;//(attr value end || tag end ) && (space offer)
+  var S_TAG_CLOSE$1 = 7;//closed el<el />
+
+  function XMLReader$1(){
+  	
+  }
+
+  XMLReader$1.prototype = {
+  	parse:function(source,defaultNSMap,entityMap){
+  		var domBuilder = this.domBuilder;
+  		domBuilder.startDocument();
+  		_copy$1(defaultNSMap ,defaultNSMap = {});
+  		parse$2(source,defaultNSMap,entityMap,
+  				domBuilder,this.errorHandler);
+  		domBuilder.endDocument();
+  	}
+  };
+  function parse$2(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
+  	function fixedFromCharCode(code) {
+  		// String.prototype.fromCharCode does not supports
+  		// > 2 bytes unicode chars directly
+  		if (code > 0xffff) {
+  			code -= 0x10000;
+  			var surrogate1 = 0xd800 + (code >> 10)
+  				, surrogate2 = 0xdc00 + (code & 0x3ff);
+
+  			return String.fromCharCode(surrogate1, surrogate2);
+  		} else {
+  			return String.fromCharCode(code);
+  		}
+  	}
+  	function entityReplacer(a){
+  		var k = a.slice(1,-1);
+  		if(k in entityMap){
+  			return entityMap[k]; 
+  		}else if(k.charAt(0) === '#'){
+  			return fixedFromCharCode(parseInt(k.substr(1).replace('x','0x')))
+  		}else{
+  			errorHandler.error('entity not found:'+a);
+  			return a;
+  		}
+  	}
+  	function appendText(end){//has some bugs
+  		if(end>start){
+  			var xt = source.substring(start,end).replace(/&#?\w+;/g,entityReplacer);
+  			locator&&position(start);
+  			domBuilder.characters(xt,0,end-start);
+  			start = end;
+  		}
+  	}
+  	function position(p,m){
+  		while(p>=lineEnd && (m = linePattern.exec(source))){
+  			lineStart = m.index;
+  			lineEnd = lineStart + m[0].length;
+  			locator.lineNumber++;
+  			//console.log('line++:',locator,startPos,endPos)
+  		}
+  		locator.columnNumber = p-lineStart+1;
+  	}
+  	var lineStart = 0;
+  	var lineEnd = 0;
+  	var linePattern = /.*(?:\r\n?|\n)|.*$/g;
+  	var locator = domBuilder.locator;
+  	
+  	var parseStack = [{currentNSMap:defaultNSMapCopy}];
+  	var closeMap = {};
+  	var start = 0;
+  	while(true){
+  		try{
+  			var tagStart = source.indexOf('<',start);
+  			if(tagStart<0){
+  				if(!source.substr(start).match(/^\s*$/)){
+  					var doc = domBuilder.doc;
+  	    			var text = doc.createTextNode(source.substr(start));
+  	    			doc.appendChild(text);
+  	    			domBuilder.currentElement = text;
+  				}
+  				return;
+  			}
+  			if(tagStart>start){
+  				appendText(tagStart);
+  			}
+  			switch(source.charAt(tagStart+1)){
+  			case '/':
+  				var end = source.indexOf('>',tagStart+3);
+  				var tagName = source.substring(tagStart+2,end);
+  				var config = parseStack.pop();
+  				if(end<0){
+  					
+  	        		tagName = source.substring(tagStart+2).replace(/[\s<].*/,'');
+  	        		//console.error('#@@@@@@'+tagName)
+  	        		errorHandler.error("end tag name: "+tagName+' is not complete:'+config.tagName);
+  	        		end = tagStart+1+tagName.length;
+  	        	}else if(tagName.match(/\s</)){
+  	        		tagName = tagName.replace(/[\s<].*/,'');
+  	        		errorHandler.error("end tag name: "+tagName+' maybe not complete');
+  	        		end = tagStart+1+tagName.length;
+  				}
+  				//console.error(parseStack.length,parseStack)
+  				//console.error(config);
+  				var localNSMap = config.localNSMap;
+  				var endMatch = config.tagName == tagName;
+  				var endIgnoreCaseMach = endMatch || config.tagName&&config.tagName.toLowerCase() == tagName.toLowerCase();
+  		        if(endIgnoreCaseMach){
+  		        	domBuilder.endElement(config.uri,config.localName,tagName);
+  					if(localNSMap){
+  						for(var prefix in localNSMap){
+  							domBuilder.endPrefixMapping(prefix) ;
+  						}
+  					}
+  					if(!endMatch){
+  		            	errorHandler.fatalError("end tag name: "+tagName+' is not match the current start tagName:'+config.tagName );
+  					}
+  		        }else{
+  		        	parseStack.push(config);
+  		        }
+  				
+  				end++;
+  				break;
+  				// end elment
+  			case '?':// <?...?>
+  				locator&&position(tagStart);
+  				end = parseInstruction$1(source,tagStart,domBuilder);
+  				break;
+  			case '!':// <!doctype,<![CDATA,<!--
+  				locator&&position(tagStart);
+  				end = parseDCC$1(source,tagStart,domBuilder,errorHandler);
+  				break;
+  			default:
+  				locator&&position(tagStart);
+  				var el = new ElementAttributes$1();
+  				var currentNSMap = parseStack[parseStack.length-1].currentNSMap;
+  				//elStartEnd
+  				var end = parseElementStartPart$1(source,tagStart,el,currentNSMap,entityReplacer,errorHandler);
+  				var len = el.length;
+  				
+  				
+  				if(!el.closed && fixSelfClosed$1(source,end,el.tagName,closeMap)){
+  					el.closed = true;
+  					if(!entityMap.nbsp){
+  						errorHandler.warning('unclosed xml attribute');
+  					}
+  				}
+  				if(locator && len){
+  					var locator2 = copyLocator$1(locator,{});
+  					//try{//attribute position fixed
+  					for(var i = 0;i<len;i++){
+  						var a = el[i];
+  						position(a.offset);
+  						a.locator = copyLocator$1(locator,{});
+  					}
+  					//}catch(e){console.error('@@@@@'+e)}
+  					domBuilder.locator = locator2;
+  					if(appendElement$1(el,domBuilder,currentNSMap)){
+  						parseStack.push(el);
+  					}
+  					domBuilder.locator = locator;
+  				}else{
+  					if(appendElement$1(el,domBuilder,currentNSMap)){
+  						parseStack.push(el);
+  					}
+  				}
+  				
+  				
+  				
+  				if(el.uri === 'http://www.w3.org/1999/xhtml' && !el.closed){
+  					end = parseHtmlSpecialContent$1(source,end,el.tagName,entityReplacer,domBuilder);
+  				}else{
+  					end++;
+  				}
+  			}
+  		}catch(e){
+  			errorHandler.error('element parse error: '+e);
+  			//errorHandler.error('element parse error: '+e);
+  			end = -1;
+  			//throw e;
+  		}
+  		if(end>start){
+  			start = end;
+  		}else{
+  			//TODO: 这里有可能sax回退，有位置错误风险
+  			appendText(Math.max(tagStart,start)+1);
+  		}
+  	}
+  }
+  function copyLocator$1(f,t){
+  	t.lineNumber = f.lineNumber;
+  	t.columnNumber = f.columnNumber;
+  	return t;
+  }
+
+  /**
+   * @see #appendElement(source,elStartEnd,el,selfClosed,entityReplacer,domBuilder,parseStack);
+   * @return end of the elementStartPart(end of elementEndPart for selfClosed el)
+   */
+  function parseElementStartPart$1(source,start,el,currentNSMap,entityReplacer,errorHandler){
+  	var attrName;
+  	var value;
+  	var p = ++start;
+  	var s = S_TAG$1;//status
+  	while(true){
+  		var c = source.charAt(p);
+  		switch(c){
+  		case '=':
+  			if(s === S_ATTR$1){//attrName
+  				attrName = source.slice(start,p);
+  				s = S_EQ$1;
+  			}else if(s === S_ATTR_SPACE$1){
+  				s = S_EQ$1;
+  			}else{
+  				//fatalError: equal must after attrName or space after attrName
+  				throw new Error('attribute equal must after attrName');
+  			}
+  			break;
+  		case '\'':
+  		case '"':
+  			if(s === S_EQ$1 || s === S_ATTR$1 //|| s == S_ATTR_SPACE
+  				){//equal
+  				if(s === S_ATTR$1){
+  					errorHandler.warning('attribute value must after "="');
+  					attrName = source.slice(start,p);
+  				}
+  				start = p+1;
+  				p = source.indexOf(c,start);
+  				if(p>0){
+  					value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
+  					el.add(attrName,value,start-1);
+  					s = S_ATTR_END$1;
+  				}else{
+  					//fatalError: no end quot match
+  					throw new Error('attribute value no end \''+c+'\' match');
+  				}
+  			}else if(s == S_ATTR_NOQUOT_VALUE$1){
+  				value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
+  				//console.log(attrName,value,start,p)
+  				el.add(attrName,value,start);
+  				//console.dir(el)
+  				errorHandler.warning('attribute "'+attrName+'" missed start quot('+c+')!!');
+  				start = p+1;
+  				s = S_ATTR_END$1;
+  			}else{
+  				//fatalError: no equal before
+  				throw new Error('attribute value must after "="');
+  			}
+  			break;
+  		case '/':
+  			switch(s){
+  			case S_TAG$1:
+  				el.setTagName(source.slice(start,p));
+  			case S_ATTR_END$1:
+  			case S_TAG_SPACE$1:
+  			case S_TAG_CLOSE$1:
+  				s =S_TAG_CLOSE$1;
+  				el.closed = true;
+  			case S_ATTR_NOQUOT_VALUE$1:
+  			case S_ATTR$1:
+  			case S_ATTR_SPACE$1:
+  				break;
+  			//case S_EQ:
+  			default:
+  				throw new Error("attribute invalid close char('/')")
+  			}
+  			break;
+  		case ''://end document
+  			//throw new Error('unexpected end of input')
+  			errorHandler.error('unexpected end of input');
+  			if(s == S_TAG$1){
+  				el.setTagName(source.slice(start,p));
+  			}
+  			return p;
+  		case '>':
+  			switch(s){
+  			case S_TAG$1:
+  				el.setTagName(source.slice(start,p));
+  			case S_ATTR_END$1:
+  			case S_TAG_SPACE$1:
+  			case S_TAG_CLOSE$1:
+  				break;//normal
+  			case S_ATTR_NOQUOT_VALUE$1://Compatible state
+  			case S_ATTR$1:
+  				value = source.slice(start,p);
+  				if(value.slice(-1) === '/'){
+  					el.closed  = true;
+  					value = value.slice(0,-1);
+  				}
+  			case S_ATTR_SPACE$1:
+  				if(s === S_ATTR_SPACE$1){
+  					value = attrName;
+  				}
+  				if(s == S_ATTR_NOQUOT_VALUE$1){
+  					errorHandler.warning('attribute "'+value+'" missed quot(")!!');
+  					el.add(attrName,value.replace(/&#?\w+;/g,entityReplacer),start);
+  				}else{
+  					if(currentNSMap[''] !== 'http://www.w3.org/1999/xhtml' || !value.match(/^(?:disabled|checked|selected)$/i)){
+  						errorHandler.warning('attribute "'+value+'" missed value!! "'+value+'" instead!!');
+  					}
+  					el.add(value,value,start);
+  				}
+  				break;
+  			case S_EQ$1:
+  				throw new Error('attribute value missed!!');
+  			}
+  //			console.log(tagName,tagNamePattern,tagNamePattern.test(tagName))
+  			return p;
+  		/*xml space '\x20' | #x9 | #xD | #xA; */
+  		case '\u0080':
+  			c = ' ';
+  		default:
+  			if(c<= ' '){//space
+  				switch(s){
+  				case S_TAG$1:
+  					el.setTagName(source.slice(start,p));//tagName
+  					s = S_TAG_SPACE$1;
+  					break;
+  				case S_ATTR$1:
+  					attrName = source.slice(start,p);
+  					s = S_ATTR_SPACE$1;
+  					break;
+  				case S_ATTR_NOQUOT_VALUE$1:
+  					var value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
+  					errorHandler.warning('attribute "'+value+'" missed quot(")!!');
+  					el.add(attrName,value,start);
+  				case S_ATTR_END$1:
+  					s = S_TAG_SPACE$1;
+  					break;
+  				//case S_TAG_SPACE:
+  				//case S_EQ:
+  				//case S_ATTR_SPACE:
+  				//	void();break;
+  				//case S_TAG_CLOSE:
+  					//ignore warning
+  				}
+  			}else{//not space
+  //S_TAG,	S_ATTR,	S_EQ,	S_ATTR_NOQUOT_VALUE
+  //S_ATTR_SPACE,	S_ATTR_END,	S_TAG_SPACE, S_TAG_CLOSE
+  				switch(s){
+  				//case S_TAG:void();break;
+  				//case S_ATTR:void();break;
+  				//case S_ATTR_NOQUOT_VALUE:void();break;
+  				case S_ATTR_SPACE$1:
+  					var tagName =  el.tagName;
+  					if(currentNSMap[''] !== 'http://www.w3.org/1999/xhtml' || !attrName.match(/^(?:disabled|checked|selected)$/i)){
+  						errorHandler.warning('attribute "'+attrName+'" missed value!! "'+attrName+'" instead2!!');
+  					}
+  					el.add(attrName,attrName,start);
+  					start = p;
+  					s = S_ATTR$1;
+  					break;
+  				case S_ATTR_END$1:
+  					errorHandler.warning('attribute space is required"'+attrName+'"!!');
+  				case S_TAG_SPACE$1:
+  					s = S_ATTR$1;
+  					start = p;
+  					break;
+  				case S_EQ$1:
+  					s = S_ATTR_NOQUOT_VALUE$1;
+  					start = p;
+  					break;
+  				case S_TAG_CLOSE$1:
+  					throw new Error("elements closed character '/' and '>' must be connected to");
+  				}
+  			}
+  		}//end outer switch
+  		//console.log('p++',p)
+  		p++;
+  	}
+  }
+  /**
+   * @return true if has new namespace define
+   */
+  function appendElement$1(el,domBuilder,currentNSMap){
+  	var tagName = el.tagName;
+  	var localNSMap = null;
+  	//var currentNSMap = parseStack[parseStack.length-1].currentNSMap;
+  	var i = el.length;
+  	while(i--){
+  		var a = el[i];
+  		var qName = a.qName;
+  		var value = a.value;
+  		var nsp = qName.indexOf(':');
+  		if(nsp>0){
+  			var prefix = a.prefix = qName.slice(0,nsp);
+  			var localName = qName.slice(nsp+1);
+  			var nsPrefix = prefix === 'xmlns' && localName;
+  		}else{
+  			localName = qName;
+  			prefix = null;
+  			nsPrefix = qName === 'xmlns' && '';
+  		}
+  		//can not set prefix,because prefix !== ''
+  		a.localName = localName ;
+  		//prefix == null for no ns prefix attribute 
+  		if(nsPrefix !== false){//hack!!
+  			if(localNSMap == null){
+  				localNSMap = {};
+  				//console.log(currentNSMap,0)
+  				_copy$1(currentNSMap,currentNSMap={});
+  				//console.log(currentNSMap,1)
+  			}
+  			currentNSMap[nsPrefix] = localNSMap[nsPrefix] = value;
+  			a.uri = 'http://www.w3.org/2000/xmlns/';
+  			domBuilder.startPrefixMapping(nsPrefix, value); 
+  		}
+  	}
+  	var i = el.length;
+  	while(i--){
+  		a = el[i];
+  		var prefix = a.prefix;
+  		if(prefix){//no prefix attribute has no namespace
+  			if(prefix === 'xml'){
+  				a.uri = 'http://www.w3.org/XML/1998/namespace';
+  			}if(prefix !== 'xmlns'){
+  				a.uri = currentNSMap[prefix || ''];
+  				
+  				//{console.log('###'+a.qName,domBuilder.locator.systemId+'',currentNSMap,a.uri)}
+  			}
+  		}
+  	}
+  	var nsp = tagName.indexOf(':');
+  	if(nsp>0){
+  		prefix = el.prefix = tagName.slice(0,nsp);
+  		localName = el.localName = tagName.slice(nsp+1);
+  	}else{
+  		prefix = null;//important!!
+  		localName = el.localName = tagName;
+  	}
+  	//no prefix element has default namespace
+  	var ns = el.uri = currentNSMap[prefix || ''];
+  	domBuilder.startElement(ns,localName,tagName,el);
+  	//endPrefixMapping and startPrefixMapping have not any help for dom builder
+  	//localNSMap = null
+  	if(el.closed){
+  		domBuilder.endElement(ns,localName,tagName);
+  		if(localNSMap){
+  			for(prefix in localNSMap){
+  				domBuilder.endPrefixMapping(prefix); 
+  			}
+  		}
+  	}else{
+  		el.currentNSMap = currentNSMap;
+  		el.localNSMap = localNSMap;
+  		//parseStack.push(el);
+  		return true;
+  	}
+  }
+  function parseHtmlSpecialContent$1(source,elStartEnd,tagName,entityReplacer,domBuilder){
+  	if(/^(?:script|textarea)$/i.test(tagName)){
+  		var elEndStart =  source.indexOf('</'+tagName+'>',elStartEnd);
+  		var text = source.substring(elStartEnd+1,elEndStart);
+  		if(/[&<]/.test(text)){
+  			if(/^script$/i.test(tagName)){
+  				//if(!/\]\]>/.test(text)){
+  					//lexHandler.startCDATA();
+  					domBuilder.characters(text,0,text.length);
+  					//lexHandler.endCDATA();
+  					return elEndStart;
+  				//}
+  			}//}else{//text area
+  				text = text.replace(/&#?\w+;/g,entityReplacer);
+  				domBuilder.characters(text,0,text.length);
+  				return elEndStart;
+  			//}
+  			
+  		}
+  	}
+  	return elStartEnd+1;
+  }
+  function fixSelfClosed$1(source,elStartEnd,tagName,closeMap){
+  	//if(tagName in closeMap){
+  	var pos = closeMap[tagName];
+  	if(pos == null){
+  		//console.log(tagName)
+  		pos =  source.lastIndexOf('</'+tagName+'>');
+  		if(pos<elStartEnd){//忘记闭合
+  			pos = source.lastIndexOf('</'+tagName);
+  		}
+  		closeMap[tagName] =pos;
+  	}
+  	return pos<elStartEnd;
+  	//} 
+  }
+  function _copy$1(source,target){
+  	for(var n in source){target[n] = source[n];}
+  }
+  function parseDCC$1(source,start,domBuilder,errorHandler){//sure start with '<!'
+  	var next= source.charAt(start+2);
+  	switch(next){
+  	case '-':
+  		if(source.charAt(start + 3) === '-'){
+  			var end = source.indexOf('-->',start+4);
+  			//append comment source.substring(4,end)//<!--
+  			if(end>start){
+  				domBuilder.comment(source,start+4,end-start-4);
+  				return end+3;
+  			}else{
+  				errorHandler.error("Unclosed comment");
+  				return -1;
+  			}
+  		}else{
+  			//error
+  			return -1;
+  		}
+  	default:
+  		if(source.substr(start+3,6) == 'CDATA['){
+  			var end = source.indexOf(']]>',start+9);
+  			domBuilder.startCDATA();
+  			domBuilder.characters(source,start+9,end-start-9);
+  			domBuilder.endCDATA(); 
+  			return end+3;
+  		}
+  		//<!DOCTYPE
+  		//startDTD(java.lang.String name, java.lang.String publicId, java.lang.String systemId) 
+  		var matchs = split$2(source,start);
+  		var len = matchs.length;
+  		if(len>1 && /!doctype/i.test(matchs[0][0])){
+  			var name = matchs[1][0];
+  			var pubid = len>3 && /^public$/i.test(matchs[2][0]) && matchs[3][0];
+  			var sysid = len>4 && matchs[4][0];
+  			var lastMatch = matchs[len-1];
+  			domBuilder.startDTD(name,pubid && pubid.replace(/^(['"])(.*?)\1$/,'$2'),
+  					sysid && sysid.replace(/^(['"])(.*?)\1$/,'$2'));
+  			domBuilder.endDTD();
+  			
+  			return lastMatch.index+lastMatch[0].length
+  		}
+  	}
+  	return -1;
+  }
+
+
+
+  function parseInstruction$1(source,start,domBuilder){
+  	var end = source.indexOf('?>',start);
+  	if(end){
+  		var match = source.substring(start,end).match(/^<\?(\S*)\s*([\s\S]*?)\s*$/);
+  		if(match){
+  			var len = match[0].length;
+  			domBuilder.processingInstruction(match[1], match[2]) ;
+  			return end+2;
+  		}else{//error
+  			return -1;
+  		}
+  	}
+  	return -1;
+  }
+
+  /**
+   * @param source
+   */
+  function ElementAttributes$1(source){
+  	
+  }
+  ElementAttributes$1.prototype = {
+  	setTagName:function(tagName){
+  		if(!tagNamePattern$1.test(tagName)){
+  			throw new Error('invalid tagName:'+tagName)
+  		}
+  		this.tagName = tagName;
+  	},
+  	add:function(qName,value,offset){
+  		if(!tagNamePattern$1.test(qName)){
+  			throw new Error('invalid attribute:'+qName)
+  		}
+  		this[this.length++] = {qName:qName,value:value,offset:offset};
+  	},
+  	length:0,
+  	getLocalName:function(i){return this[i].localName},
+  	getLocator:function(i){return this[i].locator},
+  	getQName:function(i){return this[i].qName},
+  	getURI:function(i){return this[i].uri},
+  	getValue:function(i){return this[i].value}
+  //	,getIndex:function(uri, localName)){
+  //		if(localName){
+  //			
+  //		}else{
+  //			var qName = uri
+  //		}
+  //	},
+  //	getValue:function(){return this.getValue(this.getIndex.apply(this,arguments))},
+  //	getType:function(uri,localName){}
+  //	getType:function(i){},
+  };
+
+
+
+
+  function _set_proto_$1(thiz,parent){
+  	thiz.__proto__ = parent;
+  	return thiz;
+  }
+  if(!(_set_proto_$1({},_set_proto_$1.prototype) instanceof _set_proto_$1)){
+  	_set_proto_$1 = function(thiz,parent){
+  		function p(){}		p.prototype = parent;
+  		p = new p();
+  		for(parent in thiz){
+  			p[parent] = thiz[parent];
+  		}
+  		return p;
+  	};
+  }
+
+  function split$2(source,start){
+  	var match;
+  	var buf = [];
+  	var reg = /'[^']+'|"[^"]+"|[^\s<>\/=]+=?|(\/?\s*>|<)/g;
+  	reg.lastIndex = start;
+  	reg.exec(source);//skip <
+  	while(match = reg.exec(source)){
+  		buf.push(match);
+  		if(match[1])return buf;
+  	}
+  }
+
+  var XMLReader_1$1 = XMLReader$1;
+
+  var sax$1 = {
+  	XMLReader: XMLReader_1$1
+  };
+
+  /*
+   * DOM Level 2
+   * Object DOMException
+   * @see http://www.w3.org/TR/REC-DOM-Level-1/ecma-script-language-binding.html
+   * @see http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/ecma-script-binding.html
+   */
+
+  function copy$2(src,dest){
+  	for(var p in src){
+  		dest[p] = src[p];
+  	}
+  }
+  /**
+  ^\w+\.prototype\.([_\w]+)\s*=\s*((?:.*\{\s*?[\r\n][\s\S]*?^})|\S.*?(?=[;\r\n]));?
+  ^\w+\.prototype\.([_\w]+)\s*=\s*(\S.*?(?=[;\r\n]));?
+   */
+  function _extends$1(Class,Super){
+  	var pt = Class.prototype;
+  	if(Object.create){
+  		var ppt = Object.create(Super.prototype);
+  		pt.__proto__ = ppt;
+  	}
+  	if(!(pt instanceof Super)){
+  		function t(){}		t.prototype = Super.prototype;
+  		t = new t();
+  		copy$2(pt,t);
+  		Class.prototype = pt = t;
+  	}
+  	if(pt.constructor != Class){
+  		if(typeof Class != 'function'){
+  			console.error("unknow Class:"+Class);
+  		}
+  		pt.constructor = Class;
+  	}
+  }
+  var htmlns$1 = 'http://www.w3.org/1999/xhtml' ;
+  // Node Types
+  var NodeType$1 = {};
+  var ELEMENT_NODE$1                = NodeType$1.ELEMENT_NODE                = 1;
+  var ATTRIBUTE_NODE$1              = NodeType$1.ATTRIBUTE_NODE              = 2;
+  var TEXT_NODE$1                   = NodeType$1.TEXT_NODE                   = 3;
+  var CDATA_SECTION_NODE$1          = NodeType$1.CDATA_SECTION_NODE          = 4;
+  var ENTITY_REFERENCE_NODE$1       = NodeType$1.ENTITY_REFERENCE_NODE       = 5;
+  var ENTITY_NODE$1                 = NodeType$1.ENTITY_NODE                 = 6;
+  var PROCESSING_INSTRUCTION_NODE$1 = NodeType$1.PROCESSING_INSTRUCTION_NODE = 7;
+  var COMMENT_NODE$1                = NodeType$1.COMMENT_NODE                = 8;
+  var DOCUMENT_NODE$1               = NodeType$1.DOCUMENT_NODE               = 9;
+  var DOCUMENT_TYPE_NODE$1          = NodeType$1.DOCUMENT_TYPE_NODE          = 10;
+  var DOCUMENT_FRAGMENT_NODE$1      = NodeType$1.DOCUMENT_FRAGMENT_NODE      = 11;
+  var NOTATION_NODE$1               = NodeType$1.NOTATION_NODE               = 12;
+
+  // ExceptionCode
+  var ExceptionCode$1 = {};
+  var ExceptionMessage$1 = {};
+  var INDEX_SIZE_ERR$1              = ExceptionCode$1.INDEX_SIZE_ERR              = ((ExceptionMessage$1[1]="Index size error"),1);
+  var DOMSTRING_SIZE_ERR$1          = ExceptionCode$1.DOMSTRING_SIZE_ERR          = ((ExceptionMessage$1[2]="DOMString size error"),2);
+  var HIERARCHY_REQUEST_ERR$1       = ExceptionCode$1.HIERARCHY_REQUEST_ERR       = ((ExceptionMessage$1[3]="Hierarchy request error"),3);
+  var WRONG_DOCUMENT_ERR$1          = ExceptionCode$1.WRONG_DOCUMENT_ERR          = ((ExceptionMessage$1[4]="Wrong document"),4);
+  var INVALID_CHARACTER_ERR$1       = ExceptionCode$1.INVALID_CHARACTER_ERR       = ((ExceptionMessage$1[5]="Invalid character"),5);
+  var NO_DATA_ALLOWED_ERR$1         = ExceptionCode$1.NO_DATA_ALLOWED_ERR         = ((ExceptionMessage$1[6]="No data allowed"),6);
+  var NO_MODIFICATION_ALLOWED_ERR$1 = ExceptionCode$1.NO_MODIFICATION_ALLOWED_ERR = ((ExceptionMessage$1[7]="No modification allowed"),7);
+  var NOT_FOUND_ERR$1               = ExceptionCode$1.NOT_FOUND_ERR               = ((ExceptionMessage$1[8]="Not found"),8);
+  var NOT_SUPPORTED_ERR$1           = ExceptionCode$1.NOT_SUPPORTED_ERR           = ((ExceptionMessage$1[9]="Not supported"),9);
+  var INUSE_ATTRIBUTE_ERR$1         = ExceptionCode$1.INUSE_ATTRIBUTE_ERR         = ((ExceptionMessage$1[10]="Attribute in use"),10);
+  //level2
+  var INVALID_STATE_ERR$1        	= ExceptionCode$1.INVALID_STATE_ERR        	= ((ExceptionMessage$1[11]="Invalid state"),11);
+  var SYNTAX_ERR$1               	= ExceptionCode$1.SYNTAX_ERR               	= ((ExceptionMessage$1[12]="Syntax error"),12);
+  var INVALID_MODIFICATION_ERR$1 	= ExceptionCode$1.INVALID_MODIFICATION_ERR 	= ((ExceptionMessage$1[13]="Invalid modification"),13);
+  var NAMESPACE_ERR$1            	= ExceptionCode$1.NAMESPACE_ERR           	= ((ExceptionMessage$1[14]="Invalid namespace"),14);
+  var INVALID_ACCESS_ERR$1       	= ExceptionCode$1.INVALID_ACCESS_ERR      	= ((ExceptionMessage$1[15]="Invalid access"),15);
+
+
+  function DOMException$1(code, message) {
+  	if(message instanceof Error){
+  		var error = message;
+  	}else{
+  		error = this;
+  		Error.call(this, ExceptionMessage$1[code]);
+  		this.message = ExceptionMessage$1[code];
+  		if(Error.captureStackTrace) Error.captureStackTrace(this, DOMException$1);
+  	}
+  	error.code = code;
+  	if(message) this.message = this.message + ": " + message;
+  	return error;
+  }DOMException$1.prototype = Error.prototype;
+  copy$2(ExceptionCode$1,DOMException$1);
+  /**
+   * @see http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/core.html#ID-536297177
+   * The NodeList interface provides the abstraction of an ordered collection of nodes, without defining or constraining how this collection is implemented. NodeList objects in the DOM are live.
+   * The items in the NodeList are accessible via an integral index, starting from 0.
+   */
+  function NodeList$1() {
+  }NodeList$1.prototype = {
+  	/**
+  	 * The number of nodes in the list. The range of valid child node indices is 0 to length-1 inclusive.
+  	 * @standard level1
+  	 */
+  	length:0, 
+  	/**
+  	 * Returns the indexth item in the collection. If index is greater than or equal to the number of nodes in the list, this returns null.
+  	 * @standard level1
+  	 * @param index  unsigned long 
+  	 *   Index into the collection.
+  	 * @return Node
+  	 * 	The node at the indexth position in the NodeList, or null if that is not a valid index. 
+  	 */
+  	item: function(index) {
+  		return this[index] || null;
+  	},
+  	toString:function(isHTML,nodeFilter){
+  		for(var buf = [], i = 0;i<this.length;i++){
+  			serializeToString$1(this[i],buf,isHTML,nodeFilter);
+  		}
+  		return buf.join('');
+  	}
+  };
+  function LiveNodeList$1(node,refresh){
+  	this._node = node;
+  	this._refresh = refresh;
+  	_updateLiveList$1(this);
+  }
+  function _updateLiveList$1(list){
+  	var inc = list._node._inc || list._node.ownerDocument._inc;
+  	if(list._inc != inc){
+  		var ls = list._refresh(list._node);
+  		//console.log(ls.length)
+  		__set__$1(list,'length',ls.length);
+  		copy$2(ls,list);
+  		list._inc = inc;
+  	}
+  }
+  LiveNodeList$1.prototype.item = function(i){
+  	_updateLiveList$1(this);
+  	return this[i];
+  };
+
+  _extends$1(LiveNodeList$1,NodeList$1);
+  /**
+   * 
+   * Objects implementing the NamedNodeMap interface are used to represent collections of nodes that can be accessed by name. Note that NamedNodeMap does not inherit from NodeList; NamedNodeMaps are not maintained in any particular order. Objects contained in an object implementing NamedNodeMap may also be accessed by an ordinal index, but this is simply to allow convenient enumeration of the contents of a NamedNodeMap, and does not imply that the DOM specifies an order to these Nodes.
+   * NamedNodeMap objects in the DOM are live.
+   * used for attributes or DocumentType entities 
+   */
+  function NamedNodeMap$1() {
+  }
+  function _findNodeIndex$1(list,node){
+  	var i = list.length;
+  	while(i--){
+  		if(list[i] === node){return i}
+  	}
+  }
+
+  function _addNamedNode$1(el,list,newAttr,oldAttr){
+  	if(oldAttr){
+  		list[_findNodeIndex$1(list,oldAttr)] = newAttr;
+  	}else{
+  		list[list.length++] = newAttr;
+  	}
+  	if(el){
+  		newAttr.ownerElement = el;
+  		var doc = el.ownerDocument;
+  		if(doc){
+  			oldAttr && _onRemoveAttribute$1(doc,el,oldAttr);
+  			_onAddAttribute$1(doc,el,newAttr);
+  		}
+  	}
+  }
+  function _removeNamedNode$1(el,list,attr){
+  	//console.log('remove attr:'+attr)
+  	var i = _findNodeIndex$1(list,attr);
+  	if(i>=0){
+  		var lastIndex = list.length-1;
+  		while(i<lastIndex){
+  			list[i] = list[++i];
+  		}
+  		list.length = lastIndex;
+  		if(el){
+  			var doc = el.ownerDocument;
+  			if(doc){
+  				_onRemoveAttribute$1(doc,el,attr);
+  				attr.ownerElement = null;
+  			}
+  		}
+  	}else{
+  		throw DOMException$1(NOT_FOUND_ERR$1,new Error(el.tagName+'@'+attr))
+  	}
+  }
+  NamedNodeMap$1.prototype = {
+  	length:0,
+  	item:NodeList$1.prototype.item,
+  	getNamedItem: function(key) {
+  //		if(key.indexOf(':')>0 || key == 'xmlns'){
+  //			return null;
+  //		}
+  		//console.log()
+  		var i = this.length;
+  		while(i--){
+  			var attr = this[i];
+  			//console.log(attr.nodeName,key)
+  			if(attr.nodeName == key){
+  				return attr;
+  			}
+  		}
+  	},
+  	setNamedItem: function(attr) {
+  		var el = attr.ownerElement;
+  		if(el && el!=this._ownerElement){
+  			throw new DOMException$1(INUSE_ATTRIBUTE_ERR$1);
+  		}
+  		var oldAttr = this.getNamedItem(attr.nodeName);
+  		_addNamedNode$1(this._ownerElement,this,attr,oldAttr);
+  		return oldAttr;
+  	},
+  	/* returns Node */
+  	setNamedItemNS: function(attr) {// raises: WRONG_DOCUMENT_ERR,NO_MODIFICATION_ALLOWED_ERR,INUSE_ATTRIBUTE_ERR
+  		var el = attr.ownerElement, oldAttr;
+  		if(el && el!=this._ownerElement){
+  			throw new DOMException$1(INUSE_ATTRIBUTE_ERR$1);
+  		}
+  		oldAttr = this.getNamedItemNS(attr.namespaceURI,attr.localName);
+  		_addNamedNode$1(this._ownerElement,this,attr,oldAttr);
+  		return oldAttr;
+  	},
+
+  	/* returns Node */
+  	removeNamedItem: function(key) {
+  		var attr = this.getNamedItem(key);
+  		_removeNamedNode$1(this._ownerElement,this,attr);
+  		return attr;
+  		
+  		
+  	},// raises: NOT_FOUND_ERR,NO_MODIFICATION_ALLOWED_ERR
+  	
+  	//for level2
+  	removeNamedItemNS:function(namespaceURI,localName){
+  		var attr = this.getNamedItemNS(namespaceURI,localName);
+  		_removeNamedNode$1(this._ownerElement,this,attr);
+  		return attr;
+  	},
+  	getNamedItemNS: function(namespaceURI, localName) {
+  		var i = this.length;
+  		while(i--){
+  			var node = this[i];
+  			if(node.localName == localName && node.namespaceURI == namespaceURI){
+  				return node;
+  			}
+  		}
+  		return null;
+  	}
+  };
+  /**
+   * @see http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-102161490
+   */
+  function DOMImplementation$1(/* Object */ features) {
+  	this._features = {};
+  	if (features) {
+  		for (var feature in features) {
+  			 this._features = features[feature];
+  		}
+  	}
+  }
+  DOMImplementation$1.prototype = {
+  	hasFeature: function(/* string */ feature, /* string */ version) {
+  		var versions = this._features[feature.toLowerCase()];
+  		if (versions && (!version || version in versions)) {
+  			return true;
+  		} else {
+  			return false;
+  		}
+  	},
+  	// Introduced in DOM Level 2:
+  	createDocument:function(namespaceURI,  qualifiedName, doctype){// raises:INVALID_CHARACTER_ERR,NAMESPACE_ERR,WRONG_DOCUMENT_ERR
+  		var doc = new Document$1();
+  		doc.implementation = this;
+  		doc.childNodes = new NodeList$1();
+  		doc.doctype = doctype;
+  		if(doctype){
+  			doc.appendChild(doctype);
+  		}
+  		if(qualifiedName){
+  			var root = doc.createElementNS(namespaceURI,qualifiedName);
+  			doc.appendChild(root);
+  		}
+  		return doc;
+  	},
+  	// Introduced in DOM Level 2:
+  	createDocumentType:function(qualifiedName, publicId, systemId){// raises:INVALID_CHARACTER_ERR,NAMESPACE_ERR
+  		var node = new DocumentType$1();
+  		node.name = qualifiedName;
+  		node.nodeName = qualifiedName;
+  		node.publicId = publicId;
+  		node.systemId = systemId;
+  		// Introduced in DOM Level 2:
+  		//readonly attribute DOMString        internalSubset;
+  		
+  		//TODO:..
+  		//  readonly attribute NamedNodeMap     entities;
+  		//  readonly attribute NamedNodeMap     notations;
+  		return node;
+  	}
+  };
+
+
+  /**
+   * @see http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/core.html#ID-1950641247
+   */
+
+  function Node$3() {
+  }
+  Node$3.prototype = {
+  	firstChild : null,
+  	lastChild : null,
+  	previousSibling : null,
+  	nextSibling : null,
+  	attributes : null,
+  	parentNode : null,
+  	childNodes : null,
+  	ownerDocument : null,
+  	nodeValue : null,
+  	namespaceURI : null,
+  	prefix : null,
+  	localName : null,
+  	// Modified in DOM Level 2:
+  	insertBefore:function(newChild, refChild){//raises 
+  		return _insertBefore$1(this,newChild,refChild);
+  	},
+  	replaceChild:function(newChild, oldChild){//raises 
+  		this.insertBefore(newChild,oldChild);
+  		if(oldChild){
+  			this.removeChild(oldChild);
+  		}
+  	},
+  	removeChild:function(oldChild){
+  		return _removeChild$1(this,oldChild);
+  	},
+  	appendChild:function(newChild){
+  		return this.insertBefore(newChild,null);
+  	},
+  	hasChildNodes:function(){
+  		return this.firstChild != null;
+  	},
+  	cloneNode:function(deep){
+  		return cloneNode$1(this.ownerDocument||this,this,deep);
+  	},
+  	// Modified in DOM Level 2:
+  	normalize:function(){
+  		var child = this.firstChild;
+  		while(child){
+  			var next = child.nextSibling;
+  			if(next && next.nodeType == TEXT_NODE$1 && child.nodeType == TEXT_NODE$1){
+  				this.removeChild(next);
+  				child.appendData(next.data);
+  			}else{
+  				child.normalize();
+  				child = next;
+  			}
+  		}
+  	},
+    	// Introduced in DOM Level 2:
+  	isSupported:function(feature, version){
+  		return this.ownerDocument.implementation.hasFeature(feature,version);
+  	},
+      // Introduced in DOM Level 2:
+      hasAttributes:function(){
+      	return this.attributes.length>0;
+      },
+      lookupPrefix:function(namespaceURI){
+      	var el = this;
+      	while(el){
+      		var map = el._nsMap;
+      		//console.dir(map)
+      		if(map){
+      			for(var n in map){
+      				if(map[n] == namespaceURI){
+      					return n;
+      				}
+      			}
+      		}
+      		el = el.nodeType == ATTRIBUTE_NODE$1?el.ownerDocument : el.parentNode;
+      	}
+      	return null;
+      },
+      // Introduced in DOM Level 3:
+      lookupNamespaceURI:function(prefix){
+      	var el = this;
+      	while(el){
+      		var map = el._nsMap;
+      		//console.dir(map)
+      		if(map){
+      			if(prefix in map){
+      				return map[prefix] ;
+      			}
+      		}
+      		el = el.nodeType == ATTRIBUTE_NODE$1?el.ownerDocument : el.parentNode;
+      	}
+      	return null;
+      },
+      // Introduced in DOM Level 3:
+      isDefaultNamespace:function(namespaceURI){
+      	var prefix = this.lookupPrefix(namespaceURI);
+      	return prefix == null;
+      }
+  };
+
+
+  function _xmlEncoder$1(c){
+  	return c == '<' && '&lt;' ||
+           c == '>' && '&gt;' ||
+           c == '&' && '&amp;' ||
+           c == '"' && '&quot;' ||
+           '&#'+c.charCodeAt()+';'
+  }
+
+
+  copy$2(NodeType$1,Node$3);
+  copy$2(NodeType$1,Node$3.prototype);
+
+  /**
+   * @param callback return true for continue,false for break
+   * @return boolean true: break visit;
+   */
+  function _visitNode$1(node,callback){
+  	if(callback(node)){
+  		return true;
+  	}
+  	if(node = node.firstChild){
+  		do{
+  			if(_visitNode$1(node,callback)){return true}
+          }while(node=node.nextSibling)
+      }
+  }
+
+
+
+  function Document$1(){
+  }
+  function _onAddAttribute$1(doc,el,newAttr){
+  	doc && doc._inc++;
+  	var ns = newAttr.namespaceURI ;
+  	if(ns == 'http://www.w3.org/2000/xmlns/'){
+  		//update namespace
+  		el._nsMap[newAttr.prefix?newAttr.localName:''] = newAttr.value;
+  	}
+  }
+  function _onRemoveAttribute$1(doc,el,newAttr,remove){
+  	doc && doc._inc++;
+  	var ns = newAttr.namespaceURI ;
+  	if(ns == 'http://www.w3.org/2000/xmlns/'){
+  		//update namespace
+  		delete el._nsMap[newAttr.prefix?newAttr.localName:''];
+  	}
+  }
+  function _onUpdateChild$1(doc,el,newChild){
+  	if(doc && doc._inc){
+  		doc._inc++;
+  		//update childNodes
+  		var cs = el.childNodes;
+  		if(newChild){
+  			cs[cs.length++] = newChild;
+  		}else{
+  			//console.log(1)
+  			var child = el.firstChild;
+  			var i = 0;
+  			while(child){
+  				cs[i++] = child;
+  				child =child.nextSibling;
+  			}
+  			cs.length = i;
+  		}
+  	}
+  }
+
+  /**
+   * attributes;
+   * children;
+   * 
+   * writeable properties:
+   * nodeValue,Attr:value,CharacterData:data
+   * prefix
+   */
+  function _removeChild$1(parentNode,child){
+  	var previous = child.previousSibling;
+  	var next = child.nextSibling;
+  	if(previous){
+  		previous.nextSibling = next;
+  	}else{
+  		parentNode.firstChild = next;
+  	}
+  	if(next){
+  		next.previousSibling = previous;
+  	}else{
+  		parentNode.lastChild = previous;
+  	}
+  	_onUpdateChild$1(parentNode.ownerDocument,parentNode);
+  	return child;
+  }
+  /**
+   * preformance key(refChild == null)
+   */
+  function _insertBefore$1(parentNode,newChild,nextChild){
+  	var cp = newChild.parentNode;
+  	if(cp){
+  		cp.removeChild(newChild);//remove and update
+  	}
+  	if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE$1){
+  		var newFirst = newChild.firstChild;
+  		if (newFirst == null) {
+  			return newChild;
+  		}
+  		var newLast = newChild.lastChild;
+  	}else{
+  		newFirst = newLast = newChild;
+  	}
+  	var pre = nextChild ? nextChild.previousSibling : parentNode.lastChild;
+
+  	newFirst.previousSibling = pre;
+  	newLast.nextSibling = nextChild;
+  	
+  	
+  	if(pre){
+  		pre.nextSibling = newFirst;
+  	}else{
+  		parentNode.firstChild = newFirst;
+  	}
+  	if(nextChild == null){
+  		parentNode.lastChild = newLast;
+  	}else{
+  		nextChild.previousSibling = newLast;
+  	}
+  	do{
+  		newFirst.parentNode = parentNode;
+  	}while(newFirst !== newLast && (newFirst= newFirst.nextSibling))
+  	_onUpdateChild$1(parentNode.ownerDocument||parentNode,parentNode);
+  	//console.log(parentNode.lastChild.nextSibling == null)
+  	if (newChild.nodeType == DOCUMENT_FRAGMENT_NODE$1) {
+  		newChild.firstChild = newChild.lastChild = null;
+  	}
+  	return newChild;
+  }
+  function _appendSingleChild$1(parentNode,newChild){
+  	var cp = newChild.parentNode;
+  	if(cp){
+  		var pre = parentNode.lastChild;
+  		cp.removeChild(newChild);//remove and update
+  		var pre = parentNode.lastChild;
+  	}
+  	var pre = parentNode.lastChild;
+  	newChild.parentNode = parentNode;
+  	newChild.previousSibling = pre;
+  	newChild.nextSibling = null;
+  	if(pre){
+  		pre.nextSibling = newChild;
+  	}else{
+  		parentNode.firstChild = newChild;
+  	}
+  	parentNode.lastChild = newChild;
+  	_onUpdateChild$1(parentNode.ownerDocument,parentNode,newChild);
+  	return newChild;
+  	//console.log("__aa",parentNode.lastChild.nextSibling == null)
+  }
+  Document$1.prototype = {
+  	//implementation : null,
+  	nodeName :  '#document',
+  	nodeType :  DOCUMENT_NODE$1,
+  	doctype :  null,
+  	documentElement :  null,
+  	_inc : 1,
+  	
+  	insertBefore :  function(newChild, refChild){//raises 
+  		if(newChild.nodeType == DOCUMENT_FRAGMENT_NODE$1){
+  			var child = newChild.firstChild;
+  			while(child){
+  				var next = child.nextSibling;
+  				this.insertBefore(child,refChild);
+  				child = next;
+  			}
+  			return newChild;
+  		}
+  		if(this.documentElement == null && newChild.nodeType == ELEMENT_NODE$1){
+  			this.documentElement = newChild;
+  		}
+  		
+  		return _insertBefore$1(this,newChild,refChild),(newChild.ownerDocument = this),newChild;
+  	},
+  	removeChild :  function(oldChild){
+  		if(this.documentElement == oldChild){
+  			this.documentElement = null;
+  		}
+  		return _removeChild$1(this,oldChild);
+  	},
+  	// Introduced in DOM Level 2:
+  	importNode : function(importedNode,deep){
+  		return importNode$1(this,importedNode,deep);
+  	},
+  	// Introduced in DOM Level 2:
+  	getElementById :	function(id){
+  		var rtv = null;
+  		_visitNode$1(this.documentElement,function(node){
+  			if(node.nodeType == ELEMENT_NODE$1){
+  				if(node.getAttribute('id') == id){
+  					rtv = node;
+  					return true;
+  				}
+  			}
+  		});
+  		return rtv;
+  	},
+  	
+  	//document factory method:
+  	createElement :	function(tagName){
+  		var node = new Element$1();
+  		node.ownerDocument = this;
+  		node.nodeName = tagName;
+  		node.tagName = tagName;
+  		node.childNodes = new NodeList$1();
+  		var attrs	= node.attributes = new NamedNodeMap$1();
+  		attrs._ownerElement = node;
+  		return node;
+  	},
+  	createDocumentFragment :	function(){
+  		var node = new DocumentFragment$1();
+  		node.ownerDocument = this;
+  		node.childNodes = new NodeList$1();
+  		return node;
+  	},
+  	createTextNode :	function(data){
+  		var node = new Text$1();
+  		node.ownerDocument = this;
+  		node.appendData(data);
+  		return node;
+  	},
+  	createComment :	function(data){
+  		var node = new Comment$1();
+  		node.ownerDocument = this;
+  		node.appendData(data);
+  		return node;
+  	},
+  	createCDATASection :	function(data){
+  		var node = new CDATASection$1();
+  		node.ownerDocument = this;
+  		node.appendData(data);
+  		return node;
+  	},
+  	createProcessingInstruction :	function(target,data){
+  		var node = new ProcessingInstruction$1();
+  		node.ownerDocument = this;
+  		node.tagName = node.target = target;
+  		node.nodeValue= node.data = data;
+  		return node;
+  	},
+  	createAttribute :	function(name){
+  		var node = new Attr$1();
+  		node.ownerDocument	= this;
+  		node.name = name;
+  		node.nodeName	= name;
+  		node.localName = name;
+  		node.specified = true;
+  		return node;
+  	},
+  	createEntityReference :	function(name){
+  		var node = new EntityReference$1();
+  		node.ownerDocument	= this;
+  		node.nodeName	= name;
+  		return node;
+  	},
+  	// Introduced in DOM Level 2:
+  	createElementNS :	function(namespaceURI,qualifiedName){
+  		var node = new Element$1();
+  		var pl = qualifiedName.split(':');
+  		var attrs	= node.attributes = new NamedNodeMap$1();
+  		node.childNodes = new NodeList$1();
+  		node.ownerDocument = this;
+  		node.nodeName = qualifiedName;
+  		node.tagName = qualifiedName;
+  		node.namespaceURI = namespaceURI;
+  		if(pl.length == 2){
+  			node.prefix = pl[0];
+  			node.localName = pl[1];
+  		}else{
+  			//el.prefix = null;
+  			node.localName = qualifiedName;
+  		}
+  		attrs._ownerElement = node;
+  		return node;
+  	},
+  	// Introduced in DOM Level 2:
+  	createAttributeNS :	function(namespaceURI,qualifiedName){
+  		var node = new Attr$1();
+  		var pl = qualifiedName.split(':');
+  		node.ownerDocument = this;
+  		node.nodeName = qualifiedName;
+  		node.name = qualifiedName;
+  		node.namespaceURI = namespaceURI;
+  		node.specified = true;
+  		if(pl.length == 2){
+  			node.prefix = pl[0];
+  			node.localName = pl[1];
+  		}else{
+  			//el.prefix = null;
+  			node.localName = qualifiedName;
+  		}
+  		return node;
+  	}
+  };
+  _extends$1(Document$1,Node$3);
+
+
+  function Element$1() {
+  	this._nsMap = {};
+  }Element$1.prototype = {
+  	nodeType : ELEMENT_NODE$1,
+  	hasAttribute : function(name){
+  		return this.getAttributeNode(name)!=null;
+  	},
+  	getAttribute : function(name){
+  		var attr = this.getAttributeNode(name);
+  		return attr && attr.value || '';
+  	},
+  	getAttributeNode : function(name){
+  		return this.attributes.getNamedItem(name);
+  	},
+  	setAttribute : function(name, value){
+  		var attr = this.ownerDocument.createAttribute(name);
+  		attr.value = attr.nodeValue = "" + value;
+  		this.setAttributeNode(attr);
+  	},
+  	removeAttribute : function(name){
+  		var attr = this.getAttributeNode(name);
+  		attr && this.removeAttributeNode(attr);
+  	},
+  	
+  	//four real opeartion method
+  	appendChild:function(newChild){
+  		if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE$1){
+  			return this.insertBefore(newChild,null);
+  		}else{
+  			return _appendSingleChild$1(this,newChild);
+  		}
+  	},
+  	setAttributeNode : function(newAttr){
+  		return this.attributes.setNamedItem(newAttr);
+  	},
+  	setAttributeNodeNS : function(newAttr){
+  		return this.attributes.setNamedItemNS(newAttr);
+  	},
+  	removeAttributeNode : function(oldAttr){
+  		//console.log(this == oldAttr.ownerElement)
+  		return this.attributes.removeNamedItem(oldAttr.nodeName);
+  	},
+  	//get real attribute name,and remove it by removeAttributeNode
+  	removeAttributeNS : function(namespaceURI, localName){
+  		var old = this.getAttributeNodeNS(namespaceURI, localName);
+  		old && this.removeAttributeNode(old);
+  	},
+  	
+  	hasAttributeNS : function(namespaceURI, localName){
+  		return this.getAttributeNodeNS(namespaceURI, localName)!=null;
+  	},
+  	getAttributeNS : function(namespaceURI, localName){
+  		var attr = this.getAttributeNodeNS(namespaceURI, localName);
+  		return attr && attr.value || '';
+  	},
+  	setAttributeNS : function(namespaceURI, qualifiedName, value){
+  		var attr = this.ownerDocument.createAttributeNS(namespaceURI, qualifiedName);
+  		attr.value = attr.nodeValue = "" + value;
+  		this.setAttributeNode(attr);
+  	},
+  	getAttributeNodeNS : function(namespaceURI, localName){
+  		return this.attributes.getNamedItemNS(namespaceURI, localName);
+  	},
+  	
+  	getElementsByTagName : function(tagName){
+  		return new LiveNodeList$1(this,function(base){
+  			var ls = [];
+  			_visitNode$1(base,function(node){
+  				if(node !== base && node.nodeType == ELEMENT_NODE$1 && (tagName === '*' || node.tagName == tagName)){
+  					ls.push(node);
+  				}
+  			});
+  			return ls;
+  		});
+  	},
+  	getElementsByTagNameNS : function(namespaceURI, localName){
+  		return new LiveNodeList$1(this,function(base){
+  			var ls = [];
+  			_visitNode$1(base,function(node){
+  				if(node !== base && node.nodeType === ELEMENT_NODE$1 && (namespaceURI === '*' || node.namespaceURI === namespaceURI) && (localName === '*' || node.localName == localName)){
+  					ls.push(node);
+  				}
+  			});
+  			return ls;
+  			
+  		});
+  	}
+  };
+  Document$1.prototype.getElementsByTagName = Element$1.prototype.getElementsByTagName;
+  Document$1.prototype.getElementsByTagNameNS = Element$1.prototype.getElementsByTagNameNS;
+
+
+  _extends$1(Element$1,Node$3);
+  function Attr$1() {
+  }Attr$1.prototype.nodeType = ATTRIBUTE_NODE$1;
+  _extends$1(Attr$1,Node$3);
+
+
+  function CharacterData$1() {
+  }CharacterData$1.prototype = {
+  	data : '',
+  	substringData : function(offset, count) {
+  		return this.data.substring(offset, offset+count);
+  	},
+  	appendData: function(text) {
+  		text = this.data+text;
+  		this.nodeValue = this.data = text;
+  		this.length = text.length;
+  	},
+  	insertData: function(offset,text) {
+  		this.replaceData(offset,0,text);
+  	
+  	},
+  	appendChild:function(newChild){
+  		throw new Error(ExceptionMessage$1[HIERARCHY_REQUEST_ERR$1])
+  	},
+  	deleteData: function(offset, count) {
+  		this.replaceData(offset,count,"");
+  	},
+  	replaceData: function(offset, count, text) {
+  		var start = this.data.substring(0,offset);
+  		var end = this.data.substring(offset+count);
+  		text = start + text + end;
+  		this.nodeValue = this.data = text;
+  		this.length = text.length;
+  	}
+  };
+  _extends$1(CharacterData$1,Node$3);
+  function Text$1() {
+  }Text$1.prototype = {
+  	nodeName : "#text",
+  	nodeType : TEXT_NODE$1,
+  	splitText : function(offset) {
+  		var text = this.data;
+  		var newText = text.substring(offset);
+  		text = text.substring(0, offset);
+  		this.data = this.nodeValue = text;
+  		this.length = text.length;
+  		var newNode = this.ownerDocument.createTextNode(newText);
+  		if(this.parentNode){
+  			this.parentNode.insertBefore(newNode, this.nextSibling);
+  		}
+  		return newNode;
+  	}
+  };
+  _extends$1(Text$1,CharacterData$1);
+  function Comment$1() {
+  }Comment$1.prototype = {
+  	nodeName : "#comment",
+  	nodeType : COMMENT_NODE$1
+  };
+  _extends$1(Comment$1,CharacterData$1);
+
+  function CDATASection$1() {
+  }CDATASection$1.prototype = {
+  	nodeName : "#cdata-section",
+  	nodeType : CDATA_SECTION_NODE$1
+  };
+  _extends$1(CDATASection$1,CharacterData$1);
+
+
+  function DocumentType$1() {
+  }DocumentType$1.prototype.nodeType = DOCUMENT_TYPE_NODE$1;
+  _extends$1(DocumentType$1,Node$3);
+
+  function Notation$1() {
+  }Notation$1.prototype.nodeType = NOTATION_NODE$1;
+  _extends$1(Notation$1,Node$3);
+
+  function Entity$1() {
+  }Entity$1.prototype.nodeType = ENTITY_NODE$1;
+  _extends$1(Entity$1,Node$3);
+
+  function EntityReference$1() {
+  }EntityReference$1.prototype.nodeType = ENTITY_REFERENCE_NODE$1;
+  _extends$1(EntityReference$1,Node$3);
+
+  function DocumentFragment$1() {
+  }DocumentFragment$1.prototype.nodeName =	"#document-fragment";
+  DocumentFragment$1.prototype.nodeType =	DOCUMENT_FRAGMENT_NODE$1;
+  _extends$1(DocumentFragment$1,Node$3);
+
+
+  function ProcessingInstruction$1() {
+  }
+  ProcessingInstruction$1.prototype.nodeType = PROCESSING_INSTRUCTION_NODE$1;
+  _extends$1(ProcessingInstruction$1,Node$3);
+  function XMLSerializer$1(){}
+  XMLSerializer$1.prototype.serializeToString = function(node,isHtml,nodeFilter){
+  	return nodeSerializeToString$1.call(node,isHtml,nodeFilter);
+  };
+  Node$3.prototype.toString = nodeSerializeToString$1;
+  function nodeSerializeToString$1(isHtml,nodeFilter){
+  	var buf = [];
+  	var refNode = this.nodeType == 9?this.documentElement:this;
+  	var prefix = refNode.prefix;
+  	var uri = refNode.namespaceURI;
+  	
+  	if(uri && prefix == null){
+  		//console.log(prefix)
+  		var prefix = refNode.lookupPrefix(uri);
+  		if(prefix == null){
+  			//isHTML = true;
+  			var visibleNamespaces=[
+  			{namespace:uri,prefix:null}
+  			//{namespace:uri,prefix:''}
+  			];
+  		}
+  	}
+  	serializeToString$1(this,buf,isHtml,nodeFilter,visibleNamespaces);
+  	//console.log('###',this.nodeType,uri,prefix,buf.join(''))
+  	return buf.join('');
+  }
+  function needNamespaceDefine$1(node,isHTML, visibleNamespaces) {
+  	var prefix = node.prefix||'';
+  	var uri = node.namespaceURI;
+  	if (!prefix && !uri){
+  		return false;
+  	}
+  	if (prefix === "xml" && uri === "http://www.w3.org/XML/1998/namespace" 
+  		|| uri == 'http://www.w3.org/2000/xmlns/'){
+  		return false;
+  	}
+  	
+  	var i = visibleNamespaces.length; 
+  	//console.log('@@@@',node.tagName,prefix,uri,visibleNamespaces)
+  	while (i--) {
+  		var ns = visibleNamespaces[i];
+  		// get namespace prefix
+  		//console.log(node.nodeType,node.tagName,ns.prefix,prefix)
+  		if (ns.prefix == prefix){
+  			return ns.namespace != uri;
+  		}
+  	}
+  	//console.log(isHTML,uri,prefix=='')
+  	//if(isHTML && prefix ==null && uri == 'http://www.w3.org/1999/xhtml'){
+  	//	return false;
+  	//}
+  	//node.flag = '11111'
+  	//console.error(3,true,node.flag,node.prefix,node.namespaceURI)
+  	return true;
+  }
+  function serializeToString$1(node,buf,isHTML,nodeFilter,visibleNamespaces){
+  	if(nodeFilter){
+  		node = nodeFilter(node);
+  		if(node){
+  			if(typeof node == 'string'){
+  				buf.push(node);
+  				return;
+  			}
+  		}else{
+  			return;
+  		}
+  		//buf.sort.apply(attrs, attributeSorter);
+  	}
+  	switch(node.nodeType){
+  	case ELEMENT_NODE$1:
+  		if (!visibleNamespaces) visibleNamespaces = [];
+  		var startVisibleNamespaces = visibleNamespaces.length;
+  		var attrs = node.attributes;
+  		var len = attrs.length;
+  		var child = node.firstChild;
+  		var nodeName = node.tagName;
+  		
+  		isHTML =  (htmlns$1 === node.namespaceURI) ||isHTML; 
+  		buf.push('<',nodeName);
+  		
+  		
+  		
+  		for(var i=0;i<len;i++){
+  			// add namespaces for attributes
+  			var attr = attrs.item(i);
+  			if (attr.prefix == 'xmlns') {
+  				visibleNamespaces.push({ prefix: attr.localName, namespace: attr.value });
+  			}else if(attr.nodeName == 'xmlns'){
+  				visibleNamespaces.push({ prefix: '', namespace: attr.value });
+  			}
+  		}
+  		for(var i=0;i<len;i++){
+  			var attr = attrs.item(i);
+  			if (needNamespaceDefine$1(attr,isHTML, visibleNamespaces)) {
+  				var prefix = attr.prefix||'';
+  				var uri = attr.namespaceURI;
+  				var ns = prefix ? ' xmlns:' + prefix : " xmlns";
+  				buf.push(ns, '="' , uri , '"');
+  				visibleNamespaces.push({ prefix: prefix, namespace:uri });
+  			}
+  			serializeToString$1(attr,buf,isHTML,nodeFilter,visibleNamespaces);
+  		}
+  		// add namespace for current node		
+  		if (needNamespaceDefine$1(node,isHTML, visibleNamespaces)) {
+  			var prefix = node.prefix||'';
+  			var uri = node.namespaceURI;
+  			var ns = prefix ? ' xmlns:' + prefix : " xmlns";
+  			buf.push(ns, '="' , uri , '"');
+  			visibleNamespaces.push({ prefix: prefix, namespace:uri });
+  		}
+  		
+  		if(child || isHTML && !/^(?:meta|link|img|br|hr|input)$/i.test(nodeName)){
+  			buf.push('>');
+  			//if is cdata child node
+  			if(isHTML && /^script$/i.test(nodeName)){
+  				while(child){
+  					if(child.data){
+  						buf.push(child.data);
+  					}else{
+  						serializeToString$1(child,buf,isHTML,nodeFilter,visibleNamespaces);
+  					}
+  					child = child.nextSibling;
+  				}
+  			}else
+  			{
+  				while(child){
+  					serializeToString$1(child,buf,isHTML,nodeFilter,visibleNamespaces);
+  					child = child.nextSibling;
+  				}
+  			}
+  			buf.push('</',nodeName,'>');
+  		}else{
+  			buf.push('/>');
+  		}
+  		// remove added visible namespaces
+  		//visibleNamespaces.length = startVisibleNamespaces;
+  		return;
+  	case DOCUMENT_NODE$1:
+  	case DOCUMENT_FRAGMENT_NODE$1:
+  		var child = node.firstChild;
+  		while(child){
+  			serializeToString$1(child,buf,isHTML,nodeFilter,visibleNamespaces);
+  			child = child.nextSibling;
+  		}
+  		return;
+  	case ATTRIBUTE_NODE$1:
+  		return buf.push(' ',node.name,'="',node.value.replace(/[<&"]/g,_xmlEncoder$1),'"');
+  	case TEXT_NODE$1:
+  		return buf.push(node.data.replace(/[<&]/g,_xmlEncoder$1));
+  	case CDATA_SECTION_NODE$1:
+  		return buf.push( '<![CDATA[',node.data,']]>');
+  	case COMMENT_NODE$1:
+  		return buf.push( "<!--",node.data,"-->");
+  	case DOCUMENT_TYPE_NODE$1:
+  		var pubid = node.publicId;
+  		var sysid = node.systemId;
+  		buf.push('<!DOCTYPE ',node.name);
+  		if(pubid){
+  			buf.push(' PUBLIC "',pubid);
+  			if (sysid && sysid!='.') {
+  				buf.push( '" "',sysid);
+  			}
+  			buf.push('">');
+  		}else if(sysid && sysid!='.'){
+  			buf.push(' SYSTEM "',sysid,'">');
+  		}else{
+  			var sub = node.internalSubset;
+  			if(sub){
+  				buf.push(" [",sub,"]");
+  			}
+  			buf.push(">");
+  		}
+  		return;
+  	case PROCESSING_INSTRUCTION_NODE$1:
+  		return buf.push( "<?",node.target," ",node.data,"?>");
+  	case ENTITY_REFERENCE_NODE$1:
+  		return buf.push( '&',node.nodeName,';');
+  	//case ENTITY_NODE:
+  	//case NOTATION_NODE:
+  	default:
+  		buf.push('??',node.nodeName);
+  	}
+  }
+  function importNode$1(doc,node,deep){
+  	var node2;
+  	switch (node.nodeType) {
+  	case ELEMENT_NODE$1:
+  		node2 = node.cloneNode(false);
+  		node2.ownerDocument = doc;
+  		//var attrs = node2.attributes;
+  		//var len = attrs.length;
+  		//for(var i=0;i<len;i++){
+  			//node2.setAttributeNodeNS(importNode(doc,attrs.item(i),deep));
+  		//}
+  	case DOCUMENT_FRAGMENT_NODE$1:
+  		break;
+  	case ATTRIBUTE_NODE$1:
+  		deep = true;
+  		break;
+  	//case ENTITY_REFERENCE_NODE:
+  	//case PROCESSING_INSTRUCTION_NODE:
+  	////case TEXT_NODE:
+  	//case CDATA_SECTION_NODE:
+  	//case COMMENT_NODE:
+  	//	deep = false;
+  	//	break;
+  	//case DOCUMENT_NODE:
+  	//case DOCUMENT_TYPE_NODE:
+  	//cannot be imported.
+  	//case ENTITY_NODE:
+  	//case NOTATION_NODE：
+  	//can not hit in level3
+  	//default:throw e;
+  	}
+  	if(!node2){
+  		node2 = node.cloneNode(false);//false
+  	}
+  	node2.ownerDocument = doc;
+  	node2.parentNode = null;
+  	if(deep){
+  		var child = node.firstChild;
+  		while(child){
+  			node2.appendChild(importNode$1(doc,child,deep));
+  			child = child.nextSibling;
+  		}
+  	}
+  	return node2;
+  }
+  //
+  //var _relationMap = {firstChild:1,lastChild:1,previousSibling:1,nextSibling:1,
+  //					attributes:1,childNodes:1,parentNode:1,documentElement:1,doctype,};
+  function cloneNode$1(doc,node,deep){
+  	var node2 = new node.constructor();
+  	for(var n in node){
+  		var v = node[n];
+  		if(typeof v != 'object' ){
+  			if(v != node2[n]){
+  				node2[n] = v;
+  			}
+  		}
+  	}
+  	if(node.childNodes){
+  		node2.childNodes = new NodeList$1();
+  	}
+  	node2.ownerDocument = doc;
+  	switch (node2.nodeType) {
+  	case ELEMENT_NODE$1:
+  		var attrs	= node.attributes;
+  		var attrs2	= node2.attributes = new NamedNodeMap$1();
+  		var len = attrs.length;
+  		attrs2._ownerElement = node2;
+  		for(var i=0;i<len;i++){
+  			node2.setAttributeNode(cloneNode$1(doc,attrs.item(i),true));
+  		}
+  		break;
+  	case ATTRIBUTE_NODE$1:
+  		deep = true;
+  	}
+  	if(deep){
+  		var child = node.firstChild;
+  		while(child){
+  			node2.appendChild(cloneNode$1(doc,child,deep));
+  			child = child.nextSibling;
+  		}
+  	}
+  	return node2;
+  }
+
+  function __set__$1(object,key,value){
+  	object[key] = value;
+  }
+  //do dynamic
+  try{
+  	if(Object.defineProperty){
+  		Object.defineProperty(LiveNodeList$1.prototype,'length',{
+  			get:function(){
+  				_updateLiveList$1(this);
+  				return this.$$length;
+  			}
+  		});
+  		Object.defineProperty(Node$3.prototype,'textContent',{
+  			get:function(){
+  				return getTextContent$1(this);
+  			},
+  			set:function(data){
+  				switch(this.nodeType){
+  				case ELEMENT_NODE$1:
+  				case DOCUMENT_FRAGMENT_NODE$1:
+  					while(this.firstChild){
+  						this.removeChild(this.firstChild);
+  					}
+  					if(data || String(data)){
+  						this.appendChild(this.ownerDocument.createTextNode(data));
+  					}
+  					break;
+  				default:
+  					//TODO:
+  					this.data = data;
+  					this.value = data;
+  					this.nodeValue = data;
+  				}
+  			}
+  		});
+  		
+  		function getTextContent$1(node){
+  			switch(node.nodeType){
+  			case ELEMENT_NODE$1:
+  			case DOCUMENT_FRAGMENT_NODE$1:
+  				var buf = [];
+  				node = node.firstChild;
+  				while(node){
+  					if(node.nodeType!==7 && node.nodeType !==8){
+  						buf.push(getTextContent$1(node));
+  					}
+  					node = node.nextSibling;
+  				}
+  				return buf.join('');
+  			default:
+  				return node.nodeValue;
+  			}
+  		}
+  		__set__$1 = function(object,key,value){
+  			//console.log(value)
+  			object['$$'+key] = value;
+  		};
+  	}
+  }catch(e){//ie8
+  }
+
+  //if(typeof require == 'function'){
+  	var DOMImplementation_1$1 = DOMImplementation$1;
+  	var XMLSerializer_1$1 = XMLSerializer$1;
+  //}
+
+  var dom$1 = {
+  	DOMImplementation: DOMImplementation_1$1,
+  	XMLSerializer: XMLSerializer_1$1
+  };
+
+  var domParser$1 = createCommonjsModule(function (module, exports) {
+  function DOMParser(options){
+  	this.options = options ||{locator:{}};
+  	
+  }
+  DOMParser.prototype.parseFromString = function(source,mimeType){
+  	var options = this.options;
+  	var sax =  new XMLReader();
+  	var domBuilder = options.domBuilder || new DOMHandler();//contentHandler and LexicalHandler
+  	var errorHandler = options.errorHandler;
+  	var locator = options.locator;
+  	var defaultNSMap = options.xmlns||{};
+  	var entityMap = {'lt':'<','gt':'>','amp':'&','quot':'"','apos':"'"};
+  	if(locator){
+  		domBuilder.setDocumentLocator(locator);
+  	}
+  	
+  	sax.errorHandler = buildErrorHandler(errorHandler,domBuilder,locator);
+  	sax.domBuilder = options.domBuilder || domBuilder;
+  	if(/\/x?html?$/.test(mimeType)){
+  		entityMap.nbsp = '\xa0';
+  		entityMap.copy = '\xa9';
+  		defaultNSMap['']= 'http://www.w3.org/1999/xhtml';
+  	}
+  	defaultNSMap.xml = defaultNSMap.xml || 'http://www.w3.org/XML/1998/namespace';
+  	if(source){
+  		sax.parse(source,defaultNSMap,entityMap);
+  	}else{
+  		sax.errorHandler.error("invalid doc source");
+  	}
+  	return domBuilder.doc;
+  };
+  function buildErrorHandler(errorImpl,domBuilder,locator){
+  	if(!errorImpl){
+  		if(domBuilder instanceof DOMHandler){
+  			return domBuilder;
+  		}
+  		errorImpl = domBuilder ;
+  	}
+  	var errorHandler = {};
+  	var isCallback = errorImpl instanceof Function;
+  	locator = locator||{};
+  	function build(key){
+  		var fn = errorImpl[key];
+  		if(!fn && isCallback){
+  			fn = errorImpl.length == 2?function(msg){errorImpl(key,msg);}:errorImpl;
+  		}
+  		errorHandler[key] = fn && function(msg){
+  			fn('[xmldom '+key+']\t'+msg+_locator(locator));
+  		}||function(){};
+  	}
+  	build('warning');
+  	build('error');
+  	build('fatalError');
+  	return errorHandler;
+  }
+
+  //console.log('#\n\n\n\n\n\n\n####')
+  /**
+   * +ContentHandler+ErrorHandler
+   * +LexicalHandler+EntityResolver2
+   * -DeclHandler-DTDHandler 
+   * 
+   * DefaultHandler:EntityResolver, DTDHandler, ContentHandler, ErrorHandler
+   * DefaultHandler2:DefaultHandler,LexicalHandler, DeclHandler, EntityResolver2
+   * @link http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html
+   */
+  function DOMHandler() {
+      this.cdata = false;
+  }
+  function position(locator,node){
+  	node.lineNumber = locator.lineNumber;
+  	node.columnNumber = locator.columnNumber;
+  }
+  /**
+   * @see org.xml.sax.ContentHandler#startDocument
+   * @link http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html
+   */ 
+  DOMHandler.prototype = {
+  	startDocument : function() {
+      	this.doc = new DOMImplementation().createDocument(null, null, null);
+      	if (this.locator) {
+          	this.doc.documentURI = this.locator.systemId;
+      	}
+  	},
+  	startElement:function(namespaceURI, localName, qName, attrs) {
+  		var doc = this.doc;
+  	    var el = doc.createElementNS(namespaceURI, qName||localName);
+  	    var len = attrs.length;
+  	    appendElement(this, el);
+  	    this.currentElement = el;
+  	    
+  		this.locator && position(this.locator,el);
+  	    for (var i = 0 ; i < len; i++) {
+  	        var namespaceURI = attrs.getURI(i);
+  	        var value = attrs.getValue(i);
+  	        var qName = attrs.getQName(i);
+  			var attr = doc.createAttributeNS(namespaceURI, qName);
+  			this.locator &&position(attrs.getLocator(i),attr);
+  			attr.value = attr.nodeValue = value;
+  			el.setAttributeNode(attr);
+  	    }
+  	},
+  	endElement:function(namespaceURI, localName, qName) {
+  		var current = this.currentElement;
+  		var tagName = current.tagName;
+  		this.currentElement = current.parentNode;
+  	},
+  	startPrefixMapping:function(prefix, uri) {
+  	},
+  	endPrefixMapping:function(prefix) {
+  	},
+  	processingInstruction:function(target, data) {
+  	    var ins = this.doc.createProcessingInstruction(target, data);
+  	    this.locator && position(this.locator,ins);
+  	    appendElement(this, ins);
+  	},
+  	ignorableWhitespace:function(ch, start, length) {
+  	},
+  	characters:function(chars, start, length) {
+  		chars = _toString.apply(this,arguments);
+  		//console.log(chars)
+  		if(chars){
+  			if (this.cdata) {
+  				var charNode = this.doc.createCDATASection(chars);
+  			} else {
+  				var charNode = this.doc.createTextNode(chars);
+  			}
+  			if(this.currentElement){
+  				this.currentElement.appendChild(charNode);
+  			}else if(/^\s*$/.test(chars)){
+  				this.doc.appendChild(charNode);
+  				//process xml
+  			}
+  			this.locator && position(this.locator,charNode);
+  		}
+  	},
+  	skippedEntity:function(name) {
+  	},
+  	endDocument:function() {
+  		this.doc.normalize();
+  	},
+  	setDocumentLocator:function (locator) {
+  	    if(this.locator = locator){// && !('lineNumber' in locator)){
+  	    	locator.lineNumber = 0;
+  	    }
+  	},
+  	//LexicalHandler
+  	comment:function(chars, start, length) {
+  		chars = _toString.apply(this,arguments);
+  	    var comm = this.doc.createComment(chars);
+  	    this.locator && position(this.locator,comm);
+  	    appendElement(this, comm);
+  	},
+  	
+  	startCDATA:function() {
+  	    //used in characters() methods
+  	    this.cdata = true;
+  	},
+  	endCDATA:function() {
+  	    this.cdata = false;
+  	},
+  	
+  	startDTD:function(name, publicId, systemId) {
+  		var impl = this.doc.implementation;
+  	    if (impl && impl.createDocumentType) {
+  	        var dt = impl.createDocumentType(name, publicId, systemId);
+  	        this.locator && position(this.locator,dt);
+  	        appendElement(this, dt);
+  	    }
+  	},
+  	/**
+  	 * @see org.xml.sax.ErrorHandler
+  	 * @link http://www.saxproject.org/apidoc/org/xml/sax/ErrorHandler.html
+  	 */
+  	warning:function(error) {
+  		console.warn('[xmldom warning]\t'+error,_locator(this.locator));
+  	},
+  	error:function(error) {
+  		console.error('[xmldom error]\t'+error,_locator(this.locator));
+  	},
+  	fatalError:function(error) {
+  		console.error('[xmldom fatalError]\t'+error,_locator(this.locator));
+  	    throw error;
+  	}
+  };
+  function _locator(l){
+  	if(l){
+  		return '\n@'+(l.systemId ||'')+'#[line:'+l.lineNumber+',col:'+l.columnNumber+']'
+  	}
+  }
+  function _toString(chars,start,length){
+  	if(typeof chars == 'string'){
+  		return chars.substr(start,length)
+  	}else{//java sax connect width xmldom on rhino(what about: "? && !(chars instanceof String)")
+  		if(chars.length >= start+length || start){
+  			return new java.lang.String(chars,start,length)+'';
+  		}
+  		return chars;
+  	}
+  }
+
+  /*
+   * @link http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
+   * used method of org.xml.sax.ext.LexicalHandler:
+   *  #comment(chars, start, length)
+   *  #startCDATA()
+   *  #endCDATA()
+   *  #startDTD(name, publicId, systemId)
+   *
+   *
+   * IGNORED method of org.xml.sax.ext.LexicalHandler:
+   *  #endDTD()
+   *  #startEntity(name)
+   *  #endEntity(name)
+   *
+   *
+   * @link http://www.saxproject.org/apidoc/org/xml/sax/ext/DeclHandler.html
+   * IGNORED method of org.xml.sax.ext.DeclHandler
+   * 	#attributeDecl(eName, aName, type, mode, value)
+   *  #elementDecl(name, model)
+   *  #externalEntityDecl(name, publicId, systemId)
+   *  #internalEntityDecl(name, value)
+   * @link http://www.saxproject.org/apidoc/org/xml/sax/ext/EntityResolver2.html
+   * IGNORED method of org.xml.sax.EntityResolver2
+   *  #resolveEntity(String name,String publicId,String baseURI,String systemId)
+   *  #resolveEntity(publicId, systemId)
+   *  #getExternalSubset(name, baseURI)
+   * @link http://www.saxproject.org/apidoc/org/xml/sax/DTDHandler.html
+   * IGNORED method of org.xml.sax.DTDHandler
+   *  #notationDecl(name, publicId, systemId) {};
+   *  #unparsedEntityDecl(name, publicId, systemId, notationName) {};
+   */
+  "endDTD,startEntity,endEntity,attributeDecl,elementDecl,externalEntityDecl,internalEntityDecl,resolveEntity,getExternalSubset,notationDecl,unparsedEntityDecl".replace(/\w+/g,function(key){
+  	DOMHandler.prototype[key] = function(){return null};
+  });
+
+  /* Private static helpers treated below as private instance methods, so don't need to add these to the public API; we might use a Relator to also get rid of non-standard public properties */
+  function appendElement (hander,node) {
+      if (!hander.currentElement) {
+          hander.doc.appendChild(node);
+      } else {
+          hander.currentElement.appendChild(node);
+      }
+  }//appendChild and setAttributeNS are preformance key
+
+  //if(typeof require == 'function'){
+  	var XMLReader = sax$1.XMLReader;
+  	var DOMImplementation = exports.DOMImplementation = dom$1.DOMImplementation;
+  	exports.XMLSerializer = dom$1.XMLSerializer ;
+  	exports.DOMParser = DOMParser;
+  //}
+  });
+  var domParser_1$1 = domParser$1.DOMImplementation;
+  var domParser_2$1 = domParser$1.XMLSerializer;
+  var domParser_3$1 = domParser$1.DOMParser;
+
+  function clone$1(point) { //TODO: use gl-vec2 for this
+      return [point[0], point[1]]
+  }
+
+  function vec2$1(x, y) {
+      return [x, y]
+  }
+
+  var _function$1 = function createBezierBuilder(opt) {
+      opt = opt||{};
+
+      var RECURSION_LIMIT = typeof opt.recursion === 'number' ? opt.recursion : 8;
+      var FLT_EPSILON = typeof opt.epsilon === 'number' ? opt.epsilon : 1.19209290e-7;
+      var PATH_DISTANCE_EPSILON = typeof opt.pathEpsilon === 'number' ? opt.pathEpsilon : 1.0;
+
+      var curve_angle_tolerance_epsilon = typeof opt.angleEpsilon === 'number' ? opt.angleEpsilon : 0.01;
+      var m_angle_tolerance = opt.angleTolerance || 0;
+      var m_cusp_limit = opt.cuspLimit || 0;
+
+      return function bezierCurve(start, c1, c2, end, scale, points) {
+          if (!points)
+              points = [];
+
+          scale = typeof scale === 'number' ? scale : 1.0;
+          var distanceTolerance = PATH_DISTANCE_EPSILON / scale;
+          distanceTolerance *= distanceTolerance;
+          begin(start, c1, c2, end, points, distanceTolerance);
+          return points
+      }
+
+
+      ////// Based on:
+      ////// https://github.com/pelson/antigrain/blob/master/agg-2.4/src/agg_curves.cpp
+
+      function begin(start, c1, c2, end, points, distanceTolerance) {
+          points.push(clone$1(start));
+          var x1 = start[0],
+              y1 = start[1],
+              x2 = c1[0],
+              y2 = c1[1],
+              x3 = c2[0],
+              y3 = c2[1],
+              x4 = end[0],
+              y4 = end[1];
+          recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, 0);
+          points.push(clone$1(end));
+      }
+
+      function recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, level) {
+          if(level > RECURSION_LIMIT) 
+              return
+
+          var pi = Math.PI;
+
+          // Calculate all the mid-points of the line segments
+          //----------------------
+          var x12   = (x1 + x2) / 2;
+          var y12   = (y1 + y2) / 2;
+          var x23   = (x2 + x3) / 2;
+          var y23   = (y2 + y3) / 2;
+          var x34   = (x3 + x4) / 2;
+          var y34   = (y3 + y4) / 2;
+          var x123  = (x12 + x23) / 2;
+          var y123  = (y12 + y23) / 2;
+          var x234  = (x23 + x34) / 2;
+          var y234  = (y23 + y34) / 2;
+          var x1234 = (x123 + x234) / 2;
+          var y1234 = (y123 + y234) / 2;
+
+          if(level > 0) { // Enforce subdivision first time
+              // Try to approximate the full cubic curve by a single straight line
+              //------------------
+              var dx = x4-x1;
+              var dy = y4-y1;
+
+              var d2 = Math.abs((x2 - x4) * dy - (y2 - y4) * dx);
+              var d3 = Math.abs((x3 - x4) * dy - (y3 - y4) * dx);
+
+              var da1, da2;
+
+              if(d2 > FLT_EPSILON && d3 > FLT_EPSILON) {
+                  // Regular care
+                  //-----------------
+                  if((d2 + d3)*(d2 + d3) <= distanceTolerance * (dx*dx + dy*dy)) {
+                      // If the curvature doesn't exceed the distanceTolerance value
+                      // we tend to finish subdivisions.
+                      //----------------------
+                      if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
+                          points.push(vec2$1(x1234, y1234));
+                          return
+                      }
+
+                      // Angle & Cusp Condition
+                      //----------------------
+                      var a23 = Math.atan2(y3 - y2, x3 - x2);
+                      da1 = Math.abs(a23 - Math.atan2(y2 - y1, x2 - x1));
+                      da2 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - a23);
+                      if(da1 >= pi) da1 = 2*pi - da1;
+                      if(da2 >= pi) da2 = 2*pi - da2;
+
+                      if(da1 + da2 < m_angle_tolerance) {
+                          // Finally we can stop the recursion
+                          //----------------------
+                          points.push(vec2$1(x1234, y1234));
+                          return
+                      }
+
+                      if(m_cusp_limit !== 0.0) {
+                          if(da1 > m_cusp_limit) {
+                              points.push(vec2$1(x2, y2));
+                              return
+                          }
+
+                          if(da2 > m_cusp_limit) {
+                              points.push(vec2$1(x3, y3));
+                              return
+                          }
+                      }
+                  }
+              }
+              else {
+                  if(d2 > FLT_EPSILON) {
+                      // p1,p3,p4 are collinear, p2 is considerable
+                      //----------------------
+                      if(d2 * d2 <= distanceTolerance * (dx*dx + dy*dy)) {
+                          if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
+                              points.push(vec2$1(x1234, y1234));
+                              return
+                          }
+
+                          // Angle Condition
+                          //----------------------
+                          da1 = Math.abs(Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y2 - y1, x2 - x1));
+                          if(da1 >= pi) da1 = 2*pi - da1;
+
+                          if(da1 < m_angle_tolerance) {
+                              points.push(vec2$1(x2, y2));
+                              points.push(vec2$1(x3, y3));
+                              return
+                          }
+
+                          if(m_cusp_limit !== 0.0) {
+                              if(da1 > m_cusp_limit) {
+                                  points.push(vec2$1(x2, y2));
+                                  return
+                              }
+                          }
+                      }
+                  }
+                  else if(d3 > FLT_EPSILON) {
+                      // p1,p2,p4 are collinear, p3 is considerable
+                      //----------------------
+                      if(d3 * d3 <= distanceTolerance * (dx*dx + dy*dy)) {
+                          if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
+                              points.push(vec2$1(x1234, y1234));
+                              return
+                          }
+
+                          // Angle Condition
+                          //----------------------
+                          da1 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y3 - y2, x3 - x2));
+                          if(da1 >= pi) da1 = 2*pi - da1;
+
+                          if(da1 < m_angle_tolerance) {
+                              points.push(vec2$1(x2, y2));
+                              points.push(vec2$1(x3, y3));
+                              return
+                          }
+
+                          if(m_cusp_limit !== 0.0) {
+                              if(da1 > m_cusp_limit)
+                              {
+                                  points.push(vec2$1(x3, y3));
+                                  return
+                              }
+                          }
+                      }
+                  }
+                  else {
+                      // Collinear case
+                      //-----------------
+                      dx = x1234 - (x1 + x4) / 2;
+                      dy = y1234 - (y1 + y4) / 2;
+                      if(dx*dx + dy*dy <= distanceTolerance) {
+                          points.push(vec2$1(x1234, y1234));
+                          return
+                      }
+                  }
+              }
+          }
+
+          // Continue subdivision
+          //----------------------
+          recursive(x1, y1, x12, y12, x123, y123, x1234, y1234, points, distanceTolerance, level + 1); 
+          recursive(x1234, y1234, x234, y234, x34, y34, x4, y4, points, distanceTolerance, level + 1); 
+      }
+  };
+
+  var adaptiveBezierCurve$1 = _function$1();
+
+  /**
+   * Transforms the vertices of a polygon, producing a new poly3.
+   *
+   * The polygon does not need to be a poly3, but may be any array of
+   * points. The points being represented as arrays of values.
+   *
+   * If the original has a 'plane' property, the result will have a clone
+   * of the plane.
+   *
+   * @param {Function} [transform=vec3.clone] - function used to transform the vertices.
+   * @returns {Array} a copy with transformed vertices and copied properties.
+   *
+   * @example
+   * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
+   * let observed = poly3.map(vertices)
+   */
+  const map$3 = (original, transform) => {
+    if (original === undefined) {
+      original = [];
+    }
+    if (transform === undefined) {
+      transform = _ => _;
+    }
+    return original.map(vertex => transform(vertex));
+  };
+
+  const canonicalize$6 = polygon => map$3(polygon, canonicalize$5);
+
+  /**
+   * Emits the edges of a polygon in order.
+   *
+   * @param {function} the function to call with each edge in order.
+   * @param {Polygon} the polygon of which to emit the edges.
+   */
+
+  const eachEdge$1 = (options = {}, thunk, polygon) => {
+    if (polygon.length >= 2) {
+      for (let nth = 1; nth < polygon.length; nth++) {
+        thunk(polygon[nth - 1], polygon[nth]);
+      }
+      thunk(polygon[polygon.length - 1], polygon[0]);
+    }
+  };
+
+  /**
+   * Flip the give polygon to face the opposite direction.
+   *
+   * @param {poly3} polygon - the polygon to flip
+   * @returns {poly3} a new poly3
+   */
+
+  /**
+   * Create a poly3 from the given points.
+   *
+   * @param {Array[]} points - list of points
+   * @param {plane} [planeof] - plane of the polygon
+   *
+   * @example
+   * const points = [
+   *   [0,  0, 0],
+   *   [0, 10, 0],
+   *   [0, 10, 10]
+   * ]
+   * const polygon = createFromPoints(points)
+   */
+  const fromPoints$3 = (points, planeof) => [...points];
+
+  /**
+   * Compare the given planes for equality
+   * @return {boolean} true if planes are equal
+   */
+
+  /**
+   * Flip the given plane (vec4)
+   *
+   * @param {vec4} vec - plane to flip
+   * @return {vec4} flipped plane
+   */
+
+  /**
+   * Create a new plane from the given points
+   *
+   * @param {Vec3} a - 3D point
+   * @param {Vec3} b - 3D point
+   * @param {Vec3} c - 3D point
+   * @returns {Vec4} a new plane with properly typed values
+   */
+  const fromPoints$4 = (a, b, c) => {
+    // let n = b.minus(a).cross(c.minus(a)).unit()
+    // FIXME optimize later
+    const ba = subtract$2(b, a);
+    const ca = subtract$2(c, a);
+    const cr = cross$2(ba, ca);
+    const normal = unit$1(cr); // normal part
+    //
+    const w = dot$2(normal, a);
+    return [normal[0], normal[1], normal[2], w];
+  };
+
+  const toPlane$2 = (polygon) => {
+    if (polygon.plane === undefined) {
+      if (polygon.length >= 3) {
+        polygon.plane = fromPoints$4(...polygon);
+      } else {
+        throw Error('die');
+      }
+    }
+    return polygon.plane;
+  };
+
+  /**
+   * Returns the polygon as an array of points.
+   * @param {Polygon}
+   * @returns {Points}
+   */
+
+  // Affine transformation of polygon. Returns a new polygon.
+  const transform$9 = (matrix, polygon) => {
+    const transformed = map$3(polygon, vertex => transform$8(matrix, vertex));
+    if (isMirroring$1(matrix)) {
+      // Reverse the order to preserve the orientation.
+      transformed.reverse();
+    }
+    return transformed;
+  };
+
+  const isDegenerate$1 = (polygon) => {
+    for (let nth = 0; nth < polygon.length; nth++) {
+      if (equals$3(polygon[nth], polygon[(nth + 1) % polygon.length])) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const canonicalize$7 = (polygons) => {
+    const canonicalized = [];
+    for (let polygon of polygons) {
+      polygon = canonicalize$6(polygon);
+      if (!isDegenerate$1(polygon)) {
+        canonicalized.push(polygon);
+      }
+    }
+    return canonicalized;
+  };
+
+  const eachPoint$5 = (options = {}, thunk, polygons) => {
+    for (const polygon of polygons) {
+      for (const point of polygon) {
+        thunk(point);
+      }
+    }
+  };
+
+  /**
+   * Transforms each polygon of Polygons.
+   *
+   * @param {Polygons} original - the Polygons to transform.
+   * @param {Function} [transform=identity] - function used to transform the polygons.
+   * @returns {Polygons} a copy with transformed polygons.
+   */
+
+  const isClosed$1 = (path) => (path.length === 0) || (path[0] !== null);
+
+  const isTriangle$1 = (path) => isClosed$1(path) && path.length === 3;
+
+  /*
+  ** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
+  ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
+  ** All Rights Reserved.
+  **
+  ** Permission is hereby granted, free of charge, to any person obtaining a copy
+  ** of this software and associated documentation files (the "Software"), to deal
+  ** in the Software without restriction, including without limitation the rights
+  ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  ** of the Software, and to permit persons to whom the Software is furnished to do so,
+  ** subject to the following conditions:
+  ** 
+  ** The above copyright notice including the dates of first publication and either this
+  ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
+  ** included in all copies or substantial portions of the Software. 
+  **
+  ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  ** PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC.
+  ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+  ** OR OTHER DEALINGS IN THE SOFTWARE.
+  ** 
+  ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
+  ** be used in advertising or otherwise to promote the sale, use or other dealings in
+  ** this Software without prior written authorization from Silicon Graphics, Inc.
+  */
+
+  // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
+  const measureBoundingBox$3 = (polygons) => {
+    let max = polygons[0][0];
+    let min = polygons[0][0];
+    eachPoint$5({},
+              point => {
+                max = max$1(max, point);
+                min = min$1(min, point);
+              },
+              polygons);
+    return [min, max];
+  };
+
+  const blessAsTriangles$1 = (paths) => { paths.isTriangles = true; return paths; };
+
+  const toTriangles$1 = (options = {}, paths) => {
+    if (paths.isTriangles) {
+      return paths;
+    }
+    if (paths.every(isTriangle$1)) {
+      return blessAsTriangles$1(paths);
+    }
+    const triangles = [];
+    for (const path of paths) {
+      for (let nth = 2; nth < path.length; nth++) {
+        triangles.push([path[0], path[nth - 1], path[nth]]);
+      }
+    }
+    return blessAsTriangles$1(triangles);
+  };
+
+  const transform$a = (matrix, polygons) => polygons.map(polygon => transform$9(matrix, polygon));
+
+  const translate$2 = (vector, polygons) => transform$a(fromTranslation$1(vector), polygons);
+
+  var subtract_1$1 = subtract$3;
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  function subtract$3(out, a, b) {
+      out[0] = a[0] - b[0];
+      out[1] = a[1] - b[1];
+      out[2] = a[2] - b[2];
+      return out
+  }
+
+  var cross_1$1 = cross$3;
+
+  /**
+   * Computes the cross product of two vec3's
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  function cross$3(out, a, b) {
+      var ax = a[0], ay = a[1], az = a[2],
+          bx = b[0], by = b[1], bz = b[2];
+
+      out[0] = ay * bz - az * by;
+      out[1] = az * bx - ax * bz;
+      out[2] = ax * by - ay * bx;
+      return out
+  }
+
+  var squaredLength_1$1 = squaredLength$1;
+
+  /**
+   * Calculates the squared length of a vec3
+   *
+   * @param {vec3} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+  function squaredLength$1(a) {
+      var x = a[0],
+          y = a[1],
+          z = a[2];
+      return x*x + y*y + z*z
+  }
+
+  var ab$1 = [];
+  var ap$1 = [];
+  var cr$1 = [];
+
+  var squared$1 = function (p, a, b) {
+    // // == vector solution
+    // var normalize = require('gl-vec3/normalize')
+    // var scaleAndAdd = require('gl-vec3/scaleAndAdd')
+    // var dot = require('gl-vec3/dot')
+    // var squaredDistance = require('gl-vec3/squaredDistance')
+    // // n = vector `ab` normalized
+    // var n = []
+    // // projection = projection of `point` on `n`
+    // var projection = []
+    // normalize(n, subtract(n, a, b))
+    // scaleAndAdd(projection, a, n, dot(n, p))
+    // return squaredDistance(projection, p)
+
+    // == parallelogram solution
+    //
+    //            s
+    //      __a________b__
+    //       /   |    /
+    //      /   h|   /
+    //     /_____|__/
+    //    p
+    //
+    //  s = b - a
+    //  area = s * h
+    //  |ap x s| = s * h
+    //  h = |ap x s| / s
+    //
+    subtract_1$1(ab$1, b, a);
+    subtract_1$1(ap$1, p, a);
+    var area = squaredLength_1$1(cross_1$1(cr$1, ap$1, ab$1));
+    var s = squaredLength_1$1(ab$1);
+    if (s === 0) {
+      throw Error('a and b are the same point')
+    }
+    return area / s
+  };
+
+  var pointLineDistance$1 = function (point, a, b) {
+    return Math.sqrt(squared$1(point, a, b))
+  };
+
+  var normalize_1$1 = normalize$1;
+
+  /**
+   * Normalize a vec3
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a vector to normalize
+   * @returns {vec3} out
+   */
+  function normalize$1(out, a) {
+      var x = a[0],
+          y = a[1],
+          z = a[2];
+      var len = x*x + y*y + z*z;
+      if (len > 0) {
+          //TODO: evaluate use of glm_invsqrt here?
+          len = 1 / Math.sqrt(len);
+          out[0] = a[0] * len;
+          out[1] = a[1] * len;
+          out[2] = a[2] * len;
+      }
+      return out
+  }
+
+  var tmp$2 = [0, 0, 0];
+
+  var getPlaneNormal$1 = planeNormal$1;
+
+  function planeNormal$1 (out, point1, point2, point3) {
+    subtract_1$1(out, point1, point2);
+    subtract_1$1(tmp$2, point2, point3);
+    cross_1$1(out, out, tmp$2);
+    return normalize_1$1(out, out)
+  }
+
+  var dot_1$1 = dot$3;
+
+  /**
+   * Calculates the dot product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+  function dot$3(a, b) {
+      return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+  }
+
+  var VertexList_1$1 = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var VertexList = function () {
+    function VertexList() {
+      _classCallCheck(this, VertexList);
+
+      this.head = null;
+      this.tail = null;
+    }
+
+    _createClass(VertexList, [{
+      key: "clear",
+      value: function clear() {
+        this.head = this.tail = null;
+      }
+
+      /**
+       * Inserts a `node` before `target`, it's assumed that
+       * `target` belongs to this doubly linked list
+       *
+       * @param {*} target
+       * @param {*} node
+       */
+
+    }, {
+      key: "insertBefore",
+      value: function insertBefore(target, node) {
+        node.prev = target.prev;
+        node.next = target;
+        if (!node.prev) {
+          this.head = node;
+        } else {
+          node.prev.next = node;
+        }
+        target.prev = node;
+      }
+
+      /**
+       * Inserts a `node` after `target`, it's assumed that
+       * `target` belongs to this doubly linked list
+       *
+       * @param {Vertex} target
+       * @param {Vertex} node
+       */
+
+    }, {
+      key: "insertAfter",
+      value: function insertAfter(target, node) {
+        node.prev = target;
+        node.next = target.next;
+        if (!node.next) {
+          this.tail = node;
+        } else {
+          node.next.prev = node;
+        }
+        target.next = node;
+      }
+
+      /**
+       * Appends a `node` to the end of this doubly linked list
+       * Note: `node.next` will be unlinked from `node`
+       * Note: if `node` is part of another linked list call `addAll` instead
+       *
+       * @param {*} node
+       */
+
+    }, {
+      key: "add",
+      value: function add(node) {
+        if (!this.head) {
+          this.head = node;
+        } else {
+          this.tail.next = node;
+        }
+        node.prev = this.tail;
+        // since node is the new end it doesn't have a next node
+        node.next = null;
+        this.tail = node;
+      }
+
+      /**
+       * Appends a chain of nodes where `node` is the head,
+       * the difference with `add` is that it correctly sets the position
+       * of the node list `tail` property
+       *
+       * @param {*} node
+       */
+
+    }, {
+      key: "addAll",
+      value: function addAll(node) {
+        if (!this.head) {
+          this.head = node;
+        } else {
+          this.tail.next = node;
+        }
+        node.prev = this.tail;
+
+        // find the end of the list
+        while (node.next) {
+          node = node.next;
+        }
+        this.tail = node;
+      }
+
+      /**
+       * Deletes a `node` from this linked list, it's assumed that `node` is a
+       * member of this linked list
+       *
+       * @param {*} node
+       */
+
+    }, {
+      key: "remove",
+      value: function remove(node) {
+        if (!node.prev) {
+          this.head = node.next;
+        } else {
+          node.prev.next = node.next;
+        }
+
+        if (!node.next) {
+          this.tail = node.prev;
+        } else {
+          node.next.prev = node.prev;
+        }
+      }
+
+      /**
+       * Removes a chain of nodes whose head is `a` and whose tail is `b`,
+       * it's assumed that `a` and `b` belong to this list and also that `a`
+       * comes before `b` in the linked list
+       *
+       * @param {*} a
+       * @param {*} b
+       */
+
+    }, {
+      key: "removeChain",
+      value: function removeChain(a, b) {
+        if (!a.prev) {
+          this.head = b.next;
+        } else {
+          a.prev.next = b.next;
+        }
+
+        if (!b.next) {
+          this.tail = a.prev;
+        } else {
+          b.next.prev = a.prev;
+        }
+      }
+    }, {
+      key: "first",
+      value: function first() {
+        return this.head;
+      }
+    }, {
+      key: "isEmpty",
+      value: function isEmpty() {
+        return !this.head;
+      }
+    }]);
+
+    return VertexList;
+  }();
+
+  exports.default = VertexList;
+  module.exports = exports["default"];
+  });
+
+  unwrapExports(VertexList_1$1);
+
+  var Vertex_1$1 = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var Vertex = function Vertex(point, index) {
+    _classCallCheck(this, Vertex);
+
+    this.point = point;
+    // index in the input array
+    this.index = index;
+    // vertex is a double linked list node
+    this.next = null;
+    this.prev = null;
+    // the face that is able to see this point
+    this.face = null;
+  };
+
+  exports.default = Vertex;
+  module.exports = exports["default"];
+  });
+
+  unwrapExports(Vertex_1$1);
+
+  var add_1$1 = add$4;
+
+  /**
+   * Adds two vec3's
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  function add$4(out, a, b) {
+      out[0] = a[0] + b[0];
+      out[1] = a[1] + b[1];
+      out[2] = a[2] + b[2];
+      return out
+  }
+
+  var copy_1$1 = copy$3;
+
+  /**
+   * Copy the values from one vec3 to another
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a the source vector
+   * @returns {vec3} out
+   */
+  function copy$3(out, a) {
+      out[0] = a[0];
+      out[1] = a[1];
+      out[2] = a[2];
+      return out
+  }
+
+  var length_1$1 = length$4;
+
+  /**
+   * Calculates the length of a vec3
+   *
+   * @param {vec3} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+  function length$4(a) {
+      var x = a[0],
+          y = a[1],
+          z = a[2];
+      return Math.sqrt(x*x + y*y + z*z)
+  }
+
+  var scale_1$1 = scale$3;
+
+  /**
+   * Scales a vec3 by a scalar number
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a the vector to scale
+   * @param {Number} b amount to scale the vector by
+   * @returns {vec3} out
+   */
+  function scale$3(out, a, b) {
+      out[0] = a[0] * b;
+      out[1] = a[1] * b;
+      out[2] = a[2] * b;
+      return out
+  }
+
+  var scaleAndAdd_1$1 = scaleAndAdd$1;
+
+  /**
+   * Adds two vec3's after scaling the second operand by a scalar value
+   *
+   * @param {vec3} out the receiving vector
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @param {Number} scale the amount to scale b by before adding
+   * @returns {vec3} out
+   */
+  function scaleAndAdd$1(out, a, b, scale) {
+      out[0] = a[0] + (b[0] * scale);
+      out[1] = a[1] + (b[1] * scale);
+      out[2] = a[2] + (b[2] * scale);
+      return out
+  }
+
+  var distance_1$1 = distance$2;
+
+  /**
+   * Calculates the euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} distance between a and b
+   */
+  function distance$2(a, b) {
+      var x = b[0] - a[0],
+          y = b[1] - a[1],
+          z = b[2] - a[2];
+      return Math.sqrt(x*x + y*y + z*z)
+  }
+
+  var squaredDistance_1$1 = squaredDistance$3;
+
+  /**
+   * Calculates the squared euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+  function squaredDistance$3(a, b) {
+      var x = b[0] - a[0],
+          y = b[1] - a[1],
+          z = b[2] - a[2];
+      return x*x + y*y + z*z
+  }
+
+  /**
+   * Helpers.
+   */
+
+  var s$1 = 1000;
+  var m$1 = s$1 * 60;
+  var h$1 = m$1 * 60;
+  var d$1 = h$1 * 24;
+  var w$1 = d$1 * 7;
+  var y$1 = d$1 * 365.25;
+
+  /**
+   * Parse or format the given `val`.
+   *
+   * Options:
+   *
+   *  - `long` verbose formatting [false]
+   *
+   * @param {String|Number} val
+   * @param {Object} [options]
+   * @throws {Error} throw an error if val is not a non-empty string or a number
+   * @return {String|Number}
+   * @api public
+   */
+
+  var ms$1 = function(val, options) {
+    options = options || {};
+    var type = typeof val;
+    if (type === 'string' && val.length > 0) {
+      return parse$3(val);
+    } else if (type === 'number' && isNaN(val) === false) {
+      return options.long ? fmtLong$1(val) : fmtShort$1(val);
+    }
+    throw new Error(
+      'val is not a non-empty string or a valid number. val=' +
+        JSON.stringify(val)
+    );
+  };
+
+  /**
+   * Parse the given `str` and return milliseconds.
+   *
+   * @param {String} str
+   * @return {Number}
+   * @api private
+   */
+
+  function parse$3(str) {
+    str = String(str);
+    if (str.length > 100) {
+      return;
+    }
+    var match = /^((?:\d+)?\-?\d?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+      str
+    );
+    if (!match) {
+      return;
+    }
+    var n = parseFloat(match[1]);
+    var type = (match[2] || 'ms').toLowerCase();
+    switch (type) {
+      case 'years':
+      case 'year':
+      case 'yrs':
+      case 'yr':
+      case 'y':
+        return n * y$1;
+      case 'weeks':
+      case 'week':
+      case 'w':
+        return n * w$1;
+      case 'days':
+      case 'day':
+      case 'd':
+        return n * d$1;
+      case 'hours':
+      case 'hour':
+      case 'hrs':
+      case 'hr':
+      case 'h':
+        return n * h$1;
+      case 'minutes':
+      case 'minute':
+      case 'mins':
+      case 'min':
+      case 'm':
+        return n * m$1;
+      case 'seconds':
+      case 'second':
+      case 'secs':
+      case 'sec':
+      case 's':
+        return n * s$1;
+      case 'milliseconds':
+      case 'millisecond':
+      case 'msecs':
+      case 'msec':
+      case 'ms':
+        return n;
+      default:
+        return undefined;
+    }
+  }
+
+  /**
+   * Short format for `ms`.
+   *
+   * @param {Number} ms
+   * @return {String}
+   * @api private
+   */
+
+  function fmtShort$1(ms) {
+    var msAbs = Math.abs(ms);
+    if (msAbs >= d$1) {
+      return Math.round(ms / d$1) + 'd';
+    }
+    if (msAbs >= h$1) {
+      return Math.round(ms / h$1) + 'h';
+    }
+    if (msAbs >= m$1) {
+      return Math.round(ms / m$1) + 'm';
+    }
+    if (msAbs >= s$1) {
+      return Math.round(ms / s$1) + 's';
+    }
+    return ms + 'ms';
+  }
+
+  /**
+   * Long format for `ms`.
+   *
+   * @param {Number} ms
+   * @return {String}
+   * @api private
+   */
+
+  function fmtLong$1(ms) {
+    var msAbs = Math.abs(ms);
+    if (msAbs >= d$1) {
+      return plural$1(ms, msAbs, d$1, 'day');
+    }
+    if (msAbs >= h$1) {
+      return plural$1(ms, msAbs, h$1, 'hour');
+    }
+    if (msAbs >= m$1) {
+      return plural$1(ms, msAbs, m$1, 'minute');
+    }
+    if (msAbs >= s$1) {
+      return plural$1(ms, msAbs, s$1, 'second');
+    }
+    return ms + ' ms';
+  }
+
+  /**
+   * Pluralization helper.
+   */
+
+  function plural$1(ms, msAbs, n, name) {
+    var isPlural = msAbs >= n * 1.5;
+    return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
+  }
+
+  /**
+   * This is the common logic for both the Node.js and web browser
+   * implementations of `debug()`.
+   */
+  function setup$1(env) {
+    createDebug.debug = createDebug;
+    createDebug.default = createDebug;
+    createDebug.coerce = coerce;
+    createDebug.disable = disable;
+    createDebug.enable = enable;
+    createDebug.enabled = enabled;
+    createDebug.humanize = ms$1;
+    Object.keys(env).forEach(function (key) {
+      createDebug[key] = env[key];
+    });
+    /**
+    * Active `debug` instances.
+    */
+
+    createDebug.instances = [];
+    /**
+    * The currently active debug mode names, and names to skip.
+    */
+
+    createDebug.names = [];
+    createDebug.skips = [];
+    /**
+    * Map of special "%n" handling functions, for the debug "format" argument.
+    *
+    * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
+    */
+
+    createDebug.formatters = {};
+    /**
+    * Selects a color for a debug namespace
+    * @param {String} namespace The namespace string for the for the debug instance to be colored
+    * @return {Number|String} An ANSI color code for the given namespace
+    * @api private
+    */
+
+    function selectColor(namespace) {
+      var hash = 0;
+
+      for (var i = 0; i < namespace.length; i++) {
+        hash = (hash << 5) - hash + namespace.charCodeAt(i);
+        hash |= 0; // Convert to 32bit integer
+      }
+
+      return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
+    }
+
+    createDebug.selectColor = selectColor;
+    /**
+    * Create a debugger with the given `namespace`.
+    *
+    * @param {String} namespace
+    * @return {Function}
+    * @api public
+    */
+
+    function createDebug(namespace) {
+      var prevTime;
+
+      function debug() {
+        // Disabled?
+        if (!debug.enabled) {
+          return;
+        }
+
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        var self = debug; // Set `diff` timestamp
+
+        var curr = Number(new Date());
+        var ms = curr - (prevTime || curr);
+        self.diff = ms;
+        self.prev = prevTime;
+        self.curr = curr;
+        prevTime = curr;
+        args[0] = createDebug.coerce(args[0]);
+
+        if (typeof args[0] !== 'string') {
+          // Anything else let's inspect with %O
+          args.unshift('%O');
+        } // Apply any `formatters` transformations
+
+
+        var index = 0;
+        args[0] = args[0].replace(/%([a-zA-Z%])/g, function (match, format) {
+          // If we encounter an escaped % then don't increase the array index
+          if (match === '%%') {
+            return match;
+          }
+
+          index++;
+          var formatter = createDebug.formatters[format];
+
+          if (typeof formatter === 'function') {
+            var val = args[index];
+            match = formatter.call(self, val); // Now we need to remove `args[index]` since it's inlined in the `format`
+
+            args.splice(index, 1);
+            index--;
+          }
+
+          return match;
+        }); // Apply env-specific formatting (colors, etc.)
+
+        createDebug.formatArgs.call(self, args);
+        var logFn = self.log || createDebug.log;
+        logFn.apply(self, args);
+      }
+
+      debug.namespace = namespace;
+      debug.enabled = createDebug.enabled(namespace);
+      debug.useColors = createDebug.useColors();
+      debug.color = selectColor(namespace);
+      debug.destroy = destroy;
+      debug.extend = extend; // Debug.formatArgs = formatArgs;
+      // debug.rawLog = rawLog;
+      // env-specific initialization logic for debug instances
+
+      if (typeof createDebug.init === 'function') {
+        createDebug.init(debug);
+      }
+
+      createDebug.instances.push(debug);
+      return debug;
+    }
+
+    function destroy() {
+      var index = createDebug.instances.indexOf(this);
+
+      if (index !== -1) {
+        createDebug.instances.splice(index, 1);
+        return true;
+      }
+
+      return false;
+    }
+
+    function extend(namespace, delimiter) {
+      return createDebug(this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace);
+    }
+    /**
+    * Enables a debug mode by namespaces. This can include modes
+    * separated by a colon and wildcards.
+    *
+    * @param {String} namespaces
+    * @api public
+    */
+
+
+    function enable(namespaces) {
+      createDebug.save(namespaces);
+      createDebug.names = [];
+      createDebug.skips = [];
+      var i;
+      var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+      var len = split.length;
+
+      for (i = 0; i < len; i++) {
+        if (!split[i]) {
+          // ignore empty strings
+          continue;
+        }
+
+        namespaces = split[i].replace(/\*/g, '.*?');
+
+        if (namespaces[0] === '-') {
+          createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+        } else {
+          createDebug.names.push(new RegExp('^' + namespaces + '$'));
+        }
+      }
+
+      for (i = 0; i < createDebug.instances.length; i++) {
+        var instance = createDebug.instances[i];
+        instance.enabled = createDebug.enabled(instance.namespace);
+      }
+    }
+    /**
+    * Disable debug output.
+    *
+    * @api public
+    */
+
+
+    function disable() {
+      createDebug.enable('');
+    }
+    /**
+    * Returns true if the given mode name is enabled, false otherwise.
+    *
+    * @param {String} name
+    * @return {Boolean}
+    * @api public
+    */
+
+
+    function enabled(name) {
+      if (name[name.length - 1] === '*') {
+        return true;
+      }
+
+      var i;
+      var len;
+
+      for (i = 0, len = createDebug.skips.length; i < len; i++) {
+        if (createDebug.skips[i].test(name)) {
+          return false;
+        }
+      }
+
+      for (i = 0, len = createDebug.names.length; i < len; i++) {
+        if (createDebug.names[i].test(name)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+    /**
+    * Coerce `val`.
+    *
+    * @param {Mixed} val
+    * @return {Mixed}
+    * @api private
+    */
+
+
+    function coerce(val) {
+      if (val instanceof Error) {
+        return val.stack || val.message;
+      }
+
+      return val;
+    }
+
+    createDebug.enable(createDebug.load());
+    return createDebug;
+  }
+
+  var common$2 = setup$1;
+
+  var browser$3 = createCommonjsModule(function (module, exports) {
+
+  function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+  /* eslint-env browser */
+
+  /**
+   * This is the web browser implementation of `debug()`.
+   */
+  exports.log = log;
+  exports.formatArgs = formatArgs;
+  exports.save = save;
+  exports.load = load;
+  exports.useColors = useColors;
+  exports.storage = localstorage();
+  /**
+   * Colors.
+   */
+
+  exports.colors = ['#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066FF', '#0099CC', '#0099FF', '#00CC00', '#00CC33', '#00CC66', '#00CC99', '#00CCCC', '#00CCFF', '#3300CC', '#3300FF', '#3333CC', '#3333FF', '#3366CC', '#3366FF', '#3399CC', '#3399FF', '#33CC00', '#33CC33', '#33CC66', '#33CC99', '#33CCCC', '#33CCFF', '#6600CC', '#6600FF', '#6633CC', '#6633FF', '#66CC00', '#66CC33', '#9900CC', '#9900FF', '#9933CC', '#9933FF', '#99CC00', '#99CC33', '#CC0000', '#CC0033', '#CC0066', '#CC0099', '#CC00CC', '#CC00FF', '#CC3300', '#CC3333', '#CC3366', '#CC3399', '#CC33CC', '#CC33FF', '#CC6600', '#CC6633', '#CC9900', '#CC9933', '#CCCC00', '#CCCC33', '#FF0000', '#FF0033', '#FF0066', '#FF0099', '#FF00CC', '#FF00FF', '#FF3300', '#FF3333', '#FF3366', '#FF3399', '#FF33CC', '#FF33FF', '#FF6600', '#FF6633', '#FF9900', '#FF9933', '#FFCC00', '#FFCC33'];
+  /**
+   * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+   * and the Firebug extension (any Firefox version) are known
+   * to support "%c" CSS customizations.
+   *
+   * TODO: add a `localStorage` variable to explicitly enable/disable colors
+   */
+  // eslint-disable-next-line complexity
+
+  function useColors() {
+    // NB: In an Electron preload script, document will be defined but not fully
+    // initialized. Since we know we're in Chrome, we'll just detect this case
+    // explicitly
+    if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
+      return true;
+    } // Internet Explorer and Edge do not support colors.
+
+
+    if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+      return false;
+    } // Is webkit? http://stackoverflow.com/a/16459606/376773
+    // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+
+
+    return typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+    typeof window !== 'undefined' && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+    typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+    typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+  }
+  /**
+   * Colorize log arguments if enabled.
+   *
+   * @api public
+   */
+
+
+  function formatArgs(args) {
+    args[0] = (this.useColors ? '%c' : '') + this.namespace + (this.useColors ? ' %c' : ' ') + args[0] + (this.useColors ? '%c ' : ' ') + '+' + module.exports.humanize(this.diff);
+
+    if (!this.useColors) {
+      return;
+    }
+
+    var c = 'color: ' + this.color;
+    args.splice(1, 0, c, 'color: inherit'); // The final "%c" is somewhat tricky, because there could be other
+    // arguments passed either before or after the %c, so we need to
+    // figure out the correct index to insert the CSS into
+
+    var index = 0;
+    var lastC = 0;
+    args[0].replace(/%[a-zA-Z%]/g, function (match) {
+      if (match === '%%') {
+        return;
+      }
+
+      index++;
+
+      if (match === '%c') {
+        // We only are interested in the *last* %c
+        // (the user may have provided their own)
+        lastC = index;
+      }
+    });
+    args.splice(lastC, 0, c);
+  }
+  /**
+   * Invokes `console.log()` when available.
+   * No-op when `console.log` is not a "function".
+   *
+   * @api public
+   */
+
+
+  function log() {
+    var _console;
+
+    // This hackery is required for IE8/9, where
+    // the `console.log` function doesn't have 'apply'
+    return (typeof console === "undefined" ? "undefined" : _typeof(console)) === 'object' && console.log && (_console = console).log.apply(_console, arguments);
+  }
+  /**
+   * Save `namespaces`.
+   *
+   * @param {String} namespaces
+   * @api private
+   */
+
+
+  function save(namespaces) {
+    try {
+      if (namespaces) {
+        exports.storage.setItem('debug', namespaces);
+      } else {
+        exports.storage.removeItem('debug');
+      }
+    } catch (error) {// Swallow
+      // XXX (@Qix-) should we be logging these?
+    }
+  }
+  /**
+   * Load `namespaces`.
+   *
+   * @return {String} returns the previously persisted debug modes
+   * @api private
+   */
+
+
+  function load() {
+    var r;
+
+    try {
+      r = exports.storage.getItem('debug');
+    } catch (error) {} // Swallow
+    // XXX (@Qix-) should we be logging these?
+    // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+
+
+    if (!r && typeof process !== 'undefined' && 'env' in process) {
+      r = process.env.DEBUG;
+    }
+
+    return r;
+  }
+  /**
+   * Localstorage attempts to return the localstorage.
+   *
+   * This is necessary because safari throws
+   * when a user disables cookies/localstorage
+   * and you attempt to access it.
+   *
+   * @return {LocalStorage}
+   * @api private
+   */
+
+
+  function localstorage() {
+    try {
+      // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
+      // The Browser also has localStorage in the global context.
+      return localStorage;
+    } catch (error) {// Swallow
+      // XXX (@Qix-) should we be logging these?
+    }
+  }
+
+  module.exports = common$2(exports);
+  var formatters = module.exports.formatters;
+  /**
+   * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+   */
+
+  formatters.j = function (v) {
+    try {
+      return JSON.stringify(v);
+    } catch (error) {
+      return '[UnexpectedJSONParseError]: ' + error.message;
+    }
+  };
+  });
+  var browser_1$1 = browser$3.log;
+  var browser_2$1 = browser$3.formatArgs;
+  var browser_3$1 = browser$3.save;
+  var browser_4$1 = browser$3.load;
+  var browser_5$1 = browser$3.useColors;
+  var browser_6$1 = browser$3.storage;
+  var browser_7$1 = browser$3.colors;
+
+  var isBuffer$2 = function isBuffer(arg) {
+    return arg instanceof Buffer;
+  };
+
+  var inherits_browser$1 = createCommonjsModule(function (module) {
+  if (typeof Object.create === 'function') {
+    // implementation from standard node.js 'util' module
+    module.exports = function inherits(ctor, superCtor) {
+      ctor.super_ = superCtor;
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      });
+    };
+  } else {
+    // old school shim for old browsers
+    module.exports = function inherits(ctor, superCtor) {
+      ctor.super_ = superCtor;
+      var TempCtor = function () {};
+      TempCtor.prototype = superCtor.prototype;
+      ctor.prototype = new TempCtor();
+      ctor.prototype.constructor = ctor;
+    };
+  }
+  });
+
+  var inherits$1 = createCommonjsModule(function (module) {
+  try {
+    var util = util$1;
+    if (typeof util.inherits !== 'function') throw '';
+    module.exports = util.inherits;
+  } catch (e) {
+    module.exports = inherits_browser$1;
+  }
+  });
+
+  var util$1 = createCommonjsModule(function (module, exports) {
+  // Copyright Joyent, Inc. and other Node contributors.
+  //
+  // Permission is hereby granted, free of charge, to any person obtaining a
+  // copy of this software and associated documentation files (the
+  // "Software"), to deal in the Software without restriction, including
+  // without limitation the rights to use, copy, modify, merge, publish,
+  // distribute, sublicense, and/or sell copies of the Software, and to permit
+  // persons to whom the Software is furnished to do so, subject to the
+  // following conditions:
+  //
+  // The above copyright notice and this permission notice shall be included
+  // in all copies or substantial portions of the Software.
+  //
+  // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+  // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+  // USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+  var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
+    function getOwnPropertyDescriptors(obj) {
+      var keys = Object.keys(obj);
+      var descriptors = {};
+      for (var i = 0; i < keys.length; i++) {
+        descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
+      }
+      return descriptors;
+    };
+
+  var formatRegExp = /%[sdj%]/g;
+  exports.format = function(f) {
+    if (!isString(f)) {
+      var objects = [];
+      for (var i = 0; i < arguments.length; i++) {
+        objects.push(inspect(arguments[i]));
+      }
+      return objects.join(' ');
+    }
+
+    var i = 1;
+    var args = arguments;
+    var len = args.length;
+    var str = String(f).replace(formatRegExp, function(x) {
+      if (x === '%%') return '%';
+      if (i >= len) return x;
+      switch (x) {
+        case '%s': return String(args[i++]);
+        case '%d': return Number(args[i++]);
+        case '%j':
+          try {
+            return JSON.stringify(args[i++]);
+          } catch (_) {
+            return '[Circular]';
+          }
+        default:
+          return x;
+      }
+    });
+    for (var x = args[i]; i < len; x = args[++i]) {
+      if (isNull(x) || !isObject(x)) {
+        str += ' ' + x;
+      } else {
+        str += ' ' + inspect(x);
+      }
+    }
+    return str;
+  };
+
+
+  // Mark that a method should not be used.
+  // Returns a modified function which warns once by default.
+  // If --no-deprecation is set, then it is a no-op.
+  exports.deprecate = function(fn, msg) {
+    if (typeof process !== 'undefined' && process.noDeprecation === true) {
+      return fn;
+    }
+
+    // Allow for deprecating things in the process of starting up.
+    if (typeof process === 'undefined') {
+      return function() {
+        return exports.deprecate(fn, msg).apply(this, arguments);
+      };
+    }
+
+    var warned = false;
+    function deprecated() {
+      if (!warned) {
+        {
+          console.error(msg);
+        }
+        warned = true;
+      }
+      return fn.apply(this, arguments);
+    }
+
+    return deprecated;
+  };
+
+
+  var debugs = {};
+  var debugEnviron;
+  exports.debuglog = function(set) {
+    if (isUndefined(debugEnviron))
+      debugEnviron = process.env.NODE_DEBUG || '';
+    set = set.toUpperCase();
+    if (!debugs[set]) {
+      if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+        var pid = process.pid;
+        debugs[set] = function() {
+          var msg = exports.format.apply(exports, arguments);
+          console.error('%s %d: %s', set, pid, msg);
+        };
+      } else {
+        debugs[set] = function() {};
+      }
+    }
+    return debugs[set];
+  };
+
+
+  /**
+   * Echos the value of a value. Trys to print the value out
+   * in the best way possible given the different types.
+   *
+   * @param {Object} obj The object to print out.
+   * @param {Object} opts Optional options object that alters the output.
+   */
+  /* legacy: obj, showHidden, depth, colors*/
+  function inspect(obj, opts) {
+    // default options
+    var ctx = {
+      seen: [],
+      stylize: stylizeNoColor
+    };
+    // legacy...
+    if (arguments.length >= 3) ctx.depth = arguments[2];
+    if (arguments.length >= 4) ctx.colors = arguments[3];
+    if (isBoolean(opts)) {
+      // legacy...
+      ctx.showHidden = opts;
+    } else if (opts) {
+      // got an "options" object
+      exports._extend(ctx, opts);
+    }
+    // set default options
+    if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+    if (isUndefined(ctx.depth)) ctx.depth = 2;
+    if (isUndefined(ctx.colors)) ctx.colors = false;
+    if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+    if (ctx.colors) ctx.stylize = stylizeWithColor;
+    return formatValue(ctx, obj, ctx.depth);
+  }
+  exports.inspect = inspect;
+
+
+  // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+  inspect.colors = {
+    'bold' : [1, 22],
+    'italic' : [3, 23],
+    'underline' : [4, 24],
+    'inverse' : [7, 27],
+    'white' : [37, 39],
+    'grey' : [90, 39],
+    'black' : [30, 39],
+    'blue' : [34, 39],
+    'cyan' : [36, 39],
+    'green' : [32, 39],
+    'magenta' : [35, 39],
+    'red' : [31, 39],
+    'yellow' : [33, 39]
+  };
+
+  // Don't use 'blue' not visible on cmd.exe
+  inspect.styles = {
+    'special': 'cyan',
+    'number': 'yellow',
+    'boolean': 'yellow',
+    'undefined': 'grey',
+    'null': 'bold',
+    'string': 'green',
+    'date': 'magenta',
+    // "name": intentionally not styling
+    'regexp': 'red'
+  };
+
+
+  function stylizeWithColor(str, styleType) {
+    var style = inspect.styles[styleType];
+
+    if (style) {
+      return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+             '\u001b[' + inspect.colors[style][1] + 'm';
+    } else {
+      return str;
+    }
+  }
+
+
+  function stylizeNoColor(str, styleType) {
+    return str;
+  }
+
+
+  function arrayToHash(array) {
+    var hash = {};
+
+    array.forEach(function(val, idx) {
+      hash[val] = true;
+    });
+
+    return hash;
+  }
+
+
+  function formatValue(ctx, value, recurseTimes) {
+    // Provide a hook for user-specified inspect functions.
+    // Check that value is an object with an inspect function on it
+    if (ctx.customInspect &&
+        value &&
+        isFunction(value.inspect) &&
+        // Filter out the util module, it's inspect function is special
+        value.inspect !== exports.inspect &&
+        // Also filter out any prototype objects using the circular check.
+        !(value.constructor && value.constructor.prototype === value)) {
+      var ret = value.inspect(recurseTimes, ctx);
+      if (!isString(ret)) {
+        ret = formatValue(ctx, ret, recurseTimes);
+      }
+      return ret;
+    }
+
+    // Primitive types cannot have properties
+    var primitive = formatPrimitive(ctx, value);
+    if (primitive) {
+      return primitive;
+    }
+
+    // Look up the keys of the object.
+    var keys = Object.keys(value);
+    var visibleKeys = arrayToHash(keys);
+
+    if (ctx.showHidden) {
+      keys = Object.getOwnPropertyNames(value);
+    }
+
+    // IE doesn't make error fields non-enumerable
+    // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+    if (isError(value)
+        && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+      return formatError(value);
+    }
+
+    // Some type of object without properties can be shortcutted.
+    if (keys.length === 0) {
+      if (isFunction(value)) {
+        var name = value.name ? ': ' + value.name : '';
+        return ctx.stylize('[Function' + name + ']', 'special');
+      }
+      if (isRegExp(value)) {
+        return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+      }
+      if (isDate(value)) {
+        return ctx.stylize(Date.prototype.toString.call(value), 'date');
+      }
+      if (isError(value)) {
+        return formatError(value);
+      }
+    }
+
+    var base = '', array = false, braces = ['{', '}'];
+
+    // Make Array say that they are Array
+    if (isArray(value)) {
+      array = true;
+      braces = ['[', ']'];
+    }
+
+    // Make functions say that they are functions
+    if (isFunction(value)) {
+      var n = value.name ? ': ' + value.name : '';
+      base = ' [Function' + n + ']';
+    }
+
+    // Make RegExps say that they are RegExps
+    if (isRegExp(value)) {
+      base = ' ' + RegExp.prototype.toString.call(value);
+    }
+
+    // Make dates with properties first say the date
+    if (isDate(value)) {
+      base = ' ' + Date.prototype.toUTCString.call(value);
+    }
+
+    // Make error with message first say the error
+    if (isError(value)) {
+      base = ' ' + formatError(value);
+    }
+
+    if (keys.length === 0 && (!array || value.length == 0)) {
+      return braces[0] + base + braces[1];
+    }
+
+    if (recurseTimes < 0) {
+      if (isRegExp(value)) {
+        return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+      } else {
+        return ctx.stylize('[Object]', 'special');
+      }
+    }
+
+    ctx.seen.push(value);
+
+    var output;
+    if (array) {
+      output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+    } else {
+      output = keys.map(function(key) {
+        return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+      });
+    }
+
+    ctx.seen.pop();
+
+    return reduceToSingleString(output, base, braces);
+  }
+
+
+  function formatPrimitive(ctx, value) {
+    if (isUndefined(value))
+      return ctx.stylize('undefined', 'undefined');
+    if (isString(value)) {
+      var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                               .replace(/'/g, "\\'")
+                                               .replace(/\\"/g, '"') + '\'';
+      return ctx.stylize(simple, 'string');
+    }
+    if (isNumber(value))
+      return ctx.stylize('' + value, 'number');
+    if (isBoolean(value))
+      return ctx.stylize('' + value, 'boolean');
+    // For some reason typeof null is "object", so special case here.
+    if (isNull(value))
+      return ctx.stylize('null', 'null');
+  }
+
+
+  function formatError(value) {
+    return '[' + Error.prototype.toString.call(value) + ']';
+  }
+
+
+  function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+    var output = [];
+    for (var i = 0, l = value.length; i < l; ++i) {
+      if (hasOwnProperty(value, String(i))) {
+        output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+            String(i), true));
+      } else {
+        output.push('');
+      }
+    }
+    keys.forEach(function(key) {
+      if (!key.match(/^\d+$/)) {
+        output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+            key, true));
+      }
+    });
+    return output;
+  }
+
+
+  function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+    var name, str, desc;
+    desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+    if (desc.get) {
+      if (desc.set) {
+        str = ctx.stylize('[Getter/Setter]', 'special');
+      } else {
+        str = ctx.stylize('[Getter]', 'special');
+      }
+    } else {
+      if (desc.set) {
+        str = ctx.stylize('[Setter]', 'special');
+      }
+    }
+    if (!hasOwnProperty(visibleKeys, key)) {
+      name = '[' + key + ']';
+    }
+    if (!str) {
+      if (ctx.seen.indexOf(desc.value) < 0) {
+        if (isNull(recurseTimes)) {
+          str = formatValue(ctx, desc.value, null);
+        } else {
+          str = formatValue(ctx, desc.value, recurseTimes - 1);
+        }
+        if (str.indexOf('\n') > -1) {
+          if (array) {
+            str = str.split('\n').map(function(line) {
+              return '  ' + line;
+            }).join('\n').substr(2);
+          } else {
+            str = '\n' + str.split('\n').map(function(line) {
+              return '   ' + line;
+            }).join('\n');
+          }
+        }
+      } else {
+        str = ctx.stylize('[Circular]', 'special');
+      }
+    }
+    if (isUndefined(name)) {
+      if (array && key.match(/^\d+$/)) {
+        return str;
+      }
+      name = JSON.stringify('' + key);
+      if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+        name = name.substr(1, name.length - 2);
+        name = ctx.stylize(name, 'name');
+      } else {
+        name = name.replace(/'/g, "\\'")
+                   .replace(/\\"/g, '"')
+                   .replace(/(^"|"$)/g, "'");
+        name = ctx.stylize(name, 'string');
+      }
+    }
+
+    return name + ': ' + str;
+  }
+
+
+  function reduceToSingleString(output, base, braces) {
+    var length = output.reduce(function(prev, cur) {
+      if (cur.indexOf('\n') >= 0) ;
+      return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+    }, 0);
+
+    if (length > 60) {
+      return braces[0] +
+             (base === '' ? '' : base + '\n ') +
+             ' ' +
+             output.join(',\n  ') +
+             ' ' +
+             braces[1];
+    }
+
+    return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+  }
+
+
+  // NOTE: These type checking functions intentionally don't use `instanceof`
+  // because it is fragile and can be easily faked with `Object.create()`.
+  function isArray(ar) {
+    return Array.isArray(ar);
+  }
+  exports.isArray = isArray;
+
+  function isBoolean(arg) {
+    return typeof arg === 'boolean';
+  }
+  exports.isBoolean = isBoolean;
+
+  function isNull(arg) {
+    return arg === null;
+  }
+  exports.isNull = isNull;
+
+  function isNullOrUndefined(arg) {
+    return arg == null;
+  }
+  exports.isNullOrUndefined = isNullOrUndefined;
+
+  function isNumber(arg) {
+    return typeof arg === 'number';
+  }
+  exports.isNumber = isNumber;
+
+  function isString(arg) {
+    return typeof arg === 'string';
+  }
+  exports.isString = isString;
+
+  function isSymbol(arg) {
+    return typeof arg === 'symbol';
+  }
+  exports.isSymbol = isSymbol;
+
+  function isUndefined(arg) {
+    return arg === void 0;
+  }
+  exports.isUndefined = isUndefined;
+
+  function isRegExp(re) {
+    return isObject(re) && objectToString(re) === '[object RegExp]';
+  }
+  exports.isRegExp = isRegExp;
+
+  function isObject(arg) {
+    return typeof arg === 'object' && arg !== null;
+  }
+  exports.isObject = isObject;
+
+  function isDate(d) {
+    return isObject(d) && objectToString(d) === '[object Date]';
+  }
+  exports.isDate = isDate;
+
+  function isError(e) {
+    return isObject(e) &&
+        (objectToString(e) === '[object Error]' || e instanceof Error);
+  }
+  exports.isError = isError;
+
+  function isFunction(arg) {
+    return typeof arg === 'function';
+  }
+  exports.isFunction = isFunction;
+
+  function isPrimitive(arg) {
+    return arg === null ||
+           typeof arg === 'boolean' ||
+           typeof arg === 'number' ||
+           typeof arg === 'string' ||
+           typeof arg === 'symbol' ||  // ES6 symbol
+           typeof arg === 'undefined';
+  }
+  exports.isPrimitive = isPrimitive;
+
+  exports.isBuffer = isBuffer$2;
+
+  function objectToString(o) {
+    return Object.prototype.toString.call(o);
+  }
+
+
+  function pad(n) {
+    return n < 10 ? '0' + n.toString(10) : n.toString(10);
+  }
+
+
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+                'Oct', 'Nov', 'Dec'];
+
+  // 26 Feb 16:19:34
+  function timestamp() {
+    var d = new Date();
+    var time = [pad(d.getHours()),
+                pad(d.getMinutes()),
+                pad(d.getSeconds())].join(':');
+    return [d.getDate(), months[d.getMonth()], time].join(' ');
+  }
+
+
+  // log is just a thin wrapper to console.log that prepends a timestamp
+  exports.log = function() {
+    console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+  };
+
+
+  /**
+   * Inherit the prototype methods from one constructor into another.
+   *
+   * The Function.prototype.inherits from lang.js rewritten as a standalone
+   * function (not on Function.prototype). NOTE: If this file is to be loaded
+   * during bootstrapping this function needs to be rewritten using some native
+   * functions as prototype setup using normal JavaScript does not work as
+   * expected during bootstrapping (see mirror.js in r114903).
+   *
+   * @param {function} ctor Constructor function which needs to inherit the
+   *     prototype.
+   * @param {function} superCtor Constructor function to inherit prototype from.
+   */
+  exports.inherits = inherits$1;
+
+  exports._extend = function(origin, add) {
+    // Don't do anything if add isn't an object
+    if (!add || !isObject(add)) return origin;
+
+    var keys = Object.keys(add);
+    var i = keys.length;
+    while (i--) {
+      origin[keys[i]] = add[keys[i]];
+    }
+    return origin;
+  };
+
+  function hasOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+  }
+
+  var kCustomPromisifiedSymbol = typeof Symbol !== 'undefined' ? Symbol('util.promisify.custom') : undefined;
+
+  exports.promisify = function promisify(original) {
+    if (typeof original !== 'function')
+      throw new TypeError('The "original" argument must be of type Function');
+
+    if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
+      var fn = original[kCustomPromisifiedSymbol];
+      if (typeof fn !== 'function') {
+        throw new TypeError('The "util.promisify.custom" argument must be of type Function');
+      }
+      Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+        value: fn, enumerable: false, writable: false, configurable: true
+      });
+      return fn;
+    }
+
+    function fn() {
+      var promiseResolve, promiseReject;
+      var promise = new Promise(function (resolve, reject) {
+        promiseResolve = resolve;
+        promiseReject = reject;
+      });
+
+      var args = [];
+      for (var i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+      args.push(function (err, value) {
+        if (err) {
+          promiseReject(err);
+        } else {
+          promiseResolve(value);
+        }
+      });
+
+      try {
+        original.apply(this, args);
+      } catch (err) {
+        promiseReject(err);
+      }
+
+      return promise;
+    }
+
+    Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
+
+    if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+      value: fn, enumerable: false, writable: false, configurable: true
+    });
+    return Object.defineProperties(
+      fn,
+      getOwnPropertyDescriptors(original)
+    );
+  };
+
+  exports.promisify.custom = kCustomPromisifiedSymbol;
+
+  function callbackifyOnRejected(reason, cb) {
+    // `!reason` guard inspired by bluebird (Ref: https://goo.gl/t5IS6M).
+    // Because `null` is a special error value in callbacks which means "no error
+    // occurred", we error-wrap so the callback consumer can distinguish between
+    // "the promise rejected with null" or "the promise fulfilled with undefined".
+    if (!reason) {
+      var newReason = new Error('Promise was rejected with a falsy value');
+      newReason.reason = reason;
+      reason = newReason;
+    }
+    return cb(reason);
+  }
+
+  function callbackify(original) {
+    if (typeof original !== 'function') {
+      throw new TypeError('The "original" argument must be of type Function');
+    }
+
+    // We DO NOT return the promise as it gives the user a false sense that
+    // the promise is actually somehow related to the callback's execution
+    // and that the callback throwing will reject the promise.
+    function callbackified() {
+      var args = [];
+      for (var i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+
+      var maybeCb = args.pop();
+      if (typeof maybeCb !== 'function') {
+        throw new TypeError('The last argument must be of type Function');
+      }
+      var self = this;
+      var cb = function() {
+        return maybeCb.apply(self, arguments);
+      };
+      // In true node style we process the callback on `nextTick` with all the
+      // implications (stack, `uncaughtException`, `async_hooks`)
+      original.apply(this, args)
+        .then(function(ret) { nextTick(cb, null, ret); },
+              function(rej) { nextTick(callbackifyOnRejected, rej, cb); });
+    }
+
+    Object.setPrototypeOf(callbackified, Object.getPrototypeOf(original));
+    Object.defineProperties(callbackified,
+                            getOwnPropertyDescriptors(original));
+    return callbackified;
+  }
+  exports.callbackify = callbackify;
+  });
+  var util_1$1 = util$1.format;
+  var util_2$1 = util$1.deprecate;
+  var util_3$1 = util$1.debuglog;
+  var util_4$1 = util$1.inspect;
+  var util_5$1 = util$1.isArray;
+  var util_6$1 = util$1.isBoolean;
+  var util_7$1 = util$1.isNull;
+  var util_8$1 = util$1.isNullOrUndefined;
+  var util_9$1 = util$1.isNumber;
+  var util_10$1 = util$1.isString;
+  var util_11$1 = util$1.isSymbol;
+  var util_12$1 = util$1.isUndefined;
+  var util_13$1 = util$1.isRegExp;
+  var util_14$1 = util$1.isObject;
+  var util_15$1 = util$1.isDate;
+  var util_16$1 = util$1.isError;
+  var util_17$1 = util$1.isFunction;
+  var util_18$1 = util$1.isPrimitive;
+  var util_19$1 = util$1.isBuffer;
+  var util_20$1 = util$1.log;
+  var util_21$1 = util$1.inherits;
+  var util_22$1 = util$1._extend;
+  var util_23$1 = util$1.promisify;
+  var util_24$1 = util$1.callbackify;
+
+  var argv$1 = process.argv;
+
+  var terminator = argv$1.indexOf('--');
+  var hasFlag$1 = function (flag) {
+  	flag = '--' + flag;
+  	var pos = argv$1.indexOf(flag);
+  	return pos !== -1 && (terminator !== -1 ? pos < terminator : true);
+  };
+
+  var supportsColor$1 = (function () {
+  	if ('FORCE_COLOR' in process.env) {
+  		return true;
+  	}
+
+  	if (hasFlag$1('no-color') ||
+  		hasFlag$1('no-colors') ||
+  		hasFlag$1('color=false')) {
+  		return false;
+  	}
+
+  	if (hasFlag$1('color') ||
+  		hasFlag$1('colors') ||
+  		hasFlag$1('color=true') ||
+  		hasFlag$1('color=always')) {
+  		return true;
+  	}
+
+  	if ('COLORTERM' in process.env) {
+  		return true;
+  	}
+
+  	if (process.env.TERM === 'dumb') {
+  		return false;
+  	}
+
+  	if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(process.env.TERM)) {
+  		return true;
+  	}
+
+  	return false;
+  })();
+
+  var node$1 = createCommonjsModule(function (module, exports) {
+
+  /**
+   * Module dependencies.
+   */
+
+
+
+  /**
+   * This is the Node.js implementation of `debug()`.
+   */
+
+
+  exports.init = init;
+  exports.log = log;
+  exports.formatArgs = formatArgs;
+  exports.save = save;
+  exports.load = load;
+  exports.useColors = useColors;
+  /**
+   * Colors.
+   */
+
+  exports.colors = [6, 2, 3, 4, 5, 1];
+
+  try {
+    // Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    var supportsColor = supportsColor$1;
+
+    if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
+      exports.colors = [20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68, 69, 74, 75, 76, 77, 78, 79, 80, 81, 92, 93, 98, 99, 112, 113, 128, 129, 134, 135, 148, 149, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 214, 215, 220, 221];
+    }
+  } catch (error) {} // Swallow - we only care if `supports-color` is available; it doesn't have to be.
+
+  /**
+   * Build up the default `inspectOpts` object from the environment variables.
+   *
+   *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
+   */
+
+
+  exports.inspectOpts = Object.keys(process.env).filter(function (key) {
+    return /^debug_/i.test(key);
+  }).reduce(function (obj, key) {
+    // Camel-case
+    var prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, function (_, k) {
+      return k.toUpperCase();
+    }); // Coerce string value into JS value
+
+    var val = process.env[key];
+
+    if (/^(yes|on|true|enabled)$/i.test(val)) {
+      val = true;
+    } else if (/^(no|off|false|disabled)$/i.test(val)) {
+      val = false;
+    } else if (val === 'null') {
+      val = null;
+    } else {
+      val = Number(val);
+    }
+
+    obj[prop] = val;
+    return obj;
+  }, {});
+  /**
+   * Is stdout a TTY? Colored output is enabled when `true`.
+   */
+
+  function useColors() {
+    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty$1.isatty(process.stderr.fd);
+  }
+  /**
+   * Adds ANSI color escape codes if enabled.
+   *
+   * @api public
+   */
+
+
+  function formatArgs(args) {
+    var name = this.namespace,
+        useColors = this.useColors;
+
+    if (useColors) {
+      var c = this.color;
+      var colorCode = "\x1B[3" + (c < 8 ? c : '8;5;' + c);
+      var prefix = "  ".concat(colorCode, ";1m").concat(name, " \x1B[0m");
+      args[0] = prefix + args[0].split('\n').join('\n' + prefix);
+      args.push(colorCode + 'm+' + module.exports.humanize(this.diff) + "\x1B[0m");
+    } else {
+      args[0] = getDate() + name + ' ' + args[0];
+    }
+  }
+
+  function getDate() {
+    if (exports.inspectOpts.hideDate) {
+      return '';
+    }
+
+    return new Date().toISOString() + ' ';
+  }
+  /**
+   * Invokes `util.format()` with the specified arguments and writes to stderr.
+   */
+
+
+  function log() {
+    return process.stderr.write(util$1.format.apply(util$1, arguments) + '\n');
+  }
+  /**
+   * Save `namespaces`.
+   *
+   * @param {String} namespaces
+   * @api private
+   */
+
+
+  function save(namespaces) {
+    if (namespaces) {
+      process.env.DEBUG = namespaces;
+    } else {
+      // If you set a process.env field to null or undefined, it gets cast to the
+      // string 'null' or 'undefined'. Just delete instead.
+      delete process.env.DEBUG;
+    }
+  }
+  /**
+   * Load `namespaces`.
+   *
+   * @return {String} returns the previously persisted debug modes
+   * @api private
+   */
+
+
+  function load() {
+    return process.env.DEBUG;
+  }
+  /**
+   * Init logic for `debug` instances.
+   *
+   * Create a new `inspectOpts` object in case `useColors` is set
+   * differently for a particular `debug` instance.
+   */
+
+
+  function init(debug) {
+    debug.inspectOpts = {};
+    var keys = Object.keys(exports.inspectOpts);
+
+    for (var i = 0; i < keys.length; i++) {
+      debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
+    }
+  }
+
+  module.exports = common$2(exports);
+  var formatters = module.exports.formatters;
+  /**
+   * Map %o to `util.inspect()`, all on a single line.
+   */
+
+  formatters.o = function (v) {
+    this.inspectOpts.colors = this.useColors;
+    return util$1.inspect(v, this.inspectOpts).replace(/\s*\n\s*/g, ' ');
+  };
+  /**
+   * Map %O to `util.inspect()`, allowing multiple lines if needed.
+   */
+
+
+  formatters.O = function (v) {
+    this.inspectOpts.colors = this.useColors;
+    return util$1.inspect(v, this.inspectOpts);
+  };
+  });
+  var node_1$1 = node$1.init;
+  var node_2$1 = node$1.log;
+  var node_3$1 = node$1.formatArgs;
+  var node_4$1 = node$1.save;
+  var node_5$1 = node$1.load;
+  var node_6$1 = node$1.useColors;
+  var node_7$1 = node$1.colors;
+  var node_8$1 = node$1.inspectOpts;
+
+  var src$1 = createCommonjsModule(function (module) {
+
+  /**
+   * Detect Electron renderer / nwjs process, which is node, but we should
+   * treat as a browser.
+   */
+  if (typeof process === 'undefined' || process.type === 'renderer' || browser$1 === true || process.__nwjs) {
+    module.exports = browser$3;
+  } else {
+    module.exports = node$1;
+  }
+  });
+
+  var HalfEdge_1$1 = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+
+
+  var _distance2 = _interopRequireDefault(distance_1$1);
+
+
+
+  var _squaredDistance2 = _interopRequireDefault(squaredDistance_1$1);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var debug = src$1('halfedge');
+
+  var HalfEdge = function () {
+    function HalfEdge(vertex, face) {
+      _classCallCheck(this, HalfEdge);
+
+      this.vertex = vertex;
+      this.face = face;
+      this.next = null;
+      this.prev = null;
+      this.opposite = null;
+    }
+
+    _createClass(HalfEdge, [{
+      key: 'head',
+      value: function head() {
+        return this.vertex;
+      }
+    }, {
+      key: 'tail',
+      value: function tail() {
+        return this.prev ? this.prev.vertex : null;
+      }
+    }, {
+      key: 'length',
+      value: function length() {
+        if (this.tail()) {
+          return (0, _distance2.default)(this.tail().point, this.head().point);
+        }
+        return -1;
+      }
+    }, {
+      key: 'lengthSquared',
+      value: function lengthSquared() {
+        if (this.tail()) {
+          return (0, _squaredDistance2.default)(this.tail().point, this.head().point);
+        }
+        return -1;
+      }
+    }, {
+      key: 'setOpposite',
+      value: function setOpposite(edge) {
+        var me = this;
+        if (debug.enabled) {
+          debug('opposite ' + me.tail().index + ' <--> ' + me.head().index + ' between ' + me.face.collectIndices() + ', ' + edge.face.collectIndices());
+        }
+        this.opposite = edge;
+        edge.opposite = this;
+      }
+    }]);
+
+    return HalfEdge;
+  }();
+
+  exports.default = HalfEdge;
+  module.exports = exports['default'];
+  });
+
+  unwrapExports(HalfEdge_1$1);
+
+  var Face_1$1 = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.DELETED = exports.NON_CONVEX = exports.VISIBLE = undefined;
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+
+
+  var _dot2 = _interopRequireDefault(dot_1$1);
+
+
+
+  var _add2 = _interopRequireDefault(add_1$1);
+
+
+
+  var _subtract2 = _interopRequireDefault(subtract_1$1);
+
+
+
+  var _cross2 = _interopRequireDefault(cross_1$1);
+
+
+
+  var _copy2 = _interopRequireDefault(copy_1$1);
+
+
+
+  var _length2 = _interopRequireDefault(length_1$1);
+
+
+
+  var _scale2 = _interopRequireDefault(scale_1$1);
+
+
+
+  var _scaleAndAdd2 = _interopRequireDefault(scaleAndAdd_1$1);
+
+
+
+  var _normalize2 = _interopRequireDefault(normalize_1$1);
+
+
+
+  var _HalfEdge2 = _interopRequireDefault(HalfEdge_1$1);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var debug = src$1('face');
+
+  var VISIBLE = exports.VISIBLE = 0;
+  var NON_CONVEX = exports.NON_CONVEX = 1;
+  var DELETED = exports.DELETED = 2;
+
+  var Face = function () {
+    function Face() {
+      _classCallCheck(this, Face);
+
+      this.normal = [];
+      this.centroid = [];
+      // signed distance from face to the origin
+      this.offset = 0;
+      // pointer to the a vertex in a double linked list this face can see
+      this.outside = null;
+      this.mark = VISIBLE;
+      this.edge = null;
+      this.nVertices = 0;
+    }
+
+    _createClass(Face, [{
+      key: 'getEdge',
+      value: function getEdge(i) {
+        if (typeof i !== 'number') {
+          throw Error('requires a number');
+        }
+        var it = this.edge;
+        while (i > 0) {
+          it = it.next;
+          i -= 1;
+        }
+        while (i < 0) {
+          it = it.prev;
+          i += 1;
+        }
+        return it;
+      }
+    }, {
+      key: 'computeNormal',
+      value: function computeNormal() {
+        var e0 = this.edge;
+        var e1 = e0.next;
+        var e2 = e1.next;
+        var v2 = (0, _subtract2.default)([], e1.head().point, e0.head().point);
+        var t = [];
+        var v1 = [];
+
+        this.nVertices = 2;
+        this.normal = [0, 0, 0];
+        while (e2 !== e0) {
+          (0, _copy2.default)(v1, v2);
+          (0, _subtract2.default)(v2, e2.head().point, e0.head().point);
+          (0, _add2.default)(this.normal, this.normal, (0, _cross2.default)(t, v1, v2));
+          e2 = e2.next;
+          this.nVertices += 1;
+        }
+        this.area = (0, _length2.default)(this.normal);
+        // normalize the vector, since we've already calculated the area
+        // it's cheaper to scale the vector using this quantity instead of
+        // doing the same operation again
+        this.normal = (0, _scale2.default)(this.normal, this.normal, 1 / this.area);
+      }
+    }, {
+      key: 'computeNormalMinArea',
+      value: function computeNormalMinArea(minArea) {
+        this.computeNormal();
+        if (this.area < minArea) {
+          // compute the normal without the longest edge
+          var maxEdge = void 0;
+          var maxSquaredLength = 0;
+          var edge = this.edge;
+
+          // find the longest edge (in length) in the chain of edges
+          do {
+            var lengthSquared = edge.lengthSquared();
+            if (lengthSquared > maxSquaredLength) {
+              maxEdge = edge;
+              maxSquaredLength = lengthSquared;
+            }
+            edge = edge.next;
+          } while (edge !== this.edge);
+
+          var p1 = maxEdge.tail().point;
+          var p2 = maxEdge.head().point;
+          var maxVector = (0, _subtract2.default)([], p2, p1);
+          var maxLength = Math.sqrt(maxSquaredLength);
+          // maxVector is normalized after this operation
+          (0, _scale2.default)(maxVector, maxVector, 1 / maxLength);
+          // compute the projection of maxVector over this face normal
+          var maxProjection = (0, _dot2.default)(this.normal, maxVector);
+          // subtract the quantity maxEdge adds on the normal
+          (0, _scaleAndAdd2.default)(this.normal, this.normal, maxVector, -maxProjection);
+          // renormalize `this.normal`
+          (0, _normalize2.default)(this.normal, this.normal);
+        }
+      }
+    }, {
+      key: 'computeCentroid',
+      value: function computeCentroid() {
+        this.centroid = [0, 0, 0];
+        var edge = this.edge;
+        do {
+          (0, _add2.default)(this.centroid, this.centroid, edge.head().point);
+          edge = edge.next;
+        } while (edge !== this.edge);
+        (0, _scale2.default)(this.centroid, this.centroid, 1 / this.nVertices);
+      }
+    }, {
+      key: 'computeNormalAndCentroid',
+      value: function computeNormalAndCentroid(minArea) {
+        if (typeof minArea !== 'undefined') {
+          this.computeNormalMinArea(minArea);
+        } else {
+          this.computeNormal();
+        }
+        this.computeCentroid();
+        this.offset = (0, _dot2.default)(this.normal, this.centroid);
+      }
+    }, {
+      key: 'distanceToPlane',
+      value: function distanceToPlane(point) {
+        return (0, _dot2.default)(this.normal, point) - this.offset;
+      }
+
+      /**
+       * @private
+       *
+       * Connects two edges assuming that prev.head().point === next.tail().point
+       *
+       * @param {HalfEdge} prev
+       * @param {HalfEdge} next
+       */
+
+    }, {
+      key: 'connectHalfEdges',
+      value: function connectHalfEdges(prev, next) {
+        var discardedFace = void 0;
+        if (prev.opposite.face === next.opposite.face) {
+          // `prev` is remove a redundant edge
+          var oppositeFace = next.opposite.face;
+          var oppositeEdge = void 0;
+          if (prev === this.edge) {
+            this.edge = next;
+          }
+          if (oppositeFace.nVertices === 3) {
+            // case:
+            // remove the face on the right
+            //
+            //       /|\
+            //      / | \ the face on the right
+            //     /  |  \ --> opposite edge
+            //    / a |   \
+            //   *----*----*
+            //  /     b  |  \
+            //           ▾
+            //      redundant edge
+            //
+            // Note: the opposite edge is actually in the face to the right
+            // of the face to be destroyed
+            oppositeEdge = next.opposite.prev.opposite;
+            oppositeFace.mark = DELETED;
+            discardedFace = oppositeFace;
+          } else {
+            // case:
+            //          t
+            //        *----
+            //       /| <- right face's redundant edge
+            //      / | opposite edge
+            //     /  |  ▴   /
+            //    / a |  |  /
+            //   *----*----*
+            //  /     b  |  \
+            //           ▾
+            //      redundant edge
+            oppositeEdge = next.opposite.next;
+            // make sure that the link `oppositeFace.edge` points correctly even
+            // after the right face redundant edge is removed
+            if (oppositeFace.edge === oppositeEdge.prev) {
+              oppositeFace.edge = oppositeEdge;
+            }
+
+            //       /|   /
+            //      / | t/opposite edge
+            //     /  | / ▴  /
+            //    / a |/  | /
+            //   *----*----*
+            //  /     b     \
+            oppositeEdge.prev = oppositeEdge.prev.prev;
+            oppositeEdge.prev.next = oppositeEdge;
+          }
+          //       /|
+          //      / |
+          //     /  |
+          //    / a |
+          //   *----*----*
+          //  /     b  ▴  \
+          //           |
+          //     redundant edge
+          next.prev = prev.prev;
+          next.prev.next = next;
+
+          //       / \  \
+          //      /   \->\
+          //     /     \<-\ opposite edge
+          //    / a     \  \
+          //   *----*----*
+          //  /     b  ^  \
+          next.setOpposite(oppositeEdge);
+
+          oppositeFace.computeNormalAndCentroid();
+        } else {
+          // trivial case
+          //        *
+          //       /|\
+          //      / | \
+          //     /  |--> next
+          //    / a |   \
+          //   *----*----*
+          //    \ b |   /
+          //     \  |--> prev
+          //      \ | /
+          //       \|/
+          //        *
+          prev.next = next;
+          next.prev = prev;
+        }
+        return discardedFace;
+      }
+    }, {
+      key: 'mergeAdjacentFaces',
+      value: function mergeAdjacentFaces(adjacentEdge, discardedFaces) {
+        var oppositeEdge = adjacentEdge.opposite;
+        var oppositeFace = oppositeEdge.face;
+
+        discardedFaces.push(oppositeFace);
+        oppositeFace.mark = DELETED;
+
+        // find the chain of edges whose opposite face is `oppositeFace`
+        //
+        //                ===>
+        //      \         face         /
+        //       * ---- * ---- * ---- *
+        //      /     opposite face    \
+        //                <===
+        //
+        var adjacentEdgePrev = adjacentEdge.prev;
+        var adjacentEdgeNext = adjacentEdge.next;
+        var oppositeEdgePrev = oppositeEdge.prev;
+        var oppositeEdgeNext = oppositeEdge.next;
+
+        // left edge
+        while (adjacentEdgePrev.opposite.face === oppositeFace) {
+          adjacentEdgePrev = adjacentEdgePrev.prev;
+          oppositeEdgeNext = oppositeEdgeNext.next;
+        }
+        // right edge
+        while (adjacentEdgeNext.opposite.face === oppositeFace) {
+          adjacentEdgeNext = adjacentEdgeNext.next;
+          oppositeEdgePrev = oppositeEdgePrev.prev;
+        }
+        // adjacentEdgePrev  \         face         / adjacentEdgeNext
+        //                    * ---- * ---- * ---- *
+        // oppositeEdgeNext  /     opposite face    \ oppositeEdgePrev
+
+        // fix the face reference of all the opposite edges that are not part of
+        // the edges whose opposite face is not `face` i.e. all the edges that
+        // `face` and `oppositeFace` do not have in common
+        var edge = void 0;
+        for (edge = oppositeEdgeNext; edge !== oppositeEdgePrev.next; edge = edge.next) {
+          edge.face = this;
+        }
+
+        // make sure that `face.edge` is not one of the edges to be destroyed
+        // Note: it's important for it to be a `next` edge since `prev` edges
+        // might be destroyed on `connectHalfEdges`
+        this.edge = adjacentEdgeNext;
+
+        // connect the extremes
+        // Note: it might be possible that after connecting the edges a triangular
+        // face might be redundant
+        var discardedFace = void 0;
+        discardedFace = this.connectHalfEdges(oppositeEdgePrev, adjacentEdgeNext);
+        if (discardedFace) {
+          discardedFaces.push(discardedFace);
+        }
+        discardedFace = this.connectHalfEdges(adjacentEdgePrev, oppositeEdgeNext);
+        if (discardedFace) {
+          discardedFaces.push(discardedFace);
+        }
+
+        this.computeNormalAndCentroid();
+        // TODO: additional consistency checks
+        return discardedFaces;
+      }
+    }, {
+      key: 'collectIndices',
+      value: function collectIndices() {
+        var indices = [];
+        var edge = this.edge;
+        do {
+          indices.push(edge.head().index);
+          edge = edge.next;
+        } while (edge !== this.edge);
+        return indices;
+      }
+    }], [{
+      key: 'createTriangle',
+      value: function createTriangle(v0, v1, v2) {
+        var minArea = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+        var face = new Face();
+        var e0 = new _HalfEdge2.default(v0, face);
+        var e1 = new _HalfEdge2.default(v1, face);
+        var e2 = new _HalfEdge2.default(v2, face);
+
+        // join edges
+        e0.next = e2.prev = e1;
+        e1.next = e0.prev = e2;
+        e2.next = e1.prev = e0;
+
+        // main half edge reference
+        face.edge = e0;
+        face.computeNormalAndCentroid(minArea);
+        if (debug.enabled) {
+          debug('face created %j', face.collectIndices());
+        }
+        return face;
+      }
+    }]);
+
+    return Face;
+  }();
+
+  exports.default = Face;
+  });
+
+  unwrapExports(Face_1$1);
+  var Face_2$1 = Face_1$1.DELETED;
+  var Face_3$1 = Face_1$1.NON_CONVEX;
+  var Face_4$1 = Face_1$1.VISIBLE;
+
+  var QuickHull_1$1 = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+
+
+  var _pointLineDistance2 = _interopRequireDefault(pointLineDistance$1);
+
+
+
+  var _getPlaneNormal2 = _interopRequireDefault(getPlaneNormal$1);
+
+
+
+  var _dot2 = _interopRequireDefault(dot_1$1);
+
+
+
+  var _VertexList2 = _interopRequireDefault(VertexList_1$1);
+
+
+
+  var _Vertex2 = _interopRequireDefault(Vertex_1$1);
+
+
+
+  var _Face2 = _interopRequireDefault(Face_1$1);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var debug = src$1('quickhull');
+
+  // merge types
+  // non convex with respect to the large face
+  var MERGE_NON_CONVEX_WRT_LARGER_FACE = 1;
+  var MERGE_NON_CONVEX = 2;
+
+  var QuickHull = function () {
+    function QuickHull(points) {
+      _classCallCheck(this, QuickHull);
+
+      if (!Array.isArray(points)) {
+        throw TypeError('input is not a valid array');
+      }
+      if (points.length < 4) {
+        throw Error('cannot build a simplex out of <4 points');
+      }
+
+      this.tolerance = -1;
+
+      // buffers
+      this.nFaces = 0;
+      this.nPoints = points.length;
+
+      this.faces = [];
+      this.newFaces = [];
+      // helpers
+      //
+      // let `a`, `b` be `Face` instances
+      // let `v` be points wrapped as instance of `Vertex`
+      //
+      //     [v, v, ..., v, v, v, ...]
+      //      ^             ^
+      //      |             |
+      //  a.outside     b.outside
+      //
+      this.claimed = new _VertexList2.default();
+      this.unclaimed = new _VertexList2.default();
+
+      // vertices of the hull(internal representation of points)
+      this.vertices = [];
+      for (var i = 0; i < points.length; i += 1) {
+        this.vertices.push(new _Vertex2.default(points[i], i));
+      }
+      this.discardedFaces = [];
+      this.vertexPointIndices = [];
+    }
+
+    _createClass(QuickHull, [{
+      key: 'addVertexToFace',
+      value: function addVertexToFace(vertex, face) {
+        vertex.face = face;
+        if (!face.outside) {
+          this.claimed.add(vertex);
+        } else {
+          this.claimed.insertBefore(face.outside, vertex);
+        }
+        face.outside = vertex;
+      }
+
+      /**
+       * Removes `vertex` for the `claimed` list of vertices, it also makes sure
+       * that the link from `face` to the first vertex it sees in `claimed` is
+       * linked correctly after the removal
+       *
+       * @param {Vertex} vertex
+       * @param {Face} face
+       */
+
+    }, {
+      key: 'removeVertexFromFace',
+      value: function removeVertexFromFace(vertex, face) {
+        if (vertex === face.outside) {
+          // fix face.outside link
+          if (vertex.next && vertex.next.face === face) {
+            // face has at least 2 outside vertices, move the `outside` reference
+            face.outside = vertex.next;
+          } else {
+            // vertex was the only outside vertex that face had
+            face.outside = null;
+          }
+        }
+        this.claimed.remove(vertex);
+      }
+
+      /**
+       * Removes all the visible vertices that `face` is able to see which are
+       * stored in the `claimed` vertext list
+       *
+       * @param {Face} face
+       * @return {Vertex|undefined} If face had visible vertices returns
+       * `face.outside`, otherwise undefined
+       */
+
+    }, {
+      key: 'removeAllVerticesFromFace',
+      value: function removeAllVerticesFromFace(face) {
+        if (face.outside) {
+          // pointer to the last vertex of this face
+          // [..., outside, ..., end, outside, ...]
+          //          |           |      |
+          //          a           a      b
+          var end = face.outside;
+          while (end.next && end.next.face === face) {
+            end = end.next;
+          }
+          this.claimed.removeChain(face.outside, end);
+          //                            b
+          //                       [ outside, ...]
+          //                            |  removes this link
+          //     [ outside, ..., end ] -┘
+          //          |           |
+          //          a           a
+          end.next = null;
+          return face.outside;
+        }
+      }
+
+      /**
+       * Removes all the visible vertices that `face` is able to see, additionally
+       * checking the following:
+       *
+       * If `absorbingFace` doesn't exist then all the removed vertices will be
+       * added to the `unclaimed` vertex list
+       *
+       * If `absorbingFace` exists then this method will assign all the vertices of
+       * `face` that can see `absorbingFace`, if a vertex cannot see `absorbingFace`
+       * it's added to the `unclaimed` vertex list
+       *
+       * @param {Face} face
+       * @param {Face} [absorbingFace]
+       */
+
+    }, {
+      key: 'deleteFaceVertices',
+      value: function deleteFaceVertices(face, absorbingFace) {
+        var faceVertices = this.removeAllVerticesFromFace(face);
+        if (faceVertices) {
+          if (!absorbingFace) {
+            // mark the vertices to be reassigned to some other face
+            this.unclaimed.addAll(faceVertices);
+          } else {
+            // if there's an absorbing face try to assign as many vertices
+            // as possible to it
+
+            // the reference `vertex.next` might be destroyed on
+            // `this.addVertexToFace` (see VertexList#add), nextVertex is a
+            // reference to it
+            var nextVertex = void 0;
+            for (var vertex = faceVertices; vertex; vertex = nextVertex) {
+              nextVertex = vertex.next;
+              var distance = absorbingFace.distanceToPlane(vertex.point);
+
+              // check if `vertex` is able to see `absorbingFace`
+              if (distance > this.tolerance) {
+                this.addVertexToFace(vertex, absorbingFace);
+              } else {
+                this.unclaimed.add(vertex);
+              }
+            }
+          }
+        }
+      }
+
+      /**
+       * Reassigns as many vertices as possible from the unclaimed list to the new
+       * faces
+       *
+       * @param {Faces[]} newFaces
+       */
+
+    }, {
+      key: 'resolveUnclaimedPoints',
+      value: function resolveUnclaimedPoints(newFaces) {
+        // cache next vertex so that if `vertex.next` is destroyed it's still
+        // recoverable
+        var vertexNext = this.unclaimed.first();
+        for (var vertex = vertexNext; vertex; vertex = vertexNext) {
+          vertexNext = vertex.next;
+          var maxDistance = this.tolerance;
+          var maxFace = void 0;
+          for (var i = 0; i < newFaces.length; i += 1) {
+            var face = newFaces[i];
+            if (face.mark === Face_1$1.VISIBLE) {
+              var dist = face.distanceToPlane(vertex.point);
+              if (dist > maxDistance) {
+                maxDistance = dist;
+                maxFace = face;
+              }
+              if (maxDistance > 1000 * this.tolerance) {
+                break;
+              }
+            }
+          }
+
+          if (maxFace) {
+            this.addVertexToFace(vertex, maxFace);
+          }
+        }
+      }
+
+      /**
+       * Computes the extremes of a tetrahedron which will be the initial hull
+       *
+       * @return {number[]} The min/max vertices in the x,y,z directions
+       */
+
+    }, {
+      key: 'computeExtremes',
+      value: function computeExtremes() {
+        var me = this;
+        var min = [];
+        var max = [];
+
+        // min vertex on the x,y,z directions
+        var minVertices = [];
+        // max vertex on the x,y,z directions
+        var maxVertices = [];
+
+        var i = void 0,
+            j = void 0;
+
+        // initially assume that the first vertex is the min/max
+        for (i = 0; i < 3; i += 1) {
+          minVertices[i] = maxVertices[i] = this.vertices[0];
+        }
+        // copy the coordinates of the first vertex to min/max
+        for (i = 0; i < 3; i += 1) {
+          min[i] = max[i] = this.vertices[0].point[i];
+        }
+
+        // compute the min/max vertex on all 6 directions
+        for (i = 1; i < this.vertices.length; i += 1) {
+          var vertex = this.vertices[i];
+          var point = vertex.point;
+          // update the min coordinates
+          for (j = 0; j < 3; j += 1) {
+            if (point[j] < min[j]) {
+              min[j] = point[j];
+              minVertices[j] = vertex;
+            }
+          }
+          // update the max coordinates
+          for (j = 0; j < 3; j += 1) {
+            if (point[j] > max[j]) {
+              max[j] = point[j];
+              maxVertices[j] = vertex;
+            }
+          }
+        }
+
+        // compute epsilon
+        this.tolerance = 3 * Number.EPSILON * (Math.max(Math.abs(min[0]), Math.abs(max[0])) + Math.max(Math.abs(min[1]), Math.abs(max[1])) + Math.max(Math.abs(min[2]), Math.abs(max[2])));
+        if (debug.enabled) {
+          debug('tolerance %d', me.tolerance);
+        }
+        return [minVertices, maxVertices];
+      }
+
+      /**
+       * Compues the initial tetrahedron assigning to its faces all the points that
+       * are candidates to form part of the hull
+       */
+
+    }, {
+      key: 'createInitialSimplex',
+      value: function createInitialSimplex() {
+        var vertices = this.vertices;
+
+        var _computeExtremes = this.computeExtremes(),
+            _computeExtremes2 = _slicedToArray(_computeExtremes, 2),
+            min = _computeExtremes2[0],
+            max = _computeExtremes2[1];
+
+        var v0 = void 0,
+            v1 = void 0,
+            v2 = void 0,
+            v3 = void 0;
+        var i = void 0,
+            j = void 0;
+
+        // Find the two vertices with the greatest 1d separation
+        // (max.x - min.x)
+        // (max.y - min.y)
+        // (max.z - min.z)
+        var maxDistance = 0;
+        var indexMax = 0;
+        for (i = 0; i < 3; i += 1) {
+          var distance = max[i].point[i] - min[i].point[i];
+          if (distance > maxDistance) {
+            maxDistance = distance;
+            indexMax = i;
+          }
+        }
+        v0 = min[indexMax];
+        v1 = max[indexMax];
+
+        // the next vertex is the one farthest to the line formed by `v0` and `v1`
+        maxDistance = 0;
+        for (i = 0; i < this.vertices.length; i += 1) {
+          var vertex = this.vertices[i];
+          if (vertex !== v0 && vertex !== v1) {
+            var _distance = (0, _pointLineDistance2.default)(vertex.point, v0.point, v1.point);
+            if (_distance > maxDistance) {
+              maxDistance = _distance;
+              v2 = vertex;
+            }
+          }
+        }
+
+        // the next vertes is the one farthest to the plane `v0`, `v1`, `v2`
+        // normalize((v2 - v1) x (v0 - v1))
+        var normal = (0, _getPlaneNormal2.default)([], v0.point, v1.point, v2.point);
+        // distance from the origin to the plane
+        var distPO = (0, _dot2.default)(v0.point, normal);
+        maxDistance = -1;
+        for (i = 0; i < this.vertices.length; i += 1) {
+          var _vertex = this.vertices[i];
+          if (_vertex !== v0 && _vertex !== v1 && _vertex !== v2) {
+            var _distance2 = Math.abs((0, _dot2.default)(normal, _vertex.point) - distPO);
+            if (_distance2 > maxDistance) {
+              maxDistance = _distance2;
+              v3 = _vertex;
+            }
+          }
+        }
+
+        // initial simplex
+        // Taken from http://everything2.com/title/How+to+paint+a+tetrahedron
+        //
+        //                              v2
+        //                             ,|,
+        //                           ,7``\'VA,
+        //                         ,7`   |, `'VA,
+        //                       ,7`     `\    `'VA,
+        //                     ,7`        |,      `'VA,
+        //                   ,7`          `\         `'VA,
+        //                 ,7`             |,           `'VA,
+        //               ,7`               `\       ,..ooOOTK` v3
+        //             ,7`                  |,.ooOOT''`    AV
+        //           ,7`            ,..ooOOT`\`           /7
+        //         ,7`      ,..ooOOT''`      |,          AV
+        //        ,T,..ooOOT''`              `\         /7
+        //     v0 `'TTs.,                     |,       AV
+        //            `'TTs.,                 `\      /7
+        //                 `'TTs.,             |,    AV
+        //                      `'TTs.,        `\   /7
+        //                           `'TTs.,    |, AV
+        //                                `'TTs.,\/7
+        //                                     `'T`
+        //                                       v1
+        //
+        var faces = [];
+        if ((0, _dot2.default)(v3.point, normal) - distPO < 0) {
+          // the face is not able to see the point so `planeNormal`
+          // is pointing outside the tetrahedron
+          faces.push(_Face2.default.createTriangle(v0, v1, v2), _Face2.default.createTriangle(v3, v1, v0), _Face2.default.createTriangle(v3, v2, v1), _Face2.default.createTriangle(v3, v0, v2));
+
+          // set the opposite edge
+          for (i = 0; i < 3; i += 1) {
+            var _j = (i + 1) % 3;
+            // join face[i] i > 0, with the first face
+            faces[i + 1].getEdge(2).setOpposite(faces[0].getEdge(_j));
+            // join face[i] with face[i + 1], 1 <= i <= 3
+            faces[i + 1].getEdge(1).setOpposite(faces[_j + 1].getEdge(0));
+          }
+        } else {
+          // the face is able to see the point so `planeNormal`
+          // is pointing inside the tetrahedron
+          faces.push(_Face2.default.createTriangle(v0, v2, v1), _Face2.default.createTriangle(v3, v0, v1), _Face2.default.createTriangle(v3, v1, v2), _Face2.default.createTriangle(v3, v2, v0));
+
+          // set the opposite edge
+          for (i = 0; i < 3; i += 1) {
+            var _j2 = (i + 1) % 3;
+            // join face[i] i > 0, with the first face
+            faces[i + 1].getEdge(2).setOpposite(faces[0].getEdge((3 - i) % 3));
+            // join face[i] with face[i + 1]
+            faces[i + 1].getEdge(0).setOpposite(faces[_j2 + 1].getEdge(1));
+          }
+        }
+
+        // the initial hull is the tetrahedron
+        for (i = 0; i < 4; i += 1) {
+          this.faces.push(faces[i]);
+        }
+
+        // initial assignment of vertices to the faces of the tetrahedron
+        for (i = 0; i < vertices.length; i += 1) {
+          var _vertex2 = vertices[i];
+          if (_vertex2 !== v0 && _vertex2 !== v1 && _vertex2 !== v2 && _vertex2 !== v3) {
+            maxDistance = this.tolerance;
+            var maxFace = void 0;
+            for (j = 0; j < 4; j += 1) {
+              var _distance3 = faces[j].distanceToPlane(_vertex2.point);
+              if (_distance3 > maxDistance) {
+                maxDistance = _distance3;
+                maxFace = faces[j];
+              }
+            }
+
+            if (maxFace) {
+              this.addVertexToFace(_vertex2, maxFace);
+            }
+          }
+        }
+      }
+    }, {
+      key: 'reindexFaceAndVertices',
+      value: function reindexFaceAndVertices() {
+        // remove inactive faces
+        var activeFaces = [];
+        for (var i = 0; i < this.faces.length; i += 1) {
+          var face = this.faces[i];
+          if (face.mark === Face_1$1.VISIBLE) {
+            activeFaces.push(face);
+          }
+        }
+        this.faces = activeFaces;
+      }
+    }, {
+      key: 'collectFaces',
+      value: function collectFaces(skipTriangulation) {
+        var faceIndices = [];
+        for (var i = 0; i < this.faces.length; i += 1) {
+          if (this.faces[i].mark !== Face_1$1.VISIBLE) {
+            throw Error('attempt to include a destroyed face in the hull');
+          }
+          var indices = this.faces[i].collectIndices();
+          if (skipTriangulation) {
+            faceIndices.push(indices);
+          } else {
+            for (var j = 0; j < indices.length - 2; j += 1) {
+              faceIndices.push([indices[0], indices[j + 1], indices[j + 2]]);
+            }
+          }
+        }
+        return faceIndices;
+      }
+
+      /**
+       * Finds the next vertex to make faces with the current hull
+       *
+       * - let `face` be the first face existing in the `claimed` vertex list
+       *  - if `face` doesn't exist then return since there're no vertices left
+       *  - otherwise for each `vertex` that face sees find the one furthest away
+       *  from `face`
+       *
+       * @return {Vertex|undefined} Returns undefined when there're no more
+       * visible vertices
+       */
+
+    }, {
+      key: 'nextVertexToAdd',
+      value: function nextVertexToAdd() {
+        if (!this.claimed.isEmpty()) {
+          var eyeVertex = void 0,
+              vertex = void 0;
+          var maxDistance = 0;
+          var eyeFace = this.claimed.first().face;
+          for (vertex = eyeFace.outside; vertex && vertex.face === eyeFace; vertex = vertex.next) {
+            var distance = eyeFace.distanceToPlane(vertex.point);
+            if (distance > maxDistance) {
+              maxDistance = distance;
+              eyeVertex = vertex;
+            }
+          }
+          return eyeVertex;
+        }
+      }
+
+      /**
+       * Computes a chain of half edges in ccw order called the `horizon`, for an
+       * edge to be part of the horizon it must join a face that can see
+       * `eyePoint` and a face that cannot see `eyePoint`
+       *
+       * @param {number[]} eyePoint - The coordinates of a point
+       * @param {HalfEdge} crossEdge - The edge used to jump to the current `face`
+       * @param {Face} face - The current face being tested
+       * @param {HalfEdge[]} horizon - The edges that form part of the horizon in
+       * ccw order
+       */
+
+    }, {
+      key: 'computeHorizon',
+      value: function computeHorizon(eyePoint, crossEdge, face, horizon) {
+        // moves face's vertices to the `unclaimed` vertex list
+        this.deleteFaceVertices(face);
+
+        face.mark = Face_1$1.DELETED;
+
+        var edge = void 0;
+        if (!crossEdge) {
+          edge = crossEdge = face.getEdge(0);
+        } else {
+          // start from the next edge since `crossEdge` was already analyzed
+          // (actually `crossEdge.opposite` was the face who called this method
+          // recursively)
+          edge = crossEdge.next;
+        }
+
+        // All the faces that are able to see `eyeVertex` are defined as follows
+        //
+        //       v    /
+        //           / <== visible face
+        //          /
+        //         |
+        //         | <== not visible face
+        //
+        //  dot(v, visible face normal) - visible face offset > this.tolerance
+        //
+        do {
+          var oppositeEdge = edge.opposite;
+          var oppositeFace = oppositeEdge.face;
+          if (oppositeFace.mark === Face_1$1.VISIBLE) {
+            if (oppositeFace.distanceToPlane(eyePoint) > this.tolerance) {
+              this.computeHorizon(eyePoint, oppositeEdge, oppositeFace, horizon);
+            } else {
+              horizon.push(edge);
+            }
+          }
+          edge = edge.next;
+        } while (edge !== crossEdge);
+      }
+
+      /**
+       * Creates a face with the points `eyeVertex.point`, `horizonEdge.tail` and
+       * `horizonEdge.tail` in ccw order
+       *
+       * @param {Vertex} eyeVertex
+       * @param {HalfEdge} horizonEdge
+       * @return {HalfEdge} The half edge whose vertex is the eyeVertex
+       */
+
+    }, {
+      key: 'addAdjoiningFace',
+      value: function addAdjoiningFace(eyeVertex, horizonEdge) {
+        // all the half edges are created in ccw order thus the face is always
+        // pointing outside the hull
+        // edges:
+        //
+        //                  eyeVertex.point
+        //                       / \
+        //                      /   \
+        //                  1  /     \  0
+        //                    /       \
+        //                   /         \
+        //                  /           \
+        //          horizon.tail --- horizon.head
+        //                        2
+        //
+        var face = _Face2.default.createTriangle(eyeVertex, horizonEdge.tail(), horizonEdge.head());
+        this.faces.push(face);
+        // join face.getEdge(-1) with the horizon's opposite edge
+        // face.getEdge(-1) = face.getEdge(2)
+        face.getEdge(-1).setOpposite(horizonEdge.opposite);
+        return face.getEdge(0);
+      }
+
+      /**
+       * Adds horizon.length faces to the hull, each face will be 'linked' with the
+       * horizon opposite face and the face on the left/right
+       *
+       * @param {Vertex} eyeVertex
+       * @param {HalfEdge[]} horizon - A chain of half edges in ccw order
+       */
+
+    }, {
+      key: 'addNewFaces',
+      value: function addNewFaces(eyeVertex, horizon) {
+        this.newFaces = [];
+        var firstSideEdge = void 0,
+            previousSideEdge = void 0;
+        for (var i = 0; i < horizon.length; i += 1) {
+          var horizonEdge = horizon[i];
+          // returns the right side edge
+          var sideEdge = this.addAdjoiningFace(eyeVertex, horizonEdge);
+          if (!firstSideEdge) {
+            firstSideEdge = sideEdge;
+          } else {
+            // joins face.getEdge(1) with previousFace.getEdge(0)
+            sideEdge.next.setOpposite(previousSideEdge);
+          }
+          this.newFaces.push(sideEdge.face);
+          previousSideEdge = sideEdge;
+        }
+        firstSideEdge.next.setOpposite(previousSideEdge);
+      }
+
+      /**
+       * Computes the distance from `edge` opposite face's centroid to
+       * `edge.face`
+       *
+       * @param {HalfEdge} edge
+       * @return {number}
+       * - A positive number when the centroid of the opposite face is above the
+       *   face i.e. when the faces are concave
+       * - A negative number when the centroid of the opposite face is below the
+       *   face i.e. when the faces are convex
+       */
+
+    }, {
+      key: 'oppositeFaceDistance',
+      value: function oppositeFaceDistance(edge) {
+        return edge.face.distanceToPlane(edge.opposite.face.centroid);
+      }
+
+      /**
+       * Merges a face with none/any/all its neighbors according to the strategy
+       * used
+       *
+       * if `mergeType` is MERGE_NON_CONVEX_WRT_LARGER_FACE then the merge will be
+       * decided based on the face with the larger area, the centroid of the face
+       * with the smaller area will be checked against the one with the larger area
+       * to see if it's in the merge range [tolerance, -tolerance] i.e.
+       *
+       *    dot(centroid smaller face, larger face normal) - larger face offset > -tolerance
+       *
+       * Note that the first check (with +tolerance) was done on `computeHorizon`
+       *
+       * If the above is not true then the check is done with respect to the smaller
+       * face i.e.
+       *
+       *    dot(centroid larger face, smaller face normal) - smaller face offset > -tolerance
+       *
+       * If true then it means that two faces are non convex (concave), even if the
+       * dot(...) - offset value is > 0 (that's the point of doing the merge in the
+       * first place)
+       *
+       * If two faces are concave then the check must also be done on the other face
+       * but this is done in another merge pass, for this to happen the face is
+       * marked in a temporal NON_CONVEX state
+       *
+       * if `mergeType` is MERGE_NON_CONVEX then two faces will be merged only if
+       * they pass the following conditions
+       *
+       *    dot(centroid smaller face, larger face normal) - larger face offset > -tolerance
+       *    dot(centroid larger face, smaller face normal) - smaller face offset > -tolerance
+       *
+       * @param {Face} face
+       * @param {number} mergeType - Either MERGE_NON_CONVEX_WRT_LARGER_FACE or
+       * MERGE_NON_CONVEX
+       */
+
+    }, {
+      key: 'doAdjacentMerge',
+      value: function doAdjacentMerge(face, mergeType) {
+        var edge = face.edge;
+        var convex = true;
+        var it = 0;
+        do {
+          if (it >= face.nVertices) {
+            throw Error('merge recursion limit exceeded');
+          }
+          var oppositeFace = edge.opposite.face;
+          var merge = false;
+
+          // Important notes about the algorithm to merge faces
+          //
+          // - Given a vertex `eyeVertex` that will be added to the hull
+          //   all the faces that cannot see `eyeVertex` are defined as follows
+          //
+          //      dot(v, not visible face normal) - not visible offset < tolerance
+          //
+          // - Two faces can be merged when the centroid of one of these faces
+          // projected to the normal of the other face minus the other face offset
+          // is in the range [tolerance, -tolerance]
+          // - Since `face` (given in the input for this method) has passed the
+          // check above we only have to check the lower bound e.g.
+          //
+          //      dot(v, not visible face normal) - not visible offset > -tolerance
+          //
+          if (mergeType === MERGE_NON_CONVEX) {
+            if (this.oppositeFaceDistance(edge) > -this.tolerance || this.oppositeFaceDistance(edge.opposite) > -this.tolerance) {
+              merge = true;
+            }
+          } else {
+            if (face.area > oppositeFace.area) {
+              if (this.oppositeFaceDistance(edge) > -this.tolerance) {
+                merge = true;
+              } else if (this.oppositeFaceDistance(edge.opposite) > -this.tolerance) {
+                convex = false;
+              }
+            } else {
+              if (this.oppositeFaceDistance(edge.opposite) > -this.tolerance) {
+                merge = true;
+              } else if (this.oppositeFaceDistance(edge) > -this.tolerance) {
+                convex = false;
+              }
+            }
+          }
+
+          if (merge) {
+            debug('face merge');
+            // when two faces are merged it might be possible that redundant faces
+            // are destroyed, in that case move all the visible vertices from the
+            // destroyed faces to the `unclaimed` vertex list
+            var discardedFaces = face.mergeAdjacentFaces(edge, []);
+            for (var i = 0; i < discardedFaces.length; i += 1) {
+              this.deleteFaceVertices(discardedFaces[i], face);
+            }
+            return true;
+          }
+
+          edge = edge.next;
+          it += 1;
+        } while (edge !== face.edge);
+        if (!convex) {
+          face.mark = Face_1$1.NON_CONVEX;
+        }
+        return false;
+      }
+
+      /**
+       * Adds a vertex to the hull with the following algorithm
+       *
+       * - Compute the `horizon` which is a chain of half edges, for an edge to
+       *   belong to this group it must be the edge connecting a face that can
+       *   see `eyeVertex` and a face which cannot see `eyeVertex`
+       * - All the faces that can see `eyeVertex` have its visible vertices removed
+       *   from the claimed VertexList
+       * - A new set of faces is created with each edge of the `horizon` and
+       *   `eyeVertex`, each face is connected with the opposite horizon face and
+       *   the face on the left/right
+       * - The new faces are merged if possible with the opposite horizon face first
+       *   and then the faces on the right/left
+       * - The vertices removed from all the visible faces are assigned to the new
+       *   faces if possible
+       *
+       * @param {Vertex} eyeVertex
+       */
+
+    }, {
+      key: 'addVertexToHull',
+      value: function addVertexToHull(eyeVertex) {
+        var horizon = [];
+
+        this.unclaimed.clear();
+
+        // remove `eyeVertex` from `eyeVertex.face` so that it can't be added to the
+        // `unclaimed` vertex list
+        this.removeVertexFromFace(eyeVertex, eyeVertex.face);
+        this.computeHorizon(eyeVertex.point, null, eyeVertex.face, horizon);
+        if (debug.enabled) {
+          debug('horizon %j', horizon.map(function (edge) {
+            return edge.head().index;
+          }));
+        }
+        this.addNewFaces(eyeVertex, horizon);
+
+        debug('first merge');
+
+        // first merge pass
+        // Do the merge with respect to the larger face
+        for (var i = 0; i < this.newFaces.length; i += 1) {
+          var face = this.newFaces[i];
+          if (face.mark === Face_1$1.VISIBLE) {
+            while (this.doAdjacentMerge(face, MERGE_NON_CONVEX_WRT_LARGER_FACE)) {}
+          }
+        }
+
+        debug('second merge');
+
+        // second merge pass
+        // Do the merge on non convex faces (a face is marked as non convex in the
+        // first pass)
+        for (var _i = 0; _i < this.newFaces.length; _i += 1) {
+          var _face = this.newFaces[_i];
+          if (_face.mark === Face_1$1.NON_CONVEX) {
+            _face.mark = Face_1$1.VISIBLE;
+            while (this.doAdjacentMerge(_face, MERGE_NON_CONVEX)) {}
+          }
+        }
+
+        debug('reassigning points to newFaces');
+        // reassign `unclaimed` vertices to the new faces
+        this.resolveUnclaimedPoints(this.newFaces);
+      }
+    }, {
+      key: 'build',
+      value: function build() {
+        var iterations = 0;
+        var eyeVertex = void 0;
+        this.createInitialSimplex();
+        while (eyeVertex = this.nextVertexToAdd()) {
+          iterations += 1;
+          debug('== iteration %j ==', iterations);
+          debug('next vertex to add = %d %j', eyeVertex.index, eyeVertex.point);
+          this.addVertexToHull(eyeVertex);
+          debug('end');
+        }
+        this.reindexFaceAndVertices();
+      }
+    }]);
+
+    return QuickHull;
+  }();
+
+  exports.default = QuickHull;
+  module.exports = exports['default'];
+  });
+
+  unwrapExports(QuickHull_1$1);
+
+  /**
+   * Transforms each path of Paths.
+   *
+   * @param {Paths} original - the Paths to transform.
+   * @param {Function} [transform=identity] - function used to transform the paths.
+   * @returns {Paths} the transformed paths.
+   */
+
+  // FIX: Deduplication.
+
+  var cache$1 = {
+      '1': bezier1$1
+    , '2': bezier2$1
+    , '3': bezier3$1
+    , '4': bezier4$1
+  };
+
+  var bezier$1 = neat$1;
+  var prepare_1$1 = prepare$1;
+
+  function neat$1(arr, t) {
+    return prepare$1(arr.length)(arr, t)
+  }
+
+  function prepare$1(pieces) {
+    pieces = +pieces|0;
+    if (!pieces) throw new Error('Cannot create a interpolator with no elements')
+    if (cache$1[pieces]) return cache$1[pieces]
+
+    var fn = ['var ut = 1 - t', ''];
+
+    var n = pieces;
+    while (n--) {
+      for (var j = 0; j < n; j += 1) {
+        if (n+1 === pieces) {
+          fn.push('var p'+j+' = arr['+j+'] * ut + arr['+(j+1)+'] * t');
+        } else
+        if (n > 1) {
+          fn.push('p'+j+' = p'+j+' * ut + p'+(j+1)+' * t');
+        } else {
+          fn.push('return p'+j+' * ut + p'+(j+1)+' * t');
+        }
+      }
+      if (n > 1) fn.push('');
+    }
+
+    fn = [
+      'return function bezier'+pieces+'(arr, t) {'
+      , fn.map(function(s) { return '  ' + s }).join('\n')
+      , '}'
+    ].join('\n');
+
+    return Function(fn)()
+  }
+
+  //
+  // Including the first four degrees
+  // manually - there's a slight performance penalty
+  // to generated code. It's outweighed by
+  // the gains of the optimisations, but always
+  // helps to cover the most common cases :)
+  //
+
+  function bezier1$1(arr) {
+    return arr[0]
+  }
+
+  function bezier2$1(arr, t) {
+    return arr[0] + (arr[1] - arr[0]) * t
+  }
+
+  function bezier3$1(arr, t) {
+    var ut = 1 - t;
+    return (arr[0] * ut + arr[1] * t) * ut + (arr[1] * ut + arr[2] * t) * t
+  }
+
+  function bezier4$1(arr, t) {
+    var ut = 1 - t;
+    var a1 = arr[1] * ut + arr[2] * t;
+    return ((arr[0] * ut + arr[1] * t) * ut + a1 * t) * ut + (a1 * ut + (arr[2] * ut + arr[3] * t) * t) * t
+  }
+  bezier$1.prepare = prepare_1$1;
+
+  const interpolateCubicBezier$1 = bezier$1.prepare(4);
+
+  var τ$1 = Math.PI * 2;
+
+  /**
+   * Transforms each polygon of the surface.
+   *
+   * @param {Polygons} original - the Polygons to transform.
+   * @param {Function} [transform=identity] - function used to transform the polygons.
+   * @returns {Polygons} a copy with transformed polygons.
+   */
+
+  // Internal function to massage data for passing to polygon-clipping.
+
+  /* follows "An implementation of top-down splaying"
+   * by D. Sleator <sleator@cs.cmu.edu> March 1992
+   */
+
+  /**
+   * @typedef {*} Key
+   */
+
+
+  /**
+   * @typedef {*} Value
+   */
+
+
+  /**
+   * @typedef {function(node:Node):void} Visitor
+   */
+
+
+  /**
+   * @typedef {function(a:Key, b:Key):number} Comparator
+   */
+
+
+  /**
+   * @param {function(node:Node):string} NodePrinter
+   */
+
+
+  /**
+   * @typedef {Object}  Node
+   * @property {Key}    Key
+   * @property {Value=} data
+   * @property {Node}   left
+   * @property {Node}   right
+   */
+
+  class Node$4 {
+
+    constructor (key, data) {
+      this.key    = key;
+      this.data   = data;
+      this.left   = null;
+      this.right  = null;
+    }
+  }
+
+  function DEFAULT_COMPARE$1 (a, b) { return a > b ? 1 : a < b ? -1 : 0; }
+
+
+  /**
+   * Simple top down splay, not requiring i to be in the tree t.
+   * @param {Key} i
+   * @param {Node?} t
+   * @param {Comparator} comparator
+   */
+  function splay$1 (i, t, comparator) {
+    if (t === null) return t;
+    let l, r, y;
+    const N = new Node$4();
+    l = r = N;
+
+    while (true) {
+      const cmp = comparator(i, t.key);
+      //if (i < t.key) {
+      if (cmp < 0) {
+        if (t.left === null) break;
+        //if (i < t.left.key) {
+        if (comparator(i, t.left.key) < 0) {
+          y = t.left;                           /* rotate right */
+          t.left = y.right;
+          y.right = t;
+          t = y;
+          if (t.left === null) break;
+        }
+        r.left = t;                               /* link right */
+        r = t;
+        t = t.left;
+      //} else if (i > t.key) {
+      } else if (cmp > 0) {
+        if (t.right === null) break;
+        //if (i > t.right.key) {
+        if (comparator(i, t.right.key) > 0) {
+          y = t.right;                          /* rotate left */
+          t.right = y.left;
+          y.left = t;
+          t = y;
+          if (t.right === null) break;
+        }
+        l.right = t;                              /* link left */
+        l = t;
+        t = t.right;
+      } else {
+        break;
+      }
+    }
+    /* assemble */
+    l.right = t.left;
+    r.left = t.right;
+    t.left = N.right;
+    t.right = N.left;
+    return t;
+  }
+
+
+  /**
+   * @param  {Key}        i
+   * @param  {Value}      data
+   * @param  {Comparator} comparator
+   * @param  {Tree}       tree
+   * @return {Node}      root
+   */
+  function insert$1 (i, data, t, comparator, tree) {
+    const node = new Node$4(i, data);
+
+    tree._size++;
+
+    if (t === null) {
+      node.left = node.right = null;
+      return node;
+    }
+
+    t = splay$1(i, t, comparator);
+    const cmp = comparator(i, t.key);
+    if (cmp < 0) {
+      node.left = t.left;
+      node.right = t;
+      t.left = null;
+    } else if (cmp >= 0) {
+      node.right = t.right;
+      node.left = t;
+      t.right = null;
+    }
+    return node;
+  }
+
+
+  /**
+   * Insert i into the tree t, unless it's already there.
+   * @param  {Key}        i
+   * @param  {Value}      data
+   * @param  {Comparator} comparator
+   * @param  {Tree}       tree
+   * @return {Node}       root
+   */
+  function add$5 (i, data, t, comparator, tree) {
+    const node = new Node$4(i, data);
+
+    if (t === null) {
+      node.left = node.right = null;
+      tree._size++;
+      return node;
+    }
+
+    t = splay$1(i, t, comparator);
+    const cmp = comparator(i, t.key);
+    if (cmp === 0) return t;
+    else {
+      if (cmp < 0) {
+        node.left = t.left;
+        node.right = t;
+        t.left = null;
+      } else if (cmp > 0) {
+        node.right = t.right;
+        node.left = t;
+        t.right = null;
+      }
+      tree._size++;
+      return node;
+    }
+  }
+
+
+  /**
+   * Deletes i from the tree if it's there
+   * @param {Key}        i
+   * @param {Tree}       tree
+   * @param {Comparator} comparator
+   * @param {Tree}       tree
+   * @return {Node}      new root
+   */
+  function remove$1 (i, t, comparator, tree) {
+    let x;
+    if (t === null) return null;
+    t = splay$1(i, t, comparator);
+    var cmp = comparator(i, t.key);
+    if (cmp === 0) {               /* found it */
+      if (t.left === null) {
+        x = t.right;
+      } else {
+        x = splay$1(i, t.left, comparator);
+        x.right = t.right;
+      }
+      tree._size--;
+      return x;
+    }
+    return t;                         /* It wasn't there */
+  }
+
+
+  function split$3 (key, v, comparator) {
+    let left, right;
+    if (v === null) {
+      left = right = null;
+    } else {
+      v = splay$1(key, v, comparator);
+
+      const cmp = comparator(v.key, key);
+      if (cmp === 0) {
+        left  = v.left;
+        right = v.right;
+      } else if (cmp < 0) {
+        right   = v.right;
+        v.right = null;
+        left    = v;
+      } else {
+        left   = v.left;
+        v.left = null;
+        right  = v;
+      }
+    }
+    return { left, right };
+  }
+
+
+  function merge$1 (left, right, comparator) {
+    if (right === null) return left;
+    if (left  === null) return right;
+
+    right = splay$1(left.key, right, comparator);
+    right.left = left;
+    return right;
+  }
+
+
+  /**
+   * Prints level of the tree
+   * @param  {Node}                        root
+   * @param  {String}                      prefix
+   * @param  {Boolean}                     isTail
+   * @param  {Array<string>}               out
+   * @param  {Function(node:Node):String}  printNode
+   */
+  function printRow$1 (root, prefix, isTail, out, printNode) {
+    if (root) {
+      out(`${ prefix }${ isTail ? '└── ' : '├── ' }${ printNode(root) }\n`);
+      const indent = prefix + (isTail ? '    ' : '│   ');
+      if (root.left)  printRow$1(root.left,  indent, false, out, printNode);
+      if (root.right) printRow$1(root.right, indent, true,  out, printNode);
+    }
+  }
+
+
+  class Tree$2 {
+
+    constructor (comparator = DEFAULT_COMPARE$1) {
+      this._comparator = comparator;
+      this._root = null;
+      this._size = 0;
+    }
+
+
+    /**
+     * Inserts a key, allows duplicates
+     * @param  {Key}    key
+     * @param  {Value=} data
+     * @return {Node|null}
+     */
+    insert (key, data) {
+      return this._root = insert$1(key, data, this._root, this._comparator, this);
+    }
+
+
+    /**
+     * Adds a key, if it is not present in the tree
+     * @param  {Key}    key
+     * @param  {Value=} data
+     * @return {Node|null}
+     */
+    add (key, data) {
+      return this._root = add$5(key, data, this._root, this._comparator, this);
+    }
+
+
+    /**
+     * @param  {Key} key
+     * @return {Node|null}
+     */
+    remove (key) {
+      this._root = remove$1(key, this._root, this._comparator, this);
+    }
+
+
+    /**
+     * Removes and returns the node with smallest key
+     * @return {?Node}
+     */
+    pop () {
+      let node = this._root;
+      if (node) {
+        while (node.left) node = node.left;
+        this._root = splay$1(node.key,  this._root, this._comparator);
+        this._root = remove$1(node.key, this._root, this._comparator, this);
+        return { key: node.key, data: node.data };
+      }
+      return null;
+    }
+
+
+    /**
+     * @param  {Key} key
+     * @return {Node|null}
+     */
+    findStatic (key) {
+      let current   = this._root;
+      const compare = this._comparator;
+      while (current) {
+        const cmp = compare(key, current.key);
+        if (cmp === 0)    return current;
+        else if (cmp < 0) current = current.left;
+        else              current = current.right;
+      }
+      return null;
+    }
+
+
+    /**
+     * @param  {Key} key
+     * @return {Node|null}
+     */
+    find (key) {
+      if (this._root) {
+        this._root = splay$1(key, this._root, this._comparator);
+        if (this._comparator(key, this._root.key) !== 0) return null;
+      }
+      return this._root;
+    }
+
+
+    /**
+     * @param  {Key} key
+     * @return {Boolean}
+     */
+    contains (key) {
+      let current   = this._root;
+      const compare = this._comparator;
+      while (current) {
+        const cmp = compare(key, current.key);
+        if (cmp === 0)    return true;
+        else if (cmp < 0) current = current.left;
+        else              current = current.right;
+      }
+      return false;
+    }
+
+
+    /**
+     * @param  {Visitor} visitor
+     * @param  {*=}      ctx
+     * @return {SplayTree}
+     */
+    forEach (visitor, ctx) {
+      let current = this._root;
+      const Q = [];  /* Initialize stack s */
+      let done = false;
+
+      while (!done) {
+        if (current !==  null) {
+          Q.push(current);
+          current = current.left;
+        } else {
+          if (Q.length !== 0) {
+            current = Q.pop();
+            visitor.call(ctx, current);
+
+            current = current.right;
+          } else done = true;
+        }
+      }
+      return this;
+    }
+
+
+    /**
+     * Walk key range from `low` to `high`. Stops if `fn` returns a value.
+     * @param  {Key}      low
+     * @param  {Key}      high
+     * @param  {Function} fn
+     * @param  {*?}       ctx
+     * @return {SplayTree}
+     */
+    range (low, high, fn, ctx) {
+      const Q = [];
+      const compare = this._comparator;
+      let node = this._root, cmp;
+
+      while (Q.length !== 0 || node) {
+        if (node) {
+          Q.push(node);
+          node = node.left;
+        } else {
+          node = Q.pop();
+          cmp = compare(node.key, high);
+          if (cmp > 0) {
+            break;
+          } else if (compare(node.key, low) >= 0) {
+            if (fn.call(ctx, node)) return this; // stop if smth is returned
+          }
+          node = node.right;
+        }
+      }
+      return this;
+    }
+
+
+    /**
+     * Returns array of keys
+     * @return {Array<Key>}
+     */
+    keys () {
+      const keys = [];
+      this.forEach(({ key }) => keys.push(key));
+      return keys;
+    }
+
+
+    /**
+     * Returns array of all the data in the nodes
+     * @return {Array<Value>}
+     */
+    values () {
+      const values = [];
+      this.forEach(({ data }) => values.push(data));
+      return values;
+    }
+
+
+    /**
+     * @return {Key|null}
+     */
+    min() {
+      if (this._root) return this.minNode(this._root).key;
+      return null;
+    }
+
+
+    /**
+     * @return {Key|null}
+     */
+    max() {
+      if (this._root) return this.maxNode(this._root).key;
+      return null;
+    }
+
+
+    /**
+     * @return {Node|null}
+     */
+    minNode(t = this._root) {
+      if (t) while (t.left) t = t.left;
+      return t;
+    }
+
+
+    /**
+     * @return {Node|null}
+     */
+    maxNode(t = this._root) {
+      if (t) while (t.right) t = t.right;
+      return t;
+    }
+
+
+    /**
+     * Returns node at given index
+     * @param  {number} index
+     * @return {?Node}
+     */
+    at (index) {
+      let current = this._root, done = false, i = 0;
+      const Q = [];
+
+      while (!done) {
+        if (current) {
+          Q.push(current);
+          current = current.left;
+        } else {
+          if (Q.length > 0) {
+            current = Q.pop();
+            if (i === index) return current;
+            i++;
+            current = current.right;
+          } else done = true;
+        }
+      }
+      return null;
+    }
+
+
+    /**
+     * @param  {Node}   d
+     * @return {Node|null}
+     */
+    next (d) {
+      let root = this._root;
+      let successor = null;
+
+      if (d.right) {
+        successor = d.right;
+        while (successor.left) successor = successor.left;
+        return successor;
+      }
+
+      const comparator = this._comparator;
+      while (root) {
+        const cmp = comparator(d.key, root.key);
+        if (cmp === 0) break;
+        else if (cmp < 0) {
+          successor = root;
+          root = root.left;
+        } else root = root.right;
+      }
+
+      return successor;
+    }
+
+
+    /**
+     * @param  {Node} d
+     * @return {Node|null}
+     */
+    prev (d) {
+      let root = this._root;
+      let predecessor = null;
+
+      if (d.left !== null) {
+        predecessor = d.left;
+        while (predecessor.right) predecessor = predecessor.right;
+        return predecessor;
+      }
+
+      const comparator = this._comparator;
+      while (root) {
+        const cmp = comparator(d.key, root.key);
+        if (cmp === 0) break;
+        else if (cmp < 0) root = root.left;
+        else {
+          predecessor = root;
+          root = root.right;
+        }
+      }
+      return predecessor;
+    }
+
+
+    /**
+     * @return {SplayTree}
+     */
+    clear() {
+      this._root = null;
+      this._size = 0;
+      return this;
+    }
+
+
+    /**
+     * @return {NodeList}
+     */
+    toList() {
+      return toList$1(this._root);
+    }
+
+
+    /**
+     * Bulk-load items. Both array have to be same size
+     * @param  {Array<Key>}    keys
+     * @param  {Array<Value>}  [values]
+     * @param  {Boolean}       [presort=false] Pre-sort keys and values, using
+     *                                         tree's comparator. Sorting is done
+     *                                         in-place
+     * @return {AVLTree}
+     */
+    load (keys = [], values = [], presort = false) {
+      let size = keys.length;
+      const comparator = this._comparator;
+
+      // sort if needed
+      if (presort) sort$1(keys, values, 0, size - 1, comparator);
+
+      if (this._root === null) { // empty tree
+        this._root = loadRecursive$1(this._root, keys, values, 0, size);
+        this._size = size;
+      } else { // that re-builds the whole tree from two in-order traversals
+        const mergedList = mergeLists$1(this.toList(), createList$1(keys, values), comparator);
+        size = this._size + size;
+        this._root = sortedListToBST$1({ head: mergedList }, 0, size);
+      }
+      return this;
+    }
+
+
+    /**
+     * @return {Boolean}
+     */
+    isEmpty() { return this._root === null; }
+
+    get size () { return this._size; }
+
+
+    /**
+     * @param  {NodePrinter=} printNode
+     * @return {String}
+     */
+    toString (printNode = (n) => n.key) {
+      const out = [];
+      printRow$1(this._root, '', true, (v) => out.push(v), printNode);
+      return out.join('');
+    }
+
+
+    update (key, newKey, newData) {
+      const comparator = this._comparator;
+      let { left, right } = split$3(key, this._root, comparator);
+      this._size--;
+      if (comparator(key, newKey) < 0) {
+        right = insert$1(newKey, newData, right, comparator, this);
+      } else {
+        left = insert$1(newKey, newData, left, comparator, this);
+      }
+      this._root = merge$1(left, right, comparator);
+    }
+
+
+    split(key) {
+      return split$3(key, this._root, this._comparator);
+    }
+  }
+
+
+  function loadRecursive$1 (parent, keys, values, start, end) {
+    const size = end - start;
+    if (size > 0) {
+      const middle = start + Math.floor(size / 2);
+      const key    = keys[middle];
+      const data   = values[middle];
+      const node   = { key, data, parent };
+      node.left    = loadRecursive$1(node, keys, values, start, middle);
+      node.right   = loadRecursive$1(node, keys, values, middle + 1, end);
+      return node;
+    }
+    return null;
+  }
+
+
+  function createList$1(keys, values) {
+    const head = { next: null };
+    let p = head;
+    for (let i = 0; i < keys.length; i++) {
+      p = p.next = { key: keys[i], data: values[i] };
+    }
+    p.next = null;
+    return head.next;
+  }
+
+
+  function toList$1 (root) {
+    var current = root;
+    var Q = [], done = false;
+
+    const head = { next: null };
+    let p = head;
+
+    while (!done) {
+      if (current) {
+        Q.push(current);
+        current = current.left;
+      } else {
+        if (Q.length > 0) {
+          current = p = p.next = Q.pop();
+          current = current.right;
+        } else done = true;
+      }
+    }
+    p.next = null; // that'll work even if the tree was empty
+    return head.next;
+  }
+
+
+  function sortedListToBST$1(list, start, end) {
+    const size = end - start;
+    if (size > 0) {
+      const middle = start + Math.floor(size / 2);
+      const left = sortedListToBST$1(list, start, middle);
+
+      const root = list.head;
+      root.left = left;
+
+      list.head = list.head.next;
+
+      root.right = sortedListToBST$1(list, middle + 1, end);
+      return root;
+    }
+    return null;
+  }
+
+
+  function mergeLists$1 (l1, l2, compare = (a, b) => a - b) {
+    const head = {}; // dummy
+    let p = head;
+
+    let p1 = l1;
+    let p2 = l2;
+
+    while (p1 !== null && p2 !== null) {
+      if (compare(p1.key, p2.key) < 0) {
+        p.next = p1;
+        p1 = p1.next;
+      } else {
+        p.next = p2;
+        p2 = p2.next;
+      }
+      p = p.next;
+    }
+
+    if (p1 !== null)      p.next = p1;
+    else if (p2 !== null) p.next = p2;
+
+    return head.next;
+  }
+
+
+  function sort$1(keys, values, left, right, compare) {
+    if (left >= right) return;
+
+    const pivot = keys[(left + right) >> 1];
+    let i = left - 1;
+    let j = right + 1;
+
+    while (true) {
+      do i++; while (compare(keys[i], pivot) < 0);
+      do j--; while (compare(keys[j], pivot) > 0);
+      if (i >= j) break;
+
+      let tmp = keys[i];
+      keys[i] = keys[j];
+      keys[j] = tmp;
+
+      tmp = values[i];
+      values[i] = values[j];
+      values[j] = tmp;
+    }
+
+    sort$1(keys, values,  left,     j, compare);
+    sort$1(keys, values, j + 1, right, compare);
+  }
+
+  function _classCallCheck$1(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties$1(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass$1(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$1(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties$1(Constructor, staticProps);
+    return Constructor;
+  }
+
+  /* Javascript doesn't do integer math. Everything is
+   * floating point with percision Number.EPSILON.
+   *
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON
+   */
+  var epsilon$1 = Number.EPSILON; // IE Polyfill
+
+  if (epsilon$1 === undefined) epsilon$1 = Math.pow(2, -52);
+  var EPSILON_SQ$1 = epsilon$1 * epsilon$1;
+  /* FLP comparator */
+
+  var cmp$1 = function cmp(a, b) {
+    // check if they're both 0
+    if (-epsilon$1 < a && a < epsilon$1) {
+      if (-epsilon$1 < b && b < epsilon$1) {
+        return 0;
+      }
+    } // check if they're flp equal
+
+
+    if ((a - b) * (a - b) < EPSILON_SQ$1 * a * b) {
+      return 0;
+    } // normal comparison
+
+
+    return a < b ? -1 : 1;
+  };
+  /* Greedy comparison. Two numbers are defined to touch
+   * if their midpoint is indistinguishable from either. */
+
+  var touch$1 = function touch(a, b) {
+    var m = (a + b) / 2;
+    return cmp$1(m, a) === 0 || cmp$1(m, b) === 0;
+  };
+  /* Greedy comparison. Two points are defined to touch
+   * if their midpoint is indistinguishable from either. */
+
+  var touchPoints$1 = function touchPoints(aPt, bPt) {
+    // call directly to (skip touch()) cmp() for performance boost
+    var mx = (aPt.x + bPt.x) / 2;
+    var aXMiss = cmp$1(mx, aPt.x) !== 0;
+    if (aXMiss && cmp$1(mx, bPt.x) !== 0) return false;
+    var my = (aPt.y + bPt.y) / 2;
+    var aYMiss = cmp$1(my, aPt.y) !== 0;
+    if (aYMiss && cmp$1(my, bPt.y) !== 0) return false; // we have touching on both x & y, we have to make sure it's
+    // not just on opposite points thou
+
+    if (aYMiss && aYMiss) return true;
+    if (!aYMiss && !aYMiss) return true;
+    return false;
+  };
+
+  /* Cross Product of two vectors with first point at origin */
+
+  var crossProduct$1 = function crossProduct(a, b) {
+    return a.x * b.y - a.y * b.x;
+  };
+  /* Dot Product of two vectors with first point at origin */
+
+  var dotProduct$1 = function dotProduct(a, b) {
+    return a.x * b.x + a.y * b.y;
+  };
+  /* Comparator for two vectors with same starting point */
+
+  var compareVectorAngles$1 = function compareVectorAngles(basePt, endPt1, endPt2) {
+    var v1 = {
+      x: endPt1.x - basePt.x,
+      y: endPt1.y - basePt.y
+    };
+    var v2 = {
+      x: endPt2.x - basePt.x,
+      y: endPt2.y - basePt.y
+    };
+    var kross = crossProduct$1(v1, v2);
+    return cmp$1(kross, 0);
+  };
+  var length$5 = function length(v) {
+    return Math.sqrt(dotProduct$1(v, v));
+  };
+  /* Get the sine of the angle from pShared -> pAngle to pShaed -> pBase */
+
+  var sineOfAngle$1 = function sineOfAngle(pShared, pBase, pAngle) {
+    var vBase = {
+      x: pBase.x - pShared.x,
+      y: pBase.y - pShared.y
+    };
+    var vAngle = {
+      x: pAngle.x - pShared.x,
+      y: pAngle.y - pShared.y
+    };
+    return crossProduct$1(vAngle, vBase) / length$5(vAngle) / length$5(vBase);
+  };
+  /* Get the cosine of the angle from pShared -> pAngle to pShaed -> pBase */
+
+  var cosineOfAngle$1 = function cosineOfAngle(pShared, pBase, pAngle) {
+    var vBase = {
+      x: pBase.x - pShared.x,
+      y: pBase.y - pShared.y
+    };
+    var vAngle = {
+      x: pAngle.x - pShared.x,
+      y: pAngle.y - pShared.y
+    };
+    return dotProduct$1(vAngle, vBase) / length$5(vAngle) / length$5(vBase);
+  };
+  /* Get the closest point on an line (defined by two points)
+   * to another point. */
+
+  var closestPoint$1 = function closestPoint(ptA1, ptA2, ptB) {
+    if (ptA1.x === ptA2.x) return {
+      x: ptA1.x,
+      y: ptB.y // vertical vector
+
+    };
+    if (ptA1.y === ptA2.y) return {
+      x: ptB.x,
+      y: ptA1.y // horizontal vector
+      // determinne which point is further away
+
+    };
+    var v1 = {
+      x: ptA1.x - ptB.x,
+      y: ptA1.y - ptB.y
+    };
+    var v2 = {
+      x: ptA2.x - ptB.x,
+      y: ptA2.y - ptB.y
+    };
+    var nearPt = ptA1;
+    var farPt = ptA2;
+
+    if (dotProduct$1(v1, v1) > dotProduct$1(v2, v2)) {
+      farPt = ptA1;
+      nearPt = ptA2;
+    } // use the further point as our base in the calculation, so that the
+    // vectors are more parallel, providing more accurate dot product
+
+
+    var vA = {
+      x: nearPt.x - farPt.x,
+      y: nearPt.y - farPt.y
+    };
+    var vB = {
+      x: ptB.x - farPt.x,
+      y: ptB.y - farPt.y
+    };
+    var dist = dotProduct$1(vA, vB) / dotProduct$1(vA, vA);
+    return {
+      x: farPt.x + dist * vA.x,
+      y: farPt.y + dist * vA.y
+    };
+  };
+  /* Get the x coordinate where the given line (defined by a point and vector)
+   * crosses the horizontal line with the given y coordiante.
+   * In the case of parrallel lines (including overlapping ones) returns null. */
+
+  var horizontalIntersection$1 = function horizontalIntersection(pt, v, y) {
+    if (v.y === 0) return null;
+    return {
+      x: pt.x + v.x / v.y * (y - pt.y),
+      y: y
+    };
+  };
+  /* Get the y coordinate where the given line (defined by a point and vector)
+   * crosses the vertical line with the given x coordiante.
+   * In the case of parrallel lines (including overlapping ones) returns null. */
+
+  var verticalIntersection$1 = function verticalIntersection(pt, v, x) {
+    if (v.x === 0) return null;
+    return {
+      x: x,
+      y: pt.y + v.y / v.x * (x - pt.x)
+    };
+  };
+  /* Get the intersection of two lines, each defined by a base point and a vector.
+   * In the case of parrallel lines (including overlapping ones) returns null. */
+
+  var intersection$6 = function intersection(pt1, v1, pt2, v2) {
+    // take some shortcuts for vertical and horizontal lines
+    // this also ensures we don't calculate an intersection and then discover
+    // it's actually outside the bounding box of the line
+    if (v1.x === 0) return verticalIntersection$1(pt2, v2, pt1.x);
+    if (v2.x === 0) return verticalIntersection$1(pt1, v1, pt2.x);
+    if (v1.y === 0) return horizontalIntersection$1(pt2, v2, pt1.y);
+    if (v2.y === 0) return horizontalIntersection$1(pt1, v1, pt2.y); // General case for non-overlapping segments.
+    // This algorithm is based on Schneider and Eberly.
+    // http://www.cimec.org.ar/~ncalvo/Schneider_Eberly.pdf - pg 244
+
+    var kross = crossProduct$1(v1, v2);
+    if (kross == 0) return null;
+    var ve = {
+      x: pt2.x - pt1.x,
+      y: pt2.y - pt1.y
+    };
+    var d1 = crossProduct$1(ve, v1) / kross;
+    var d2 = crossProduct$1(ve, v2) / kross; // take the average of the two calculations to minimize rounding error
+
+    var x1 = pt1.x + d2 * v1.x,
+        x2 = pt2.x + d1 * v2.x;
+    var y1 = pt1.y + d2 * v1.y,
+        y2 = pt2.y + d1 * v2.y;
+    var x = (x1 + x2) / 2;
+    var y = (y1 + y2) / 2;
+    return {
+      x: x,
+      y: y
+    };
+  };
+
+  /**
+   * This class rounds incoming values sufficiently so that
+   * floating points problems are, for the most part, avoided.
+   *
+   * Incoming points are have their x & y values tested against
+   * all previously seen x & y values. If either is 'too close'
+   * to a previously seen value, it's value is 'snapped' to the
+   * previously seen value.
+   *
+   * All points should be rounded by this class before being
+   * stored in any data structures in the rest of this algorithm.
+   */
+
+  var PtRounder$1 =
+  /*#__PURE__*/
+  function () {
+    function PtRounder() {
+      _classCallCheck$1(this, PtRounder);
+
+      this.reset();
+    }
+
+    _createClass$1(PtRounder, [{
+      key: "reset",
+      value: function reset() {
+        this.xRounder = new CoordRounder$1();
+        this.yRounder = new CoordRounder$1();
+      }
+    }, {
+      key: "round",
+      value: function round(x, y) {
+        return {
+          x: this.xRounder.round(x),
+          y: this.yRounder.round(y)
+        };
+      }
+    }]);
+
+    return PtRounder;
+  }();
+
+  var CoordRounder$1 =
+  /*#__PURE__*/
+  function () {
+    function CoordRounder() {
+      _classCallCheck$1(this, CoordRounder);
+
+      this.tree = new Tree$2(); // preseed with 0 so we don't end up with values < Number.EPSILON
+
+      this.round(0);
+    } // Note: this can rounds input values backwards or forwards.
+    //       You might ask, why not restrict this to just rounding
+    //       forwards? Wouldn't that allow left endpoints to always
+    //       remain left endpoints during splitting (never change to
+    //       right). No - it wouldn't, because we snap intersections
+    //       to endpoints (to establish independence from the segment
+    //       angle for t-intersections).
+
+
+    _createClass$1(CoordRounder, [{
+      key: "round",
+      value: function round(coord) {
+        var node = this.tree.add(coord);
+        var prevNode = this.tree.prev(node);
+
+        if (prevNode !== null && cmp$1(node.key, prevNode.key) === 0) {
+          this.tree.remove(coord);
+          return prevNode.key;
+        }
+
+        var nextNode = this.tree.next(node);
+
+        if (nextNode !== null && cmp$1(node.key, nextNode.key) === 0) {
+          this.tree.remove(coord);
+          return nextNode.key;
+        }
+
+        return coord;
+      }
+    }]);
+
+    return CoordRounder;
+  }(); // singleton available by import
+
+
+  var rounder$1 = new PtRounder$1();
+
+  /* Given input geometry as a standard array-of-arrays geojson-style
+   * geometry, return one that uses objects as points, for better perf */
+
+  var pointsAsObjects$1 = function pointsAsObjects(geom) {
+    // we can handle well-formed multipolys and polys
+    var output = [];
+
+    if (!Array.isArray(geom)) {
+      throw new Error('Input is not a Polygon or MultiPolygon');
+    }
+
+    for (var i = 0, iMax = geom.length; i < iMax; i++) {
+      if (!Array.isArray(geom[i]) || geom[i].length == 0) {
+        throw new Error('Input is not a Polygon or MultiPolygon');
+      }
+
+      output.push([]);
+
+      for (var j = 0, jMax = geom[i].length; j < jMax; j++) {
+        if (!Array.isArray(geom[i][j]) || geom[i][j].length == 0) {
+          throw new Error('Input is not a Polygon or MultiPolygon');
+        }
+
+        if (Array.isArray(geom[i][j][0])) {
+          // multipolygon
+          output[i].push([]);
+
+          for (var k = 0, kMax = geom[i][j].length; k < kMax; k++) {
+            if (!Array.isArray(geom[i][j][k]) || geom[i][j][k].length < 2) {
+              throw new Error('Input is not a Polygon or MultiPolygon');
+            }
+
+            if (geom[i][j][k].length > 2) {
+              throw new Error('Input has more than two coordinates. ' + 'Only 2-dimensional polygons supported.');
+            }
+
+            output[i][j].push(rounder$1.round(geom[i][j][k][0], geom[i][j][k][1]));
+          }
+        } else {
+          // polygon
+          if (geom[i][j].length < 2) {
+            throw new Error('Input is not a Polygon or MultiPolygon');
+          }
+
+          if (geom[i][j].length > 2) {
+            throw new Error('Input has more than two coordinates. ' + 'Only 2-dimensional polygons supported.');
+          }
+
+          output[i].push(rounder$1.round(geom[i][j][0], geom[i][j][1]));
+        }
+      }
+    }
+
+    return output;
+  };
+  /* WARN: input modified directly */
+
+  var forceMultiPoly$1 = function forceMultiPoly(geom) {
+    if (Array.isArray(geom)) {
+      if (geom.length === 0) return; // allow empty multipolys
+
+      if (Array.isArray(geom[0])) {
+        if (Array.isArray(geom[0][0])) {
+          if (typeof geom[0][0][0].x === 'number' && typeof geom[0][0][0].y === 'number') {
+            // multipolygon
+            return;
+          }
+        }
+
+        if (typeof geom[0][0].x === 'number' && typeof geom[0][0].y === 'number') {
+          // polygon
+          geom.unshift(geom.splice(0));
+          return;
+        }
+      }
+    }
+
+    throw new Error('Unrecognized input - not a polygon nor multipolygon');
+  };
+  /* WARN: input modified directly */
+
+  var cleanMultiPoly$1 = function cleanMultiPoly(multipoly) {
+    var i = 0;
+
+    while (i < multipoly.length) {
+      var poly = multipoly[i];
+
+      if (poly.length === 0) {
+        multipoly.splice(i, 1);
+        continue;
+      }
+
+      var exteriorRing = poly[0];
+      cleanRing$1(exteriorRing); // poly is dropped if exteriorRing is degenerate
+
+      if (exteriorRing.length === 0) {
+        multipoly.splice(i, 1);
+        continue;
+      }
+
+      var j = 1;
+
+      while (j < poly.length) {
+        var interiorRing = poly[j];
+        cleanRing$1(interiorRing);
+        if (interiorRing.length === 0) poly.splice(j, 1);else j++;
+      }
+
+      i++;
+    }
+  };
+  /* Clean ring:
+   *  - remove duplicate points
+   *  - remove colinear points
+   *  - remove rings with no area (less than 3 distinct points)
+   *  - un-close rings (last point should not repeat first)
+   *
+   * WARN: input modified directly */
+
+  var cleanRing$1 = function cleanRing(ring) {
+    if (ring.length === 0) return;
+    var firstPt = ring[0];
+    var lastPt = ring[ring.length - 1];
+    if (firstPt.x === lastPt.x && firstPt.y === lastPt.y) ring.pop();
+
+    var isPointUncessary = function isPointUncessary(prevPt, pt, nextPt) {
+      return prevPt.x === pt.x && prevPt.y === pt.y || nextPt.x === pt.x && nextPt.y === pt.y || compareVectorAngles$1(pt, prevPt, nextPt) === 0;
+    };
+
+    var i = 0;
+    var prevPt, nextPt;
+
+    while (i < ring.length) {
+      prevPt = i === 0 ? ring[ring.length - 1] : ring[i - 1];
+      nextPt = i === ring.length - 1 ? ring[0] : ring[i + 1];
+      if (isPointUncessary(prevPt, ring[i], nextPt)) ring.splice(i, 1);else i++;
+    } // if our ring has less than 3 distinct points now (so is degenerate)
+    // shrink it down to the empty array to communicate to our caller to
+    // drop it
+
+
+    while (ring.length < 3 && ring.length > 0) {
+      ring.pop();
+    }
+  };
+
+  var SweepEvent$1 =
+  /*#__PURE__*/
+  function () {
+    _createClass$1(SweepEvent, null, [{
+      key: "compare",
+      // for ordering sweep events in the sweep event queue
+      value: function compare(a, b) {
+        // favor event with a point that the sweep line hits first
+        var ptCmp = SweepEvent.comparePoints(a.point, b.point);
+        if (ptCmp !== 0) return ptCmp; // the points are the same, so link them if needed
+
+        if (a.point !== b.point) a.link(b); // favor right events over left
+
+        if (a.isLeft !== b.isLeft) return a.isLeft ? 1 : -1; // we have two matching left or right endpoints
+        // ordering of this case is the same as for their segments
+
+        return Segment$1.compare(a.segment, b.segment);
+      } // for ordering points in sweep line order
+
+    }, {
+      key: "comparePoints",
+      value: function comparePoints(aPt, bPt) {
+        if (aPt.x < bPt.x) return -1;
+        if (aPt.x > bPt.x) return 1;
+        if (aPt.y < bPt.y) return -1;
+        if (aPt.y > bPt.y) return 1;
+        return 0;
+      } // Warning: 'point' input will be modified and re-used (for performance)
+
+    }]);
+
+    function SweepEvent(point, isLeft) {
+      _classCallCheck$1(this, SweepEvent);
+
+      if (point.events === undefined) point.events = [this];else point.events.push(this);
+      this.point = point;
+      this.isLeft = isLeft; // this.segment, this.otherSE set by factory
+    }
+
+    _createClass$1(SweepEvent, [{
+      key: "link",
+      value: function link(other) {
+        if (other.point === this.point) {
+          throw new Error('Tried to link already linked events');
+        }
+
+        var otherEvents = other.point.events;
+
+        for (var i = 0, iMax = otherEvents.length; i < iMax; i++) {
+          var evt = otherEvents[i];
+          this.point.events.push(evt);
+          evt.point = this.point;
+        }
+
+        this.checkForConsuming();
+      }
+      /* Do a pass over our linked events and check to see if any pair
+       * of segments match, and should be consumed. */
+
+    }, {
+      key: "checkForConsuming",
+      value: function checkForConsuming() {
+        // FIXME: The loops in this method run O(n^2) => no good.
+        //        Maintain little ordered sweep event trees?
+        //        Can we maintaining an ordering that avoids the need
+        //        for the re-sorting with getLeftmostComparator in geom-out?
+        // Compare each pair of events to see if other events also match
+        var numEvents = this.point.events.length;
+
+        for (var i = 0; i < numEvents; i++) {
+          var evt1 = this.point.events[i];
+          if (evt1.segment.consumedBy !== undefined) continue;
+
+          for (var j = i + 1; j < numEvents; j++) {
+            var evt2 = this.point.events[j];
+            if (evt2.consumedBy !== undefined) continue;
+            if (evt1.otherSE.point.events !== evt2.otherSE.point.events) continue;
+            evt1.segment.consume(evt2.segment);
+          }
+        }
+      }
+    }, {
+      key: "getAvailableLinkedEvents",
+      value: function getAvailableLinkedEvents() {
+        // point.events is always of length 2 or greater
+        var events = [];
+
+        for (var i = 0, iMax = this.point.events.length; i < iMax; i++) {
+          var evt = this.point.events[i];
+
+          if (evt !== this && !evt.segment.ringOut && evt.segment.isInResult()) {
+            events.push(evt);
+          }
+        }
+
+        return events;
+      }
+      /**
+       * Returns a comparator function for sorting linked events that will
+       * favor the event that will give us the smallest left-side angle.
+       * All ring construction starts as low as possible heading to the right,
+       * so by always turning left as sharp as possible we'll get polygons
+       * without uncessary loops & holes.
+       *
+       * The comparator function has a compute cache such that it avoids
+       * re-computing already-computed values.
+       */
+
+    }, {
+      key: "getLeftmostComparator",
+      value: function getLeftmostComparator(baseEvent) {
+        var _this = this;
+
+        var cache = new Map();
+
+        var fillCache = function fillCache(linkedEvent) {
+          var nextEvent = linkedEvent.otherSE;
+          cache.set(linkedEvent, {
+            sine: sineOfAngle$1(_this.point, baseEvent.point, nextEvent.point),
+            cosine: cosineOfAngle$1(_this.point, baseEvent.point, nextEvent.point)
+          });
+        };
+
+        return function (a, b) {
+          if (!cache.has(a)) fillCache(a);
+          if (!cache.has(b)) fillCache(b);
+
+          var _cache$get = cache.get(a),
+              asine = _cache$get.sine,
+              acosine = _cache$get.cosine;
+
+          var _cache$get2 = cache.get(b),
+              bsine = _cache$get2.sine,
+              bcosine = _cache$get2.cosine; // both on or above x-axis
+
+
+          if (asine >= 0 && bsine >= 0) {
+            if (acosine < bcosine) return 1;
+            if (acosine > bcosine) return -1;
+            return 0;
+          } // both below x-axis
+
+
+          if (asine < 0 && bsine < 0) {
+            if (acosine < bcosine) return -1;
+            if (acosine > bcosine) return 1;
+            return 0;
+          } // one above x-axis, one below
+
+
+          if (bsine < asine) return -1;
+          if (bsine > asine) return 1;
+          return 0;
+        };
+      }
+    }]);
+
+    return SweepEvent;
+  }();
+
+  /**
+   * A bounding box has the format:
+   *
+   *  { ll: { x: xmin, y: ymin }, ur: { x: xmax, y: ymax } }
+   *
+   */
+
+  var isInBbox$1 = function isInBbox(bbox, point) {
+    return bbox.ll.x <= point.x && point.x <= bbox.ur.x && bbox.ll.y <= point.y && point.y <= bbox.ur.y;
+  };
+  /* Greedy comparison with a bbox. A point is defined to 'touch'
+   * a bbox if:
+   *  - it is inside the bbox
+   *  - it 'touches' one of the sides (another greedy comparison) */
+
+  var touchesBbox$1 = function touchesBbox(bbox, point) {
+    return (bbox.ll.x <= point.x || touch$1(bbox.ll.x, point.x)) && (point.x <= bbox.ur.x || touch$1(point.x, bbox.ur.x)) && (bbox.ll.y <= point.y || touch$1(bbox.ll.y, point.y)) && (point.y <= bbox.ur.y || touch$1(point.y, bbox.ur.y));
+  };
+  /* Returns either null, or a bbox (aka an ordered pair of points)
+   * If there is only one point of overlap, a bbox with identical points
+   * will be returned */
+
+  var getBboxOverlap$1 = function getBboxOverlap(b1, b2) {
+    // check if the bboxes overlap at all
+    if (b2.ur.x < b1.ll.x || b1.ur.x < b2.ll.x || b2.ur.y < b1.ll.y || b1.ur.y < b2.ll.y) return null; // find the middle two X values
+
+    var lowerX = b1.ll.x < b2.ll.x ? b2.ll.x : b1.ll.x;
+    var upperX = b1.ur.x < b2.ur.x ? b1.ur.x : b2.ur.x; // find the middle two Y values
+
+    var lowerY = b1.ll.y < b2.ll.y ? b2.ll.y : b1.ll.y;
+    var upperY = b1.ur.y < b2.ur.y ? b1.ur.y : b2.ur.y; // put those middle values together to get the overlap
+
+    return {
+      ll: {
+        x: lowerX,
+        y: lowerY
+      },
+      ur: {
+        x: upperX,
+        y: upperY
+      }
+    };
+  };
+
+  // segments and sweep events when all else is identical
+
+  var segmentId$1 = 0;
+
+  var Segment$1 =
+  /*#__PURE__*/
+  function () {
+    _createClass$1(Segment, null, [{
+      key: "compare",
+
+      /* This compare() function is for ordering segments in the sweep
+       * line tree, and does so according to the following criteria:
+       *
+       * Consider the vertical line that lies an infinestimal step to the
+       * right of the right-more of the two left endpoints of the input
+       * segments. Imagine slowly moving a point up from negative infinity
+       * in the increasing y direction. Which of the two segments will that
+       * point intersect first? That segment comes 'before' the other one.
+       *
+       * If neither segment would be intersected by such a line, (if one
+       * or more of the segments are vertical) then the line to be considered
+       * is directly on the right-more of the two left inputs.
+       */
+      value: function compare(a, b) {
+        var alx = a.leftSE.point.x;
+        var blx = b.leftSE.point.x;
+        var arx = a.rightSE.point.x;
+        var brx = b.rightSE.point.x; // check if they're even in the same vertical plane
+
+        if (brx < alx) return 1;
+        if (arx < blx) return -1;
+        var aly = a.leftSE.point.y;
+        var bly = b.leftSE.point.y;
+        var ary = a.rightSE.point.y;
+        var bry = b.rightSE.point.y; // is left endpoint of segment B the right-more?
+
+        if (alx < blx) {
+          // are the two segments in the same horizontal plane?
+          if (bly < aly && bly < ary) return 1;
+          if (bly > aly && bly > ary) return -1; // is the B left endpoint colinear to segment A?
+
+          var aCmpBLeft = a.comparePoint(b.leftSE.point);
+          if (aCmpBLeft < 0) return 1;
+          if (aCmpBLeft > 0) return -1; // is the A right endpoint colinear to segment B ?
+
+          var bCmpARight = b.comparePoint(a.rightSE.point);
+          if (bCmpARight !== 0) return bCmpARight; // colinear segments, consider the one with left-more
+          // left endpoint to be first (arbitrary?)
+
+          return -1;
+        } // is left endpoint of segment A the right-more?
+
+
+        if (alx > blx) {
+          if (aly < bly && aly < bry) return -1;
+          if (aly > bly && aly > bry) return 1; // is the A left endpoint colinear to segment B?
+
+          var bCmpALeft = b.comparePoint(a.leftSE.point);
+          if (bCmpALeft !== 0) return bCmpALeft; // is the B right endpoint colinear to segment A?
+
+          var aCmpBRight = a.comparePoint(b.rightSE.point);
+          if (aCmpBRight < 0) return 1;
+          if (aCmpBRight > 0) return -1; // colinear segments, consider the one with left-more
+          // left endpoint to be first (arbitrary?)
+
+          return 1;
+        } // if we get here, the two left endpoints are in the same
+        // vertical plane, ie alx === blx
+        // consider the lower left-endpoint to come first
+
+
+        if (aly < bly) return -1;
+        if (aly > bly) return 1; // left endpoints are identical
+        // check for colinearity by using the left-more right endpoint
+        // is the A right endpoint more left-more?
+
+        if (arx < brx) {
+          var _bCmpARight = b.comparePoint(a.rightSE.point);
+
+          if (_bCmpARight !== 0) return _bCmpARight; // colinear segments with matching left endpoints,
+          // consider the one with more left-more right endpoint to be first
+
+          return -1;
+        } // is the B right endpoint more left-more?
+
+
+        if (arx > brx) {
+          var _aCmpBRight = a.comparePoint(b.rightSE.point);
+
+          if (_aCmpBRight < 0) return 1;
+          if (_aCmpBRight > 0) return -1; // colinear segments with matching left endpoints,
+          // consider the one with more left-more right endpoint to be first
+
+          return 1;
+        } // if we get here, two two right endpoints are in the same
+        // vertical plane, ie arx === brx
+        // consider the lower right-endpoint to come first
+
+
+        if (ary < bry) return -1;
+        if (ary > bry) return 1; // right endpoints identical as well, so the segments are idential
+        // fall back on creation order as consistent tie-breaker
+
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1; // identical segment, ie a === b
+
+        return 0;
+      }
+      /* Warning: a reference to ringsIn input will be stored,
+       *  and possibly will be later modified */
+
+    }]);
+
+    function Segment(leftSE, rightSE, ringsIn) {
+      _classCallCheck$1(this, Segment);
+
+      this.id = ++segmentId$1;
+      this.leftSE = leftSE;
+      leftSE.segment = this;
+      leftSE.otherSE = rightSE;
+      this.rightSE = rightSE;
+      rightSE.segment = this;
+      rightSE.otherSE = leftSE;
+      this.ringsIn = ringsIn;
+      this._cache = {}; // left unset for performance, set later in algorithm
+      // this.ringOut, this.consumedBy, this.prev
+    }
+
+    _createClass$1(Segment, [{
+      key: "replaceRightSE",
+
+      /* When a segment is split, the rightSE is replaced with a new sweep event */
+      value: function replaceRightSE(newRightSE) {
+        this.rightSE = newRightSE;
+        this.rightSE.segment = this;
+        this.rightSE.otherSE = this.leftSE;
+        this.leftSE.otherSE = this.rightSE;
+      }
+    }, {
+      key: "bbox",
+      value: function bbox() {
+        var y1 = this.leftSE.point.y;
+        var y2 = this.rightSE.point.y;
+        return {
+          ll: {
+            x: this.leftSE.point.x,
+            y: y1 < y2 ? y1 : y2
+          },
+          ur: {
+            x: this.rightSE.point.x,
+            y: y1 > y2 ? y1 : y2
+          }
+        };
+      }
+      /* A vector from the left point to the right */
+
+    }, {
+      key: "vector",
+      value: function vector() {
+        return {
+          x: this.rightSE.point.x - this.leftSE.point.x,
+          y: this.rightSE.point.y - this.leftSE.point.y
+        };
+      }
+    }, {
+      key: "isAnEndpoint",
+      value: function isAnEndpoint(pt) {
+        return pt.x === this.leftSE.point.x && pt.y === this.leftSE.point.y || pt.x === this.rightSE.point.x && pt.y === this.rightSE.point.y;
+      }
+      /* Compare this segment with a point. Return value indicates:
+       *     1: point lies above or to the left of segment
+       *     0: point is colinear to segment
+       *    -1: point is below or to the right of segment */
+
+    }, {
+      key: "comparePoint",
+      value: function comparePoint(point) {
+        if (this.isAnEndpoint(point)) return 0;
+        var interPt = closestPoint$1(this.leftSE.point, this.rightSE.point, point);
+        if (point.y < interPt.y) return -1;
+        if (point.y > interPt.y) return 1; // depending on if our segment angles up or down,
+        // the x coord comparison means oppposite things
+
+        if (point.x < interPt.x) {
+          if (this.leftSE.point.y < this.rightSE.point.y) return 1;
+          if (this.leftSE.point.y > this.rightSE.point.y) return -1;
+        }
+
+        if (point.x > interPt.x) {
+          if (this.leftSE.point.y < this.rightSE.point.y) return -1;
+          if (this.leftSE.point.y > this.rightSE.point.y) return 1;
+        } // on the line
+
+
+        return 0;
+      }
+      /* Does the point in question touch the given segment?
+       * Greedy - essentially a 2 * Number.EPSILON comparison.
+       * If it's not possible to add an independent point between the
+       * point and the segment, we say the point 'touches' the segment. */
+
+    }, {
+      key: "touches",
+      value: function touches(point) {
+        if (!touchesBbox$1(this.bbox(), point)) return false; // if the points have been linked already, performance boost use that
+
+        if (point === this.leftSE.point || point === this.rightSE.point) return true; // avoid doing vector math on tiny vectors
+
+        if (touchPoints$1(this.leftSE.point, point)) return true;
+        if (touchPoints$1(this.rightSE.point, point)) return true;
+        var cPt1 = closestPoint$1(this.leftSE.point, this.rightSE.point, point);
+        var avgPt1 = {
+          x: (cPt1.x + point.x) / 2,
+          y: (cPt1.y + point.y) / 2
+        };
+        return touchPoints$1(avgPt1, cPt1) || touchPoints$1(avgPt1, point);
+      }
+      /**
+       * Given another segment, returns the first non-trivial intersection
+       * between the two segments (in terms of sweep line ordering), if it exists.
+       *
+       * A 'non-trivial' intersection is one that will cause one or both of the
+       * segments to be split(). As such, 'trivial' vs. 'non-trivial' intersection:
+       *
+       *   * endpoint of segA with endpoint of segB --> trivial
+       *   * endpoint of segA with point along segB --> non-trivial
+       *   * endpoint of segB with point along segA --> non-trivial
+       *   * point along segA with point along segB --> non-trivial
+       *
+       * If no non-trivial intersection exists, return null
+       * Else, return null.
+       */
+
+    }, {
+      key: "getIntersection",
+      value: function getIntersection(other) {
+        // If bboxes don't overlap, there can't be any intersections
+        var bboxOverlap = getBboxOverlap$1(this.bbox(), other.bbox());
+        if (bboxOverlap === null) return null; // We first check to see if the endpoints can be considered intersections.
+        // This will 'snap' intersections to endpoints if possible, and will
+        // handle cases of colinearity.
+        // does each endpoint touch the other segment?
+
+        var touchesOtherLSE = this.touches(other.leftSE.point);
+        var touchesThisLSE = other.touches(this.leftSE.point);
+        var touchesOtherRSE = this.touches(other.rightSE.point);
+        var touchesThisRSE = other.touches(this.rightSE.point); // do left endpoints match?
+
+        if (touchesThisLSE && touchesOtherLSE) {
+          // these two cases are for colinear segments with matching left
+          // endpoints, and one segment being longer than the other
+          if (touchesThisRSE && !touchesOtherRSE) return this.rightSE.point;
+          if (!touchesThisRSE && touchesOtherRSE) return other.rightSE.point; // either the two segments match exactly (two trival intersections)
+          // or just on their left endpoint (one trivial intersection
+
+          return null;
+        } // does this left endpoint matches (other doesn't)
+
+
+        if (touchesThisLSE) {
+          // check for segments that just intersect on opposing endpoints
+          if (touchesOtherRSE && touchPoints$1(this.leftSE.point, other.rightSE.point)) return null; // t-intersection on left endpoint
+
+          return this.leftSE.point;
+        } // does other left endpoint matches (this doesn't)
+
+
+        if (touchesOtherLSE) {
+          // check for segments that just intersect on opposing endpoints
+          if (touchesThisRSE && touchPoints$1(this.rightSE.point, other.leftSE.point)) return null; // t-intersection on left endpoint
+
+          return other.leftSE.point;
+        } // trivial intersection on right endpoints
+
+
+        if (touchesThisRSE && touchesOtherRSE) return null; // t-intersections on just one right endpoint
+
+        if (touchesThisRSE) return this.rightSE.point;
+        if (touchesOtherRSE) return other.rightSE.point; // None of our endpoints intersect. Look for a general intersection between
+        // infinite lines laid over the segments
+
+        var pt = intersection$6(this.leftSE.point, this.vector(), other.leftSE.point, other.vector()); // are the segments parrallel? Note that if they were colinear with overlap,
+        // they would have an endpoint intersection and that case was already handled above
+
+        if (pt === null) return null; // is the intersection found between the lines not on the segments?
+
+        if (!isInBbox$1(bboxOverlap, pt)) return null; // round the the computed point if needed
+
+        return rounder$1.round(pt.x, pt.y);
+      }
+      /**
+       * Split the given segment into multiple segments on the given points.
+       *  * Each existing segment will retain its leftSE and a new rightSE will be
+       *    generated for it.
+       *  * A new segment will be generated which will adopt the original segment's
+       *    rightSE, and a new leftSE will be generated for it.
+       *  * If there are more than two points given to split on, new segments
+       *    in the middle will be generated with new leftSE and rightSE's.
+       *  * An array of the newly generated SweepEvents will be returned.
+       *
+       * Warning: input array of points is modified
+       */
+
+    }, {
+      key: "split",
+      value: function split(point) {
+        var newEvents = [];
+        var alreadyLinked = point.events !== undefined;
+        var newLeftSE = new SweepEvent$1(point, true);
+        var newRightSE = new SweepEvent$1(point, false);
+        var oldRightSE = this.rightSE;
+        this.replaceRightSE(newRightSE);
+        newEvents.push(newRightSE);
+        newEvents.push(newLeftSE);
+        new Segment(newLeftSE, oldRightSE, this.ringsIn.slice()); // in the point we just used to create new sweep events with was already
+        // linked to other events, we need to check if either of the affected
+        // segments should be consumed
+
+        if (alreadyLinked) {
+          newLeftSE.checkForConsuming();
+          newRightSE.checkForConsuming();
+        }
+
+        return newEvents;
+      }
+      /* Consume another segment. We take their ringsIn under our wing
+       * and mark them as consumed. Use for perfectly overlapping segments */
+
+    }, {
+      key: "consume",
+      value: function consume(other) {
+        var consumer = this;
+        var consumee = other;
+
+        while (consumer.consumedBy) {
+          consumer = consumer.consumedBy;
+        }
+
+        while (consumee.consumedBy) {
+          consumee = consumee.consumedBy;
+        }
+
+        var cmp$$1 = Segment.compare(consumer, consumee);
+        if (cmp$$1 === 0) return; // already consumed
+        // the winner of the consumption is the earlier segment
+        // according to sweep line ordering
+
+        if (cmp$$1 > 0) {
+          var tmp = consumer;
+          consumer = consumee;
+          consumee = tmp;
+        } // make sure a segment doesn't consume it's prev
+
+
+        if (consumer.prev === consumee) {
+          var _tmp = consumer;
+          consumer = consumee;
+          consumee = _tmp;
+        }
+
+        for (var i = 0, iMax = consumee.ringsIn.length; i < iMax; i++) {
+          consumer.ringsIn.push(consumee.ringsIn[i]);
+        }
+
+        consumee.ringsIn = null;
+        consumee.consumedBy = consumer; // mark sweep events consumed as to maintain ordering in sweep event queue
+
+        consumee.leftSE.consumedBy = consumer.leftSE;
+        consumee.rightSE.consumedBy = consumer.rightSE;
+      }
+      /* The first segment previous segment chain that is in the result */
+
+    }, {
+      key: "prevInResult",
+      value: function prevInResult() {
+        var key = 'prevInResult';
+        if (this._cache[key] === undefined) this._cache[key] = this["_".concat(key)]();
+        return this._cache[key];
+      }
+    }, {
+      key: "_prevInResult",
+      value: function _prevInResult() {
+        if (!this.prev) return null;
+        if (this.prev.isInResult()) return this.prev;
+        return this.prev.prevInResult();
+      }
+    }, {
+      key: "ringsBefore",
+      value: function ringsBefore() {
+        var key = 'ringsBefore';
+        if (this._cache[key] === undefined) this._cache[key] = this["_".concat(key)]();
+        return this._cache[key];
+      }
+    }, {
+      key: "_ringsBefore",
+      value: function _ringsBefore() {
+        if (!this.prev) return [];
+        return (this.prev.consumedBy || this.prev).ringsAfter();
+      }
+    }, {
+      key: "ringsAfter",
+      value: function ringsAfter() {
+        var key = 'ringsAfter';
+        if (this._cache[key] === undefined) this._cache[key] = this["_".concat(key)]();
+        return this._cache[key];
+      }
+    }, {
+      key: "_ringsAfter",
+      value: function _ringsAfter() {
+        var rings = this.ringsBefore().slice(0);
+
+        for (var i = 0, iMax = this.ringsIn.length; i < iMax; i++) {
+          var ring = this.ringsIn[i];
+          var index = rings.indexOf(ring);
+          if (index === -1) rings.push(ring);else rings.splice(index, 1);
+        }
+
+        return rings;
+      }
+    }, {
+      key: "multiPolysBefore",
+      value: function multiPolysBefore() {
+        var key = 'multiPolysBefore';
+        if (this._cache[key] === undefined) this._cache[key] = this["_".concat(key)]();
+        return this._cache[key];
+      }
+    }, {
+      key: "_multiPolysBefore",
+      value: function _multiPolysBefore() {
+        if (!this.prev) return [];
+        return (this.prev.consumedBy || this.prev).multiPolysAfter();
+      }
+    }, {
+      key: "multiPolysAfter",
+      value: function multiPolysAfter() {
+        var key = 'multiPolysAfter';
+        if (this._cache[key] === undefined) this._cache[key] = this["_".concat(key)]();
+        return this._cache[key];
+      }
+    }, {
+      key: "_multiPolysAfter",
+      value: function _multiPolysAfter() {
+        // first calcualte our polysAfter
+        var polysAfter = [];
+        var polysExclude = [];
+        var ringsAfter = this.ringsAfter();
+
+        for (var i = 0, iMax = ringsAfter.length; i < iMax; i++) {
+          var ring = ringsAfter[i];
+          var poly = ring.poly;
+          if (polysExclude.indexOf(poly) !== -1) continue;
+          if (ring.isExterior) polysAfter.push(poly);else {
+            if (polysExclude.indexOf(poly) === -1) polysExclude.push(poly);
+            var index = polysAfter.indexOf(ring.poly);
+            if (index !== -1) polysAfter.splice(index, 1);
+          }
+        } // now calculate our multiPolysAfter
+
+
+        var mps = [];
+
+        for (var _i = 0, _iMax = polysAfter.length; _i < _iMax; _i++) {
+          var mp = polysAfter[_i].multiPoly;
+          if (mps.indexOf(mp) === -1) mps.push(mp);
+        }
+
+        return mps;
+      }
+      /* Is this segment part of the final result? */
+
+    }, {
+      key: "isInResult",
+      value: function isInResult() {
+        var key = 'isInResult';
+        if (this._cache[key] === undefined) this._cache[key] = this["_".concat(key)]();
+        return this._cache[key];
+      }
+    }, {
+      key: "_isInResult",
+      value: function _isInResult() {
+        // if we've been consumed, we're not in the result
+        if (this.consumedBy) return false;
+        var mpsBefore = this.multiPolysBefore();
+        var mpsAfter = this.multiPolysAfter();
+
+        switch (operation$1.type) {
+          case 'union':
+            {
+              // UNION - included iff:
+              //  * On one side of us there is 0 poly interiors AND
+              //  * On the other side there is 1 or more.
+              var noBefores = mpsBefore.length === 0;
+              var noAfters = mpsAfter.length === 0;
+              return noBefores !== noAfters;
+            }
+
+          case 'intersection':
+            {
+              // INTERSECTION - included iff:
+              //  * on one side of us all multipolys are rep. with poly interiors AND
+              //  * on the other side of us, not all multipolys are repsented
+              //    with poly interiors
+              var least;
+              var most;
+
+              if (mpsBefore.length < mpsAfter.length) {
+                least = mpsBefore.length;
+                most = mpsAfter.length;
+              } else {
+                least = mpsAfter.length;
+                most = mpsBefore.length;
+              }
+
+              return most === operation$1.numMultiPolys && least < most;
+            }
+
+          case 'xor':
+            {
+              // XOR - included iff:
+              //  * the difference between the number of multipolys represented
+              //    with poly interiors on our two sides is an odd number
+              var diff = Math.abs(mpsBefore.length - mpsAfter.length);
+              return diff % 2 === 1;
+            }
+
+          case 'difference':
+            {
+              // DIFFERENCE included iff:
+              //  * on exactly one side, we have just the subject
+              var isJustSubject = function isJustSubject(mps) {
+                return mps.length === 1 && mps[0].isSubject;
+              };
+
+              return isJustSubject(mpsBefore) !== isJustSubject(mpsAfter);
+            }
+
+          default:
+            throw new Error("Unrecognized operation type found ".concat(operation$1.type));
+        }
+      }
+    }], [{
+      key: "fromRing",
+      value: function fromRing(pt1, pt2, ring) {
+        var leftPt, rightPt; // ordering the two points according to sweep line ordering
+
+        var cmpPts = SweepEvent$1.comparePoints(pt1, pt2);
+
+        if (cmpPts < 0) {
+          leftPt = pt1;
+          rightPt = pt2;
+        } else if (cmpPts > 0) {
+          leftPt = pt2;
+          rightPt = pt1;
+        } else throw new Error("Tried to create degenerate segment at [".concat(pt1.x, ", ").concat(pt1.y, "]"));
+
+        var leftSE = new SweepEvent$1(leftPt, true);
+        var rightSE = new SweepEvent$1(rightPt, false);
+        return new Segment(leftSE, rightSE, [ring]);
+      }
+    }]);
+
+    return Segment;
+  }();
+
+  var RingIn$1 =
+  /*#__PURE__*/
+  function () {
+    function RingIn(geomRing, poly, isExterior) {
+      _classCallCheck$1(this, RingIn);
+
+      this.poly = poly;
+      this.isExterior = isExterior;
+      this.segments = [];
+      var prevPoint = geomRing[0];
+
+      for (var i = 1, iMax = geomRing.length; i < iMax; i++) {
+        var point = geomRing[i];
+        this.segments.push(Segment$1.fromRing(prevPoint, point, this));
+        prevPoint = point;
+      }
+
+      this.segments.push(Segment$1.fromRing(prevPoint, geomRing[0], this));
+    }
+
+    _createClass$1(RingIn, [{
+      key: "getSweepEvents",
+      value: function getSweepEvents() {
+        var sweepEvents = [];
+
+        for (var i = 0, iMax = this.segments.length; i < iMax; i++) {
+          var segment = this.segments[i];
+          sweepEvents.push(segment.leftSE);
+          sweepEvents.push(segment.rightSE);
+        }
+
+        return sweepEvents;
+      }
+    }]);
+
+    return RingIn;
+  }();
+  var PolyIn$1 =
+  /*#__PURE__*/
+  function () {
+    function PolyIn(geomPoly, multiPoly) {
+      _classCallCheck$1(this, PolyIn);
+
+      this.exteriorRing = new RingIn$1(geomPoly[0], this, true);
+      this.interiorRings = [];
+
+      for (var i = 1, iMax = geomPoly.length; i < iMax; i++) {
+        this.interiorRings.push(new RingIn$1(geomPoly[i], this, false));
+      }
+
+      this.multiPoly = multiPoly;
+    }
+
+    _createClass$1(PolyIn, [{
+      key: "getSweepEvents",
+      value: function getSweepEvents() {
+        var sweepEvents = this.exteriorRing.getSweepEvents();
+
+        for (var i = 0, iMax = this.interiorRings.length; i < iMax; i++) {
+          var ringSweepEvents = this.interiorRings[i].getSweepEvents();
+
+          for (var j = 0, jMax = ringSweepEvents.length; j < jMax; j++) {
+            sweepEvents.push(ringSweepEvents[j]);
+          }
+        }
+
+        return sweepEvents;
+      }
+    }]);
+
+    return PolyIn;
+  }();
+  var MultiPolyIn$1 =
+  /*#__PURE__*/
+  function () {
+    function MultiPolyIn(geomMultiPoly) {
+      _classCallCheck$1(this, MultiPolyIn);
+
+      this.polys = [];
+
+      for (var i = 0, iMax = geomMultiPoly.length; i < iMax; i++) {
+        this.polys.push(new PolyIn$1(geomMultiPoly[i], this));
+      }
+
+      this.isSubject = false;
+    }
+
+    _createClass$1(MultiPolyIn, [{
+      key: "markAsSubject",
+      value: function markAsSubject() {
+        this.isSubject = true;
+      }
+    }, {
+      key: "getSweepEvents",
+      value: function getSweepEvents() {
+        var sweepEvents = [];
+
+        for (var i = 0, iMax = this.polys.length; i < iMax; i++) {
+          var polySweepEvents = this.polys[i].getSweepEvents();
+
+          for (var j = 0, jMax = polySweepEvents.length; j < jMax; j++) {
+            sweepEvents.push(polySweepEvents[j]);
+          }
+        }
+
+        return sweepEvents;
+      }
+    }]);
+
+    return MultiPolyIn;
+  }();
+
+  var RingOut$1 =
+  /*#__PURE__*/
+  function () {
+    _createClass$1(RingOut, null, [{
+      key: "factory",
+
+      /* Given the segments from the sweep line pass, compute & return a series
+       * of closed rings from all the segments marked to be part of the result */
+      value: function factory(allSegments) {
+        var ringsOut = [];
+
+        for (var i = 0, iMax = allSegments.length; i < iMax; i++) {
+          var segment = allSegments[i];
+          if (!segment.isInResult() || segment.ringOut) continue;
+          var prevEvent = null;
+          var event = segment.leftSE;
+          var nextEvent = segment.rightSE;
+          var events = [event];
+          var startingPoint = event.point;
+          var intersectionLEs = [];
+          /* Walk the chain of linked events to form a closed ring */
+
+          while (true) {
+            prevEvent = event;
+            event = nextEvent;
+            events.push(event);
+            /* Is the ring complete? */
+
+            if (event.point === startingPoint) break;
+
+            while (true) {
+              var availableLEs = event.getAvailableLinkedEvents();
+              /* Did we hit a dead end? This shouldn't happen. Indicates some earlier
+               * part of the algorithm malfunctioned... please file a bug report. */
+
+              if (availableLEs.length === 0) {
+                var firstPt = events[0].point;
+                var lastPt = events[events.length - 1].point;
+                throw new Error("Unable to complete output ring starting at [".concat(firstPt.x, ",") + " ".concat(firstPt.y, "]. Last matching segment found ends at") + " [".concat(lastPt.x, ", ").concat(lastPt.y, "]."));
+              }
+              /* Only one way to go, so cotinue on the path */
+
+
+              if (availableLEs.length === 1) {
+                nextEvent = availableLEs[0].otherSE;
+                break;
+              }
+              /* We must have an intersection. Check for a completed loop */
+
+
+              var indexLE = null;
+
+              for (var j = 0, jMax = intersectionLEs.length; j < jMax; j++) {
+                if (intersectionLEs[j].point === event.point) {
+                  indexLE = j;
+                  break;
+                }
+              }
+              /* Found a completed loop. Cut that off and make a ring */
+
+
+              if (indexLE !== null) {
+                var intersectionLE = intersectionLEs.splice(indexLE)[0];
+                var ringEvents = events.splice(intersectionLE.index);
+                ringEvents.unshift(ringEvents[0].otherSE);
+                ringsOut.push(new RingOut(ringEvents.reverse()));
+                continue;
+              }
+              /* register the intersection */
+
+
+              intersectionLEs.push({
+                index: events.length,
+                point: event.point
+              });
+              /* Choose the left-most option to continue the walk */
+
+              var comparator = event.getLeftmostComparator(prevEvent);
+              nextEvent = availableLEs.sort(comparator)[0].otherSE;
+              break;
+            }
+          }
+
+          ringsOut.push(new RingOut(events));
+        }
+
+        return ringsOut;
+      }
+    }]);
+
+    function RingOut(events) {
+      _classCallCheck$1(this, RingOut);
+
+      this.events = events;
+
+      for (var i = 0, iMax = events.length; i < iMax; i++) {
+        events[i].segment.ringOut = this;
+      }
+
+      this.poly = null;
+    }
+
+    _createClass$1(RingOut, [{
+      key: "getGeom",
+      value: function getGeom() {
+        // Remove superfluous points (ie extra points along a straight line),
+        var prevPt = this.events[0].point;
+        var points = [prevPt];
+
+        for (var i = 1, iMax = this.events.length - 1; i < iMax; i++) {
+          var _pt = this.events[i].point;
+          var _nextPt = this.events[i + 1].point;
+          if (compareVectorAngles$1(_pt, prevPt, _nextPt) === 0) continue;
+          points.push(_pt);
+          prevPt = _pt;
+        } // ring was all (within rounding error of angle calc) colinear points
+
+
+        if (points.length === 1) return null; // check if the starting point is necessary
+
+        var pt = points[0];
+        var nextPt = points[1];
+        if (compareVectorAngles$1(pt, prevPt, nextPt) === 0) points.shift();
+        points.push(points[0]);
+        var step = this.isExteriorRing() ? 1 : -1;
+        var iStart = this.isExteriorRing() ? 0 : points.length - 1;
+        var iEnd = this.isExteriorRing() ? points.length : -1;
+        var orderedPoints = [];
+
+        for (var _i = iStart; _i != iEnd; _i += step) {
+          orderedPoints.push([points[_i].x, points[_i].y]);
+        }
+
+        return orderedPoints;
+      }
+    }, {
+      key: "isExteriorRing",
+      value: function isExteriorRing() {
+        if (this._isExteriorRing === undefined) {
+          var enclosing = this.enclosingRing();
+          this._isExteriorRing = enclosing ? !enclosing.isExteriorRing() : true;
+        }
+
+        return this._isExteriorRing;
+      }
+    }, {
+      key: "enclosingRing",
+      value: function enclosingRing() {
+        if (this._enclosingRing === undefined) {
+          this._enclosingRing = this._calcEnclosingRing();
+        }
+
+        return this._enclosingRing;
+      }
+      /* Returns the ring that encloses this one, if any */
+
+    }, {
+      key: "_calcEnclosingRing",
+      value: function _calcEnclosingRing() {
+        // start with the ealier sweep line event so that the prevSeg
+        // chain doesn't lead us inside of a loop of ours
+        var leftMostEvt = this.events[0];
+
+        for (var i = 1, iMax = this.events.length; i < iMax; i++) {
+          var evt = this.events[i];
+          if (SweepEvent$1.compare(leftMostEvt, evt) > 0) leftMostEvt = evt;
+        }
+
+        var prevSeg = leftMostEvt.segment.prevInResult();
+        var prevPrevSeg = prevSeg ? prevSeg.prevInResult() : null;
+
+        while (true) {
+          // no segment found, thus no ring can enclose us
+          if (!prevSeg) return null; // no segments below prev segment found, thus the ring of the prev
+          // segment must loop back around and enclose us
+
+          if (!prevPrevSeg) return prevSeg.ringOut; // if the two segments are of different rings, the ring of the prev
+          // segment must either loop around us or the ring of the prev prev
+          // seg, which would make us and the ring of the prev peers
+
+          if (prevPrevSeg.ringOut !== prevSeg.ringOut) {
+            if (prevPrevSeg.ringOut.enclosingRing() !== prevSeg.ringOut) {
+              return prevSeg.ringOut;
+            } else return prevSeg.ringOut.enclosingRing();
+          } // two segments are from the same ring, so this was a penisula
+          // of that ring. iterate downward, keep searching
+
+
+          prevSeg = prevPrevSeg.prevInResult();
+          prevPrevSeg = prevSeg ? prevSeg.prevInResult() : null;
+        }
+      }
+    }]);
+
+    return RingOut;
+  }();
+  var PolyOut$1 =
+  /*#__PURE__*/
+  function () {
+    function PolyOut(exteriorRing) {
+      _classCallCheck$1(this, PolyOut);
+
+      this.exteriorRing = exteriorRing;
+      exteriorRing.poly = this;
+      this.interiorRings = [];
+    }
+
+    _createClass$1(PolyOut, [{
+      key: "addInterior",
+      value: function addInterior(ring) {
+        this.interiorRings.push(ring);
+        ring.poly = this;
+      }
+    }, {
+      key: "getGeom",
+      value: function getGeom() {
+        var geom = [this.exteriorRing.getGeom()]; // exterior ring was all (within rounding error of angle calc) colinear points
+
+        if (geom[0] === null) return null;
+
+        for (var i = 0, iMax = this.interiorRings.length; i < iMax; i++) {
+          var ringGeom = this.interiorRings[i].getGeom(); // interior ring was all (within rounding error of angle calc) colinear points
+
+          if (ringGeom === null) continue;
+          geom.push(ringGeom);
+        }
+
+        return geom;
+      }
+    }]);
+
+    return PolyOut;
+  }();
+  var MultiPolyOut$1 =
+  /*#__PURE__*/
+  function () {
+    function MultiPolyOut(rings) {
+      _classCallCheck$1(this, MultiPolyOut);
+
+      this.rings = rings;
+      this.polys = this._composePolys(rings);
+    }
+
+    _createClass$1(MultiPolyOut, [{
+      key: "getGeom",
+      value: function getGeom() {
+        var geom = [];
+
+        for (var i = 0, iMax = this.polys.length; i < iMax; i++) {
+          var polyGeom = this.polys[i].getGeom(); // exterior ring was all (within rounding error of angle calc) colinear points
+
+          if (polyGeom === null) continue;
+          geom.push(polyGeom);
+        }
+
+        return geom;
+      }
+    }, {
+      key: "_composePolys",
+      value: function _composePolys(rings) {
+        var polys = [];
+
+        for (var i = 0, iMax = rings.length; i < iMax; i++) {
+          var ring = rings[i];
+          if (ring.poly) continue;
+          if (ring.isExteriorRing()) polys.push(new PolyOut$1(ring));else {
+            var enclosingRing = ring.enclosingRing();
+            if (!enclosingRing.poly) polys.push(new PolyOut$1(enclosingRing));
+            enclosingRing.poly.addInterior(ring);
+          }
+        }
+
+        return polys;
+      }
+    }]);
+
+    return MultiPolyOut;
+  }();
+
+  /**
+   * NOTE:  We must be careful not to change any segments while
+   *        they are in the SplayTree. AFAIK, there's no way to tell
+   *        the tree to rebalance itself - thus before splitting
+   *        a segment that's in the tree, we remove it from the tree,
+   *        do the split, then re-insert it. (Even though splitting a
+   *        segment *shouldn't* change its correct position in the
+   *        sweep line tree, the reality is because of rounding errors,
+   *        it sometimes does.)
+   */
+
+  var SweepLine$1 =
+  /*#__PURE__*/
+  function () {
+    function SweepLine(queue) {
+      var comparator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Segment$1.compare;
+
+      _classCallCheck$1(this, SweepLine);
+
+      this.queue = queue;
+      this.tree = new Tree$2(comparator);
+      this.segments = [];
+    }
+
+    _createClass$1(SweepLine, [{
+      key: "process",
+      value: function process(event) {
+        var segment = event.segment;
+        var newEvents = []; // if we've already been consumed by another segment,
+        // clean up our body parts and get out
+
+        if (event.consumedBy) {
+          if (event.isLeft) this.queue.remove(event.otherSE);else this.tree.remove(segment);
+          return newEvents;
+        }
+
+        var node = event.isLeft ? this.tree.insert(segment) : this.tree.find(segment);
+        if (!node) throw new Error("Unable to find segment #".concat(segment.id, " ") + "[".concat(segment.leftSE.point.x, ", ").concat(segment.leftSE.point.y, "] -> ") + "[".concat(segment.rightSE.point.x, ", ").concat(segment.rightSE.point.y, "] ") + 'in SweepLine tree. Please submit a bug report.');
+        var prevNode = node;
+        var nextNode = node;
+        var prevSeg = undefined;
+        var nextSeg = undefined; // skip consumed segments still in tree
+
+        while (prevSeg === undefined) {
+          prevNode = this.tree.prev(prevNode);
+          if (prevNode === null) prevSeg = null;else if (prevNode.key.consumedBy === undefined) prevSeg = prevNode.key;
+        } // skip consumed segments still in tree
+
+
+        while (nextSeg === undefined) {
+          nextNode = this.tree.next(nextNode);
+          if (nextNode === null) nextSeg = null;else if (nextNode.key.consumedBy === undefined) nextSeg = nextNode.key;
+        }
+
+        if (event.isLeft) {
+          // Check for intersections against the previous segment in the sweep line
+          var prevMySplitter = null;
+
+          if (prevSeg) {
+            var prevInter = prevSeg.getIntersection(segment);
+
+            if (prevInter !== null) {
+              if (!segment.isAnEndpoint(prevInter)) prevMySplitter = prevInter;
+
+              if (!prevSeg.isAnEndpoint(prevInter)) {
+                var newEventsFromSplit = this._splitSafely(prevSeg, prevInter);
+
+                for (var i = 0, iMax = newEventsFromSplit.length; i < iMax; i++) {
+                  newEvents.push(newEventsFromSplit[i]);
+                }
+              }
+            }
+          } // Check for intersections against the next segment in the sweep line
+
+
+          var nextMySplitter = null;
+
+          if (nextSeg) {
+            var nextInter = nextSeg.getIntersection(segment);
+
+            if (nextInter !== null) {
+              if (!segment.isAnEndpoint(nextInter)) nextMySplitter = nextInter;
+
+              if (!nextSeg.isAnEndpoint(nextInter)) {
+                var _newEventsFromSplit = this._splitSafely(nextSeg, nextInter);
+
+                for (var _i = 0, _iMax = _newEventsFromSplit.length; _i < _iMax; _i++) {
+                  newEvents.push(_newEventsFromSplit[_i]);
+                }
+              }
+            }
+          } // For simplicity, even if we find more than one intersection we only
+          // spilt on the 'earliest' (sweep-line style) of the intersections.
+          // The other intersection will be handled in a future process().
+
+
+          if (prevMySplitter !== null || nextMySplitter !== null) {
+            var mySplitter = null;
+            if (prevMySplitter === null) mySplitter = nextMySplitter;else if (nextMySplitter === null) mySplitter = prevMySplitter;else {
+              var cmpSplitters = SweepEvent$1.comparePoints(prevMySplitter, nextMySplitter);
+              if (cmpSplitters < 0) mySplitter = prevMySplitter;
+              if (cmpSplitters > 0) mySplitter = nextMySplitter; // the two splitters are the exact same point
+
+              mySplitter = prevMySplitter;
+            } // Rounding errors can cause changes in ordering,
+            // so remove afected segments and right sweep events before splitting
+
+            this.queue.remove(segment.rightSE);
+            newEvents.push(segment.rightSE);
+
+            var _newEventsFromSplit2 = segment.split(mySplitter);
+
+            for (var _i2 = 0, _iMax2 = _newEventsFromSplit2.length; _i2 < _iMax2; _i2++) {
+              newEvents.push(_newEventsFromSplit2[_i2]);
+            }
+          }
+
+          if (newEvents.length > 0) {
+            // We found some intersections, so re-do the current event to
+            // make sure sweep line ordering is totally consistent for later
+            // use with the segment 'prev' pointers
+            this.tree.remove(segment);
+            newEvents.push(event);
+          } else {
+            // done with left event
+            this.segments.push(segment);
+            segment.prev = prevSeg;
+          }
+        } else {
+          // event.isRight
+          // since we're about to be removed from the sweep line, check for
+          // intersections between our previous and next segments
+          if (prevSeg && nextSeg) {
+            var inter = prevSeg.getIntersection(nextSeg);
+
+            if (inter !== null) {
+              if (!prevSeg.isAnEndpoint(inter)) {
+                var _newEventsFromSplit3 = this._splitSafely(prevSeg, inter);
+
+                for (var _i3 = 0, _iMax3 = _newEventsFromSplit3.length; _i3 < _iMax3; _i3++) {
+                  newEvents.push(_newEventsFromSplit3[_i3]);
+                }
+              }
+
+              if (!nextSeg.isAnEndpoint(inter)) {
+                var _newEventsFromSplit4 = this._splitSafely(nextSeg, inter);
+
+                for (var _i4 = 0, _iMax4 = _newEventsFromSplit4.length; _i4 < _iMax4; _i4++) {
+                  newEvents.push(_newEventsFromSplit4[_i4]);
+                }
+              }
+            }
+          }
+
+          this.tree.remove(segment);
+        }
+
+        return newEvents;
+      }
+      /* Safely split a segment that is currently in the datastructures
+       * IE - a segment other than the one that is currently being processed. */
+
+    }, {
+      key: "_splitSafely",
+      value: function _splitSafely(seg, pt) {
+        // Rounding errors can cause changes in ordering,
+        // so remove afected segments and right sweep events before splitting
+        // removeNode() doesn't work, so have re-find the seg
+        // https://github.com/w8r/splay-tree/pull/5
+        this.tree.remove(seg);
+        var rightSE = seg.rightSE;
+        this.queue.remove(rightSE);
+        var newEvents = seg.split(pt);
+        newEvents.push(rightSE); // splitting can trigger consumption
+
+        if (seg.consumedBy === undefined) this.tree.insert(seg);
+        return newEvents;
+      }
+    }]);
+
+    return SweepLine;
+  }();
+
+  var Operation$1 =
+  /*#__PURE__*/
+  function () {
+    function Operation() {
+      _classCallCheck$1(this, Operation);
+    }
+
+    _createClass$1(Operation, [{
+      key: "run",
+      value: function run(type, geom, moreGeoms) {
+        operation$1.type = type;
+        rounder$1.reset();
+        /* Make a copy of the input geometry with rounded points as objects */
+
+        var geoms = [pointsAsObjects$1(geom)];
+
+        for (var i = 0, iMax = moreGeoms.length; i < iMax; i++) {
+          geoms.push(pointsAsObjects$1(moreGeoms[i]));
+        }
+        /* Clean inputs */
+
+
+        for (var _i = 0, _iMax = geoms.length; _i < _iMax; _i++) {
+          forceMultiPoly$1(geoms[_i]);
+          cleanMultiPoly$1(geoms[_i]);
+        }
+        /* Convert inputs to MultiPoly objects, mark subject */
+
+
+        var multipolys = [];
+
+        for (var _i2 = 0, _iMax2 = geoms.length; _i2 < _iMax2; _i2++) {
+          multipolys.push(new MultiPolyIn$1(geoms[_i2]));
+        }
+
+        multipolys[0].markAsSubject();
+        operation$1.numMultiPolys = multipolys.length;
+        /* Put segment endpoints in a priority queue */
+
+        var queue = new Tree$2(SweepEvent$1.compare);
+
+        for (var _i3 = 0, _iMax3 = multipolys.length; _i3 < _iMax3; _i3++) {
+          var sweepEvents = multipolys[_i3].getSweepEvents();
+
+          for (var j = 0, jMax = sweepEvents.length; j < jMax; j++) {
+            queue.insert(sweepEvents[j]);
+          }
+        }
+        /* Pass the sweep line over those endpoints */
+
+
+        var sweepLine = new SweepLine$1(queue);
+        var prevQueueSize = queue.size;
+        var node = queue.pop();
+
+        while (node) {
+          var evt = node.key;
+
+          if (queue.size === prevQueueSize) {
+            // prevents an infinite loop, an otherwise common manifestation of bugs
+            throw new Error("Unable to pop() SweepEvent [".concat(evt.point.x, ", ").concat(evt.point.y, "] from ") + "segment #".concat(evt.segment.id, " from queue. Please file a bug report."));
+          }
+
+          var newEvents = sweepLine.process(evt);
+
+          for (var _i4 = 0, _iMax4 = newEvents.length; _i4 < _iMax4; _i4++) {
+            var _evt = newEvents[_i4];
+            if (_evt.consumedBy === undefined) queue.insert(_evt);
+          }
+
+          prevQueueSize = queue.size;
+          node = queue.pop();
+        } // free some memory we don't need anymore
+
+
+        rounder$1.reset();
+        /* Collect and compile segments we're keeping into a multipolygon */
+
+        var ringsOut = RingOut$1.factory(sweepLine.segments);
+        var result = new MultiPolyOut$1(ringsOut);
+        return result.getGeom();
+      }
+    }]);
+
+    return Operation;
+  }(); // singleton available by import
+
+  var operation$1 = new Operation$1();
+
+  // Relax the coplanar arrangement into polygon soup.
+  const toPolygons$2 = (options = {}, solid) => [].concat(...solid);
+
+  const eachItem$1 = (geometry, operation) => {
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        geometry.assembly.forEach(walk);
+      }
+      operation(geometry);
+    };
+    walk(geometry);
+  };
+
+  const toPolygons$3 = (geometry) => {
+    const polygonSets = [];
+    eachItem$1(geometry,
+             item => {
+               if (item.z0Surface) {
+                 polygonSets.push(item.z0Surface);
+               }
+             });
+    return [].concat(...polygonSets);
+  };
+
+  /** Serialize the give objects to SVG format.
+   * @param {Object} [options] - options for serialization
+   * @param {Object|Array} objects - objects to serialize as SVG
+   * @returns {Array} serialized contents, SVG format
+   */
+  const toSvg$2 = async ({ padding = 0 }, geometry) => {
+    // FIX: SVG should handle both surfaces and paths.
+    const polygons = canonicalize$7(toPolygons$3(geometry));
+    const min = measureBoundingBox$3(polygons)[0];
+    // TODO: Add transform and translate support to polygons.
+    const shiftedPolygons = canonicalize$7(translate$2(negate$1(min), polygons));
+    const [width, height] = measureBoundingBox$3(shiftedPolygons)[1];
+
+    return [
+      `<?xml version="1.0" encoding="UTF-8"?>`,
+      `<!-- Generated by jsxcad -->`,
+      `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">`,
+      `<svg baseProfile="tiny" height="${height} mm" width="${width} mm" viewBox="${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
+      ...shiftedPolygons.map(polygon => `<path d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`),
+      `</svg>`
+    ].join('\n');
+  };
+
+  const ensureMapElement$1 = (map, key, ensurer = (_ => [])) => {
+    if (!map.has(key)) {
+      map.set(key, ensurer());
+    }
+    return map.get(key);
+  };
+
+  /**
+   * Return the direction of the given line.
+   *
+   * @return {vec3} the relative vector in the direction of the line
+   */
+
+  /**
+   * Create a line in 3D space from the given data.
+   *
+   * The point can be any random point on the line.
+   * The direction must be a vector with positive or negative distance from the point.
+   * See the logic of fromPoints for appropriate values.
+   *
+   * @param {vec3} point start point of the line segment
+   * @param {vec3} direction direction of the line segment
+   * @returns {line3} a new unbounded 3D line
+   */
+  const fromPointAndDirection$1 = (point, direction) => [point, unit$1(direction)];
+
+  /**
+   * Creates a new 3D line that passes through the given points.
+   *
+   * @param {vec3} p1 start point of the line segment
+   * @param {vec3} p2 end point of the line segment
+   * @returns {line3} a new unbounded 3D line
+   */
+  const fromPoints$5 = (p1, p2) => {
+    const direction = subtract$2(p2, p1);
+    return fromPointAndDirection$1(p1, direction);
+  };
+
+  /**
+   * Return the origin of the given line.
+   *
+   * @param {line3} line the 3D line of reference
+   * @return {vec3} the origin of the line
+   */
+
+  const toIdentity$2 = JSON.stringify;
+
+  /**
+   * findVertexViolations determines that the vertex's edges are closed.
+   *
+   * For a watertight vertex, it will consist of unique lines with an even count.
+   *
+   * @params {start} start - the vertex.
+   * @params {Array<point>} ends - the sorted other end of each edge.
+   * @returns {Array} violations.
+   *
+   * Note that checking for pairs of edges isn't sufficient.
+   *
+   *    A-----B
+   *    |     |
+   *    |     E--F
+   *    |     |  |
+   *    C-----D--G
+   *
+   * A situation with B~D, D~B, E~D, D~E would lead such an algorithm to believe
+   * the vertex was watertight when it is only partially watertight.
+   *
+   * So, we need to detect any distinct colinear edges.
+   */
+  const findVertexViolations$1 = (start, ...ends) => {
+    const lines = new Map();
+    ends.forEach(end => {
+      // These are not actually lines, but they all start at the same position, so we can pretend.
+      const ray = fromPoints$5(start, end);
+      ensureMapElement$1(lines, toIdentity$2(ray)).push(end);
+    });
+
+    const distance = (end) => length$3(subtract$2(end, start));
+
+    let violations = [];
+    lines.forEach(ends => {
+      ends.sort((a, b) => distance(a) - distance(b));
+      for (let nth = 1; nth < ends.length; nth++) {
+        if (!equals$3(ends[nth], ends[nth - 1])) {
+          violations.push(['unequal', [start, ...ends]]);
+          violations.push(['unequal', [start, ...ends].reverse()]);
+          break;
+        }
+      }
+      if (ends.length % 2 !== 0) ;
+    });
+
+    // If no violations, it is Watertight.
+    return violations;
+  };
+
+  const toIdentity$3 = JSON.stringify;
+
+  const findPolygonsViolations$1 = polygons => {
+    // A map from vertex value to connected edges represented as an array in
+    // the form [start, ...end].
+    const edges = new Map();
+    const addEdge = (start, end) => ensureMapElement$1(edges, toIdentity$3(start), () => [start]).push(end);
+    const addEdges = (start, end) => { addEdge(start, end); addEdge(end, start); };
+    polygons.forEach(polygon => eachEdge$1({}, addEdges, polygon));
+
+    // Edges are assembled, check for matches
+    let violations = [];
+    edges.forEach(vertex => {
+      violations = [].concat(violations, findVertexViolations$1(...vertex));
+    });
+
+    return violations;
+  };
+
+  const isWatertightPolygons$1 = polygons => findPolygonsViolations$1(polygons).length === 0;
+
+  const EPS$1 = 1e-5;
+  const W$4 = 3;
+
+  const tag$1 = vertex => JSON.stringify([...vertex]);
+
+  function addSide$1 (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vertex1, polygonindex) {
+    let starttag = tag$1(vertex0);
+    let endtag = tag$1(vertex1);
+    if (starttag === endtag) throw new Error('Assertion failed');
+    let newsidetag = starttag + '/' + endtag;
+    let reversesidetag = endtag + '/' + starttag;
+    if (reversesidetag in sidemap) {
+      // we have a matching reverse oriented side.
+      // Instead of adding the new side, cancel out the reverse side:
+      // console.log("addSide("+newsidetag+") has reverse side:");
+      deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend, vertex1, vertex0, null);
+      return null;
+    }
+    //  console.log("addSide("+newsidetag+")");
+    let newsideobj = {
+      vertex0: vertex0,
+      vertex1: vertex1,
+      polygonindex: polygonindex
+    };
+    if (!(newsidetag in sidemap)) {
+      sidemap[newsidetag] = [newsideobj];
+    } else {
+      sidemap[newsidetag].push(newsideobj);
+    }
+    if (starttag in vertextag2sidestart) {
+      vertextag2sidestart[starttag].push(newsidetag);
+    } else {
+      vertextag2sidestart[starttag] = [newsidetag];
+    }
+    if (endtag in vertextag2sideend) {
+      vertextag2sideend[endtag].push(newsidetag);
+    } else {
+      vertextag2sideend[endtag] = [newsidetag];
+    }
+    return newsidetag;
+  }
+
+  function deleteSide$1 (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vertex1, polygonindex) {
+    let starttag = tag$1(vertex0);
+    let endtag = tag$1(vertex1);
+    let sidetag = starttag + '/' + endtag;
+    // console.log("deleteSide("+sidetag+")");
+    if (!(sidetag in sidemap)) throw new Error('Assertion failed');
+    let idx = -1;
+    let sideobjs = sidemap[sidetag];
+    for (let i = 0; i < sideobjs.length; i++) {
+      let sideobj = sideobjs[i];
+      if (!equals$3(sideobj.vertex0, vertex0)) continue;
+      if (!equals$3(sideobj.vertex1, vertex1)) continue;
+      if (polygonindex !== null) {
+        if (sideobj.polygonindex !== polygonindex) continue;
+      }
+      idx = i;
+      break;
+    }
+    if (idx < 0) throw new Error('Assertion failed');
+    sideobjs.splice(idx, 1);
+    if (sideobjs.length === 0) {
+      delete sidemap[sidetag];
+    }
+    idx = vertextag2sidestart[starttag].indexOf(sidetag);
+    if (idx < 0) throw new Error('Assertion failed');
+    vertextag2sidestart[starttag].splice(idx, 1);
+    if (vertextag2sidestart[starttag].length === 0) {
+      delete vertextag2sidestart[starttag];
+    }
+
+    idx = vertextag2sideend[endtag].indexOf(sidetag);
+    if (idx < 0) throw new Error('Assertion failed');
+    vertextag2sideend[endtag].splice(idx, 1);
+    if (vertextag2sideend[endtag].length === 0) {
+      delete vertextag2sideend[endtag];
+    }
+  }
+
+  /*
+       fixTJunctions:
+
+       Suppose we have two polygons ACDB and EDGF:
+
+        A-----B
+        |     |
+        |     E--F
+        |     |  |
+        C-----D--G
+
+       Note that vertex E forms a T-junction on the side BD. In this case some STL slicers will complain
+       that the solid is not watertight. This is because the watertightness check is done by checking if
+       each side DE is matched by another side ED.
+
+       This function will return a new solid with ACDB replaced by ACDEB
+
+       Note that this can create polygons that are slightly non-convex (due to rounding errors). Therefore the result
+       should not be used for further Geom3 operations!
+  */
+  const fixTJunctions$1 = function (polygons) {
+    let sidemap = {};
+
+    // STEP 1
+    for (let polygonindex = 0; polygonindex < polygons.length; polygonindex++) {
+      let polygon = polygons[polygonindex];
+      let numvertices = polygon.length;
+      // should be true
+      if (numvertices >= 3) {
+        let vertex = polygon[0];
+        let vertextag = tag$1(vertex);
+        for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
+          let nextvertexindex = vertexindex + 1;
+          if (nextvertexindex === numvertices) nextvertexindex = 0;
+          let nextvertex = polygon[nextvertexindex];
+          let nextvertextag = tag$1(nextvertex);
+          let sidetag = vertextag + '/' + nextvertextag;
+          let reversesidetag = nextvertextag + '/' + vertextag;
+          if (reversesidetag in sidemap) {
+            // this side matches the same side in another polygon. Remove from sidemap:
+            let ar = sidemap[reversesidetag];
+            ar.splice(-1, 1);
+            if (ar.length === 0) {
+              delete sidemap[reversesidetag];
+            }
+          } else {
+            let sideobj = {
+              vertex0: vertex,
+              vertex1: nextvertex,
+              polygonindex: polygonindex
+            };
+            if (!(sidetag in sidemap)) {
+              sidemap[sidetag] = [sideobj];
+            } else {
+              sidemap[sidetag].push(sideobj);
+            }
+          }
+          vertex = nextvertex;
+          vertextag = nextvertextag;
+        }
+      }
+    }
+    // STEP 2
+    // now sidemap contains 'unmatched' sides
+    // i.e. side AB in one polygon does not have a matching side BA in another polygon
+    let vertextag2sidestart = {};
+    let vertextag2sideend = {};
+    let sidestocheck = {};
+    let sidemapisempty = true;
+    for (let sidetag in sidemap) {
+      sidemapisempty = false;
+      sidestocheck[sidetag] = true;
+      sidemap[sidetag].map(function (sideobj) {
+        let starttag = tag$1(sideobj.vertex0);
+        let endtag = tag$1(sideobj.vertex1);
+        if (starttag in vertextag2sidestart) {
+          vertextag2sidestart[starttag].push(sidetag);
+        } else {
+          vertextag2sidestart[starttag] = [sidetag];
+        }
+        if (endtag in vertextag2sideend) {
+          vertextag2sideend[endtag].push(sidetag);
+        } else {
+          vertextag2sideend[endtag] = [sidetag];
+        }
+      });
+    }
+
+    // STEP 3 : if sidemap is not empty
+    if (!sidemapisempty) {
+      // make a copy of the polygons array, since we are going to modify it:
+      polygons = polygons.slice(0);
+      while (true) {
+        let sidemapisempty = true;
+        for (let sidetag in sidemap) {
+          sidemapisempty = false;
+          sidestocheck[sidetag] = true;
+        }
+        if (sidemapisempty) break;
+        let donesomething = false;
+        while (true) {
+          let sidetagtocheck = null;
+          for (let sidetag in sidestocheck) {
+            sidetagtocheck = sidetag;
+            break; // FIXME  : say what now ?
+          }
+          if (sidetagtocheck === null) break; // sidestocheck is empty, we're done!
+          let donewithside = true;
+          if (sidetagtocheck in sidemap) {
+            let sideobjs = sidemap[sidetagtocheck];
+            if (sideobjs.length === 0) throw new Error('Assertion failed');
+            let sideobj = sideobjs[0];
+            for (let directionindex = 0; directionindex < 2; directionindex++) {
+              let startvertex = (directionindex === 0) ? sideobj.vertex0 : sideobj.vertex1;
+              let endvertex = (directionindex === 0) ? sideobj.vertex1 : sideobj.vertex0;
+              let startvertextag = tag$1(startvertex);
+              let endvertextag = tag$1(endvertex);
+              let matchingsides = [];
+              if (directionindex === 0) {
+                if (startvertextag in vertextag2sideend) {
+                  matchingsides = vertextag2sideend[startvertextag];
+                }
+              } else {
+                if (startvertextag in vertextag2sidestart) {
+                  matchingsides = vertextag2sidestart[startvertextag];
+                }
+              }
+              for (let matchingsideindex = 0; matchingsideindex < matchingsides.length; matchingsideindex++) {
+                let matchingsidetag = matchingsides[matchingsideindex];
+                let matchingside = sidemap[matchingsidetag][0];
+                let matchingsidestartvertex = (directionindex === 0) ? matchingside.vertex0 : matchingside.vertex1;
+                let matchingsideendvertex = (directionindex === 0) ? matchingside.vertex1 : matchingside.vertex0;
+                let matchingsidestartvertextag = tag$1(matchingsidestartvertex);
+                let matchingsideendvertextag = tag$1(matchingsideendvertex);
+                if (matchingsideendvertextag !== startvertextag) throw new Error('Assertion failed');
+                if (matchingsidestartvertextag === endvertextag) {
+                  // matchingside cancels sidetagtocheck
+                  deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend, startvertex, endvertex, null);
+                  deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend, endvertex, startvertex, null);
+                  donewithside = false;
+                  directionindex = 2; // skip reverse direction check
+                  donesomething = true;
+                  break;
+                } else {
+                  let startpos = startvertex;
+                  let endpos = endvertex;
+                  let checkpos = matchingsidestartvertex;
+                  // let direction = checkpos.minus(startpos)
+                  let direction = subtract$2(checkpos, startpos);
+                  // Now we need to check if endpos is on the line startpos-checkpos:
+                  // let t = endpos.minus(startpos).dot(direction) / direction.dot(direction)
+                  let t = dot$2(subtract$2(endpos, startpos), direction) / dot$2(direction, direction);
+                  if ((t > 0) && (t < 1)) {
+                    let closestpoint = add$3(startpos, multiply$3(direction, fromScalar$1(t)));
+                    let distancesquared = squaredDistance$2(closestpoint, endpos);
+                    if (distancesquared < (EPS$1 * EPS$1)) {
+                      // Yes it's a t-junction! We need to split matchingside in two:
+                      let polygonindex = matchingside.polygonindex;
+                      let polygon = polygons[polygonindex];
+                      // find the index of startvertextag in polygon:
+                      let insertionvertextag = tag$1(matchingside.vertex1);
+                      let insertionvertextagindex = -1;
+                      for (let i = 0; i < polygon.length; i++) {
+                        if (tag$1(polygon[i]) === insertionvertextag) {
+                          insertionvertextagindex = i;
+                          break;
+                        }
+                      }
+                      if (insertionvertextagindex < 0) throw new Error('Assertion failed');
+                      // split the side by inserting the vertex:
+                      let newvertices = polygon.slice(0);
+                      newvertices.splice(insertionvertextagindex, 0, endvertex);
+                      let newpolygon = fromPoints$3(newvertices);
+
+                      // calculate plane with differents point
+                      if (isNaN(toPlane$2(newpolygon)[W$4])) {
+                        let found = false;
+                        let loop = function (callback) {
+                          newpolygon.forEach(function (item) {
+                            if (found) return;
+                            callback(item);
+                          });
+                        };
+
+                        loop(function (a) {
+                          loop(function (b) {
+                            loop(function (c) {
+                              newpolygon.plane = fromPoints$4(a, b, c);
+                              if (!isNaN(toPlane$2(newpolygon)[W$4])) {
+                                found = true;
+                              }
+                            });
+                          });
+                        });
+                      }
+                      polygons[polygonindex] = newpolygon;
+                      // remove the original sides from our maps
+                      // deleteSide(sideobj.vertex0, sideobj.vertex1, null)
+                      deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend,
+                                 matchingside.vertex0, matchingside.vertex1, polygonindex);
+                      let newsidetag1 = addSide$1(sidemap, vertextag2sidestart, vertextag2sideend,
+                                                matchingside.vertex0, endvertex, polygonindex);
+                      let newsidetag2 = addSide$1(sidemap, vertextag2sidestart, vertextag2sideend, endvertex,
+                                                matchingside.vertex1, polygonindex);
+                      if (newsidetag1 !== null) sidestocheck[newsidetag1] = true;
+                      if (newsidetag2 !== null) sidestocheck[newsidetag2] = true;
+                      donewithside = false;
+                      directionindex = 2; // skip reverse direction check
+                      donesomething = true;
+                      break;
+                    } // if(distancesquared < 1e-10)
+                  } // if( (t > 0) && (t < 1) )
+                } // if(endingstidestartvertextag === endvertextag)
+              } // for matchingsideindex
+            } // for directionindex
+          } // if(sidetagtocheck in sidemap)
+          if (donewithside) {
+            delete sidestocheck[sidetagtocheck];
+          }
+        }
+        if (!donesomething) break;
+      }
+    }
+
+    return polygons;
+  };
+
+  const makeWatertight$1 = polygons => fixTJunctions$1(polygons);
+
+  /**
+   * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
+   * The exterior side of a polygon is determined by a CCW point ordering.
+   *
+   * @param {Object} options.
+   * @param {Polygon Array} polygons - An array of arrays of points.
+   * @returns {String} - the ascii STL output.
+   */
+
+  const geometryToTriangles$1 = (geometry) => {
+    const triangleSets = [];
+    eachItem$1(geometry,
+             item => {
+               if (item.solid) {
+                 triangleSets.push(toTriangles$1({}, toPolygons$2({}, item.solid)));
+               }
+             });
+    return [].concat(...triangleSets);
+  };
+
+  const toStl$1 = async (options = {}, geometry) => {
+    let polygons = geometryToTriangles$1(geometry);
+    if (!isWatertightPolygons$1(polygons)) {
+      console.log(`polygonsToStla: Polygon is not watertight`);
+      if (options.doMakeWatertight) {
+        polygons = makeWatertight$1(polygons);
+      }
+    }
+    return `solid JSxCAD\n${convertToFacets$1(options, canonicalize$7(toTriangles$1({}, polygons)))}\nendsolid JSxCAD\n`;
+  };
+
+  const convertToFacets$1 = (options, polygons) =>
+    polygons.map(convertToFacet$1).join('\n');
+
+  const toStlVector$1 = vector =>
+    `${vector[0]} ${vector[1]} ${vector[2]}`;
+
+  const toStlVertex$1 = vertex =>
+    `vertex ${toStlVector$1(vertex)}`;
+
+  const convertToFacet$1 = polygon =>
+    `facet normal ${toStlVector$1(toPlane$2(polygon))}\n` +
+    `outer loop\n` +
+    `${toStlVertex$1(polygon[0])}\n` +
+    `${toStlVertex$1(polygon[1])}\n` +
+    `${toStlVertex$1(polygon[2])}\n` +
+    `endloop\n` +
+    `endfacet`;
+
   /* global postMessage, onmessage:writable */
 
   const say = (message) => postMessage(message);
@@ -73795,6 +83566,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   values = values.map(Shape.fromGeometry);
                   return assemble$1(...values).toDisjointGeometry()
                   break
+              case "hull":
+                  values = values.map(Shape.fromGeometry);
+                  return hull(...values).toDisjointGeometry()
+                  break
+              case "rotate":
+                  return rotate([values[1], values[2], values[3]], Shape.fromGeometry(values[0])).toDisjointGeometry()
+                  break
               case "extrude":
                   return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
                   break
@@ -73804,12 +83582,35 @@ define("./webworker.js",['require'], function (require) { 'use strict';
               case "render":
                   return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
                   break
+              case "union":
+                  return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+                  break
+              case "intersection":
+                  return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+                  break
+              case "difference":
+                  return difference$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+                  break
+              case "stretch":
+                  return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
+                  break
+              case "scale":
+                  return Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry()
+                  break
+              case "svg":
+                  const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
+                  return toSvg$2({}, crossSection)
+                  break
+              case "stl":
+                  return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
+                  break
               default:
                   return -1
           }
       }
       catch(err){
-          return err
+          console.log(err);
+          return -1
       }
   };
 

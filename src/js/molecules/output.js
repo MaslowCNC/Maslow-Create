@@ -28,6 +28,7 @@ export default class Output extends Atom {
         
         this.value = this.findIOValue('number or geometry')
         this.parent.value = this.value
+        this.parent.propogate()
         
         super.updateValue()
     }
