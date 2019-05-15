@@ -3,7 +3,7 @@ import GlobalVariables from '../globalvariables'
 export default class Connector {
     constructor(values){
         
-        this.isMoving = true
+        this.isMoving = false
         this.color = 'black'
         this.atomType = 'Connector'
         this.selected = false
@@ -37,25 +37,23 @@ export default class Connector {
     }
 
     clickUp(x,y){
-        
         if(this.isMoving){  //we only want to attach the connector which is currently moving
+            var attachmentMade = false
             GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
-                molecule.children.forEach(child => {                                    //For each of their attachment points
-                    var thisConnectionValid = child.wasConnectionMade(x,y, this)       //Check to see if we made a connection
-                    if(thisConnectionValid){
-                        this.attachmentPoint2 = thisConnectionValid
-                        this.propogate()                                               //Send information from one point to the other
+                molecule.children.forEach(attachmentPoint => {                                    //For each of their attachment points
+                    if(attachmentPoint.wasConnectionMade(x,y)){
+                        attachmentMade = true
+                        this.attachmentPoint2 = attachmentPoint
+                        attachmentPoint.attach(this)
+                        this.propogate()
                     }
                 })
             })
+            if (!attachmentMade){
+                this.deleteSelf()
+            }
+            this.isMoving = false
         }
-        
-        
-        if (this.attachmentPoint2 == null){                                 //If we have not made a connection
-            this.deleteSelf()                                              //Delete this connector
-        }
-        
-        this.isMoving = false                                                         //Move over 
     }
 
     clickMove(x,y){

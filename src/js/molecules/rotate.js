@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
 
 export default class Rotate extends Atom {
     
@@ -20,14 +19,9 @@ export default class Rotate extends Atom {
     }
     
     updateValue(){
-        
         try{
-            this.value = GlobalVariables.api.rotate([this.findIOValue('x-axis degrees'), this.findIOValue('y-axis degrees'), this.findIOValue('z-axis degrees')], this.findIOValue('geometry'))
-        }
-        catch(err){
-            console.warn("Error. Couldn't render")
-        }
-        
-        super.updateValue()
+            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('x-axis degrees'), this.findIOValue('y-axis degrees'), this.findIOValue('z-axis degrees')]
+            this.basicThreadValueProcessing(values, "rotate")
+        }catch(err){this.setAlert(err)}
     }
 }

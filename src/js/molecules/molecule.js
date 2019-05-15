@@ -62,13 +62,14 @@ export default class Molecule extends Atom{
     
     backgroundClick(){
         
+        this.selected = true
         this.updateSidebar()
-        
         this.sendToRender()
     }
     
     updateValue(){
-        //Grab the code from the output object
+        this.processing = true
+        this.clearAlert()
         
         //Grab values from the inputs and push them out to the input objects
         this.children.forEach(child => {
@@ -81,13 +82,10 @@ export default class Molecule extends Atom{
             }
         })
         
-        //Grab the value from the Molecule's output and set it to be the molecule's code block so that clicking on the molecule will display what it is outputting
-        this.nodesOnTheScreen.forEach(atom => {
-            if(atom.atomType == 'Output'){
-                this.value = atom.value
-            }
-        })
-        
+        this.processing = false
+    }
+    
+    propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
@@ -165,7 +163,9 @@ export default class Molecule extends Atom{
         var bomList = []
         try{
             bomList = extractBomTags(this.value)
-        }catch(err){console.warn(err)}
+        }catch(err){
+            this.setAlert("Unable to read BOM")
+        }
         
         if(bomList.length > 0){
         
@@ -288,8 +288,6 @@ export default class Molecule extends Atom{
     }
         
     deserialize(moleculeList, moleculeID){
-        
-        // try{
         //Find the target molecule in the list
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
@@ -299,7 +297,6 @@ export default class Molecule extends Atom{
         moleculeObject.allAtoms.forEach(atom => {
             this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
         })
-            
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
@@ -308,16 +305,10 @@ export default class Molecule extends Atom{
         this.savedConnectors.forEach(connector => {
             this.placeConnector(connector)
         })
-            
+        
         this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
-            
+
         this.updateValue()
-        // }
-        // catch(err){
-        // console.log("Unable to load molecule: ");
-        // console.log(moleculeObject);
-        // console.log(err);
-        // }
     }
     
     placeAtom(newAtomObj, moleculeList, typesList){
