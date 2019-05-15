@@ -118,7 +118,6 @@ export default class Display {
                 try {
                     return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: "render"})
                 } catch(err) {
-                    console.log("this didn't render")
                     return -1
                 }
             }

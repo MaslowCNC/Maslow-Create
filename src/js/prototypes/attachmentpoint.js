@@ -140,7 +140,8 @@ export default class AttachmentPoint {
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 
                     attachmentPoint1: this,
-                    atomType: 'Connector'
+                    atomType: 'Connector',
+                    isMoving: true
                 })
                 this.connectors.push(connector)
             }
@@ -221,7 +222,6 @@ export default class AttachmentPoint {
 
     }
     
-    
     keyPress(key){
         this.connectors.forEach(connector => {
             connector.keyPress(key)       
@@ -241,21 +241,26 @@ export default class AttachmentPoint {
         this.parent.updateSidebar()
     }
     
-    wasConnectionMade(x,y, connector){
+    wasConnectionMade(x,y){
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
-            
+        
             if(this.connectors.length > 0){ //Don't accept a second connection to an input
                 return false
             }
-            
-            this.connectors.push(connector)
-            
-            return this
+            else{
+                return true
+            }
         }
-        return false
+        else{
+            return false
+        }
     }
 
+    attach(connector){
+        this.connectors.push(connector)
+    }
+    
     setDefault(){
         this.setValue(this.defaultValue)
        
