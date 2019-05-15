@@ -180,10 +180,10 @@ export default class Display {
     }
     
     onWindowResize() {
-        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight - 1)
+        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight)
         this.camera.updateProjectionMatrix()
         this.controls.handleResize()
-        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight - 1)
+        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight)
     }
     
     render() {

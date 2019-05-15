@@ -139,7 +139,7 @@ function onWindowResize() {
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 
-    GlobalVariables.display.onWindowResize()    
+    GlobalVariables.display.onWindowResize()
 }
 
 
