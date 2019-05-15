@@ -46,7 +46,6 @@ export default class Connector {
                         this.attachmentPoint2 = attachmentPoint
                         attachmentPoint.attach(this)
                         this.propogate()
-                        console.log("would have connected")
                     }
                 })
             })
