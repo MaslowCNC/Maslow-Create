@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom.js'
-import GlobalVariables from '../globalvariables.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
 
 export default class ShrinkWrap extends Atom{

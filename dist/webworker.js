@@ -73923,6 +73923,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second vector to add
    * @returns {vec3} the added vectors
    */
+  const add$3 = ([ax, ay, az], [bx, by, bz]) => [(ax + bx), (ay + by), (az + bz)];
 
   /**
    * Calculates the dot product of two vec3's
@@ -73988,6 +73989,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param  {Float} scalar
    * @returns {Vec3}
    */
+  const fromScalar$1 = (scalar) => [scalar, scalar, scalar];
 
   /**
    * Creates a new vec3 initialized with the given values
@@ -74006,6 +74008,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} a vector to calculate length of
    * @returns {Number} length of a
    */
+  const length$3 = ([x = 0, y = 0, z = 0]) => Math.sqrt((x * x) + (y * y) + (z * z));
 
   /**
    * Performs a linear interpolation between two vec3's
@@ -74045,6 +74048,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
+  const multiply$3 = ([ax, ay, az], [bx, by, bz]) => [(ax * bx), (ay * by), (az * bz)];
 
   /**
    * Negates the components of a vec3
@@ -74061,6 +74065,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
+  const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [(ax - bx), (ay - by), (az - bz)];
 
   /**
    * Calculates the squared euclidian distance between two vec3's
@@ -74069,6 +74074,12 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} squared distance between a and b
    */
+  const squaredDistance$2 = ([ax, ay, az], [bx, by, bz]) => {
+    const x = bx - ax;
+    const y = by - ay;
+    const z = bz - az;
+    return (x * x) + (y * y) + (z * z);
+  };
 
   /**
    * Calculates the squared length of a vec3
@@ -74091,6 +74102,20 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
             (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
             (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w];
+  };
+
+  /**
+   * Calculates the unit vector of the given vector
+   *
+   * @param {vec3} vector - the base vector for calculations
+   * @returns {vec3} unit vector of the given vector
+   */
+  const unit$1 = (vector) => {
+    const [x, y, z] = vector;
+    const magnitude = length$3(vector);
+    return [x / magnitude,
+            y / magnitude,
+            z / magnitude];
   };
 
   /**
@@ -76680,6 +76705,15 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {Polygon} the polygon of which to emit the edges.
    */
 
+  const eachEdge$1 = (options = {}, thunk, polygon) => {
+    if (polygon.length >= 2) {
+      for (let nth = 1; nth < polygon.length; nth++) {
+        thunk(polygon[nth - 1], polygon[nth]);
+      }
+      thunk(polygon[polygon.length - 1], polygon[0]);
+    }
+  };
+
   /**
    * Flip the give polygon to face the opposite direction.
    *
@@ -76701,6 +76735,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * ]
    * const polygon = createFromPoints(points)
    */
+  const fromPoints$3 = (points, planeof) => [...points];
 
   /**
    * Compare the given planes for equality
@@ -76713,6 +76748,37 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec4} vec - plane to flip
    * @return {vec4} flipped plane
    */
+
+  /**
+   * Create a new plane from the given points
+   *
+   * @param {Vec3} a - 3D point
+   * @param {Vec3} b - 3D point
+   * @param {Vec3} c - 3D point
+   * @returns {Vec4} a new plane with properly typed values
+   */
+  const fromPoints$4 = (a, b, c) => {
+    // let n = b.minus(a).cross(c.minus(a)).unit()
+    // FIXME optimize later
+    const ba = subtract$2(b, a);
+    const ca = subtract$2(c, a);
+    const cr = cross$2(ba, ca);
+    const normal = unit$1(cr); // normal part
+    //
+    const w = dot$2(normal, a);
+    return [normal[0], normal[1], normal[2], w];
+  };
+
+  const toPlane$2 = (polygon) => {
+    if (polygon.plane === undefined) {
+      if (polygon.length >= 3) {
+        polygon.plane = fromPoints$4(...polygon);
+      } else {
+        throw Error('die');
+      }
+    }
+    return polygon.plane;
+  };
 
   /**
    * Returns the polygon as an array of points.
@@ -76766,6 +76832,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @returns {Polygons} a copy with transformed polygons.
    */
 
+  const isClosed$1 = (path) => (path.length === 0) || (path[0] !== null);
+
+  const isTriangle$1 = (path) => isClosed$1(path) && path.length === 3;
+
   /*
   ** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
   ** Copyright (C) [dates of first publication] Silicon Graphics, Inc.
@@ -76807,11 +76877,29 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return [min, max];
   };
 
+  const blessAsTriangles$1 = (paths) => { paths.isTriangles = true; return paths; };
+
+  const toTriangles$1 = (options = {}, paths) => {
+    if (paths.isTriangles) {
+      return paths;
+    }
+    if (paths.every(isTriangle$1)) {
+      return blessAsTriangles$1(paths);
+    }
+    const triangles = [];
+    for (const path of paths) {
+      for (let nth = 2; nth < path.length; nth++) {
+        triangles.push([path[0], path[nth - 1], path[nth]]);
+      }
+    }
+    return blessAsTriangles$1(triangles);
+  };
+
   const transform$a = (matrix, polygons) => polygons.map(polygon => transform$9(matrix, polygon));
 
   const translate$2 = (vector, polygons) => transform$a(fromTranslation$1(vector), polygons);
 
-  var subtract_1$1 = subtract$2;
+  var subtract_1$1 = subtract$3;
 
   /**
    * Subtracts vector b from vector a
@@ -76821,7 +76909,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
-  function subtract$2(out, a, b) {
+  function subtract$3(out, a, b) {
       out[0] = a[0] - b[0];
       out[1] = a[1] - b[1];
       out[2] = a[2] - b[2];
@@ -77165,7 +77253,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   unwrapExports(Vertex_1$1);
 
-  var add_1$1 = add$3;
+  var add_1$1 = add$4;
 
   /**
    * Adds two vec3's
@@ -77175,7 +77263,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
-  function add$3(out, a, b) {
+  function add$4(out, a, b) {
       out[0] = a[0] + b[0];
       out[1] = a[1] + b[1];
       out[2] = a[2] + b[2];
@@ -77198,7 +77286,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       return out
   }
 
-  var length_1$1 = length$3;
+  var length_1$1 = length$4;
 
   /**
    * Calculates the length of a vec3
@@ -77206,7 +77294,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} a vector to calculate length of
    * @returns {Number} length of a
    */
-  function length$3(a) {
+  function length$4(a) {
       var x = a[0],
           y = a[1],
           z = a[2];
@@ -77264,7 +77352,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       return Math.sqrt(x*x + y*y + z*z)
   }
 
-  var squaredDistance_1$1 = squaredDistance$2;
+  var squaredDistance_1$1 = squaredDistance$3;
 
   /**
    * Calculates the squared euclidian distance between two vec3's
@@ -77273,7 +77361,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} squared distance between a and b
    */
-  function squaredDistance$2(a, b) {
+  function squaredDistance$3(a, b) {
       var x = b[0] - a[0],
           y = b[1] - a[1],
           z = b[2] - a[2];
@@ -80438,7 +80526,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @param  {Tree}       tree
    * @return {Node}       root
    */
-  function add$4 (i, data, t, comparator, tree) {
+  function add$5 (i, data, t, comparator, tree) {
     const node = new Node$4(i, data);
 
     if (t === null) {
@@ -80573,7 +80661,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
      * @return {Node|null}
      */
     add (key, data) {
-      return this._root = add$4(key, data, this._root, this._comparator, this);
+      return this._root = add$5(key, data, this._root, this._comparator, this);
     }
 
 
@@ -81147,7 +81235,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     var kross = crossProduct$1(v1, v2);
     return cmp$1(kross, 0);
   };
-  var length$4 = function length(v) {
+  var length$5 = function length(v) {
     return Math.sqrt(dotProduct$1(v, v));
   };
   /* Get the sine of the angle from pShared -> pAngle to pShaed -> pBase */
@@ -81161,7 +81249,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       x: pAngle.x - pShared.x,
       y: pAngle.y - pShared.y
     };
-    return crossProduct$1(vAngle, vBase) / length$4(vAngle) / length$4(vBase);
+    return crossProduct$1(vAngle, vBase) / length$5(vAngle) / length$5(vBase);
   };
   /* Get the cosine of the angle from pShared -> pAngle to pShaed -> pBase */
 
@@ -81174,7 +81262,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       x: pAngle.x - pShared.x,
       y: pAngle.y - pShared.y
     };
-    return dotProduct$1(vAngle, vBase) / length$4(vAngle) / length$4(vBase);
+    return dotProduct$1(vAngle, vBase) / length$5(vAngle) / length$5(vBase);
   };
   /* Get the closest point on an line (defined by two points)
    * to another point. */
@@ -82945,6 +83033,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   var operation$1 = new Operation$1();
 
   // Relax the coplanar arrangement into polygon soup.
+  const toPolygons$2 = (options = {}, solid) => [].concat(...solid);
 
   const eachItem$1 = (geometry, operation) => {
     const walk = (geometry) => {
@@ -82956,7 +83045,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     walk(geometry);
   };
 
-  const toPolygons$2 = (geometry) => {
+  const toPolygons$3 = (geometry) => {
     const polygonSets = [];
     eachItem$1(geometry,
              item => {
@@ -82974,7 +83063,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    */
   const toSvg$2 = async ({ padding = 0 }, geometry) => {
     // FIX: SVG should handle both surfaces and paths.
-    const polygons = canonicalize$7(toPolygons$2(geometry));
+    const polygons = canonicalize$7(toPolygons$3(geometry));
     const min = measureBoundingBox$3(polygons)[0];
     // TODO: Add transform and translate support to polygons.
     const shiftedPolygons = canonicalize$7(translate$2(negate$1(min), polygons));
@@ -82989,6 +83078,481 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       `</svg>`
     ].join('\n');
   };
+
+  const ensureMapElement$1 = (map, key, ensurer = (_ => [])) => {
+    if (!map.has(key)) {
+      map.set(key, ensurer());
+    }
+    return map.get(key);
+  };
+
+  /**
+   * Return the direction of the given line.
+   *
+   * @return {vec3} the relative vector in the direction of the line
+   */
+
+  /**
+   * Create a line in 3D space from the given data.
+   *
+   * The point can be any random point on the line.
+   * The direction must be a vector with positive or negative distance from the point.
+   * See the logic of fromPoints for appropriate values.
+   *
+   * @param {vec3} point start point of the line segment
+   * @param {vec3} direction direction of the line segment
+   * @returns {line3} a new unbounded 3D line
+   */
+  const fromPointAndDirection$1 = (point, direction) => [point, unit$1(direction)];
+
+  /**
+   * Creates a new 3D line that passes through the given points.
+   *
+   * @param {vec3} p1 start point of the line segment
+   * @param {vec3} p2 end point of the line segment
+   * @returns {line3} a new unbounded 3D line
+   */
+  const fromPoints$5 = (p1, p2) => {
+    const direction = subtract$2(p2, p1);
+    return fromPointAndDirection$1(p1, direction);
+  };
+
+  /**
+   * Return the origin of the given line.
+   *
+   * @param {line3} line the 3D line of reference
+   * @return {vec3} the origin of the line
+   */
+
+  const toIdentity$2 = JSON.stringify;
+
+  /**
+   * findVertexViolations determines that the vertex's edges are closed.
+   *
+   * For a watertight vertex, it will consist of unique lines with an even count.
+   *
+   * @params {start} start - the vertex.
+   * @params {Array<point>} ends - the sorted other end of each edge.
+   * @returns {Array} violations.
+   *
+   * Note that checking for pairs of edges isn't sufficient.
+   *
+   *    A-----B
+   *    |     |
+   *    |     E--F
+   *    |     |  |
+   *    C-----D--G
+   *
+   * A situation with B~D, D~B, E~D, D~E would lead such an algorithm to believe
+   * the vertex was watertight when it is only partially watertight.
+   *
+   * So, we need to detect any distinct colinear edges.
+   */
+  const findVertexViolations$1 = (start, ...ends) => {
+    const lines = new Map();
+    ends.forEach(end => {
+      // These are not actually lines, but they all start at the same position, so we can pretend.
+      const ray = fromPoints$5(start, end);
+      ensureMapElement$1(lines, toIdentity$2(ray)).push(end);
+    });
+
+    const distance = (end) => length$3(subtract$2(end, start));
+
+    let violations = [];
+    lines.forEach(ends => {
+      ends.sort((a, b) => distance(a) - distance(b));
+      for (let nth = 1; nth < ends.length; nth++) {
+        if (!equals$3(ends[nth], ends[nth - 1])) {
+          violations.push(['unequal', [start, ...ends]]);
+          violations.push(['unequal', [start, ...ends].reverse()]);
+          break;
+        }
+      }
+      if (ends.length % 2 !== 0) ;
+    });
+
+    // If no violations, it is Watertight.
+    return violations;
+  };
+
+  const toIdentity$3 = JSON.stringify;
+
+  const findPolygonsViolations$1 = polygons => {
+    // A map from vertex value to connected edges represented as an array in
+    // the form [start, ...end].
+    const edges = new Map();
+    const addEdge = (start, end) => ensureMapElement$1(edges, toIdentity$3(start), () => [start]).push(end);
+    const addEdges = (start, end) => { addEdge(start, end); addEdge(end, start); };
+    polygons.forEach(polygon => eachEdge$1({}, addEdges, polygon));
+
+    // Edges are assembled, check for matches
+    let violations = [];
+    edges.forEach(vertex => {
+      violations = [].concat(violations, findVertexViolations$1(...vertex));
+    });
+
+    return violations;
+  };
+
+  const isWatertightPolygons$1 = polygons => findPolygonsViolations$1(polygons).length === 0;
+
+  const EPS$1 = 1e-5;
+  const W$4 = 3;
+
+  const tag$1 = vertex => JSON.stringify([...vertex]);
+
+  function addSide$1 (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vertex1, polygonindex) {
+    let starttag = tag$1(vertex0);
+    let endtag = tag$1(vertex1);
+    if (starttag === endtag) throw new Error('Assertion failed');
+    let newsidetag = starttag + '/' + endtag;
+    let reversesidetag = endtag + '/' + starttag;
+    if (reversesidetag in sidemap) {
+      // we have a matching reverse oriented side.
+      // Instead of adding the new side, cancel out the reverse side:
+      // console.log("addSide("+newsidetag+") has reverse side:");
+      deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend, vertex1, vertex0, null);
+      return null;
+    }
+    //  console.log("addSide("+newsidetag+")");
+    let newsideobj = {
+      vertex0: vertex0,
+      vertex1: vertex1,
+      polygonindex: polygonindex
+    };
+    if (!(newsidetag in sidemap)) {
+      sidemap[newsidetag] = [newsideobj];
+    } else {
+      sidemap[newsidetag].push(newsideobj);
+    }
+    if (starttag in vertextag2sidestart) {
+      vertextag2sidestart[starttag].push(newsidetag);
+    } else {
+      vertextag2sidestart[starttag] = [newsidetag];
+    }
+    if (endtag in vertextag2sideend) {
+      vertextag2sideend[endtag].push(newsidetag);
+    } else {
+      vertextag2sideend[endtag] = [newsidetag];
+    }
+    return newsidetag;
+  }
+
+  function deleteSide$1 (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vertex1, polygonindex) {
+    let starttag = tag$1(vertex0);
+    let endtag = tag$1(vertex1);
+    let sidetag = starttag + '/' + endtag;
+    // console.log("deleteSide("+sidetag+")");
+    if (!(sidetag in sidemap)) throw new Error('Assertion failed');
+    let idx = -1;
+    let sideobjs = sidemap[sidetag];
+    for (let i = 0; i < sideobjs.length; i++) {
+      let sideobj = sideobjs[i];
+      if (!equals$3(sideobj.vertex0, vertex0)) continue;
+      if (!equals$3(sideobj.vertex1, vertex1)) continue;
+      if (polygonindex !== null) {
+        if (sideobj.polygonindex !== polygonindex) continue;
+      }
+      idx = i;
+      break;
+    }
+    if (idx < 0) throw new Error('Assertion failed');
+    sideobjs.splice(idx, 1);
+    if (sideobjs.length === 0) {
+      delete sidemap[sidetag];
+    }
+    idx = vertextag2sidestart[starttag].indexOf(sidetag);
+    if (idx < 0) throw new Error('Assertion failed');
+    vertextag2sidestart[starttag].splice(idx, 1);
+    if (vertextag2sidestart[starttag].length === 0) {
+      delete vertextag2sidestart[starttag];
+    }
+
+    idx = vertextag2sideend[endtag].indexOf(sidetag);
+    if (idx < 0) throw new Error('Assertion failed');
+    vertextag2sideend[endtag].splice(idx, 1);
+    if (vertextag2sideend[endtag].length === 0) {
+      delete vertextag2sideend[endtag];
+    }
+  }
+
+  /*
+       fixTJunctions:
+
+       Suppose we have two polygons ACDB and EDGF:
+
+        A-----B
+        |     |
+        |     E--F
+        |     |  |
+        C-----D--G
+
+       Note that vertex E forms a T-junction on the side BD. In this case some STL slicers will complain
+       that the solid is not watertight. This is because the watertightness check is done by checking if
+       each side DE is matched by another side ED.
+
+       This function will return a new solid with ACDB replaced by ACDEB
+
+       Note that this can create polygons that are slightly non-convex (due to rounding errors). Therefore the result
+       should not be used for further Geom3 operations!
+  */
+  const fixTJunctions$1 = function (polygons) {
+    let sidemap = {};
+
+    // STEP 1
+    for (let polygonindex = 0; polygonindex < polygons.length; polygonindex++) {
+      let polygon = polygons[polygonindex];
+      let numvertices = polygon.length;
+      // should be true
+      if (numvertices >= 3) {
+        let vertex = polygon[0];
+        let vertextag = tag$1(vertex);
+        for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
+          let nextvertexindex = vertexindex + 1;
+          if (nextvertexindex === numvertices) nextvertexindex = 0;
+          let nextvertex = polygon[nextvertexindex];
+          let nextvertextag = tag$1(nextvertex);
+          let sidetag = vertextag + '/' + nextvertextag;
+          let reversesidetag = nextvertextag + '/' + vertextag;
+          if (reversesidetag in sidemap) {
+            // this side matches the same side in another polygon. Remove from sidemap:
+            let ar = sidemap[reversesidetag];
+            ar.splice(-1, 1);
+            if (ar.length === 0) {
+              delete sidemap[reversesidetag];
+            }
+          } else {
+            let sideobj = {
+              vertex0: vertex,
+              vertex1: nextvertex,
+              polygonindex: polygonindex
+            };
+            if (!(sidetag in sidemap)) {
+              sidemap[sidetag] = [sideobj];
+            } else {
+              sidemap[sidetag].push(sideobj);
+            }
+          }
+          vertex = nextvertex;
+          vertextag = nextvertextag;
+        }
+      }
+    }
+    // STEP 2
+    // now sidemap contains 'unmatched' sides
+    // i.e. side AB in one polygon does not have a matching side BA in another polygon
+    let vertextag2sidestart = {};
+    let vertextag2sideend = {};
+    let sidestocheck = {};
+    let sidemapisempty = true;
+    for (let sidetag in sidemap) {
+      sidemapisempty = false;
+      sidestocheck[sidetag] = true;
+      sidemap[sidetag].map(function (sideobj) {
+        let starttag = tag$1(sideobj.vertex0);
+        let endtag = tag$1(sideobj.vertex1);
+        if (starttag in vertextag2sidestart) {
+          vertextag2sidestart[starttag].push(sidetag);
+        } else {
+          vertextag2sidestart[starttag] = [sidetag];
+        }
+        if (endtag in vertextag2sideend) {
+          vertextag2sideend[endtag].push(sidetag);
+        } else {
+          vertextag2sideend[endtag] = [sidetag];
+        }
+      });
+    }
+
+    // STEP 3 : if sidemap is not empty
+    if (!sidemapisempty) {
+      // make a copy of the polygons array, since we are going to modify it:
+      polygons = polygons.slice(0);
+      while (true) {
+        let sidemapisempty = true;
+        for (let sidetag in sidemap) {
+          sidemapisempty = false;
+          sidestocheck[sidetag] = true;
+        }
+        if (sidemapisempty) break;
+        let donesomething = false;
+        while (true) {
+          let sidetagtocheck = null;
+          for (let sidetag in sidestocheck) {
+            sidetagtocheck = sidetag;
+            break; // FIXME  : say what now ?
+          }
+          if (sidetagtocheck === null) break; // sidestocheck is empty, we're done!
+          let donewithside = true;
+          if (sidetagtocheck in sidemap) {
+            let sideobjs = sidemap[sidetagtocheck];
+            if (sideobjs.length === 0) throw new Error('Assertion failed');
+            let sideobj = sideobjs[0];
+            for (let directionindex = 0; directionindex < 2; directionindex++) {
+              let startvertex = (directionindex === 0) ? sideobj.vertex0 : sideobj.vertex1;
+              let endvertex = (directionindex === 0) ? sideobj.vertex1 : sideobj.vertex0;
+              let startvertextag = tag$1(startvertex);
+              let endvertextag = tag$1(endvertex);
+              let matchingsides = [];
+              if (directionindex === 0) {
+                if (startvertextag in vertextag2sideend) {
+                  matchingsides = vertextag2sideend[startvertextag];
+                }
+              } else {
+                if (startvertextag in vertextag2sidestart) {
+                  matchingsides = vertextag2sidestart[startvertextag];
+                }
+              }
+              for (let matchingsideindex = 0; matchingsideindex < matchingsides.length; matchingsideindex++) {
+                let matchingsidetag = matchingsides[matchingsideindex];
+                let matchingside = sidemap[matchingsidetag][0];
+                let matchingsidestartvertex = (directionindex === 0) ? matchingside.vertex0 : matchingside.vertex1;
+                let matchingsideendvertex = (directionindex === 0) ? matchingside.vertex1 : matchingside.vertex0;
+                let matchingsidestartvertextag = tag$1(matchingsidestartvertex);
+                let matchingsideendvertextag = tag$1(matchingsideendvertex);
+                if (matchingsideendvertextag !== startvertextag) throw new Error('Assertion failed');
+                if (matchingsidestartvertextag === endvertextag) {
+                  // matchingside cancels sidetagtocheck
+                  deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend, startvertex, endvertex, null);
+                  deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend, endvertex, startvertex, null);
+                  donewithside = false;
+                  directionindex = 2; // skip reverse direction check
+                  donesomething = true;
+                  break;
+                } else {
+                  let startpos = startvertex;
+                  let endpos = endvertex;
+                  let checkpos = matchingsidestartvertex;
+                  // let direction = checkpos.minus(startpos)
+                  let direction = subtract$2(checkpos, startpos);
+                  // Now we need to check if endpos is on the line startpos-checkpos:
+                  // let t = endpos.minus(startpos).dot(direction) / direction.dot(direction)
+                  let t = dot$2(subtract$2(endpos, startpos), direction) / dot$2(direction, direction);
+                  if ((t > 0) && (t < 1)) {
+                    let closestpoint = add$3(startpos, multiply$3(direction, fromScalar$1(t)));
+                    let distancesquared = squaredDistance$2(closestpoint, endpos);
+                    if (distancesquared < (EPS$1 * EPS$1)) {
+                      // Yes it's a t-junction! We need to split matchingside in two:
+                      let polygonindex = matchingside.polygonindex;
+                      let polygon = polygons[polygonindex];
+                      // find the index of startvertextag in polygon:
+                      let insertionvertextag = tag$1(matchingside.vertex1);
+                      let insertionvertextagindex = -1;
+                      for (let i = 0; i < polygon.length; i++) {
+                        if (tag$1(polygon[i]) === insertionvertextag) {
+                          insertionvertextagindex = i;
+                          break;
+                        }
+                      }
+                      if (insertionvertextagindex < 0) throw new Error('Assertion failed');
+                      // split the side by inserting the vertex:
+                      let newvertices = polygon.slice(0);
+                      newvertices.splice(insertionvertextagindex, 0, endvertex);
+                      let newpolygon = fromPoints$3(newvertices);
+
+                      // calculate plane with differents point
+                      if (isNaN(toPlane$2(newpolygon)[W$4])) {
+                        let found = false;
+                        let loop = function (callback) {
+                          newpolygon.forEach(function (item) {
+                            if (found) return;
+                            callback(item);
+                          });
+                        };
+
+                        loop(function (a) {
+                          loop(function (b) {
+                            loop(function (c) {
+                              newpolygon.plane = fromPoints$4(a, b, c);
+                              if (!isNaN(toPlane$2(newpolygon)[W$4])) {
+                                found = true;
+                              }
+                            });
+                          });
+                        });
+                      }
+                      polygons[polygonindex] = newpolygon;
+                      // remove the original sides from our maps
+                      // deleteSide(sideobj.vertex0, sideobj.vertex1, null)
+                      deleteSide$1(sidemap, vertextag2sidestart, vertextag2sideend,
+                                 matchingside.vertex0, matchingside.vertex1, polygonindex);
+                      let newsidetag1 = addSide$1(sidemap, vertextag2sidestart, vertextag2sideend,
+                                                matchingside.vertex0, endvertex, polygonindex);
+                      let newsidetag2 = addSide$1(sidemap, vertextag2sidestart, vertextag2sideend, endvertex,
+                                                matchingside.vertex1, polygonindex);
+                      if (newsidetag1 !== null) sidestocheck[newsidetag1] = true;
+                      if (newsidetag2 !== null) sidestocheck[newsidetag2] = true;
+                      donewithside = false;
+                      directionindex = 2; // skip reverse direction check
+                      donesomething = true;
+                      break;
+                    } // if(distancesquared < 1e-10)
+                  } // if( (t > 0) && (t < 1) )
+                } // if(endingstidestartvertextag === endvertextag)
+              } // for matchingsideindex
+            } // for directionindex
+          } // if(sidetagtocheck in sidemap)
+          if (donewithside) {
+            delete sidestocheck[sidetagtocheck];
+          }
+        }
+        if (!donesomething) break;
+      }
+    }
+
+    return polygons;
+  };
+
+  const makeWatertight$1 = polygons => fixTJunctions$1(polygons);
+
+  /**
+   * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
+   * The exterior side of a polygon is determined by a CCW point ordering.
+   *
+   * @param {Object} options.
+   * @param {Polygon Array} polygons - An array of arrays of points.
+   * @returns {String} - the ascii STL output.
+   */
+
+  const geometryToTriangles$1 = (geometry) => {
+    const triangleSets = [];
+    eachItem$1(geometry,
+             item => {
+               if (item.solid) {
+                 triangleSets.push(toTriangles$1({}, toPolygons$2({}, item.solid)));
+               }
+             });
+    return [].concat(...triangleSets);
+  };
+
+  const toStl$1 = async (options = {}, geometry) => {
+    let polygons = geometryToTriangles$1(geometry);
+    if (!isWatertightPolygons$1(polygons)) {
+      console.log(`polygonsToStla: Polygon is not watertight`);
+      if (options.doMakeWatertight) {
+        polygons = makeWatertight$1(polygons);
+      }
+    }
+    return `solid JSxCAD\n${convertToFacets$1(options, canonicalize$7(toTriangles$1({}, polygons)))}\nendsolid JSxCAD\n`;
+  };
+
+  const convertToFacets$1 = (options, polygons) =>
+    polygons.map(convertToFacet$1).join('\n');
+
+  const toStlVector$1 = vector =>
+    `${vector[0]} ${vector[1]} ${vector[2]}`;
+
+  const toStlVertex$1 = vertex =>
+    `vertex ${toStlVector$1(vertex)}`;
+
+  const convertToFacet$1 = polygon =>
+    `facet normal ${toStlVector$1(toPlane$2(polygon))}\n` +
+    `outer loop\n` +
+    `${toStlVertex$1(polygon[0])}\n` +
+    `${toStlVertex$1(polygon[1])}\n` +
+    `${toStlVertex$1(polygon[2])}\n` +
+    `endloop\n` +
+    `endfacet`;
 
   /* global postMessage, onmessage:writable */
 
@@ -83036,6 +83600,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
               case "svg":
                   const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
                   return toSvg$2({}, crossSection)
+                  break
+              case "stl":
+                  return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
                   break
               default:
                   return -1

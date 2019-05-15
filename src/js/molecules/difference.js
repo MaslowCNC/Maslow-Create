@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
 
 export default class Difference extends Atom{
     

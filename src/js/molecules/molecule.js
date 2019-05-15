@@ -62,8 +62,8 @@ export default class Molecule extends Atom{
     
     backgroundClick(){
         
+        this.selected = true
         this.updateSidebar()
-        
         this.sendToRender()
     }
     
