@@ -68,7 +68,8 @@ export default class Molecule extends Atom{
     }
     
     updateValue(){
-        //Grab the code from the output object
+        this.processing = true
+        this.clearAlert()
         
         //Grab values from the inputs and push them out to the input objects
         this.children.forEach(child => {
@@ -81,13 +82,10 @@ export default class Molecule extends Atom{
             }
         })
         
-        //Grab the value from the Molecule's output and set it to be the molecule's code block so that clicking on the molecule will display what it is outputting
-        this.nodesOnTheScreen.forEach(atom => {
-            if(atom.atomType == 'Output'){
-                this.value = atom.value
-            }
-        })
-        
+        this.processing = false
+    }
+    
+    propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
         this.children.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){

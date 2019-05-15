@@ -31,6 +31,13 @@ export const extractBomTags = (geometry) => {
             })
         }
     }
-    walk(geometry)
+    if(geometry != null){
+        try{
+            walk(geometry)
+        }
+        catch(err){
+            console.log(err)
+        }
+    }
     return bomItems
 }

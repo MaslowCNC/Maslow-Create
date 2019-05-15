@@ -113,13 +113,20 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        const computeValue = async () => {
-            return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: "render"})
-        }
+        if(shape != null){
+            const computeValue = async () => {
+                try {
+                    return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: "render"})
+                } catch(err) {
+                    console.log("this didn't render")
+                    return -1
+                }
+            }
 
-        computeValue().then(result => {
-            this.updateDisplayData(result)
-        })
+            computeValue().then(result => {
+                this.updateDisplayData(result)
+            })
+        }
     }
     
     updateDisplayData(threejsGeometry){

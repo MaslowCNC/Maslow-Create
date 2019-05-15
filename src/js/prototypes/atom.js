@@ -343,6 +343,7 @@ export default class Atom {
     
     basicThreadValueProcessing(values, key){
         this.processing = true
+        this.clearAlert()
         
         const computeValue = async (values, key) => {
             try{
@@ -352,8 +353,6 @@ export default class Atom {
                 this.setAlert(err)
             }
         }
-        
-        this.clearAlert()
         
         computeValue(values, key).then(result => {
             if (result != -1 ){

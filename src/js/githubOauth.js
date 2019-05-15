@@ -388,9 +388,12 @@ export default function GitHubModule(){
             }
             
             convertSTL.toStla({}, shape.toDisjointGeometry()).then( stlContent => {
-                const crossSection = shape.rotate([90,0,0]).crossSection().toDisjointGeometry()
-                convertSVG.toSvg({}, crossSection).then( contentSvg => {
-            
+                const computeSvg = async (values, key) => {
+                    return await GlobalVariables.ask({values: values, key: key})
+                }
+                
+                computeSvg([shape.toLazyGeometry().toGeometry()], "svg").then(contentSvg => {
+                    
                     var bomContent = bomHeader
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
                     bomItems.forEach(item => {
