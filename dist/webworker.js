@@ -83034,7 +83034,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   return Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry()
                   break
               case "svg":
-                  const crossSection = Shape.fromGeometry(values[0]).crossSection().toDisjointGeometry();
+                  const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
                   console.log("crossSection:");
                   console.log(crossSection);
                   return toSvg$2({}, crossSection)
