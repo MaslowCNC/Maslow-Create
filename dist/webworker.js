@@ -83749,9 +83749,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   return toSvg$2({}, crossSection)
                   break
               case "SVG Picture":
-                  const shape = Shape.fromGeometry(values[0]);
-                  console.log(shape);
-                  return toSvg$1({cameraPosition: [0, 0, 700]}, shape.toDisjointGeometry())
+                  const shape = Shape.fromGeometry(values[0]).center();
+                  const bounds = shape.measureBoundingBox();
+                  const cameraDistance = 6*Math.max(...bounds[1]);
+                  return toSvg$1({cameraPosition: [0, 0, cameraDistance]}, shape.rotate([-60, -45, 0]).toDisjointGeometry())
               case "stl":
                   return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
                   break
