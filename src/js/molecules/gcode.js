@@ -33,7 +33,7 @@ export default class Gcode extends Atom {
             }catch(err){this.setAlert(err)}
         }
         
-        const input = this.findIOValue('geometry')
+        const input = this.findIOValue('geometry').center()
         
         try{
             computeSvg([input.toLazyGeometry().toGeometry()], "svg").then(result => {
