@@ -33,9 +33,7 @@ export default class Constant extends Atom{
         
         var valueList = super.updateSidebar() //call the super function
         
-        var output = this.inputs[0]
-        
-        this.createEditableValueListItem(valueList,output,'value', 'Value', true)
+        this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         
     }
