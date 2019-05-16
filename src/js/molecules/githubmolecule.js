@@ -55,6 +55,10 @@ export default class GitHubMolecule extends Molecule {
                 })
             }
             
+            if(this.topLevel){
+                GlobalVariables.evalLock = false
+            }
+            this.unlock()
             GlobalVariables.currentMolecule.backgroundClick()
         })
     }

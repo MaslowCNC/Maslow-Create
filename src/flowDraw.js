@@ -114,7 +114,8 @@ function init() {
         //Have the current molecule load it
         if(typeof ID != undefined){
             GlobalVariables.currentMolecule = new GitHubMolecule({
-                projectID: ID
+                projectID: ID,
+                topLevel: true
             })
         }
     }
