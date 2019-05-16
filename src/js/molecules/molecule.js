@@ -68,35 +68,43 @@ export default class Molecule extends Atom{
     }
     
     updateValue(){
-        this.processing = true
-        this.clearAlert()
-        
-        //Grab values from the inputs and push them out to the input objects
-        this.inputs.forEach(child => {
-            if(child.type == 'input'){
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            this.processing = true
+            this.clearAlert()
+            
+            //Grab values from the inputs and push them out to the input objects
+            this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
-                    if(atom.atomType == 'Input' && child.name == atom.name){
-                        atom.setOutput(child.getValue())
+                    if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
+                        atom.setOutput(moleculeInput.getValue())
                     }
                 })
-            }
-        })
-        
-        this.processing = false
+            })
+            
+            this.processing = false
+        }
     }
     
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        this.inputs.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.value)
-            }
-        })
+        if(this.output){
+            this.output.setValue(this.value)
+        }
         
         //If this molecule is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
         }
+    }
+    
+    unlock(){
+        //Runs right after the loading process to unlock attachment points which have no connectors attached
+        super.unlock()
+        
+        this.nodesOnTheScreen.forEach(node => {
+            node.unlock()
+        })
+        this.updateValue()
     }
     
     updateSidebar(){
@@ -190,8 +198,6 @@ export default class Molecule extends Atom{
     goToParentMolecule(){
         //Go to the parent molecule if there is one
         
-        GlobalVariables.currentMolecule.updateValue()
-        
         if(!GlobalVariables.currentMolecule.topLevel){
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
         }
@@ -259,13 +265,11 @@ export default class Molecule extends Atom{
             //Store a represnetation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom's connectors
-            atom.inputs.forEach(attachmentPoint => {
-                if(attachmentPoint.type == 'output'){
-                    attachmentPoint.connectors.forEach(connector => {
-                        allConnectors.push(connector.serialize())
-                    })
-                }
-            })
+            if(atom.output){
+                atom.output.connectors.forEach(connector => {
+                    allConnectors.push(connector.serialize())
+                })
+            }
         })
         
         var thisAsObject = super.serialize(savedObject)

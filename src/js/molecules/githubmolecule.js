@@ -75,9 +75,11 @@ export default class GitHubMolecule extends Molecule {
     }
     
     updateValue(){
-        super.updateValue()
-        if(this.name != 'Molecule'){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can't handle calls right away
-            this.backgroundClick()
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            super.updateValue()
+            if(this.name != 'Molecule'){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can't handle calls right away
+                this.backgroundClick()
+            }
         }
     }
     

@@ -23,6 +23,7 @@ export default class AttachmentPoint {
         this.valueType = 'number' //options are number, geometry, array
         this.type = 'output'
         this.value = 10
+        this.ready = false //Used to order initilization when program is loaded
         
         this.connectors = []
         
@@ -271,6 +272,9 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue
+        if(!GlobalVariables.evalLock){
+            this.ready = true
+        }
         //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node

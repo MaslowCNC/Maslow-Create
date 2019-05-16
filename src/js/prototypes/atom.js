@@ -172,6 +172,11 @@ export default class Atom {
                 clickProcessed = true
             }
         })
+        if(this.output){
+            if(this.output.clickDown(x,y, clickProcessed) == true){
+                clickProcessed = true
+            }
+        }
         
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
@@ -213,6 +218,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.clickUp(x,y)     
         })
+        if(this.output){
+            this.output.clickUp(x,y)
+        }
     }
 
     clickMove(x,y){
@@ -224,6 +232,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.clickMove(x,y)       
         })
+        if(this.output){
+            this.output.clickMove(x,y)
+        }
     }
     
     keyPress(key){
@@ -348,27 +359,39 @@ export default class Atom {
     }
     
     basicThreadValueProcessing(values, key){
-        this.processing = true
-        this.clearAlert()
-        
-        const computeValue = async (values, key) => {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            this.processing = true
+            this.clearAlert()
+            
+            const computeValue = async (values, key) => {
+                try{
+                    return await GlobalVariables.ask({values: values, key: key})
+                }
+                catch(err){
+                    this.setAlert(err)
+                }
             }
-            catch(err){
-                this.setAlert(err)
-            }
+            
+            computeValue(values, key).then(result => {
+                if (result != -1 ){
+                    this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                    this.displayAndPropogate()
+                }else{
+                    this.setAlert("Unable to compute")
+                }
+                this.processing = false
+            })
         }
-        
-        computeValue(values, key).then(result => {
-            if (result != -1 ){
-                this.value = GlobalVariables.api.Shape.fromGeometry(result)
-                this.displayAndPropogate()
-            }else{
-                this.setAlert("Unable to compute")
+    }
+    
+    unlock(){
+        //Runs right after the loading process to unlock attachment points which have no connectors attached
+        this.inputs.forEach(input => {
+            if(input.connectors.length == 0){
+                input.ready = true
             }
-            this.processing = false
         })
+        this.updateValue()
     }
     
     sendToRender(){
