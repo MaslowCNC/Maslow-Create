@@ -597,6 +597,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * @returns {Number} dot product of a and b
    */
 
+  const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
+
   /**
    * Creates a new vec2 from the point given.
    * Missing ranks are implicitly zero.
@@ -7217,6 +7219,31 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const transform$3 = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
 
   const translate = (vector, polygons) => transform$3(fromTranslation(vector), polygons);
+
+  /**
+   * Construct a regular unit polygon of a given edge count.
+   * Note: radius and length must not conflict.
+   *
+   * @param {Object} [options] - options for construction
+   * @param {Integer} [options.edges=32] - how many edges the polygon has.
+   * @returns {PointArray} Array of points along the path of the circle in CCW winding.
+   *
+   * @example
+   * const circlePoints = regularPolygon({ edges: 32 })
+   *
+   * @example
+   * const squarePoints = regularPolygon({ edges: 4 })
+   * })
+   */
+  const buildRegularPolygon = ({ edges = 32 }) => {
+    let points = [];
+    for (let i = 0; i < edges; i++) {
+      let radians = 2 * Math.PI * i / edges;
+      let point = fromAngleRadians(radians);
+      points.push(point);
+    }
+    return points;
+  };
 
   const extrudeLinear = ({ height = 1 }, polygons) => {
     const extruded = [];
@@ -22519,11 +22546,73 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.center = method$3;
 
+  const assertBoolean = (value) => {
+    if (typeof value !== 'boolean') {
+      throw Error(`Not a boolean: ${value}`);
+    }
+    return true;
+  };
+
+  const assertEmpty = (value) => {
+    if (value.length === undefined) {
+      throw Error(`Has no length: ${value}`);
+    }
+    if (value.length !== 0) {
+      throw Error(`Is not empty: ${value}`);
+    }
+    return true;
+  };
+
+  const assertSingle = (value) => {
+    if (value.length === undefined) {
+      throw Error(`Has no length: ${value}`);
+    }
+    if (value.length !== 1) {
+      throw Error(`Is not single: ${value}`);
+    }
+    return true;
+  };
+
   const assertNumber = (value) => {
     if (typeof value !== 'number') {
       throw Error(`Not a number: ${value}`);
     }
     return true;
+  };
+
+  const buildCircle = ({ r = 1, fn = 32, center = false }) =>
+    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: fn })).scale(r);
+
+  /**
+   *
+   * circle();                        // openscad like
+   * circle(1);
+   * circle({r: 2, fn:5});            // fn = number of segments to approximate the circle
+   * circle({r: 3, center: true});    // center: false (default)
+   *
+   */
+  const circle = (...params) => {
+    // circle({ r: 3, center: true, fn: 5 });
+    try {
+      const { r, center = false, fn = 32 } = params[0];
+      assertNumber(r);
+      assertNumber(fn);
+      assertBoolean(center);
+      return buildCircle({ r: r, fn: fn, center: center });
+    } catch (e) {}
+
+    // circle(1);
+    try {
+      const [r] = params[0];
+      assertNumber(r);
+      return buildCircle({ r: r });
+    } catch (e) {}
+
+    // circle(1);
+    try {
+      assertEmpty(params);
+      return buildCircle({});
+    } catch (e) {}
   };
 
   const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
@@ -23282,6 +23371,57 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const method$c = function (factor) { return scale$2(factor, this); };
 
   Shape.prototype.scale = method$c;
+
+  const buildSquare = ({ scale = [1, 1, 1] }) => {
+    const shape = Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 }));
+    const transformedShape = shape.rotateZ(45).scale(scale);
+    return transformedShape;
+  };
+
+  const decode = (params) => {
+    const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
+
+    // square({ size: [2,4], center: true }); // 2x4, center: false (default)
+    try {
+      const { size, center = false } = params[0];
+      const [length, width] = size;
+      assertNumber(length);
+      assertNumber(width);
+      assertBoolean(center);
+      return { scale: [edgeScale * length, edgeScale * width] };
+    } catch (e) {}
+
+    // square([2,4]}); // 2x4, center: false (default)
+    try {
+      const [length, width] = params[0];
+      assertNumber(length);
+      assertNumber(width);
+      return { scale: [edgeScale * length, edgeScale * width] };
+    } catch (e) {}
+    // square(1); // 2x4, center: false (default)
+    try {
+      const [length] = params;
+      assertNumber(length);
+      assertSingle(params);
+      return { scale: [edgeScale * length, edgeScale * length] };
+    } catch (e) {}
+    // square()
+    try {
+      assertEmpty(params);
+      return {};
+    } catch (e) {}
+    throw Error(`Unsupported interface for square: ${JSON.stringify(params)}`);
+  };
+
+  /**
+   *
+   * square();                                   // openscad like
+   * square(1);                                  // 1x1
+   * square([2,3]);                              // 2x3
+   * square({size: [2,4], center: true});        // 2x4, center: false (default)
+   *
+   */
+  const square = (...params) => buildSquare(decode(params));
 
   const union$5 = (...params) => {
     switch (params.length) {
@@ -83556,6 +83696,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   /* global postMessage, onmessage:writable */
 
+
   const say = (message) => postMessage(message);
   // const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
   const agent = async ({ ask, question }) => {
@@ -83565,6 +83706,12 @@ define("./webworker.js",['require'], function (require) { 'use strict';
               case "assemble":
                   values = values.map(Shape.fromGeometry);
                   return assemble$1(...values).toDisjointGeometry()
+                  break
+              case "circle":
+                  return circle({r: values[0], center: true, fn: values[1]}).toDisjointGeometry()
+                  break
+              case "rectangle":
+                  return square({size: [values[0],values[1]]}).toDisjointGeometry()
                   break
               case "hull":
                   values = values.map(Shape.fromGeometry);
@@ -83601,6 +83748,11 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
                   return toSvg$2({}, crossSection)
                   break
+              case "SVG Picture":
+                  const shape = Shape.fromGeometry(values[0]).center();
+                  const bounds = shape.measureBoundingBox();
+                  const cameraDistance = 6*Math.max(...bounds[1]);
+                  return toSvg$1({cameraPosition: [0, 0, cameraDistance]}, shape.rotate([-60, -45, 0]).toDisjointGeometry())
               case "stl":
                   return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
                   break

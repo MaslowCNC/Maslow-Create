@@ -99,6 +99,7 @@ export default class AttachmentPoint {
         this.valueType = &apos;number&apos; //options are number, geometry, array
         this.type = &apos;output&apos;
         this.value = 10
+        this.ready = false //Used to order initilization when program is loaded
         
         this.connectors = []
         
@@ -121,12 +122,11 @@ export default class AttachmentPoint {
         if (this.expandedRadius){
             this.radius = this.parentMolecule.radius/1.6
         }
-
-        if(this.parentMolecule.children.length &lt; 2 &amp;&amp; this.type == &apos;input&apos;){
+        if(this.parentMolecule.inputs.length &lt; 2 &amp;&amp; this.type == &apos;input&apos;){
             this.x= this.parentMolecule.x-this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }    
-        else if(this.parentMolecule.children.length &lt; 2 &amp;&amp; this.type == &apos;output&apos;){
+        else if(this.parentMolecule.inputs.length &lt; 2 &amp;&amp; this.type == &apos;output&apos;){
             this.x= this.parentMolecule.x+this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }                 
@@ -282,7 +282,7 @@ export default class AttachmentPoint {
     }
 
     expandOut(cursorDistance){
-        const inputList = this.parentMolecule.children.filter(input =&gt; input.type == &apos;input&apos;)
+        const inputList = this.parentMolecule.inputs.filter(input =&gt; input.type == &apos;input&apos;)
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
@@ -311,10 +311,6 @@ export default class AttachmentPoint {
             connector.deleteSelf()       
         })
         
-    }
-    
-    updateSidebar(){
-        this.parent.updateSidebar()
     }
     
     wasConnectionMade(x,y){
@@ -348,6 +344,9 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue
+        if(!GlobalVariables.evalLock){
+            this.ready = true
+        }
         //propagate the change to linked elements if this is an output
         if (this.type == &apos;output&apos;){
             this.connectors.forEach(connector =&gt; {     //select any connectors attached to this node

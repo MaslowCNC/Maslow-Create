@@ -129,7 +129,9 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     if(!clickHandledByMolecule){
         GlobalVariables.currentMolecule.backgroundClick()
     }
-    
+    else{
+        GlobalVariables.currentMolecule.deselect()
+    }
     //hide the menu if it is visible
     if (!document.querySelector(&apos;.menu&apos;).contains(event.target)) {
         Menu.hidemenu()
@@ -215,7 +217,7 @@ function onWindowResize() {
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 
-    GlobalVariables.display.onWindowResize()    
+    GlobalVariables.display.onWindowResize()
 }
 
 

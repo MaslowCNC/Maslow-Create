@@ -151,9 +151,11 @@ export default class GitHubMolecule extends Molecule {
     }
     
     updateValue(){
-        super.updateValue()
-        if(this.name != &apos;Molecule&apos;){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can&apos;t handle calls right away
-            this.backgroundClick()
+        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+            super.updateValue()
+            if(this.name != &apos;Molecule&apos;){ //This is a total hack to slow things down by checking to see if the name has been loaded because min.js can&apos;t handle calls right away
+                this.backgroundClick()
+            }
         }
     }
     
@@ -178,7 +180,7 @@ export default class GitHubMolecule extends Molecule {
         valueList.appendChild(name)
         
         //Add options to set all of the inputs
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
                 this.createEditableValueListItem(valueList,child,&apos;value&apos;, child.name, true)
             }

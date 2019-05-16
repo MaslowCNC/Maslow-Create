@@ -78,7 +78,7 @@
 
 const howManyInputPortsAvailable = function(target){
     var portsAvailable = 0
-    target.children.forEach(io =&gt; {
+    target.inputs.forEach(io =&gt; {
         if(io.type == &apos;input&apos; &amp;&amp; io.connectors.length == 0){   //if this port is available
             portsAvailable = portsAvailable + 1  //Add one to the count
         }
@@ -87,7 +87,7 @@ const howManyInputPortsAvailable = function(target){
 }
 
 const deleteEmptyPort = function(target){
-    target.children.forEach(io =&gt; {
+    target.inputs.forEach(io =&gt; {
         if(io.type == &apos;input&apos; &amp;&amp; io.connectors.length == 0 &amp;&amp; howManyInputPortsAvailable(target) &gt;= 2){
             target.removeIO(&apos;input&apos;, io.name, target)
         }
@@ -97,7 +97,7 @@ const deleteEmptyPort = function(target){
 export const addOrDeletePorts = (target) =&gt; {
     //Because a molecule loads with no connectors attached to the ports and we don&apos;t want them to delete before
     //They are conencted to we use teh ioValues list to keep track of them
-    target.children.forEach(child =&gt; {
+    target.inputs.forEach(child =&gt; {
         target.ioValues.forEach(ioValue =&gt; {
             if (child.name == ioValue.name &amp;&amp; child.connectors.length &gt; 0){
                 target.ioValues.splice(target.ioValues.indexOf(ioValue),1) //Let&apos;s remove it from the ioValues list
@@ -107,7 +107,7 @@ export const addOrDeletePorts = (target) =&gt; {
     
     //Add or delete ports as needed
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available
-        target.addIO(&apos;input&apos;, &apos;2D shape &apos; + GlobalVariables.generateUniqueID(), target, &apos;geometry&apos;, &apos;&apos;)
+        target.addIO(&apos;input&apos;, &apos;3D shape &apos; + GlobalVariables.generateUniqueID(), target, &apos;geometry&apos;, &apos;&apos;)
         target.addedIO = true
     }
     if(howManyInputPortsAvailable(target) &gt;= 2 &amp;&amp; target.ioValues.length &lt;= 1){  //We need to remove the empty port

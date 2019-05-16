@@ -75,7 +75,6 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/circle.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
-import GlobalVariables from &apos;../globalvariables&apos;
 
 export default class Circle extends Atom {
     
@@ -98,14 +97,15 @@ export default class Circle extends Atom {
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
+        try{
+            const maximumSegmentSize = this.findIOValue(&apos;max segment size&apos;)
+            const circumference  = 3.14*2*this.findIOValue(&apos;radius&apos;)
+            const numberOfSegments = parseInt( circumference / maximumSegmentSize )
+            
+            const values = [this.findIOValue(&apos;radius&apos;), numberOfSegments]
+            this.basicThreadValueProcessing(values, &quot;circle&quot;)
+        }catch(err){this.setAlert(err)}
         
-        var maximumSegmentSize = this.findIOValue(&apos;max segment size&apos;)
-        var circumference  = 3.14*2*this.findIOValue(&apos;radius&apos;)
-        var numberOfSegments = parseInt( circumference / maximumSegmentSize )
-        
-        this.value = GlobalVariables.api.circle({r: this.findIOValue(&apos;radius&apos;), center: true, fn: numberOfSegments})
-        
-        super.updateValue()
     }
 }</code></pre>
 

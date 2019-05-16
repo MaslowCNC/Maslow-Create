@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/equation.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
 
 export default class Equation extends Atom {
     
@@ -107,40 +108,38 @@ export default class Equation extends Atom {
     
     updateValue(){
         //A super classed version of the update codeblock default function which computes the equation values
-        var x = this.findIOValue(&apos;x&apos;)
-        var y = this.findIOValue(&apos;y&apos;)
-        
-        var z
-        switch(this.currentEquation){
-        case 0:
-            z = x+y
-            break
-        case 1:
-            z = x-y
-            break
-        case 2:
-            z = x*y
-            break
-        case 3:
-            z = x/y
-            break
-        case 4:
-            z = Math.cos(x)
-            break
-        case 5:
-            z = Math.sin(x)
-            break
-        case 6:
-            z = Math.pow(x,y)
-            break
-        }
-        
-        //Set the output to be the generated value
-        this.children.forEach(child =&gt; {
-            if(child.type == &apos;output&apos;){
-                child.setValue(z)
+        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+            var x = this.findIOValue(&apos;x&apos;)
+            var y = this.findIOValue(&apos;y&apos;)
+            
+            var z
+            switch(this.currentEquation){
+            case 0:
+                z = x+y
+                break
+            case 1:
+                z = x-y
+                break
+            case 2:
+                z = x*y
+                break
+            case 3:
+                z = x/y
+                break
+            case 4:
+                z = Math.cos(x)
+                break
+            case 5:
+                z = Math.sin(x)
+                break
+            case 6:
+                z = Math.pow(x,y)
+                break
             }
-        })
+            
+            //Set the output to be the generated value
+            this.output.setValue(z)
+        }
     }
     
     changeEquation(newValue){

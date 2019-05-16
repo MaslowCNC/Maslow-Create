@@ -101,12 +101,13 @@ export default class Output extends Atom {
     }
     
     updateValue(){
-        
-        this.value = this.findIOValue(&apos;number or geometry&apos;)
-        this.parent.value = this.value
-        this.parent.propogate()
-        
-        super.updateValue()
+        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+            this.value = this.findIOValue(&apos;number or geometry&apos;)
+            this.parent.value = this.value
+            this.parent.propogate()
+            
+            super.updateValue()
+        }
     }
     
     setID(newID){
@@ -118,7 +119,7 @@ export default class Output extends Atom {
         this.scaledX = GlobalVariables.scaleFactorXY * this.x
         this.scaledY = GlobalVariables.scaleFactorXY * this.y
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.draw()       
         })
 

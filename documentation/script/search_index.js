@@ -714,6 +714,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#evallock",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-evalLock",
+    "src/js/globalvariables.js~GlobalVariables#evalLock",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#generateuniqueid",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-generateUniqueID",
     "src/js/globalvariables.js~GlobalVariables#generateUniqueID",
@@ -723,6 +729,12 @@ window.esdocSearchIndex = [
     "src/js/globalvariables.js~globalvariables#github",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-gitHub",
     "src/js/globalvariables.js~GlobalVariables#gitHub",
+    "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#render",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-render",
+    "src/js/globalvariables.js~GlobalVariables#render",
     "member"
   ],
   [
@@ -1008,12 +1020,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/circle.js~circle#value",
-    "class/src/js/molecules/circle.js~Circle.html#instance-member-value",
-    "src/js/molecules/circle.js~Circle#value",
-    "member"
-  ],
-  [
     "src/js/molecules/constant.js",
     "file/src/js/molecules/constant.js.html",
     "src/js/molecules/constant.js",
@@ -1029,6 +1035,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/constant.js~constant#constructor",
     "class/src/js/molecules/constant.js~Constant.html#instance-constructor-constructor",
     "src/js/molecules/constant.js~Constant#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#displayandpropogate",
+    "class/src/js/molecules/constant.js~Constant.html#instance-method-displayAndPropogate",
+    "src/js/molecules/constant.js~Constant#displayAndPropogate",
     "method"
   ],
   [
@@ -1059,12 +1071,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/constant.js~constant#serialize",
     "class/src/js/molecules/constant.js~Constant.html#instance-method-serialize",
     "src/js/molecules/constant.js~Constant#serialize",
-    "method"
-  ],
-  [
-    "src/js/molecules/constant.js~constant#setvalue",
-    "class/src/js/molecules/constant.js~Constant.html#instance-method-setValue",
-    "src/js/molecules/constant.js~Constant#setValue",
     "method"
   ],
   [
@@ -1506,15 +1512,15 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#children",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-children",
-    "src/js/molecules/molecule.js~Molecule#children",
-    "member"
-  ],
-  [
     "src/js/molecules/molecule.js~molecule#constructor",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-constructor-constructor",
     "src/js/molecules/molecule.js~Molecule#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#deselect",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-deselect",
+    "src/js/molecules/molecule.js~Molecule#deselect",
     "method"
   ],
   [
@@ -1552,6 +1558,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-goToParentMolecule",
     "src/js/molecules/molecule.js~Molecule#goToParentMolecule",
     "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#inputs",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-inputs",
+    "src/js/molecules/molecule.js~Molecule#inputs",
+    "member"
   ],
   [
     "src/js/molecules/molecule.js~molecule#name",
@@ -1624,6 +1636,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-topLevel",
     "src/js/molecules/molecule.js~Molecule#topLevel",
     "member"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#unlock",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-unlock",
+    "src/js/molecules/molecule.js~Molecule#unlock",
+    "method"
   ],
   [
     "src/js/molecules/molecule.js~molecule#updatesidebar",
@@ -1828,12 +1846,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/rectangle.js~Rectangle.html#instance-method-updateValue",
     "src/js/molecules/rectangle.js~Rectangle#updateValue",
     "method"
-  ],
-  [
-    "src/js/molecules/rectangle.js~rectangle#value",
-    "class/src/js/molecules/rectangle.js~Rectangle.html#instance-member-value",
-    "src/js/molecules/rectangle.js~Rectangle#value",
-    "member"
   ],
   [
     "src/js/molecules/regularpolygon.js",
@@ -2142,12 +2154,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/prototypes/atom.js~atom#children",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-member-children",
-    "src/js/prototypes/atom.js~Atom#children",
-    "member"
-  ],
-  [
     "src/js/prototypes/atom.js~atom#clearalert",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert",
     "src/js/prototypes/atom.js~Atom#clearAlert",
@@ -2250,6 +2256,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#inputs",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-member-inputs",
+    "src/js/prototypes/atom.js~Atom#inputs",
+    "member"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#ismoving",
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-isMoving",
     "src/js/prototypes/atom.js~Atom#isMoving",
@@ -2265,6 +2277,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#name",
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-name",
     "src/js/prototypes/atom.js~Atom#name",
+    "member"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#output",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-member-output",
+    "src/js/prototypes/atom.js~Atom#output",
     "member"
   ],
   [
@@ -2338,6 +2356,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-strokeColor",
     "src/js/prototypes/atom.js~Atom#strokeColor",
     "member"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#unlock",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-unlock",
+    "src/js/prototypes/atom.js~Atom#unlock",
+    "method"
   ],
   [
     "src/js/prototypes/atom.js~atom#update",
@@ -2520,6 +2544,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#ready",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-ready",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#ready",
+    "member"
+  ],
+  [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#reset",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-reset",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#reset",
@@ -2559,12 +2589,6 @@ window.esdocSearchIndex = [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#update",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-update",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#update",
-    "method"
-  ],
-  [
-    "src/js/prototypes/attachmentpoint.js~attachmentpoint#updatesidebar",
-    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-updateSidebar",
-    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#updateSidebar",
     "method"
   ],
   [

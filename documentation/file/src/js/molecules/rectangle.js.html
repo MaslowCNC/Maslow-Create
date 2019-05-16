@@ -75,7 +75,6 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/rectangle.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
-import GlobalVariables from &apos;../globalvariables&apos;
 
 export default class Rectangle extends Atom {
 
@@ -95,10 +94,10 @@ export default class Rectangle extends Atom {
     }
     
     updateValue(){
-        
-        this.value = GlobalVariables.api.square([this.findIOValue(&apos;x length&apos;),this.findIOValue(&apos;y length&apos;)])
-        
-        super.updateValue()
+        try{
+            const values = [this.findIOValue(&apos;x length&apos;),this.findIOValue(&apos;y length&apos;)]
+            this.basicThreadValueProcessing(values, &quot;rectangle&quot;)
+        }catch(err){this.setAlert(err)}
     }
 }</code></pre>
 

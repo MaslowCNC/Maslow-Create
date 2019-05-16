@@ -81,7 +81,8 @@ export default class Atom {
 
     constructor(values){
         //Setup default values
-        this.children = []
+        this.inputs = []
+        this.output = null
         
         this.x = 0
         this.y = 0
@@ -116,7 +117,7 @@ export default class Atom {
         
         if (typeof this.ioValues !== &apos;undefined&apos;) {
             this.ioValues.forEach(ioValue =&gt; { //for each saved value
-                this.children.forEach(io =&gt; {  //Find the matching IO and set it to be the saved value
+                this.inputs.forEach(io =&gt; {  //Find the matching IO and set it to be the saved value
                     if(ioValue.name == io.name &amp;&amp; io.type == &apos;input&apos;){
                         io.setValue(ioValue.ioValue)
                     }
@@ -126,7 +127,7 @@ export default class Atom {
     }
     
     draw() {   
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.draw()       
         })
       
@@ -187,7 +188,7 @@ export default class Atom {
     
     addIO(type, name, target, valueType, defaultValue){
         
-        if(target.children.find(o =&gt; (o.name === name &amp;&amp; o.type === type))== undefined){ //Check to make sure there isn&apos;t already an IO with the same type and name
+        if(target.inputs.find(o =&gt; (o.name === name &amp;&amp; o.type === type))== undefined){ //Check to make sure there isn&apos;t already an IO with the same type and name
             //compute the baseline offset from parent node
             var offset
             if (type == &apos;input&apos;){
@@ -196,7 +197,7 @@ export default class Atom {
             else{
                 offset = target.scaledRadius
             }
-            var input = new AttachmentPoint({
+            var newAp = new AttachmentPoint({
                 parentMolecule: target,
                 defaultOffsetX: offset,
                 defaultOffsetY: 0,
@@ -209,17 +210,21 @@ export default class Atom {
                 atomType: &apos;AttachmentPoint&apos;
             })
             
-            target.children.push(input)
+            if(type == &apos;input&apos;){
+                target.inputs.push(newAp)
+            }else{
+                target.output = newAp
+            }
         }
     }
     
     removeIO(type, name, target){
         //Remove the target IO attachment point
         
-        target.children.forEach(io =&gt; {
+        target.inputs.forEach(io =&gt; {
             if(io.name == name &amp;&amp; io.type == type){
                 io.deleteSelf()
-                target.children.splice(target.children.indexOf(io),1)
+                target.inputs.splice(target.inputs.indexOf(io),1)
             }
         })
     }
@@ -238,13 +243,18 @@ export default class Atom {
     clickDown(x,y, clickProcessed){
         //Returns true if something was done with the click
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             if(child.clickDown(x,y, clickProcessed) == true){
                 clickProcessed = true
             }
         })
+        if(this.output){
+            if(this.output.clickDown(x,y, clickProcessed) == true){
+                clickProcessed = true
+            }
+        }
         
-        //If none of the children processed the click see if the atom should, if not clicked, then deselect
+        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed &amp;&amp; GlobalVariables.distBetweenPoints(x, this.x, y, this.y) &lt; this.radius){
             this.color = this.selectedColor
             this.isMoving = true
@@ -281,9 +291,12 @@ export default class Atom {
     clickUp(x,y){
         this.isMoving = false
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.clickUp(x,y)     
         })
+        if(this.output){
+            this.output.clickUp(x,y)
+        }
     }
 
     clickMove(x,y){
@@ -292,9 +305,12 @@ export default class Atom {
             this.y = y
         }
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.clickMove(x,y)       
         })
+        if(this.output){
+            this.output.clickMove(x,y)
+        }
     }
     
     keyPress(key){
@@ -306,7 +322,7 @@ export default class Atom {
             }
         }
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.keyPress(key)
         })
     }
@@ -317,7 +333,7 @@ export default class Atom {
         var valueList = this.initializeSideBar()
         
         //Add options to set all of the inputs
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
                 this.createEditableValueListItem(valueList,child,&apos;value&apos;, child.name, true)
             }
@@ -348,9 +364,9 @@ export default class Atom {
     }
     
     deleteNode(){
-        //deletes this node and all of it&apos;s children
+        //deletes this node and all of it&apos;s inputs
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.deleteSelf()       
         })
         
@@ -361,9 +377,12 @@ export default class Atom {
     
     update() {
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.update()     
         })
+        if(this.output){
+            this.output.update()
+        }
         
         this.draw()
     }
@@ -371,7 +390,7 @@ export default class Atom {
     serialize(){
         
         var ioValues = []
-        this.children.forEach(io =&gt; {
+        this.inputs.forEach(io =&gt; {
             if (typeof io.getValue() == &apos;number&apos; &amp;&amp; io.type == &apos;input&apos;){
                 var saveIO = {
                     name: io.name,
@@ -404,41 +423,51 @@ export default class Atom {
     }
     
     displayAndPropogate(){
-        //If this molecule is selected, send the updated value to the renderer
+        //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
         }
         
         //Set the output nodes with name &apos;geometry&apos; to be the generated code
-        this.children.forEach(child =&gt; {
-            if(child.valueType == &apos;geometry&apos; &amp;&amp; child.type == &apos;output&apos;){
-                child.setValue(this.value)
-            }
-        })
+        if(this.output){
+            this.output.setValue(this.value)
+        }
     }
     
     basicThreadValueProcessing(values, key){
-        this.processing = true
-        this.clearAlert()
-        
-        const computeValue = async (values, key) =&gt; {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
+        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+            this.processing = true
+            this.clearAlert()
+            
+            const computeValue = async (values, key) =&gt; {
+                try{
+                    return await GlobalVariables.ask({values: values, key: key})
+                }
+                catch(err){
+                    this.setAlert(err)
+                }
             }
-            catch(err){
-                this.setAlert(err)
-            }
+            
+            computeValue(values, key).then(result =&gt; {
+                if (result != -1 ){
+                    this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                    this.displayAndPropogate()
+                }else{
+                    this.setAlert(&quot;Unable to compute&quot;)
+                }
+                this.processing = false
+            })
         }
-        
-        computeValue(values, key).then(result =&gt; {
-            if (result != -1 ){
-                this.value = GlobalVariables.api.Shape.fromGeometry(result)
-                this.displayAndPropogate()
-            }else{
-                this.setAlert(&quot;Unable to compute&quot;)
+    }
+    
+    unlock(){
+        //Runs right after the loading process to unlock attachment points which have no connectors attached
+        this.inputs.forEach(input =&gt; {
+            if(input.connectors.length == 0){
+                input.ready = true
             }
-            this.processing = false
         })
+        this.updateValue()
     }
     
     sendToRender(){
@@ -458,7 +487,7 @@ export default class Atom {
         ioName = ioName.split(&apos;~&apos;).join(&apos;&apos;)
         var ioValue = null
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             if(child.name == ioName &amp;&amp; child.type == &apos;input&apos;){
                 ioValue = child.getValue()
             }

@@ -93,14 +93,8 @@ export default class Constant extends Atom{
         
         this.addIO(&apos;output&apos;, &apos;number&apos;, this, &apos;number&apos;, 10)
         
-        if (typeof this.ioValues !== &apos;undefined&apos;) {
-            this.ioValues.forEach(ioValue =&gt; { //for each saved value
-                this.children.forEach(io =&gt; {  //Find the matching IO and set it to be the saved value
-                    if(ioValue.name == io.name){
-                        io.setValue(ioValue.ioValue)
-                    }
-                })
-            })
+        if (typeof this.ioValues == &apos;object&apos;) {
+            this.output.setValue(this.ioValues[0].ioValue)
         }
     }
     
@@ -108,17 +102,8 @@ export default class Constant extends Atom{
         //updates the sidebar to display information about this node
         
         var valueList = super.updateSidebar() //call the super function
-        
-        var output = this.children[0]
-        
-        this.createEditableValueListItem(valueList,output,&apos;value&apos;, &apos;Value&apos;, true)
         this.createEditableValueListItem(valueList,this,&apos;name&apos;, &apos;Name&apos;, false)
-        
-    }
-    
-    setValue(newName){
-        //Called by the sidebar to set the name
-        this.name = newName
+        this.createEditableValueListItem(valueList,this.output,&apos;value&apos;, &apos;Value&apos;, true)
     }
     
     serialize(values){
@@ -127,7 +112,7 @@ export default class Constant extends Atom{
         
         valuesObj.ioValues = [{
             name: &apos;number&apos;,
-            ioValue: this.children[0].getValue()
+            ioValue: this.output.getValue()
         }]
         
         return valuesObj
@@ -135,7 +120,7 @@ export default class Constant extends Atom{
     }
     
     draw() {
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.draw()       
         })
         
@@ -146,6 +131,10 @@ export default class Constant extends Atom{
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
+    }
+    
+    displayAndPropogate(){
+        this.output.setValue(this.output.getValue())
     }
 }
 </code></pre>

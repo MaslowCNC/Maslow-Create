@@ -192,7 +192,7 @@ export default class Display {
         if(shape != null){
             const computeValue = async () =&gt; {
                 try {
-                    return await GlobalVariables.ask({values: shape.toLazyGeometry().toGeometry(), key: &quot;render&quot;})
+                    return await GlobalVariables.render({values: shape.toLazyGeometry().toGeometry(), key: &quot;render&quot;})
                 } catch(err) {
                     return -1
                 }
@@ -256,10 +256,10 @@ export default class Display {
     }
     
     onWindowResize() {
-        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight - 1)
+        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight)
         this.camera.updateProjectionMatrix()
         this.controls.handleResize()
-        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight - 1)
+        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight)
     }
     
     render() {

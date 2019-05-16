@@ -83,6 +83,7 @@ canvas {
 body {
     font-family: 'Work Sans', sans-serif;
     background: #B0AEB0;
+    overflow: hidden;
 }
 
 #parametersdiv {

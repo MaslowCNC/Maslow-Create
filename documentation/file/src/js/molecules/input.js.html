@@ -108,7 +108,7 @@ export default class Input extends Atom {
         
         this.createEditableValueListItem(valueList,this,&apos;name&apos;, &apos;Name&apos;, false)
         
-        this.parent.children.forEach(child =&gt; {
+        this.parent.inputs.forEach(child =&gt; {
             if (child.name == this.name){
                 this.createEditableValueListItem(valueList,child,&apos;value&apos;, &apos;Value&apos;, true)
             }
@@ -122,7 +122,7 @@ export default class Input extends Atom {
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
         
-        this.children.forEach(child =&gt; {
+        this.inputs.forEach(child =&gt; {
             child.draw()       
         })
         
@@ -157,7 +157,7 @@ export default class Input extends Atom {
     updateParentName(){
         //Callled when the name has changed to updated the name of the parent molecule IO
         //Run through the parent molecule and find the input with the same name
-        this.parent.children.forEach(child =&gt; {
+        this.parent.inputs.forEach(child =&gt; {
             if (child.name == this.oldName){
                 child.name = this.name
             }
@@ -167,15 +167,11 @@ export default class Input extends Atom {
     
     setOutput(newOutput){
         //Set the input&apos;s output
-        
         this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
         
         //Set the output nodes with type &apos;geometry&apos; to be the new value
-        this.children.forEach(child =&gt; {
-            if(child.type == &apos;output&apos;){
-                child.setValue(newOutput)
-            }
-        })
+        this.output.setValue(newOutput)
+        
     } 
     
     updateValue(){

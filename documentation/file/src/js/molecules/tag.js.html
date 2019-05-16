@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/tag.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
 
 export default class Tag extends Atom{
     
@@ -92,15 +93,16 @@ export default class Tag extends Atom{
     }
     
     updateValue(){
-        
-        try{
-            this.value = this.findIOValue(&apos;geometry&apos;).as(this.findIOValue(&apos;tag&apos;))
-            this.clearAlert()
-        }catch(err){
-            this.setAlert(err)
+        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+            try{
+                this.value = this.findIOValue(&apos;geometry&apos;).as(this.findIOValue(&apos;tag&apos;))
+                this.clearAlert()
+            }catch(err){
+                this.setAlert(err)
+            }
+            
+            super.updateValue()
         }
-        
-        super.updateValue()
     }
 }</code></pre>
 
