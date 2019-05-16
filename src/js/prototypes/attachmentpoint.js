@@ -45,12 +45,11 @@ export default class AttachmentPoint {
         if (this.expandedRadius){
             this.radius = this.parentMolecule.radius/1.6
         }
-
-        if(this.parentMolecule.children.length < 2 && this.type == 'input'){
+        if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             this.x= this.parentMolecule.x-this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }    
-        else if(this.parentMolecule.children.length < 2 && this.type == 'output'){
+        else if(this.parentMolecule.inputs.length < 2 && this.type == 'output'){
             this.x= this.parentMolecule.x+this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }                 
@@ -206,7 +205,7 @@ export default class AttachmentPoint {
     }
 
     expandOut(cursorDistance){
-        const inputList = this.parentMolecule.children.filter(input => input.type == 'input')
+        const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 

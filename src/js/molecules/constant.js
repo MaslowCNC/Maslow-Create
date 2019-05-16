@@ -19,7 +19,7 @@ export default class Constant extends Atom{
         
         if (typeof this.ioValues !== 'undefined') {
             this.ioValues.forEach(ioValue => { //for each saved value
-                this.children.forEach(io => {  //Find the matching IO and set it to be the saved value
+                this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
                     if(ioValue.name == io.name){
                         io.setValue(ioValue.ioValue)
                     }
@@ -33,7 +33,7 @@ export default class Constant extends Atom{
         
         var valueList = super.updateSidebar() //call the super function
         
-        var output = this.children[0]
+        var output = this.inputs[0]
         
         this.createEditableValueListItem(valueList,output,'value', 'Value', true)
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
@@ -51,7 +51,7 @@ export default class Constant extends Atom{
         
         valuesObj.ioValues = [{
             name: 'number',
-            ioValue: this.children[0].getValue()
+            ioValue: this.inputs[0].getValue()
         }]
         
         return valuesObj
@@ -59,7 +59,7 @@ export default class Constant extends Atom{
     }
     
     draw() {
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.draw()       
         })
         
