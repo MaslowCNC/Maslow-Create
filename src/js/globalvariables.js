@@ -70,6 +70,9 @@ class GlobalVariables{
         createService({ webWorker: './webworker.js', agent }).then(result => {
             this.ask = result.ask
         })
+        createService({ webWorker: './webworker.js', agent }).then(result => {
+            this.render = result.ask
+        })
     }
     
     generateUniqueID(){
