@@ -51,7 +51,7 @@ export default class Constant extends Atom{
         
         valuesObj.ioValues = [{
             name: 'number',
-            ioValue: this.inputs[0].getValue()
+            ioValue: this.output.getValue()
         }]
         
         return valuesObj
