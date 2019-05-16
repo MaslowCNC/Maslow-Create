@@ -5,7 +5,8 @@ export default class Atom {
 
     constructor(values){
         //Setup default values
-        this.children = []
+        this.inputs = []
+        this.output = null
         
         this.x = 0
         this.y = 0
@@ -40,7 +41,7 @@ export default class Atom {
         
         if (typeof this.ioValues !== 'undefined') {
             this.ioValues.forEach(ioValue => { //for each saved value
-                this.children.forEach(io => {  //Find the matching IO and set it to be the saved value
+                this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
                     if(ioValue.name == io.name && io.type == 'input'){
                         io.setValue(ioValue.ioValue)
                     }
@@ -50,7 +51,7 @@ export default class Atom {
     }
     
     draw() {   
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.draw()       
         })
       
@@ -111,7 +112,7 @@ export default class Atom {
     
     addIO(type, name, target, valueType, defaultValue){
         
-        if(target.children.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
+        if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
             var offset
             if (type == 'input'){
@@ -120,7 +121,7 @@ export default class Atom {
             else{
                 offset = target.scaledRadius
             }
-            var input = new AttachmentPoint({
+            var newAp = new AttachmentPoint({
                 parentMolecule: target,
                 defaultOffsetX: offset,
                 defaultOffsetY: 0,
@@ -133,17 +134,21 @@ export default class Atom {
                 atomType: 'AttachmentPoint'
             })
             
-            target.children.push(input)
+            if(type == 'input'){
+                target.inputs.push(newAp)
+            }else{
+                target.output = newAp
+            }
         }
     }
     
     removeIO(type, name, target){
         //Remove the target IO attachment point
         
-        target.children.forEach(io => {
+        target.inputs.forEach(io => {
             if(io.name == name && io.type == type){
                 io.deleteSelf()
-                target.children.splice(target.children.indexOf(io),1)
+                target.inputs.splice(target.inputs.indexOf(io),1)
             }
         })
     }
@@ -162,13 +167,13 @@ export default class Atom {
     clickDown(x,y, clickProcessed){
         //Returns true if something was done with the click
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             if(child.clickDown(x,y, clickProcessed) == true){
                 clickProcessed = true
             }
         })
         
-        //If none of the children processed the click see if the atom should, if not clicked, then deselect
+        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
             this.color = this.selectedColor
             this.isMoving = true
@@ -205,7 +210,7 @@ export default class Atom {
     clickUp(x,y){
         this.isMoving = false
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.clickUp(x,y)     
         })
     }
@@ -216,7 +221,7 @@ export default class Atom {
             this.y = y
         }
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.clickMove(x,y)       
         })
     }
@@ -230,7 +235,7 @@ export default class Atom {
             }
         }
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.keyPress(key)
         })
     }
@@ -241,7 +246,7 @@ export default class Atom {
         var valueList = this.initializeSideBar()
         
         //Add options to set all of the inputs
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             if(child.type == 'input' && child.valueType != 'geometry'){
                 this.createEditableValueListItem(valueList,child,'value', child.name, true)
             }
@@ -272,9 +277,9 @@ export default class Atom {
     }
     
     deleteNode(){
-        //deletes this node and all of it's children
+        //deletes this node and all of it's inputs
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.deleteSelf()       
         })
         
@@ -285,9 +290,12 @@ export default class Atom {
     
     update() {
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.update()     
         })
+        if(this.output){
+            this.output.update()
+        }
         
         this.draw()
     }
@@ -295,7 +303,7 @@ export default class Atom {
     serialize(){
         
         var ioValues = []
-        this.children.forEach(io => {
+        this.inputs.forEach(io => {
             if (typeof io.getValue() == 'number' && io.type == 'input'){
                 var saveIO = {
                     name: io.name,
@@ -334,11 +342,9 @@ export default class Atom {
         }
         
         //Set the output nodes with name 'geometry' to be the generated code
-        this.children.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.value)
-            }
-        })
+        if(this.output){
+            this.output.setValue(this.value)
+        }
     }
     
     basicThreadValueProcessing(values, key){
@@ -382,7 +388,7 @@ export default class Atom {
         ioName = ioName.split('~').join('')
         var ioValue = null
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             if(child.name == ioName && child.type == 'input'){
                 ioValue = child.getValue()
             }

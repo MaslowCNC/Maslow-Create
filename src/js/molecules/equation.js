@@ -60,7 +60,7 @@ export default class Equation extends Atom {
         }
         
         //Set the output to be the generated value
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             if(child.type == 'output'){
                 child.setValue(z)
             }
