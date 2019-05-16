@@ -17,8 +17,8 @@ export default class Constant extends Atom{
         
         this.addIO('output', 'number', this, 'number', 10)
         
-        if (typeof this.ioValues == 'array') {
-            this.output.setValue(ioValues[0].ioValue)
+        if (typeof this.ioValues == 'object') {
+            this.output.setValue(this.ioValues[0].ioValue)
         }
     }
     
