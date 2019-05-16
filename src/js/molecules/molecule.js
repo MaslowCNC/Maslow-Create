@@ -198,8 +198,6 @@ export default class Molecule extends Atom{
     goToParentMolecule(){
         //Go to the parent molecule if there is one
         
-        GlobalVariables.currentMolecule.updateValue()
-        
         if(!GlobalVariables.currentMolecule.topLevel){
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
         }
