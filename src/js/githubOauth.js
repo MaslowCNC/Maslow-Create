@@ -389,9 +389,7 @@ export default function GitHubModule(){
                 return await GlobalVariables.ask({values: values, key: key})
             }
             threadCompute([shape.toLazyGeometry().toGeometry()], "stl").then( stlContent => {
-                const computeSvg = async (values, key) => {
-                    return await GlobalVariables.ask({values: values, key: key})
-                }
+                
                 threadCompute([shape.toLazyGeometry().toGeometry()], "SVG Picture").then(contentSvg => {
                     
                     var bomContent = bomHeader
