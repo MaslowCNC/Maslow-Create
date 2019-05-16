@@ -42,7 +42,7 @@ export default class Output extends Atom {
         this.scaledX = GlobalVariables.scaleFactorXY * this.x
         this.scaledY = GlobalVariables.scaleFactorXY * this.y
         
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.draw()       
         })
 

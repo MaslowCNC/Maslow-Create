@@ -40,7 +40,7 @@ export default class Connector {
         if(this.isMoving){  //we only want to attach the connector which is currently moving
             var attachmentMade = false
             GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  
-                molecule.children.forEach(attachmentPoint => {                                    //For each of their attachment points
+                molecule.inputs.forEach(attachmentPoint => {                                    //For each of their attachment points
                     if(attachmentPoint.wasConnectionMade(x,y)){
                         attachmentMade = true
                         this.attachmentPoint2 = attachmentPoint

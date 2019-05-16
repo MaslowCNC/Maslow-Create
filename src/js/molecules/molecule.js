@@ -11,7 +11,7 @@ export default class Molecule extends Atom{
         super(values)
         
         this.nodesOnTheScreen = []
-        this.children = []
+        this.inputs = []
         this.name = 'Molecule'
         this.atomType = 'Molecule'
         this.centerColor = '#949294'
@@ -72,7 +72,7 @@ export default class Molecule extends Atom{
         this.clearAlert()
         
         //Grab values from the inputs and push them out to the input objects
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             if(child.type == 'input'){
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && child.name == atom.name){
@@ -87,7 +87,7 @@ export default class Molecule extends Atom{
     
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             if(child.valueType == 'geometry' && child.type == 'output'){
                 child.setValue(this.value)
             }
@@ -145,7 +145,7 @@ export default class Molecule extends Atom{
         
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
             //Add options to set all of the inputs
-            this.children.forEach(child => {
+            this.inputs.forEach(child => {
                 if(child.type == 'input' && child.valueType != 'geometry'){
                     this.createEditableValueListItem(valueList,child,'value', child.name, true)
                 }
@@ -259,7 +259,7 @@ export default class Molecule extends Atom{
             //Store a represnetation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom's connectors
-            atom.children.forEach(attachmentPoint => {
+            atom.inputs.forEach(attachmentPoint => {
                 if(attachmentPoint.type == 'output'){
                     attachmentPoint.connectors.forEach(connector => {
                         allConnectors.push(connector.serialize())
@@ -354,7 +354,7 @@ export default class Molecule extends Atom{
             this.nodesOnTheScreen.forEach(atom => {
                 //Find the output node
                 if (atom.uniqueID == connectorObj.ap1ID){
-                    atom.children.forEach(child => {
+                    atom.inputs.forEach(child => {
                         if(child.name == connectorObj.ap1Name && child.type == 'output'){
                             connector = new Connector({
                                 atomType: 'Connector',
@@ -367,7 +367,7 @@ export default class Molecule extends Atom{
                 }
                 //Find the input node
                 if (atom.uniqueID == connectorObj.ap2ID){
-                    atom.children.forEach(child => {
+                    atom.inputs.forEach(child => {
                         if(child.name == connectorObj.ap2Name && child.type == 'input' && child.connectors.length == 0){
                             cp2NotFound = false
                             ap2 = child
