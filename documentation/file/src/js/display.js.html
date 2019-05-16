@@ -139,39 +139,38 @@ export default class Display {
         this.onWindowResize()
 
         this.targetDiv.addEventListener(&apos;mousedown&apos;, () =&gt; {
+            if(!GlobalVariables.runMode){
+                let sideBar = document.querySelector(&apos;.sideBar&apos;)
+                while (sideBar.firstChild) {
+                    sideBar.removeChild(sideBar.firstChild)
+                }
+                
+                //add the name as a title
+                var name = document.createElement(&apos;h1&apos;)
+                name.textContent = &quot;3D View&quot;
+                name.setAttribute(&apos;class&apos;,&apos;doc-title&apos;)
+                sideBar.appendChild(name)
 
-            let sideBar = document.querySelector(&apos;.sideBar&apos;)
-            while (sideBar.firstChild) {
-                sideBar.removeChild(sideBar.firstChild)
+                var gridCheck = document.createElement(&apos;input&apos;)
+                sideBar.appendChild(gridCheck)
+                gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+                gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+                gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+                var gridCheckLabel = document.createElement(&apos;label&apos;)
+                sideBar.appendChild(gridCheckLabel)
+                gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
+                gridCheckLabel.textContent= &quot;Grid&quot;
+
+                gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
+                    if(event.target.checked){
+                        this.scene.add( this.plane )
+                    }
+                    else{
+                        this.scene.remove(this.plane)
+                    }
+                })
             }
-            
-            //add the name as a title
-            var name = document.createElement(&apos;h1&apos;)
-            name.textContent = &quot;3D View&quot;
-            name.setAttribute(&apos;class&apos;,&apos;doc-title&apos;)
-            sideBar.appendChild(name)
-
-            var gridCheck = document.createElement(&apos;input&apos;)
-            sideBar.appendChild(gridCheck)
-            gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
-            gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
-            gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
-            var gridCheckLabel = document.createElement(&apos;label&apos;)
-            sideBar.appendChild(gridCheckLabel)
-            gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
-            gridCheckLabel.textContent= &quot;Grid&quot;
-
-            gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
-                if(event.target.checked){
-                    this.scene.add( this.plane )
-                }
-                else{
-                    this.scene.remove(this.plane)
-                }
-            })
-            
         })
-
     }
     
     makeMaterial(material){
