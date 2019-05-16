@@ -237,10 +237,6 @@ export default class AttachmentPoint {
         
     }
     
-    updateSidebar(){
-        this.parent.updateSidebar()
-    }
-    
     wasConnectionMade(x,y){
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...

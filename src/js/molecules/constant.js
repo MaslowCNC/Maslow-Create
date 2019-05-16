@@ -17,12 +17,8 @@ export default class Constant extends Atom{
         
         this.addIO('output', 'number', this, 'number', 10)
         
-        if (typeof this.ioValues !== 'undefined') {
-            this.ioValues.forEach(ioValue => { //for each saved value
-                if(ioValue.name == this.output.name){
-                    this.output.setValue(ioValue.ioValue)
-                }
-            })
+        if (typeof this.ioValues == 'array') {
+            this.output.setValue(ioValues[0].ioValue)
         }
     }
     
@@ -30,15 +26,8 @@ export default class Constant extends Atom{
         //updates the sidebar to display information about this node
         
         var valueList = super.updateSidebar() //call the super function
-        
-        this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
-        
-    }
-    
-    setValue(newName){
-        //Called by the sidebar to set the name
-        this.name = newName
+        this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
     }
     
     serialize(values){
@@ -66,5 +55,9 @@ export default class Constant extends Atom{
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
+    }
+    
+    displayAndPropogate(){
+        this.output.setValue(this.output.getValue())
     }
 }

@@ -347,7 +347,7 @@ export default class Atom {
     }
     
     displayAndPropogate(){
-        //If this molecule is selected, send the updated value to the renderer
+        //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
         }
