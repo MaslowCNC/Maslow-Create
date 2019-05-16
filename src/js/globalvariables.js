@@ -63,6 +63,7 @@ class GlobalVariables{
         this.currentMolecule
         this.topLevelMolecule
         this.runMode = false
+        this.evalLock = true
         this.gitHub = new GitHubModule()
         
         const agent = async ({ question }) => `Secret ${question}`

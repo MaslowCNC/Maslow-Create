@@ -342,27 +342,29 @@ export default class Atom {
     }
     
     basicThreadValueProcessing(values, key){
-        this.processing = true
-        this.clearAlert()
-        
-        const computeValue = async (values, key) => {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
+        if(!GlobalVariables.evalLock){
+            this.processing = true
+            this.clearAlert()
+            
+            const computeValue = async (values, key) => {
+                try{
+                    return await GlobalVariables.ask({values: values, key: key})
+                }
+                catch(err){
+                    this.setAlert(err)
+                }
             }
-            catch(err){
-                this.setAlert(err)
-            }
+            
+            computeValue(values, key).then(result => {
+                if (result != -1 ){
+                    this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                    this.displayAndPropogate()
+                }else{
+                    this.setAlert("Unable to compute")
+                }
+                this.processing = false
+            })
         }
-        
-        computeValue(values, key).then(result => {
-            if (result != -1 ){
-                this.value = GlobalVariables.api.Shape.fromGeometry(result)
-                this.displayAndPropogate()
-            }else{
-                this.setAlert("Unable to compute")
-            }
-            this.processing = false
-        })
     }
     
     sendToRender(){
