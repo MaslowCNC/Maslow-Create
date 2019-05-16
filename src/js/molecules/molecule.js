@@ -319,7 +319,7 @@ export default class Molecule extends Atom{
         this.updateValue()
     }
     
-    placeAtom(newAtomObj, moleculeList, typesList){
+    placeAtom(newAtomObj, moleculeList, typesList, unlock){
         //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
         
         for(var key in typesList) {
@@ -336,6 +336,11 @@ export default class Molecule extends Atom{
                 //If this is a molecule, deserialize it
                 if(atom.atomType == 'Molecule' && moleculeList != null){
                     atom.deserialize(moleculeList, atom.uniqueID)
+                }
+                
+                if(unlock){
+                    //Make it spawn ready to update right away
+                    atom.unlock()
                 }
                 
                 this.nodesOnTheScreen.push(atom)
