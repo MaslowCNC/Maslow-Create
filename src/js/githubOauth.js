@@ -385,14 +385,14 @@ export default function GitHubModule(){
                 shape = GlobalVariables.api.sphere()
             }
             
-            const computeSvg = async (values, key) => {
+            const threadCompute = async (values, key) => {
                 return await GlobalVariables.ask({values: values, key: key})
             }
-            computeSvg([shape.toLazyGeometry().toGeometry()], "stl").then( stlContent => {
+            threadCompute([shape.toLazyGeometry().toGeometry()], "stl").then( stlContent => {
                 const computeSvg = async (values, key) => {
                     return await GlobalVariables.ask({values: values, key: key})
                 }
-                computeSvg([shape.toLazyGeometry().toGeometry()], "svg").then(contentSvg => {
+                threadCompute([shape.toLazyGeometry().toGeometry()], "SVG Picture").then(contentSvg => {
                     
                     var bomContent = bomHeader
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)

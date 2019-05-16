@@ -83696,6 +83696,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   /* global postMessage, onmessage:writable */
 
+
   const say = (message) => postMessage(message);
   // const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
   const agent = async ({ ask, question }) => {
@@ -83747,6 +83748,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
                   const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
                   return toSvg$2({}, crossSection)
                   break
+              case "SVG Picture":
+                  const shape = Shape.fromGeometry(values[0]);
+                  console.log(shape);
+                  return toSvg$1({cameraPosition: [0, 0, 700]}, shape.toDisjointGeometry())
               case "stl":
                   return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
                   break
