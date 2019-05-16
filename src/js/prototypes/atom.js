@@ -6,6 +6,7 @@ export default class Atom {
     constructor(values){
         //Setup default values
         this.inputs = []
+        this.output = null
         
         this.x = 0
         this.y = 0
@@ -120,7 +121,7 @@ export default class Atom {
             else{
                 offset = target.scaledRadius
             }
-            var input = new AttachmentPoint({
+            var newAp = new AttachmentPoint({
                 parentMolecule: target,
                 defaultOffsetX: offset,
                 defaultOffsetY: 0,
@@ -133,7 +134,11 @@ export default class Atom {
                 atomType: 'AttachmentPoint'
             })
             
-            target.inputs.push(input)
+            if(type == 'input'){
+                target.inputs.push(newAp)
+            }else{
+                target.output = newAp
+            }
         }
     }
     
@@ -288,6 +293,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.update()     
         })
+        if(this.output){
+            this.output.update()
+        }
         
         this.draw()
     }
@@ -334,11 +342,7 @@ export default class Atom {
         }
         
         //Set the output nodes with name 'geometry' to be the generated code
-        this.inputs.forEach(child => {
-            if(child.valueType == 'geometry' && child.type == 'output'){
-                child.setValue(this.value)
-            }
-        })
+        this.output.setValue(this.value)
     }
     
     basicThreadValueProcessing(values, key){
