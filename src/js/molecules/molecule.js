@@ -267,13 +267,11 @@ export default class Molecule extends Atom{
             //Store a represnetation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom's connectors
-            atom.inputs.forEach(attachmentPoint => {
-                if(attachmentPoint.type == 'output'){
-                    attachmentPoint.connectors.forEach(connector => {
-                        allConnectors.push(connector.serialize())
-                    })
-                }
-            })
+            if(atom.output){
+                atom.output.connectors.forEach(connector => {
+                    allConnectors.push(connector.serialize())
+                })
+            }
         })
         
         var thisAsObject = super.serialize(savedObject)
