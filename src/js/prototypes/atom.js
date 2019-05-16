@@ -360,6 +360,7 @@ export default class Atom {
     
     basicThreadValueProcessing(values, key){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            console.log("Processing: " + this.name);
             this.processing = true
             this.clearAlert()
             

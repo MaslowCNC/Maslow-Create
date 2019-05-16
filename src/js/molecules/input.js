@@ -92,6 +92,8 @@ export default class Input extends Atom {
     setOutput(newOutput){
         //Set the input's output
         
+        console.log("Updating value of input: " + this.name)
+        
         this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
         
         //Set the output nodes with type 'geometry' to be the new value
@@ -101,6 +103,5 @@ export default class Input extends Atom {
     
     updateValue(){
         //This empty function handles any calls to the normal update code block function which breaks things here
-        console.log("updating value of input: " + this.name)
     }
 }

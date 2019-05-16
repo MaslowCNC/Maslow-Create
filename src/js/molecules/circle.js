@@ -22,14 +22,14 @@ export default class Circle extends Atom {
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
-            var maximumSegmentSize = this.findIOValue('max segment size')
-            var circumference  = 3.14*2*this.findIOValue('radius')
-            var numberOfSegments = parseInt( circumference / maximumSegmentSize )
+        try{
+            const maximumSegmentSize = this.findIOValue('max segment size')
+            const circumference  = 3.14*2*this.findIOValue('radius')
+            const numberOfSegments = parseInt( circumference / maximumSegmentSize )
             
-            this.value = GlobalVariables.api.circle({r: this.findIOValue('radius'), center: true, fn: numberOfSegments})
-            
-            super.updateValue()
-        }
+            const values = [this.findIOValue('radius'), numberOfSegments]
+            this.basicThreadValueProcessing(values, "circle")
+        }catch(err){this.setAlert(err)}
+        
     }
 }

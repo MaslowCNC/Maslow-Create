@@ -68,21 +68,21 @@ export default class Molecule extends Atom{
     }
     
     updateValue(){
-        this.processing = true
-        this.clearAlert()
-        
-        //Grab values from the inputs and push them out to the input objects
-        this.inputs.forEach(child => {
-            if(child.type == 'input'){
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            this.processing = true
+            this.clearAlert()
+            
+            //Grab values from the inputs and push them out to the input objects
+            this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
-                    if(atom.atomType == 'Input' && child.name == atom.name){
-                        atom.setOutput(child.getValue())
+                    if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
+                        atom.setOutput(moleculeInput.getValue())
                     }
                 })
-            }
-        })
-        
-        this.processing = false
+            })
+            
+            this.processing = false
+        }
     }
     
     propogate(){

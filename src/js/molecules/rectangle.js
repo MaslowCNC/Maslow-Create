@@ -19,10 +19,9 @@ export default class Rectangle extends Atom {
     }
     
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
-            this.value = GlobalVariables.api.square([this.findIOValue('x length'),this.findIOValue('y length')])
-            
-            super.updateValue()
-        }
+        try{
+            const values = [this.findIOValue('x length'),this.findIOValue('y length')]
+            this.basicThreadValueProcessing(values, "rectangle")
+        }catch(err){this.setAlert(err)}
     }
 }
