@@ -22,7 +22,7 @@ export default class Circle extends Atom {
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
-        if(!GlobalVariables.evalLock){
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             var maximumSegmentSize = this.findIOValue('max segment size')
             var circumference  = 3.14*2*this.findIOValue('radius')
             var numberOfSegments = parseInt( circumference / maximumSegmentSize )

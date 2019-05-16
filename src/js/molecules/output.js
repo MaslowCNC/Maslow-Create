@@ -25,7 +25,7 @@ export default class Output extends Atom {
     }
     
     updateValue(){
-        if(!GlobalVariables.evalLock){
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             this.value = this.findIOValue('number or geometry')
             this.parent.value = this.value
             this.parent.propogate()

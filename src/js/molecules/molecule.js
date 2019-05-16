@@ -99,6 +99,16 @@ export default class Molecule extends Atom{
         }
     }
     
+    unlock(){
+        //Runs right after the loading process to unlock attachment points which have no connectors attached
+        super.unlock()
+        
+        this.nodesOnTheScreen.forEach(node => {
+            node.unlock()
+        })
+        this.updateValue()
+    }
+    
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         

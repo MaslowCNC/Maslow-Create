@@ -348,7 +348,7 @@ export default class Atom {
     }
     
     basicThreadValueProcessing(values, key){
-        if(!GlobalVariables.evalLock){
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             this.processing = true
             this.clearAlert()
             
@@ -371,6 +371,16 @@ export default class Atom {
                 this.processing = false
             })
         }
+    }
+    
+    unlock(){
+        //Runs right after the loading process to unlock attachment points which have no connectors attached
+        this.inputs.forEach(input => {
+            if(input.connectors.length == 0){
+                input.ready = true
+            }
+        })
+        this.updateValue()
     }
     
     sendToRender(){
