@@ -53,7 +53,9 @@ flowCanvas.addEventListener('mousedown', event => {
     if(!clickHandledByMolecule){
         GlobalVariables.currentMolecule.backgroundClick()
     }
-    
+    else{
+        GlobalVariables.currentMolecule.deselect()
+    }
     //hide the menu if it is visible
     if (!document.querySelector('.menu').contains(event.target)) {
         Menu.hidemenu()

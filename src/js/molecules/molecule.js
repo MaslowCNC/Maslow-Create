@@ -67,6 +67,10 @@ export default class Molecule extends Atom{
         this.sendToRender()
     }
     
+    deselect(){
+        this.selected = false
+    }
+    
     updateValue(){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             this.processing = true
