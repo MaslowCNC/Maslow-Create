@@ -33,9 +33,9 @@ export default class Gcode extends Atom {
             }catch(err){this.setAlert(err)}
         }
         
-        const input = this.findIOValue('geometry')
-        
         try{
+            const input = this.findIOValue('geometry')
+            
             computeSvg([input.toLazyGeometry().toGeometry()], "svg").then(result => {
                 if (result != -1 ){
                     
