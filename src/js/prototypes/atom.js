@@ -342,7 +342,9 @@ export default class Atom {
         }
         
         //Set the output nodes with name 'geometry' to be the generated code
-        this.output.setValue(this.value)
+        if(this.output){
+            this.output.setValue(this.value)
+        }
     }
     
     basicThreadValueProcessing(values, key){

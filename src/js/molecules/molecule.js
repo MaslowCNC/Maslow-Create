@@ -354,16 +354,12 @@ export default class Molecule extends Atom{
             this.nodesOnTheScreen.forEach(atom => {
                 //Find the output node
                 if (atom.uniqueID == connectorObj.ap1ID){
-                    atom.inputs.forEach(child => {
-                        if(child.name == connectorObj.ap1Name && child.type == 'output'){
-                            connector = new Connector({
-                                atomType: 'Connector',
-                                attachmentPoint1: child,
-                                parentMolecule:  atom
-                            })
-                            cp1NotFound = false
-                        }
-                    })
+                        connector = new Connector({
+                            atomType: 'Connector',
+                            attachmentPoint1: atom.output,
+                            parentMolecule:  atom
+                        })
+                        cp1NotFound = false
                 }
                 //Find the input node
                 if (atom.uniqueID == connectorObj.ap2ID){
