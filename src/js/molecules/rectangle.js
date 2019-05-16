@@ -19,9 +19,10 @@ export default class Rectangle extends Atom {
     }
     
     updateValue(){
-        
-        this.value = GlobalVariables.api.square([this.findIOValue('x length'),this.findIOValue('y length')])
-        
-        super.updateValue()
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            this.value = GlobalVariables.api.square([this.findIOValue('x length'),this.findIOValue('y length')])
+            
+            super.updateValue()
+        }
     }
 }

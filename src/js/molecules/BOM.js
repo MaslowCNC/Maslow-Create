@@ -31,14 +31,16 @@ export default class AddBOMTag extends Atom{
     
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
-        try{
-            this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMitem))
-            this.clearAlert()
-        }catch(err){
-            this.setAlert(err)
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            try{
+                this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMitem))
+                this.clearAlert()
+            }catch(err){
+                this.setAlert(err)
+            }
+            
+            super.updateValue()
         }
-        
-        super.updateValue()
     }
     
     updateSidebar(){

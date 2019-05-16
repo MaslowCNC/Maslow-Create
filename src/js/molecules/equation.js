@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Equation extends Atom {
     
@@ -31,40 +32,38 @@ export default class Equation extends Atom {
     
     updateValue(){
         //A super classed version of the update codeblock default function which computes the equation values
-        var x = this.findIOValue('x')
-        var y = this.findIOValue('y')
-        
-        var z
-        switch(this.currentEquation){
-        case 0:
-            z = x+y
-            break
-        case 1:
-            z = x-y
-            break
-        case 2:
-            z = x*y
-            break
-        case 3:
-            z = x/y
-            break
-        case 4:
-            z = Math.cos(x)
-            break
-        case 5:
-            z = Math.sin(x)
-            break
-        case 6:
-            z = Math.pow(x,y)
-            break
-        }
-        
-        //Set the output to be the generated value
-        this.inputs.forEach(child => {
-            if(child.type == 'output'){
-                child.setValue(z)
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            var x = this.findIOValue('x')
+            var y = this.findIOValue('y')
+            
+            var z
+            switch(this.currentEquation){
+            case 0:
+                z = x+y
+                break
+            case 1:
+                z = x-y
+                break
+            case 2:
+                z = x*y
+                break
+            case 3:
+                z = x/y
+                break
+            case 4:
+                z = Math.cos(x)
+                break
+            case 5:
+                z = Math.sin(x)
+                break
+            case 6:
+                z = Math.pow(x,y)
+                break
             }
-        })
+            
+            //Set the output to be the generated value
+            this.output.setValue(z)
+        }
     }
     
     changeEquation(newValue){

@@ -172,6 +172,11 @@ export default class Atom {
                 clickProcessed = true
             }
         })
+        if(this.output){
+            if(this.output.clickDown(x,y, clickProcessed) == true){
+                clickProcessed = true
+            }
+        }
         
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
@@ -213,6 +218,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.clickUp(x,y)     
         })
+        if(this.output){
+            this.output.clickUp(x,y)
+        }
     }
 
     clickMove(x,y){
@@ -224,6 +232,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.clickMove(x,y)       
         })
+        if(this.output){
+            this.output.clickMove(x,y)
+        }
     }
     
     keyPress(key){

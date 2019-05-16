@@ -95,14 +95,12 @@ export default class Input extends Atom {
         this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
         
         //Set the output nodes with type 'geometry' to be the new value
-        this.inputs.forEach(child => {
-            if(child.type == 'output'){
-                child.setValue(newOutput)
-            }
-        })
+        this.output.setValue(newOutput)
+        
     } 
     
     updateValue(){
         //This empty function handles any calls to the normal update code block function which breaks things here
+        console.log("updating value of input: " + this.name)
     }
 }
