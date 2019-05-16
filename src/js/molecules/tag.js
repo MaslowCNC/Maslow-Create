@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 export default class Tag extends Atom{
     
@@ -16,14 +17,15 @@ export default class Tag extends Atom{
     }
     
     updateValue(){
-        
-        try{
-            this.value = this.findIOValue('geometry').as(this.findIOValue('tag'))
-            this.clearAlert()
-        }catch(err){
-            this.setAlert(err)
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            try{
+                this.value = this.findIOValue('geometry').as(this.findIOValue('tag'))
+                this.clearAlert()
+            }catch(err){
+                this.setAlert(err)
+            }
+            
+            super.updateValue()
         }
-        
-        super.updateValue()
     }
 }

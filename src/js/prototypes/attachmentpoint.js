@@ -23,6 +23,7 @@ export default class AttachmentPoint {
         this.valueType = 'number' //options are number, geometry, array
         this.type = 'output'
         this.value = 10
+        this.ready = false //Used to order initilization when program is loaded
         
         this.connectors = []
         
@@ -45,12 +46,11 @@ export default class AttachmentPoint {
         if (this.expandedRadius){
             this.radius = this.parentMolecule.radius/1.6
         }
-
-        if(this.parentMolecule.children.length < 2 && this.type == 'input'){
+        if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             this.x= this.parentMolecule.x-this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }    
-        else if(this.parentMolecule.children.length < 2 && this.type == 'output'){
+        else if(this.parentMolecule.inputs.length < 2 && this.type == 'output'){
             this.x= this.parentMolecule.x+this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }                 
@@ -206,7 +206,7 @@ export default class AttachmentPoint {
     }
 
     expandOut(cursorDistance){
-        const inputList = this.parentMolecule.children.filter(input => input.type == 'input')
+        const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
@@ -235,10 +235,6 @@ export default class AttachmentPoint {
             connector.deleteSelf()       
         })
         
-    }
-    
-    updateSidebar(){
-        this.parent.updateSidebar()
     }
     
     wasConnectionMade(x,y){
@@ -272,6 +268,9 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue
+        if(!GlobalVariables.evalLock){
+            this.ready = true
+        }
         //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node

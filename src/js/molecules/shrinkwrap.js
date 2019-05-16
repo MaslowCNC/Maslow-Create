@@ -29,7 +29,7 @@ export default class ShrinkWrap extends Atom{
         
         try{
             var inputs = []
-            this.children.forEach( io => {
+            this.inputs.forEach( io => {
                 if(io.connectors.length > 0 && io.type == 'input'){
                     inputs.push(io.getValue())
                 }
@@ -50,7 +50,7 @@ export default class ShrinkWrap extends Atom{
         var thisAsObject = super.serialize(savedObject)
         
         var ioValues = []
-        this.children.forEach(io => {
+        this.inputs.forEach(io => {
             if (io.type == 'input'){
                 var saveIO = {
                     name: io.name,

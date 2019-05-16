@@ -385,14 +385,12 @@ export default function GitHubModule(){
                 shape = GlobalVariables.api.sphere()
             }
             
-            const computeSvg = async (values, key) => {
+            const threadCompute = async (values, key) => {
                 return await GlobalVariables.ask({values: values, key: key})
             }
-            computeSvg([shape.toLazyGeometry().toGeometry()], "stl").then( stlContent => {
-                const computeSvg = async (values, key) => {
-                    return await GlobalVariables.ask({values: values, key: key})
-                }
-                computeSvg([shape.toLazyGeometry().toGeometry()], "svg").then(contentSvg => {
+            threadCompute([shape.toLazyGeometry().toGeometry()], "stl").then( stlContent => {
+                
+                threadCompute([shape.toLazyGeometry().toGeometry()], "SVG Picture").then(contentSvg => {
                     
                     var bomContent = bomHeader
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
@@ -519,6 +517,8 @@ export default function GitHubModule(){
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
             GlobalVariables.topLevelMolecule.backgroundClick()
+            GlobalVariables.evalLock = false
+            GlobalVariables.topLevelMolecule.unlock()
             
             var _this = this
             intervalTimer = setInterval(function() { _this.saveProject() }, 60000) //Save the project regularly
