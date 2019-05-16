@@ -19,11 +19,9 @@ export default class Constant extends Atom{
         
         if (typeof this.ioValues !== 'undefined') {
             this.ioValues.forEach(ioValue => { //for each saved value
-                this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
-                    if(ioValue.name == io.name){
-                        io.setValue(ioValue.ioValue)
-                    }
-                })
+                if(ioValue.name == this.output.name){
+                    this.output.setValue(ioValue.ioValue)
+                }
             })
         }
     }
