@@ -44,12 +44,57 @@ export default class Display {
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
+
+        // Sets initial plane and mesh
+        var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
+        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
+        planeMaterial.wireframe = true
+        planeMaterial.transparent = true 
+        planeMaterial.opacity = 0.2
+        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
+        this.plane.receiveShadow = true
+        this.scene.add( this.plane )
+
         //
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
+
+        this.targetDiv.addEventListener('mousedown', () => {
+            if(!GlobalVariables.runMode){
+                let sideBar = document.querySelector('.sideBar')
+                while (sideBar.firstChild) {
+                    sideBar.removeChild(sideBar.firstChild)
+                }
+                
+                //add the name as a title
+                var name = document.createElement('h1')
+                name.textContent = "3D View"
+                name.setAttribute('class','doc-title')
+                sideBar.appendChild(name)
+
+                var gridCheck = document.createElement('input')
+                sideBar.appendChild(gridCheck)
+                gridCheck.setAttribute('type', 'checkbox')
+                gridCheck.setAttribute('id', 'gridCheck')
+                gridCheck.setAttribute('checked', 'true')
+                var gridCheckLabel = document.createElement('label')
+                sideBar.appendChild(gridCheckLabel)
+                gridCheckLabel.setAttribute('for', 'gridCheck')
+                gridCheckLabel.textContent= "Grid"
+
+                gridCheck.addEventListener('change', event => {
+                    if(event.target.checked){
+                        this.scene.add( this.plane )
+                    }
+                    else{
+                        this.scene.remove(this.plane)
+                    }
+                })
+            }
+        })
     }
     
     makeMaterial(material){
@@ -67,7 +112,19 @@ export default class Display {
     }
     
     writeToDisplay(shape){
-        this.updateDisplayData(this.convert.toThreejsGeometry(shape.toDisjointGeometry()))
+        if(shape != null){
+            const computeValue = async () => {
+                try {
+                    return await GlobalVariables.render({values: shape.toLazyGeometry().toGeometry(), key: "render"})
+                } catch(err) {
+                    return -1
+                }
+            }
+
+            computeValue().then(result => {
+                this.updateDisplayData(result)
+            })
+        }
     }
     
     updateDisplayData(threejsGeometry){
@@ -118,15 +175,14 @@ export default class Display {
                 this.datasets.push(dataset)
             }
         }
-
         walk(threejsGeometry)
     }
     
     onWindowResize() {
-        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight - 1)
+        this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight)
         this.camera.updateProjectionMatrix()
         this.controls.handleResize()
-        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight - 1)
+        this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight)
     }
     
     render() {

@@ -23,6 +23,7 @@ export default class AttachmentPoint {
         this.valueType = 'number' //options are number, geometry, array
         this.type = 'output'
         this.value = 10
+        this.ready = false //Used to order initilization when program is loaded
         
         this.connectors = []
         
@@ -45,12 +46,11 @@ export default class AttachmentPoint {
         if (this.expandedRadius){
             this.radius = this.parentMolecule.radius/1.6
         }
-
-        if(this.parentMolecule.children.length < 2 && this.type == 'input'){
+        if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             this.x= this.parentMolecule.x-this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }    
-        else if(this.parentMolecule.children.length < 2 && this.type == 'output'){
+        else if(this.parentMolecule.inputs.length < 2 && this.type == 'output'){
             this.x= this.parentMolecule.x+this.parentMolecule.radius
             this.y= this.parentMolecule.y
         }                 
@@ -140,7 +140,8 @@ export default class AttachmentPoint {
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 
                     attachmentPoint1: this,
-                    atomType: 'Connector'
+                    atomType: 'Connector',
+                    isMoving: true
                 })
                 this.connectors.push(connector)
             }
@@ -205,7 +206,7 @@ export default class AttachmentPoint {
     }
 
     expandOut(cursorDistance){
-        const inputList = this.parentMolecule.children.filter(input => input.type == 'input')
+        const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
@@ -220,7 +221,6 @@ export default class AttachmentPoint {
         this.offsetY = this.hoverOffsetY * 30/cursorDistance
 
     }
-    
     
     keyPress(key){
         this.connectors.forEach(connector => {
@@ -237,25 +237,26 @@ export default class AttachmentPoint {
         
     }
     
-    updateSidebar(){
-        this.parent.updateSidebar()
-    }
-    
-    wasConnectionMade(x,y, connector){
+    wasConnectionMade(x,y){
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
-            
+        
             if(this.connectors.length > 0){ //Don't accept a second connection to an input
                 return false
             }
-            
-            this.connectors.push(connector)
-            
-            return this
+            else{
+                return true
+            }
         }
-        return false
+        else{
+            return false
+        }
     }
 
+    attach(connector){
+        this.connectors.push(connector)
+    }
+    
     setDefault(){
         this.setValue(this.defaultValue)
        
@@ -267,6 +268,9 @@ export default class AttachmentPoint {
     
     setValue(newValue){
         this.value = newValue
+        if(!GlobalVariables.evalLock){
+            this.ready = true
+        }
         //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node

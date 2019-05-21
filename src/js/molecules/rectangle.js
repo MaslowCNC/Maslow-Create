@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
 
 export default class Rectangle extends Atom {
 
@@ -19,9 +18,9 @@ export default class Rectangle extends Atom {
     }
     
     updateValue(){
-        
-        this.value = GlobalVariables.api.square([this.findIOValue('x length'),this.findIOValue('y length')])
-        
-        super.updateValue()
+        try{
+            const values = [this.findIOValue('x length'),this.findIOValue('y length')]
+            this.basicThreadValueProcessing(values, "rectangle")
+        }catch(err){this.setAlert(err)}
     }
 }

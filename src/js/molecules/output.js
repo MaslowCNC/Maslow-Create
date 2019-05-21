@@ -25,11 +25,13 @@ export default class Output extends Atom {
     }
     
     updateValue(){
-        
-        this.value = this.findIOValue('number or geometry')
-        this.parent.value = this.value
-        
-        super.updateValue()
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            this.value = this.findIOValue('number or geometry')
+            this.parent.value = this.value
+            this.parent.propogate()
+            
+            super.updateValue()
+        }
     }
     
     setID(newID){
@@ -37,6 +39,10 @@ export default class Output extends Atom {
     }
     
     draw() {
+        
+        this.inputs.forEach(child => {
+            child.draw()       
+        })
 
         this.height= this.radius
         
@@ -72,7 +78,6 @@ export default class Output extends Atom {
         this.children.forEach(child => {
             child.draw()       
         })
-
         
     }
 }
