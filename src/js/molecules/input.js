@@ -49,20 +49,14 @@ export default class Input extends Atom {
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height/2)
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height)
         GlobalVariables.c.lineTo(this.x - this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height)
         GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
         GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
-        GlobalVariables.c.stroke()
-
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.arc(this.x,this.y,this.radius,1.2*Math.PI,1*Math.PI);
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
 
         this.children.forEach(child => {

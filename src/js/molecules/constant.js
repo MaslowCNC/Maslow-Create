@@ -59,16 +59,21 @@ export default class Constant extends Atom{
     }
     
     draw() {
-        this.children.forEach(child => {
-            child.draw()       
-        })
         
         GlobalVariables.c.beginPath()
+        GlobalVariables.c.strokeStyle = this.parent.strokeColor
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height)
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
+
+        this.children.forEach(child => {
+            child.draw()       
+        })
     }
+
 }
