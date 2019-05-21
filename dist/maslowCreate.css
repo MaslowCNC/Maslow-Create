@@ -38,6 +38,7 @@
    -webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     -moz-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
+    border-radius: 25px;
 }
 
 .flex-parent {
@@ -82,6 +83,7 @@ canvas {
 body {
     font-family: 'Work Sans', sans-serif;
     background: #B0AEB0;
+    overflow: hidden;
 }
 
 #parametersdiv {

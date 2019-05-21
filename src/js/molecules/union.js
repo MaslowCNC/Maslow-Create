@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
 
 export default class Union extends Atom {
     
@@ -18,15 +17,11 @@ export default class Union extends Atom {
     }
     
     updateValue(){
-        
         try{
-            this.clearAlert()
-            this.value = GlobalVariables.api.union(this.findIOValue('geometry1'), this.findIOValue('geometry2'))
-        }catch(err){
-            this.setAlert(err)
-        }
-        
-        super.updateValue()
+            const values = [this.findIOValue('geometry1').toLazyGeometry().toGeometry(), this.findIOValue('geometry2').toLazyGeometry().toGeometry()]
+            
+            this.basicThreadValueProcessing(values, "union")
+        }catch(err){this.setAlert(err)}
     }
     
 }

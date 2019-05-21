@@ -17,14 +17,8 @@ export default class Constant extends Atom{
         
         this.addIO('output', 'number', this, 'number', 10)
         
-        if (typeof this.ioValues !== 'undefined') {
-            this.ioValues.forEach(ioValue => { //for each saved value
-                this.children.forEach(io => {  //Find the matching IO and set it to be the saved value
-                    if(ioValue.name == io.name){
-                        io.setValue(ioValue.ioValue)
-                    }
-                })
-            })
+        if (typeof this.ioValues == 'object') {
+            this.output.setValue(this.ioValues[0].ioValue)
         }
     }
     
@@ -32,17 +26,8 @@ export default class Constant extends Atom{
         //updates the sidebar to display information about this node
         
         var valueList = super.updateSidebar() //call the super function
-        
-        var output = this.children[0]
-        
-        this.createEditableValueListItem(valueList,output,'value', 'Value', true)
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
-        
-    }
-    
-    setValue(newName){
-        //Called by the sidebar to set the name
-        this.name = newName
+        this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
     }
     
     serialize(values){
@@ -51,7 +36,7 @@ export default class Constant extends Atom{
         
         valuesObj.ioValues = [{
             name: 'number',
-            ioValue: this.children[0].getValue()
+            ioValue: this.output.getValue()
         }]
         
         return valuesObj
@@ -59,7 +44,7 @@ export default class Constant extends Atom{
     }
     
     draw() {
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.draw()       
         })
         
@@ -70,5 +55,9 @@ export default class Constant extends Atom{
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
+    }
+    
+    displayAndPropogate(){
+        this.output.setValue(this.output.getValue())
     }
 }

@@ -18,8 +18,9 @@ export default class Scale extends Atom{
     
     updateValue(){
         
-        this.value = this.findIOValue('geometry').scale(this.findIOValue('multiple'))
-        
-        super.updateValue()
+        try{
+            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('multiple')]
+            this.basicThreadValueProcessing(values, "scale")
+        }catch(err){this.setAlert(err)}
     }
 }

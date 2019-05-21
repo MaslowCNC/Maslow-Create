@@ -24,30 +24,37 @@ export default class Gcode extends Atom {
     }
     
     updateValue(){
-        //Generate a .svg file
+        this.processing = true
+        this.clearAlert()
+        
+        const computeSvg = async (values, key) => {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }catch(err){this.setAlert(err)}
+        }
+        
         try{
-            this.clearAlert()
             const input = this.findIOValue('geometry')
             
-            const crossSection = input.crossSection().toDisjointGeometry()
-            
-            const bounds = input.measureBoundingBox()
-            const partThickness = bounds[1][2]-bounds[0][2]
-            const convertSVG = require('@jsxcad/convert-svg')
-            convertSVG.toSvg({}, crossSection).then( contentSvg => {
-            
-                //convert that to gcode
-                this.value = this.svg2gcode(contentSvg, {
-                    passes: this.findIOValue('passes'),
-                    materialWidth: -1*partThickness,
-                    bitWidth: this.findIOValue('tool size')
-                })
-                
-                super.updateValue()
+            computeSvg([input.toLazyGeometry().toGeometry()], "svg").then(result => {
+                if (result != -1 ){
+                    
+                    const bounds = input.measureBoundingBox()
+                    const partThickness = bounds[1][2]-bounds[0][2]
+                    
+                    //convert that to gcode
+                    this.value = this.svg2gcode(result, {
+                        passes: this.findIOValue('passes'),
+                        materialWidth: -1*partThickness,
+                        bitWidth: this.findIOValue('tool size')
+                    })
+                    
+                }else{
+                    this.setAlert("Unable to compute")
+                }
+                this.processing = false
             })
-        }catch(err){
-            this.setAlert(err)
-        }
+        }catch(err){this.setAlert(err)}
     }
     
     updateSidebar(){

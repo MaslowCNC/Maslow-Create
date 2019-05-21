@@ -33,6 +33,10 @@
     
     <!-- The login popup -->
     <div class = "login-popup off" id = "projects-popup">
+        
+        <!-- Draw the canvas for creating the design -->
+          <canvas id = "flow-canvas" style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
+        
         <div class="login-page">
           <div class="form">
             <h1>Maslow Create uses GitHub to store your projects</h1>
@@ -43,10 +47,6 @@
               <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
             </form>
           </div>
-          
-          
-          <!-- Draw the canvas for creating the design -->
-          <canvas id = "flow-canvas" style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
           
         </div>
     </div>
@@ -64,21 +64,7 @@
         </div>
     </div>
     
-    <script src="/js/octokit-rest.min.js"></script>
-    <script src="/js/oauth.js"></script>
-    <script src="/js/FileSaver.js"></script>
-    <script src="/js/SVGReader.js"></script>
-    <script src="/js/vec2.js"></script>
-    
-    <!-- ThreeJS -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
-    <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
-    <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"></script>
-    <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
-    
-    
-    <script src="/js/flowDraw.bundle.js"></script>
+    <script src="../js/flowDraw.bundle.js"></script>
     
 </body>
 </html>

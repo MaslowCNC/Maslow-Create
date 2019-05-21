@@ -53,7 +53,9 @@ flowCanvas.addEventListener('mousedown', event => {
     if(!clickHandledByMolecule){
         GlobalVariables.currentMolecule.backgroundClick()
     }
-    
+    else{
+        GlobalVariables.currentMolecule.deselect()
+    }
     //hide the menu if it is visible
     if (!document.querySelector('.menu').contains(event.target)) {
         Menu.hidemenu()
@@ -112,7 +114,8 @@ function init() {
         //Have the current molecule load it
         if(typeof ID != undefined){
             GlobalVariables.currentMolecule = new GitHubMolecule({
-                projectID: ID
+                projectID: ID,
+                topLevel: true
             })
         }
     }
@@ -139,7 +142,7 @@ function onWindowResize() {
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 
-    GlobalVariables.display.onWindowResize()    
+    GlobalVariables.display.onWindowResize()
 }
 
 
