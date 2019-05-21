@@ -45,6 +45,9 @@ export default class Display {
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
+        //sets axes
+        var axesHelper = new THREE.AxesHelper( 10 )
+        this.scene.add(axesHelper)
 
         // Sets initial plane and mesh
         var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
@@ -84,6 +87,7 @@ export default class Display {
                 var gridCheckLabel = document.createElement('label')
                 sideBar.appendChild(gridCheckLabel)
                 gridCheckLabel.setAttribute('for', 'gridCheck')
+                gridCheckLabel.setAttribute('style', 'margin-right:1em;')
                 gridCheckLabel.textContent= "Grid"
 
                 gridCheck.addEventListener('change', event => {
@@ -95,6 +99,28 @@ export default class Display {
                     }
                 })
 
+                //Axes Html
+
+                var axesCheck = document.createElement('input')
+                sideBar.appendChild(axesCheck)
+                axesCheck.setAttribute('type', 'checkbox')
+                axesCheck.setAttribute('id', 'axesCheck')
+                axesCheck.setAttribute('checked', 'true')
+                var axesCheckLabel = document.createElement('label')
+                sideBar.appendChild(axesCheckLabel)
+                axesCheckLabel.setAttribute('for', 'axesCheck')
+                axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+                axesCheckLabel.textContent= "Axes"
+
+                axesCheck.addEventListener('change', event => {
+                    if(event.target.checked){
+                        this.scene.add( axesHelper)
+                    }
+                    else{
+                        this.scene.remove( axesHelper )
+                    }
+                })
+
                 //Wireframe HTML element
 
                 var wireCheck = document.createElement('input')
@@ -102,10 +128,10 @@ export default class Display {
                 wireCheck.setAttribute('type', 'checkbox')
                 wireCheck.setAttribute('id', 'wireCheck')
                 wireCheck.setAttribute('checked', 'false')
-                //wireCheck.setAttribute('style', 'display:inline-block;')
                 var wireCheckLabel = document.createElement('label')
                 sideBar.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
+                wireCheckLabel.setAttribute('style', 'margin-right:10em;')
                 wireCheckLabel.textContent= "Wireframe"
 
                 wireCheck.addEventListener('change', event => {
