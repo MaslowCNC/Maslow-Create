@@ -302,7 +302,7 @@ export default function GitHubModule(){
                 accept: 'application/vnd.github.mercy-preview+json'
             }
         }).then(result => {
-            return result;
+            return result
         })
     }
     
