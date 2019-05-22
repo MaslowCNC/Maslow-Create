@@ -315,7 +315,7 @@ export default class Atom {
         
         var ioValues = []
         this.inputs.forEach(io => {
-            if (typeof io.getValue() == 'number' && io.type == 'input'){
+            if (typeof io.getValue() == 'number'){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
@@ -381,6 +381,11 @@ export default class Atom {
                 }
                 this.processing = false
             })
+        }
+        else{
+            if(this.atomType == ShrinkWrap){
+                console.log("Not processing shrink wrap because some inputs are locked");
+            }
         }
     }
     
