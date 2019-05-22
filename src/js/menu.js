@@ -136,9 +136,9 @@ class Menu {
                 
                 this.githubList = document.getElementById('githubList')
                 
-                var oldResults = document.getElementsByClassName('menu-item')
+                var oldResults = githubList.getElementsByClassName('menu-item')
                 for (i = 0; i < oldResults.length; i++) {
-                    oldResults[i].style.display = 'none'
+                    githubList.removeChild(oldResults[i])
                 }
                 
                 GlobalVariables.gitHub.searchGithub(input).then(result => {
