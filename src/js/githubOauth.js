@@ -293,7 +293,7 @@ export default function GitHubModule(){
     }
     
     this.searchGithub = async (searchString) => {
-        octokit.search.repos({
+        return await octokit.search.repos({
             q: searchString + ' topic:maslowcreate',
             sort: 'stars',
             per_page: 10,
@@ -301,8 +301,6 @@ export default function GitHubModule(){
             headers: {
                 accept: 'application/vnd.github.mercy-preview+json'
             }
-        }).then(result => {
-            return result
         })
     }
     
