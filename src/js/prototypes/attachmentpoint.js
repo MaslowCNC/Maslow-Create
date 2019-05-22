@@ -68,6 +68,8 @@ export default class AttachmentPoint {
         if (this.showHoverText){
             if(this.type == 'input'){
                
+                
+                GlobalVariables.c.globalCompositeOperation='destination-over'
                 GlobalVariables.c.beginPath()
 
                 if (this.name === 'geometry'){
@@ -82,6 +84,9 @@ export default class AttachmentPoint {
                 }
             
                 GlobalVariables.c.fill()
+                
+                
+                GlobalVariables.c.globalCompositeOperation='source-over'
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor
                 GlobalVariables.c.textAlign = 'end'
