@@ -141,15 +141,7 @@ class Menu {
                     oldResults[i].style.display = 'none'
                 }
                 
-                GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
-                    q: input + ' topic:maslowcreate',
-                    sort: 'stars',
-                    per_page: 10,
-                    page: 1,
-                    headers: {
-                        accept: 'application/vnd.github.mercy-preview+json'
-                    }
-                }).then(result => {
+                GlobalVariables.gitHub.searchGithub(input).then(result => {
                     result.data.items.forEach(item => {
                         var newElement = document.createElement('LI')
                         var text = document.createTextNode(item.name)
