@@ -134,7 +134,7 @@ class Menu {
             if(evt.code == 'Enter'){
                 input = document.getElementById('menuInput').value
                 
-                this.githubList = document.getElementById('githubList')
+                var githubList = document.getElementById('githubList')
                 
                 var oldResults = githubList.getElementsByClassName('menu-item')
                 for (i = 0; i < oldResults.length; i++) {
@@ -148,7 +148,7 @@ class Menu {
                         newElement.setAttribute('class', 'menu-item')
                         newElement.setAttribute('id', item.id)
                         newElement.appendChild(text) 
-                        this.githubList.appendChild(newElement) 
+                        githubList.appendChild(newElement) 
                         
                         document.getElementById(item.id).addEventListener('click', (e) => {
                             this.placeGitHubMolecule(e)
