@@ -308,7 +308,7 @@ export default class Molecule extends Atom{
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
-        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
+        //Place the connectors
         this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
             this.placeConnector(connector)

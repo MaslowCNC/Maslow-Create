@@ -51,7 +51,7 @@ export default class GitHubMolecule extends Molecule {
             //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
             if(typeof this.parent !== 'undefined'){
                 this.parent.savedConnectors.forEach(connector => {
-                    this.parent.placeConnector(JSON.parse(connector))
+                    this.parent.placeConnector(connector)
                 })
             }
             
