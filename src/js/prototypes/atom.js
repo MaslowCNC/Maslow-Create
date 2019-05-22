@@ -257,9 +257,9 @@ export default class Atom {
         var valueList = this.initializeSideBar()
         
         //Add options to set all of the inputs
-        this.inputs.forEach(child => {
-            if(child.type == 'input' && child.valueType != 'geometry'){
-                this.createEditableValueListItem(valueList,child,'value', child.name, true)
+        this.inputs.forEach(input => {
+            if(input.type == 'input' && input.valueType != 'geometry' && input.connectors.length == 0){
+                this.createEditableValueListItem(valueList,input,'value', input.name, true)
             }
         })
         

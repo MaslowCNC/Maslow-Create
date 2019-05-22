@@ -292,6 +292,20 @@ export default function GitHubModule(){
         })
     }
     
+    this.searchGithub = async (searchString) => {
+        octokit.search.repos({
+            q: searchString + ' topic:maslowcreate',
+            sort: 'stars',
+            per_page: 10,
+            page: 1,
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
+            }
+        }).then(result => {
+            return result;
+        })
+    }
+    
     this.createNewProject = function(){
         
         if(typeof intervalTimer != undefined){
