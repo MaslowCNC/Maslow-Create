@@ -140,7 +140,8 @@ export default class AttachmentPoint {
 
     clickDown(x,y, clickProcessed){
         if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius && !clickProcessed){
-            
+            console.log("Value: ");
+            console.log(this.getValue())
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 

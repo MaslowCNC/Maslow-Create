@@ -18,7 +18,7 @@ export default class GitHubMolecule extends Molecule {
     }
     
     doubleClick(x,y){
-        //Prevent you from being able to double click into a github molecule
+        // Prevent you from being able to double click into a github molecule
         
         var clickProcessed = false
         

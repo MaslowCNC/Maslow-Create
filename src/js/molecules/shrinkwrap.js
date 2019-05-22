@@ -26,7 +26,7 @@ export default class ShrinkWrap extends Atom{
     }
     
     updateValue(){
-        
+        console.log("Shrinkwrap updating it's value")
         try{
             var inputsList = []
             this.inputs.forEach( io => {

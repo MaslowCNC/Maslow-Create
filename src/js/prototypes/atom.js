@@ -131,7 +131,8 @@ export default class Atom {
                 value: defaultValue,
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
-                atomType: 'AttachmentPoint'
+                atomType: 'AttachmentPoint',
+                ready: !GlobalVariables.evalLock
             })
             
             if(type == 'input'){
@@ -383,7 +384,7 @@ export default class Atom {
             })
         }
         else{
-            if(this.atomType == ShrinkWrap){
+            if(this.atomType == 'ShrinkWrap'){
                 console.log("Not processing shrink wrap because some inputs are locked");
             }
         }
