@@ -30,7 +30,7 @@ export default class ShrinkWrap extends Atom{
         try{
             var inputsList = []
             this.inputs.forEach( io => {
-                if(io.connectors.length > 0 && io.type == 'input'){
+                if(io.connectors.length > 0){
                     inputsList.push(io.getValue())
                 }
             })

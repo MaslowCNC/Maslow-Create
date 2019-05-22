@@ -96,7 +96,11 @@ export default class Input extends Atom {
         //Set the output nodes with type 'geometry' to be the new value
         this.output.setValue(newOutput)
         
-    } 
+    }
+    
+    getOutput(){
+        return this.output.getValue()
+    }
     
     updateValue(){
         //This empty function handles any calls to the normal update code block function which breaks things here
