@@ -383,11 +383,6 @@ export default class Atom {
                 this.processing = false
             })
         }
-        else{
-            if(this.atomType == 'ShrinkWrap'){
-                console.log("Not processing shrink wrap because some inputs are locked");
-            }
-        }
     }
     
     unlock(){
