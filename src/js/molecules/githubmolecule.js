@@ -14,13 +14,11 @@ export default class GitHubMolecule extends Molecule {
         this.projectID = 0
         
         this.setValues(values)
-        
         this.loadProjectByID(this.projectID)
-        
     }
     
     doubleClick(x,y){
-        //Prevent you from being able to double click into a github molecule
+        // Prevent you from being able to double click into a github molecule
         
         var clickProcessed = false
         
@@ -42,7 +40,7 @@ export default class GitHubMolecule extends Molecule {
             let moleculesList =  JSON.parse(rawFile).molecules
             
             //Preserve values which will be overwritten by the deserialize process
-            var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+            var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
             
             this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
@@ -65,6 +63,17 @@ export default class GitHubMolecule extends Molecule {
     
     serialize(){
         
+        var ioValues = []
+        this.inputs.forEach(io => {
+            if (typeof io.getValue() == 'number'){
+                var saveIO = {
+                    name: io.name,
+                    ioValue: io.getValue()
+                }
+                ioValues.push(saveIO)
+            }
+        })
+        
         //Return a placeholder for this molecule
         var object = {
             atomType: this.atomType,
@@ -72,7 +81,8 @@ export default class GitHubMolecule extends Molecule {
             x: this.x,
             y: this.y,
             uniqueID: this.uniqueID,
-            projectID: this.projectID
+            projectID: this.projectID,
+            ioValues: ioValues
         }
         
         return object

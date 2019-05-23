@@ -131,7 +131,8 @@ export default class Atom {
                 value: defaultValue,
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
-                atomType: 'AttachmentPoint'
+                atomType: 'AttachmentPoint',
+                ready: !GlobalVariables.evalLock
             })
             
             if(type == 'input'){
@@ -315,7 +316,7 @@ export default class Atom {
         
         var ioValues = []
         this.inputs.forEach(io => {
-            if (typeof io.getValue() == 'number' && io.type == 'input'){
+            if (typeof io.getValue() == 'number'){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
