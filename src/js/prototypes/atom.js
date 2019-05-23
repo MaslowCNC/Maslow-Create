@@ -294,6 +294,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.deleteSelf()       
         })
+        if(this.output){
+            this.output.deleteSelf()
+        }
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
