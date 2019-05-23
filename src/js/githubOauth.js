@@ -154,6 +154,7 @@ export default function GitHubModule(){
         
         var projectPicture = document.createElement("IMG")
         projectPicture.setAttribute("src", thumbnailPath)
+        projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
         projectPicture.setAttribute("style", "width: 100%; height: 100%;")
         project.appendChild(projectPicture)
         project.appendChild(document.createElement("BR"))
