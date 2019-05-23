@@ -80,7 +80,7 @@ if (!self.define) {
     });
   };
 }
-define("./webworker.js",['require'], function (require) { 'use strict';
+define("./webworker.js",[],function () { 'use strict';
 
   // radians = degrees * PI / 180
 
@@ -740,10 +740,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   function createCommonjsModule(fn, module) {
   	return module = { exports: {} }, fn(module, module.exports), module.exports;
-  }
-
-  function getCjsExportFromNamespace (n) {
-  	return n && n['default'] || n;
   }
 
   //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
@@ -3237,49 +3233,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return polygon.plane;
   };
 
-  /**
-   * Check whether the polygon is convex.
-   * @returns {boolean}
-   */
-  const areVerticesConvex = (vertices, plane) => {
-    const numvertices = vertices.length;
-    if (numvertices > 2) {
-      let prevprevpos = vertices[numvertices - 2];
-      let prevpos = vertices[numvertices - 1];
-      for (let i = 0; i < numvertices; i++) {
-        const pos = vertices[i];
-        if (!isConvexPoint(prevprevpos, prevpos, pos, plane)) {
-          return false;
-        }
-        prevprevpos = prevpos;
-        prevpos = pos;
-      }
-    }
-    return true;
-  };
-
-  // calculate whether three points form a convex corner
-  //  prevpoint, point, nextpoint: the 3 coordinates (Vector3D instances)
-  //  normal: the normal vector of the plane
-  const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
-    const crossproduct = cross(
-      subtract(point, prevpoint),
-      subtract(nextpoint, point)
-    );
-    // note: plane ~= normal point
-    const crossdotnormal = dot(crossproduct, plane);
-    return crossdotnormal >= 0;
-  };
-
-  // FIXME: not used anywhere ???
-  /* const isStrictlyConvexPoint = function (prevpoint, point, nextpoint, normal) {
-    let crossproduct = point.minus(prevpoint).cross(nextpoint.minus(point))
-    let crossdotnormal = crossproduct.dot(normal)
-    return (crossdotnormal >= EPS)
-  } */
-
-  const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
-
   const isCoplanar = (polygon) => {
     const plane = toPlane(polygon);
     for (const point of polygon) {
@@ -3462,7 +3415,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
     let edges = [];
     const addEdge = (start, end) => {
-      edges.push([start, end]);
+      edges.push([canonicalize(start), canonicalize(end)]);
     };
 
     // Find the edges along the plane and fold them into paths to produce a set of closed loops.
@@ -7134,57 +7087,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   var tess2$1 = tess2;
 
-  const blessAsConvex = (paths) => { paths.isConvex = true; return paths; };
-
-  const toContour = (polygon) => {
-    const points = [];
-    for (const [x = 0, y = 0, z = 0] of polygon) {
-      points.push(x, y, z);
-    }
-    return points;
-  };
-
-  const fromTessellation = (tessellation) => {
-    const tessPolygons = tessellation.elements;
-    const vertices = tessellation.vertices;
-    const polygons = [];
-
-    const toPoint = (offset) => {
-      const vertex = tessPolygons[offset];
-      return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];
-    };
-
-    for (let nth = 0; nth < tessPolygons.length; nth += 3) {
-      polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);
-    }
-
-    return polygons;
-  };
-
-  // This currently does triangulation.
-  // Higher arities are possible, but end up being null padded.
-  // Let's see if they're useful.
-
-  // TODO: Call this toConvexPolygons
-  const makeConvex = (options = {}, polygons) => {
-    if (polygons.isConvex) {
-      return polygons;
-    }
-    if (polygons.every(isConvex)) {
-      return blessAsConvex(polygons);
-    }
-    const contours = polygons.map(toContour);
-    // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
-    const convex = fromTessellation(
-      tess2$1.tesselate({ contours: contours,
-                        windingRule: tess2$1.WINDING_ODD,
-                        elementType: tess2$1.POLYGONS,
-                        polySize: 3,
-                        vertexSize: 3
-      }));
-    return blessAsConvex(convex);
-  };
-
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
   const measureBoundingBox = (polygons) => {
     let max$1 = polygons[0][0];
@@ -7243,34 +7145,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       points.push(point);
     }
     return points;
-  };
-
-  const extrudeLinear = ({ height = 1 }, polygons) => {
-    const extruded = [];
-    const up = [0, 0, height];
-
-    // Build the walls.
-    for (const polygon of polygons) {
-      // Build floor outline. This need not be a convex polygon.
-      const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();
-      // Walk around the floor to build the walls.
-      for (let i = 0; i < floor.length; i++) {
-        const start = floor[i];
-        const end = floor[(i + 1) % floor.length];
-        // Remember that we are walking CCW.
-        extruded.push([start, add(start, up), end]);
-        extruded.push([end, add(start, up), add(end, up)]);
-      }
-    }
-
-    // Build the roof and floor from convex polygons.
-    for (const polygon of makeConvex({}, polygons)) {
-      const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();
-      const roof = floor.map(vertex => add(vertex, up)).reverse();
-      extruded.push(roof, floor);
-    }
-
-    return extruded;
   };
 
   const transform$4 = (matrix, points) => points.map(point => transform(matrix, point));
@@ -8570,11 +8444,26 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   var browser_6 = browser$2.storage;
   var browser_7 = browser$2.colors;
 
+  // MIT lisence
+  // from https://github.com/substack/tty-browserify/blob/1ba769a6429d242f36226538835b4034bf6b7886/index.js
 
+  function isatty() {
+    return false;
+  }
 
-  var tty = /*#__PURE__*/Object.freeze({
+  function ReadStream() {
+    throw new Error('tty.ReadStream is not implemented');
+  }
 
-  });
+  function WriteStream() {
+    throw new Error('tty.ReadStream is not implemented');
+  }
+
+  var tty = {
+    isatty: isatty,
+    ReadStream: ReadStream,
+    WriteStream: WriteStream
+  };
 
   var lookup = [];
   var revLookup = [];
@@ -10542,14 +10431,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isFastBuffer(obj.slice(0, 0))
   }
 
-  var isBuffer$1 = function isBuffer(arg) {
-    return arg instanceof Buffer;
-  };
-
-  var inherits_browser = createCommonjsModule(function (module) {
-  if (typeof Object.create === 'function') {
-    // implementation from standard node.js 'util' module
-    module.exports = function inherits(ctor, superCtor) {
+  var inherits;
+  if (typeof Object.create === 'function'){
+    inherits = function inherits(ctor, superCtor) {
+      // implementation from standard node.js 'util' module
       ctor.super_ = superCtor;
       ctor.prototype = Object.create(superCtor.prototype, {
         constructor: {
@@ -10561,8 +10446,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       });
     };
   } else {
-    // old school shim for old browsers
-    module.exports = function inherits(ctor, superCtor) {
+    inherits = function inherits(ctor, superCtor) {
       ctor.super_ = superCtor;
       var TempCtor = function () {};
       TempCtor.prototype = superCtor.prototype;
@@ -10570,52 +10454,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       ctor.prototype.constructor = ctor;
     };
   }
-  });
-
-  var inherits = createCommonjsModule(function (module) {
-  try {
-    var util$1 = util;
-    if (typeof util$1.inherits !== 'function') throw '';
-    module.exports = util$1.inherits;
-  } catch (e) {
-    module.exports = inherits_browser;
-  }
-  });
-
-  var util = createCommonjsModule(function (module, exports) {
-  // Copyright Joyent, Inc. and other Node contributors.
-  //
-  // Permission is hereby granted, free of charge, to any person obtaining a
-  // copy of this software and associated documentation files (the
-  // "Software"), to deal in the Software without restriction, including
-  // without limitation the rights to use, copy, modify, merge, publish,
-  // distribute, sublicense, and/or sell copies of the Software, and to permit
-  // persons to whom the Software is furnished to do so, subject to the
-  // following conditions:
-  //
-  // The above copyright notice and this permission notice shall be included
-  // in all copies or substantial portions of the Software.
-  //
-  // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-  // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-  // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-  // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-  // USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-  var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
-    function getOwnPropertyDescriptors(obj) {
-      var keys = Object.keys(obj);
-      var descriptors = {};
-      for (var i = 0; i < keys.length; i++) {
-        descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
-      }
-      return descriptors;
-    };
+  var inherits$1 = inherits;
 
   var formatRegExp = /%[sdj%]/g;
-  exports.format = function(f) {
+  function format(f) {
     if (!isString(f)) {
       var objects = [];
       for (var i = 0; i < arguments.length; i++) {
@@ -10651,21 +10493,16 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       }
     }
     return str;
-  };
-
+  }
 
   // Mark that a method should not be used.
   // Returns a modified function which warns once by default.
   // If --no-deprecation is set, then it is a no-op.
-  exports.deprecate = function(fn, msg) {
-    if (typeof process !== 'undefined' && process.noDeprecation === true) {
-      return fn;
-    }
-
+  function deprecate(fn, msg) {
     // Allow for deprecating things in the process of starting up.
-    if (typeof process === 'undefined') {
+    if (isUndefined(global$1.process)) {
       return function() {
-        return exports.deprecate(fn, msg).apply(this, arguments);
+        return deprecate(fn, msg).apply(this, arguments);
       };
     }
 
@@ -10681,20 +10518,19 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
 
     return deprecated;
-  };
-
+  }
 
   var debugs = {};
   var debugEnviron;
-  exports.debuglog = function(set) {
+  function debuglog(set) {
     if (isUndefined(debugEnviron))
       debugEnviron = process.env.NODE_DEBUG || '';
     set = set.toUpperCase();
     if (!debugs[set]) {
       if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-        var pid = process.pid;
+        var pid = 0;
         debugs[set] = function() {
-          var msg = exports.format.apply(exports, arguments);
+          var msg = format.apply(null, arguments);
           console.error('%s %d: %s', set, pid, msg);
         };
       } else {
@@ -10702,8 +10538,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       }
     }
     return debugs[set];
-  };
-
+  }
 
   /**
    * Echos the value of a value. Trys to print the value out
@@ -10727,7 +10562,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       ctx.showHidden = opts;
     } else if (opts) {
       // got an "options" object
-      exports._extend(ctx, opts);
+      _extend(ctx, opts);
     }
     // set default options
     if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
@@ -10737,8 +10572,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     if (ctx.colors) ctx.stylize = stylizeWithColor;
     return formatValue(ctx, obj, ctx.depth);
   }
-  exports.inspect = inspect;
-
 
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   inspect.colors = {
@@ -10806,7 +10639,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
         value &&
         isFunction(value.inspect) &&
         // Filter out the util module, it's inspect function is special
-        value.inspect !== exports.inspect &&
+        value.inspect !== inspect &&
         // Also filter out any prototype objects using the circular check.
         !(value.constructor && value.constructor.prototype === value)) {
       var ret = value.inspect(recurseTimes, ctx);
@@ -10857,7 +10690,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     var base = '', array = false, braces = ['{', '}'];
 
     // Make Array say that they are Array
-    if (isArray(value)) {
+    if (isArray$1(value)) {
       array = true;
       braces = ['[', ']'];
     }
@@ -11036,71 +10869,58 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   // NOTE: These type checking functions intentionally don't use `instanceof`
   // because it is fragile and can be easily faked with `Object.create()`.
-  function isArray(ar) {
+  function isArray$1(ar) {
     return Array.isArray(ar);
   }
-  exports.isArray = isArray;
 
   function isBoolean(arg) {
     return typeof arg === 'boolean';
   }
-  exports.isBoolean = isBoolean;
 
   function isNull(arg) {
     return arg === null;
   }
-  exports.isNull = isNull;
 
   function isNullOrUndefined(arg) {
     return arg == null;
   }
-  exports.isNullOrUndefined = isNullOrUndefined;
 
   function isNumber(arg) {
     return typeof arg === 'number';
   }
-  exports.isNumber = isNumber;
 
   function isString(arg) {
     return typeof arg === 'string';
   }
-  exports.isString = isString;
 
   function isSymbol(arg) {
     return typeof arg === 'symbol';
   }
-  exports.isSymbol = isSymbol;
 
   function isUndefined(arg) {
     return arg === void 0;
   }
-  exports.isUndefined = isUndefined;
 
   function isRegExp(re) {
     return isObject(re) && objectToString(re) === '[object RegExp]';
   }
-  exports.isRegExp = isRegExp;
 
   function isObject(arg) {
     return typeof arg === 'object' && arg !== null;
   }
-  exports.isObject = isObject;
 
   function isDate(d) {
     return isObject(d) && objectToString(d) === '[object Date]';
   }
-  exports.isDate = isDate;
 
   function isError(e) {
     return isObject(e) &&
         (objectToString(e) === '[object Error]' || e instanceof Error);
   }
-  exports.isError = isError;
 
   function isFunction(arg) {
     return typeof arg === 'function';
   }
-  exports.isFunction = isFunction;
 
   function isPrimitive(arg) {
     return arg === null ||
@@ -11110,9 +10930,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
            typeof arg === 'symbol' ||  // ES6 symbol
            typeof arg === 'undefined';
   }
-  exports.isPrimitive = isPrimitive;
 
-  exports.isBuffer = isBuffer$1;
+  function isBuffer$1(maybeBuf) {
+    return isBuffer(maybeBuf);
+  }
 
   function objectToString(o) {
     return Object.prototype.toString.call(o);
@@ -11138,27 +10959,11 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
 
   // log is just a thin wrapper to console.log that prepends a timestamp
-  exports.log = function() {
-    console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-  };
+  function log() {
+    console.log('%s - %s', timestamp(), format.apply(null, arguments));
+  }
 
-
-  /**
-   * Inherit the prototype methods from one constructor into another.
-   *
-   * The Function.prototype.inherits from lang.js rewritten as a standalone
-   * function (not on Function.prototype). NOTE: If this file is to be loaded
-   * during bootstrapping this function needs to be rewritten using some native
-   * functions as prototype setup using normal JavaScript does not work as
-   * expected during bootstrapping (see mirror.js in r114903).
-   *
-   * @param {function} ctor Constructor function which needs to inherit the
-   *     prototype.
-   * @param {function} superCtor Constructor function to inherit prototype from.
-   */
-  exports.inherits = inherits;
-
-  exports._extend = function(origin, add) {
+  function _extend(origin, add) {
     // Don't do anything if add isn't an object
     if (!add || !isObject(add)) return origin;
 
@@ -11168,149 +10973,35 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       origin[keys[i]] = add[keys[i]];
     }
     return origin;
-  };
-
+  }
   function hasOwnProperty(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
-  var kCustomPromisifiedSymbol = typeof Symbol !== 'undefined' ? Symbol('util.promisify.custom') : undefined;
-
-  exports.promisify = function promisify(original) {
-    if (typeof original !== 'function')
-      throw new TypeError('The "original" argument must be of type Function');
-
-    if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
-      var fn = original[kCustomPromisifiedSymbol];
-      if (typeof fn !== 'function') {
-        throw new TypeError('The "util.promisify.custom" argument must be of type Function');
-      }
-      Object.defineProperty(fn, kCustomPromisifiedSymbol, {
-        value: fn, enumerable: false, writable: false, configurable: true
-      });
-      return fn;
-    }
-
-    function fn() {
-      var promiseResolve, promiseReject;
-      var promise = new Promise(function (resolve, reject) {
-        promiseResolve = resolve;
-        promiseReject = reject;
-      });
-
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      args.push(function (err, value) {
-        if (err) {
-          promiseReject(err);
-        } else {
-          promiseResolve(value);
-        }
-      });
-
-      try {
-        original.apply(this, args);
-      } catch (err) {
-        promiseReject(err);
-      }
-
-      return promise;
-    }
-
-    Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
-
-    if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
-      value: fn, enumerable: false, writable: false, configurable: true
-    });
-    return Object.defineProperties(
-      fn,
-      getOwnPropertyDescriptors(original)
-    );
+  var util = {
+    inherits: inherits$1,
+    _extend: _extend,
+    log: log,
+    isBuffer: isBuffer$1,
+    isPrimitive: isPrimitive,
+    isFunction: isFunction,
+    isError: isError,
+    isDate: isDate,
+    isObject: isObject,
+    isRegExp: isRegExp,
+    isUndefined: isUndefined,
+    isSymbol: isSymbol,
+    isString: isString,
+    isNumber: isNumber,
+    isNullOrUndefined: isNullOrUndefined,
+    isNull: isNull,
+    isBoolean: isBoolean,
+    isArray: isArray$1,
+    inspect: inspect,
+    deprecate: deprecate,
+    format: format,
+    debuglog: debuglog
   };
-
-  exports.promisify.custom = kCustomPromisifiedSymbol;
-
-  function callbackifyOnRejected(reason, cb) {
-    // `!reason` guard inspired by bluebird (Ref: https://goo.gl/t5IS6M).
-    // Because `null` is a special error value in callbacks which means "no error
-    // occurred", we error-wrap so the callback consumer can distinguish between
-    // "the promise rejected with null" or "the promise fulfilled with undefined".
-    if (!reason) {
-      var newReason = new Error('Promise was rejected with a falsy value');
-      newReason.reason = reason;
-      reason = newReason;
-    }
-    return cb(reason);
-  }
-
-  function callbackify(original) {
-    if (typeof original !== 'function') {
-      throw new TypeError('The "original" argument must be of type Function');
-    }
-
-    // We DO NOT return the promise as it gives the user a false sense that
-    // the promise is actually somehow related to the callback's execution
-    // and that the callback throwing will reject the promise.
-    function callbackified() {
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-
-      var maybeCb = args.pop();
-      if (typeof maybeCb !== 'function') {
-        throw new TypeError('The last argument must be of type Function');
-      }
-      var self = this;
-      var cb = function() {
-        return maybeCb.apply(self, arguments);
-      };
-      // In true node style we process the callback on `nextTick` with all the
-      // implications (stack, `uncaughtException`, `async_hooks`)
-      original.apply(this, args)
-        .then(function(ret) { nextTick(cb, null, ret); },
-              function(rej) { nextTick(callbackifyOnRejected, rej, cb); });
-    }
-
-    Object.setPrototypeOf(callbackified, Object.getPrototypeOf(original));
-    Object.defineProperties(callbackified,
-                            getOwnPropertyDescriptors(original));
-    return callbackified;
-  }
-  exports.callbackify = callbackify;
-  });
-  var util_1 = util.format;
-  var util_2 = util.deprecate;
-  var util_3 = util.debuglog;
-  var util_4 = util.inspect;
-  var util_5 = util.isArray;
-  var util_6 = util.isBoolean;
-  var util_7 = util.isNull;
-  var util_8 = util.isNullOrUndefined;
-  var util_9 = util.isNumber;
-  var util_10 = util.isString;
-  var util_11 = util.isSymbol;
-  var util_12 = util.isUndefined;
-  var util_13 = util.isRegExp;
-  var util_14 = util.isObject;
-  var util_15 = util.isDate;
-  var util_16 = util.isError;
-  var util_17 = util.isFunction;
-  var util_18 = util.isPrimitive;
-  var util_19 = util.isBuffer;
-  var util_20 = util.log;
-  var util_21 = util.inherits;
-  var util_22 = util._extend;
-  var util_23 = util.promisify;
-  var util_24 = util.callbackify;
-
-
-
-  var os = /*#__PURE__*/Object.freeze({
-
-  });
 
   var hasFlag = function (flag, argv) {
   	argv = argv || process.argv;
@@ -11321,8 +11012,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
   };
-
-  getCjsExportFromNamespace(os);
 
   const env$1 = process.env;
 
@@ -11414,8 +11103,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   var supportsColor = process && support(supportLevel);
 
-  var tty$1 = getCjsExportFromNamespace(tty);
-
   var node = createCommonjsModule(function (module, exports) {
 
   /**
@@ -11486,7 +11173,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    */
 
   function useColors() {
-    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty$1.isatty(process.stderr.fd);
+    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
   }
   /**
    * Adds ANSI color escape codes if enabled.
@@ -12934,6 +12621,12 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));
   };
 
+  const eachPoint$1 = (options = {}, thunk, points) => {
+    for (const point of points) {
+      thunk(point);
+    }
+  };
+
   const flip$3 = (points) => points;
 
   const canonicalize$4 = (paths) => {
@@ -12947,7 +12640,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const difference = (pathset, ...pathsets) => { throw Error('Not implemented'); };
 
-  const eachPoint$1 = (options = {}, thunk, paths) => {
+  const eachPoint$2 = (options = {}, thunk, paths) => {
     for (const path of paths) {
       for (const point of path) {
         if (point !== null) {
@@ -13050,24 +12743,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const interpolateCubicBezier = bezier.prepare(4);
 
-  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
-
-  const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
-
-  var τ = Math.PI * 2;
-
-  const addTag = (tag, geometry) => {
-    const copy = Object.assign({}, geometry);
-    if (copy.tags) {
-      copy.tags = [tag, ...copy.tags];
-    } else {
-      copy.tags = [tag];
-    }
-    return copy;
-  };
-
-  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
-
   const toPlane$1 = (surface) => toPlane(surface[0]);
 
   // Transforms
@@ -13085,7 +12760,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const eachPoint$2 = (options = {}, thunk, surface) => {
+  const eachPoint$3 = (options = {}, thunk, surface) => {
     for (const polygon of surface) {
       for (const point of polygon) {
         thunk(point);
@@ -13118,7 +12793,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     for (const polygons of clipping) {
       for (const polygon of polygons) {
         polygon.pop();
-        polygonArray.push(polygon);
+        polygonArray.push(polygon.map(([x, y]) => [x, y, 0]));
       }
     }
     return polygonArray;
@@ -15873,9 +15548,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return clippingToPolygons(index.intersection(...z0Surfaces.map(z0SurfaceToClipping)));
   };
 
-  const blessAsConvex$1 = (paths) => { paths.isConvex = true; return paths; };
+  const blessAsConvex = (paths) => { paths.isConvex = true; return paths; };
 
-  const toContour$1 = (polygon) => {
+  const toContour = (polygon) => {
     const points = [];
     for (const [x = 0, y = 0, z = 0] of polygon) {
       points.push(x, y, z);
@@ -15883,7 +15558,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return points;
   };
 
-  const fromTessellation$1 = (tessellation) => {
+  const fromTessellation = (tessellation) => {
     const tessPolygons = tessellation.elements;
     const vertices = tessellation.vertices;
     const polygons = [];
@@ -15905,23 +15580,20 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   // Let's see if they're useful.
 
   // TODO: Call this toConvexPolygons
-  const makeConvex$1 = (options = {}, polygons) => {
+  const makeConvex = (options = {}, polygons) => {
     if (polygons.isConvex) {
       return polygons;
     }
-    if (polygons.every(isConvex)) {
-      return blessAsConvex$1(polygons);
-    }
-    const contours = polygons.map(toContour$1);
+    const contours = polygons.map(toContour);
     // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
-    const convex = fromTessellation$1(
+    const convex = fromTessellation(
       tess2$1.tesselate({ contours: contours,
                         windingRule: tess2$1.WINDING_ODD,
                         elementType: tess2$1.POLYGONS,
                         polySize: 3,
                         vertexSize: 3
       }));
-    return blessAsConvex$1(convex);
+    return blessAsConvex(convex);
   };
 
   /**
@@ -15943,10 +15615,14 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return clippingToPolygons(result);
   };
 
-  const makeConvex$2 = (options = {}, surface) => {
+  const makeConvex$1 = (options = {}, surface) => {
+    if (surface.length === 0) {
+      // An empty surface is not non-convex.
+      return surface;
+    }
     assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
-    let retessellatedSurface = makeConvex$1({}, union$2(...transform$6(to, surface).map(polygon => [polygon])));
+    let retessellatedSurface = makeConvex({}, transform$6(to, surface));
     return transform$6(from, retessellatedSurface);
   };
 
@@ -15961,9 +15637,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const multiply$2 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
 
-  const eachPoint$3 = (options = {}, thunk, solid) => {
+  const eachPoint$4 = (options = {}, thunk, solid) => {
     for (const surface of solid) {
-      eachPoint$2(options, thunk, surface);
+      eachPoint$3(options, thunk, surface);
     }
   };
 
@@ -15997,7 +15673,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const measureBoundingBox$1 = (solid) => {
     let max$1 = solid[0][0][0];
     let min$1 = solid[0][0][0];
-    eachPoint$3({},
+    eachPoint$4({},
               point => {
                 max$1 = max(max$1, point);
                 min$1 = min(min$1, point);
@@ -16022,6 +15698,52 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   // Relax the coplanar arrangement into polygon soup.
   const toPolygons = (options = {}, solid) => [].concat(...solid);
+
+  const extrude = ({ height = 1 }, surface) => {
+    const polygons = [];
+    const up = [0, 0, height];
+
+    // Build the walls.
+    for (const polygon of surface) {
+      // Build floor outline. This need not be a convex polygon.
+      const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
+      // Walk around the floor to build the walls.
+      for (let i = 0; i < floor.length; i++) {
+        const start = floor[i];
+        const end = floor[(i + 1) % floor.length];
+        // Remember that we are walking CCW.
+        polygons.push([start, add(start, up), end]);
+        polygons.push([end, add(start, up), add(end, up)]);
+      }
+    }
+
+    // Build the roof and floor from convex polygons.
+    for (const polygon of makeConvex({}, surface)) {
+      const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
+      const roof = floor.map(vertex => add(vertex, up)).reverse();
+      polygons.push(roof, floor);
+    }
+
+    return fromPolygons({}, polygons);
+  };
+
+  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+
+  const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
+
+  var τ = Math.PI * 2;
+
+  const addTag = (tag, geometry) => {
+    const copy = Object.assign({}, geometry);
+    if (copy.tags) {
+      copy.tags = [tag, ...copy.tags];
+    } else {
+      copy.tags = [tag];
+    }
+    return copy;
+  };
+
+  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
 
   const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
     if (set === undefined) {
@@ -16466,17 +16188,17 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     walk(geometry);
   };
 
-  const eachPoint$4 = (options, operation, geometry) => {
+  const eachPoint$5 = (options, operation, geometry) => {
     map$2(geometry,
         (geometry) => {
-          if (geometry.paths) {
-            eachPoint$1(options, operation, geometry.paths);
-          }
-          if (geometry.solid) {
-            eachPoint$3(options, operation, geometry.solid);
-          }
-          if (geometry.z0Surface) {
-            eachPoint$2(options, operation, geometry.z0Surface);
+          if (geometry.points) {
+            eachPoint$1(options, operation, geometry.points);
+          } else if (geometry.paths) {
+            eachPoint$2(options, operation, geometry.paths);
+          } else if (geometry.solid) {
+            eachPoint$4(options, operation, geometry.solid);
+          } else if (geometry.z0Surface) {
+            eachPoint$3(options, operation, geometry.z0Surface);
           }
         });
   };
@@ -16504,6 +16226,28 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const flip$8 = (assembly) => assembly.map(flipEntry);
 
+  const getSolids = (geometry) => {
+    const solids = [];
+    eachItem(geometry,
+             item => {
+               if (item.solid) {
+                 solids.push(item.solid);
+               }
+             });
+    return solids;
+  };
+
+  const getZ0Surfaces = (geometry) => {
+    const z0Surfaces = [];
+    eachItem(geometry,
+             item => {
+               if (item.z0Surface) {
+                 z0Surfaces.push(item.z0Surface);
+               }
+             });
+    return z0Surfaces;
+  };
+
   const intersection$4 = (...geometries) => {
     const assembly = { assembly: geometries };
     const pathsData = filterAndFlattenAssemblyData({ form: 'paths' }, assembly);
@@ -16520,24 +16264,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       intersectioned.assembly.push({ z0Surface: intersection$2(...z0SurfaceData) });
     }
     return intersectioned;
-  };
-
-  const toComponents = ({ requires, excludes }, geometry) => {
-    const components = [];
-
-    const walk = (geometry) => {
-      for (const item of geometry.assembly) {
-        if (hasMatchingTag(excludes, item.tags)) {
-          continue;
-        } else if (hasMatchingTag(requires, item.tags, true)) {
-          components.push(item);
-        } else if (item.assembly !== undefined) {
-          walk(item);
-        }
-      }
-    };
-    walk(geometry);
-    return components;
   };
 
   const differenceItems = (base, ...subtractions) => {
@@ -16569,6 +16295,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     if (geometry.assembly === undefined) {
       // A singleton is disjoint.
       return geometry;
+    } else if (geometry.disjointGeometry) {
+      return geometry.disjointGeometry;
     } else {
       const subtractions = [];
       const walk = (geometry, disjointed) => {
@@ -16585,14 +16313,38 @@ define("./webworker.js",['require'], function (require) { 'use strict';
         return disjointed;
       };
       const result = walk(geometry, { assembly: [], tags: geometry.tags });
+      geometry.disjointGeometry = result;
       return result;
     }
+  };
+
+  const toComponents = ({ requires, excludes }, geometry) => {
+    const components = [];
+    const walk = (geometry) => {
+      for (const item of geometry.assembly) {
+        if (hasMatchingTag(excludes, item.tags)) {
+          continue;
+        } else if (hasMatchingTag(requires, item.tags, true)) {
+          components.push(item);
+        } else if (item.assembly !== undefined) {
+          walk(item);
+        }
+      }
+    };
+    walk(toDisjointGeometry(geometry));
+    return components;
   };
 
   const toPaths = ({ requires, excludes }, assembly) =>
     ({
       paths: union(...filterAndFlattenAssemblyData({ requires, excludes, form: 'paths' }, toDisjointGeometry(assembly)))
     });
+
+  const toPoints = (options = {}, geometry) => {
+    const points = [];
+    eachPoint$5(options, point => points.push(point), geometry);
+    return { points };
+  };
 
   const toSolid = ({ requires, excludes }, assembly) =>
     ({
@@ -22334,11 +22086,15 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
 
     eachPoint (options = {}, operation) {
-      return eachPoint$4(options, operation, toGeometry(this));
+      return eachPoint$5(options, operation, toGeometry(this));
     }
 
     toGeometry (options = {}) {
       return this.geometry;
+    }
+
+    toPoints (options = {}) {
+      return fromGeometry(toPoints(options, toGeometry(this)));
     }
 
     toPaths (options = {}) {
@@ -22358,7 +22114,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
 
     toComponents (options) {
-      return toComponents(toGeometry(this));
+      return toComponents(options, toGeometry(this)).map(fromGeometry);
     }
 
     transform (matrix) {
@@ -22387,7 +22143,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
 
     close () {
-      const geometry = this.toPaths().toDisjointGeometry();
+      const geometry = this.toGeometry();
       if (!isSingleOpenPath(geometry)) {
         throw Error('Close requires a single open path.');
       }
@@ -22397,7 +22153,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     concat (...shapes) {
       const paths = [];
       for (const shape of [this, ...shapes]) {
-        const geometry = shape.toPaths().toDisjointGeometry();
+        const geometry = shape.toGeometry();
         if (!isSingleOpenPath(geometry)) {
           throw Error('Concatenation requires single open paths.');
         }
@@ -22431,7 +22187,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
 
     toComponents (options = {}) {
-      return toLazyGeometry(this).toComponents(options);
+      return toLazyGeometry(this).toComponents(options).map(Shape.fromLazyGeometry);
     }
 
     toDisjointGeometry (options = {}) {
@@ -22442,20 +22198,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       return toLazyGeometry(this).toGeometry(options);
     }
 
-    toPaths (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));
-    }
-
     toPoints (options = {}) {
       return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));
-    }
-
-    toSolid (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toSolid(options));
-    }
-
-    toZ0Surface (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toZ0Surface(options));
     }
 
     transform (matrix) {
@@ -22464,6 +22208,11 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
     union (...shapes) {
       return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
+    }
+
+    withComponents (options = {}) {
+      const components = this.toComponents(options);
+      return assembleLazily(...components);
     }
   }
   const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
@@ -22480,18 +22229,141 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
 
   const intersectionLazily = (shape, ...shapes) =>
-    Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));
+    Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry)));
 
-  Shape.fromClosedPath = (path) => new Shape(fromGeometry({ paths: [close(path)] }));
-  Shape.fromGeometry = (geometry) => new Shape(fromGeometry(geometry));
+  Shape.fromClosedPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [close(path)] }));
+  Shape.fromGeometry = (geometry) => Shape.fromLazyGeometry(fromGeometry(geometry));
   Shape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);
-  Shape.fromOpenPath = (path) => new Shape(fromGeometry({ paths: [open(path)] }));
-  Shape.fromPaths = (paths) => new Shape(fromGeometry({ paths: paths }));
-  Shape.fromPathToZ0Surface = (path) => new Shape(fromGeometry({ z0Surface: [path] }));
-  Shape.fromPathsToZ0Surface = (paths) => new Shape(fromGeometry({ z0Surface: paths }));
-  Shape.fromPolygonsToSolid = (polygons) => new Shape(fromGeometry({ solid: fromPolygons({}, polygons) }));
-  Shape.fromPolygonsToZ0Surface = (polygons) => new Shape(fromGeometry({ z0Surface: polygons }));
-  Shape.fromSurfaces = (surfaces) => new Shape(fromGeometry({ solid: surfaces }));
+  Shape.fromOpenPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [open(path)] }));
+  Shape.fromPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [path] }));
+  Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometry({ paths: paths }));
+  Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: [path] }));
+  Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: paths }));
+  Shape.fromPoint = (point) => Shape.fromLazyGeometry(fromGeometry({ points: [point] }));
+  Shape.fromPoints = (points) => Shape.fromLazyGeometry(fromGeometry({ points: points }));
+  Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometry({ solid: fromPolygons({}, polygons) }));
+  Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: polygons }));
+  Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometry({ solid: surfaces }));
+  Shape.fromSolid = (solid) => Shape.fromLazyGeometry(fromGeometry({ solid: solid }));
+
+  /**
+   *
+   * # Measure Bounding Box
+   *
+   * Provides the corners of the smallest orthogonal box containing the shape.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere(7)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * (
+   *  ([corner1, corner2]) => cube({ corner1, corner2})
+   * )(sphere(7).measureBoundingBox())
+   * ```
+   * :::
+   **/
+
+  const measureBoundingBox$2 = (shape) => {
+    let minPoint = [Infinity, Infinity, Infinity];
+    let maxPoint = [-Infinity, -Infinity, -Infinity];
+    shape.eachPoint({},
+                    (point) => {
+                      minPoint = min(minPoint, point);
+                      maxPoint = max(maxPoint, point);
+                    });
+    return [minPoint, maxPoint];
+  };
+
+  const method = function () { return measureBoundingBox$2(this); };
+
+  Shape.prototype.measureBoundingBox = method;
+
+  const translate$1 = ([x = 0, y = 0, z = 0], shape) => {
+    return shape.transform(fromTranslation([x, y, z]));
+  };
+
+  const method$1 = function (vector) {
+    return translate$1(vector, this);
+  };
+
+  Shape.prototype.translate = method$1;
+
+  /**
+   *
+   * # Above
+   *
+   * Moves the shape so that it is just above the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cube(10).above(),
+   *          cylinder(2, 15).rotateY(90))
+   * ```
+   * :::
+   **/
+
+  const Z$1 = 2;
+
+  const above = (shape) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    return translate$1(negate([0, 0, minPoint[Z$1]]), shape);
+  };
+
+  const method$2 = function () { return above(this); };
+
+  Shape.prototype.above = method$2;
+
+  /**
+   *
+   * # Arc Cosine
+   *
+   * Gives the arc cosine converted to degrees.
+   * ```
+   * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
+   *
+   * acos(0) = 90
+   * acos(0.5) = 60
+   * acos(1) = 0
+   * ```
+   *
+   **/
+
+  /**
+   *
+   * # Assemble
+   *
+   * Produces an assembly of shapes that can be manipulated as a single shape.
+   *
+   * ::: illustration { "view": { "position": [80, 80, 80] } }
+   * ```
+   * assemble(circle(20).translate([0, 0, -12]),
+   *          square(40).translate([0, 0, 16]).outline(),
+   *          cylinder(10, 20));
+   * ```
+   * :::
+   *
+   * Components of the assembly can be extracted by tag filtering.
+   *
+   * Components later in the assembly project holes into components earlier in the assembly so that the geometries are disjoint.
+   *
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          cylinder(10, 40).above().as('cylinder'))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          cylinder(10, 40).above().as('cylinder'))
+   *   .toComponents({ requires: ['cube'] })[0]
+   * ```
+   * :::
+   *
+   **/
 
   const assemble$1 = (...params) => {
     switch (params.length) {
@@ -22507,34 +22379,80 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const method = function (...shapes) { return assemble$1(this, ...shapes); };
+  const method$3 = function (...shapes) { return assemble$1(this, ...shapes); };
 
-  Shape.prototype.assemble = method;
+  Shape.prototype.assemble = method$3;
 
-  const measureBoundingBox$2 = (shape) => {
-    let minPoint = [Infinity, Infinity, Infinity];
-    let maxPoint = [-Infinity, -Infinity, -Infinity];
-    shape.eachPoint({},
-                    (point) => {
-                      minPoint = min(minPoint, point);
-                      maxPoint = max(maxPoint, point);
-                    });
-    return [minPoint, maxPoint];
+  /**
+   *
+   * # Back
+   *
+   * Moves the shape so that it is just behind the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
+   *          cube(10).back())
+   * ```
+   * :::
+   **/
+
+  const Y$1 = 1;
+
+  const back = (shape) => {
+    const [, maxPoint] = measureBoundingBox$2(shape);
+    return translate$1(negate([0, maxPoint[Y$1], 0]), shape);
   };
 
-  const method$1 = function () { return measureBoundingBox$2(this); };
+  const method$4 = function () { return back(this); };
 
-  Shape.prototype.measureBoundingBox = method$1;
+  Shape.prototype.back = method$4;
 
-  const translate$1 = ([x = 0, y = 0, z = 0], shape) => {
-    return shape.transform(fromTranslation([x, y, z]));
+  /**
+   *
+   * # Below
+   *
+   * Moves the shape so that it is just below the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 10] } }
+   * ```
+   * assemble(cylinder(2, 15).rotateY(90),
+   *          cube(10).below())
+   * ```
+   * :::
+   **/
+
+  const Z$2 = 2;
+
+  const below = (shape) => {
+    const [, maxPoint] = measureBoundingBox$2(shape);
+    return translate$1(negate([0, 0, maxPoint[Z$2]]), shape);
   };
 
-  const method$2 = function (vector) {
-    return translate$1(vector, this);
-  };
+  const method$5 = function () { return below(this); };
 
-  Shape.prototype.translate = method$2;
+  Shape.prototype.below = method$5;
+
+  /**
+   *
+   * # Center
+   *
+   * Moves the shape so that it is centered on the origin.
+   *
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * cube({ corner1: [30, -30, 10],
+   *        corner2: [10, -10, 0] })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * cube({ corner1: [30, -30, 10],
+   *        corner2: [10, -10, 0] })
+   *   .center()
+   * ```
+   * :::
+   **/
 
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$2(shape);
@@ -22542,16 +22460,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return translate$1(negate(center), shape);
   };
 
-  const method$3 = function () { return center(this); };
+  const method$6 = function () { return center(this); };
 
-  Shape.prototype.center = method$3;
-
-  const assertBoolean = (value) => {
-    if (typeof value !== 'boolean') {
-      throw Error(`Not a boolean: ${value}`);
-    }
-    return true;
-  };
+  Shape.prototype.center = method$6;
 
   const assertEmpty = (value) => {
     if (value.length === undefined) {
@@ -22563,79 +22474,14 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return true;
   };
 
-  const assertSingle = (value) => {
-    if (value.length === undefined) {
-      throw Error(`Has no length: ${value}`);
-    }
-    if (value.length !== 1) {
-      throw Error(`Is not single: ${value}`);
-    }
-    return true;
-  };
-
-  const assertNumber = (value) => {
-    if (typeof value !== 'number') {
-      throw Error(`Not a number: ${value}`);
+  const assertNumber = (...values) => {
+    for (const value of values) {
+      if (typeof value !== 'number') {
+        throw Error(`Not a number: ${value}`);
+      }
     }
     return true;
   };
-
-  const buildCircle = ({ r = 1, fn = 32, center = false }) =>
-    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: fn })).scale(r);
-
-  /**
-   *
-   * circle();                        // openscad like
-   * circle(1);
-   * circle({r: 2, fn:5});            // fn = number of segments to approximate the circle
-   * circle({r: 3, center: true});    // center: false (default)
-   *
-   */
-  const circle = (...params) => {
-    // circle({ r: 3, center: true, fn: 5 });
-    try {
-      const { r, center = false, fn = 32 } = params[0];
-      assertNumber(r);
-      assertNumber(fn);
-      assertBoolean(center);
-      return buildCircle({ r: r, fn: fn, center: center });
-    } catch (e) {}
-
-    // circle(1);
-    try {
-      const [r] = params[0];
-      assertNumber(r);
-      return buildCircle({ r: r });
-    } catch (e) {}
-
-    // circle(1);
-    try {
-      assertEmpty(params);
-      return buildCircle({});
-    } catch (e) {}
-  };
-
-  const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-    const geometry = shape.toSolid().toDisjointGeometry();
-    const polygons = toPolygons({}, geometry.solid);
-    const triangles = toTriangles({}, polygons);
-    const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
-    return Shape.fromPathsToZ0Surface(paths);
-  };
-
-  const method$4 = function (options) { return crossSection(options, this); };
-
-  Shape.prototype.crossSection = method$4;
-
-  // Geometry construction.
-
-  const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
-
-  const difference$5 = (...params) => differenceLazily(...params);
-
-  const method$5 = function (...shapes) { return difference$5(this, ...shapes); };
-
-  Shape.prototype.difference = method$5;
 
   const dispatch = (name, ...dispatches) => {
     return (...params) => {
@@ -22654,14 +22500,236 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     };
   };
 
-  const fromHeight = ({ height }, shape) => {
-    const geometry = shape.toZ0Surface();
-    const extrusion = extrudeLinear({ height: height }, geometry.lazyGeometry.geometry.z0Surface);
-    const extrudedShape = Shape.fromPolygonsToSolid(extrusion).translate([0, 0, height / 2]);
-    return extrudedShape;
+  /**
+   *
+   * # Circle (disc)
+   *
+   * Circles are approximated as surfaces delimeted by regular polygons.
+   *
+   * Properly speaking what is produced here are discs.
+   * The circle perimeter can be extracted via outline().
+   *
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * circle()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle({ radius: 10,
+   *          resolution: 8 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle({ diameter: 20,
+   *          resolution: 16 })
+   * ```
+   * :::
+   **/
+
+  // FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified circle.
+  // Is this the most useful measure?
+
+  const unitCircle = ({ resolution = 32 }) =>
+    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: resolution }));
+
+  const fromValue = (radius) => unitCircle({ resolution: 32 }).scale(radius);
+
+  const fromRadius = ({ radius, resolution = 32 }) => unitCircle({ resolution }).scale(radius);
+
+  const fromDiameter = ({ diameter, resolution = 32 }) => unitCircle({ resolution }).scale(diameter / 2);
+
+  const circle = dispatch(
+    'circle',
+    // circle()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue(1);
+    },
+    // circle(2)
+    (value) => {
+      assertNumber(value);
+      return () => fromValue(value);
+    },
+    // circle({ radius: 2, resolution: 32 })
+    ({ radius, resolution }) => {
+      assertNumber(radius);
+      return () => fromRadius({ radius, resolution });
+    },
+    // circle({ diameter: 2, resolution: 32 })
+    ({ diameter, resolution }) => {
+      assertNumber(diameter);
+      return () => fromDiameter({ diameter, resolution });
+    });
+
+  circle.fromValue = fromValue;
+  circle.fromRadius = fromRadius;
+  circle.fromDiameter = fromDiameter;
+
+  /**
+   *
+   * # Cosine
+   *
+   * Gives the cosine in degrees.
+   * ```
+   * cos(a) => Math.cos(a / 360 * Math.PI * 2);
+   *
+   * cos(0) = 1
+   * cos(45) = 0.707
+   * cos(90) = 0
+   * ```
+   *
+   **/
+
+  /**
+   *
+   * # CrossSection
+   *
+   * Produces a cross-section of a solid as a surface.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * difference(cylinder(10, 10),
+   *            cylinder(8, 10))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(sphere(10),
+   *            sphere(8))
+   *   .crossSection()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(sphere(10),
+   *            sphere(8))
+   *   .crossSection()
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
+    const solids = getSolids(shape.toGeometry());
+    const shapes = [];
+    for (const solid of solids) {
+      const polygons = toPolygons({}, solid);
+      const triangles = toTriangles({}, polygons);
+      const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
+      shapes.push(Shape.fromPathsToZ0Surface(paths));
+    }
+    return assemble$1(...shapes);
   };
 
-  const extrude = dispatch(
+  const method$7 = function (options) { return crossSection(options, this); };
+
+  Shape.prototype.crossSection = method$7;
+
+  /**
+   *
+   * # Cube (cuboid)
+   *
+   * Generates cuboids.
+   *
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube({ radius: 8 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube({ diameter: 16 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube({ corner1: [0, 0, 0],
+   *        corner2: [10, 10, 10] })
+   * ```
+   * :::
+   *
+   **/
+
+  // Geometry construction.
+
+  const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
+
+  /**
+   *
+   * # Difference
+   *
+   * Difference produces a version of the first shape with the remaining shapes removed, where applicable.
+   * Different kinds of shapes do not interact. e.g., you cannot subtract a surface from a solid.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * difference(cube(10, 10).below(),
+   *            cube(5, 10).below())
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(2.5))
+   * ```
+   * :::
+   *
+   **/
+
+  const difference$5 = (...params) => differenceLazily(...params);
+
+  const method$8 = function (...shapes) { return difference$5(this, ...shapes); };
+
+  Shape.prototype.difference = method$8;
+
+  /**
+   *
+   * # Extrude
+   *
+   * Generates a solid from a surface.
+   *
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(8))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * difference(circle(10),
+   *            circle(8))
+   *   .extrude({ height: 10 })
+   * ```
+   * :::
+   *
+   **/
+
+  const fromHeight = ({ height }, shape) => {
+    const z0Surfaces = getZ0Surfaces(shape.toGeometry());
+    const solids = z0Surfaces.map(z0Surface => extrude({ height: height }, z0Surface));
+    const assembly = assemble$1(...solids.map(Shape.fromSolid));
+    return assembly;
+  };
+
+  const extrude$1 = dispatch(
     'extrude',
     ({ height }, shape) => {
       assertNumber(height);
@@ -22669,9 +22737,49 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   );
 
-  const method$6 = function (options) { return extrude(options, this); };
+  const method$9 = function (options) { return extrude$1(options, this); };
 
-  Shape.prototype.extrude = method$6;
+  Shape.prototype.extrude = method$9;
+
+  /**
+   *
+   * # Front
+   *
+   * Moves the shape so that it is just before the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
+   *          cube(10).front())
+   * ```
+   * :::
+   **/
+
+  const Y$2 = 1;
+
+  const front = (shape) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    return translate$1(negate([0, minPoint[Y$2], 0]), shape);
+  };
+
+  const method$a = function () { return front(this); };
+
+  Shape.prototype.front = method$a;
+
+  /**
+   *
+   * # Hull
+   *
+   * Builds the convex hull of a set of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(point([0, 0, 10]),
+   *      circle(10))
+   * ```
+   * :::
+   *
+   **/
 
   const hull = (...geometries) => {
     // FIX: Support z0Surface hulling.
@@ -22680,11 +22788,34 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
   };
 
+  /**
+   *
+   * # Intersection
+   *
+   * Intersection produces a version of the first shape retaining only the parts included in the remaining shapes.
+   *
+   * Different kinds of shapes do not interact. e.g., you cannot intersect a surface and a solid.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * intersection(cube(12),
+   *              sphere(8))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * intersection(circle(10).translate([-5]),
+   *              circle(10).translate([5]))
+   * ```
+   * :::
+   *
+   **/
+
   const intersection$5 = (...params) => intersectionLazily(...params);
 
-  const method$7 = function (...shapes) { return intersection$5(this, ...shapes); };
+  const method$b = function (...shapes) { return intersection$5(this, ...shapes); };
 
-  Shape.prototype.intersection = method$7;
+  Shape.prototype.intersection = method$b;
 
   const conversation = ({ agent, say }) => {
     let id = 0;
@@ -22697,7 +22828,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     };
     const hear = async (message) => {
       const { id, question, answer, error } = message;
-      if (answer) {
+      // Check hasOwnProperty to detect undefined values.
+      if (message.hasOwnProperty('answer')) {
         const { resolve, reject } = openQuestions[id];
         if (error) {
           reject(error);
@@ -22705,7 +22837,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
           resolve(answer);
         }
         delete openQuestions[id];
-      } else if (question) {
+      } else if (message.hasOwnProperty('question')) {
         const answer = await agent({ ask, question });
         say({ id, answer });
       } else {
@@ -22714,23 +22846,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     };
     return { ask, hear };
   };
-
-  const files = {};
-  const fileCreationWatchers = [];
-
-  const getFile = (path) => {
-    let file = files[path];
-    if (file === undefined) {
-      file = { path: path, watchers: [] };
-      files[path] = file;
-      for (const watcher of fileCreationWatchers) {
-        watcher(file);
-      }
-    }
-    return file;
-  };
-
-  const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);
 
   // Inlined browser-or-node@1.2.1 due to es6 importing issue.
 
@@ -22746,11 +22861,103 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 
+  /* global Worker */
+
+  // Sets up a worker with conversational interface.
+  const createService = async ({ nodeWorker, webWorker, agent }) => {
+    if (isNode) {
+      // const { Worker } = await import('worker_threads');
+      const { Worker } = require('worker_threads');
+      const worker = new Worker(nodeWorker);
+      const say = (message) => worker.postMessage(message);
+      const { ask, hear } = conversation({ agent, say });
+      const stop = async () => {
+        return new Promise((resolve, reject) => {
+          worker.terminate((err, exitCode) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(exitCode);
+            }
+          });
+        });
+      };
+      worker.on('message', hear);
+      return { ask, stop };
+    } else if (isBrowser) {
+      const worker = new Worker(webWorker);
+      const say = (message) => worker.postMessage(message);
+      const { ask, hear } = conversation({ agent, say });
+      worker.onmessage = ({ data }) => hear(data);
+      return { ask };
+    } else {
+      throw Error('die');
+    }
+  };
+
+  var empty = {};
+
+  var fs = /*#__PURE__*/Object.freeze({
+    'default': empty
+  });
+
+  // Copyright Joyent, Inc. and other Node contributors.
+
+  // Split a filename into [root, dir, basename, ext], unix version
+  // 'root' is just a slash, or nothing.
+  var splitPathRe =
+      /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+  var splitPath = function(filename) {
+    return splitPathRe.exec(filename).slice(1);
+  };
+
+  function dirname(path) {
+    var result = splitPath(path),
+        root = result[0],
+        dir = result[1];
+
+    if (!root && !dir) {
+      // No dirname whatsoever
+      return '.';
+    }
+
+    if (dir) {
+      // It has a dirname, strip trailing slash
+      dir = dir.substr(0, dir.length - 1);
+    }
+
+    return root + dir;
+  }
+
+  const files = {};
+  const fileCreationWatchers = [];
+
+  const getFile = (options, path) => {
+    let file = files[path];
+    if (file === undefined) {
+      file = { path: path, watchers: [] };
+      files[path] = file;
+      for (const watcher of fileCreationWatchers) {
+        watcher(options, file);
+      }
+    }
+    return file;
+  };
+
+  const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);
+
+  /* global self */
+
+  const { promises } = fs;
+
   const writeFile = async (options, path, data) => {
+    if (isWebWorker) {
+      return self.ask({ writeFile: { options, path, data: await data } });
+    }
     const { ephemeral } = options;
 
     data = await data;
-    const file = getFile(path);
+    const file = getFile(options, path);
     file.data = data;
 
     for (const watcher of file.watchers) {
@@ -22759,29 +22966,36 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
     if (!ephemeral) {
       if (isNode) {
-        const fs = await new Promise(function (resolve, reject) { require(['./fs-b077e889'], resolve, reject) });
-        let result = await fs.promises.writeFile(path, data);
-        return result;
+        try {
+          await promises.mkdir(dirname(path), { recursive: true });
+        } catch (error) {
+          console.log(`QQ/mkdir: ${error.toString()}`);
+        }
+        return promises.writeFile(path, data);
       }
     }
   };
 
-  const log = (text) => writeFile({ ephemeral: true }, 'console/out', text);
+  const log$1 = (text) => writeFile({ ephemeral: true }, 'console/out', text);
+
+  var nodeFetch = {};
+
+  /* global self */
+
+  const { promises: promises$1 } = fs;
 
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
       return window.fetch;
     } else {
-      const module = await new Promise(function (resolve, reject) { require(['./node-fetch-b077e889'], resolve, reject) });
-      return module.default;
+      return nodeFetch;
     }
   };
 
   const getFileFetcher = async () => {
     if (isNode) {
       // FIX: Put this through getFile, also.
-      const fs = await new Promise(function (resolve, reject) { require(['./fs-b077e889'], resolve, reject) });
-      return fs.promises.readFile;
+      return promises$1.readFile;
     } else if (isBrowser) {
       // This will always fail, but maybe it should use local storage.
       return () => {};
@@ -22808,7 +23022,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     // Try to load the data from a source.
     for (const source of sources) {
       if (source.url !== undefined) {
-        log(`# Fetching ${source.url}`);
+        log$1(`# Fetching ${source.url}`);
         const response = await fetchUrl(source.url);
         if (response.ok) {
           const data = await response.text();
@@ -22817,7 +23031,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       } else if (source.file !== undefined) {
         try {
           const data = await fetchFile(source.file);
-          return data;
+          if (data !== undefined) {
+            return data;
+          }
         } catch (e) {}
       } else {
         throw Error('die');
@@ -22826,13 +23042,26 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   };
 
   const readFile = async (options, path) => {
+    const { ephemeral, decode } = options;
+    if (isWebWorker) {
+      return self.ask({ readFile: { options, path } });
+    }
     const { sources = [] } = options;
-    const file = getFile(path);
+    const file = getFile(options, path);
     if (file.data === undefined) {
       file.data = await fetchPersistent(path);
+      if (file.data !== undefined) {
+        if (decode !== undefined && Buffer.isBuffer(file.data)) {
+          file.data = file.data.toString(decode);
+        }
+      }
     }
     if (file.data === undefined) {
       file.data = await fetchSources(sources);
+      if (!ephemeral) {
+        // Update persistent storage.
+        await writeFile(options, path, file.data);
+      }
     }
     if (file.data !== undefined) {
       if (file.data.then) {
@@ -22843,18 +23072,64 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return file.data;
   };
 
-  const watchFile = (path, thunk) => getFile(path).watchers.push(thunk);
+  const watchFile = (path, thunk) => getFile({}, path).watchers.push(thunk);
 
 
 
   var sys = /*#__PURE__*/Object.freeze({
+    createService: createService,
     conversation: conversation,
-    log: log,
+    log: log$1,
     readFile: readFile,
     watchFile: watchFile,
     watchFileCreation: watchFileCreation,
     writeFile: writeFile
   });
+
+  /**
+   *
+   * # Max
+   *
+   * Produces the maximum of a series of numbers.
+   *
+   * ```
+   * max(1, 2, 3, 4) == 4
+   * ```
+   *
+   **/
+
+  /**
+   *
+   * # Outline
+   *
+   * Generates the outline of a surface.
+   *
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(2).translate([-4]),
+   *            circle(2).translate([4]))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(2).translate([-4]),
+   *            circle(2).translate([4]))
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const outline = (options = {}, shape) => {
+    // FIX: Handle non-z0surfaces.
+    return Shape.fromPaths(union$2(...getZ0Surfaces(shape.toGeometry())));
+  };
+
+  const method$c = function (options) { return outline(options, this); };
+
+  Shape.prototype.outline = method$c;
 
   const ensureMapElement = (map, key, ensurer = (_ => [])) => {
     if (!map.has(key)) {
@@ -23331,32 +23606,43 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     `endloop\n` +
     `endfacet`;
 
+  const X$1 = 0;
+
+  const right = (shape) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    return translate$1(negate([minPoint[X$1], 0, 0]), shape);
+  };
+
+  const method$d = function () { return right(this); };
+
+  Shape.prototype.right = method$d;
+
   const a2r = (angle) => angle * 0.017453292519943295;
 
   const rotate = ([x = 0, y = 0, z = 0], shape) =>
     shape.transform(multiply$1(fromZRotation(a2r(z)), multiply$1(fromYRotation(a2r(y)), fromXRotation(a2r(x)))));
 
-  const method$8 = function (angles) { return rotate(angles, this); };
+  const method$e = function (angles) { return rotate(angles, this); };
 
-  Shape.prototype.rotate = method$8;
+  Shape.prototype.rotate = method$e;
 
   const rotateX = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$9 = function (angle) { return rotateX(angle, this); };
+  const method$f = function (angle) { return rotateX(angle, this); };
 
-  Shape.prototype.rotateX = method$9;
+  Shape.prototype.rotateX = method$f;
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$a = function (angle) { return rotateY(angle, this); };
+  const method$g = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$a;
+  Shape.prototype.rotateY = method$g;
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$b = function (angle) { return rotateZ(angle, this); };
+  const method$h = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$b;
+  Shape.prototype.rotateZ = method$h;
 
   const scale$2 = (factor, shape) => {
     if (factor.length) {
@@ -23368,60 +23654,40 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const method$c = function (factor) { return scale$2(factor, this); };
+  const method$i = function (factor) { return scale$2(factor, this); };
 
-  Shape.prototype.scale = method$c;
+  Shape.prototype.scale = method$i;
 
-  const buildSquare = ({ scale = [1, 1, 1] }) => {
-    const shape = Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 }));
-    const transformedShape = shape.rotateZ(45).scale(scale);
-    return transformedShape;
-  };
+  const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
+  const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale$1);
 
-  const decode = (params) => {
-    const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
+  const fromSize = ({ size }) => unitSquare().scale(size);
+  const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
 
-    // square({ size: [2,4], center: true }); // 2x4, center: false (default)
-    try {
-      const { size, center = false } = params[0];
-      const [length, width] = size;
-      assertNumber(length);
-      assertNumber(width);
-      assertBoolean(center);
-      return { scale: [edgeScale * length, edgeScale * width] };
-    } catch (e) {}
-
-    // square([2,4]}); // 2x4, center: false (default)
-    try {
-      const [length, width] = params[0];
-      assertNumber(length);
-      assertNumber(width);
-      return { scale: [edgeScale * length, edgeScale * width] };
-    } catch (e) {}
-    // square(1); // 2x4, center: false (default)
-    try {
-      const [length] = params;
-      assertNumber(length);
-      assertSingle(params);
-      return { scale: [edgeScale * length, edgeScale * length] };
-    } catch (e) {}
+  const square = dispatch(
+    'square',
     // square()
-    try {
-      assertEmpty(params);
-      return {};
-    } catch (e) {}
-    throw Error(`Unsupported interface for square: ${JSON.stringify(params)}`);
-  };
-
-  /**
-   *
-   * square();                                   // openscad like
-   * square(1);                                  // 1x1
-   * square([2,3]);                              // 2x3
-   * square({size: [2,4], center: true});        // 2x4, center: false (default)
-   *
-   */
-  const square = (...params) => buildSquare(decode(params));
+    (...args) => {
+      assertEmpty(args);
+      return () => fromSize({ size: 1 });
+    },
+    // square(4)
+    (size) => {
+      assertNumber(size);
+      return () => fromSize({ size });
+    },
+    // square({ size: 4 })
+    ({ size }) => {
+      assertNumber(size);
+      return () => fromSize({ size });
+    },
+    // square({ size: [4, 5] })
+    ({ size }) => {
+      const [width, length, ...rest] = size;
+      assertNumber(width, length);
+      assertEmpty(rest);
+      return () => fromDimensions({ width, length });
+    });
 
   const union$5 = (...params) => {
     switch (params.length) {
@@ -23437,9 +23703,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const method$d = function (...shapes) { return union$5(this, ...shapes); };
+  const method$j = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$d;
+  Shape.prototype.union = method$j;
 
   const toGeometry$1 = ({ disjoint = true }, shape) => {
     if (disjoint) {
@@ -23452,22 +23718,22 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writeStl = async (options, shape) => {
     const { path } = options;
     const geometry = toGeometry$1(options, shape);
-    return writeFile({ geometry }, path, toStl(options, geometry));
+    return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$e = function (options = {}) { writeStl(options, this); return this; };
+  const method$k = function (options = {}) { writeStl(options, this); return this; };
 
-  Shape.prototype.writeStl = method$e;
+  Shape.prototype.writeStl = method$k;
 
   const writeSvg = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toSvg(options, geometry));
+    return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$f = function (options = {}) { writeSvg(options, this); return this; };
+  const method$l = function (options = {}) { writeSvg(options, this); return this; };
 
-  Shape.prototype.writeSvg = method$f;
+  Shape.prototype.writeSvg = method$l;
 
   // Polyfills
 
@@ -73406,8 +73672,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     SVGObject.prototype.constructor = SVGObject;
 
     const SVGRenderer = function () {
-    	console.log('THREE.SVGRenderer', THREE.REVISION);
-
     	var _this = this;
     		var _renderData; var _elements; var _lights;
     		var _projector = new Projector();
@@ -73798,6 +74062,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return { SVGRenderer };
   };
 
+  const pointsToThreejsPoints = (geometry) => {
+    return geometry.points;
+  };
+
   const pathsToThreejsSegments = (geometry) => {
     const segments = [];
     for (const path of geometry) {
@@ -73831,7 +74099,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
         positions.push(...point);
       }
     };
-    for (const triangle of toTriangles({}, makeConvex$2({}, geometry))) {
+    for (const triangle of toTriangles({}, makeConvex$1({}, geometry))) {
       outputTriangle(triangle);
       outputTriangle(flip(triangle));
     }
@@ -73845,6 +74113,8 @@ define("./webworker.js",['require'], function (require) { 'use strict';
       return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };
     } else if (geometry.paths) {
       return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };
+    } else if (geometry.points) {
+      return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: geometry.tags, isThreejsGeometry: true };
     } else if (geometry.solid) {
       return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };
     } else if (geometry.z0Surface) {
@@ -73858,13 +74128,23 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const { SVGRenderer } = installSVGRenderer({ THREE: THREE$1, Projector: Projector$1, RenderableFace, RenderableLine, RenderableSprite, document: new domParser_3().parseFromString('<xml></xml>', 'text/xml') });
   // Bootstrap done.
 
-  const build$1 = ({ cameraPosition = [0, 0, 16], pageSize = [100, 100] }, geometry) => {
+  const build$1 = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
+    const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
     const [pageWidth, pageHeight] = pageSize;
     const camera = new PerspectiveCamera(27, pageWidth / pageHeight, 1, 3500);
-    [camera.position.x, camera.position.y, camera.position.z] = cameraPosition;
+    [camera.position.x, camera.position.y, camera.position.z] = position;
+    camera.up = new Vector3(...up);
+    camera.lookAt(...target);
     const scene = new Scene();
-    scene.background = new Color(0x050505);
+    scene.background = new Color(0xffffff);
     scene.add(camera);
+    if (grid) {
+      const grid = new GridHelper(100, 10, 'green', 'blue');
+      grid.material = new LineBasicMaterial({ color: 0x000000 });
+      grid.rotation.x = -Math.PI / 2;
+      // grid.material.transparent = true;
+      scene.add(grid);
+    }
     //
     var ambientLight = new AmbientLight(0x222222);
     scene.add(ambientLight);
@@ -73875,6 +74155,14 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     const walk = (geometry) => {
       if (geometry.assembly) {
         geometry.assembly.forEach(walk);
+      } else if (geometry.threejsPoints) {
+        const points = geometry.threejsPoints;
+        const threejsGeometry = new Geometry();
+        const material = new PointsMaterial({ color: 0x0000ff });
+        for (const [x, y, z] of points) {
+          threejsGeometry.vertices.push(new Vector3(x, y, z));
+        }
+        scene.add(new Points(threejsGeometry, material));
       } else if (geometry.threejsSegments) {
         const segments = geometry.threejsSegments;
         const threejsGeometry = new Geometry();
@@ -73904,7 +74192,9 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return [scene, camera];
   };
 
-  const toSvg$1 = async (options = {}, geometry) => {
+  const toSvg$1 = async (options = {}, geometry) => toSvgSync(options, geometry);
+
+  const toSvgSync = (options = {}, geometry) => {
     const [scene, camera] = build$1(options, geometry);
     const { pageSize = [500, 500] } = options;
     const [pageWidth, pageHeight] = pageSize;
@@ -73920,12 +74210,12 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writeSvgPhoto = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toSvg$1(options, geometry));
+    return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$g = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$m = function (options = {}) { writeSvgPhoto(options, this); return this; };
 
-  Shape.prototype.writeSvgPhoto = method$g;
+  Shape.prototype.writeSvgPhoto = method$m;
 
   /**
    *
@@ -76956,7 +77246,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return canonicalized;
   };
 
-  const eachPoint$5 = (options = {}, thunk, polygons) => {
+  const eachPoint$6 = (options = {}, thunk, polygons) => {
     for (const polygon of polygons) {
       for (const point of polygon) {
         thunk(point);
@@ -77008,7 +77298,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const measureBoundingBox$3 = (polygons) => {
     let max = polygons[0][0];
     let min = polygons[0][0];
-    eachPoint$5({},
+    eachPoint$6({},
               point => {
                 max = max$1(max, point);
                 min = min$1(min, point);
@@ -78106,770 +78396,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   var browser_6$1 = browser$3.storage;
   var browser_7$1 = browser$3.colors;
 
-  var isBuffer$2 = function isBuffer(arg) {
-    return arg instanceof Buffer;
-  };
-
-  var inherits_browser$1 = createCommonjsModule(function (module) {
-  if (typeof Object.create === 'function') {
-    // implementation from standard node.js 'util' module
-    module.exports = function inherits(ctor, superCtor) {
-      ctor.super_ = superCtor;
-      ctor.prototype = Object.create(superCtor.prototype, {
-        constructor: {
-          value: ctor,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      });
-    };
-  } else {
-    // old school shim for old browsers
-    module.exports = function inherits(ctor, superCtor) {
-      ctor.super_ = superCtor;
-      var TempCtor = function () {};
-      TempCtor.prototype = superCtor.prototype;
-      ctor.prototype = new TempCtor();
-      ctor.prototype.constructor = ctor;
-    };
-  }
-  });
-
-  var inherits$1 = createCommonjsModule(function (module) {
-  try {
-    var util = util$1;
-    if (typeof util.inherits !== 'function') throw '';
-    module.exports = util.inherits;
-  } catch (e) {
-    module.exports = inherits_browser$1;
-  }
-  });
-
-  var util$1 = createCommonjsModule(function (module, exports) {
-  // Copyright Joyent, Inc. and other Node contributors.
-  //
-  // Permission is hereby granted, free of charge, to any person obtaining a
-  // copy of this software and associated documentation files (the
-  // "Software"), to deal in the Software without restriction, including
-  // without limitation the rights to use, copy, modify, merge, publish,
-  // distribute, sublicense, and/or sell copies of the Software, and to permit
-  // persons to whom the Software is furnished to do so, subject to the
-  // following conditions:
-  //
-  // The above copyright notice and this permission notice shall be included
-  // in all copies or substantial portions of the Software.
-  //
-  // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-  // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-  // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-  // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-  // USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-  var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
-    function getOwnPropertyDescriptors(obj) {
-      var keys = Object.keys(obj);
-      var descriptors = {};
-      for (var i = 0; i < keys.length; i++) {
-        descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
-      }
-      return descriptors;
-    };
-
-  var formatRegExp = /%[sdj%]/g;
-  exports.format = function(f) {
-    if (!isString(f)) {
-      var objects = [];
-      for (var i = 0; i < arguments.length; i++) {
-        objects.push(inspect(arguments[i]));
-      }
-      return objects.join(' ');
-    }
-
-    var i = 1;
-    var args = arguments;
-    var len = args.length;
-    var str = String(f).replace(formatRegExp, function(x) {
-      if (x === '%%') return '%';
-      if (i >= len) return x;
-      switch (x) {
-        case '%s': return String(args[i++]);
-        case '%d': return Number(args[i++]);
-        case '%j':
-          try {
-            return JSON.stringify(args[i++]);
-          } catch (_) {
-            return '[Circular]';
-          }
-        default:
-          return x;
-      }
-    });
-    for (var x = args[i]; i < len; x = args[++i]) {
-      if (isNull(x) || !isObject(x)) {
-        str += ' ' + x;
-      } else {
-        str += ' ' + inspect(x);
-      }
-    }
-    return str;
-  };
-
-
-  // Mark that a method should not be used.
-  // Returns a modified function which warns once by default.
-  // If --no-deprecation is set, then it is a no-op.
-  exports.deprecate = function(fn, msg) {
-    if (typeof process !== 'undefined' && process.noDeprecation === true) {
-      return fn;
-    }
-
-    // Allow for deprecating things in the process of starting up.
-    if (typeof process === 'undefined') {
-      return function() {
-        return exports.deprecate(fn, msg).apply(this, arguments);
-      };
-    }
-
-    var warned = false;
-    function deprecated() {
-      if (!warned) {
-        {
-          console.error(msg);
-        }
-        warned = true;
-      }
-      return fn.apply(this, arguments);
-    }
-
-    return deprecated;
-  };
-
-
-  var debugs = {};
-  var debugEnviron;
-  exports.debuglog = function(set) {
-    if (isUndefined(debugEnviron))
-      debugEnviron = process.env.NODE_DEBUG || '';
-    set = set.toUpperCase();
-    if (!debugs[set]) {
-      if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-        var pid = process.pid;
-        debugs[set] = function() {
-          var msg = exports.format.apply(exports, arguments);
-          console.error('%s %d: %s', set, pid, msg);
-        };
-      } else {
-        debugs[set] = function() {};
-      }
-    }
-    return debugs[set];
-  };
-
-
-  /**
-   * Echos the value of a value. Trys to print the value out
-   * in the best way possible given the different types.
-   *
-   * @param {Object} obj The object to print out.
-   * @param {Object} opts Optional options object that alters the output.
-   */
-  /* legacy: obj, showHidden, depth, colors*/
-  function inspect(obj, opts) {
-    // default options
-    var ctx = {
-      seen: [],
-      stylize: stylizeNoColor
-    };
-    // legacy...
-    if (arguments.length >= 3) ctx.depth = arguments[2];
-    if (arguments.length >= 4) ctx.colors = arguments[3];
-    if (isBoolean(opts)) {
-      // legacy...
-      ctx.showHidden = opts;
-    } else if (opts) {
-      // got an "options" object
-      exports._extend(ctx, opts);
-    }
-    // set default options
-    if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
-    if (isUndefined(ctx.depth)) ctx.depth = 2;
-    if (isUndefined(ctx.colors)) ctx.colors = false;
-    if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
-    if (ctx.colors) ctx.stylize = stylizeWithColor;
-    return formatValue(ctx, obj, ctx.depth);
-  }
-  exports.inspect = inspect;
-
-
-  // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-  inspect.colors = {
-    'bold' : [1, 22],
-    'italic' : [3, 23],
-    'underline' : [4, 24],
-    'inverse' : [7, 27],
-    'white' : [37, 39],
-    'grey' : [90, 39],
-    'black' : [30, 39],
-    'blue' : [34, 39],
-    'cyan' : [36, 39],
-    'green' : [32, 39],
-    'magenta' : [35, 39],
-    'red' : [31, 39],
-    'yellow' : [33, 39]
-  };
-
-  // Don't use 'blue' not visible on cmd.exe
-  inspect.styles = {
-    'special': 'cyan',
-    'number': 'yellow',
-    'boolean': 'yellow',
-    'undefined': 'grey',
-    'null': 'bold',
-    'string': 'green',
-    'date': 'magenta',
-    // "name": intentionally not styling
-    'regexp': 'red'
-  };
-
-
-  function stylizeWithColor(str, styleType) {
-    var style = inspect.styles[styleType];
-
-    if (style) {
-      return '\u001b[' + inspect.colors[style][0] + 'm' + str +
-             '\u001b[' + inspect.colors[style][1] + 'm';
-    } else {
-      return str;
-    }
-  }
-
-
-  function stylizeNoColor(str, styleType) {
-    return str;
-  }
-
-
-  function arrayToHash(array) {
-    var hash = {};
-
-    array.forEach(function(val, idx) {
-      hash[val] = true;
-    });
-
-    return hash;
-  }
-
-
-  function formatValue(ctx, value, recurseTimes) {
-    // Provide a hook for user-specified inspect functions.
-    // Check that value is an object with an inspect function on it
-    if (ctx.customInspect &&
-        value &&
-        isFunction(value.inspect) &&
-        // Filter out the util module, it's inspect function is special
-        value.inspect !== exports.inspect &&
-        // Also filter out any prototype objects using the circular check.
-        !(value.constructor && value.constructor.prototype === value)) {
-      var ret = value.inspect(recurseTimes, ctx);
-      if (!isString(ret)) {
-        ret = formatValue(ctx, ret, recurseTimes);
-      }
-      return ret;
-    }
-
-    // Primitive types cannot have properties
-    var primitive = formatPrimitive(ctx, value);
-    if (primitive) {
-      return primitive;
-    }
-
-    // Look up the keys of the object.
-    var keys = Object.keys(value);
-    var visibleKeys = arrayToHash(keys);
-
-    if (ctx.showHidden) {
-      keys = Object.getOwnPropertyNames(value);
-    }
-
-    // IE doesn't make error fields non-enumerable
-    // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
-    if (isError(value)
-        && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
-      return formatError(value);
-    }
-
-    // Some type of object without properties can be shortcutted.
-    if (keys.length === 0) {
-      if (isFunction(value)) {
-        var name = value.name ? ': ' + value.name : '';
-        return ctx.stylize('[Function' + name + ']', 'special');
-      }
-      if (isRegExp(value)) {
-        return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-      }
-      if (isDate(value)) {
-        return ctx.stylize(Date.prototype.toString.call(value), 'date');
-      }
-      if (isError(value)) {
-        return formatError(value);
-      }
-    }
-
-    var base = '', array = false, braces = ['{', '}'];
-
-    // Make Array say that they are Array
-    if (isArray(value)) {
-      array = true;
-      braces = ['[', ']'];
-    }
-
-    // Make functions say that they are functions
-    if (isFunction(value)) {
-      var n = value.name ? ': ' + value.name : '';
-      base = ' [Function' + n + ']';
-    }
-
-    // Make RegExps say that they are RegExps
-    if (isRegExp(value)) {
-      base = ' ' + RegExp.prototype.toString.call(value);
-    }
-
-    // Make dates with properties first say the date
-    if (isDate(value)) {
-      base = ' ' + Date.prototype.toUTCString.call(value);
-    }
-
-    // Make error with message first say the error
-    if (isError(value)) {
-      base = ' ' + formatError(value);
-    }
-
-    if (keys.length === 0 && (!array || value.length == 0)) {
-      return braces[0] + base + braces[1];
-    }
-
-    if (recurseTimes < 0) {
-      if (isRegExp(value)) {
-        return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-      } else {
-        return ctx.stylize('[Object]', 'special');
-      }
-    }
-
-    ctx.seen.push(value);
-
-    var output;
-    if (array) {
-      output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
-    } else {
-      output = keys.map(function(key) {
-        return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
-      });
-    }
-
-    ctx.seen.pop();
-
-    return reduceToSingleString(output, base, braces);
-  }
-
-
-  function formatPrimitive(ctx, value) {
-    if (isUndefined(value))
-      return ctx.stylize('undefined', 'undefined');
-    if (isString(value)) {
-      var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                               .replace(/'/g, "\\'")
-                                               .replace(/\\"/g, '"') + '\'';
-      return ctx.stylize(simple, 'string');
-    }
-    if (isNumber(value))
-      return ctx.stylize('' + value, 'number');
-    if (isBoolean(value))
-      return ctx.stylize('' + value, 'boolean');
-    // For some reason typeof null is "object", so special case here.
-    if (isNull(value))
-      return ctx.stylize('null', 'null');
-  }
-
-
-  function formatError(value) {
-    return '[' + Error.prototype.toString.call(value) + ']';
-  }
-
-
-  function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
-    var output = [];
-    for (var i = 0, l = value.length; i < l; ++i) {
-      if (hasOwnProperty(value, String(i))) {
-        output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-            String(i), true));
-      } else {
-        output.push('');
-      }
-    }
-    keys.forEach(function(key) {
-      if (!key.match(/^\d+$/)) {
-        output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-            key, true));
-      }
-    });
-    return output;
-  }
-
-
-  function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-    var name, str, desc;
-    desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
-    if (desc.get) {
-      if (desc.set) {
-        str = ctx.stylize('[Getter/Setter]', 'special');
-      } else {
-        str = ctx.stylize('[Getter]', 'special');
-      }
-    } else {
-      if (desc.set) {
-        str = ctx.stylize('[Setter]', 'special');
-      }
-    }
-    if (!hasOwnProperty(visibleKeys, key)) {
-      name = '[' + key + ']';
-    }
-    if (!str) {
-      if (ctx.seen.indexOf(desc.value) < 0) {
-        if (isNull(recurseTimes)) {
-          str = formatValue(ctx, desc.value, null);
-        } else {
-          str = formatValue(ctx, desc.value, recurseTimes - 1);
-        }
-        if (str.indexOf('\n') > -1) {
-          if (array) {
-            str = str.split('\n').map(function(line) {
-              return '  ' + line;
-            }).join('\n').substr(2);
-          } else {
-            str = '\n' + str.split('\n').map(function(line) {
-              return '   ' + line;
-            }).join('\n');
-          }
-        }
-      } else {
-        str = ctx.stylize('[Circular]', 'special');
-      }
-    }
-    if (isUndefined(name)) {
-      if (array && key.match(/^\d+$/)) {
-        return str;
-      }
-      name = JSON.stringify('' + key);
-      if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-        name = name.substr(1, name.length - 2);
-        name = ctx.stylize(name, 'name');
-      } else {
-        name = name.replace(/'/g, "\\'")
-                   .replace(/\\"/g, '"')
-                   .replace(/(^"|"$)/g, "'");
-        name = ctx.stylize(name, 'string');
-      }
-    }
-
-    return name + ': ' + str;
-  }
-
-
-  function reduceToSingleString(output, base, braces) {
-    var length = output.reduce(function(prev, cur) {
-      if (cur.indexOf('\n') >= 0) ;
-      return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-    }, 0);
-
-    if (length > 60) {
-      return braces[0] +
-             (base === '' ? '' : base + '\n ') +
-             ' ' +
-             output.join(',\n  ') +
-             ' ' +
-             braces[1];
-    }
-
-    return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-  }
-
-
-  // NOTE: These type checking functions intentionally don't use `instanceof`
-  // because it is fragile and can be easily faked with `Object.create()`.
-  function isArray(ar) {
-    return Array.isArray(ar);
-  }
-  exports.isArray = isArray;
-
-  function isBoolean(arg) {
-    return typeof arg === 'boolean';
-  }
-  exports.isBoolean = isBoolean;
-
-  function isNull(arg) {
-    return arg === null;
-  }
-  exports.isNull = isNull;
-
-  function isNullOrUndefined(arg) {
-    return arg == null;
-  }
-  exports.isNullOrUndefined = isNullOrUndefined;
-
-  function isNumber(arg) {
-    return typeof arg === 'number';
-  }
-  exports.isNumber = isNumber;
-
-  function isString(arg) {
-    return typeof arg === 'string';
-  }
-  exports.isString = isString;
-
-  function isSymbol(arg) {
-    return typeof arg === 'symbol';
-  }
-  exports.isSymbol = isSymbol;
-
-  function isUndefined(arg) {
-    return arg === void 0;
-  }
-  exports.isUndefined = isUndefined;
-
-  function isRegExp(re) {
-    return isObject(re) && objectToString(re) === '[object RegExp]';
-  }
-  exports.isRegExp = isRegExp;
-
-  function isObject(arg) {
-    return typeof arg === 'object' && arg !== null;
-  }
-  exports.isObject = isObject;
-
-  function isDate(d) {
-    return isObject(d) && objectToString(d) === '[object Date]';
-  }
-  exports.isDate = isDate;
-
-  function isError(e) {
-    return isObject(e) &&
-        (objectToString(e) === '[object Error]' || e instanceof Error);
-  }
-  exports.isError = isError;
-
-  function isFunction(arg) {
-    return typeof arg === 'function';
-  }
-  exports.isFunction = isFunction;
-
-  function isPrimitive(arg) {
-    return arg === null ||
-           typeof arg === 'boolean' ||
-           typeof arg === 'number' ||
-           typeof arg === 'string' ||
-           typeof arg === 'symbol' ||  // ES6 symbol
-           typeof arg === 'undefined';
-  }
-  exports.isPrimitive = isPrimitive;
-
-  exports.isBuffer = isBuffer$2;
-
-  function objectToString(o) {
-    return Object.prototype.toString.call(o);
-  }
-
-
-  function pad(n) {
-    return n < 10 ? '0' + n.toString(10) : n.toString(10);
-  }
-
-
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-                'Oct', 'Nov', 'Dec'];
-
-  // 26 Feb 16:19:34
-  function timestamp() {
-    var d = new Date();
-    var time = [pad(d.getHours()),
-                pad(d.getMinutes()),
-                pad(d.getSeconds())].join(':');
-    return [d.getDate(), months[d.getMonth()], time].join(' ');
-  }
-
-
-  // log is just a thin wrapper to console.log that prepends a timestamp
-  exports.log = function() {
-    console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-  };
-
-
-  /**
-   * Inherit the prototype methods from one constructor into another.
-   *
-   * The Function.prototype.inherits from lang.js rewritten as a standalone
-   * function (not on Function.prototype). NOTE: If this file is to be loaded
-   * during bootstrapping this function needs to be rewritten using some native
-   * functions as prototype setup using normal JavaScript does not work as
-   * expected during bootstrapping (see mirror.js in r114903).
-   *
-   * @param {function} ctor Constructor function which needs to inherit the
-   *     prototype.
-   * @param {function} superCtor Constructor function to inherit prototype from.
-   */
-  exports.inherits = inherits$1;
-
-  exports._extend = function(origin, add) {
-    // Don't do anything if add isn't an object
-    if (!add || !isObject(add)) return origin;
-
-    var keys = Object.keys(add);
-    var i = keys.length;
-    while (i--) {
-      origin[keys[i]] = add[keys[i]];
-    }
-    return origin;
-  };
-
-  function hasOwnProperty(obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
-  }
-
-  var kCustomPromisifiedSymbol = typeof Symbol !== 'undefined' ? Symbol('util.promisify.custom') : undefined;
-
-  exports.promisify = function promisify(original) {
-    if (typeof original !== 'function')
-      throw new TypeError('The "original" argument must be of type Function');
-
-    if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
-      var fn = original[kCustomPromisifiedSymbol];
-      if (typeof fn !== 'function') {
-        throw new TypeError('The "util.promisify.custom" argument must be of type Function');
-      }
-      Object.defineProperty(fn, kCustomPromisifiedSymbol, {
-        value: fn, enumerable: false, writable: false, configurable: true
-      });
-      return fn;
-    }
-
-    function fn() {
-      var promiseResolve, promiseReject;
-      var promise = new Promise(function (resolve, reject) {
-        promiseResolve = resolve;
-        promiseReject = reject;
-      });
-
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      args.push(function (err, value) {
-        if (err) {
-          promiseReject(err);
-        } else {
-          promiseResolve(value);
-        }
-      });
-
-      try {
-        original.apply(this, args);
-      } catch (err) {
-        promiseReject(err);
-      }
-
-      return promise;
-    }
-
-    Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
-
-    if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
-      value: fn, enumerable: false, writable: false, configurable: true
-    });
-    return Object.defineProperties(
-      fn,
-      getOwnPropertyDescriptors(original)
-    );
-  };
-
-  exports.promisify.custom = kCustomPromisifiedSymbol;
-
-  function callbackifyOnRejected(reason, cb) {
-    // `!reason` guard inspired by bluebird (Ref: https://goo.gl/t5IS6M).
-    // Because `null` is a special error value in callbacks which means "no error
-    // occurred", we error-wrap so the callback consumer can distinguish between
-    // "the promise rejected with null" or "the promise fulfilled with undefined".
-    if (!reason) {
-      var newReason = new Error('Promise was rejected with a falsy value');
-      newReason.reason = reason;
-      reason = newReason;
-    }
-    return cb(reason);
-  }
-
-  function callbackify(original) {
-    if (typeof original !== 'function') {
-      throw new TypeError('The "original" argument must be of type Function');
-    }
-
-    // We DO NOT return the promise as it gives the user a false sense that
-    // the promise is actually somehow related to the callback's execution
-    // and that the callback throwing will reject the promise.
-    function callbackified() {
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-
-      var maybeCb = args.pop();
-      if (typeof maybeCb !== 'function') {
-        throw new TypeError('The last argument must be of type Function');
-      }
-      var self = this;
-      var cb = function() {
-        return maybeCb.apply(self, arguments);
-      };
-      // In true node style we process the callback on `nextTick` with all the
-      // implications (stack, `uncaughtException`, `async_hooks`)
-      original.apply(this, args)
-        .then(function(ret) { nextTick(cb, null, ret); },
-              function(rej) { nextTick(callbackifyOnRejected, rej, cb); });
-    }
-
-    Object.setPrototypeOf(callbackified, Object.getPrototypeOf(original));
-    Object.defineProperties(callbackified,
-                            getOwnPropertyDescriptors(original));
-    return callbackified;
-  }
-  exports.callbackify = callbackify;
-  });
-  var util_1$1 = util$1.format;
-  var util_2$1 = util$1.deprecate;
-  var util_3$1 = util$1.debuglog;
-  var util_4$1 = util$1.inspect;
-  var util_5$1 = util$1.isArray;
-  var util_6$1 = util$1.isBoolean;
-  var util_7$1 = util$1.isNull;
-  var util_8$1 = util$1.isNullOrUndefined;
-  var util_9$1 = util$1.isNumber;
-  var util_10$1 = util$1.isString;
-  var util_11$1 = util$1.isSymbol;
-  var util_12$1 = util$1.isUndefined;
-  var util_13$1 = util$1.isRegExp;
-  var util_14$1 = util$1.isObject;
-  var util_15$1 = util$1.isDate;
-  var util_16$1 = util$1.isError;
-  var util_17$1 = util$1.isFunction;
-  var util_18$1 = util$1.isPrimitive;
-  var util_19$1 = util$1.isBuffer;
-  var util_20$1 = util$1.log;
-  var util_21$1 = util$1.inherits;
-  var util_22$1 = util$1._extend;
-  var util_23$1 = util$1.promisify;
-  var util_24$1 = util$1.callbackify;
-
   var argv$1 = process.argv;
 
   var terminator = argv$1.indexOf('--');
@@ -78982,7 +78508,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    */
 
   function useColors() {
-    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty$1.isatty(process.stderr.fd);
+    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
   }
   /**
    * Adds ANSI color escape codes if enabled.
@@ -79019,7 +78545,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
 
   function log() {
-    return process.stderr.write(util$1.format.apply(util$1, arguments) + '\n');
+    return process.stderr.write(util.format.apply(util, arguments) + '\n');
   }
   /**
    * Save `namespaces`.
@@ -79074,7 +78600,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   formatters.o = function (v) {
     this.inspectOpts.colors = this.useColors;
-    return util$1.inspect(v, this.inspectOpts).replace(/\s*\n\s*/g, ' ');
+    return util.inspect(v, this.inspectOpts).replace(/\s*\n\s*/g, ' ');
   };
   /**
    * Map %O to `util.inspect()`, allowing multiple lines if needed.
@@ -79083,7 +78609,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   formatters.O = function (v) {
     this.inspectOpts.colors = this.useColors;
-    return util$1.inspect(v, this.inspectOpts);
+    return util.inspect(v, this.inspectOpts);
   };
   });
   var node_1$1 = node$1.init;
@@ -83694,79 +83220,76 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     `endloop\n` +
     `endfacet`;
 
-  /* global postMessage, onmessage:writable */
-
+  /* global postMessage, onmessage:writable, self */
 
   const say = (message) => postMessage(message);
-  // const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
   const agent = async ({ ask, question }) => {
+    try {
       var {key, values} = question;
-      try{
-          switch(key){
-              case "assemble":
-                  values = values.map(Shape.fromGeometry);
-                  return assemble$1(...values).toDisjointGeometry()
-                  break
-              case "circle":
-                  return circle({r: values[0], center: true, fn: values[1]}).toDisjointGeometry()
-                  break
-              case "rectangle":
-                  return square({size: [values[0],values[1]]}).toDisjointGeometry()
-                  break
-              case "hull":
-                  values = values.map(Shape.fromGeometry);
-                  return hull(...values).toDisjointGeometry()
-                  break
-              case "rotate":
-                  return rotate([values[1], values[2], values[3]], Shape.fromGeometry(values[0])).toDisjointGeometry()
-                  break
-              case "extrude":
-                  return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
-                  break
-              case "translate":
-                  return Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry()
-                  break
-              case "render":
-                  return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
-                  break
-              case "union":
-                  return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
-                  break
-              case "intersection":
-                  return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
-                  break
-              case "difference":
-                  return difference$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
-                  break
-              case "stretch":
-                  return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
-                  break
-              case "scale":
-                  return Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry()
-                  break
-              case "svg":
-                  const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
-                  return toSvg$2({}, crossSection)
-                  break
-              case "SVG Picture":
-                  const shape = Shape.fromGeometry(values[0]).center();
-                  const bounds = shape.measureBoundingBox();
-                  const cameraDistance = 6*Math.max(...bounds[1]);
-                  return toSvg$1({cameraPosition: [0, 0, cameraDistance]}, shape.rotate([-60, -45, 0]).toDisjointGeometry())
-              case "stl":
-                  return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
-                  break
-              default:
-                  return -1
-          }
+      switch(key){
+          case "assemble":
+              values = values.map(Shape.fromGeometry);
+              return assemble$1(...values).toDisjointGeometry()
+              break
+          case "circle":
+              return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
+              break
+          case "rectangle":
+              return square({size: [values[0],values[1]]}).toDisjointGeometry()
+              break
+          case "hull":
+              values = values.map(Shape.fromGeometry);
+              return hull(...values).toDisjointGeometry()
+              break
+          case "rotate":
+              return rotate([values[1], values[2], values[3]], Shape.fromGeometry(values[0])).toDisjointGeometry()
+              break
+          case "extrude":
+              return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
+              break
+          case "translate":
+              return Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry()
+              break
+          case "render":
+              return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
+              break
+          case "union":
+              return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+              break
+          case "intersection":
+              return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+              break
+          case "difference":
+              return difference$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
+              break
+          case "stretch":
+              return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
+              break
+          case "scale":
+              return Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry()
+              break
+          case "svg":
+              const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
+              return toSvg$2({}, crossSection)
+              break
+          case "SVG Picture":
+              const shape = Shape.fromGeometry(values[0]).center();
+              const bounds = shape.measureBoundingBox();
+              const cameraDistance = 6*Math.max(...bounds[1]);
+              return toSvg$1({cameraPosition: [0, 0, cameraDistance]}, shape.rotate([-60, -45, 0]).toDisjointGeometry())
+          case "stl":
+              return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
+              break
+          default:
+              return -1
       }
-      catch(err){
-          console.log(err);
-          return -1
-      }
+    }
+    catch(error){
+      console.log(err);
+    }
   };
-
-  const { hear } = conversation({ agent, say });
+  const { ask, hear } = conversation({ agent, say });
+  self.ask = ask;
   onmessage = ({ data }) => hear(data);
   if (onmessage === undefined) throw Error('die');
 

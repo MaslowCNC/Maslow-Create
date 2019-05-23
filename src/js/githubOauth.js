@@ -85,7 +85,8 @@ export default function GitHubModule(){
         
         
         this.projectsSpaceDiv = document.createElement("DIV")
-        this.projectsSpaceDiv.setAttribute("class", "float-left-div{")
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div")
+        this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
         popup.appendChild(this.projectsSpaceDiv)
         
         yoursButton.click()
