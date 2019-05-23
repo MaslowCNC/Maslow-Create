@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 export default class Circle extends Atom {
     
@@ -10,7 +11,6 @@ export default class Circle extends Atom {
         this.atomType = 'Circle'
         
         this.addIO('input', 'radius', this, 'number', 10)
-        this.addIO('input', 'max segment size', this, 'number', 1)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         this.setValues(values)
@@ -22,9 +22,8 @@ export default class Circle extends Atom {
     updateValue(){
         //Overwrite the normal update code block to update the number of segments also
         try{
-            const maximumSegmentSize = this.findIOValue('max segment size')
             const circumference  = 3.14*2*this.findIOValue('radius')
-            const numberOfSegments = parseInt( circumference / maximumSegmentSize )
+            const numberOfSegments = parseInt( circumference / GlobalVariables.circleSegmentSize )
             
             const values = [this.findIOValue('radius'), numberOfSegments]
             this.basicThreadValueProcessing(values, "circle")
