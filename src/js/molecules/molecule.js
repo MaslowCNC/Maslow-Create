@@ -54,6 +54,7 @@ export default class Molecule extends Atom{
         
         if (distFromClick < this.radius){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
+            GlobalVariables.currentMolecule.backgroundClick()
             clickProcessed = true
         }
         
@@ -206,6 +207,7 @@ export default class Molecule extends Atom{
         
         if(!GlobalVariables.currentMolecule.topLevel){
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
+            GlobalVariables.currentMolecule.backgroundClick()
         }
     }
     
@@ -322,7 +324,7 @@ export default class Molecule extends Atom{
     }
     
     placeAtom(newAtomObj, moleculeList, typesList, unlock){
-        //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
+        //Place the atom - note that types not listed in typesList will not be placed with no warning
         
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
