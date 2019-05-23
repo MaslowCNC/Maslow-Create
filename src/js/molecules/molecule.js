@@ -158,6 +158,8 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         
+        this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
+        
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
             //Add options to set all of the inputs
             this.inputs.forEach(child => {
