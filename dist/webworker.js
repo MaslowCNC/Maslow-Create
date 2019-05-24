@@ -490,63 +490,6 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {mat4} b the second operand
    * @returns {mat4} out
    */
-  const multiply$1 = (a, b) => {
-    const out = Array(16);
-    const a00 = a[0];
-    const a01 = a[1];
-    const a02 = a[2];
-    const a03 = a[3];
-    const a10 = a[4];
-    const a11 = a[5];
-    const a12 = a[6];
-    const a13 = a[7];
-    const a20 = a[8];
-    const a21 = a[9];
-    const a22 = a[10];
-    const a23 = a[11];
-    const a30 = a[12];
-    const a31 = a[13];
-    const a32 = a[14];
-    const a33 = a[15];
-
-    // Cache only the current line of the second matrix
-    let b0 = b[0];
-    let b1 = b[1];
-    let b2 = b[2];
-    let b3 = b[3];
-    out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
-    b0 = b[4];
-    b1 = b[5];
-    b2 = b[6];
-    b3 = b[7];
-    out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
-    b0 = b[8];
-    b1 = b[9];
-    b2 = b[10];
-    b3 = b[11];
-    out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
-    b0 = b[12];
-    b1 = b[13];
-    b2 = b[14];
-    b3 = b[15];
-    out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-    return out;
-  };
 
   /**
    * Calculates the absolute value of the give vector
@@ -15635,7 +15578,7 @@ define("./webworker.js",[],function () { 'use strict';
     return total;
   };
 
-  const multiply$2 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
+  const multiply$1 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
 
   const eachPoint$4 = (options = {}, thunk, solid) => {
     for (const surface of solid) {
@@ -16369,7 +16312,7 @@ define("./webworker.js",[],function () { 'use strict';
       transformed.points = transform$4(matrix, item.points);
     }
     if (item.solid) {
-      transformed.solid = multiply$2(matrix, item.solid);
+      transformed.solid = multiply$1(matrix, item.solid);
     }
     if (item.z0Surface) {
       // FIX: Handle transformations that take the surface out of z0.
@@ -22259,9 +22202,8 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    * ::: illustration { "view": { "position": [40, 40, 40] } }
    * ```
-   * (
-   *  ([corner1, corner2]) => cube({ corner1, corner2})
-   * )(sphere(7).measureBoundingBox())
+   * const [corner1, corner2] = sphere(7).measureBoundingBox();
+   * cube({ corner1, corner2 })
    * ```
    * :::
    **/
@@ -22984,6 +22926,28 @@ define("./webworker.js",[],function () { 'use strict';
 
   const { promises: promises$1 } = fs;
 
+  const dataAs = (as, data) => {
+    if (data !== undefined) {
+      switch (as) {
+        case 'utf8':
+          if (typeof data === 'string') {
+            return data;
+          } else if (Buffer.isBuffer(data)) {
+            const utf8 = data.toString('utf8');
+            return utf8;
+          }
+          break;
+        case 'bytes':
+          if (Buffer.isBuffer(data)) {
+            return data;
+          } else if (data instanceof ArrayBuffer) {
+            return new Uint8Array(data);
+          }
+          break;
+      }
+    }
+  };
+
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
       return window.fetch;
@@ -23006,17 +22970,17 @@ define("./webworker.js",[],function () { 'use strict';
 
   // Fetch from internal store.
   // FIX: Support browser local storage.
-  const fetchPersistent = async (path) => {
+  const fetchPersistent = async ({ as }, path) => {
     try {
       const fetchFile = await getFileFetcher();
       const data = await fetchFile(path);
-      return data;
+      return dataAs(as, data);
     } catch (e) {
     }
   };
 
   // Fetch from external sources.
-  const fetchSources = async (sources) => {
+  const fetchSources = async ({ as = 'utf8' }, sources) => {
     const fetchUrl = await getUrlFetcher();
     const fetchFile = await getFileFetcher();
     // Try to load the data from a source.
@@ -23025,14 +22989,18 @@ define("./webworker.js",[],function () { 'use strict';
         log$1(`# Fetching ${source.url}`);
         const response = await fetchUrl(source.url);
         if (response.ok) {
-          const data = await response.text();
-          return data;
+          switch (as) {
+            case 'utf8':
+              return dataAs(as, await response.text());
+            case 'bytes':
+              return dataAs(as, await response.arrayBuffer());
+          }
         }
       } else if (source.file !== undefined) {
         try {
           const data = await fetchFile(source.file);
           if (data !== undefined) {
-            return data;
+            return dataAs(as, data);
           }
         } catch (e) {}
       } else {
@@ -23042,22 +23010,19 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const readFile = async (options, path) => {
-    const { ephemeral, decode } = options;
+    const { ephemeral, as = 'utf8' } = options;
     if (isWebWorker) {
       return self.ask({ readFile: { options, path } });
     }
     const { sources = [] } = options;
     const file = getFile(options, path);
-    if (file.data === undefined) {
-      file.data = await fetchPersistent(path);
-      if (file.data !== undefined) {
-        if (decode !== undefined && Buffer.isBuffer(file.data)) {
-          file.data = file.data.toString(decode);
-        }
-      }
+    if (file.data === undefined || file.as !== as) {
+      file.data = await fetchPersistent({ as }, path);
+      file.as = as;
     }
-    if (file.data === undefined) {
-      file.data = await fetchSources(sources);
+    if (file.data === undefined || file.as !== as) {
+      file.data = await fetchSources({ as }, sources);
+      file.as = as;
       if (!ephemeral) {
         // Update persistent storage.
         await writeFile(options, path, file.data);
@@ -23606,6 +23571,20 @@ define("./webworker.js",[],function () { 'use strict';
     `endloop\n` +
     `endfacet`;
 
+  /**
+   *
+   * # Right
+   *
+   * Moves the shape so that it is just to the right of the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cube(10).right(),
+   *          cylinder(2, 15))
+   * ```
+   * :::
+   **/
+
   const X$1 = 0;
 
   const right = (shape) => {
@@ -23617,32 +23596,100 @@ define("./webworker.js",[],function () { 'use strict';
 
   Shape.prototype.right = method$d;
 
-  const a2r = (angle) => angle * 0.017453292519943295;
-
-  const rotate = ([x = 0, y = 0, z = 0], shape) =>
-    shape.transform(multiply$1(fromZRotation(a2r(z)), multiply$1(fromYRotation(a2r(y)), fromXRotation(a2r(x)))));
-
-  const method$e = function (angles) { return rotate(angles, this); };
-
-  Shape.prototype.rotate = method$e;
+  /**
+   *
+   * # Rotate X
+   *
+   * Rotates the shape around the X axis.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10).rotateX(90)
+   * ```
+   * :::
+   **/
 
   const rotateX = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$f = function (angle) { return rotateX(angle, this); };
+  const method$e = function (angle) { return rotateX(angle, this); };
 
-  Shape.prototype.rotateX = method$f;
+  Shape.prototype.rotateX = method$e;
+
+  /**
+   *
+   * # Rotate Y
+   *
+   * Rotates the shape around the Y axis.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10).rotateY(90)
+   * ```
+   * :::
+   **/
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$g = function (angle) { return rotateY(angle, this); };
+  const method$f = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$g;
+  Shape.prototype.rotateY = method$f;
+
+  /**
+   *
+   * # Rotate Z
+   *
+   * Rotates the shape around the Z axis.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10).rotateZ(45)
+   * ```
+   * :::
+   **/
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$h = function (angle) { return rotateZ(angle, this); };
+  const method$g = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$h;
+  Shape.prototype.rotateZ = method$g;
+
+  /**
+   *
+   * # Scale
+   *
+   * Scales an object uniformly or per axis.
+   *
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube().scale(2)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube().scale([1, 2, 3])
+   * ```
+   * :::
+   **/
 
   const scale$2 = (factor, shape) => {
     if (factor.length) {
@@ -23654,15 +23701,80 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$i = function (factor) { return scale$2(factor, this); };
+  const method$h = function (factor) { return scale$2(factor, this); };
 
-  Shape.prototype.scale = method$i;
+  Shape.prototype.scale = method$h;
+
+  /**
+   *
+   * # Sine
+   *
+   * Gives the sine in degrees.
+   * ```
+   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
+   *
+   * sin(0) = 0
+   * sin(45) = 0.707
+   * sin(90) = 1
+   * ```
+   *
+   **/
+
+  /**
+   *
+   * # Square Root
+   *
+   * Gives the the square root of a number.
+   * ```
+   * sqrt(a) => Math.sqrt(a);
+   *
+   * sqrt(0) = 0
+   * sqrt(4) = 2
+   * sqrt(16) = 4
+   * ```
+   *
+   **/
+
+  /**
+   *
+   * # Square (rectangle)
+   *
+   * Properly speaking what is produced here are rectangles.
+   *
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * square()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square(6, 12)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square({ radius: 10 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square({ diameter: 20 })
+   * ```
+   * :::
+   **/
 
   const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
   const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale$1);
 
   const fromSize = ({ size }) => unitSquare().scale(size);
   const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
+  const fromRadius$1 = ({ radius }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(radius);
+  const fromDiameter$1 = ({ diameter }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(diameter / 2);
 
   const square = dispatch(
     'square',
@@ -23672,21 +23784,27 @@ define("./webworker.js",[],function () { 'use strict';
       return () => fromSize({ size: 1 });
     },
     // square(4)
-    (size) => {
+    (size, ...rest) => {
       assertNumber(size);
+      assertEmpty(rest);
       return () => fromSize({ size });
     },
-    // square({ size: 4 })
-    ({ size }) => {
-      assertNumber(size);
-      return () => fromSize({ size });
-    },
-    // square({ size: [4, 5] })
-    ({ size }) => {
-      const [width, length, ...rest] = size;
-      assertNumber(width, length);
+    // square(4, 6)
+    (width, length, ...rest) => {
+      assertNumber(width);
+      assertNumber(length);
       assertEmpty(rest);
       return () => fromDimensions({ width, length });
+    },
+    // square({ radius: 5 })
+    ({ radius }) => {
+      assertNumber(radius);
+      return () => fromRadius$1({ radius });
+    },
+    // square({ diameter: 5 })
+    ({ diameter }) => {
+      assertNumber(diameter);
+      return () => fromDiameter$1({ diameter });
     });
 
   const union$5 = (...params) => {
@@ -23703,9 +23821,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$j = function (...shapes) { return union$5(this, ...shapes); };
+  const method$i = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$j;
+  Shape.prototype.union = method$i;
 
   const toGeometry$1 = ({ disjoint = true }, shape) => {
     if (disjoint) {
@@ -23721,9 +23839,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$k = function (options = {}) { writeStl(options, this); return this; };
+  const method$j = function (options = {}) { writeStl(options, this); return this; };
 
-  Shape.prototype.writeStl = method$k;
+  Shape.prototype.writeStl = method$j;
 
   const writeSvg = async (options, shape) => {
     const { path } = options;
@@ -23731,9 +23849,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$l = function (options = {}) { writeSvg(options, this); return this; };
+  const method$k = function (options = {}) { writeSvg(options, this); return this; };
 
-  Shape.prototype.writeSvg = method$l;
+  Shape.prototype.writeSvg = method$k;
 
   // Polyfills
 
@@ -74129,9 +74247,9 @@ define("./webworker.js",[],function () { 'use strict';
   // Bootstrap done.
 
   const build$1 = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
-    const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+    const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1], near = 1, far = 3500 } = view;
     const [pageWidth, pageHeight] = pageSize;
-    const camera = new PerspectiveCamera(27, pageWidth / pageHeight, 1, 3500);
+    const camera = new PerspectiveCamera(27, pageWidth / pageHeight, near, far);
     [camera.position.x, camera.position.y, camera.position.z] = position;
     camera.up = new Vector3(...up);
     camera.lookAt(...target);
@@ -74213,9 +74331,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$m = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$l = function (options = {}) { writeSvgPhoto(options, this); return this; };
 
-  Shape.prototype.writeSvgPhoto = method$m;
+  Shape.prototype.writeSvgPhoto = method$l;
 
   /**
    *
@@ -74478,7 +74596,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
-  const multiply$3 = ([ax, ay, az], [bx, by, bz]) => [(ax * bx), (ay * by), (az * bz)];
+  const multiply$2 = ([ax, ay, az], [bx, by, bz]) => [(ax * bx), (ay * by), (az * bz)];
 
   /**
    * Negates the components of a vec3
@@ -83095,7 +83213,7 @@ define("./webworker.js",[],function () { 'use strict';
                   // let t = endpos.minus(startpos).dot(direction) / direction.dot(direction)
                   let t = dot$2(subtract$2(endpos, startpos), direction) / dot$2(direction, direction);
                   if ((t > 0) && (t < 1)) {
-                    let closestpoint = add$3(startpos, multiply$3(direction, fromScalar$1(t)));
+                    let closestpoint = add$3(startpos, multiply$2(direction, fromScalar$1(t)));
                     let distancesquared = squaredDistance$2(closestpoint, endpos);
                     if (distancesquared < (EPS$1 * EPS$1)) {
                       // Yes it's a t-junction! We need to split matchingside in two:
@@ -83235,14 +83353,14 @@ define("./webworker.js",[],function () { 'use strict';
               return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
               break
           case "rectangle":
-              return square({size: [values[0],values[1]]}).toDisjointGeometry()
+              return square(values[0],values[1]).toDisjointGeometry()
               break
           case "hull":
               values = values.map(Shape.fromGeometry);
               return hull(...values).toDisjointGeometry()
               break
           case "rotate":
-              return rotate([values[1], values[2], values[3]], Shape.fromGeometry(values[0])).toDisjointGeometry()
+              return Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toDisjointGeometry()
               break
           case "extrude":
               return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
@@ -83276,7 +83394,9 @@ define("./webworker.js",[],function () { 'use strict';
               const shape = Shape.fromGeometry(values[0]).center();
               const bounds = shape.measureBoundingBox();
               const cameraDistance = 6*Math.max(...bounds[1]);
-              return toSvg$1({cameraPosition: [0, 0, cameraDistance]}, shape.rotate([-60, -45, 0]).toDisjointGeometry())
+              console.log("Camera distance: ");
+              console.log(cameraDistance);
+              return toSvg$1({view: { position: [0, 0, cameraDistance], near: 1, far: 10000}}, shape.rotateX(-60).rotateY(-45).toDisjointGeometry())
           case "stl":
               return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
               break
@@ -83285,7 +83405,7 @@ define("./webworker.js",[],function () { 'use strict';
       }
     }
     catch(error){
-      console.log(err);
+      console.log(error);
     }
   };
   const { ask, hear } = conversation({ agent, say });
