@@ -12,8 +12,6 @@ export default class Rectangle extends Atom {
         this.name = 'Rectangle'
         this.atomType = 'Rectangle'
         
-        this.updateValue()
-        
         this.setValues(values)
     }
     
