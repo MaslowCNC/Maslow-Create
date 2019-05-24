@@ -14,13 +14,9 @@ export default class Circle extends Atom {
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         this.setValues(values)
-        
-        //generate the correct codeblock for this atom on creation
-        this.updateValue()
     }
     
     updateValue(){
-        //Overwrite the normal update code block to update the number of segments also
         try{
             const circumference  = 3.14*2*this.findIOValue('radius')
             const numberOfSegments = parseInt( circumference / GlobalVariables.circleSegmentSize )
@@ -28,6 +24,5 @@ export default class Circle extends Atom {
             const values = [this.findIOValue('radius'), numberOfSegments]
             this.basicThreadValueProcessing(values, "circle")
         }catch(err){this.setAlert(err)}
-        
     }
 }
