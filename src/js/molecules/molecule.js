@@ -290,6 +290,7 @@ export default class Molecule extends Atom{
         
         //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject)
+        savedObject.circleSegmentSize = GlobalVariables.circleSegmentSize
             
         if(this.topLevel == true){
             //If this is the top level, return the complete file to be saved
@@ -306,7 +307,7 @@ export default class Molecule extends Atom{
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
-            
+        
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
             this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)

@@ -522,10 +522,14 @@ export default function GitHubModule(){
         }).then(result => {
             
             //content will be base64 encoded
-            let rawFile = atob(result.data.content)
+            let rawFile = JSON.parse(atob(result.data.content))
             
             
-            var moleculesList = JSON.parse(rawFile).molecules
+            var moleculesList = rawFile.molecules
+            
+            if(rawFile.circleSegmentSize){
+                GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
+            }
             
             //Load the top level molecule from the file
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
