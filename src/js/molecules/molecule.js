@@ -410,5 +410,15 @@ export default class Molecule extends Atom{
         //Update the connection
         connector.propogate()
     }
+    
+    sendToRender(){
+        super.sendToRender()
+        if(this.topLevel){
+            try{
+                GlobalVariables.display.zoomCameraToFit(this.value.measureBoundingBox())
+            }
+            catch(err){}
+        }
+    }
 }
 
