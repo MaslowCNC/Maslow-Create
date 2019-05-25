@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/circle.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
 
 export default class Circle extends Atom {
     
@@ -86,26 +87,19 @@ export default class Circle extends Atom {
         this.atomType = &apos;Circle&apos;
         
         this.addIO(&apos;input&apos;, &apos;radius&apos;, this, &apos;number&apos;, 10)
-        this.addIO(&apos;input&apos;, &apos;max segment size&apos;, this, &apos;number&apos;, 1)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         this.setValues(values)
-        
-        //generate the correct codeblock for this atom on creation
-        this.updateValue()
     }
     
     updateValue(){
-        //Overwrite the normal update code block to update the number of segments also
         try{
-            const maximumSegmentSize = this.findIOValue(&apos;max segment size&apos;)
             const circumference  = 3.14*2*this.findIOValue(&apos;radius&apos;)
-            const numberOfSegments = parseInt( circumference / maximumSegmentSize )
+            const numberOfSegments = parseInt( circumference / GlobalVariables.circleSegmentSize )
             
             const values = [this.findIOValue(&apos;radius&apos;), numberOfSegments]
             this.basicThreadValueProcessing(values, &quot;circle&quot;)
         }catch(err){this.setAlert(err)}
-        
     }
 }</code></pre>
 

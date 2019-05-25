@@ -141,12 +141,13 @@ class GlobalVariables{
         this.runMode = false
         this.evalLock = true
         this.gitHub = new GitHubModule()
+        this.circleSegmentSize = 2
         
         const agent = async ({ question }) =&gt; `Secret ${question}`
-        createService({ webWorker: &apos;./webworker.js&apos;, agent }).then(result =&gt; {
+        createService({ webWorker: &apos;../webworker.js&apos;, agent }).then(result =&gt; {
             this.ask = result.ask
         })
-        createService({ webWorker: &apos;./webworker.js&apos;, agent }).then(result =&gt; {
+        createService({ webWorker: &apos;../webworker.js&apos;, agent }).then(result =&gt; {
             this.render = result.ask
         })
     }

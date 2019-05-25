@@ -1,6 +1,6 @@
 {
   "coverage": "0.25%",
-  "expectCount": 386,
+  "expectCount": 389,
   "actualCount": 1,
   "files": {
     "src/flowDraw.js": {
@@ -42,7 +42,7 @@
       ]
     },
     "src/js/display.js": {
-      "expectCount": 15,
+      "expectCount": 16,
       "actualCount": 0,
       "undocumentLines": [
         5,
@@ -58,8 +58,9 @@
         100,
         114,
         130,
-        181,
-        188
+        137,
+        188,
+        195
       ]
     },
     "src/js/githubOauth.js": {
@@ -70,7 +71,7 @@
       ]
     },
     "src/js/globalvariables.js": {
-      "expectCount": 15,
+      "expectCount": 16,
       "actualCount": 0,
       "undocumentLines": [
         30,
@@ -83,11 +84,12 @@
         65,
         66,
         67,
-        71,
-        74,
-        78,
-        82,
-        91
+        68,
+        72,
+        75,
+        79,
+        83,
+        92
       ]
     },
     "src/js/lib/browserOrNode.js": {
@@ -115,7 +117,7 @@
       ]
     },
     "src/js/menu.js": {
-      "expectCount": 12,
+      "expectCount": 11,
       "actualCount": 0,
       "undocumentLines": [
         3,
@@ -127,9 +129,8 @@
         74,
         98,
         104,
-        137,
-        170,
-        195
+        162,
+        187
       ]
     },
     "src/js/molecules/assembly.js": {
@@ -168,11 +169,11 @@
       "expectCount": 5,
       "actualCount": 0,
       "undocumentLines": [
-        3,
-        5,
-        9,
+        4,
+        6,
         10,
-        22
+        11,
+        19
       ]
     },
     "src/js/molecules/constant.js": {
@@ -260,15 +261,15 @@
         12,
         13,
         14,
-        22,
-        36,
-        66,
-        81,
-        90
+        20,
+        34,
+        64,
+        91,
+        100
       ]
     },
     "src/js/molecules/input.js": {
-      "expectCount": 17,
+      "expectCount": 18,
       "actualCount": 0,
       "undocumentLines": [
         4,
@@ -280,14 +281,15 @@
         13,
         14,
         18,
-        28,
-        42,
-        43,
+        30,
         44,
-        71,
-        81,
-        92,
-        101
+        45,
+        46,
+        73,
+        83,
+        94,
+        103,
+        107
       ]
     },
     "src/js/molecules/intersection.js": {
@@ -302,7 +304,7 @@
       ]
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 28,
+      "expectCount": 29,
       "actualCount": 0,
       "undocumentLines": [
         7,
@@ -315,24 +317,25 @@
         18,
         35,
         47,
-        63,
-        65,
-        70,
-        74,
-        76,
-        92,
-        104,
-        114,
-        174,
-        202,
-        210,
-        215,
-        239,
-        252,
-        298,
-        312,
-        322,
-        360
+        64,
+        66,
+        71,
+        75,
+        77,
+        95,
+        107,
+        117,
+        179,
+        207,
+        216,
+        221,
+        245,
+        258,
+        305,
+        319,
+        329,
+        367,
+        414
       ]
     },
     "src/js/molecules/output.js": {
@@ -382,7 +385,7 @@
         5,
         12,
         13,
-        20
+        18
       ]
     },
     "src/js/molecules/regularPolygon.js": {
@@ -431,7 +434,7 @@
         14,
         15,
         28,
-        49
+        47
       ]
     },
     "src/js/molecules/stretch.js": {
@@ -505,30 +508,30 @@
         35,
         53,
         113,
-        145,
-        156,
-        162,
-        167,
-        200,
-        215,
-        226,
-        240,
-        254,
-        269,
-        290,
-        302,
-        314,
-        339,
-        345,
+        146,
+        157,
+        163,
+        168,
+        201,
+        216,
+        227,
+        241,
+        255,
+        270,
+        291,
+        306,
+        318,
+        343,
         349,
-        361,
-        387,
-        397,
-        408,
-        423,
-        478,
-        509,
-        549
+        353,
+        365,
+        391,
+        401,
+        412,
+        427,
+        482,
+        513,
+        553
       ]
     },
     "src/js/prototypes/attachmentpoint.js": {
@@ -559,19 +562,19 @@
         40,
         50,
         51,
-        136,
-        167,
-        173,
-        200,
-        208,
-        225,
-        231,
-        240,
-        256,
+        141,
+        171,
+        177,
+        204,
+        212,
+        229,
+        235,
+        244,
         260,
-        265,
+        264,
         269,
-        286
+        273,
+        290
       ]
     },
     "src/js/prototypes/connector.js": {

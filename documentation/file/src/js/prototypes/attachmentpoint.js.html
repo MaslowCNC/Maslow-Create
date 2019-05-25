@@ -144,6 +144,8 @@ export default class AttachmentPoint {
         if (this.showHoverText){
             if(this.type == &apos;input&apos;){
                
+                
+                GlobalVariables.c.globalCompositeOperation=&apos;destination-over&apos;
                 GlobalVariables.c.beginPath()
 
                 if (this.name === &apos;geometry&apos;){
@@ -158,6 +160,9 @@ export default class AttachmentPoint {
                 }
             
                 GlobalVariables.c.fill()
+                
+                
+                GlobalVariables.c.globalCompositeOperation=&apos;source-over&apos;
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor
                 GlobalVariables.c.textAlign = &apos;end&apos;
@@ -211,7 +216,6 @@ export default class AttachmentPoint {
 
     clickDown(x,y, clickProcessed){
         if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) &lt; this.defaultRadius &amp;&amp; !clickProcessed){
-            
             if(this.type == &apos;output&apos;){                  //begin to extend a connector from this if it is an output
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 

@@ -108,7 +108,6 @@ export const addOrDeletePorts = (target) =&gt; {
     //Add or delete ports as needed
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available
         target.addIO(&apos;input&apos;, &apos;3D shape &apos; + GlobalVariables.generateUniqueID(), target, &apos;geometry&apos;, &apos;&apos;)
-        target.addedIO = true
     }
     if(howManyInputPortsAvailable(target) &gt;= 2 &amp;&amp; target.ioValues.length &lt;= 1){  //We need to remove the empty port
         deleteEmptyPort(target)

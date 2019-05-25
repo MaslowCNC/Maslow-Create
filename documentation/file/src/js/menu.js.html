@@ -210,29 +210,21 @@ class Menu {
             if(evt.code == &apos;Enter&apos;){
                 input = document.getElementById(&apos;menuInput&apos;).value
                 
-                this.githubList = document.getElementById(&apos;githubList&apos;)
+                var githubList = document.getElementById(&apos;githubList&apos;)
                 
-                var oldResults = document.getElementsByClassName(&apos;menu-item&apos;)
+                var oldResults = githubList.getElementsByClassName(&apos;menu-item&apos;)
                 for (i = 0; i &lt; oldResults.length; i++) {
-                    oldResults[i].style.display = &apos;none&apos;
+                    githubList.removeChild(oldResults[i])
                 }
                 
-                GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
-                    q: input + &apos; topic:maslowcreate&apos;,
-                    sort: &apos;stars&apos;,
-                    per_page: 10,
-                    page: 1,
-                    headers: {
-                        accept: &apos;application/vnd.github.mercy-preview+json&apos;
-                    }
-                }).then(result =&gt; {
+                GlobalVariables.gitHub.searchGithub(input).then(result =&gt; {
                     result.data.items.forEach(item =&gt; {
                         var newElement = document.createElement(&apos;LI&apos;)
                         var text = document.createTextNode(item.name)
                         newElement.setAttribute(&apos;class&apos;, &apos;menu-item&apos;)
                         newElement.setAttribute(&apos;id&apos;, item.id)
                         newElement.appendChild(text) 
-                        this.githubList.appendChild(newElement) 
+                        githubList.appendChild(newElement) 
                         
                         document.getElementById(item.id).addEventListener(&apos;click&apos;, (e) =&gt; {
                             this.placeGitHubMolecule(e)
