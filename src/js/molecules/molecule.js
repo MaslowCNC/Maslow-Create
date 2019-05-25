@@ -104,6 +104,15 @@ export default class Molecule extends Atom{
         }
     }
     
+    lock(){
+        //Locks all the inputs to not update in preperation for a big change to propogate through
+        super.lock()
+        
+        this.nodesOnTheScreen.forEach(node => {
+            node.lock()
+        })
+    }
+    
     unlock(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         super.unlock()
