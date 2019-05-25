@@ -83394,9 +83394,7 @@ define("./webworker.js",[],function () { 'use strict';
               const shape = Shape.fromGeometry(values[0]).center();
               const bounds = shape.measureBoundingBox();
               const cameraDistance = 6*Math.max(...bounds[1]);
-              console.log("Camera distance: ");
-              console.log(cameraDistance);
-              return toSvg$1({view: { position: [0, 0, cameraDistance], near: 1, far: 10000}}, shape.rotateX(-60).rotateY(-45).toDisjointGeometry())
+              return toSvg$1({view: { position: [0, 0, cameraDistance], near: 1, far: 10000}}, shape.rotateX(20).rotateY(-45).toDisjointGeometry())
           case "stl":
               return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
               break
@@ -83406,6 +83404,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
     catch(error){
       console.log(error);
+      return -1
     }
   };
   const { ask, hear } = conversation({ agent, say });
