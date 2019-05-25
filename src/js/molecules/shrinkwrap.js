@@ -26,15 +26,14 @@ export default class ShrinkWrap extends Atom{
     }
     
     updateValue(){
-        
         try{
-            var inputs = []
+            var inputsList = []
             this.inputs.forEach( io => {
-                if(io.connectors.length > 0 && io.type == 'input'){
-                    inputs.push(io.getValue())
+                if(io.connectors.length > 0){
+                    inputsList.push(io.getValue())
                 }
             })
-            const values = inputs.map(x => {
+            const values = inputsList.map(x => {
                 return x.toLazyGeometry().toGeometry()
             })
             
@@ -44,8 +43,7 @@ export default class ShrinkWrap extends Atom{
         //Delete or add ports as needed
         addOrDeletePorts(this)
     }
-    
-    
+     
     serialize(savedObject){
         var thisAsObject = super.serialize(savedObject)
         
