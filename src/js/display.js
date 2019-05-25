@@ -130,8 +130,8 @@ export default class Display {
     zoomCameraToFit(bounds){
         this.controls.reset()
         this.camera.position.x = 0
-        this.camera.position.y = -4*Math.max(...bounds[1])
-        this.camera.position.z = 4*Math.max(...bounds[1])
+        this.camera.position.y = -5*Math.max(...bounds[1])
+        this.camera.position.z = 5*Math.max(...bounds[1])
     }
     
     updateDisplayData(threejsGeometry){

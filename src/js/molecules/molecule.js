@@ -413,11 +413,8 @@ export default class Molecule extends Atom{
     
     sendToRender(){
         super.sendToRender()
-        if(this.topLevel){
-            try{
-                GlobalVariables.display.zoomCameraToFit(this.value.measureBoundingBox())
-            }
-            catch(err){}
+        if(this.topLevel && this.value.measureBoundingBox){
+            GlobalVariables.display.zoomCameraToFit(this.value.measureBoundingBox())
         }
     }
 }
