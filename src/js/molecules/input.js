@@ -43,10 +43,6 @@ export default class Input extends Atom {
         
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
-
-        this.inputs.forEach(child => {
-            child.draw()       
-        })
         
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.strokeStyle = this.parent.strokeColor
@@ -63,10 +59,12 @@ export default class Input extends Atom {
         GlobalVariables.c.closePath()
         GlobalVariables.c.stroke()
 
-        this.children.forEach(child => {
-            child.draw()       
+        this.inputs.forEach(input => {
+            input.draw()       
         })
-        
+        if(this.output){
+            this.output.draw()
+        }
     }
     
     deleteNode() {

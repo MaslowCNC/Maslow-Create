@@ -39,10 +39,6 @@ export default class Output extends Atom {
     }
     
     draw() {
-        
-        this.inputs.forEach(child => {
-            child.draw()       
-        })
 
         this.height= this.radius
         
@@ -75,7 +71,7 @@ export default class Output extends Atom {
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
 
-        this.children.forEach(child => {
+        this.inputs.forEach(child => {
             child.draw()       
         })
         

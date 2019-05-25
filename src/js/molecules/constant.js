@@ -44,10 +44,6 @@ export default class Constant extends Atom{
     }
     
     draw() {
-
-        this.inputs.forEach(child => {
-            child.draw()       
-        })
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.strokeStyle = this.parent.strokeColor
@@ -60,9 +56,12 @@ export default class Constant extends Atom{
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
 
-        this.children.forEach(child => {
-            child.draw()       
+       this.inputs.forEach(input => {
+            input.draw()       
         })
+        if(this.output){
+            this.output.draw()
+        }
     }
  
     displayAndPropogate(){
