@@ -7,7 +7,7 @@ export default class Input extends Atom {
         super (values)
         
         this.name = 'Input' + GlobalVariables.generateUniqueID()
-        this.value = ''
+        this.value = 10
         this.type = 'input'
         this.atomType = 'Input'
         this.height = 16
