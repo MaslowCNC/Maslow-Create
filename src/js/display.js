@@ -101,13 +101,15 @@ export default class Display {
 
                 //Axes Html
 
+                var axesDiv = document.createElement('div')
+                sideBar.appendChild(axesDiv)
                 var axesCheck = document.createElement('input')
-                sideBar.appendChild(axesCheck)
+                axesDiv.appendChild(axesCheck)
                 axesCheck.setAttribute('type', 'checkbox')
                 axesCheck.setAttribute('id', 'axesCheck')
                 axesCheck.setAttribute('checked', 'true')
                 var axesCheckLabel = document.createElement('label')
-                sideBar.appendChild(axesCheckLabel)
+                axesDiv.appendChild(axesCheckLabel)
                 axesCheckLabel.setAttribute('for', 'axesCheck')
                 axesCheckLabel.setAttribute('style', 'margin-right:1em;')
                 axesCheckLabel.textContent= "Axes"
