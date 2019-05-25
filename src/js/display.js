@@ -128,10 +128,9 @@ export default class Display {
     }
     
     zoomCameraToFit(bounds){
-        console.log("Zooming to: " + 6*Math.max(...bounds[1]))
         this.controls.reset()
-        this.camera.position.x = 4*Math.max(...bounds[1])
-        this.camera.position.y = 4*Math.max(...bounds[1])
+        this.camera.position.x = 0
+        this.camera.position.y = -4*Math.max(...bounds[1])
         this.camera.position.z = 4*Math.max(...bounds[1])
     }
     
