@@ -41,6 +41,10 @@
     border-radius: 25px;
 }
 
+#gridDiv, #wireDiv{
+ display: block;
+}
+
 .flex-parent {
   flex-basis:1;
   flex-shrink: 2; 

@@ -76,13 +76,16 @@ export default class Display {
                 name.setAttribute('class','doc-title')
                 sideBar.appendChild(name)
 
+                var gridDiv = document.createElement('div')
+                sideBar.appendChild(gridDiv)
+                gridDiv.setAttribute('id', 'gridDiv')
                 var gridCheck = document.createElement('input')
-                sideBar.appendChild(gridCheck)
+                gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute('type', 'checkbox')
                 gridCheck.setAttribute('id', 'gridCheck')
                 gridCheck.setAttribute('checked', 'true')
                 var gridCheckLabel = document.createElement('label')
-                sideBar.appendChild(gridCheckLabel)
+                gridDiv.appendChild(gridCheckLabel)
                 gridCheckLabel.setAttribute('for', 'gridCheck')
                 gridCheckLabel.textContent= "Grid"
 
@@ -97,19 +100,22 @@ export default class Display {
 
                 //Wireframe HTML element
 
+                var wireDiv = document.createElement('div')
+                sideBar.appendChild(wireDiv)
+                wireDiv.setAttribute('id', 'wireDiv')
                 var wireCheck = document.createElement('input')
-                sideBar.appendChild(wireCheck)
+                wireDiv.appendChild(wireCheck)
                 wireCheck.setAttribute('type', 'checkbox')
                 wireCheck.setAttribute('id', 'wireCheck')
-                wireCheck.setAttribute('checked', 'false')
-                //wireCheck.setAttribute('style', 'display:inline-block;')
                 var wireCheckLabel = document.createElement('label')
-                sideBar.appendChild(wireCheckLabel)
+                wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
                 wireCheckLabel.textContent= "Wireframe"
+                console.log("wire" + this.threeMaterial.wireframe)
+                console.log("checkbox" + wireCheck.checked)
 
                 wireCheck.addEventListener('change', event => {
-                    if(event.target.checked){
+                    if( event.target.checked){
                         this.threeMaterial.wireframe = true
                     }
                     else{
