@@ -56,7 +56,7 @@ export default class Constant extends Atom{
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
 
-       this.inputs.forEach(input => {
+        this.inputs.forEach(input => {
             input.draw()       
         })
         if(this.output){
