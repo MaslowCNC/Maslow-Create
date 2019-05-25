@@ -10,7 +10,7 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
-let originalWidth=GlobalVariables.canvas.width
+let originalWidth = GlobalVariables.canvas.width
 
 var url = window.location.href
 GlobalVariables.runMode = url.includes('run') //Check if we are using the run mode based on url
