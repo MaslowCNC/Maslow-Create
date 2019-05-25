@@ -111,8 +111,6 @@ export default class Display {
                 wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
                 wireCheckLabel.textContent= "Wireframe"
-                console.log("wire" + this.threeMaterial.wireframe)
-                console.log("checkbox" + wireCheck.checked)
 
                 wireCheck.addEventListener('change', event => {
                     if( event.target.checked){
