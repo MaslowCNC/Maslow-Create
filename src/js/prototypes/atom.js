@@ -393,6 +393,9 @@ export default class Atom {
         this.inputs.forEach(input => {
             input.ready = false
         })
+        if(this.output){
+            this.output.lock()
+        }
     }
     
     unlock(){

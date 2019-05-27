@@ -92,9 +92,10 @@ export default class Input extends Atom {
     }
     
     setOutput(newOutput){
+        this.output.lock() //Lock all of the dependants
         //Set the input's output
         this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
-        //Set the output nodes with type 'geometry' to be the new value
+        //Set the output to be the new value
         this.output.setValue(newOutput)
     }
     
