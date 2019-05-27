@@ -388,16 +388,6 @@ export default class Atom {
         }
     }
     
-    lock(){
-        //Sets all the inputs to be in the not ready state to prepare for a big propogation
-        this.inputs.forEach(input => {
-            input.ready = false
-        })
-        if(this.output){
-            this.output.lock()
-        }
-    }
-    
     unlock(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
