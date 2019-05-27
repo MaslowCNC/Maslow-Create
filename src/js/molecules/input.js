@@ -42,32 +42,31 @@ export default class Input extends Atom {
     }
     
     draw() {
-        this.scaledX = GlobalVariables.scaleFactorXY * this.x
-        this.scaledY = GlobalVariables.scaleFactorXY * this.y
         
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
         
-        this.inputs.forEach(child => {
-            child.draw()       
-        })
-        
-        
         GlobalVariables.c.fillStyle = this.color
-        
+        GlobalVariables.c.strokeStyle = this.parent.strokeColor
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-
-        
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height/2)
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height)
         GlobalVariables.c.lineTo(this.x - this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height)
         GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
         GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
+        GlobalVariables.c.stroke()
 
+        this.inputs.forEach(input => {
+            input.draw()       
+        })
+        if(this.output){
+            this.output.draw()
+        }
     }
     
     deleteNode() {
