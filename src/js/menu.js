@@ -134,29 +134,21 @@ class Menu {
             if(evt.code == 'Enter'){
                 input = document.getElementById('menuInput').value
                 
-                this.githubList = document.getElementById('githubList')
+                var githubList = document.getElementById('githubList')
                 
-                var oldResults = document.getElementsByClassName('menu-item')
+                var oldResults = githubList.getElementsByClassName('menu-item')
                 for (i = 0; i < oldResults.length; i++) {
-                    oldResults[i].style.display = 'none'
+                    githubList.removeChild(oldResults[i])
                 }
                 
-                GlobalVariables.gitHub.octokit.search.repos({  //FIXME: This should be a function exported from the GitHub objects
-                    q: input + ' topic:maslowcreate',
-                    sort: 'stars',
-                    per_page: 10,
-                    page: 1,
-                    headers: {
-                        accept: 'application/vnd.github.mercy-preview+json'
-                    }
-                }).then(result => {
+                GlobalVariables.gitHub.searchGithub(input).then(result => {
                     result.data.items.forEach(item => {
                         var newElement = document.createElement('LI')
                         var text = document.createTextNode(item.name)
                         newElement.setAttribute('class', 'menu-item')
                         newElement.setAttribute('id', item.id)
                         newElement.appendChild(text) 
-                        this.githubList.appendChild(newElement) 
+                        githubList.appendChild(newElement) 
                         
                         document.getElementById(item.id).addEventListener('click', (e) => {
                             this.placeGitHubMolecule(e)

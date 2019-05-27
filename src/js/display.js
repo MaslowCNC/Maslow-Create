@@ -79,13 +79,16 @@ export default class Display {
                 name.setAttribute('class','doc-title')
                 sideBar.appendChild(name)
 
+                var gridDiv = document.createElement('div')
+                sideBar.appendChild(gridDiv)
+                gridDiv.setAttribute('id', 'gridDiv')
                 var gridCheck = document.createElement('input')
-                sideBar.appendChild(gridCheck)
+                gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute('type', 'checkbox')
                 gridCheck.setAttribute('id', 'gridCheck')
                 gridCheck.setAttribute('checked', 'true')
                 var gridCheckLabel = document.createElement('label')
-                sideBar.appendChild(gridCheckLabel)
+                gridDiv.appendChild(gridCheckLabel)
                 gridCheckLabel.setAttribute('for', 'gridCheck')
                 gridCheckLabel.setAttribute('style', 'margin-right:1em;')
                 gridCheckLabel.textContent= "Grid"
@@ -125,19 +128,22 @@ export default class Display {
 
                 //Wireframe HTML element
 
+                var wireDiv = document.createElement('div')
+                sideBar.appendChild(wireDiv)
+                wireDiv.setAttribute('id', 'wireDiv')
                 var wireCheck = document.createElement('input')
-                sideBar.appendChild(wireCheck)
+                wireDiv.appendChild(wireCheck)
                 wireCheck.setAttribute('type', 'checkbox')
                 wireCheck.setAttribute('id', 'wireCheck')
                 wireCheck.setAttribute('checked', 'false')
                 var wireCheckLabel = document.createElement('label')
-                sideBar.appendChild(wireCheckLabel)
+                wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
                 wireCheckLabel.setAttribute('style', 'margin-right:10em;')
                 wireCheckLabel.textContent= "Wireframe"
 
                 wireCheck.addEventListener('change', event => {
-                    if(event.target.checked){
+                    if( event.target.checked){
                         this.threeMaterial.wireframe = true
                     }
                     else{
@@ -176,6 +182,13 @@ export default class Display {
                 this.updateDisplayData(result)
             })
         }
+    }
+    
+    zoomCameraToFit(bounds){
+        this.controls.reset()
+        this.camera.position.x = 0
+        this.camera.position.y = -5*Math.max(...bounds[1])
+        this.camera.position.z = 5*Math.max(...bounds[1])
     }
     
     updateDisplayData(threejsGeometry){

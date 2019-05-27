@@ -7,7 +7,7 @@ export default class Input extends Atom {
         super (values)
         
         this.name = 'Input' + GlobalVariables.generateUniqueID()
-        this.value = ''
+        this.value = 10
         this.type = 'input'
         this.atomType = 'Input'
         this.height = 16
@@ -23,6 +23,8 @@ export default class Input extends Atom {
         if (typeof this.parent !== 'undefined') {
             this.parent.addIO('input', this.name, this.parent, 'number or geometry', 10)
         }
+        
+        this.setOutput(this.value) //force propogation
     }
     
     updateSidebar(){
@@ -96,7 +98,11 @@ export default class Input extends Atom {
         //Set the output nodes with type 'geometry' to be the new value
         this.output.setValue(newOutput)
         
-    } 
+    }
+    
+    getOutput(){
+        return this.output.getValue()
+    }
     
     updateValue(){
         //This empty function handles any calls to the normal update code block function which breaks things here

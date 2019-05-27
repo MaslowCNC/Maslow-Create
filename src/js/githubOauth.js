@@ -85,7 +85,8 @@ export default function GitHubModule(){
         
         
         this.projectsSpaceDiv = document.createElement("DIV")
-        this.projectsSpaceDiv.setAttribute("class", "float-left-div{")
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div")
+        this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
         popup.appendChild(this.projectsSpaceDiv)
         
         yoursButton.click()
@@ -154,6 +155,7 @@ export default function GitHubModule(){
         
         var projectPicture = document.createElement("IMG")
         projectPicture.setAttribute("src", thumbnailPath)
+        projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
         projectPicture.setAttribute("style", "width: 100%; height: 100%;")
         project.appendChild(projectPicture)
         project.appendChild(document.createElement("BR"))
@@ -289,6 +291,18 @@ export default function GitHubModule(){
         }).then(result => {
             var url = result.data.html_url
             window.open(url)
+        })
+    }
+    
+    this.searchGithub = async (searchString) => {
+        return await octokit.search.repos({
+            q: searchString + ' topic:maslowcreate',
+            sort: 'stars',
+            per_page: 10,
+            page: 1,
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
+            }
         })
     }
     
@@ -508,10 +522,14 @@ export default function GitHubModule(){
         }).then(result => {
             
             //content will be base64 encoded
-            let rawFile = atob(result.data.content)
+            let rawFile = JSON.parse(atob(result.data.content))
             
             
-            var moleculesList = JSON.parse(rawFile).molecules
+            var moleculesList = rawFile.molecules
+            
+            if(rawFile.circleSegmentSize){
+                GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
+            }
             
             //Load the top level molecule from the file
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
