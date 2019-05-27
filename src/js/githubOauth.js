@@ -18,8 +18,16 @@ export default function GitHubModule(){
     })
     
     this.tryLogin = function(){
+        
         // Initialize with OAuth.io app public key
-        OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
+        if(window.location.href.includes('private')){
+            console.log("using repo scope")
+            OAuth.initialize('6CQQE8MMCBFjdWEjevnTBMCQpsw') //app public key for repo scope
+        }
+        else{
+            console.log("using public_repo scope")
+            OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8') //app public key for public_repo scope
+        }
         // Use popup for oauth
         OAuth.popup('github').then(github => {
             
