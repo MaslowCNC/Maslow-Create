@@ -351,6 +351,7 @@ export default class Atom {
     }
     
     displayAndPropogate(){
+        console.log("Propogating: " + this.name)
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
@@ -395,7 +396,13 @@ export default class Atom {
                 input.ready = true
             }
         })
-        this.updateValue()
+    }
+    
+    beginPropogation(){
+        //This function will trigger the tips of the tree branches to start generating values
+        if(this.inputs.every(x => x.connectors.length == 0) || this.inputs.length == 0){ //If this atom has nothing upstream of it, and if it does not trigger propogation from it
+            this.updateValue()
+        }
     }
     
     sendToRender(){

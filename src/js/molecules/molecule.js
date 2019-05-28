@@ -111,7 +111,13 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(node => {
             node.unlock()
         })
-        this.updateValue()
+    }
+    
+    beginPropogation(){
+        super.beginPropogation()
+        this.nodesOnTheScreen.forEach(node => {
+            node.beginPropogation()
+        })
     }
     
     updateSidebar(){
