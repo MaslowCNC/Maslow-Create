@@ -324,7 +324,7 @@ export default class Molecule extends Atom{
         //Place the connectors
         this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
-            this.placeConnector(connector)
+            this.placeConnector(connector, true)
         })
         
         this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
@@ -370,7 +370,7 @@ export default class Molecule extends Atom{
         }
     }
     
-    placeConnector(connectorObj){
+    placeConnector(connectorObj, silent){
         var connector
         var cp1NotFound = true
         var cp2NotFound = true
@@ -414,7 +414,9 @@ export default class Molecule extends Atom{
         connector.attachmentPoint2.connectors.push(connector)
         
         //Update the connection
-        connector.propogate()
+        if(!silent){
+            connector.propogate()
+        }
     }
     
     sendToRender(){

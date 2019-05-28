@@ -351,7 +351,9 @@ export default class Atom {
     }
     
     displayAndPropogate(){
-        console.log("Propogating: " + this.name)
+        if(this.parent.topLevel){
+            console.log("Propogating: " + this.name)
+        }
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
