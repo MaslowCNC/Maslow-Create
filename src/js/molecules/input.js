@@ -103,6 +103,6 @@ export default class Input extends Atom {
     }
     
     updateValue(){
-        //This empty function handles any calls to the normal update code block function which breaks things here
+        this.setOutput(this.getOutput())
     }
 }
