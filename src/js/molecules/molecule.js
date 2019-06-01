@@ -54,6 +54,7 @@ export default class Molecule extends Atom{
         
         if (distFromClick < this.radius){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
+            GlobalVariables.currentMolecule.backgroundClick()
             clickProcessed = true
         }
         
@@ -80,7 +81,9 @@ export default class Molecule extends Atom{
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        atom.setOutput(moleculeInput.getValue())
+                        if(atom.getOutput() != moleculeInput.getValue()){                //Dont update the input if it hasn't changed
+                            atom.setOutput(moleculeInput.getValue())
+                        }
                     }
                 })
             })
@@ -155,6 +158,8 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         
+        this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
+        
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
             //Add options to set all of the inputs
             this.inputs.forEach(child => {
@@ -204,6 +209,7 @@ export default class Molecule extends Atom{
         
         if(!GlobalVariables.currentMolecule.topLevel){
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
+            GlobalVariables.currentMolecule.backgroundClick()
         }
     }
     
@@ -284,6 +290,7 @@ export default class Molecule extends Atom{
         
         //Add a JSON representation of this object to the file being saved
         savedObject.molecules.push(thisAsObject)
+        savedObject.circleSegmentSize = GlobalVariables.circleSegmentSize
             
         if(this.topLevel == true){
             //If this is the top level, return the complete file to be saved
@@ -300,7 +307,7 @@ export default class Molecule extends Atom{
         var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
-            
+        
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
             this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
@@ -308,7 +315,7 @@ export default class Molecule extends Atom{
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
-        //Place the connectors FIXME: This is being saved into the object twice now that we are saving everything from the main object so the variable name should be changed
+        //Place the connectors
         this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
             this.placeConnector(connector)
@@ -320,7 +327,7 @@ export default class Molecule extends Atom{
     }
     
     placeAtom(newAtomObj, moleculeList, typesList, unlock){
-        //Place the atom - note that types not listed in availableTypes will not be placed with no warning (ie go up one level)
+        //Place the atom - note that types not listed in typesList will not be placed with no warning
         
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
@@ -402,6 +409,13 @@ export default class Molecule extends Atom{
         
         //Update the connection
         connector.propogate()
+    }
+    
+    sendToRender(){
+        super.sendToRender()
+        if(this.topLevel && this.value.measureBoundingBox){
+            GlobalVariables.display.zoomCameraToFit(this.value.measureBoundingBox())
+        }
     }
 }
 

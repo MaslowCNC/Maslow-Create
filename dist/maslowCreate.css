@@ -41,6 +41,10 @@
     border-radius: 25px;
 }
 
+#gridDiv, #wireDiv{
+ display: block;
+}
+
 .flex-parent {
   flex-basis:1;
   flex-shrink: 2; 
@@ -212,6 +216,7 @@ input.menu_search:focus {
 .tab {
   padding-top:5px;
   padding-bottom:5px;
+  height: 100%
   overflow: hidden;
   background-color: #f1f1f1;
 }
@@ -354,6 +359,9 @@ input.menu_search:focus {
     height: 90%;
     top: 50%;
     left: 50%;
+    display: flex;
+    align-items: center;
+    flex-flow: column;
     transform: translate(-50%, -50%);
 }
 
@@ -372,6 +380,7 @@ input.menu_search:focus {
 
 .float-left-div{
     float: left;
+    overflow: auto;
 }
 
 .github-login-display{

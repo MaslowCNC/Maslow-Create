@@ -13,6 +13,7 @@ export default class Display {
         this.scene
         this.renderer
         this.stats
+        this.threeMaterial
         this.mesh
         this.gui
         this.targetDiv = document.getElementById('viewerContext')
@@ -44,6 +45,9 @@ export default class Display {
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
+        //sets axes
+        var axesHelper = new THREE.AxesHelper( 10 )
+        this.scene.add(axesHelper)
 
         // Sets initial plane and mesh
         var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
@@ -69,20 +73,24 @@ export default class Display {
                     sideBar.removeChild(sideBar.firstChild)
                 }
                 
-                //add the name as a title
+                //Grid display html element
                 var name = document.createElement('h1')
                 name.textContent = "3D View"
                 name.setAttribute('class','doc-title')
                 sideBar.appendChild(name)
 
+                var gridDiv = document.createElement('div')
+                sideBar.appendChild(gridDiv)
+                gridDiv.setAttribute('id', 'gridDiv')
                 var gridCheck = document.createElement('input')
-                sideBar.appendChild(gridCheck)
+                gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute('type', 'checkbox')
                 gridCheck.setAttribute('id', 'gridCheck')
                 gridCheck.setAttribute('checked', 'true')
                 var gridCheckLabel = document.createElement('label')
-                sideBar.appendChild(gridCheckLabel)
+                gridDiv.appendChild(gridCheckLabel)
                 gridCheckLabel.setAttribute('for', 'gridCheck')
+                gridCheckLabel.setAttribute('style', 'margin-right:1em;')
                 gridCheckLabel.textContent= "Grid"
 
                 gridCheck.addEventListener('change', event => {
@@ -91,6 +99,55 @@ export default class Display {
                     }
                     else{
                         this.scene.remove(this.plane)
+                    }
+                })
+
+                //Axes Html
+
+                var axesDiv = document.createElement('div')
+                sideBar.appendChild(axesDiv)
+                var axesCheck = document.createElement('input')
+                axesDiv.appendChild(axesCheck)
+                axesCheck.setAttribute('type', 'checkbox')
+                axesCheck.setAttribute('id', 'axesCheck')
+                axesCheck.setAttribute('checked', 'true')
+                var axesCheckLabel = document.createElement('label')
+                axesDiv.appendChild(axesCheckLabel)
+                axesCheckLabel.setAttribute('for', 'axesCheck')
+                axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+                axesCheckLabel.textContent= "Axes"
+
+                axesCheck.addEventListener('change', event => {
+                    if(event.target.checked){
+                        this.scene.add( axesHelper)
+                    }
+                    else{
+                        this.scene.remove( axesHelper )
+                    }
+                })
+
+                //Wireframe HTML element
+
+                var wireDiv = document.createElement('div')
+                sideBar.appendChild(wireDiv)
+                wireDiv.setAttribute('id', 'wireDiv')
+                var wireCheck = document.createElement('input')
+                wireDiv.appendChild(wireCheck)
+                wireCheck.setAttribute('type', 'checkbox')
+                wireCheck.setAttribute('id', 'wireCheck')
+                wireCheck.setAttribute('checked', 'false')
+                var wireCheckLabel = document.createElement('label')
+                wireDiv.appendChild(wireCheckLabel)
+                wireCheckLabel.setAttribute('for', 'wireCheck')
+                wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+                wireCheckLabel.textContent= "Wireframe"
+
+                wireCheck.addEventListener('change', event => {
+                    if( event.target.checked){
+                        this.threeMaterial.wireframe = true
+                    }
+                    else{
+                        this.threeMaterial.wireframe = false
                     }
                 })
             }
@@ -127,6 +184,13 @@ export default class Display {
         }
     }
     
+    zoomCameraToFit(bounds){
+        this.controls.reset()
+        this.camera.position.x = 0
+        this.camera.position.y = -5*Math.max(...bounds[1])
+        this.camera.position.z = 5*Math.max(...bounds[1])
+    }
+    
     updateDisplayData(threejsGeometry){
         // Delete any previous dataset in the window.
         for (const { mesh } of this.datasets) {
@@ -136,12 +200,12 @@ export default class Display {
         // Build new datasets from the written data, and display them.
         this.datasets = []
         
-        let threeMaterial = new THREE.MeshStandardMaterial({
+        this.threeMaterial = new THREE.MeshStandardMaterial({
             color: 0x5f6670,
             roughness: 0.65,
-            metalness: 0.40
+            metalness: 0.40   
         })
-        
+
         const walk = (geometry) => {
             if (geometry.assembly) {
                 geometry.assembly.forEach(walk)
@@ -152,7 +216,7 @@ export default class Display {
                 for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
                     threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ))
                 }
-                dataset.mesh = new THREE.LineSegments(threejsGeometry, threeMaterial)
+                dataset.mesh = new THREE.LineSegments(threejsGeometry, this.threeMaterial)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
             } else if (geometry.threejsSolid) {
@@ -161,7 +225,7 @@ export default class Display {
                 const threejsGeometry = new THREE.BufferGeometry()
                 threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
                 threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-                dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial)
+                dataset.mesh = new THREE.Mesh(threejsGeometry, this.threeMaterial)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
             } else if (geometry.threejsSurface) {
@@ -170,7 +234,7 @@ export default class Display {
                 const threejsGeometry = new THREE.BufferGeometry()
                 threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
                 threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-                dataset.mesh = new THREE.Mesh(threejsGeometry, threeMaterial)
+                dataset.mesh = new THREE.Mesh(threejsGeometry, this.threeMaterial)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
             }

@@ -131,7 +131,8 @@ export default class Atom {
                 value: defaultValue,
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
-                atomType: 'AttachmentPoint'
+                atomType: 'AttachmentPoint',
+                ready: !GlobalVariables.evalLock
             })
             
             if(type == 'input'){
@@ -257,9 +258,9 @@ export default class Atom {
         var valueList = this.initializeSideBar()
         
         //Add options to set all of the inputs
-        this.inputs.forEach(child => {
-            if(child.type == 'input' && child.valueType != 'geometry'){
-                this.createEditableValueListItem(valueList,child,'value', child.name, true)
+        this.inputs.forEach(input => {
+            if(input.type == 'input' && input.valueType != 'geometry' && input.connectors.length == 0){
+                this.createEditableValueListItem(valueList,input,'value', input.name, true)
             }
         })
         
@@ -293,6 +294,9 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.deleteSelf()       
         })
+        if(this.output){
+            this.output.deleteSelf()
+        }
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
@@ -315,7 +319,7 @@ export default class Atom {
         
         var ioValues = []
         this.inputs.forEach(io => {
-            if (typeof io.getValue() == 'number' && io.type == 'input'){
+            if (typeof io.getValue() == 'number'){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()

@@ -94,6 +94,10 @@ export default class Connector {
         }
     }
     
+    lock(){
+        this.attachmentPoint2.lock()
+    }
+    
     propogate(){
         //takes the input and passes it to the output
         this.attachmentPoint2.setValue(this.attachmentPoint1.getValue())
