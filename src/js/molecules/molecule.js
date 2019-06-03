@@ -309,17 +309,18 @@ export default class Molecule extends Atom{
         
     deserialize(moleculeList, moleculeID){
         //Find the target molecule in the list
-        var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
+        let promiseArray = []
+        let moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
-        
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            promiseArray.push(promise)
         })
+        
         //reload the molecule object to prevent persistence issues
         moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
-            
         //Place the connectors
         this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
@@ -329,11 +330,12 @@ export default class Molecule extends Atom{
         this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
         this.updateValue()
+        return Promise.all(promiseArray)
     }
     
     async placeAtom(newAtomObj, moleculeList, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
-        
+        var promise
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
@@ -345,14 +347,15 @@ export default class Molecule extends Atom{
                     atom.draw() //The poling happens in draw :roll_eyes:
                 }
 
-                //If this is a molecule, deserialize it
+                //If this is a molecule, de-serialize it
                 if(atom.atomType == 'Molecule' && moleculeList != null){
-                    atom.deserialize(moleculeList, atom.uniqueID)
+                    promise = atom.deserialize(moleculeList, atom.uniqueID)
                 }
                 
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
-                    atom.loadProjectByID(atom.projectID)
+                    promise = await atom.loadProjectByID(atom.projectID)
+                    console.log("Finished loading by ID")
                 }
                 
                 if(unlock){
@@ -363,6 +366,7 @@ export default class Molecule extends Atom{
                 this.nodesOnTheScreen.push(atom)
             }
         }
+        return promise
     }
     
     placeConnector(connectorObj){

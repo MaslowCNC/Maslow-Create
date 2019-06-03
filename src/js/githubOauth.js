@@ -538,33 +538,32 @@ export default function GitHubModule(){
             }
             
             //Load the top level molecule from the file
-            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
+            const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
-            GlobalVariables.topLevelMolecule.backgroundClick()
-            GlobalVariables.evalLock = false
-            GlobalVariables.topLevelMolecule.unlock()
-            GlobalVariables.topLevelMolecule.beginPropogation()
-            console.log("Beginning propogation from load")
+            allAtomsPlaced.then( ()=> {
+                GlobalVariables.evalLock = false
+                GlobalVariables.topLevelMolecule.unlock()
+                GlobalVariables.topLevelMolecule.beginPropogation()
+                GlobalVariables.topLevelMolecule.backgroundClick()
+                console.log("Beginning propagation from load")
+            })
             
-            intervalTimer = setInterval(()=>{ this.saveProject() }, 60000) //Save the project regularly
+            intervalTimer = setInterval(() => this.saveProject(), 60000) //Save the project regularly
         })
         
     }
     
     this.getProjectByID = async function(id){
-        let result = await octokit.request('GET /repositories/:id', {id})
-            
+        let repo = await octokit.request('GET /repositories/:id', {id})
         //Find out the owners info;
-        var user     = result.data.owner.login
-        var repoName = result.data.name
-        
+        const user     = repo.data.owner.login
+        const repoName = repo.data.name
         //Get the file contents
-        result = await octokit.repos.getContents({
+        let result = await octokit.repos.getContents({
             owner: user,
             repo: repoName,
             path: 'project.maslowcreate'
         })
-        
         return result
     }
     

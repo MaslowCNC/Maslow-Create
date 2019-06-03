@@ -30,16 +30,15 @@ export default class GitHubMolecule extends Molecule {
     }
     
     async loadProjectByID(id){
-    //Get the repo by ID
+        
+        //Get the repo by ID
         const result = await GlobalVariables.gitHub.getProjectByID(id)
-                    
         //content will be base64 encoded
         let rawFile = atob(result.data.content)
         let moleculesList =  JSON.parse(rawFile).molecules
         
-        //Preserve values which will be overwritten by the deserialize process
+        //Preserve values which will be overwritten by the de-serialize process
         var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
-        
         this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
         
         this.setValues(preservedValues)
@@ -50,8 +49,6 @@ export default class GitHubMolecule extends Molecule {
                 this.parent.placeConnector(connector)
             })
         }
-        
-        console.log("Finished loading github molecule")
     }
     
     serialize(){
