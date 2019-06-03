@@ -33,7 +33,7 @@ export default class Output extends Atom {
             super.updateValue()
             
             if(this.parent.topLevel){
-                console.trace()
+                console.log("TOP LEVEL OUTPUT RAN")
             }
         }
     }

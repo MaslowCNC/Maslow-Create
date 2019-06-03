@@ -351,9 +351,6 @@ export default class Atom {
     }
     
     displayAndPropogate(){
-        if(this.parent.topLevel){
-            console.log("Propogating: " + this.name)
-        }
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
@@ -362,6 +359,7 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.setValue(this.value)
+            this.output.ready = true
         }
     }
     

@@ -41,7 +41,6 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
-        
     }
     
     doubleClick(x,y){
@@ -324,7 +323,7 @@ export default class Molecule extends Atom{
         //Place the connectors
         this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
         this.savedConnectors.forEach(connector => {
-            this.placeConnector(connector, true)
+            this.placeConnector(connector)
         })
         
         this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
@@ -332,7 +331,7 @@ export default class Molecule extends Atom{
         this.updateValue()
     }
     
-    placeAtom(newAtomObj, moleculeList, typesList, unlock){
+    async placeAtom(newAtomObj, moleculeList, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
         
         for(var key in typesList) {
@@ -351,6 +350,11 @@ export default class Molecule extends Atom{
                     atom.deserialize(moleculeList, atom.uniqueID)
                 }
                 
+                //If this is a github molecule load it from the web
+                if(atom.atomType == 'GitHubMolecule'){
+                    atom.loadProjectByID(atom.projectID)
+                }
+                
                 if(unlock){
                     //Make it spawn ready to update right away
                     atom.unlock()
@@ -359,18 +363,9 @@ export default class Molecule extends Atom{
                 this.nodesOnTheScreen.push(atom)
             }
         }
-        
-        if(newAtomObj.atomType == 'Output'){
-            //re-asign output ID numbers if a new one is supposed to be placed
-            this.nodesOnTheScreen.forEach(atom => {
-                if(atom.atomType == 'Output'){
-                    atom.setID(newAtomObj.uniqueID)
-                }
-            })
-        }
     }
     
-    placeConnector(connectorObj, silent){
+    placeConnector(connectorObj){
         var connector
         var cp1NotFound = true
         var cp2NotFound = true
@@ -414,9 +409,7 @@ export default class Molecule extends Atom{
         connector.attachmentPoint2.connectors.push(connector)
         
         //Update the connection
-        if(!silent){
-            connector.propogate()
-        }
+        connector.propogate()
     }
     
     sendToRender(){
