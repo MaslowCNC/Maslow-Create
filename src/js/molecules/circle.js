@@ -19,7 +19,7 @@ export default class Circle extends Atom {
     updateValue(){
         try{
             const circumference  = 3.14*2*this.findIOValue('radius')
-            const numberOfSegments = parseInt( circumference / GlobalVariables.circleSegmentSize )
+            const numberOfSegments = Math.max(parseInt( circumference / GlobalVariables.circleSegmentSize ),5)
             
             const values = [this.findIOValue('radius'), numberOfSegments]
             this.basicThreadValueProcessing(values, "circle")

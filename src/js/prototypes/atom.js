@@ -359,6 +359,7 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.setValue(this.value)
+            this.output.ready = true
         }
     }
     
@@ -395,7 +396,13 @@ export default class Atom {
                 input.ready = true
             }
         })
-        this.updateValue()
+    }
+    
+    beginPropogation(){
+        //This function will trigger the tips of the tree branches to start generating values
+        if(this.inputs.every(x => x.connectors.length == 0) || this.inputs.length == 0){ //If this atom has nothing upstream of it, and if it does not trigger propogation from it
+            this.updateValue()
+        }
     }
     
     sendToRender(){
