@@ -319,18 +319,22 @@ export default class Molecule extends Atom{
             promiseArray.push(promise)
         })
         
-        //reload the molecule object to prevent persistence issues
-        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
-        //Place the connectors
-        this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
-        this.savedConnectors.forEach(connector => {
-            this.placeConnector(connector)
-        })
-        
-        this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
+        return Promise.all(promiseArray).then( ()=> {
+            //Once all the atoms are placed we can finish
+            console.log("One")
+            
+            //reload the molecule object to prevent persistence issues
+            moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
+            //Place the connectors
+            this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
+            this.savedConnectors.forEach(connector => {
+                this.placeConnector(connector)
+            })
+            
+            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
-        this.updateValue()
-        return Promise.all(promiseArray)
+            this.updateValue()
+        })
     }
     
     async placeAtom(newAtomObj, moleculeList, typesList, unlock){
@@ -355,7 +359,6 @@ export default class Molecule extends Atom{
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
                     promise = await atom.loadProjectByID(atom.projectID)
-                    console.log("Finished loading by ID")
                 }
                 
                 if(unlock){

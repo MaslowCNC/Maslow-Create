@@ -42,13 +42,6 @@ export default class GitHubMolecule extends Molecule {
         this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
         
         this.setValues(preservedValues)
-        
-        //Try to re-establish the connectors in the parent molecule to get the ones that were missed before when this molecule had not yet been fully loaded
-        if(typeof this.parent !== 'undefined'){
-            this.parent.savedConnectors.forEach(connector => {
-                this.parent.placeConnector(connector)
-            })
-        }
     }
     
     serialize(){
