@@ -321,7 +321,6 @@ export default class Molecule extends Atom{
         
         return Promise.all(promiseArray).then( ()=> {
             //Once all the atoms are placed we can finish
-            console.log("One")
             
             //reload the molecule object to prevent persistence issues
             moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]

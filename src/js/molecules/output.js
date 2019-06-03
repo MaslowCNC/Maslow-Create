@@ -31,10 +31,6 @@ export default class Output extends Atom {
             this.parent.propogate()
             
             super.updateValue()
-            
-            if(this.parent.topLevel){
-                console.log("Top level output ran")
-            }
         }
     }
     

@@ -541,8 +541,6 @@ export default function GitHubModule(){
             const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
             allAtomsPlaced.then( ()=> {
-                console.log("Two")
-                console.log("Beginning propagation from load")
                 GlobalVariables.evalLock = false
                 GlobalVariables.topLevelMolecule.unlock()
                 GlobalVariables.topLevelMolecule.beginPropogation()
