@@ -18,8 +18,14 @@ export default function GitHubModule(){
     })
     
     this.tryLogin = function(){
+        
         // Initialize with OAuth.io app public key
-        OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
+        if(window.location.href.includes('private')){
+            OAuth.initialize('6CQQE8MMCBFjdWEjevnTBMCQpsw') //app public key for repo scope
+        }
+        else{
+            OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8') //app public key for public_repo scope
+        }
         // Use popup for oauth
         OAuth.popup('github').then(github => {
             
@@ -492,7 +498,7 @@ export default function GitHubModule(){
     }
     
     this.loadProject = function(projectName){
-        
+        GlobalVariables.evalLock = true //Lock evaluation of anything
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
@@ -532,32 +538,31 @@ export default function GitHubModule(){
             }
             
             //Load the top level molecule from the file
-            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
+            const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
-            GlobalVariables.topLevelMolecule.backgroundClick()
-            GlobalVariables.evalLock = false
-            GlobalVariables.topLevelMolecule.unlock()
+            allAtomsPlaced.then( ()=> {
+                GlobalVariables.evalLock = false
+                GlobalVariables.topLevelMolecule.unlock()
+                GlobalVariables.topLevelMolecule.beginPropogation()
+                GlobalVariables.topLevelMolecule.backgroundClick()
+            })
             
-            var _this = this
-            intervalTimer = setInterval(function() { _this.saveProject() }, 60000) //Save the project regularly
+            intervalTimer = setInterval(() => this.saveProject(), 60000) //Save the project regularly
         })
         
     }
     
     this.getProjectByID = async function(id){
-        let result = await octokit.request('GET /repositories/:id', {id})
-            
+        let repo = await octokit.request('GET /repositories/:id', {id})
         //Find out the owners info;
-        var user     = result.data.owner.login
-        var repoName = result.data.name
-        
+        const user     = repo.data.owner.login
+        const repoName = repo.data.name
         //Get the file contents
-        result = await octokit.repos.getContents({
+        let result = await octokit.repos.getContents({
             owner: user,
             repo: repoName,
             path: 'project.maslowcreate'
         })
-        
         return result
     }
     

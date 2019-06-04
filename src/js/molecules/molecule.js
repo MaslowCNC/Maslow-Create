@@ -41,7 +41,6 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
-        
     }
     
     doubleClick(x,y){
@@ -111,7 +110,13 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(node => {
             node.unlock()
         })
-        this.updateValue()
+    }
+    
+    beginPropogation(){
+        super.beginPropogation()
+        this.nodesOnTheScreen.forEach(node => {
+            node.beginPropogation()
+        })
     }
     
     updateSidebar(){
@@ -137,6 +142,8 @@ export default class Molecule extends Atom{
                 GlobalVariables.gitHub.openGitHubPage()
             })
             
+            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
+            
         }
         
         this.createButton(valueList,this,'Download STL',() => {
@@ -158,9 +165,8 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         
-        this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
-        
-        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
+
+        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
             //Add options to set all of the inputs
             this.inputs.forEach(child => {
                 if(child.type == 'input' && child.valueType != 'geometry'){
@@ -304,31 +310,36 @@ export default class Molecule extends Atom{
         
     deserialize(moleculeList, moleculeID){
         //Find the target molecule in the list
-        var moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
+        let promiseArray = []
+        let moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
-        
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
-        })
-        //reload the molecule object to prevent persistence issues
-        moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
-            
-        //Place the connectors
-        this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
-        this.savedConnectors.forEach(connector => {
-            this.placeConnector(connector)
+            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            promiseArray.push(promise)
         })
         
-        this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
+        return Promise.all(promiseArray).then( ()=> {
+            //Once all the atoms are placed we can finish
+            
+            //reload the molecule object to prevent persistence issues
+            moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
+            //Place the connectors
+            this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
+            this.savedConnectors.forEach(connector => {
+                this.placeConnector(connector)
+            })
+            
+            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
-        this.updateValue()
+            this.updateValue()
+        })
     }
     
-    placeAtom(newAtomObj, moleculeList, typesList, unlock){
+    async placeAtom(newAtomObj, moleculeList, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
-        
+        var promise
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
@@ -340,28 +351,26 @@ export default class Molecule extends Atom{
                     atom.draw() //The poling happens in draw :roll_eyes:
                 }
 
-                //If this is a molecule, deserialize it
+                //If this is a molecule, de-serialize it
                 if(atom.atomType == 'Molecule' && moleculeList != null){
-                    atom.deserialize(moleculeList, atom.uniqueID)
+                    promise = atom.deserialize(moleculeList, atom.uniqueID)
+                }
+                
+                //If this is a github molecule load it from the web
+                if(atom.atomType == 'GitHubMolecule'){
+                    promise = await atom.loadProjectByID(atom.projectID)
                 }
                 
                 if(unlock){
                     //Make it spawn ready to update right away
                     atom.unlock()
+                    atom.updateValue() //setup the initial value
                 }
                 
                 this.nodesOnTheScreen.push(atom)
             }
         }
-        
-        if(newAtomObj.atomType == 'Output'){
-            //re-asign output ID numbers if a new one is supposed to be placed
-            this.nodesOnTheScreen.forEach(atom => {
-                if(atom.atomType == 'Output'){
-                    atom.setID(newAtomObj.uniqueID)
-                }
-            })
-        }
+        return promise
     }
     
     placeConnector(connectorObj){

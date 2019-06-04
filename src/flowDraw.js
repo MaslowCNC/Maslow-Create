@@ -12,8 +12,7 @@ GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
 let originalWidth = GlobalVariables.canvas.width
 
-var url = window.location.href
-GlobalVariables.runMode = url.includes('run') //Check if we are using the run mode based on url
+GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
 
 let lowerHalfOfScreen = document.querySelector('.flex-parent')
 if(!GlobalVariables.runMode){
@@ -116,6 +115,13 @@ function init() {
             GlobalVariables.currentMolecule = new GitHubMolecule({
                 projectID: ID,
                 topLevel: true
+            })
+            GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
+            GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
+                GlobalVariables.evalLock = false
+                GlobalVariables.topLevelMolecule.unlock()
+                GlobalVariables.topLevelMolecule.beginPropogation()
+                GlobalVariables.topLevelMolecule.backgroundClick()
             })
         }
     }

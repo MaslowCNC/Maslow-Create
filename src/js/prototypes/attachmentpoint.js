@@ -261,6 +261,20 @@ export default class AttachmentPoint {
         this.connectors.push(connector)
     }
     
+    lock(){
+        if(this.type == 'output'){
+            this.connectors.forEach(connector => {
+                connector.lock()
+            })
+        }
+        else{
+            this.ready = false
+            if(this.parentMolecule.output){
+                this.parentMolecule.output.lock()
+            }
+        }
+    }
+    
     setDefault(){
         this.setValue(this.defaultValue)
        
