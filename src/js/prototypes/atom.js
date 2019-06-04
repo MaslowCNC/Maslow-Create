@@ -188,7 +188,6 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            console.log(this.parent)
         }
         else{
             this.color = this.defaultColor

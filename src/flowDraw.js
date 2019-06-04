@@ -122,7 +122,6 @@ function init() {
                 GlobalVariables.topLevelMolecule.unlock()
                 GlobalVariables.topLevelMolecule.beginPropogation()
                 GlobalVariables.topLevelMolecule.backgroundClick()
-                console.log(GlobalVariables.topLevelMolecule)
             })
         }
     }
