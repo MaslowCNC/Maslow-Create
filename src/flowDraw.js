@@ -116,6 +116,13 @@ function init() {
                 projectID: ID,
                 topLevel: true
             })
+            GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
+            GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
+                GlobalVariables.evalLock = false
+                GlobalVariables.topLevelMolecule.unlock()
+                GlobalVariables.topLevelMolecule.beginPropogation()
+                GlobalVariables.topLevelMolecule.backgroundClick()
+            })
         }
     }
     
