@@ -10,7 +10,6 @@ export default class GitHubMolecule extends Molecule {
         this.atomType = 'GitHubMolecule'
         this.topLevel = false //a flag to signal if this node is the top level node
         this.centerColor = 'black'
-        this.projectID = 0
         
         this.setValues(values)
     }
@@ -38,10 +37,12 @@ export default class GitHubMolecule extends Molecule {
         let moleculesList =  JSON.parse(rawFile).molecules
         
         //Preserve values which will be overwritten by the de-serialize process
-        var preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
-        this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
+        var preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
+        var promsie = this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
         
         this.setValues(preservedValues)
+        
+        return promsie
     }
     
     serialize(){
