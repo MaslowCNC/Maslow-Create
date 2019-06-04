@@ -142,6 +142,8 @@ export default class Molecule extends Atom{
                 GlobalVariables.gitHub.openGitHubPage()
             })
             
+            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
+            
         }
         
         this.createButton(valueList,this,'Download STL',() => {
@@ -163,9 +165,8 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         
-        this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
-        
-        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID){ //If we are not currently inside this molecule
+
+        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
             //Add options to set all of the inputs
             this.inputs.forEach(child => {
                 if(child.type == 'input' && child.valueType != 'geometry'){
