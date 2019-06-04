@@ -498,7 +498,7 @@ export default function GitHubModule(){
     }
     
     this.loadProject = function(projectName){
-        
+        GlobalVariables.evalLock = true //Lock evaluation of anything
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
