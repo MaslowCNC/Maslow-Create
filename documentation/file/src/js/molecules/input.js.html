@@ -83,7 +83,7 @@ export default class Input extends Atom {
         super (values)
         
         this.name = &apos;Input&apos; + GlobalVariables.generateUniqueID()
-        this.value = &apos;&apos;
+        this.value = 10
         this.type = &apos;input&apos;
         this.atomType = &apos;Input&apos;
         this.height = 16
@@ -99,8 +99,6 @@ export default class Input extends Atom {
         if (typeof this.parent !== &apos;undefined&apos;) {
             this.parent.addIO(&apos;input&apos;, this.name, this.parent, &apos;number or geometry&apos;, 10)
         }
-        
-        this.setOutput(this.value) //force propogation
     }
     
     updateSidebar(){
@@ -118,32 +116,31 @@ export default class Input extends Atom {
     }
     
     draw() {
-        this.scaledX = GlobalVariables.scaleFactorXY * this.x
-        this.scaledY = GlobalVariables.scaleFactorXY * this.y
         
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
         
-        this.inputs.forEach(child =&gt; {
-            child.draw()       
-        })
-        
-        
         GlobalVariables.c.fillStyle = this.color
-        
+        GlobalVariables.c.strokeStyle = this.parent.strokeColor
         GlobalVariables.c.textAlign = &apos;start&apos; 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-
-        
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height/2)
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height)
         GlobalVariables.c.lineTo(this.x - this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height)
         GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
         GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
+        GlobalVariables.c.stroke()
 
+        this.inputs.forEach(input =&gt; {
+            input.draw()       
+        })
+        if(this.output){
+            this.output.draw()
+        }
     }
     
     deleteNode() {
@@ -168,20 +165,25 @@ export default class Input extends Atom {
     }
     
     setOutput(newOutput){
+        this.output.lock() //Lock all of the dependants
         //Set the input&apos;s output
         this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
-        
-        //Set the output nodes with type &apos;geometry&apos; to be the new value
+        //Set the output to be the new value
         this.output.setValue(newOutput)
-        
+    }
+    
+    beginPropogation(){
+        if(this.parent.topLevel){
+            this.updateValue()
+        }
     }
     
     getOutput(){
         return this.output.getValue()
     }
     
-    updateValue(){
-        //This empty function handles any calls to the normal update code block function which breaks things here
+    displayAndPropogate(){
+        this.setOutput(this.getOutput())
     }
 }
 </code></pre>

@@ -1,21 +1,20 @@
 {
   "coverage": "0.25%",
-  "expectCount": 389,
+  "expectCount": 387,
   "actualCount": 1,
   "files": {
     "src/flowDraw.js": {
-      "expectCount": 9,
+      "expectCount": 8,
       "actualCount": 0,
       "undocumentLines": [
         13,
-        15,
-        18,
-        24,
-        26,
-        31,
-        101,
-        129,
-        151
+        17,
+        23,
+        25,
+        30,
+        100,
+        135,
+        157
       ]
     },
     "src/js/alwaysOneFreeInput.js": {
@@ -42,25 +41,26 @@
       ]
     },
     "src/js/display.js": {
-      "expectCount": 16,
+      "expectCount": 17,
       "actualCount": 0,
       "undocumentLines": [
         5,
         7,
         9,
         10,
-        18,
-        21,
-        24,
-        35,
-        54,
-        59,
-        100,
-        114,
-        130,
-        137,
-        188,
-        195
+        19,
+        22,
+        25,
+        36,
+        58,
+        63,
+        157,
+        171,
+        187,
+        194,
+        203,
+        245,
+        252
       ]
     },
     "src/js/githubOauth.js": {
@@ -191,7 +191,7 @@
         25,
         33,
         46,
-        60
+        67
       ]
     },
     "src/js/molecules/difference.js": {
@@ -251,25 +251,22 @@
       ]
     },
     "src/js/molecules/githubmolecule.js": {
-      "expectCount": 12,
+      "expectCount": 9,
       "actualCount": 0,
       "undocumentLines": [
         4,
         6,
+        9,
         10,
         11,
         12,
-        13,
-        14,
-        20,
-        34,
-        64,
-        91,
-        100
+        17,
+        31,
+        54
       ]
     },
     "src/js/molecules/input.js": {
-      "expectCount": 18,
+      "expectCount": 17,
       "actualCount": 0,
       "undocumentLines": [
         4,
@@ -281,15 +278,14 @@
         13,
         14,
         18,
-        30,
-        44,
-        45,
-        46,
-        73,
-        83,
-        94,
-        103,
-        107
+        28,
+        42,
+        70,
+        80,
+        91,
+        99,
+        105,
+        109
       ]
     },
     "src/js/molecules/intersection.js": {
@@ -304,7 +300,7 @@
       ]
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 29,
+      "expectCount": 30,
       "actualCount": 0,
       "undocumentLines": [
         7,
@@ -316,30 +312,31 @@
         17,
         18,
         35,
-        47,
-        64,
-        66,
-        71,
-        75,
-        77,
-        95,
-        107,
-        117,
-        179,
-        207,
-        216,
-        221,
-        245,
-        258,
-        305,
-        319,
+        46,
+        63,
+        65,
+        70,
+        74,
+        76,
+        94,
+        106,
+        115,
+        122,
+        185,
+        213,
+        222,
+        227,
+        251,
+        264,
+        311,
         329,
-        367,
-        414
+        340,
+        376,
+        423
       ]
     },
     "src/js/molecules/output.js": {
-      "expectCount": 14,
+      "expectCount": 12,
       "actualCount": 0,
       "undocumentLines": [
         5,
@@ -353,9 +350,7 @@
         27,
         37,
         38,
-        41,
-        43,
-        44
+        41
       ]
     },
     "src/js/molecules/readme.js": {
@@ -483,7 +478,7 @@
       ]
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 46,
+      "expectCount": 47,
       "actualCount": 0,
       "undocumentLines": [
         4,
@@ -524,18 +519,19 @@
         343,
         349,
         353,
-        365,
-        391,
+        366,
+        392,
         401,
-        412,
-        427,
-        482,
-        513,
-        553
+        408,
+        419,
+        434,
+        489,
+        520,
+        560
       ]
     },
     "src/js/prototypes/attachmentpoint.js": {
-      "expectCount": 37,
+      "expectCount": 38,
       "actualCount": 0,
       "undocumentLines": [
         4,
@@ -572,13 +568,14 @@
         244,
         260,
         264,
-        269,
-        273,
-        290
+        278,
+        283,
+        287,
+        304
       ]
     },
     "src/js/prototypes/connector.js": {
-      "expectCount": 21,
+      "expectCount": 22,
       "actualCount": 0,
       "undocumentLines": [
         3,
@@ -601,7 +598,8 @@
         74,
         85,
         97,
-        102
+        101,
+        108
       ]
     },
     "src/utils.js": {

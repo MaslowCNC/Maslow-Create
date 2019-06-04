@@ -654,6 +654,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/display.js~display#threematerial",
+    "class/src/js/display.js~Display.html#instance-member-threeMaterial",
+    "src/js/display.js~Display#threeMaterial",
+    "member"
+  ],
+  [
     "src/js/display.js~display#updatedisplaydata",
     "class/src/js/display.js~Display.html#instance-method-updateDisplayData",
     "src/js/display.js~Display#updateDisplayData",
@@ -1320,12 +1326,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/githubmolecule.js~githubmolecule#projectid",
-    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-member-projectID",
-    "src/js/molecules/githubmolecule.js~GitHubMolecule#projectID",
-    "member"
-  ],
-  [
     "src/js/molecules/githubmolecule.js~githubmolecule#serialize",
     "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-serialize",
     "src/js/molecules/githubmolecule.js~GitHubMolecule#serialize",
@@ -1336,18 +1336,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-member-topLevel",
     "src/js/molecules/githubmolecule.js~GitHubMolecule#topLevel",
     "member"
-  ],
-  [
-    "src/js/molecules/githubmolecule.js~githubmolecule#updatesidebar",
-    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-updateSidebar",
-    "src/js/molecules/githubmolecule.js~GitHubMolecule#updateSidebar",
-    "method"
-  ],
-  [
-    "src/js/molecules/githubmolecule.js~githubmolecule#updatevalue",
-    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-updateValue",
-    "src/js/molecules/githubmolecule.js~GitHubMolecule#updateValue",
-    "method"
   ],
   [
     "src/js/molecules/input.js",
@@ -1362,6 +1350,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/input.js~input#beginpropogation",
+    "class/src/js/molecules/input.js~Input.html#instance-method-beginPropogation",
+    "src/js/molecules/input.js~Input#beginPropogation",
+    "method"
+  ],
+  [
     "src/js/molecules/input.js~input#constructor",
     "class/src/js/molecules/input.js~Input.html#instance-constructor-constructor",
     "src/js/molecules/input.js~Input#constructor",
@@ -1371,6 +1365,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/input.js~input#deletenode",
     "class/src/js/molecules/input.js~Input.html#instance-method-deleteNode",
     "src/js/molecules/input.js~Input#deleteNode",
+    "method"
+  ],
+  [
+    "src/js/molecules/input.js~input#displayandpropogate",
+    "class/src/js/molecules/input.js~Input.html#instance-method-displayAndPropogate",
+    "src/js/molecules/input.js~Input#displayAndPropogate",
     "method"
   ],
   [
@@ -1410,18 +1410,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/input.js~input#scaledx",
-    "class/src/js/molecules/input.js~Input.html#instance-member-scaledX",
-    "src/js/molecules/input.js~Input#scaledX",
-    "member"
-  ],
-  [
-    "src/js/molecules/input.js~input#scaledy",
-    "class/src/js/molecules/input.js~Input.html#instance-member-scaledY",
-    "src/js/molecules/input.js~Input#scaledY",
-    "member"
-  ],
-  [
     "src/js/molecules/input.js~input#setoutput",
     "class/src/js/molecules/input.js~Input.html#instance-method-setOutput",
     "src/js/molecules/input.js~Input#setOutput",
@@ -1443,12 +1431,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/input.js~input#updatesidebar",
     "class/src/js/molecules/input.js~Input.html#instance-method-updateSidebar",
     "src/js/molecules/input.js~Input#updateSidebar",
-    "method"
-  ],
-  [
-    "src/js/molecules/input.js~input#updatevalue",
-    "class/src/js/molecules/input.js~Input.html#instance-method-updateValue",
-    "src/js/molecules/input.js~Input#updateValue",
     "method"
   ],
   [
@@ -1503,6 +1485,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/molecule.js~molecule#backgroundclick",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-backgroundClick",
     "src/js/molecules/molecule.js~Molecule#backgroundClick",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#beginpropogation",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropogation",
+    "src/js/molecules/molecule.js~Molecule#beginPropogation",
     "method"
   ],
   [
@@ -1701,18 +1689,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/output.js~output#radius",
     "class/src/js/molecules/output.js~Output.html#instance-member-radius",
     "src/js/molecules/output.js~Output#radius",
-    "member"
-  ],
-  [
-    "src/js/molecules/output.js~output#scaledx",
-    "class/src/js/molecules/output.js~Output.html#instance-member-scaledX",
-    "src/js/molecules/output.js~Output#scaledX",
-    "member"
-  ],
-  [
-    "src/js/molecules/output.js~output#scaledy",
-    "class/src/js/molecules/output.js~Output.html#instance-member-scaledY",
-    "src/js/molecules/output.js~Output#scaledY",
     "member"
   ],
   [
@@ -2160,6 +2136,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#beginpropogation",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation",
+    "src/js/prototypes/atom.js~Atom#beginPropogation",
+    "method"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#clearalert",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert",
     "src/js/prototypes/atom.js~Atom#clearAlert",
@@ -2532,6 +2514,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#lock",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-lock",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#lock",
+    "method"
+  ],
+  [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#offsetx",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-offsetX",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#offsetX",
@@ -2715,6 +2703,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/connector.js~connector#keypress",
     "class/src/js/prototypes/connector.js~Connector.html#instance-method-keyPress",
     "src/js/prototypes/connector.js~Connector#keyPress",
+    "method"
+  ],
+  [
+    "src/js/prototypes/connector.js~connector#lock",
+    "class/src/js/prototypes/connector.js~Connector.html#instance-method-lock",
+    "src/js/prototypes/connector.js~Connector#lock",
     "method"
   ],
   [
