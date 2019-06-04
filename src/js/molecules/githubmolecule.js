@@ -36,8 +36,14 @@ export default class GitHubMolecule extends Molecule {
         let rawFile = atob(result.data.content)
         let moleculesList =  JSON.parse(rawFile).molecules
         
-        //Preserve values which will be overwritten by the de-serialize process
-        var preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
+        //Preserve values which will be overwritten by the de-serialize process. We only want to keep them if this is not the top level atom
+        var preservedValues
+        if(this.topLevel){
+            preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
+        }
+        else{
+            preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+        }
         var promsie = this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
         
         this.setValues(preservedValues)
