@@ -1,7 +1,14 @@
 import Atom from '../prototypes/atom'
 
+/**
+ * This class creates the translate atom.
+ */
 export default class Translate extends Atom{
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
@@ -17,6 +24,9 @@ export default class Translate extends Atom{
         this.setValues(values)
     }
     
+    /**
+     * Pass the input geometry to a worker function to compute the translation.
+     */ 
     updateValue(){
         try{
             const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]

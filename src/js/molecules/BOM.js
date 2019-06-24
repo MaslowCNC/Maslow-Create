@@ -1,17 +1,15 @@
-/**
- * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
- */
-
 import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
 import {BOMEntry} from '../BOM.js'
 
-
+/**
+ * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
+ */
 export default class AddBOMTag extends Atom{
     /**
-    * The constructor function.
-    * @param {object} values An array of values passed in which will be assigned to the class as this.x
-    */ 
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
@@ -29,8 +27,10 @@ export default class AddBOMTag extends Atom{
         this.setValues(values)
     }
     
+    /**
+     * Set the value to be the BOMitem, then call super updateValue()
+     */ 
     updateValue(){
-        //Overwrite the normal update code block to update the number of segments also
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             try{
                 this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMitem))
@@ -43,18 +43,20 @@ export default class AddBOMTag extends Atom{
         }
     }
     
+    /**
+     * Updates the side bar to display the BOM item information
+     */ 
     updateSidebar(){
-        //updates the sidebar to display information about this node
-        
         var valueList = super.updateSidebar() //call the super function
-        
         this.createBOM(valueList)
     }
     
+    /**
+     * Add a B to the molecule representation
+     */ 
     draw() {
         
         super.draw() //Super call to draw the rest
-        
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#949294'
@@ -65,12 +67,18 @@ export default class AddBOMTag extends Atom{
         
     }
     
+    /**
+     * I'm not sure this actually does anything. Delete? 
+     */ 
     requestReadme(){
         //request any contributions from this atom to the readme
-        
         return [this.readmeText]
     }
    
+    /**
+     * Creates an editable UI represntation of the bom list. 
+     * @param {Object} list - list is an object to which the generated HTML element will be apended
+     */ 
     createBOM(list){
         
         list.appendChild(document.createElement('br'))
@@ -93,7 +101,9 @@ export default class AddBOMTag extends Atom{
         list.appendChild(x)
     }
     
-    
+    /**
+     * Add the bom item to the saved object
+     */ 
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)

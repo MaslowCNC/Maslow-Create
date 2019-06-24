@@ -1,9 +1,15 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
-
+/**
+ * This class creates the output atom.
+ */
 export default class Output extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super (values)
         
@@ -24,6 +30,9 @@ export default class Output extends Atom {
         this.addIO('input', 'number or geometry', this, 'geometry', '')
     }
     
+    /**
+     * Take the input value of this function and pass it to the parent Molecule to go up one level.
+     */ 
     updateValue(){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             this.value = this.findIOValue('number or geometry')
@@ -34,10 +43,16 @@ export default class Output extends Atom {
         }
     }
     
+    /**
+     * I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.
+     */ 
     setID(newID){
         this.uniqueID = newID
     }
     
+    /**
+     * Draw the output shape on the screen.
+     */ 
     draw() {
 
         this.height= this.radius

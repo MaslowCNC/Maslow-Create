@@ -1,8 +1,15 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
+/**
+ * This class creates the constant atom instance which can be used to define a numerical constant.
+ */
 export default class Constant extends Atom{
     
+    /**
+     * Creates a new constant atom.
+     * @param {object} values - An object of values. Each of these values will be applied to the resulting atom.
+     */ 
     constructor(values){
         super(values)
         
@@ -21,7 +28,9 @@ export default class Constant extends Atom{
             this.output.setValue(this.ioValues[0].ioValue)
         }
     }
-    
+    /**
+     * Add entries for name and value to the side bar. Note: I think that should happen automatically and this function can be deleted. Please test that future self.
+     */ 
     updateSidebar(){
         //updates the sidebar to display information about this node
         
@@ -30,6 +39,9 @@ export default class Constant extends Atom{
         this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
     }
     
+    /**
+     * Add the value to be saved to the object saved for this molecule.
+     */ 
     serialize(values){
         //Save the IO value to the serial stream
         var valuesObj = super.serialize(values)
@@ -43,6 +55,9 @@ export default class Constant extends Atom{
         
     }
     
+    /**
+     * Draw the constant which is more rectangular than the regular shape.
+     */ 
     draw() {
         
         GlobalVariables.c.beginPath()
@@ -63,7 +78,10 @@ export default class Constant extends Atom{
             this.output.draw()
         }
     }
- 
+    
+    /**
+     * Overwrite the default displayAndPropogate()...why?
+     */ 
     displayAndPropogate(){
         this.output.setValue(this.output.getValue())
     }

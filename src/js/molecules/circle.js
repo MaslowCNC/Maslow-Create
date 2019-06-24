@@ -1,8 +1,15 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables.js'
 
+/**
+ * This class creates the circle atom.
+ */
 export default class Circle extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         
         super(values)
@@ -16,6 +23,9 @@ export default class Circle extends Atom {
         this.setValues(values)
     }
     
+    /**
+     * Super class the default update value function. This function computes the number of points to use for the circle and then calls the worker thread to create the circle.
+     */ 
     updateValue(){
         try{
             const circumference  = 3.14*2*this.findIOValue('radius')

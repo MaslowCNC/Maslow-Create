@@ -1,7 +1,14 @@
 import Atom from '../prototypes/atom'
 
+/**
+ * This class creates the rectangle atom.
+ */
 export default class Rectangle extends Atom {
 
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
@@ -15,6 +22,9 @@ export default class Rectangle extends Atom {
         this.setValues(values)
     }
     
+    /**
+     * Create a new rectangle in a worker thread.
+     */ 
     updateValue(){
         try{
             const values = [this.findIOValue('x length'),this.findIOValue('y length')]

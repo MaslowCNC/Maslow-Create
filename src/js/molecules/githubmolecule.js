@@ -1,8 +1,15 @@
 import Molecule from '../molecules/molecule'
 import GlobalVariables from '../globalvariables'
 
+/**
+ * This class creates the circle atom.
+ */
 export default class GitHubMolecule extends Molecule {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
 
@@ -14,13 +21,12 @@ export default class GitHubMolecule extends Molecule {
         this.setValues(values)
     }
     
+    /**
+     * This replaces the default Molecule double click behavior to prevent you from being able to double click into a github molecule
+     */ 
     doubleClick(x,y){
-        // Prevent you from being able to double click into a github molecule
-        
         var clickProcessed = false
-        
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
-        
         if (distFromClick < this.radius){
             clickProcessed = true
         }
@@ -28,6 +34,10 @@ export default class GitHubMolecule extends Molecule {
         return clickProcessed 
     }
     
+    /**
+     * Loads a project into this GitHub molecule from github based on the passed github ID. This function is async and execution time depends on project complexity, and network speed.
+     * @param {number} id - The GitHub project ID for the project to be loaded.
+     */ 
     async loadProjectByID(id){
         
         //Get the repo by ID
@@ -51,6 +61,9 @@ export default class GitHubMolecule extends Molecule {
         return promsie
     }
     
+    /**
+     * Save the project information to be loaded. This should use super.serialize() to maintain a connection with Molecule, but it doesn't...should be fixed
+     */ 
     serialize(){
         
         var ioValues = []

@@ -1,7 +1,14 @@
 import Atom from '../prototypes/atom'
 
+/**
+ * This class creates the circle atom.
+ */
 export default class Union extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         
         super(values)
@@ -16,6 +23,9 @@ export default class Union extends Atom {
         this.setValues(values)
     }
     
+    /**
+     * Pass the input geometries to a worker thread to compute their union.
+     */ 
     updateValue(){
         try{
             const values = [this.findIOValue('geometry1').toLazyGeometry().toGeometry(), this.findIOValue('geometry2').toLazyGeometry().toGeometry()]
