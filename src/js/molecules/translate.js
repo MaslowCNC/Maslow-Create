@@ -18,7 +18,15 @@ export default class Translate extends Atom{
         this.addIO('input', 'zDist', this, 'number', 0)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Translate'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Translate'
         
         this.setValues(values)

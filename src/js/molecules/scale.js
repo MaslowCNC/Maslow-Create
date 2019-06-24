@@ -17,7 +17,15 @@ export default class Scale extends Atom{
         this.addIO('input', 'multiple', this, 'number', 10)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Scale'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Scale'
         
         this.setValues(values)

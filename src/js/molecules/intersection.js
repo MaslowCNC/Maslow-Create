@@ -16,8 +16,15 @@ export default class Intersection extends Atom {
         this.addIO('input', 'geometry1', this, 'geometry', '')
         this.addIO('input', 'geometry2', this, 'geometry', '')
         this.addIO('output', 'geometry', this, 'geometry', '')
-        
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Intersection'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Intersection'
         
         this.setValues(values)

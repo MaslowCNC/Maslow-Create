@@ -16,7 +16,15 @@ export default class Gcode extends Atom {
         
         super(values)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Gcode'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Gcode'
         
         this.addIO('input', 'geometry', this, 'geometry', GlobalVariables.api.sphere())

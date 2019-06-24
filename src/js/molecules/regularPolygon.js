@@ -17,7 +17,15 @@ export default class RegularPolygon extends Atom {
         this.addIO('input', 'radius', this, 'number', 10)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'RegularPolygon'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'RegularPolygon'
 
         // create the polygon code block

@@ -14,8 +14,20 @@ export default class Assembly extends Atom{
         
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Assembly'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Assembly'
+        /**
+         * A list of all of the inputs to this molecule. May be loaded when the molecule is created.
+         * @type {array}
+         */
         this.ioValues = []
         
         this.setValues(values)

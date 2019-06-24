@@ -19,7 +19,15 @@ export default class Stretch extends Atom {
         this.addIO('input', 'z', this, 'number', 1)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Stretch'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Stretch'
         
         this.setValues(values)

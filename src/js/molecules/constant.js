@@ -13,11 +13,30 @@ export default class Constant extends Atom{
     constructor(values){
         super(values)
         
-        this.value = ''
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.type = 'constant'
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Constant'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Constant'
+        /**
+         * This atom's height as drawn on the screen...probably doesn't need to be in this scope
+         * @type {string}
+         */
         this.height = 16
+        /**
+         * This atom's radius as drawn on the screen...probably doesn't need to be in this scope
+         * @type {string}
+         */
         this.radius = 15
         
         this.setValues(values)

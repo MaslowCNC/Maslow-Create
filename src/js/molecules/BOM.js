@@ -13,12 +13,31 @@ export default class AddBOMTag extends Atom{
     constructor(values){
         super(values)
         
-        this.value = ''
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Add BOM Tag'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.type = 'addBOMTag'
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Add BOM Tag'
+        /**
+         * This atom's radius as drawn on the screen. Probably inherited and can be deleted.
+         * @type {string}
+         */
         this.radius = 20
         
+        /**
+         * The BOM item object created by this atom
+         * @type {string}
+         */
         this.BOMitem = new BOMEntry()
         
         this.addIO('input', 'geometry', this, 'geometry', null)

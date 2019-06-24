@@ -15,8 +15,20 @@ export default class Code extends Atom {
         
         super(values)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = "Code"
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.atomType = "Code"
+        /**
+         * The code contained within the atom stored as a string.
+         * @type {string}
+         */
         this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.value = 10;"
         
         this.addIO("output", "geometry", this, "geometry", "")

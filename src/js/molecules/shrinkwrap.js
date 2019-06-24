@@ -15,10 +15,30 @@ export default class ShrinkWrap extends Atom{
         
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Shrink Wrap'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'ShrinkWrap'
+        /**
+         * A list of all of the inputs to this molecule. May be passed to the constructor and loaded.
+         * @type {array}
+         */
         this.ioValues = []
+        /**
+         * This was used when there was a drop down to select closed...may be deleted
+         * @type {number}
+         */
         this.closedSelection = 0
+        /**
+         * I believe this is no longer used alzatin - is that right?
+         * @type {boolean}
+         */
         this.addedIO = false
         
         this.setValues(values)

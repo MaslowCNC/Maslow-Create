@@ -17,11 +17,25 @@ export default class Equation extends Atom {
         this.addIO('input', 'y', this, 'number', 0)
         this.addIO('output', 'z', this, 'number', 0)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Equation'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Equation'
-        this.defaultValue = ''
-        this.value = ''
+        /**
+         * An array of all of the possible equation selections
+         * @type {array of strings}
+         */
         this.equationOptions = ['x+y', 'x-y', 'x*y', 'x/y', 'cos(x)', 'sin(x)', 'x^y']
+        /**
+         * The index number of the currently selected option
+         * @type {number}
+         */
         this.currentEquation = 0
         
         this.setValues(values)

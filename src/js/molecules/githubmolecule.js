@@ -13,9 +13,25 @@ export default class GitHubMolecule extends Molecule {
     constructor(values){
         super(values)
 
+        /** 
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Github Molecule'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'GitHubMolecule'
-        this.topLevel = false //a flag to signal if this node is the top level node
+        /**
+         * A flag to signal if this node is the top level node
+         * @type {boolean}
+         */
+        this.topLevel = false
+        /**
+         * The color for the whole in the center of the drawing...probably doesn't need to be in this scope
+         * @type {string}
+         */
         this.centerColor = 'black'
         
         this.setValues(values)

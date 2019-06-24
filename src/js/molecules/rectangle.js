@@ -16,7 +16,15 @@ export default class Rectangle extends Atom {
         this.addIO('input', 'y length', this, 'number', 10)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Rectangle'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Rectangle'
         
         this.setValues(values)

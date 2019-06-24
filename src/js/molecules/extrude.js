@@ -13,7 +13,15 @@ export default class Extrude extends Atom{
         
         super(values)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Extrude'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Extrude'
         
         this.addIO('input', 'geometry' , this, 'geometry', '')

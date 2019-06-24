@@ -19,7 +19,15 @@ export default class Rotate extends Atom {
         this.addIO('input', 'z-axis degrees', this, 'number', 0)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Rotate'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Rotate'
         
         this.setValues(values)

@@ -17,7 +17,15 @@ export default class Union extends Atom {
         this.addIO('input', 'geometry2', this, 'geometry', '')
         this.addIO('output', 'geometry', this, 'geometry', '')
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Union'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Union'
         
         this.setValues(values)

@@ -18,11 +18,35 @@ export default class Output extends Atom {
             this.parent.addIO('output', 'Geometry', this.parent, 'geometry', '')
         }
         
+        /**
+         * This atom's value
+         * @type {object}
+         */
         this.value = null
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.type = 'output'
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Output'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Output'
+        /**
+         * This atom's height
+         * @type {number}
+         */
         this.height = 16
+        /**
+         * This atom's radius
+         * @type {number}
+         */
         this.radius = 20
         
         this.setValues(values)

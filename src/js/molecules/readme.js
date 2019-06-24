@@ -12,11 +12,30 @@ export default class Readme extends Atom{
     constructor(values){
         super(values)
         
-        this.value = ''
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.atomType = 'Readme'
+        /**
+         * The text to appear in the README file
+         * @type {string}
+         */
         this.readmeText = 'Readme text here'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.type = 'readme'
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'README'
+        /**
+         * This atom's radius...probably inherited and can be deleted
+         * @type {number}
+         */
         this.radius = 20
         
         this.setValues(values)
