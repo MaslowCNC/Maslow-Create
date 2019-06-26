@@ -5,7 +5,7 @@
   "main": "webpack.config.js",
   "scripts": {
     "start": "webpack --config webpack.config.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "lint": "eslint --ignore-path .eslintignore .",
     "doc": "./node_modules/.bin/esdoc"
   },
@@ -23,6 +23,7 @@
     "codemirror": "^5.46.0",
     "esm": "^3.2.22",
     "gsap": "^2.0.1",
+    "mocha": "^6.1.4",
     "oauthio-web": "^0.6.2",
     "three": "^0.104.0"
   },
@@ -36,6 +37,7 @@
     "babel-preset-stage-0": "^6.24.1",
     "browser-sync": "^2.24.4",
     "browser-sync-webpack-plugin": "^2.2.2",
+    "chai": "^4.2.0",
     "copy-webpack-plugin": "^5.0.1",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
