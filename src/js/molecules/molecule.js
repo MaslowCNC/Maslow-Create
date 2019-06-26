@@ -4,8 +4,15 @@ import GlobalVariables from '../globalvariables.js'
 import saveAs from '../lib/FileSaver.js'
 import { extractBomTags } from '../BOM.js'
 
+/**
+ * This class creates the Molecule atom.
+ */
 export default class Molecule extends Atom{
-
+    
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         
         super(values)
@@ -32,6 +39,9 @@ export default class Molecule extends Atom{
         this.updateValue()
     }
     
+    /**
+     * Add the center dot to the molecule
+     */ 
     draw(){
         super.draw() //Super call to draw the rest
         

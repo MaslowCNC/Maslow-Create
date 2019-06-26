@@ -2,7 +2,7 @@ import Molecule from '../molecules/molecule'
 import GlobalVariables from '../globalvariables'
 
 /**
- * This class creates the circle atom.
+ * This class creates the GitHubMolecule atom.
  */
 export default class GitHubMolecule extends Molecule {
     
@@ -39,6 +39,8 @@ export default class GitHubMolecule extends Molecule {
     
     /**
      * This replaces the default Molecule double click behavior to prevent you from being able to double click into a github molecule
+     * @param {number} x - The x cordinate of the click
+     * @param {number} y - The y cordinate of the click
      */ 
     doubleClick(x,y){
         var clickProcessed = false
