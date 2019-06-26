@@ -3,7 +3,7 @@
 var expect = require('chai').expect
 const fs = require('fs')
 
-describe('#sum()', function() {
+describe('Check Documentation', function() {
 
   context('Documentation Level', function() {
     it('Has not gone down', function() {
