@@ -7,3 +7,5 @@ dist/run/index.html
 dist/documentation/*
 dist/index.html
 coverage
+.nyc*
+.nyc_output/*
