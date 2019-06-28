@@ -5,9 +5,10 @@
   "main": "webpack.config.js",
   "scripts": {
     "start": "webpack --config webpack.config.js",
-    "test": "mocha",
+    "test": "nyc --reporter=html --reporter=text mocha",
     "lint": "eslint --ignore-path .eslintignore .",
-    "doc": "./node_modules/.bin/esdoc"
+    "doc": "./node_modules/.bin/esdoc",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "keywords": [],
   "author": "",
@@ -21,9 +22,11 @@
     "@octokit/rest": "16.25.0",
     "circular-json": "^0.5.9",
     "codemirror": "^5.46.0",
+    "coveralls": "^3.0.4",
     "esm": "^3.2.22",
     "gsap": "^2.0.1",
     "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "oauthio-web": "^0.6.2",
     "three": "^0.104.0"
   },

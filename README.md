@@ -1,7 +1,8 @@
 # A web based CAD program for cooperative design.
 
 [![Build Status](https://travis-ci.org/MaslowCNC/Maslow-Create.svg?branch=master)](https://travis-ci.org/MaslowCNC/Maslow-Create)
-[![Build Status](https://maslowcreate.org/documentation/badge.svg)](https://maslowcreate.org/documentation/)
+[![Documentation](https://maslowcreate.org/documentation/badge.svg)](https://maslowcreate.org/documentation/)
+[![Coverage Status](https://coveralls.io/repos/github/MaslowCNC/Maslow-Create/badge.svg?branch=master)](https://coveralls.io/github/MaslowCNC/Maslow-Create?branch=master)
 
 
 ![overview](https://raw.githubusercontent.com/BarbourSmith/Maslow-Create/master/MaslowCreate.png)

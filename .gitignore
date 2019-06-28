@@ -6,3 +6,5 @@ package-lock.json
 dist/run/index.html
 dist/documentation/*
 dist/index.html
+coverage
+.nyc_output/*
