@@ -121,7 +121,7 @@ export default class Display {
                 axesCheck.setAttribute('id', 'axesCheck')
                 
                 if (this.axesCheck){
-                     axesCheck.setAttribute('checked', 'true')
+                    axesCheck.setAttribute('checked', 'true')
                 }
 
                 var axesCheckLabel = document.createElement('label')
@@ -151,13 +151,9 @@ export default class Display {
                 wireCheck.setAttribute('type', 'checkbox')
                 wireCheck.setAttribute('id', 'wireCheck')
                
-                 console.log('this.wiredisplay' + this.wireDisplay) 
-                 console.log(this.threeMaterial.wireframe)
-
                 if (this.wireDisplay){
-                   wireCheck.setAttribute('checked', 'true')
-                   this.threeMaterial.wireframe = true
-                   console.log('this.wiredisplay' + this.wireDisplay)
+                    wireCheck.setAttribute('checked', 'true')
+                    this.threeMaterial.wireframe = true
                 }
                 //wireCheck.setAttribute('checked', false)
                 var wireCheckLabel = document.createElement('label')
@@ -170,13 +166,10 @@ export default class Display {
                     if( event.target.checked){
                         this.threeMaterial.wireframe = true
                         this.wireDisplay = true
-                        console.log('this.wiredisplay(in checked e)' + this.wireDisplay)
                     }
                     else{
                         this.threeMaterial.wireframe = false
                         this.wireDisplay = false
-                        console.log('this.wiredisplay (in !checked)' + this.wireDisplay)
-
                     }
                 })
             }
