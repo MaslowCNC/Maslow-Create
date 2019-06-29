@@ -8,6 +8,9 @@ export default class Display {
         GlobalVariables.api = require('@jsxcad/api-v1')
         this.convert = require('@jsxcad/convert-threejs')
         this.datasets = []
+        this.displayGrid = true
+        this.axesCheck = true
+        this.wireDisplay = false
         this.camera
         this.controls
         this.scene
@@ -86,7 +89,11 @@ export default class Display {
                 gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute('type', 'checkbox')
                 gridCheck.setAttribute('id', 'gridCheck')
-                gridCheck.setAttribute('checked', 'true')
+               
+                if (this.displayGrid){
+                    gridCheck.setAttribute('checked', 'true')
+                }
+
                 var gridCheckLabel = document.createElement('label')
                 gridDiv.appendChild(gridCheckLabel)
                 gridCheckLabel.setAttribute('for', 'gridCheck')
@@ -96,9 +103,11 @@ export default class Display {
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
                         this.scene.add( this.plane )
+                        this.displayGrid = true
                     }
                     else{
                         this.scene.remove(this.plane)
+                        this.displayGrid = false
                     }
                 })
 
@@ -110,7 +119,11 @@ export default class Display {
                 axesDiv.appendChild(axesCheck)
                 axesCheck.setAttribute('type', 'checkbox')
                 axesCheck.setAttribute('id', 'axesCheck')
-                axesCheck.setAttribute('checked', 'true')
+                
+                if (this.axesCheck){
+                    axesCheck.setAttribute('checked', 'true')
+                }
+
                 var axesCheckLabel = document.createElement('label')
                 axesDiv.appendChild(axesCheckLabel)
                 axesCheckLabel.setAttribute('for', 'axesCheck')
@@ -120,9 +133,11 @@ export default class Display {
                 axesCheck.addEventListener('change', event => {
                     if(event.target.checked){
                         this.scene.add( axesHelper)
+                        this.axesCheck = true
                     }
                     else{
                         this.scene.remove( axesHelper )
+                        this.axesCheck = false
                     }
                 })
 
@@ -135,7 +150,12 @@ export default class Display {
                 wireDiv.appendChild(wireCheck)
                 wireCheck.setAttribute('type', 'checkbox')
                 wireCheck.setAttribute('id', 'wireCheck')
-                wireCheck.setAttribute('checked', 'false')
+               
+                if (this.wireDisplay){
+                    wireCheck.setAttribute('checked', 'true')
+                    this.threeMaterial.wireframe = true
+                }
+                //wireCheck.setAttribute('checked', false)
                 var wireCheckLabel = document.createElement('label')
                 wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
@@ -145,9 +165,11 @@ export default class Display {
                 wireCheck.addEventListener('change', event => {
                     if( event.target.checked){
                         this.threeMaterial.wireframe = true
+                        this.wireDisplay = true
                     }
                     else{
                         this.threeMaterial.wireframe = false
+                        this.wireDisplay = false
                     }
                 })
             }
@@ -203,7 +225,8 @@ export default class Display {
         this.threeMaterial = new THREE.MeshStandardMaterial({
             color: 0x5f6670,
             roughness: 0.65,
-            metalness: 0.40   
+            metalness: 0.40,   
+            wireframe: this.wireDisplay
         })
 
         const walk = (geometry) => {
