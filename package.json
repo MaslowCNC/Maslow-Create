@@ -14,13 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@jscad/csg": "^0.7.0",
-    "@jsxcad/api-v1": "0.0.58",
-    "@jsxcad/convert-stl": "0.0.63",
-    "@jsxcad/convert-svg": "0.0.63",
-    "@jsxcad/convert-threejs": "0.0.58",
     "@octokit/rest": "16.25.0",
-    "circular-json": "^0.5.9",
     "codemirror": "^5.46.0",
     "coveralls": "^3.0.4",
     "esm": "^3.2.22",
