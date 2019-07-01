@@ -81,7 +81,7 @@ export default class Atom {
          * This atom's value...Is can this be done away with? Are we basically storing the value in the output now?
          * @type {object}
          */
-        this.value = GlobalVariables.api.sphere()
+        this.value = null
         /** 
          * A flag to indicate if this atom is currently being draged on the screen.
          * @type {boolean}
@@ -543,7 +543,7 @@ export default class Atom {
             
             computeValue(values, key).then(result => {
                 if (result != -1 ){
-                    this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                    this.value = result
                     this.displayAndPropogate()
                 }else{
                     this.setAlert("Unable to compute")

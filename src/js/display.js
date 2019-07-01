@@ -5,8 +5,6 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 export default class Display {
 
     constructor(){
-        GlobalVariables.api = require('@jsxcad/api-v1')
-        this.convert = require('@jsxcad/convert-threejs')
         this.datasets = []
         this.displayGrid = true
         this.axesCheck = true
