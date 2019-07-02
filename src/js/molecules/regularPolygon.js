@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the regular polygon atom.
