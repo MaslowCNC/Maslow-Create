@@ -3,13 +3,28 @@ import GlobalVariables from '../globalvariables.js'
 import saveAs from '../lib/FileSaver.js'
 import SVGReader from '../lib/SVGReader.js'
 
+/**
+ * This class creates the circle atom.
+ */
 export default class Gcode extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         
         super(values)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Gcode'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Gcode'
         
         this.addIO('input', 'geometry', this, 'geometry', GlobalVariables.api.sphere())
@@ -23,6 +38,9 @@ export default class Gcode extends Atom {
         this.updateValue()
     }
     
+    /**
+     * Generate a new .svg file from the input geometry, then compute a gcode path from it. Processing takes place in a worker thread
+     */ 
     updateValue(){
         this.processing = true
         this.clearAlert()
@@ -36,7 +54,7 @@ export default class Gcode extends Atom {
         try{
             const input = this.findIOValue('geometry')
             
-            computeSvg([input.toLazyGeometry().toGeometry()], "svg").then(result => {
+            computeSvg([input], "svg").then(result => {
                 if (result != -1 ){
                     
                     const bounds = input.measureBoundingBox()
@@ -57,6 +75,9 @@ export default class Gcode extends Atom {
         }catch(err){this.setAlert(err)}
     }
     
+    /**
+     * Add a button to download the generated gcode
+     */ 
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
@@ -66,10 +87,15 @@ export default class Gcode extends Atom {
         })
     }
     
+    /**
+     * Does nothing, just here to supress the normal send to render behavior
+     */ 
     sendToRender(){
-        //Supress the normal send to render behavior
     }
     
+    /**
+     * This function was taken from github. It needs to be more well documented.
+     */ 
     svg2gcode(svg, settings) {
         // clean off any preceding whitespace
         svg = svg.replace(/^[\n\r \t]/gm, '')

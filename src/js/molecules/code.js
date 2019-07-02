@@ -2,14 +2,33 @@ import Atom from '../prototypes/atom.js'
 import CodeMirror from 'codemirror'
 import GlobalVariables from '../globalvariables.js'
 
+/**
+ * The Code molecule type adds support for executing arbirary jsxcad code.
+ */
 export default class Code extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         
         super(values)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = "Code"
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.atomType = "Code"
+        /**
+         * The code contained within the atom stored as a string.
+         * @type {string}
+         */
         this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.value = 10;"
         
         this.addIO("output", "geometry", this, "geometry", "")
@@ -20,11 +39,13 @@ export default class Code extends Atom {
         this.updateValue()
     }
     
+    /**
+     * Grab the code as a text string and execute it. This really needs to be moved to a worker for security.
+     */ 
     updateValue(){
         //This should pull and run the code in the editor
         
         //reset the IOs to the default state
-        
         const code = new Function('$',
             `const { ${Object.keys({...GlobalVariables.api, ...{This: this}}).join(', ')} } = $;\n\n` + 
                                   this.code)
@@ -37,6 +58,9 @@ export default class Code extends Atom {
         super.updateValue()
     }
     
+    /**
+     * Add a button to open the code editor to the side bar
+     */ 
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
@@ -75,6 +99,9 @@ export default class Code extends Atom {
         })
     }
     
+    /**
+     * Save the input code
+     */ 
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)
