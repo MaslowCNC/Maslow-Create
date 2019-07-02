@@ -96,7 +96,9 @@ window.addEventListener('keydown', event => {
 
 
 // Implementation
-
+/**
+ * Runs once when the program begins to initialize variables.
+ */ 
 function init() {
     if(!GlobalVariables.runMode){ //If we are in CAD mode load an empty project as a placeholder
         GlobalVariables.currentMolecule = new Molecule({
@@ -132,6 +134,9 @@ function init() {
     animate()
 }
 
+/**
+ * Handles the window's resize behavior when the browser size changes.
+ */ 
 function onWindowResize() {
     
     var bounds = GlobalVariables.canvas.getBoundingClientRect()
@@ -153,7 +158,9 @@ function onWindowResize() {
 
 
 
-// Animation Loop
+/**
+ * Animation loop. Runs with every frame to draw the program on the display.
+ */ 
 function animate() {
     requestAnimationFrame(animate)
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)

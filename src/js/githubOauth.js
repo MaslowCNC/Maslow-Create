@@ -3,6 +3,9 @@ import GlobalVariables from './globalvariables.js'
 import { extractBomTags } from './BOM.js'
 import { OAuth } from 'oauthio-web'
 
+/**
+ * This function works like a class to sandbox interaction with GitHub.
+ */
 export default function GitHubModule(){
     const Octokit = require('@octokit/rest')
     var octokit = new Octokit()

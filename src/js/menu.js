@@ -1,9 +1,23 @@
 import GlobalVariables from './globalvariables'
 
+/**
+ * This class creates the right click menu behavior for placing atoms.
+ */
 class Menu {
+    /**
+     * The constructor creates a new menu. The menu is only created once when the program launches and is hidden and displayed when the menu is needed.
+     */
     constructor(){
+        /** 
+         * The HTML object which contains the menu
+         * @type {object}
+         */
         this.menu = document.querySelector('.menu')
         this.menu.classList.add('off')
+        /** 
+         * An array which lists all of the options in the menu.
+         * @type {array}
+         */
         this.menuList = document.getElementById('menuList')
     
         //Add the search bar to the list item
@@ -41,6 +55,10 @@ class Menu {
         })
     }
     
+    /**
+     * Runs when a menu option is clicked to place a new atom from the local atoms list.
+     * @param {object} ev - The event triggered by clicking on a menu item.
+     */ 
     placeNewNode(ev){
         let clr = ev.target.id
         this.hidemenu(ev)
@@ -54,7 +72,11 @@ class Menu {
             
         }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
     }
-
+    
+    /**
+     * Runs when a menu option is clicked to place a new atom from searching on GitHub.
+     * @param {object} ev - The event triggered by clicking on a menu item.
+     */ 
     placeGitHubMolecule(ev){
         
         this.hidemenu()
@@ -70,7 +92,11 @@ class Menu {
             uniqueID: GlobalVariables.generateUniqueID()
         }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
     }
-
+    
+    /**
+     * Runs when a menu is opened by right clicking.
+     * @param {object} ev - The event triggered by right clicking on the canvas.
+     */ 
     showmenu(ev){
         //Open the default tab
         document.getElementById('localTab').click()
@@ -94,13 +120,20 @@ class Menu {
         
         document.getElementById('menuInput').focus()
     }
-
+    
+    /**
+     * Hides the menu if it is open.
+     */ 
     hidemenu(){
         this.menu.classList.add('off')
         this.menu.style.top = '-200%'
         this.menu.style.left = '-200%'
     }
-
+    
+    /**
+     * Runs when a new search is commanded.
+     * @param {object} evt - The event triggered by the search bar.
+     */ 
     searchMenu(evt) {
       
         if(document.getElementsByClassName('tablinks active')[0].id == 'localTab'){
@@ -158,7 +191,12 @@ class Menu {
             }
         }
     }
-
+    
+    /**
+     * Switches tabs within the menu.
+     * @param {object} evt - The event triggered by clicking on a tab.
+     * @param {object} tabName - The name of the tab clicked.
+     */ 
     openTab(evt, tabName) {
         // Declare all variables
         var i, tabcontent, tablinks
