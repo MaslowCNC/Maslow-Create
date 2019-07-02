@@ -37,7 +37,7 @@ export default class Translate extends Atom{
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
+            const values = [this.findIOValue('geometry'), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
             
             this.basicThreadValueProcessing(values, "translate")
         }catch(err){this.setAlert(err)}

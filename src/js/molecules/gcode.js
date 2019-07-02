@@ -54,7 +54,7 @@ export default class Gcode extends Atom {
         try{
             const input = this.findIOValue('geometry')
             
-            computeSvg([input.toLazyGeometry().toGeometry()], "svg").then(result => {
+            computeSvg([input], "svg").then(result => {
                 if (result != -1 ){
                     
                     const bounds = input.measureBoundingBox()

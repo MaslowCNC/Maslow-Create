@@ -38,7 +38,7 @@ export default class Stretch extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('x'),this.findIOValue('y'),this.findIOValue('z')]
+            const values = [this.findIOValue('geometry'), this.findIOValue('x'),this.findIOValue('y'),this.findIOValue('z')]
             
             this.basicThreadValueProcessing(values, "stretch")
         }catch(err){this.setAlert(err)}

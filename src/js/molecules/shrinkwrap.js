@@ -64,7 +64,7 @@ export default class ShrinkWrap extends Atom{
                 }
             })
             const values = inputsList.map(x => {
-                return x.toLazyGeometry().toGeometry()
+                return x
             })
             
             this.basicThreadValueProcessing(values, "hull")

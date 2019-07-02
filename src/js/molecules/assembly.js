@@ -52,7 +52,7 @@ export default class Assembly extends Atom{
                 }
             })
             const values = inputs.map(x => {
-                return x.toLazyGeometry().toGeometry()
+                return x
             })
             
             this.basicThreadValueProcessing(values, "assemble")
