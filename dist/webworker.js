@@ -88389,42 +88389,39 @@ return d[d.length-1];};return ", funcName].join("");
           case "circle":
               return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
               break
-          case "regular polygon":
-              return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
+          case "difference":
+              return difference$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
               break
-          case "rectangle":
-              return square(values[0],values[1]).toDisjointGeometry()
+          case "extrude":
+              return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
               break
           case "hull":
               values = values.map(Shape.fromGeometry);
               return hull(...values).toDisjointGeometry()
               break
-          case "rotate":
-              return Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toDisjointGeometry()
+          case "intersection":
+              return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
               break
-          case "extrude":
-              return Shape.fromGeometry(values[0]).extrude({height: values[1]}).toDisjointGeometry()
+          case "rectangle":
+              return square(values[0],values[1]).toDisjointGeometry()
               break
-          case "translate":
-              return Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry()
+          case "regular polygon":
+              return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
               break
           case "render":
               return toThreejsGeometry(Shape.fromGeometry(values).toDisjointGeometry())
               break
-          case "union":
-              return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
-              break
-          case "intersection":
-              return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
-              break
-          case "difference":
-              return difference$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
-              break
-          case "stretch":
-              return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
+          case "rotate":
+              return Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toDisjointGeometry()
               break
           case "scale":
               return Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry()
+              break
+          case "stl":
+              return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
+              break
+          case "stretch":
+              return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry()
               break
           case "svg":
               const crossSection = Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
@@ -88435,11 +88432,14 @@ return d[d.length-1];};return ", funcName].join("");
               const bounds = shape.measureBoundingBox();
               const cameraDistance = 6*Math.max(...bounds[1]);
               return toSvg$1({view: { position: [0, 0, cameraDistance], near: 1, far: 10000}}, shape.rotateX(20).rotateY(-45).toDisjointGeometry())
-          case "stl":
-              return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
-              break
           case "tag":
               return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry()
+              break
+          case "translate":
+              return Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry()
+              break
+          case "union":
+              return union$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry()
               break
           default:
               return -1
