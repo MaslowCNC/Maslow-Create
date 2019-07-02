@@ -116,14 +116,14 @@ class GlobalVariables{
         this.circleSegmentSize = 2
         
         const agent = async ({ question }) => `Secret ${question}`
-        createService({ webWorker: '../webworker.js', agent }).then(result => {
+        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
             /** 
              * A worker thread which can do computation.
              * @type {object}
              */
             this.ask = result.ask
         })
-        createService({ webWorker: '../webworker.js', agent }).then(result => {
+        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
             /** 
              * A worker thread which can do computation.
              * @type {object}
