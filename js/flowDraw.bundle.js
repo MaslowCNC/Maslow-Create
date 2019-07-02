@@ -77596,9 +77596,8 @@ function GitHubModule() {
         // Use popup for oauth
         _oauthioWeb.OAuth.popup('github').then(function (github) {
 
-            octokit.authenticate({
-                type: "oauth",
-                token: github.access_token
+            octokit = new Octokit({
+                auth: github.access_token
             });
 
             //Test the authentication 
@@ -78727,14 +78726,14 @@ var GlobalVariables = function () {
         return _ref2.apply(this, arguments);
       };
     }();
-    (0, _service.createService)({ webWorker: '../webworker.js', agent: agent }).then(function (result) {
+    (0, _service.createService)({ webWorker: '../maslowWorker.js', agent: agent }).then(function (result) {
       /** 
        * A worker thread which can do computation.
        * @type {object}
        */
       _this.ask = result.ask;
     });
-    (0, _service.createService)({ webWorker: '../webworker.js', agent: agent }).then(function (result) {
+    (0, _service.createService)({ webWorker: '../maslowWorker.js', agent: agent }).then(function (result) {
       /** 
        * A worker thread which can do computation.
        * @type {object}
@@ -83498,8 +83497,14 @@ var Molecule = function (_Atom) {
         value: function sendToRender() {
             _get(Molecule.prototype.__proto__ || Object.getPrototypeOf(Molecule.prototype), 'sendToRender', this).call(this);
             if (this.value != null) {
-                if (this.topLevel && this.value.measureBoundingBox) {
-                    _globalvariables2.default.display.zoomCameraToFit(this.value.measureBoundingBox());
+                if (this.topLevel) {
+                    _globalvariables2.default.ask({ values: [this.value], key: "bounding box" }).then(function (result) {
+                        if (result != -1) {
+                            _globalvariables2.default.display.zoomCameraToFit(result);
+                        } else {
+                            console.warn("Unable to compute bounding box");
+                        }
+                    });
                 }
             }
         }
