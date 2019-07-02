@@ -58,9 +58,8 @@ export default function GitHubModule(){
         // Use popup for oauth
         OAuth.popup('github').then(github => {
             
-            octokit.authenticate({
-                type: "oauth",
-                token: github.access_token
+            octokit = new Octokit({
+                auth: github.access_token
             })
             
             //Test the authentication 
