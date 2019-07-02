@@ -2,23 +2,71 @@ import GlobalVariables from './globalvariables'
 import * as THREE from 'three'
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
 
+/**
+ * This class handles writing to the 3D preview display
+ */
 export default class Display {
-
+    /**
+     * The constructor run to create the new display. It seems to run with each refresh which doesn't seem right to me.
+     */
     constructor(){
+        
         GlobalVariables.api = require('@jsxcad/api-v1')
         this.convert = require('@jsxcad/convert-threejs')
+        /** 
+         * An array which contains the data to be respresented in 3D.
+         * @type {array}
+         */
         this.datasets = []
+        /** 
+         * An Flag to indicate if the grid on the XY plane should be displayed.
+         * @type {boolean}
+         */
         this.displayGrid = true
+        /** 
+         * A flag to indicate if the axes should be displayed.
+         * @type {boolean}
+         */
         this.axesCheck = true
+        /** 
+         * A flag to indicate if the frame should be displayed in wire frame.
+         * @type {boolean}
+         */
         this.wireDisplay = false
+        /** 
+         * A threejs camera instance.
+         * @type {object}
+         */
         this.camera
+        /** 
+         * A three js controls instance.
+         * @type {object}
+         */
         this.controls
+        /** 
+         * A threejs scene instance.
+         * @type {object}
+         */
         this.scene
+        /** 
+         * A threejs renderer instance.
+         * @type {object}
+         */
         this.renderer
-        this.stats
+        /** 
+         * An instance of the threejs mesh material.
+         * @type {object}
+         */
         this.threeMaterial
+        /** 
+         * The applied material type.
+         * @type {object}
+         */
         this.mesh
-        this.gui
+        /** 
+         * The HTML div object targeted to add the display to.
+         * @type {object}
+         */
         this.targetDiv = document.getElementById('viewerContext')
         
         //Add the JSXCAD window
@@ -176,6 +224,10 @@ export default class Display {
         })
     }
     
+    /**
+     * This function is intended to allow for materials. It is currently not used and can probably be deleted.
+     * @param {object} material - A string to define the material type.
+     */ 
     makeMaterial(material){
         switch (material) {
         case 'metal':
@@ -190,6 +242,10 @@ export default class Display {
         }
     }
     
+    /**
+     * Writes a shape to the 3D display. Expecting a threejs geometry.
+     * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
+     */ 
     writeToDisplay(shape){
         if(shape != null){
             const computeValue = async () => {
@@ -206,6 +262,10 @@ export default class Display {
         }
     }
     
+    /**
+     * Zooms the camera to fit target bounds on the screen.
+     * @param {array} bounds - An array of some sort...this comment should be updated.
+     */ 
     zoomCameraToFit(bounds){
         this.controls.reset()
         this.camera.position.x = 0
@@ -213,6 +273,10 @@ export default class Display {
         this.camera.position.z = 5*Math.max(...bounds[1])
     }
     
+    /**
+     * Clears the display and writes a threejs geometry to it.
+     * @param {object} threejsGeometry - A threejs geometry to write to the display.
+     */ 
     updateDisplayData(threejsGeometry){
         // Delete any previous dataset in the window.
         for (const { mesh } of this.datasets) {
@@ -265,6 +329,9 @@ export default class Display {
         walk(threejsGeometry)
     }
     
+    /**
+     * Handles resizing the 3D viewer when the window resizes.
+     */ 
     onWindowResize() {
         this.camera.aspect = this.targetDiv.clientWidth / (this.targetDiv.clientHeight)
         this.camera.updateProjectionMatrix()
@@ -272,6 +339,10 @@ export default class Display {
         this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight)
     }
     
+    /**
+     * Clears the display and writes a threejs geometry to it.
+     * @param {object} threejsGeometry - A threejs geometry to write to the display.
+     */ 
     render() {
         this.renderer.render( this.scene, this.camera )
     }
