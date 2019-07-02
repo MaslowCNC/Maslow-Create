@@ -247,8 +247,9 @@ export default class Display {
         if(shape != null){
             const computeValue = async () => {
                 try {
-                    return await GlobalVariables.render({values: shape.toLazyGeometry().toGeometry(), key: "render"})
+                    return await GlobalVariables.render({values: shape, key: "render"})
                 } catch(err) {
+                    console.warn(err)
                     return -1
                 }
             }

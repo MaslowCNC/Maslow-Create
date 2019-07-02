@@ -38,8 +38,9 @@ export default class RegularPolygon extends Atom {
      * Create a new regular polygon in a worker thread.
      */ 
     updateValue(){
-        this.value = GlobalVariables.api.circle({r: this.findIOValue('radius'), center: true, fn: this.findIOValue('number of sides')})
-        
-        super.updateValue()
+        try{
+            const values = [this.findIOValue('radius'), findIOValue('number of sides')]
+            this.basicThreadValueProcessing(values, "regular polygon")
+        }catch(err){this.setAlert(err)} 
     }  
 }

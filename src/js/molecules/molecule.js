@@ -206,22 +206,22 @@ export default class Molecule extends Atom{
             
         }
         
-        this.createButton(valueList,this,'Download STL',() => {
-            const convertSTL = require('@jsxcad/convert-stl')
-            convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent => {
-                const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
-                saveAs(blob, this.name+'.stl')
-            })
-        })
+        // this.createButton(valueList,this,'Download STL',() => {
+            // const convertSTL = require('@jsxcad/convert-stl')
+            // convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent => {
+                // const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
+                // saveAs(blob, this.name+'.stl')
+            // })
+        // })
         
-        this.createButton(valueList,this,'Download SVG',() => {
-            const convertSVG = require('@jsxcad/convert-svg')
-            const crossSection = this.value.crossSection().toDisjointGeometry()
-            convertSVG.toSvg({}, crossSection).then( contentSvg => {
-                const blob = new Blob([contentSvg], {type: 'text/plain;charset=utf-8'})
-                saveAs(blob, this.name+'.svg')
-            })
-        })
+        // this.createButton(valueList,this,'Download SVG',() => {
+            // const convertSVG = require('@jsxcad/convert-svg')
+            // const crossSection = this.value.crossSection().toDisjointGeometry()
+            // convertSVG.toSvg({}, crossSection).then( contentSvg => {
+                // const blob = new Blob([contentSvg], {type: 'text/plain;charset=utf-8'})
+                // saveAs(blob, this.name+'.svg')
+            // })
+        // })
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         

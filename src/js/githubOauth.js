@@ -464,18 +464,19 @@ export default function GitHubModule(){
         //Save the current project into the github repo
         if(currentRepoName != null){
             var shape = null
-            if(GlobalVariables.topLevelMolecule.value instanceof GlobalVariables.api.Shape){
+            if(typeof GlobalVariables.topLevelMolecule.value == "object"){
                 shape = GlobalVariables.topLevelMolecule.value
             }else{
-                shape = GlobalVariables.api.sphere()
+                console.warn("Unable to save")
+                return -1
             }
             
             const threadCompute = async (values, key) => {
                 return await GlobalVariables.ask({values: values, key: key})
             }
-            threadCompute([shape.toLazyGeometry().toGeometry()], "stl").then( stlContent => {
+            threadCompute([shape], "stl").then( stlContent => {
                 
-                threadCompute([shape.toLazyGeometry().toGeometry()], "SVG Picture").then(contentSvg => {
+                threadCompute([shape], "SVG Picture").then(contentSvg => {
                     
                     var bomContent = bomHeader
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)

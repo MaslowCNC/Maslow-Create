@@ -35,7 +35,7 @@ export default class Extrude extends Atom{
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry').toLazyGeometry().toGeometry(), this.findIOValue('height')]
+            const values = [this.findIOValue('geometry'), this.findIOValue('height')]
             
             this.basicThreadValueProcessing(values, "extrude")
         }catch(err){this.setAlert(err)}

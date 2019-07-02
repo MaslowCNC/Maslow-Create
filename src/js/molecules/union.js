@@ -36,7 +36,7 @@ export default class Union extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry1').toLazyGeometry().toGeometry(), this.findIOValue('geometry2').toLazyGeometry().toGeometry()]
+            const values = [this.findIOValue('geometry1'), this.findIOValue('geometry2')]
             
             this.basicThreadValueProcessing(values, "union")
         }catch(err){this.setAlert(err)}
