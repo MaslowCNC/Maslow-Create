@@ -1,1 +1,247 @@
-[]
+[
+  {
+    "name": "Display#render",
+    "filePath": "src/js/display.js",
+    "lines": [
+      {
+        "lineNumber": 339,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 340,
+        "line": "     * Clears the display and writes a threejs geometry to it.\r"
+      },
+      {
+        "lineNumber": 341,
+        "line": "     * @param {object} threejsGeometry - A threejs geometry to write to the display.\r"
+      },
+      {
+        "lineNumber": 342,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 343,
+        "line": "    render() {\r"
+      }
+    ],
+    "codeParams": [],
+    "docParams": [
+      "threejsGeometry"
+    ]
+  },
+  {
+    "name": "GlobalVariables#distBetweenPoints",
+    "filePath": "src/js/globalvariables.js",
+    "lines": [
+      {
+        "lineNumber": 141,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 142,
+        "line": "     * Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.\r"
+      },
+      {
+        "lineNumber": 143,
+        "line": "     * @param {number} x1 - The x cordinate of the first point.\r"
+      },
+      {
+        "lineNumber": 144,
+        "line": "     * @param {number} y1 - The y cordinate of the first point.\r"
+      },
+      {
+        "lineNumber": 145,
+        "line": "     * @param {number} x2 - The x cordinate of the second point.\r"
+      },
+      {
+        "lineNumber": 146,
+        "line": "     * @param {number} y2 - The y cordinate of the second point.\r"
+      },
+      {
+        "lineNumber": 147,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 148,
+        "line": "    distBetweenPoints(x1, x2, y1, y2){\r"
+      }
+    ],
+    "codeParams": [
+      "x1",
+      "x2",
+      "y1",
+      "y2"
+    ],
+    "docParams": [
+      "x1",
+      "y1",
+      "x2",
+      "y2"
+    ]
+  },
+  {
+    "name": "Molecule#serialize",
+    "filePath": "src/js/molecules/molecule.js",
+    "lines": [
+      {
+        "lineNumber": 340,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 341,
+        "line": "     * Generates and returns a JSON represntation of this molecule and all of its children.\r"
+      },
+      {
+        "lineNumber": 342,
+        "line": "     * @param {savedObject} A JSON object to append the represntation of this atom to.\r"
+      },
+      {
+        "lineNumber": 343,
+        "line": "     */\r"
+      },
+      {
+        "lineNumber": 344,
+        "line": "    serialize(savedObject){\r"
+      }
+    ],
+    "codeParams": [
+      "savedObject"
+    ],
+    "docParams": [
+      "A"
+    ]
+  },
+  {
+    "name": "Molecule#placeConnector",
+    "filePath": "src/js/molecules/molecule.js",
+    "lines": [
+      {
+        "lineNumber": 468,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 469,
+        "line": "     * Places a new connector within the molecule\r"
+      },
+      {
+        "lineNumber": 470,
+        "line": "     * @param {connectorObj} An object represntation of the connector specifying its inputs and outputs.\r"
+      },
+      {
+        "lineNumber": 471,
+        "line": "     */\r"
+      },
+      {
+        "lineNumber": 472,
+        "line": "    placeConnector(connectorObj){\r"
+      }
+    ],
+    "codeParams": [
+      "connectorObj"
+    ],
+    "docParams": [
+      "An"
+    ]
+  },
+  {
+    "name": "Atom#keyPress",
+    "filePath": "src/js/prototypes/atom.js",
+    "lines": [
+      {
+        "lineNumber": 372,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 373,
+        "line": "     * Set the atom's response to a key press. Is used to delete the atom if it is selected.\r"
+      },
+      {
+        "lineNumber": 374,
+        "line": "     * @param {number} x - The X cordinate of the click\r"
+      },
+      {
+        "lineNumber": 375,
+        "line": "     * @param {number} y - The Y cordinate of the click\r"
+      },
+      {
+        "lineNumber": 376,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 377,
+        "line": "    keyPress(key){\r"
+      }
+    ],
+    "codeParams": [
+      "key"
+    ],
+    "docParams": [
+      "x",
+      "y"
+    ]
+  },
+  {
+    "name": "AttachmentPoint#expandOut",
+    "filePath": "src/js/prototypes/attachmentpoint.js",
+    "lines": [
+      {
+        "lineNumber": 310,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 311,
+        "line": "     * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.\r"
+      },
+      {
+        "lineNumber": 312,
+        "line": "     * @param {number} x - The x cordinate of the click\r"
+      },
+      {
+        "lineNumber": 313,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 314,
+        "line": "    expandOut(cursorDistance){\r"
+      }
+    ],
+    "codeParams": [
+      "cursorDistance"
+    ],
+    "docParams": [
+      "x"
+    ]
+  },
+  {
+    "name": "Connector#keyPress",
+    "filePath": "src/js/prototypes/connector.js",
+    "lines": [
+      {
+        "lineNumber": 118,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 119,
+        "line": "     * Called when any key is pressed. If the key is delete or backspace and the connector is selected then the connector is deleted.\r"
+      },
+      {
+        "lineNumber": 120,
+        "line": "     * @param {string} x - The key which was pressed\r"
+      },
+      {
+        "lineNumber": 121,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 122,
+        "line": "    keyPress(key){\r"
+      }
+    ],
+    "codeParams": [
+      "key"
+    ],
+    "docParams": [
+      "x"
+    ]
+  }
+]

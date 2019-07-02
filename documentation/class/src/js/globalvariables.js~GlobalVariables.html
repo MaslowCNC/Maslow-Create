@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -80,7 +75,7 @@
   
   
   
-  <span data-ice="source">| <span><a href="file/src/js/globalvariables.js.html#lineNumber30">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/js/globalvariables.js.html#lineNumber31">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -104,7 +99,8 @@
 
   
   
-  
+  <div class="description" data-ice="description"><p>This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.</p>
+</div>
   
 
   
@@ -142,7 +138,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>The constructor creates a new instance of the Global Variables object.</p>
+</div>
       </div>
     </td>
     <td>
@@ -171,13 +168,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-ask">ask</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-ask">ask</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>A worker thread which can do computation.</p>
+</div>
       </div>
     </td>
     <td>
@@ -199,13 +197,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-availableTypes">availableTypes</a></span></span><span class="code" data-ice="signature">: {&quot;assembly&quot;: <span>*</span>, &quot;circle&quot;: <span>*</span>, &quot;rectangle&quot;: <span>*</span>, &quot;shirinkwrap&quot;: <span>*</span>, &quot;translate&quot;: <span>*</span>, &quot;tag&quot;: <span>*</span>, &quot;regularPolygon&quot;: <span>*</span>, &quot;extrude&quot;: <span>*</span>, &quot;scale&quot;: <span>*</span>, &quot;intersection&quot;: <span>*</span>, &quot;difference&quot;: <span>*</span>, &quot;costant&quot;: <span>*</span>, &quot;equation&quot;: <span>*</span>, &quot;molecule&quot;: <span>*</span>, &quot;input&quot;: <span>*</span>, &quot;readme&quot;: <span>*</span>, &quot;addBOMTag&quot;: <span>*</span>, &quot;rotate&quot;: <span>*</span>, &quot;githubmolecule&quot;: <span>*</span>, &quot;union&quot;: <span>*</span>, &quot;stretch&quot;: <span>*</span>, &quot;gcode&quot;: <span>*</span>, &quot;code&quot;: <span>*</span>}</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-availableTypes">availableTypes</a></span></span><span class="code" data-ice="signature">: <span>array</span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>An array of all of the available types of atoms which can be placed with a right click.</p>
+</div>
       </div>
     </td>
     <td>
@@ -227,13 +226,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-c">c</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-c">c</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>The 2D reference to the canvas object on which the atoms are drawn.</p>
+</div>
       </div>
     </td>
     <td>
@@ -255,13 +255,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-canvas">canvas</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-canvas">canvas</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>The canvas object on which the atoms are drawn.</p>
+</div>
       </div>
     </td>
     <td>
@@ -289,7 +290,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>The size (in mm) of segments to use for circles.</p>
+</div>
       </div>
     </td>
     <td>
@@ -317,7 +319,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>A flag to indicate if the evaluation of molecules is blocked.</p>
+</div>
       </div>
     </td>
     <td>
@@ -339,13 +342,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-gitHub">gitHub</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-gitHub">gitHub</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>The github object which is used to interact with GitHub.</p>
+</div>
       </div>
     </td>
     <td>
@@ -367,13 +371,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-render">render</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-render">render</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>A worker thread which can do computation.</p>
+</div>
       </div>
     </td>
     <td>
@@ -401,7 +406,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>A flag to indicate if the program is running in run mode (ie a shared link).</p>
+</div>
       </div>
     </td>
     <td>
@@ -429,7 +435,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>The current amount by which the canvas has been scaled.</p>
+</div>
       </div>
     </td>
     <td>
@@ -486,13 +493,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-method-distBetweenPoints">distBetweenPoints</a></span></span><span class="code" data-ice="signature">(x1: <span>*</span>, x2: <span>*</span>, y1: <span>*</span>, y2: <span>*</span>): <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-method-distBetweenPoints">distBetweenPoints</a></span></span><span class="code" data-ice="signature">(x1: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, y1: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, x2: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, y2: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Computes the distance between two points on a plane.</p>
+</div>
       </div>
     </td>
     <td>
@@ -520,7 +528,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>A function to generate a unique ID value.</p>
+</div>
       </div>
     </td>
     <td>
@@ -550,14 +559,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber31">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber35">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The constructor creates a new instance of the Global Variables object.</p>
+</div>
 
   
 
@@ -592,18 +602,19 @@
     
     
     
-    <span class="code" data-ice="name">ask</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">ask</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber72">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber124">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>A worker thread which can do computation.</p>
+</div>
 
   
 
@@ -635,18 +646,19 @@
     
     
     
-    <span class="code" data-ice="name">availableTypes</span><span class="code" data-ice="signature">: {&quot;assembly&quot;: <span>*</span>, &quot;circle&quot;: <span>*</span>, &quot;rectangle&quot;: <span>*</span>, &quot;shirinkwrap&quot;: <span>*</span>, &quot;translate&quot;: <span>*</span>, &quot;tag&quot;: <span>*</span>, &quot;regularPolygon&quot;: <span>*</span>, &quot;extrude&quot;: <span>*</span>, &quot;scale&quot;: <span>*</span>, &quot;intersection&quot;: <span>*</span>, &quot;difference&quot;: <span>*</span>, &quot;costant&quot;: <span>*</span>, &quot;equation&quot;: <span>*</span>, &quot;molecule&quot;: <span>*</span>, &quot;input&quot;: <span>*</span>, &quot;readme&quot;: <span>*</span>, &quot;addBOMTag&quot;: <span>*</span>, &quot;rotate&quot;: <span>*</span>, &quot;githubmolecule&quot;: <span>*</span>, &quot;union&quot;: <span>*</span>, &quot;stretch&quot;: <span>*</span>, &quot;gcode&quot;: <span>*</span>, &quot;code&quot;: <span>*</span>}</span>
+    <span class="code" data-ice="name">availableTypes</span><span class="code" data-ice="signature">: <span>array</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber35">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber55">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>An array of all of the available types of atoms which can be placed with a right click.</p>
+</div>
 
   
 
@@ -678,18 +690,19 @@
     
     
     
-    <span class="code" data-ice="name">c</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">c</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber33">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber45">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The 2D reference to the canvas object on which the atoms are drawn.</p>
+</div>
 
   
 
@@ -721,18 +734,19 @@
     
     
     
-    <span class="code" data-ice="name">canvas</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">canvas</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber32">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber40">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The canvas object on which the atoms are drawn.</p>
+</div>
 
   
 
@@ -768,14 +782,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber68">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber116">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The size (in mm) of segments to use for circles.</p>
+</div>
 
   
 
@@ -811,14 +826,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber66">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber106">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>A flag to indicate if the evaluation of molecules is blocked. Used to prevent evaluation until all molecules have been placed.</p>
+</div>
 
   
 
@@ -850,18 +866,19 @@
     
     
     
-    <span class="code" data-ice="name">gitHub</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">gitHub</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber67">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber111">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The github object which is used to interact with GitHub.</p>
+</div>
 
   
 
@@ -893,18 +910,19 @@
     
     
     
-    <span class="code" data-ice="name">render</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">render</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber75">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber131">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>A worker thread which can do computation.</p>
+</div>
 
   
 
@@ -940,14 +958,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber65">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber101">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>A flag to indicate if the program is running in run mode (ie a shared link).</p>
+</div>
 
   
 
@@ -983,14 +1002,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber34">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber50">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The current amount by which the canvas has been scaled.</p>
+</div>
 
   
 
@@ -1026,7 +1046,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber60">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber84">source</a></span></span>
     </span>
   </h3>
 
@@ -1068,18 +1088,19 @@
     
     
     
-    <span class="code" data-ice="name">distBetweenPoints</span><span class="code" data-ice="signature">(x1: <span>*</span>, x2: <span>*</span>, y1: <span>*</span>, y2: <span>*</span>): <span>*</span></span>
+    <span class="code" data-ice="name">distBetweenPoints</span><span class="code" data-ice="signature">(x1: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, y1: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, x2: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, y2: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber83">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber149">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.</p>
+</div>
 
   
 
@@ -1093,27 +1114,31 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">x1</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">x2</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>The x cordinate of the first point.</p>
+</td>
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">y1</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>The y cordinate of the first point.</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">x2</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>The x cordinate of the second point.</p>
+</td>
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">y2</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>The y cordinate of the second point.</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -1161,14 +1186,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber79">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber138">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.</p>
+</div>
 
   
 

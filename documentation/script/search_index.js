@@ -186,21 +186,9 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/lib/vec2.js~vec2",
-    "function/index.html#static-function-Vec2",
-    "<span>Vec2</span> <span class=\"search-result-import-path\">canvas-template/src/js/lib/vec2.js</span>",
-    "function"
-  ],
-  [
     "canvas-template/src/js/alwaysonefreeinput.js~addordeleteports",
     "function/index.html#static-function-addOrDeletePorts",
     "<span>addOrDeletePorts</span> <span class=\"search-result-import-path\">canvas-template/src/js/alwaysOneFreeInput.js</span>",
-    "function"
-  ],
-  [
-    "canvas-template/src/js/lib/conversation.js~conversation",
-    "function/index.html#static-function-conversation",
-    "<span>conversation</span> <span class=\"search-result-import-path\">canvas-template/src/js/lib/conversation.js</span>",
     "function"
   ],
   [
@@ -213,24 +201,6 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/globalvariables.js~globalvariables",
     "variable/index.html#static-variable-globalVariables",
     "<span>globalVariables</span> <span class=\"search-result-import-path\">canvas-template/src/js/globalvariables.js</span>",
-    "variable"
-  ],
-  [
-    "canvas-template/src/js/lib/browserornode.js~isbrowser",
-    "variable/index.html#static-variable-isBrowser",
-    "<span>isBrowser</span> <span class=\"search-result-import-path\">canvas-template/src/js/lib/browserOrNode.js</span>",
-    "variable"
-  ],
-  [
-    "canvas-template/src/js/lib/browserornode.js~isnode",
-    "variable/index.html#static-variable-isNode",
-    "<span>isNode</span> <span class=\"search-result-import-path\">canvas-template/src/js/lib/browserOrNode.js</span>",
-    "variable"
-  ],
-  [
-    "canvas-template/src/js/lib/browserornode.js~iswebworker",
-    "variable/index.html#static-variable-isWebWorker",
-    "<span>isWebWorker</span> <span class=\"search-result-import-path\">canvas-template/src/js/lib/browserOrNode.js</span>",
     "variable"
   ],
   [
@@ -582,6 +552,12 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/js/display.js~display#axescheck",
+    "class/src/js/display.js~Display.html#instance-member-axesCheck",
+    "src/js/display.js~Display#axesCheck",
+    "member"
+  ],
+  [
     "src/js/display.js~display#camera",
     "class/src/js/display.js~Display.html#instance-member-camera",
     "src/js/display.js~Display#camera",
@@ -600,15 +576,15 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/display.js~display#convert",
-    "class/src/js/display.js~Display.html#instance-member-convert",
-    "src/js/display.js~Display#convert",
-    "member"
-  ],
-  [
     "src/js/display.js~display#datasets",
     "class/src/js/display.js~Display.html#instance-member-datasets",
     "src/js/display.js~Display#datasets",
+    "member"
+  ],
+  [
+    "src/js/display.js~display#displaygrid",
+    "class/src/js/display.js~Display.html#instance-member-displayGrid",
+    "src/js/display.js~Display#displayGrid",
     "member"
   ],
   [
@@ -664,6 +640,12 @@ window.esdocSearchIndex = [
     "class/src/js/display.js~Display.html#instance-method-updateDisplayData",
     "src/js/display.js~Display#updateDisplayData",
     "method"
+  ],
+  [
+    "src/js/display.js~display#wiredisplay",
+    "class/src/js/display.js~Display.html#instance-member-wireDisplay",
+    "src/js/display.js~Display#wireDisplay",
+    "member"
   ],
   [
     "src/js/display.js~display#writetodisplay",
@@ -772,36 +754,6 @@ window.esdocSearchIndex = [
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-secretTypes",
     "src/js/globalvariables.js~GlobalVariables#secretTypes",
     "member"
-  ],
-  [
-    "src/js/lib/filesaver.js",
-    "file/src/js/lib/FileSaver.js.html",
-    "src/js/lib/FileSaver.js",
-    "file"
-  ],
-  [
-    "src/js/lib/svgreader.js",
-    "file/src/js/lib/SVGReader.js.html",
-    "src/js/lib/SVGReader.js",
-    "file"
-  ],
-  [
-    "src/js/lib/browserornode.js",
-    "file/src/js/lib/browserOrNode.js.html",
-    "src/js/lib/browserOrNode.js",
-    "file"
-  ],
-  [
-    "src/js/lib/conversation.js",
-    "file/src/js/lib/conversation.js.html",
-    "src/js/lib/conversation.js",
-    "file"
-  ],
-  [
-    "src/js/lib/vec2.js",
-    "file/src/js/lib/vec2.js.html",
-    "src/js/lib/vec2.js",
-    "file"
   ],
   [
     "src/js/menu.js",
@@ -1086,12 +1038,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/constant.js~constant#value",
-    "class/src/js/molecules/constant.js~Constant.html#instance-member-value",
-    "src/js/molecules/constant.js~Constant#value",
-    "member"
-  ],
-  [
     "src/js/molecules/difference.js",
     "file/src/js/molecules/difference.js.html",
     "src/js/molecules/difference.js",
@@ -1152,12 +1098,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/equation.js~equation#defaultvalue",
-    "class/src/js/molecules/equation.js~Equation.html#instance-member-defaultValue",
-    "src/js/molecules/equation.js~Equation#defaultValue",
-    "member"
-  ],
-  [
     "src/js/molecules/equation.js~equation#equationoptions",
     "class/src/js/molecules/equation.js~Equation.html#instance-member-equationOptions",
     "src/js/molecules/equation.js~Equation#equationOptions",
@@ -1186,12 +1126,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/equation.js~Equation.html#instance-method-updateValue",
     "src/js/molecules/equation.js~Equation#updateValue",
     "method"
-  ],
-  [
-    "src/js/molecules/equation.js~equation#value",
-    "class/src/js/molecules/equation.js~Equation.html#instance-member-value",
-    "src/js/molecules/equation.js~Equation#value",
-    "member"
   ],
   [
     "src/js/molecules/extrude.js",
@@ -1794,12 +1728,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/readme.js~readme#value",
-    "class/src/js/molecules/readme.js~Readme.html#instance-member-value",
-    "src/js/molecules/readme.js~Readme#value",
-    "member"
-  ],
-  [
     "src/js/molecules/rectangle.js",
     "file/src/js/molecules/rectangle.js.html",
     "src/js/molecules/rectangle.js",
@@ -1858,12 +1786,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/regularPolygon.js~RegularPolygon.html#instance-method-updateValue",
     "src/js/molecules/regularPolygon.js~RegularPolygon#updateValue",
     "method"
-  ],
-  [
-    "src/js/molecules/regularpolygon.js~regularpolygon#value",
-    "class/src/js/molecules/regularPolygon.js~RegularPolygon.html#instance-member-value",
-    "src/js/molecules/regularPolygon.js~RegularPolygon#value",
-    "member"
   ],
   [
     "src/js/molecules/rotate.js",
@@ -2038,12 +1960,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/tag.js~Tag.html#instance-method-updateValue",
     "src/js/molecules/tag.js~Tag#updateValue",
     "method"
-  ],
-  [
-    "src/js/molecules/tag.js~tag#value",
-    "class/src/js/molecules/tag.js~Tag.html#instance-member-value",
-    "src/js/molecules/tag.js~Tag#value",
-    "member"
   ],
   [
     "src/js/molecules/translate.js",

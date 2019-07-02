@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,30 +72,56 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
 
-
+/**
+ * This class creates the readme atom.
+ */
 export default class Readme extends Atom{
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
-        this.value = &apos;&apos;
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.atomType = &apos;Readme&apos;
+        /**
+         * The text to appear in the README file
+         * @type {string}
+         */
         this.readmeText = &apos;Readme text here&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.type = &apos;readme&apos;
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;README&apos;
+        /**
+         * This atom&apos;s radius...probably inherited and can be deleted
+         * @type {number}
+         */
         this.radius = 20
         
         this.setValues(values)
     }
     
+    /**
+     * Add a place to edit the readme text to the sidebar*/ 
     updateSidebar(){
-        //updates the sidebar to display information about this node
-        
         var valueList = super.updateSidebar() //call the super function
-        
         this.createEditableValueListItem(valueList,this,&apos;readmeText&apos;, &apos;Notes&apos;, false)
-        
     }
     
+    /**
+     * Draw the two // marks on the readme atom
+     */ 
     draw() {
         
         super.draw() //Super call to draw the rest
@@ -121,16 +142,23 @@ export default class Readme extends Atom{
         GlobalVariables.c.stroke()
     }
     
+    /**
+     * Update the readme text. Called when the readme text has been edited.
+     */ 
     setValue(newText) {
         this.readmeText = newText
     }
     
+    /**
+     * Provides this molecules contribution to the global Readme
+     */ 
     requestReadme(){
-        //request any contributions from this atom to the readme
-        
         return [this.readmeText]
     }
     
+    /**
+     * Add the readme text to the information saved for this atom
+     */ 
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)

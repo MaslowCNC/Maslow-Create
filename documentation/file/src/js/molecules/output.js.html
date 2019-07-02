@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,9 +72,15 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
 
-
+/**
+ * This class creates the output atom.
+ */
 export default class Output extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super (values)
         
@@ -88,11 +89,35 @@ export default class Output extends Atom {
             this.parent.addIO(&apos;output&apos;, &apos;Geometry&apos;, this.parent, &apos;geometry&apos;, &apos;&apos;)
         }
         
+        /**
+         * This atom&apos;s value
+         * @type {object}
+         */
         this.value = null
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.type = &apos;output&apos;
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Output&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;Output&apos;
+        /**
+         * This atom&apos;s height
+         * @type {number}
+         */
         this.height = 16
+        /**
+         * This atom&apos;s radius
+         * @type {number}
+         */
         this.radius = 20
         
         this.setValues(values)
@@ -100,6 +125,9 @@ export default class Output extends Atom {
         this.addIO(&apos;input&apos;, &apos;number or geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
     }
     
+    /**
+     * Take the input value of this function and pass it to the parent Molecule to go up one level.
+     */ 
     updateValue(){
         if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
             this.value = this.findIOValue(&apos;number or geometry&apos;)
@@ -110,10 +138,16 @@ export default class Output extends Atom {
         }
     }
     
+    /**
+     * I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.
+     */ 
     setID(newID){
         this.uniqueID = newID
     }
     
+    /**
+     * Draw the output shape on the screen.
+     */ 
     draw() {
 
         this.height= this.radius

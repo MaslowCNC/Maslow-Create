@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -79,13 +74,28 @@ import GlobalVariables from &apos;../globalvariables.js&apos;
 import saveAs from &apos;../lib/FileSaver.js&apos;
 import SVGReader from &apos;../lib/SVGReader.js&apos;
 
+/**
+ * This class creates the circle atom.
+ */
 export default class Gcode extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         
         super(values)
         
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Gcode&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;Gcode&apos;
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, GlobalVariables.api.sphere())
@@ -99,6 +109,9 @@ export default class Gcode extends Atom {
         this.updateValue()
     }
     
+    /**
+     * Generate a new .svg file from the input geometry, then compute a gcode path from it. Processing takes place in a worker thread
+     */ 
     updateValue(){
         this.processing = true
         this.clearAlert()
@@ -112,7 +125,7 @@ export default class Gcode extends Atom {
         try{
             const input = this.findIOValue(&apos;geometry&apos;)
             
-            computeSvg([input.toLazyGeometry().toGeometry()], &quot;svg&quot;).then(result =&gt; {
+            computeSvg([input], &quot;svg&quot;).then(result =&gt; {
                 if (result != -1 ){
                     
                     const bounds = input.measureBoundingBox()
@@ -133,6 +146,9 @@ export default class Gcode extends Atom {
         }catch(err){this.setAlert(err)}
     }
     
+    /**
+     * Add a button to download the generated gcode
+     */ 
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
@@ -142,10 +158,15 @@ export default class Gcode extends Atom {
         })
     }
     
+    /**
+     * Does nothing, just here to supress the normal send to render behavior
+     */ 
     sendToRender(){
-        //Supress the normal send to render behavior
     }
     
+    /**
+     * This function was taken from github. It needs to be more well documented.
+     */ 
     svg2gcode(svg, settings) {
         // clean off any preceding whitespace
         svg = svg.replace(/^[\n\r \t]/gm, &apos;&apos;)

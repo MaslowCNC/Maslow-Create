@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -76,10 +71,24 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/menu.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./globalvariables&apos;
 
+/**
+ * This class creates the right click menu behavior for placing atoms.
+ */
 class Menu {
+    /**
+     * The constructor creates a new menu. The menu is only created once when the program launches and is hidden and displayed when the menu is needed.
+     */
     constructor(){
+        /** 
+         * The HTML object which contains the menu
+         * @type {object}
+         */
         this.menu = document.querySelector(&apos;.menu&apos;)
         this.menu.classList.add(&apos;off&apos;)
+        /** 
+         * An array which lists all of the options in the menu.
+         * @type {array}
+         */
         this.menuList = document.getElementById(&apos;menuList&apos;)
     
         //Add the search bar to the list item
@@ -117,6 +126,10 @@ class Menu {
         })
     }
     
+    /**
+     * Runs when a menu option is clicked to place a new atom from the local atoms list.
+     * @param {object} ev - The event triggered by clicking on a menu item.
+     */ 
     placeNewNode(ev){
         let clr = ev.target.id
         this.hidemenu(ev)
@@ -130,7 +143,11 @@ class Menu {
             
         }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
     }
-
+    
+    /**
+     * Runs when a menu option is clicked to place a new atom from searching on GitHub.
+     * @param {object} ev - The event triggered by clicking on a menu item.
+     */ 
     placeGitHubMolecule(ev){
         
         this.hidemenu()
@@ -146,7 +163,11 @@ class Menu {
             uniqueID: GlobalVariables.generateUniqueID()
         }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
     }
-
+    
+    /**
+     * Runs when a menu is opened by right clicking.
+     * @param {object} ev - The event triggered by right clicking on the canvas.
+     */ 
     showmenu(ev){
         //Open the default tab
         document.getElementById(&apos;localTab&apos;).click()
@@ -170,13 +191,20 @@ class Menu {
         
         document.getElementById(&apos;menuInput&apos;).focus()
     }
-
+    
+    /**
+     * Hides the menu if it is open.
+     */ 
     hidemenu(){
         this.menu.classList.add(&apos;off&apos;)
         this.menu.style.top = &apos;-200%&apos;
         this.menu.style.left = &apos;-200%&apos;
     }
-
+    
+    /**
+     * Runs when a new search is commanded.
+     * @param {object} evt - The event triggered by the search bar.
+     */ 
     searchMenu(evt) {
       
         if(document.getElementsByClassName(&apos;tablinks active&apos;)[0].id == &apos;localTab&apos;){
@@ -234,7 +262,12 @@ class Menu {
             }
         }
     }
-
+    
+    /**
+     * Switches tabs within the menu.
+     * @param {object} evt - The event triggered by clicking on a tab.
+     * @param {object} tabName - The name of the tab clicked.
+     */ 
     openTab(evt, tabName) {
         // Declare all variables
         var i, tabcontent, tablinks

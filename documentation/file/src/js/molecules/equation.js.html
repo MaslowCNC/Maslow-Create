@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,8 +72,15 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
 
+/**
+ * This class creates the Equation atom.
+ */
 export default class Equation extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
@@ -86,17 +88,34 @@ export default class Equation extends Atom {
         this.addIO(&apos;input&apos;, &apos;y&apos;, this, &apos;number&apos;, 0)
         this.addIO(&apos;output&apos;, &apos;z&apos;, this, &apos;number&apos;, 0)
         
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Equation&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;Equation&apos;
-        this.defaultValue = &apos;&apos;
-        this.value = &apos;&apos;
+        /**
+         * An array of all of the possible equation selections
+         * @type {array of strings}
+         */
         this.equationOptions = [&apos;x+y&apos;, &apos;x-y&apos;, &apos;x*y&apos;, &apos;x/y&apos;, &apos;cos(x)&apos;, &apos;sin(x)&apos;, &apos;x^y&apos;]
+        /**
+         * The index number of the currently selected option
+         * @type {number}
+         */
         this.currentEquation = 0
         
         this.setValues(values)
         
     }
     
+    /**
+     * Add the equation choice to the object which is saved for this molecule
+     */
     serialize(){
         var superSerialObject = super.serialize(null)
         
@@ -106,8 +125,10 @@ export default class Equation extends Atom {
         return superSerialObject
     }
     
+    /**
+     * Check the selection of equation and then apply that to the inputs
+     */
     updateValue(){
-        //A super classed version of the update codeblock default function which computes the equation values
         if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
             var x = this.findIOValue(&apos;x&apos;)
             var y = this.findIOValue(&apos;y&apos;)
@@ -142,11 +163,17 @@ export default class Equation extends Atom {
         }
     }
     
+    /**
+     * Called when the equation drop down is changed. Grab the new value and then recompute.
+     */
     changeEquation(newValue){
         this.currentEquation = parseInt(newValue)
         this.updateValue()
     }
     
+    /**
+     * Add a dropdown to choose the equation type to the sidebar.
+     */
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         

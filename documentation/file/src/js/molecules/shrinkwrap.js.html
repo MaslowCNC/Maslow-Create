@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,17 +72,44 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
 import { addOrDeletePorts } from &apos;../alwaysOneFreeInput.js&apos;
 
+/**
+ * This class creates the shrinkwrap atom. This behavior can also be called &apos;hull&apos;
+ */
 export default class ShrinkWrap extends Atom{
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Shrink Wrap&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;ShrinkWrap&apos;
+        /**
+         * A list of all of the inputs to this molecule. May be passed to the constructor and loaded.
+         * @type {array}
+         */
         this.ioValues = []
+        /**
+         * This was used when there was a drop down to select closed...may be deleted
+         * @type {number}
+         */
         this.closedSelection = 0
+        /**
+         * I believe this is no longer used alzatin - is that right?
+         * @type {boolean}
+         */
         this.addedIO = false
         
         this.setValues(values)
@@ -101,6 +123,9 @@ export default class ShrinkWrap extends Atom{
         this.updateValue()
     }
     
+    /**
+     * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
+     */ 
     updateValue(){
         try{
             var inputsList = []
@@ -110,7 +135,7 @@ export default class ShrinkWrap extends Atom{
                 }
             })
             const values = inputsList.map(x =&gt; {
-                return x.toLazyGeometry().toGeometry()
+                return x
             })
             
             this.basicThreadValueProcessing(values, &quot;hull&quot;)
@@ -120,6 +145,9 @@ export default class ShrinkWrap extends Atom{
         addOrDeletePorts(this)
     }
      
+    /**
+     * Add the names of the inputs to the saved object so that they can be loaded later
+     */ 
     serialize(savedObject){
         var thisAsObject = super.serialize(savedObject)
         

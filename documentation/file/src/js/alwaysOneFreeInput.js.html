@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -75,7 +70,12 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/alwaysOneFreeInput.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./globalvariables.js&apos;
+//This module is used to create atoms which do not have a set number of inputs, but instead always have one input free.
 
+/**
+ * Computes the number of inputs which are curently available on a target atom.
+ * @param {object} target - The atom which should have it&apos;s number of inputs computed.
+ */ 
 const howManyInputPortsAvailable = function(target){
     var portsAvailable = 0
     target.inputs.forEach(io =&gt; {
@@ -86,6 +86,10 @@ const howManyInputPortsAvailable = function(target){
     return portsAvailable
 }
 
+/**
+ * Deletes one free input from an atom which has more than one free input available.
+ * @param {object} target - The atom which should have one input deleted (if there are more than two free).
+ */ 
 const deleteEmptyPort = function(target){
     target.inputs.forEach(io =&gt; {
         if(io.type == &apos;input&apos; &amp;&amp; io.connectors.length == 0 &amp;&amp; howManyInputPortsAvailable(target) &gt;= 2){
@@ -94,9 +98,13 @@ const deleteEmptyPort = function(target){
     })
 }
 
+/**
+ * Adds or deletes inputs from a target atom until there is exactly one input available.
+ * @param {object} target - The atom which should have it&apos;s number of inputs adjusted.
+ */ 
 export const addOrDeletePorts = (target) =&gt; {
     //Because a molecule loads with no connectors attached to the ports and we don&apos;t want them to delete before
-    //They are conencted to we use teh ioValues list to keep track of them
+    //They are conencted to we use the ioValues list to keep track of them
     target.inputs.forEach(child =&gt; {
         target.ioValues.forEach(ioValue =&gt; {
             if (child.name == ioValue.name &amp;&amp; child.connectors.length &gt; 0){

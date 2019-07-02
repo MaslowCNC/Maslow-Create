@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -74,13 +69,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Display from &apos;<span><a href="file/src/js/display.js.html#lineNumber5">canvas-template/src/js/display.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Display from &apos;<span><a href="file/src/js/display.js.html#lineNumber8">canvas-template/src/js/display.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/js/display.js.html#lineNumber5">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/js/display.js.html#lineNumber8">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -100,7 +95,8 @@
 
   
   
-  
+  <div class="description" data-ice="description"><p>This class handles writing to the 3D preview display</p>
+</div>
   
 
   
@@ -138,7 +134,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>The constructor run to create the new display.</p>
+</div>
       </div>
     </td>
     <td>
@@ -154,6 +151,35 @@
   <tbody>
   
   <tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-axesCheck">axesCheck</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>A flag to indicate if the axes should be displayed.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
@@ -223,13 +249,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-convert">convert</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-datasets">datasets</a></span></span><span class="code" data-ice="signature">: <span>array</span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>An array which contains the data to be respresented in 3D.</p>
+</div>
       </div>
     </td>
     <td>
@@ -251,13 +278,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-datasets">datasets</a></span></span><span class="code" data-ice="signature">: <span><span>*</span><span>[]</span></span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-displayGrid">displayGrid</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>An Flag to indicate if the grid on the XY plane should be displayed.</p>
+</div>
       </div>
     </td>
     <td>
@@ -363,13 +391,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-targetDiv">targetDiv</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-targetDiv">targetDiv</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>The HTML div object targeted to add the display to.</p>
+</div>
       </div>
     </td>
     <td>
@@ -405,6 +434,35 @@
       
     </td>
   </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-wireDisplay">wireDisplay</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>A flag to indicate if the frame should be displayed in wire frame.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 </div>
@@ -426,13 +484,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-makeMaterial">makeMaterial</a></span></span><span class="code" data-ice="signature">(material: <span>*</span>): <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-makeMaterial">makeMaterial</a></span></span><span class="code" data-ice="signature">(material: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>This function is intended to allow for materials.</p>
+</div>
       </div>
     </td>
     <td>
@@ -460,7 +519,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>Handles resizing the 3D viewer when the window resizes.</p>
+</div>
       </div>
     </td>
     <td>
@@ -482,13 +542,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-render">render</a></span></span><span class="code" data-ice="signature">()</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-render">render</a></span></span><span class="code" data-ice="signature">(threejsGeometry: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Clears the display and writes a threejs geometry to it.</p>
+</div>
       </div>
     </td>
     <td>
@@ -510,13 +571,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-updateDisplayData">updateDisplayData</a></span></span><span class="code" data-ice="signature">(threejsGeometry: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-updateDisplayData">updateDisplayData</a></span></span><span class="code" data-ice="signature">(threejsGeometry: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Clears the display and writes a threejs geometry to it.</p>
+</div>
       </div>
     </td>
     <td>
@@ -538,13 +600,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-writeToDisplay">writeToDisplay</a></span></span><span class="code" data-ice="signature">(shape: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-writeToDisplay">writeToDisplay</a></span></span><span class="code" data-ice="signature">(shape: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Writes a shape to the 3D display.</p>
+</div>
       </div>
     </td>
     <td>
@@ -566,13 +629,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-zoomCameraToFit">zoomCameraToFit</a></span></span><span class="code" data-ice="signature">(bounds: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-zoomCameraToFit">zoomCameraToFit</a></span></span><span class="code" data-ice="signature">(bounds: <span>array</span>)</span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Zooms the camera to fit target bounds on the screen.</p>
+</div>
       </div>
     </td>
     <td>
@@ -602,14 +666,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber7">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber12">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The constructor run to create the new display. It seems to run with each refresh which doesn&apos;t seem right to me.</p>
+</div>
 
   
 
@@ -637,6 +702,50 @@
 <div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-axesCheck">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">axesCheck</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber27">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>A flag to indicate if the axes should be displayed.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-camera">
     <span class="access" data-ice="access">public</span>
     
@@ -648,7 +757,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber22">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber70">source</a></span></span>
     </span>
   </h3>
 
@@ -691,50 +800,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber25">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-convert">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">convert</span><span class="code" data-ice="signature">: <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber9">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber73">source</a></span></span>
     </span>
   </h3>
 
@@ -773,18 +839,63 @@
     
     
     
-    <span class="code" data-ice="name">datasets</span><span class="code" data-ice="signature">: <span><span>*</span><span>[]</span></span></span>
+    <span class="code" data-ice="name">datasets</span><span class="code" data-ice="signature">: <span>array</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber10">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber17">source</a></span></span>
     </span>
   </h3>
 
   
   
   
+  <div data-ice="description"><p>An array which contains the data to be respresented in 3D.</p>
+</div>
+
   
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-displayGrid">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">displayGrid</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber22">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>An Flag to indicate if the grid on the XY plane should be displayed.</p>
+</div>
 
   
 
@@ -820,7 +931,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber58">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber106">source</a></span></span>
     </span>
   </h3>
 
@@ -863,7 +974,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber63">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber111">source</a></span></span>
     </span>
   </h3>
 
@@ -906,7 +1017,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber36">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber84">source</a></span></span>
     </span>
   </h3>
 
@@ -945,18 +1056,19 @@
     
     
     
-    <span class="code" data-ice="name">targetDiv</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">targetDiv</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber19">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber67">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>The HTML div object targeted to add the display to.</p>
+</div>
 
   
 
@@ -992,7 +1104,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber203">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber287">source</a></span></span>
     </span>
   </h3>
 
@@ -1000,6 +1112,50 @@
   
   
   
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-wireDisplay">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">wireDisplay</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber32">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>A flag to indicate if the frame should be displayed in wire frame.</p>
+</div>
 
   
 
@@ -1034,18 +1190,19 @@
     
     
     
-    <span class="code" data-ice="name">makeMaterial</span><span class="code" data-ice="signature">(material: <span>*</span>): <span>*</span></span>
+    <span class="code" data-ice="name">makeMaterial</span><span class="code" data-ice="signature">(material: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber157">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber228">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>This function is intended to allow for materials. It is currently not used and can probably be deleted.</p>
+</div>
 
   
 
@@ -1059,9 +1216,10 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">material</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>A string to define the material type.</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -1109,14 +1267,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber245">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber333">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Handles resizing the 3D viewer when the window resizes.</p>
+</div>
 
   
 
@@ -1148,22 +1307,40 @@
     
     
     
-    <span class="code" data-ice="name">render</span><span class="code" data-ice="signature">()</span>
+    <span class="code" data-ice="name">render</span><span class="code" data-ice="signature">(threejsGeometry: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber252">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber344">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Clears the display and writes a threejs geometry to it.</p>
+</div>
 
   
 
-  <div data-ice="properties">
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">threejsGeometry</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>A threejs geometry to write to the display.</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
 </div>
 
   
@@ -1191,18 +1368,19 @@
     
     
     
-    <span class="code" data-ice="name">updateDisplayData</span><span class="code" data-ice="signature">(threejsGeometry: <span>*</span>)</span>
+    <span class="code" data-ice="name">updateDisplayData</span><span class="code" data-ice="signature">(threejsGeometry: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber194">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber278">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Clears the display and writes a threejs geometry to it.</p>
+</div>
 
   
 
@@ -1216,9 +1394,10 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">threejsGeometry</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>A threejs geometry to write to the display.</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -1250,18 +1429,19 @@
     
     
     
-    <span class="code" data-ice="name">writeToDisplay</span><span class="code" data-ice="signature">(shape: <span>*</span>)</span>
+    <span class="code" data-ice="name">writeToDisplay</span><span class="code" data-ice="signature">(shape: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber171">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber246">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Writes a shape to the 3D display. Expecting a threejs geometry.</p>
+</div>
 
   
 
@@ -1275,9 +1455,10 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">shape</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>A jsxcad geometry data set to write to the display. Computation is done in a worker thread</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -1309,18 +1490,19 @@
     
     
     
-    <span class="code" data-ice="name">zoomCameraToFit</span><span class="code" data-ice="signature">(bounds: <span>*</span>)</span>
+    <span class="code" data-ice="name">zoomCameraToFit</span><span class="code" data-ice="signature">(bounds: <span>array</span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber187">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber267">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Zooms the camera to fit target bounds on the screen.</p>
+</div>
 
   
 
@@ -1334,9 +1516,10 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">bounds</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span>array</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>An array of some sort...this comment should be updated.</p>
+</td>
     </tr>
 </tbody>
   </table>

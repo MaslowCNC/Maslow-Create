@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -74,16 +69,46 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/BOM.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">export class BOMEntry {
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * This class defines a BOMEntry object which is used to define one entry in a bill of materials.
+ */ 
+export class BOMEntry {
+    /**
+     * The constructor returns a new blank BOMEntry object.
+     */ 
     constructor(){
+        /** 
+         * The name of the item.
+         * @type {string}
+         */
         this.BOMitemName  = &apos;name&apos;
+        /** 
+         * The number of this item needed.
+         * @type {number}
+         */
         this.numberNeeded = 0
+        /** 
+         * The cost of one of this item in USD.
+         * @type {number}
+         */
         this.costUSD      = 0
+        /** 
+         * A link to where to purchase the item.
+         * @type {string}
+         */
         this.source       = &apos;www.example.com&apos;
+        /** 
+         * The total number of this item needed for this part. Should this be removed in favor of  forcing the parts to be modeled? Probably nobody would bother.
+         * @type {number}
+         */
         this.totalNeeded  = this.numberNeeded //Scaled by the number of this instance
     }
 }
 
+/**
+ * Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.
+ * @param {object} geometry - The geometry which should be scanned for tags.
+ */ 
 export const extractBomTags = (geometry) =&gt; {
     var bomItems = []
     const walk = (geometry) =&gt; {

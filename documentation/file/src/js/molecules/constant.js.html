@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,16 +72,42 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
 
+/**
+ * This class creates the constant atom instance which can be used to define a numerical constant.
+ */
 export default class Constant extends Atom{
     
+    /**
+     * Creates a new constant atom.
+     * @param {object} values - An object of values. Each of these values will be applied to the resulting atom.
+     */ 
     constructor(values){
         super(values)
         
-        this.value = &apos;&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.type = &apos;constant&apos;
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Constant&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;Constant&apos;
+        /**
+         * This atom&apos;s height as drawn on the screen...probably doesn&apos;t need to be in this scope
+         * @type {string}
+         */
         this.height = 16
+        /**
+         * This atom&apos;s radius as drawn on the screen...probably doesn&apos;t need to be in this scope
+         * @type {string}
+         */
         this.radius = 15
         
         this.setValues(values)
@@ -97,7 +118,9 @@ export default class Constant extends Atom{
             this.output.setValue(this.ioValues[0].ioValue)
         }
     }
-    
+    /**
+     * Add entries for name and value to the side bar. Note: I think that should happen automatically and this function can be deleted. Please test that future self.
+     */ 
     updateSidebar(){
         //updates the sidebar to display information about this node
         
@@ -106,6 +129,9 @@ export default class Constant extends Atom{
         this.createEditableValueListItem(valueList,this.output,&apos;value&apos;, &apos;Value&apos;, true)
     }
     
+    /**
+     * Add the value to be saved to the object saved for this molecule.
+     */ 
     serialize(values){
         //Save the IO value to the serial stream
         var valuesObj = super.serialize(values)
@@ -119,6 +145,9 @@ export default class Constant extends Atom{
         
     }
     
+    /**
+     * Draw the constant which is more rectangular than the regular shape.
+     */ 
     draw() {
         
         GlobalVariables.c.beginPath()
@@ -139,7 +168,10 @@ export default class Constant extends Atom{
             this.output.draw()
         }
     }
- 
+    
+    /**
+     * Overwrite the default displayAndPropogate()...why?
+     */ 
     displayAndPropogate(){
         this.output.setValue(this.output.getValue())
     }

@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -98,7 +93,8 @@
       <div>
         
         
-        
+        <div data-ice="description"><p>This function works like a class to sandbox interaction with GitHub.</p>
+</div>
       </div>
     </td>
     <td>
@@ -120,13 +116,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span><span class="code" data-ice="signature">(x: <span>*</span>, y: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span><span class="code" data-ice="signature">(target: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Adds or deletes inputs from a target atom until there is exactly one input available.</p>
+</div>
       </div>
     </td>
     <td>
@@ -148,69 +145,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span><span class="code" data-ice="signature">(target: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span><span class="code" data-ice="signature">(geometry: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span><span class="code" data-ice="signature">(objectPattern: {&quot;agent&quot;: <span>*</span>, &quot;say&quot;: <span>*</span>}): {&quot;ask&quot;: <span>*</span>, &quot;hear&quot;: <span>*</span>}</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span><span class="code" data-ice="signature">(geometry: <span>*</span>): <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
+        <div data-ice="description"><p>Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.</p>
+</div>
       </div>
     </td>
     <td>
@@ -235,83 +177,19 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/githubOauth.js.html#lineNumber6">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/githubOauth.js.html#lineNumber9">source</a></span></span>
     </span>
   </h3>
 
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import GitHubModule from &apos;<span><a href="file/src/js/githubOauth.js.html#lineNumber6">canvas-template/src/js/githubOauth.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import GitHubModule from &apos;<span><a href="file/src/js/githubOauth.js.html#lineNumber9">canvas-template/src/js/githubOauth.js</a></span>&apos;</code></pre></div>
   
   
-  
+  <div data-ice="description"><p>This function works like a class to sandbox interaction with GitHub.</p>
+</div>
 
   
 
   <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="static-function-Vec2">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">Vec2</span><span class="code" data-ice="signature">(x: <span>*</span>, y: <span>*</span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/lib/vec2.js.html#lineNumber5">source</a></span></span>
-    </span>
-  </h3>
-
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Vec2 from &apos;<span><a href="file/src/js/lib/vec2.js.html#lineNumber5">canvas-template/src/js/lib/vec2.js</a></span>&apos;</code></pre></div>
-  
-  
-  
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">x</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">y</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
 </div>
 
   
@@ -339,18 +217,19 @@
     
     
     
-    <span class="code" data-ice="name">addOrDeletePorts</span><span class="code" data-ice="signature">(target: <span>*</span>)</span>
+    <span class="code" data-ice="name">addOrDeletePorts</span><span class="code" data-ice="signature">(target: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/alwaysOneFreeInput.js.html#lineNumber21">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/alwaysOneFreeInput.js.html#lineNumber34">source</a></span></span>
     </span>
   </h3>
 
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {addOrDeletePorts} from &apos;<span><a href="file/src/js/alwaysOneFreeInput.js.html#lineNumber21">canvas-template/src/js/alwaysOneFreeInput.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {addOrDeletePorts} from &apos;<span><a href="file/src/js/alwaysOneFreeInput.js.html#lineNumber34">canvas-template/src/js/alwaysOneFreeInput.js</a></span>&apos;</code></pre></div>
   
   
-  
+  <div data-ice="description"><p>Adds or deletes inputs from a target atom until there is exactly one input available.</p>
+</div>
 
   
 
@@ -364,9 +243,10 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">target</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>The atom which should have it&apos;s number of inputs adjusted.</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -374,77 +254,6 @@
 </div>
 
   
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="static-function-conversation">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">conversation</span><span class="code" data-ice="signature">(objectPattern: {&quot;agent&quot;: <span>*</span>, &quot;say&quot;: <span>*</span>}): {&quot;ask&quot;: <span>*</span>, &quot;hear&quot;: <span>*</span>}</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/lib/conversation.js.html#lineNumber1">source</a></span></span>
-    </span>
-  </h3>
-
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {conversation} from &apos;<span><a href="file/src/js/lib/conversation.js.html#lineNumber1">canvas-template/src/js/lib/conversation.js</a></span>&apos;</code></pre></div>
-  
-  
-  
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">objectPattern</td>
-      <td data-ice="type" class="code">{&quot;agent&quot;: <span>*</span>, &quot;say&quot;: <span>*</span>}</td>
-      <td data-ice="appendix"><ul><li>default: {&quot;agent&quot;:null,&quot;say&quot;:null}</li></ul></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType">{&quot;ask&quot;: <span>*</span>, &quot;hear&quot;: <span>*</span>}</td>
-          
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
 
   
 
@@ -469,18 +278,19 @@
     
     
     
-    <span class="code" data-ice="name">extractBomTags</span><span class="code" data-ice="signature">(geometry: <span>*</span>): <span>*</span></span>
+    <span class="code" data-ice="name">extractBomTags</span><span class="code" data-ice="signature">(geometry: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/BOM.js.html#lineNumber11">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/BOM.js.html#lineNumber41">source</a></span></span>
     </span>
   </h3>
 
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {extractBomTags} from &apos;<span><a href="file/src/js/BOM.js.html#lineNumber11">canvas-template/src/js/BOM.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {extractBomTags} from &apos;<span><a href="file/src/js/BOM.js.html#lineNumber41">canvas-template/src/js/BOM.js</a></span>&apos;</code></pre></div>
   
   
-  
+  <div data-ice="description"><p>Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.</p>
+</div>
 
   
 
@@ -494,9 +304,10 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">geometry</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>The geometry which should be scanned for tags.</p>
+</td>
     </tr>
 </tbody>
   </table>

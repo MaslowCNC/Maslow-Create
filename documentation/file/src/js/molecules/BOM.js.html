@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -74,29 +69,46 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/BOM.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
- * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
- */
-
-import Atom from &apos;../prototypes/atom.js&apos;
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
 import GlobalVariables from &apos;../globalvariables.js&apos;
 import {BOMEntry} from &apos;../BOM.js&apos;
 
-
+/**
+ * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
+ */
 export default class AddBOMTag extends Atom{
     /**
-    * The constructor function.
-    * @param {object} values An array of values passed in which will be assigned to the class as this.x
-    */ 
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
-        this.value = &apos;&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;Add BOM Tag&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.type = &apos;addBOMTag&apos;
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Add BOM Tag&apos;
+        /**
+         * This atom&apos;s radius as drawn on the screen. Probably inherited and can be deleted.
+         * @type {string}
+         */
         this.radius = 20
         
+        /**
+         * The BOM item object created by this atom
+         * @type {string}
+         */
         this.BOMitem = new BOMEntry()
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
@@ -105,8 +117,10 @@ export default class AddBOMTag extends Atom{
         this.setValues(values)
     }
     
+    /**
+     * Set the value to be the BOMitem, then call super updateValue()
+     */ 
     updateValue(){
-        //Overwrite the normal update code block to update the number of segments also
         if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
             try{
                 this.value = this.findIOValue(&apos;geometry&apos;).as(JSON.stringify(this.BOMitem))
@@ -119,18 +133,20 @@ export default class AddBOMTag extends Atom{
         }
     }
     
+    /**
+     * Updates the side bar to display the BOM item information
+     */ 
     updateSidebar(){
-        //updates the sidebar to display information about this node
-        
         var valueList = super.updateSidebar() //call the super function
-        
         this.createBOM(valueList)
     }
     
+    /**
+     * Add a B to the molecule representation
+     */ 
     draw() {
         
         super.draw() //Super call to draw the rest
-        
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = &apos;#949294&apos;
@@ -141,12 +157,18 @@ export default class AddBOMTag extends Atom{
         
     }
     
+    /**
+     * I&apos;m not sure this actually does anything. Delete? 
+     */ 
     requestReadme(){
         //request any contributions from this atom to the readme
-        
         return [this.readmeText]
     }
    
+    /**
+     * Creates an editable UI represntation of the bom list. 
+     * @param {Object} list - list is an object to which the generated HTML element will be apended
+     */ 
     createBOM(list){
         
         list.appendChild(document.createElement(&apos;br&apos;))
@@ -169,7 +191,9 @@ export default class AddBOMTag extends Atom{
         list.appendChild(x)
     }
     
-    
+    /**
+     * Add the bom item to the saved object
+     */ 
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)

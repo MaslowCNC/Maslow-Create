@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,26 +72,50 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Molecule from &apos;../molecules/molecule&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
 
+/**
+ * This class creates the GitHubMolecule atom.
+ */
 export default class GitHubMolecule extends Molecule {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
 
+        /** 
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Github Molecule&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;GitHubMolecule&apos;
-        this.topLevel = false //a flag to signal if this node is the top level node
+        /**
+         * A flag to signal if this node is the top level node
+         * @type {boolean}
+         */
+        this.topLevel = false
+        /**
+         * The color for the whole in the center of the drawing...probably doesn&apos;t need to be in this scope
+         * @type {string}
+         */
         this.centerColor = &apos;black&apos;
         
         this.setValues(values)
     }
     
+    /**
+     * This replaces the default Molecule double click behavior to prevent you from being able to double click into a github molecule
+     * @param {number} x - The x coordinate of the click
+     * @param {number} y - The y coordinate of the click
+     */ 
     doubleClick(x,y){
-        // Prevent you from being able to double click into a github molecule
-        
         var clickProcessed = false
-        
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
-        
         if (distFromClick &lt; this.radius){
             clickProcessed = true
         }
@@ -104,6 +123,10 @@ export default class GitHubMolecule extends Molecule {
         return clickProcessed 
     }
     
+    /**
+     * Loads a project into this GitHub molecule from github based on the passed github ID. This function is async and execution time depends on project complexity, and network speed.
+     * @param {number} id - The GitHub project ID for the project to be loaded.
+     */ 
     async loadProjectByID(id){
         
         //Get the repo by ID
@@ -127,6 +150,9 @@ export default class GitHubMolecule extends Molecule {
         return promsie
     }
     
+    /**
+     * Save the project information to be loaded. This should use super.serialize() to maintain a connection with Molecule, but it doesn&apos;t...should be fixed
+     */ 
     serialize(){
         
         var ioValues = []

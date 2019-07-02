@@ -38,11 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-lib">js/lib</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-conversation">conversation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Vec2">Vec2</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isBrowser">isBrowser</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNode">isNode</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isWebWorker">isWebWorker</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -77,20 +72,54 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
 
+/**
+ * This class creates the input atom.
+ */
 export default class Input extends Atom {
-    
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super (values)
         
+        /** 
+         * This atom&apos;s name
+         * @type {string}
+         */
         this.name = &apos;Input&apos; + GlobalVariables.generateUniqueID()
+        /** 
+         * The value the input is set to, defaults to 10. Is this still used or are we using the value of the attachmentPoint now?
+         * @type {number}
+         */
         this.value = 10
+        /** 
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.type = &apos;input&apos;
+        /** 
+         * This atom&apos;s type
+         * @type {string}
+         */
         this.atomType = &apos;Input&apos;
+        /** 
+         * This atom&apos;s height for drawing
+         * @type {number}
+         */
         this.height = 16
+        /** 
+         * This atom&apos;s radius for drawing
+         * @type {string}
+         */
         this.radius = 15
         
         this.setValues(values)
         
+        /** 
+         * This atom&apos;s old name, used during name changes
+         * @type {string}
+         */
         this.oldName = this.name
         
         this.addIO(&apos;output&apos;, &apos;number or geometry&apos;, this, &apos;number or geometry&apos;, 10)
@@ -101,6 +130,9 @@ export default class Input extends Atom {
         }
     }
     
+    /**
+     * Updates the side bar to let the user change the atom value. Note that the parent molecule input is set, not this atom&apos;s input by changes.
+     */ 
     updateSidebar(){
         //updates the sidebar to display information about this node
         
@@ -115,6 +147,9 @@ export default class Input extends Atom {
         })
     }
     
+    /**
+     * Draws the atom on the screen.
+     */ 
     draw() {
         
         //Check if the name has been updated
@@ -143,8 +178,10 @@ export default class Input extends Atom {
         }
     }
     
+    /**
+     * Remove the input from the parent molecule, then delete the atom normally.
+     */ 
     deleteNode() {
-        
         //Remove this input from the parent molecule
         if (typeof this.parent !== &apos;undefined&apos;) {
             this.parent.removeIO(&apos;input&apos;, this.name, this.parent)
@@ -153,8 +190,10 @@ export default class Input extends Atom {
         super.deleteNode()
     }
     
+    /**
+     * Called when the name has changed to updated the name of the parent molecule IO
+     */ 
     updateParentName(){
-        //Callled when the name has changed to updated the name of the parent molecule IO
         //Run through the parent molecule and find the input with the same name
         this.parent.inputs.forEach(child =&gt; {
             if (child.name == this.oldName){
@@ -164,24 +203,37 @@ export default class Input extends Atom {
         this.oldName = this.name
     }
     
+    /**
+     * Set&apos;s the input&apos;s value after locking everything downstream to ensure optimal computation.
+     * @param {number} newOutput - The new value to be used
+     */ 
     setOutput(newOutput){
-        this.output.lock() //Lock all of the dependants
+        this.output.lock() //Lock all of the dependents
         //Set the input&apos;s output
         this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
         //Set the output to be the new value
         this.output.setValue(newOutput)
     }
     
+    /**
+     * If this atom is a top level input it begins propogation here. Is this used?
+     */ 
     beginPropogation(){
         if(this.parent.topLevel){
             this.updateValue()
         }
     }
     
+    /**
+     * Returns the current value being output
+     */ 
     getOutput(){
         return this.output.getValue()
     }
     
+    /**
+     * Sets the output to be the current value...why?
+     */ 
     displayAndPropogate(){
         this.setOutput(this.getOutput())
     }
