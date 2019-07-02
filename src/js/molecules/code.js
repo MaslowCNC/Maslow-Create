@@ -1,5 +1,5 @@
 import Atom from '../prototypes/atom.js'
-import CodeMirror from 'codemirror'
+// import CodeMirror from 'codemirror'
 import GlobalVariables from '../globalvariables.js'
 
 /**
