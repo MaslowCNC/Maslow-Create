@@ -88389,6 +88389,9 @@ return d[d.length-1];};return ", funcName].join("");
           case "circle":
               return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
               break
+          case "regular polygon":
+              return circle({radius: values[0], center: true, resolution: values[1]}).toDisjointGeometry()
+              break
           case "rectangle":
               return square(values[0],values[1]).toDisjointGeometry()
               break
@@ -88434,6 +88437,9 @@ return d[d.length-1];};return ", funcName].join("");
               return toSvg$1({view: { position: [0, 0, cameraDistance], near: 1, far: 10000}}, shape.rotateX(20).rotateY(-45).toDisjointGeometry())
           case "stl":
               return toStl$1({}, Shape.fromGeometry(values[0]).toDisjointGeometry())
+              break
+          case "tag":
+              return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry()
               break
           default:
               return -1
