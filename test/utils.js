@@ -1,7 +1,6 @@
 /* Test the global variables module */
 
 var expect = require('chai').expect
-const fs = require('fs')
 
 import {distance, randomColor, randomIntFromRange} from '../src/utils.js'
 
