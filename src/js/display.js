@@ -21,6 +21,11 @@ export default class Display {
          */
         this.displayGrid = true
         /** 
+         * Grid scale to keep track of zoom scale
+         * @type {number}
+         */
+        this.gridScale = 10
+        /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
          */
@@ -97,15 +102,8 @@ export default class Display {
         var axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(axesHelper)
 
-        // Sets initial plane and mesh
-        var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        this.plane.receiveShadow = true
-        this.scene.add( this.plane )
+        // Creates initial grid plane
+        this.resizeGrid()
 
         //
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -219,6 +217,22 @@ export default class Display {
                 })
             }
         })
+        
+        this.targetDiv.addEventListener('wheel', () =>{
+            this.camera.position.z
+            const dist3D = Math.sqrt(Math.pow(this.camera.position.x,2)
+                         + Math.pow(this.camera.position.y,2)
+                         + Math.pow(this.camera.position.x,2))
+            if((dist3D/this.gridScale) > 5){
+                console.log("grid scale is resizing ")  
+                this.scene.remove(this.plane)
+                this.gridScale *= 10
+                this.resizeGrid()
+          
+            }
+            console.log(dist3D)
+            
+        })
     }
     
     /**
@@ -270,7 +284,21 @@ export default class Display {
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
     }
-    
+    /**
+     * Redraws the grid with gridscale update value
+     */ 
+    resizeGrid () {
+        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
+        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
+        planeMaterial.wireframe = true
+        planeMaterial.transparent = true 
+        planeMaterial.opacity = 0.2
+        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
+        this.plane.receiveShadow = true
+        this.scene.add( this.plane )   
+        console.log("redraw grid after zoom")
+    }
+
     /**
      * Clears the display and writes a threejs geometry to it.
      * @param {object} threejsGeometry - A threejs geometry to write to the display.
