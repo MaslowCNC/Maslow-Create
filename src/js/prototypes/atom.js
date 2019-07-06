@@ -1,28 +1,111 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
 
+/**
+ * This class is the prototype for all atoms.
+ */
 export default class Atom {
 
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         //Setup default values
+        /** 
+         * An array of all of the input attachment points connected to this atom
+         * @type {array}
+         */
         this.inputs = []
+        /** 
+         * This atom's output attachment point if it has one
+         * @type {object}
+         */
         this.output = null
         
+        /** 
+         * The X cordinate of this atom
+         * @type {number}
+         */
         this.x = 0
+        /** 
+         * The Y cordinate of this atom
+         * @type {number}
+         */
         this.y = 0
+        /** 
+         * This atom's radius as displayed on the screen
+         * @type {number}
+         */
         this.radius = 20
+        /** 
+         * This atom's default color (ie when not selected or processing)
+         * @type {string}
+         */
         this.defaultColor = '#F3EFEF'
+        /** 
+         * This atom's color when selected
+         * @type {string}
+         */
+        /** 
+         * The color to use for strokes when selected
+         * @type {string}
+         */
         this.selectedColor = '#484848'
+        /** 
+         * The color currently used for strokes
+         * @type {string}
+         */
         this.strokeColor = '#484848'
+        /** 
+         * A flag to indicate if this atom is curently selected
+         * @type {boolean}
+         */
         this.selected = false
+        /** 
+         * This atom's curent color
+         * @type {string}
+         */
         this.color = '#F3EFEF'
+        /** 
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'name'
+        /** 
+         * This atom's parent, usually the molecule which contains this atom
+         * @type {object}
+         */
         this.parentMolecule = null
-        this.value = GlobalVariables.api.sphere()
+        /** 
+         * This atom's value...Is can this be done away with? Are we basically storing the value in the output now?
+         * @type {object}
+         */
+        this.value = null
+        /** 
+         * A flag to indicate if this atom is currently being draged on the screen.
+         * @type {boolean}
+         */
         this.isMoving = false
+        /** 
+         * The X cordinate of this atom now
+         * @type {number}
+         */
         this.x = 0
+        /** 
+         * The Y cordinate of this atom now
+         * @type {number}
+         */
         this.y = 0
+        /** 
+         * A warning message displayed next to the atom. Put text in here to have a warning automatically show up. Cleared each time the output is regenerated.
+         * @type {string}
+         */
         this.alertMessage = ''
+        /** 
+         * A flag to indicate if the atom is currently computing a new output. Turns the molecule blue.
+         * @type {boolean}
+         */
         this.processing = false
         
 
@@ -32,6 +115,10 @@ export default class Atom {
         
     }
     
+    /**
+     * Applies each of the passed values to this as this.x
+     * @param {object} values - A list of values to set
+     */ 
     setValues(values){
         //Assign the object to have the passed in values
         
@@ -50,6 +137,9 @@ export default class Atom {
         }
     }
     
+    /**
+     * Draws the atom on the screen
+     */ 
     draw() {   
         this.inputs.forEach(child => {
             child.draw()       
@@ -110,6 +200,14 @@ export default class Atom {
         }
     }
     
+    /**
+     * Adds a new attachment point to this atom
+     * @param {boolean} type - The type of the IO (input or output)
+     * @param {string} name - The name of the new attachment point
+     * @param {object} target - The attom to attach the new attachment point to. Should we force this to always be this one?
+     * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
+     * @param {object} defaultValue - The default value to be used when the value is not yet set
+     */ 
     addIO(type, name, target, valueType, defaultValue){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
@@ -143,6 +241,12 @@ export default class Atom {
         }
     }
     
+    /**
+     * Removes an attachment point from an atom.
+     * @param {boolean} type - The type of the IO (input or output).
+     * @param {string} name - The name of the new attachment point.
+     * @param {object} target - The attom which the attachment point is attached to. Should this be forced to be this.?
+     */ 
     removeIO(type, name, target){
         //Remove the target IO attachment point
         
@@ -153,18 +257,31 @@ export default class Atom {
             }
         })
     }
-
+    
+    /**
+     * Set an alert to display next to the atom.
+     * @param {string} message - The message to display.
+     */ 
     setAlert(message){
         this.color = 'orange'
         this.alertMessage = String(message)
 
     }
-
+    
+    /**
+     * Clears the alert message attached to this atom.
+     */ 
     clearAlert(){
         this.color = this.defaultColor
         this.alertMessage = ''
     }
     
+    /**
+     * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
+     */ 
     clickDown(x,y, clickProcessed){
         //Returns true if something was done with the click
         
@@ -198,6 +315,11 @@ export default class Atom {
         return clickProcessed 
     }
 
+    /**
+     * Set the atom's response to a mouse double click. By default this isn't to do anything other than mark the double click as handled.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
     doubleClick(x,y){
         //returns true if something was done with the click
         
@@ -213,6 +335,11 @@ export default class Atom {
         return clickProcessed 
     }
 
+    /**
+     * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
     clickUp(x,y){
         this.isMoving = false
         
@@ -223,7 +350,12 @@ export default class Atom {
             this.output.clickUp(x,y)
         }
     }
-
+    
+    /**
+     * Set the atom's response to a mouse click and drag. Moves the atom around the screen.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
     clickMove(x,y){
         if (this.isMoving == true){
             this.x = x
@@ -238,6 +370,11 @@ export default class Atom {
         }
     }
     
+    /**
+     * Set the atom's response to a key press. Is used to delete the atom if it is selected.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
     keyPress(key){
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){
@@ -252,6 +389,9 @@ export default class Atom {
         })
     }
     
+    /**
+     * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.
+     */ 
     updateSidebar(){
         //updates the sidebar to display information about this node
         
@@ -267,6 +407,9 @@ export default class Atom {
         return valueList
     }
     
+    /**
+     * Initialized the sidebar with a title and create the HTML object.
+     */ 
     initializeSideBar(){
         //remove everything in the sideBar now
         let sideBar = document.querySelector('.sideBar')
@@ -288,6 +431,9 @@ export default class Atom {
         return valueList
     }
     
+    /**
+     * Delete this atom.
+     */ 
     deleteNode(){
         //deletes this node and all of it's inputs
         
@@ -303,6 +449,9 @@ export default class Atom {
         GlobalVariables.currentMolecule.backgroundClick()
     }
     
+    /**
+     * Runs with each frame to draw the atom.
+     */ 
     update() {
         
         this.inputs.forEach(child => {
@@ -315,6 +464,9 @@ export default class Atom {
         this.draw()
     }
     
+    /**
+     * Create an object containing the information about this atom that we want to save. 
+     */ 
     serialize(){
         
         var ioValues = []
@@ -340,16 +492,25 @@ export default class Atom {
         return object
     }
     
+    /**
+     * Return any contribution from this atom to the README file
+     */ 
     requestReadme(){
         //request any contributions from this atom to the readme
         
         return []
     }
     
+    /**
+     * Set's the output value and shows the atom output on the 3D view.
+     */ 
     updateValue(){
         this.displayAndPropogate()
     }
     
+    /**
+     * Displays the atom in 3D and sets the output.
+     */ 
     displayAndPropogate(){
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
@@ -359,9 +520,13 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.setValue(this.value)
+            this.output.ready = true
         }
     }
     
+    /**
+     * Calls a worker thread to compute the atom's value.
+     */ 
     basicThreadValueProcessing(values, key){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             this.processing = true
@@ -378,7 +543,7 @@ export default class Atom {
             
             computeValue(values, key).then(result => {
                 if (result != -1 ){
-                    this.value = GlobalVariables.api.Shape.fromGeometry(result)
+                    this.value = result
                     this.displayAndPropogate()
                 }else{
                     this.setAlert("Unable to compute")
@@ -388,6 +553,9 @@ export default class Atom {
         }
     }
     
+    /**
+     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before begining to process.
+     */ 
     unlock(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
@@ -395,9 +563,20 @@ export default class Atom {
                 input.ready = true
             }
         })
-        this.updateValue()
     }
     
+    /**
+     * This function will trigger the tips of the tree branches to start generating values.
+     */ 
+    beginPropogation(){
+        if(this.inputs.every(x => x.connectors.length == 0) || this.inputs.length == 0){ //If this atom has nothing upstream of it, and if it does not trigger propogation from it
+            this.updateValue()
+        }
+    }
+    
+    /**
+     * Send the value of this atom to the 3D display.
+     */ 
     sendToRender(){
         //Send code to JSxCAD to render
         try{
@@ -409,9 +588,11 @@ export default class Atom {
 
     }
     
+    /**
+     * Find the value of an input for with a given name.
+     * @param {string} ioName - The name of the target attachment point.
+     */ 
     findIOValue(ioName){
-        //find the value of an input for a given name
-        
         ioName = ioName.split('~').join('')
         var ioValue = null
         
@@ -424,6 +605,15 @@ export default class Atom {
         return ioValue
     }
     
+    /**
+     * Creates an editable HTML item to set the value of an object element. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} object - The object with the element we are editing.
+     * @param {string} key - The key of the element to edit.
+     * @param {string} label - The label to display next to the editable value.
+     * @param {boolean} resultShouldBeNumber - A flag to indicate if the input should be converted to a number.
+     * @param {object} callBack - Optional. A function to call with the new value when the value changes.
+     */ 
     createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
@@ -479,6 +669,13 @@ export default class Atom {
 
     }
     
+    /**
+     * Creates an non-editable HTML item to set the value of an object element. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} object - The object with the element we are displaying.
+     * @param {string} key - The key of the element to display.
+     * @param {string} label - The label to display next to the displayed value.
+     */ 
     createNonEditableValueListItem(list,object,key, label){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
@@ -509,7 +706,15 @@ export default class Atom {
         
 
     }
-
+    
+    /**
+     * Creates dropdown with multiple options to select. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
+     * @param {array} options - A list of options to display in the drop down.
+     * @param {number} selectedOption - The zero referenced index of the selected option.
+     * @param {string} description - A description of what the dropdown does.
+     */ 
     createDropDown(list,parent,options,selectedOption, description){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
@@ -549,7 +754,14 @@ export default class Atom {
             false
         )
     }
-
+    
+    /**
+     * Creates button. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
+     * @param {string} buttonText - The text on the button.
+     * @param {object} functionToCall - The function to call when the button is pressed.
+     */ 
     createButton(list,parent,buttonText,functionToCall){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)

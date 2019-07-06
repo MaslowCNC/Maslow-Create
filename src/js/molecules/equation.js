@@ -1,8 +1,15 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
+/**
+ * This class creates the Equation atom.
+ */
 export default class Equation extends Atom {
     
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
         super(values)
         
@@ -10,17 +17,34 @@ export default class Equation extends Atom {
         this.addIO('input', 'y', this, 'number', 0)
         this.addIO('output', 'z', this, 'number', 0)
         
+        /**
+         * This atom's name
+         * @type {string}
+         */
         this.name = 'Equation'
+        /**
+         * This atom's type
+         * @type {string}
+         */
         this.atomType = 'Equation'
-        this.defaultValue = ''
-        this.value = ''
+        /**
+         * An array of all of the possible equation selections
+         * @type {array of strings}
+         */
         this.equationOptions = ['x+y', 'x-y', 'x*y', 'x/y', 'cos(x)', 'sin(x)', 'x^y']
+        /**
+         * The index number of the currently selected option
+         * @type {number}
+         */
         this.currentEquation = 0
         
         this.setValues(values)
         
     }
     
+    /**
+     * Add the equation choice to the object which is saved for this molecule
+     */
     serialize(){
         var superSerialObject = super.serialize(null)
         
@@ -30,8 +54,10 @@ export default class Equation extends Atom {
         return superSerialObject
     }
     
+    /**
+     * Check the selection of equation and then apply that to the inputs
+     */
     updateValue(){
-        //A super classed version of the update codeblock default function which computes the equation values
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             var x = this.findIOValue('x')
             var y = this.findIOValue('y')
@@ -66,11 +92,17 @@ export default class Equation extends Atom {
         }
     }
     
+    /**
+     * Called when the equation drop down is changed. Grab the new value and then recompute.
+     */
     changeEquation(newValue){
         this.currentEquation = parseInt(newValue)
         this.updateValue()
     }
     
+    /**
+     * Add a dropdown to choose the equation type to the sidebar.
+     */
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         

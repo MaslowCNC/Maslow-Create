@@ -1,30 +1,107 @@
 import Connector from './connector'
 import GlobalVariables from '../globalvariables'
 
+/**
+ * This class creates a new attachmentPoint which are the input and output blobs on Atoms
+ */
 export default class AttachmentPoint {
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
     constructor(values){
- 
+        
+        /** 
+         * This atom's default radius (non hover)
+         * @type {number}
+         */
         this.defaultRadius = 8
+        /** 
+         * A flag to indicate if this attachmet point is currently expanded.
+         * @type {boolean}
+         */
         this.expandedRadius = false
+        /** 
+         * This atom's current radius as displayed.
+         * @type {number}
+         */
         this.radius = 8
         
+        /** 
+         * How close does the mouse need to get to expand the atom
+         * @type {number}
+         */
         this.hoverDetectRadius = 8
+        /** 
+         * When the mouse is hovering where should the AP move in X
+         * @type {number}
+         */
         this.hoverOffsetX = 0
+        /** 
+         * When the mouse is hovering where should the AP move in Y
+         * @type {number}
+         */
         this.hoverOffsetY = 0
+        /** 
+         * A unique identifying number for this attachment point
+         * @type {number}
+         */
         this.uniqueID = 0
+        /** 
+         * The default offset position in X referenced to the center of the parent atom.
+         * @type {number}
+         */
         this.defaultOffsetX = 0
+        /** 
+         * The default offset position in Y referenced to the center of the parent atom.
+         * @type {number}
+         */
         this.defaultOffsetY = 0
+        /** 
+         * The current offset position in X referenced to the center of the parent atom.
+         * @type {number}
+         */
         this.offsetX = 0
+        /** 
+         * The current offset position in Y referenced to the center of the parent atom.
+         * @type {number}
+         */
         this.offsetY = 0
+        /** 
+         * A flag to determine if the hover text is shown next to the attachment point.
+         * @type {boolean}
+         */
         this.showHoverText = false
+        /** 
+         * The attachment point type.
+         * @type {string}
+         */
         this.atomType = 'AttachmentPoint'
         
-        
-        this.valueType = 'number' //options are number, geometry, array
+        /** 
+         * The attachment point value type. Options are number, geometry, array.
+         * @type {string}
+         */
+        this.valueType = 'number'
+        /** 
+         * The attachment point type. Options are input, output.
+         * @type {string}
+         */
         this.type = 'output'
+        /** 
+         * The attachment point current value. Default is 10.
+         * @type {number}
+         */
         this.value = 10
-        this.ready = false //Used to order initilization when program is loaded
-        
+        /** 
+         * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
+         * @type {string}
+         */
+        this.ready = false
+        /** 
+         * A list of all of the connectors attached to this attachmet point
+         * @type {object}
+         */
         this.connectors = []
         
         this.offsetX = this.defaultOffsetX
@@ -37,6 +114,9 @@ export default class AttachmentPoint {
         this.clickMove(0,0) //trigger a refresh to get all the current values
     }
     
+    /**
+     * Draws the attachment point on the screen. Called with each frame.
+     */ 
     draw() {
 
         this.defaultRadius = this.radius
@@ -137,7 +217,13 @@ export default class AttachmentPoint {
             }
         }
     }
-
+    
+    /**
+     * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.
+     * @param {number} x - The x cordinate of the click
+     * @param {number} y - The y cordinate of the click
+     * @param {boolean} clickProcessed - Has the click already been handled
+     */ 
     clickDown(x,y, clickProcessed){
         if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius && !clickProcessed){
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
@@ -168,12 +254,22 @@ export default class AttachmentPoint {
         }
     }
 
+    /**
+     * Handles mouse click up. If the click is inside the AP and a connector is currently extending, then a connection is made
+     * @param {number} x - The x cordinate of the click
+     * @param {number} y - The y cordinate of the click
+     */ 
     clickUp(x,y){
         this.connectors.forEach(connector => {
             connector.clickUp(x, y)       
         })
     }
-
+    
+    /**
+     * Handles mouse click and move to expand the AP. Could this be done with a call to expand out?
+     * @param {number} x - The x cordinate of the click
+     * @param {number} y - The y cordinate of the click
+     */ 
     clickMove(x,y){
         
         //expand if touched by mouse
@@ -200,7 +296,10 @@ export default class AttachmentPoint {
             connector.clickMove(x, y)       
         })
     }
-
+    
+    /**
+     * I'm not sure what this does. Can it be deleted?
+     */ 
     reset(){
         if (this.type == 'input'){
             this.offsetX = -1* this.parentMolecule.radius
@@ -208,7 +307,11 @@ export default class AttachmentPoint {
         }
         this.showHoverText = false
     }
-
+    
+    /**
+     * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.
+     * @param {number} x - The x cordinate of the click
+     */ 
     expandOut(cursorDistance){
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
@@ -226,12 +329,19 @@ export default class AttachmentPoint {
 
     }
     
+    /**
+     * Just passes a key press to the attached connectors. No impact on the connector.
+     * @param {string} key - The key which was pressed
+     */ 
     keyPress(key){
         this.connectors.forEach(connector => {
             connector.keyPress(key)       
         })
     }
     
+    /**
+     * Delete any connectors attached to this ap
+     */ 
     deleteSelf(){
         //remove any connectors which were attached to this attachment point
         
@@ -241,6 +351,11 @@ export default class AttachmentPoint {
         
     }
     
+    /**
+     * Can be called to see if the target cordinates are within this ap. Returns true/false.
+     * @param {number} x - The x cordinate of the target
+     * @param {number} y - The y cordinate of the target
+     */ 
     wasConnectionMade(x,y){
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
@@ -256,11 +371,18 @@ export default class AttachmentPoint {
             return false
         }
     }
-
+    
+    /**
+     * Attaches a new connector to this ap
+     * @param {object} connector - The connector to attach
+     */ 
     attach(connector){
         this.connectors.push(connector)
     }
     
+    /**
+     * Passes a lock command to the parent molecule, or to the attached connector depending on input/output.
+     */ 
     lock(){
         if(this.type == 'output'){
             this.connectors.forEach(connector => {
@@ -275,15 +397,23 @@ export default class AttachmentPoint {
         }
     }
     
+    /**
+     * Restores the ap to it's default value.
+     */ 
     setDefault(){
         this.setValue(this.defaultValue)
-       
     }
     
+    /**
+     * Reads and returns the curent value of the ap.
+     */ 
     getValue(){
         return this.value
     }
     
+    /**
+     * Sets the current value of the ap.
+     */ 
     setValue(newValue){
         this.value = newValue
         if(!GlobalVariables.evalLock){
@@ -301,6 +431,9 @@ export default class AttachmentPoint {
         }
     }
     
+    /**
+     * Computes the curent position and then draws the ap on the screen.
+     */ 
     update() {
         this.x = this.parentMolecule.x + this.offsetX
         this.y = this.parentMolecule.y + this.offsetY
