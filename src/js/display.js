@@ -224,13 +224,16 @@ export default class Display {
                          + Math.pow(this.camera.position.y,2)
                          + Math.pow(this.camera.position.x,2))
             if((dist3D/this.gridScale) > 5){
-                console.log("grid scale is resizing ")  
                 this.scene.remove(this.plane)
                 this.gridScale *= 10
                 this.resizeGrid()
-          
             }
-            console.log(dist3D)
+           
+            else if((dist3D/this.gridScale) < .5){ 
+                this.scene.remove(this.plane)
+                this.gridScale /= 10
+                this.resizeGrid()
+            }    
             
         })
     }
