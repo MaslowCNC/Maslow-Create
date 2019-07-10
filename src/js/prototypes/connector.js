@@ -118,7 +118,7 @@ export default class Connector {
     
     /**
      * Called when any key is pressed. If the key is delete or backspace and the connector is selected then the connector is deleted.
-     * @param {string} x - The key which was pressed
+     * @param {string} key - The key which was pressed
      */ 
     keyPress(key){
         if(this.selected){

@@ -310,7 +310,7 @@ export default class AttachmentPoint {
     
     /**
      * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.
-     * @param {number} x - The x cordinate of the click
+     * @param {number} cursorDistance - The distance the cursor is from the attachment point.
      */ 
     expandOut(cursorDistance){
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')

@@ -340,7 +340,7 @@ export default class Molecule extends Atom{
     
     /**
      * Generates and returns a JSON represntation of this molecule and all of its children.
-     * @param {savedObject} A JSON object to append the represntation of this atom to.
+     * @param {object} savedObject - A JSON object to append the represntation of this atom to.
      */
     serialize(savedObject){
         //Save this molecule.
@@ -468,7 +468,7 @@ export default class Molecule extends Atom{
     
     /**
      * Places a new connector within the molecule
-     * @param {connectorObj} An object represntation of the connector specifying its inputs and outputs.
+     * @param {object} connectorObj - An object represntation of the connector specifying its inputs and outputs.
      */
     placeConnector(connectorObj){
         var connector

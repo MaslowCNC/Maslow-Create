@@ -79,7 +79,7 @@ class GlobalVariables{
         }
         /** 
          * An array of all of the secret types of atoms which cannot be placed by the user
-         * @type {array}
+         * @type {object}
          */
         this.secretTypes = {
             output:        {creator: Output, atomType: 'Output'}
@@ -142,8 +142,8 @@ class GlobalVariables{
     /**
      * Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.
      * @param {number} x1 - The x cordinate of the first point.
-     * @param {number} y1 - The y cordinate of the first point.
      * @param {number} x2 - The x cordinate of the second point.
+     * @param {number} y1 - The y cordinate of the first point.
      * @param {number} y2 - The y cordinate of the second point.
      */ 
     distBetweenPoints(x1, x2, y1, y2){
@@ -155,4 +155,7 @@ class GlobalVariables{
     }
 }
 
+/**
+ * Because we want global variables to be the same every time it is imported we export an instance of global variables instead of the constructor.
+ */
 export default (new GlobalVariables)

@@ -67,9 +67,17 @@ export default class Display {
         this.targetDiv = document.getElementById('viewerContext')
         
         //Add the JSXCAD window
+        /** 
+         * The camera which controls how the scene is rendered.
+         * @type {object}
+         */
         this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
         [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, -30, 50]
         //
+        /** 
+         * The controls which let the user pan and zoom with the mouse.
+         * @type {object}
+         */
         this.controls = new TrackballControls(this.camera, this.targetDiv)
         this.controls.rotateSpeed = 4.0
         this.controls.zoomSpeed = 4.0
@@ -81,6 +89,10 @@ export default class Display {
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
         //
+        /** 
+         * The threejs scene to which things should be added to show up on the display.
+         * @type {object}
+         */
         this.scene = new THREE.Scene()
         this.scene.background = new THREE.Color(0xB0AEB0)
         this.scene.add(this.camera)
@@ -103,11 +115,18 @@ export default class Display {
         planeMaterial.wireframe = true
         planeMaterial.transparent = true 
         planeMaterial.opacity = 0.2
+        /** 
+         * The plane which apears under objects in the 3D display.
+         * @type {object}
+         */
         this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
         this.plane.receiveShadow = true
         this.scene.add( this.plane )
 
-        //
+        /** 
+         * The three js webGLRendere object which does the actual rendering to the screen.
+         * @type {object}
+         */
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
@@ -284,6 +303,10 @@ export default class Display {
         // Build new datasets from the written data, and display them.
         this.datasets = []
         
+        /** 
+         * Does this even need to be a global object?
+         * @type {object}
+         */
         this.threeMaterial = new THREE.MeshStandardMaterial({
             color: 0x5f6670,
             roughness: 0.65,
@@ -338,8 +361,7 @@ export default class Display {
     }
     
     /**
-     * Clears the display and writes a threejs geometry to it.
-     * @param {object} threejsGeometry - A threejs geometry to write to the display.
+     * Runs regularly to update the display.
      */ 
     render() {
         this.renderer.render( this.scene, this.camera )
