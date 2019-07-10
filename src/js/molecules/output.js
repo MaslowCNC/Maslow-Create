@@ -71,6 +71,10 @@ export default class Output extends Atom {
      * I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.
      */ 
     setID(newID){
+        /**
+         * The unique ID of this atom.
+         * @type {number}
+         */ 
         this.uniqueID = newID
     }
     

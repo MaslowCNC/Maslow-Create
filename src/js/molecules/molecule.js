@@ -103,7 +103,9 @@ export default class Molecule extends Atom{
      * Handle a background click (a click which doesn't land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
-        
+        /**
+         * Flag that the attom is now selected.
+         */
         this.selected = true
         this.updateSidebar()
         this.sendToRender()
@@ -117,10 +119,14 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Grab values from the inputs and push them out to the input atoms
+     * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            /** 
+             * Flag that the current molecule is processing.
+             * @type {boolean}
+             */
             this.processing = true
             this.clearAlert()
             
@@ -340,7 +346,7 @@ export default class Molecule extends Atom{
     
     /**
      * Generates and returns a JSON represntation of this molecule and all of its children.
-     * @param {savedObject} A JSON object to append the represntation of this atom to.
+     * @param {object} savedObject - A JSON object to append the represntation of this atom to.
      */
     serialize(savedObject){
         //Save this molecule.
@@ -468,7 +474,7 @@ export default class Molecule extends Atom{
     
     /**
      * Places a new connector within the molecule
-     * @param {connectorObj} An object represntation of the connector specifying its inputs and outputs.
+     * @param {object} connectorObj - An object represntation of the connector specifying its inputs and outputs.
      */
     placeConnector(connectorObj){
         var connector
