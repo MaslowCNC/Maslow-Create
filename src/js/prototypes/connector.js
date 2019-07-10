@@ -43,6 +43,9 @@ export default class Connector {
         this.attachmentPoint2 = null
         
         for(var key in values) {
+            /**
+             * Assign each of the values in values as this.value
+             */
             this[key] = values[key]
         }
         
@@ -111,7 +114,13 @@ export default class Connector {
      */ 
     clickMove(x,y){
         if (this.isMoving == true){
+            /**
+             * The s cordinate of the end of the connector.
+             */
             this.endX = x
+            /**
+             * The y cordinate of the end of the connector.
+             */
             this.endY = y
         }
     }

@@ -103,7 +103,9 @@ export default class Molecule extends Atom{
      * Handle a background click (a click which doesn't land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
-        
+        /**
+         * Flag that the attom is now selected.
+         */
         this.selected = true
         this.updateSidebar()
         this.sendToRender()
@@ -117,10 +119,14 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Grab values from the inputs and push them out to the input atoms
+     * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            /** 
+             * Flag that the current molecule is processing.
+             * @type {boolean}
+             */
             this.processing = true
             this.clearAlert()
             

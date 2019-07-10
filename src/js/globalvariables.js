@@ -44,6 +44,13 @@ class GlobalVariables{
          */
         this.c = null
         /** 
+         * An array of all of the secret types of atoms which can not be placed by the user.
+         * @type {array}
+         */
+        this.secretTypes = {
+            output:        {creator: Output, atomType: 'Output'}
+        }
+        /** 
          * The current amount by which the canvas has been scaled.
          * @type {number}
          */
@@ -76,13 +83,6 @@ class GlobalVariables{
             stretch:            {creator: Stretch, atomType: 'Stretch'},
             gcode:              {creator: Gcode, atomType: 'Gcode'},
             code:               {creator: Code, atomType: 'Code'}
-        }
-        /** 
-         * An array of all of the secret types of atoms which cannot be placed by the user
-         * @type {object}
-         */
-        this.secretTypes = {
-            output:        {creator: Output, atomType: 'Output'}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.

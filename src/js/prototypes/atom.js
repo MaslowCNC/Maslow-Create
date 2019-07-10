@@ -110,6 +110,9 @@ export default class Atom {
         
 
         for(var key in values) {
+            /** 
+             * Assign each of the values in values as this.value
+             */
             this[key] = values[key]
         }
         
