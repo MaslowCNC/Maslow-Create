@@ -24,7 +24,7 @@ export default class Display {
          * Grid scale to keep track of zoom scale
          * @type {number}
          */
-        this.gridScale = 10
+        this.gridScale = 5
         /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
@@ -104,7 +104,7 @@ export default class Display {
 
         // Creates initial grid plane
         this.resizeGrid()
-
+        console.log("initial grid is being created")
         //
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
@@ -218,23 +218,22 @@ export default class Display {
             }
         })
         
-        this.targetDiv.addEventListener('wheel', () =>{
-            this.camera.position.z
+        // This event listener adjusts the gridScale when you zoom in and out
+        
+        this.targetDiv.addEventListener('wheel', () =>{ 
             const dist3D = Math.sqrt(Math.pow(this.camera.position.x,2)
                          + Math.pow(this.camera.position.y,2)
-                         + Math.pow(this.camera.position.x,2))
+                         + Math.pow(this.camera.position.z,2))
             if((dist3D/this.gridScale) > 5){
                 this.scene.remove(this.plane)
-                this.gridScale *= 10
+                this.gridScale *= 5
                 this.resizeGrid()
             }
-           
             else if((dist3D/this.gridScale) < .5){ 
                 this.scene.remove(this.plane)
-                this.gridScale /= 10
+                this.gridScale /= 5
                 this.resizeGrid()
             }    
-            
         })
     }
     
@@ -287,10 +286,21 @@ export default class Display {
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
     }
+
     /**
      * Redraws the grid with gridscale update value
      */ 
     resizeGrid () {
+        const dist3D = Math.sqrt(Math.pow(this.camera.position.x,2)
+                         + Math.pow(this.camera.position.y,2)
+                         + Math.pow(this.camera.position.z,2))
+            /*initializes grid at scale if object loaded is already 
+            zoomed out farther than initial grid tier*/  
+            if (this.gridScale == 5){
+                while((dist3D/this.gridScale) > .1){
+                this.gridScale *= 5 
+                }
+            } 
         var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
         var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
         planeMaterial.wireframe = true
@@ -299,7 +309,6 @@ export default class Display {
         this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
         this.plane.receiveShadow = true
         this.scene.add( this.plane )   
-        console.log("redraw grid after zoom")
     }
 
     /**
