@@ -253,11 +253,14 @@ export default class Molecule extends Atom{
      * @param {object} list - The HTML object to append the created element to.
      */ 
     displaySimpleBOM(list){
+        console.log("Display Simple BOM ran")
         var bomList = []
-        try{
-            bomList = extractBomTags(this.value)
-        }catch(err){
-            this.setAlert("Unable to read BOM")
+        if(this.value != null){
+            try{
+                bomList = extractBomTags(this.value)
+            }catch(err){
+                this.setAlert("Unable to read BOM")
+            }
         }
         
         if(bomList.length > 0){

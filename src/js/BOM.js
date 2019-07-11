@@ -39,6 +39,7 @@ export class BOMEntry {
  * @param {object} geometry - The geometry which should be scanned for tags.
  */ 
 export const extractBomTags = (geometry) => {
+    console.log("Extract BOM tags ran")
     var bomItems = []
     const walk = (geometry) => {
         if (geometry.assembly) {
