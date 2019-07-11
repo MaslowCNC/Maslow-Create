@@ -254,10 +254,12 @@ export default class Molecule extends Atom{
      */ 
     displaySimpleBOM(list){
         var bomList = []
-        try{
-            bomList = extractBomTags(this.value)
-        }catch(err){
-            this.setAlert("Unable to read BOM")
+        if(this.value != null){
+            try{
+                bomList = extractBomTags(this.value)
+            }catch(err){
+                this.setAlert("Unable to read BOM")
+            }
         }
         
         if(bomList.length > 0){
