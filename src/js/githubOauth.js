@@ -356,6 +356,34 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Open a new tab with the README page for the project.
+     */
+    this.openREADMEPage = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/blob/master/README.md'
+            window.open(url)
+        })
+    }
+    
+    /** 
+     * Open a new tab with the Bill Of Materials page for the project.
+     */
+    this.openBillOfMaterialsPage = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/blob/master/BillOfMaterials.md'
+            window.open(url)
+        })
+    }
+    
+    /** 
      * Search github for projects which match a string.
      */
     this.searchGithub = async (searchString) => {

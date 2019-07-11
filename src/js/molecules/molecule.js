@@ -208,6 +208,14 @@ export default class Molecule extends Atom{
                 GlobalVariables.gitHub.openGitHubPage()
             })
             
+            this.createButton(valueList,this,'README',() => {
+                GlobalVariables.gitHub.openREADMEPage()
+            })
+            
+            this.createButton(valueList,this,'Bill Of Materials',() => {
+                GlobalVariables.gitHub.openBillOfMaterialsPage()
+            })
+            
             this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
             
         }
