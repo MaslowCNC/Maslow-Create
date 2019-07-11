@@ -654,7 +654,7 @@ export default function GitHubModule(){
     /** 
      * Loads a project from github by its github ID.
      */
-    this.getProjectByID = async function(id){
+    this.getProjectByID = async function(id, saveUserInfo){
         let repo = await octokit.request('GET /repositories/:id', {id})
         //Find out the owners info;
         const user     = repo.data.owner.login
@@ -665,6 +665,13 @@ export default function GitHubModule(){
             repo: repoName,
             path: 'project.maslowcreate'
         })
+        
+        //If this is the top level we will save the rep info at the top level
+        if(saveUserInfo){
+            currentUser = user
+            currentRepoName = repoName
+        }
+        
         return result
     }
     
