@@ -1,3 +1,9 @@
 Thanks for contributing to Maslow Create! You rock.
 
-Pull requests for bug fixes, performance increases, and new atoms which cannot be made from a combination of existing atoms are very welcome. New atoms which are possible through a combination of existing atoms are better created as new Maslow Create projects which can be imported through GitHub.
+Please check that your pull request:
+
+- [] Passes lint. You can see which parts of your pull request are not passing lint and fix basic errors by running `npm run lint -- --fix` from within the Maslow-Create repo
+
+- [] Is documented. You can see which lines need to be documented in your pull reqeust by running the command `npm run doc` from within the Maslow-Create repo and then looking at the generated `dist\documentation\coverage.json` file.
+
+Thanks for helping to keep the project tidy!
