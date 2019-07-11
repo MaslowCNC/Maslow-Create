@@ -40,7 +40,9 @@ export class BOMEntry {
  */ 
 export const extractBomTags = (geometry) => {
     console.log("Extract BOM tags ran")
-    var bomItems = []
+    console.log(geometry)
+    console.log(typeof geometry)
+    
     const walk = (geometry) => {
         if (geometry.assembly) {
             geometry.assembly.forEach(walk)
@@ -62,7 +64,9 @@ export const extractBomTags = (geometry) => {
             })
         }
     }
-    if(typeof geometry == 'object'){
+    
+    var bomItems = []
+    if(geometry != null){
         walk(geometry)
     }
     return bomItems
