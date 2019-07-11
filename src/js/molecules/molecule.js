@@ -253,7 +253,6 @@ export default class Molecule extends Atom{
      * @param {object} list - The HTML object to append the created element to.
      */ 
     displaySimpleBOM(list){
-        console.log("Display Simple BOM ran")
         var bomList = []
         if(this.value != null){
             try{
