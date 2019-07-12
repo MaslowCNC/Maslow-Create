@@ -104,7 +104,6 @@ export default class Display {
 
         // Creates initial grid plane
         this.resizeGrid()
-        console.log("initial grid is being created")
         //
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
@@ -294,13 +293,13 @@ export default class Display {
         const dist3D = Math.sqrt(Math.pow(this.camera.position.x,2)
                          + Math.pow(this.camera.position.y,2)
                          + Math.pow(this.camera.position.z,2))
-            /*initializes grid at scale if object loaded is already 
+        /*initializes grid at scale if object loaded is already 
             zoomed out farther than initial grid tier*/  
-            if (this.gridScale == 5){
-                while((dist3D/this.gridScale) > .1){
+        if (this.gridScale == 5){
+            while((dist3D/this.gridScale) > .1){
                 this.gridScale *= 5 
-                }
-            } 
+            }
+        } 
         var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
         var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
         planeMaterial.wireframe = true
