@@ -42,6 +42,9 @@ export default class Gcode extends Atom {
      * Generate a new .svg file from the input geometry, then compute a gcode path from it. Processing takes place in a worker thread
      */ 
     updateValue(){
+        /**
+         * Flag that the attom is now processing.
+         */
         this.processing = true
         this.clearAlert()
         
@@ -60,7 +63,9 @@ export default class Gcode extends Atom {
                     const bounds = input.measureBoundingBox()
                     const partThickness = bounds[1][2]-bounds[0][2]
                     
-                    //convert that to gcode
+                    /**
+                     * Assign the atom value to be the new computed results.
+                     */
                     this.value = this.svg2gcode(result, {
                         passes: this.findIOValue('passes'),
                         materialWidth: -1*partThickness,
