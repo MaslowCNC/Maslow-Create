@@ -356,6 +356,34 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Open a new tab with the README page for the project.
+     */
+    this.openREADMEPage = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/blob/master/README.md'
+            window.open(url)
+        })
+    }
+    
+    /** 
+     * Open a new tab with the Bill Of Materials page for the project.
+     */
+    this.openBillOfMaterialsPage = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/blob/master/BillOfMaterials.md'
+            window.open(url)
+        })
+    }
+    
+    /** 
      * Search github for projects which match a string.
      */
     this.searchGithub = async (searchString) => {
@@ -626,7 +654,7 @@ export default function GitHubModule(){
     /** 
      * Loads a project from github by its github ID.
      */
-    this.getProjectByID = async function(id){
+    this.getProjectByID = async function(id, saveUserInfo){
         let repo = await octokit.request('GET /repositories/:id', {id})
         //Find out the owners info;
         const user     = repo.data.owner.login
@@ -637,6 +665,13 @@ export default function GitHubModule(){
             repo: repoName,
             path: 'project.maslowcreate'
         })
+        
+        //If this is the top level we will save the rep info at the top level
+        if(saveUserInfo){
+            currentUser = user
+            currentRepoName = repoName
+        }
+        
         return result
     }
     

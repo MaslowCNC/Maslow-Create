@@ -110,6 +110,9 @@ export default class Atom {
         
 
         for(var key in values) {
+            /** 
+             * Assign each of the values in values as this.value
+             */
             this[key] = values[key]
         }
         
@@ -372,8 +375,7 @@ export default class Atom {
     
     /**
      * Set the atom's response to a key press. Is used to delete the atom if it is selected.
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
+     * @param {string} key - The key which has been pressed.
      */ 
     keyPress(key){
         //runs whenever a key is pressed

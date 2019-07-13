@@ -222,4 +222,7 @@ class Menu {
     }
 }
 
+/**
+ * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.
+ */
 export default (new Menu)

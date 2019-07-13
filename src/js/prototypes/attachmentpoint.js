@@ -108,6 +108,9 @@ export default class AttachmentPoint {
         this.offsetY = this.defaultOffsetY
         
         for(var key in values) {
+            /**
+             * Assign values in values as this.x
+             */
             this[key] = values[key]
         }
         
@@ -127,8 +130,14 @@ export default class AttachmentPoint {
             this.radius = this.parentMolecule.radius/1.6
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
-            this.x= this.parentMolecule.x-this.parentMolecule.radius
-            this.y= this.parentMolecule.y
+            /**
+             * The x cordinate of the attachment point.
+             */
+            this.x = this.parentMolecule.x-this.parentMolecule.radius
+            /**
+             * The y cordinate of the attachment point.
+             */
+            this.y = this.parentMolecule.y
         }    
         else if(this.parentMolecule.inputs.length < 2 && this.type == 'output'){
             this.x= this.parentMolecule.x+this.parentMolecule.radius
@@ -310,7 +319,7 @@ export default class AttachmentPoint {
     
     /**
      * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.
-     * @param {number} x - The x cordinate of the click
+     * @param {number} cursorDistance - The distance the cursor is from the attachment point.
      */ 
     expandOut(cursorDistance){
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
