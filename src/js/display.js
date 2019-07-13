@@ -312,6 +312,7 @@ export default class Display {
 
         /*initializes grid at scale if object loaded is already 
             zoomed out farther than initial grid tier*/ 
+        this.gridScale = 5    
         while((this.dist3D(this.camera.position)/this.gridScale) > 5){
             this.gridScale *= 5 
             // Creates initial grid plane
