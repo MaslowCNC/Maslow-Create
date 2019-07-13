@@ -21,6 +21,11 @@ export default class Display {
          */
         this.displayGrid = true
         /** 
+         * Grid scale to keep track of zoom scale
+         * @type {number}
+         */
+        this.gridScale = 5
+        /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
          */
@@ -108,25 +113,13 @@ export default class Display {
         //sets axes
         var axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(axesHelper)
-
-        // Sets initial plane and mesh
-        var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
-        /** 
-         * The plane which apears under objects in the 3D display.
-         * @type {object}
-         */
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        this.plane.receiveShadow = true
-        this.scene.add( this.plane )
-
+        
+        //
         /** 
          * The three js webGLRendere object which does the actual rendering to the screen.
          * @type {object}
          */
+
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
@@ -238,6 +231,33 @@ export default class Display {
                 })
             }
         })
+        
+        // This event listener adjusts the gridScale when you zoom in and out
+        
+        this.targetDiv.addEventListener('wheel', () =>{ 
+            
+            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
+                //this.scene.remove(this.plane)
+                this.gridScale *= 5
+                this.resizeGrid()
+            }
+            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
+                //this.scene.remove(this.plane)
+                this.gridScale /= 5
+                this.resizeGrid()
+            }    
+        })
+    }
+
+    /**
+     * This function is intended to calculate the 3d distance between object and camera
+     * @param {position} material - A string to define the material type.
+     */ 
+    dist3D(position){
+        const distance3D = Math.sqrt(Math.pow(position.x,2)
+                         + Math.pow(position.y,2)
+                         + Math.pow(position.z,2))
+        return distance3D
     }
     
     /**
@@ -284,12 +304,37 @@ export default class Display {
      * @param {array} bounds - An array of some sort...this comment should be updated.
      */ 
     zoomCameraToFit(bounds){
+
         this.controls.reset()
         this.camera.position.x = 0
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
+
+        /*initializes grid at scale if object loaded is already 
+            zoomed out farther than initial grid tier*/ 
+        this.gridScale = 5    
+        while((this.dist3D(this.camera.position)/this.gridScale) > 5){
+            this.gridScale *= 5 
+            // Creates initial grid plane
+            this.resizeGrid()
+        }
     }
-    
+
+    /**
+     * Redraws the grid with gridscale update value
+     */ 
+    resizeGrid () {
+        this.scene.remove(this.plane)
+        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
+        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
+        planeMaterial.wireframe = true
+        planeMaterial.transparent = true 
+        planeMaterial.opacity = 0.2
+        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
+        this.plane.receiveShadow = true
+        this.scene.add( this.plane )   
+    }
+
     /**
      * Clears the display and writes a threejs geometry to it.
      * @param {object} threejsGeometry - A threejs geometry to write to the display.
