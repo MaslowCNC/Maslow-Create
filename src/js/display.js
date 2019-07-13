@@ -113,9 +113,6 @@ export default class Display {
         //sets axes
         var axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(axesHelper)
-
-        // Creates initial grid plane
-        this.resizeGrid()
         
         //
         /** 
@@ -238,20 +235,29 @@ export default class Display {
         // This event listener adjusts the gridScale when you zoom in and out
         
         this.targetDiv.addEventListener('wheel', () =>{ 
-            const dist3D = Math.sqrt(Math.pow(this.camera.position.x,2)
-                         + Math.pow(this.camera.position.y,2)
-                         + Math.pow(this.camera.position.z,2))
-            if((dist3D/this.gridScale) > 5){
-                this.scene.remove(this.plane)
+            
+            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
+                //this.scene.remove(this.plane)
                 this.gridScale *= 5
                 this.resizeGrid()
             }
-            else if((dist3D/this.gridScale) < .5){ 
-                this.scene.remove(this.plane)
+            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
+                //this.scene.remove(this.plane)
                 this.gridScale /= 5
                 this.resizeGrid()
             }    
         })
+    }
+
+    /**
+     * This function is intended to calculate the 3d distance between object and camera
+     * @param {position} material - A string to define the material type.
+     */ 
+    dist3D(position){
+        const distance3D = Math.sqrt(Math.pow(position.x,2)
+                         + Math.pow(position.y,2)
+                         + Math.pow(position.z,2))
+        return distance3D
     }
     
     /**
@@ -298,26 +304,26 @@ export default class Display {
      * @param {array} bounds - An array of some sort...this comment should be updated.
      */ 
     zoomCameraToFit(bounds){
+
         this.controls.reset()
         this.camera.position.x = 0
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
+
+        /*initializes grid at scale if object loaded is already 
+            zoomed out farther than initial grid tier*/ 
+        while((this.dist3D(this.camera.position)/this.gridScale) > 5){
+            this.gridScale *= 5 
+            // Creates initial grid plane
+            this.resizeGrid()
+        }
     }
 
     /**
      * Redraws the grid with gridscale update value
      */ 
     resizeGrid () {
-        const dist3D = Math.sqrt(Math.pow(this.camera.position.x,2)
-                         + Math.pow(this.camera.position.y,2)
-                         + Math.pow(this.camera.position.z,2))
-        /*initializes grid at scale if object loaded is already 
-            zoomed out farther than initial grid tier*/  
-        if (this.gridScale == 5){
-            while((dist3D/this.gridScale) > .1){
-                this.gridScale *= 5 
-            }
-        } 
+        this.scene.remove(this.plane)
         var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
         var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
         planeMaterial.wireframe = true
