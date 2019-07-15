@@ -115,6 +115,13 @@ class GlobalVariables{
          */
         this.c = null
         /** 
+         * An array of all of the secret types of atoms which can not be placed by the user.
+         * @type {array}
+         */
+        this.secretTypes = {
+            output:        {creator: Output, atomType: &apos;Output&apos;}
+        }
+        /** 
          * The current amount by which the canvas has been scaled.
          * @type {number}
          */
@@ -147,13 +154,6 @@ class GlobalVariables{
             stretch:            {creator: Stretch, atomType: &apos;Stretch&apos;},
             gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;},
             code:               {creator: Code, atomType: &apos;Code&apos;}
-        }
-        /** 
-         * An array of all of the secret types of atoms which cannot be placed by the user
-         * @type {array}
-         */
-        this.secretTypes = {
-            output:        {creator: Output, atomType: &apos;Output&apos;}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.
@@ -213,8 +213,8 @@ class GlobalVariables{
     /**
      * Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.
      * @param {number} x1 - The x cordinate of the first point.
-     * @param {number} y1 - The y cordinate of the first point.
      * @param {number} x2 - The x cordinate of the second point.
+     * @param {number} y1 - The y cordinate of the first point.
      * @param {number} y2 - The y cordinate of the second point.
      */ 
     distBetweenPoints(x1, x2, y1, y2){
@@ -226,6 +226,9 @@ class GlobalVariables{
     }
 }
 
+/**
+ * Because we want global variables to be the same every time it is imported we export an instance of global variables instead of the constructor.
+ */
 export default (new GlobalVariables)</code></pre>
 
 </div>

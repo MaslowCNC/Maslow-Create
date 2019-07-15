@@ -123,16 +123,14 @@ export default class AddBOMTag extends Atom{
     updateValue(){
         if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
             try{
-                this.value = this.findIOValue(&apos;geometry&apos;).as(JSON.stringify(this.BOMitem))
+                const values = [this.findIOValue(&apos;geometry&apos;), JSON.stringify(this.BOMitem)]
+                this.basicThreadValueProcessing(values, &quot;tag&quot;)
                 this.clearAlert()
-            }catch(err){
-                this.setAlert(err)
-            }
-            
+            }catch(err){this.setAlert(err)}
             super.updateValue()
         }
     }
-    
+        
     /**
      * Updates the side bar to display the BOM item information
      */ 

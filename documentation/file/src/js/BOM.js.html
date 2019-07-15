@@ -110,10 +110,22 @@ export class BOMEntry {
  * @param {object} geometry - The geometry which should be scanned for tags.
  */ 
 export const extractBomTags = (geometry) =&gt; {
+    
     var bomItems = []
+    
     const walk = (geometry) =&gt; {
-        if (geometry.assembly) {
-            geometry.assembly.forEach(walk)
+        //Grab any available tags
+        if(geometry.tags){
+            geometry.tags.forEach(tag =&gt; {
+                if(tag.substring(0,11) == &apos;user/{&quot;BOMi&apos;){
+                    bomItems.push(JSON.parse(tag.substring(5)))
+                }
+            })
+        }
+        
+        //Walk deeper if there is deeper to go
+        if (geometry.disjointAssembly) {
+            geometry.disjointAssembly.forEach(walk)
         }
         else if (geometry.lazyGeometry) {
             walk(geometry.lazyGeometry)
@@ -121,18 +133,12 @@ export const extractBomTags = (geometry) =&gt; {
         else if (geometry.geometry) {
             walk(geometry.geometry)
         }
-        else if (geometry.geometry) {
-            walk(geometry.geometry)
-        }
-        else if(geometry.tags){
-            geometry.tags.forEach(tag =&gt; {
-                if(tag.substring(0,6) == &apos;{&quot;BOMi&apos;){
-                    bomItems.push(JSON.parse(tag))
-                }
-            })
+        else{
+            return
         }
     }
-    if(typeof geometry == &apos;object&apos;){
+    
+    if(geometry != null){
         walk(geometry)
     }
     return bomItems

@@ -130,7 +130,7 @@ export default class GitHubMolecule extends Molecule {
     async loadProjectByID(id){
         
         //Get the repo by ID
-        const result = await GlobalVariables.gitHub.getProjectByID(id)
+        const result = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         //content will be base64 encoded
         let rawFile = atob(result.data.content)
         let moleculesList =  JSON.parse(rawFile).molecules

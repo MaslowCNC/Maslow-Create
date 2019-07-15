@@ -558,6 +558,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/display.js~display#baselog",
+    "class/src/js/display.js~Display.html#instance-method-baseLog",
+    "src/js/display.js~Display#baseLog",
+    "method"
+  ],
+  [
     "src/js/display.js~display#camera",
     "class/src/js/display.js~Display.html#instance-member-camera",
     "src/js/display.js~Display#camera",
@@ -585,6 +591,18 @@ window.esdocSearchIndex = [
     "src/js/display.js~display#displaygrid",
     "class/src/js/display.js~Display.html#instance-member-displayGrid",
     "src/js/display.js~Display#displayGrid",
+    "member"
+  ],
+  [
+    "src/js/display.js~display#dist3d",
+    "class/src/js/display.js~Display.html#instance-method-dist3D",
+    "src/js/display.js~Display#dist3D",
+    "method"
+  ],
+  [
+    "src/js/display.js~display#gridscale",
+    "class/src/js/display.js~Display.html#instance-member-gridScale",
+    "src/js/display.js~Display#gridScale",
     "member"
   ],
   [
@@ -616,6 +634,12 @@ window.esdocSearchIndex = [
     "class/src/js/display.js~Display.html#instance-member-renderer",
     "src/js/display.js~Display#renderer",
     "member"
+  ],
+  [
+    "src/js/display.js~display#resizegrid",
+    "class/src/js/display.js~Display.html#instance-method-resizeGrid",
+    "src/js/display.js~Display#resizeGrid",
+    "method"
   ],
   [
     "src/js/display.js~display#scene",
@@ -892,12 +916,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-method-updateValue",
     "src/js/molecules/BOM.js~AddBOMTag#updateValue",
     "method"
-  ],
-  [
-    "src/js/molecules/bom.js~addbomtag#value",
-    "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-member-value",
-    "src/js/molecules/BOM.js~AddBOMTag#value",
-    "member"
   ],
   [
     "src/js/molecules/assembly.js",

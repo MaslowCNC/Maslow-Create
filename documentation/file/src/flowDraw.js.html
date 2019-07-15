@@ -81,23 +81,28 @@ GlobalVariables.c = GlobalVariables.canvas.getContext(&apos;2d&apos;)
 
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
+/** 
+ * The original width of the canvas before scaling.
+ * @type {number}
+ */
 let originalWidth = GlobalVariables.canvas.width
 
 GlobalVariables.runMode = window.location.href.includes(&apos;run&apos;) //Check if we are using the run mode based on url
 
-let lowerHalfOfScreen = document.querySelector(&apos;.flex-parent&apos;)
 if(!GlobalVariables.runMode){
-    lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+    document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
 }else{
-    lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
+    document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
 }
-let upperHalfOfScreen = document.querySelector(&apos;#flow-canvas&apos;)
-upperHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
-let viewer = document.querySelector(&apos;.jscad-container&apos;)
-viewer.setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
+document.querySelector(&apos;#flow-canvas&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
 
 
 // Event Listeners
+/** 
+ * The cansvas on which the atoms are placed.
+ * @type {object}
+ */
 let flowCanvas = document.getElementById(&apos;flow-canvas&apos;)
 
 flowCanvas.addEventListener(&apos;mousemove&apos;, event =&gt; {
@@ -215,12 +220,12 @@ function onWindowResize() {
     GlobalVariables.canvas.height = bounds.height 
     //reset screen parameters 
     if(!GlobalVariables.runMode){
-        lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+        document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
     }else{
-        lowerHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
+        document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
     }
-    upperHalfOfScreen.setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
-    viewer.setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
+    document.querySelector(&apos;#flow-canvas&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+    document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 

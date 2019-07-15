@@ -76667,22 +76667,27 @@ _globalvariables2.default.c = _globalvariables2.default.canvas.getContext('2d');
 
 _globalvariables2.default.canvas.width = innerWidth;
 _globalvariables2.default.canvas.height = innerHeight / 2;
+/** 
+ * The original width of the canvas before scaling.
+ * @type {number}
+ */
 var originalWidth = _globalvariables2.default.canvas.width;
 
 _globalvariables2.default.runMode = window.location.href.includes('run'); //Check if we are using the run mode based on url
 
-var lowerHalfOfScreen = document.querySelector('.flex-parent');
 if (!_globalvariables2.default.runMode) {
-    lowerHalfOfScreen.setAttribute('style', 'height:' + innerHeight / 2 + 'px');
+    document.querySelector('.flex-parent').setAttribute('style', 'height:' + innerHeight / 2 + 'px');
 } else {
-    lowerHalfOfScreen.setAttribute('style', 'height:' + innerHeight + 'px');
+    document.querySelector('.flex-parent').setAttribute('style', 'height:' + innerHeight + 'px');
 }
-var upperHalfOfScreen = document.querySelector('#flow-canvas');
-upperHalfOfScreen.setAttribute('style', 'height:' + innerHeight / 2 + 'px');
-var viewer = document.querySelector('.jscad-container');
-viewer.setAttribute('style', 'width:' + innerWidth / 2 + 'px');
+document.querySelector('#flow-canvas').setAttribute('style', 'height:' + innerHeight / 2 + 'px');
+document.querySelector('.jscad-container').setAttribute('style', 'width:' + innerWidth / 2 + 'px');
 
 // Event Listeners
+/** 
+ * The cansvas on which the atoms are placed.
+ * @type {object}
+ */
 var flowCanvas = document.getElementById('flow-canvas');
 
 flowCanvas.addEventListener('mousemove', function (event) {
@@ -76798,12 +76803,12 @@ function onWindowResize() {
     _globalvariables2.default.canvas.height = bounds.height;
     //reset screen parameters 
     if (!_globalvariables2.default.runMode) {
-        lowerHalfOfScreen.setAttribute('style', 'height:' + innerHeight / 2 + 'px');
+        document.querySelector('.flex-parent').setAttribute('style', 'height:' + innerHeight / 2 + 'px');
     } else {
-        lowerHalfOfScreen.setAttribute('style', 'height:' + innerHeight + 'px');
+        document.querySelector('.flex-parent').setAttribute('style', 'height:' + innerHeight + 'px');
     }
-    upperHalfOfScreen.setAttribute('style', 'height:' + innerHeight / 2 + 'px');
-    viewer.setAttribute('style', 'width:' + innerWidth / 2 + 'px');
+    document.querySelector('#flow-canvas').setAttribute('style', 'height:' + innerHeight / 2 + 'px');
+    document.querySelector('.jscad-container').setAttribute('style', 'width:' + innerWidth / 2 + 'px');
 
     _globalvariables2.default.scale1 = _globalvariables2.default.canvas.width / originalWidth;
 
@@ -76843,8 +76848,6 @@ init();
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -76892,25 +76895,32 @@ exports.BOMEntry = function BOMEntry() {
 
 
 var extractBomTags = exports.extractBomTags = function extractBomTags(geometry) {
+
     var bomItems = [];
+
     var walk = function walk(geometry) {
-        if (geometry.assembly) {
-            geometry.assembly.forEach(walk);
+        //Grab any available tags
+        if (geometry.tags) {
+            geometry.tags.forEach(function (tag) {
+                if (tag.substring(0, 11) == 'user/{"BOMi') {
+                    bomItems.push(JSON.parse(tag.substring(5)));
+                }
+            });
+        }
+
+        //Walk deeper if there is deeper to go
+        if (geometry.disjointAssembly) {
+            geometry.disjointAssembly.forEach(walk);
         } else if (geometry.lazyGeometry) {
             walk(geometry.lazyGeometry);
         } else if (geometry.geometry) {
             walk(geometry.geometry);
-        } else if (geometry.geometry) {
-            walk(geometry.geometry);
-        } else if (geometry.tags) {
-            geometry.tags.forEach(function (tag) {
-                if (tag.substring(0, 6) == '{"BOMi') {
-                    bomItems.push(JSON.parse(tag));
-                }
-            });
+        } else {
+            return;
         }
     };
-    if ((typeof geometry === 'undefined' ? 'undefined' : _typeof(geometry)) == 'object') {
+
+    if (geometry != null) {
         walk(geometry);
     }
     return bomItems;
@@ -77058,6 +77068,11 @@ var Display = function () {
          */
         this.displayGrid = true;
         /** 
+         * Grid scale to keep track of zoom scale
+         * @type {number}
+         */
+        this.gridScale = 5;
+        /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
          */
@@ -77104,9 +77119,17 @@ var Display = function () {
         this.targetDiv = document.getElementById('viewerContext');
 
         //Add the JSXCAD window
+        /** 
+         * The camera which controls how the scene is rendered.
+         * @type {object}
+         */
         this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
 
         //
+        /** 
+         * The controls which let the user pan and zoom with the mouse.
+         * @type {object}
+         */
         var _ref = [0, -30, 50];
         this.camera.position.x = _ref[0];
         this.camera.position.y = _ref[1];
@@ -77124,6 +77147,10 @@ var Display = function () {
             _this.render();
         });
         //
+        /** 
+         * The threejs scene to which things should be added to show up on the display.
+         * @type {object}
+         */
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xB0AEB0);
         this.scene.add(this.camera);
@@ -77140,17 +77167,12 @@ var Display = function () {
         var axesHelper = new THREE.AxesHelper(10);
         this.scene.add(axesHelper);
 
-        // Sets initial plane and mesh
-        var planeGeometry = new THREE.PlaneBufferGeometry(100, 100, 60, 60);
-        var planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-        planeMaterial.wireframe = true;
-        planeMaterial.transparent = true;
-        planeMaterial.opacity = 0.2;
-        this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        this.plane.receiveShadow = true;
-        this.scene.add(this.plane);
-
         //
+        /** 
+         * The three js webGLRendere object which does the actual rendering to the screen.
+         * @type {object}
+         */
+
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.targetDiv.appendChild(this.renderer.domElement);
@@ -77259,15 +77281,53 @@ var Display = function () {
                 });
             }
         });
-    }
 
+        // This event listener adjusts the gridScale when you zoom in and out
+
+        this.targetDiv.addEventListener('wheel', function () {
+
+            if (_this.dist3D(_this.camera.position) / _this.gridScale > 5) {
+                //this.scene.remove(this.plane)
+                _this.gridScale = Math.pow(5, _this.baseLog(_this.dist3D(_this.camera.position), 5));
+                _this.resizeGrid();
+            } else if (_this.dist3D(_this.camera.position) / _this.gridScale < .5) {
+                //this.scene.remove(this.plane)
+                _this.gridScale = Math.pow(5, _this.baseLog(_this.dist3D(_this.camera.position), 5));
+                _this.resizeGrid();
+            }
+        });
+    }
     /**
-     * This function is intended to allow for materials. It is currently not used and can probably be deleted.
-     * @param {object} material - A string to define the material type.
+     * This function is intended to calculate the base log of two numbers and round it to an integer
+     * @param {number,number}
      */
 
 
     _createClass(Display, [{
+        key: 'baseLog',
+        value: function baseLog(x, y) {
+            var baseLog = Math.round(Math.log(x) / Math.log(y));
+            return baseLog;
+        }
+
+        /**
+         * This function is intended to calculate the 3d distance between object and camera
+         * @param {number}
+         */
+
+    }, {
+        key: 'dist3D',
+        value: function dist3D(position) {
+            var distance3D = Math.sqrt(Math.pow(position.x, 2) + Math.pow(position.y, 2) + Math.pow(position.z, 2));
+            return distance3D;
+        }
+
+        /**
+         * This function is intended to allow for materials. It is currently not used and can probably be deleted.
+         * @param {object} material - A string to define the material type.
+         */
+
+    }, {
         key: 'makeMaterial',
         value: function makeMaterial(material) {
             switch (material) {
@@ -77341,10 +77401,35 @@ var Display = function () {
     }, {
         key: 'zoomCameraToFit',
         value: function zoomCameraToFit(bounds) {
+
             this.controls.reset();
             this.camera.position.x = 0;
             this.camera.position.y = -5 * Math.max.apply(Math, _toConsumableArray(bounds[1]));
             this.camera.position.z = 5 * Math.max.apply(Math, _toConsumableArray(bounds[1]));
+
+            /*initializes grid at scale if object loaded is already 
+                zoomed out farther than initial grid tier*/
+            this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position), 5));
+            // Creates initial grid plane
+            this.resizeGrid();
+        }
+
+        /**
+         * Redraws the grid with gridscale update value
+         */
+
+    }, {
+        key: 'resizeGrid',
+        value: function resizeGrid() {
+            this.scene.remove(this.plane);
+            var planeGeometry = new THREE.PlaneBufferGeometry(this.gridScale, this.gridScale, 10, 10);
+            var planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            planeMaterial.wireframe = true;
+            planeMaterial.transparent = true;
+            planeMaterial.opacity = 0.2;
+            this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            this.plane.receiveShadow = true;
+            this.scene.add(this.plane);
         }
 
         /**
@@ -77388,6 +77473,10 @@ var Display = function () {
 
             this.datasets = [];
 
+            /** 
+             * Does this even need to be a global object?
+             * @type {object}
+             */
             this.threeMaterial = new THREE.MeshStandardMaterial({
                 color: 0x5f6670,
                 roughness: 0.65,
@@ -77487,8 +77576,7 @@ var Display = function () {
         }
 
         /**
-         * Clears the display and writes a threejs geometry to it.
-         * @param {object} threejsGeometry - A threejs geometry to write to the display.
+         * Runs regularly to update the display.
          */
 
     }, {
@@ -77547,7 +77635,7 @@ function GitHubModule() {
 
     var Octokit = __webpack_require__(/*! @octokit/rest */ "./node_modules/@octokit/rest/index.js");
     /** 
-     * The ocotkit instance which allows authenticated interaction with GitHub.
+     * The octokit instance which allows authenticated interaction with GitHub.
      * @type {object}
      */
     var octokit = new Octokit();
@@ -77571,6 +77659,13 @@ function GitHubModule() {
      * @type {string}
      */
     var bomHeader = "###### Note: Do not edit this file directly, it is automatically generated from the CAD model \n# Bill Of Materials \n |Part|Number Needed|Price|Source| \n |----|----------|-----|-----|";
+
+    /** 
+     * The text to display at the top of the ReadMe file.
+     * @type {string}
+     */
+    var readmeHeader = "###### Note: Do not edit this file directly, it is automatically generated from the CAD model";
+
     /** 
      * The timer used to trigger saving of the file.
      * @type {object}
@@ -77896,6 +77991,34 @@ function GitHubModule() {
     };
 
     /** 
+     * Open a new tab with the README page for the project.
+     */
+    this.openREADMEPage = function () {
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(function (result) {
+            var url = result.data.html_url + '/blob/master/README.md';
+            window.open(url);
+        });
+    };
+
+    /** 
+     * Open a new tab with the Bill Of Materials page for the project.
+     */
+    this.openBillOfMaterialsPage = function () {
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(function (result) {
+            var url = result.data.html_url + '/blob/master/BillOfMaterials.md';
+            window.open(url);
+        });
+    };
+
+    /** 
      * Search github for projects which match a string.
      */
     this.searchGithub = function () {
@@ -77983,7 +78106,7 @@ function GitHubModule() {
                     content: content
                 }).then(function () {
                     //Then create the README file
-                    content = window.btoa("readme init"); // create a file with just the word "init" in it and base64 encode it
+                    content = window.btoa(readmeHeader); // create a file with just the word "init" in it and base64 encode it
                     octokit.repos.createFile({
                         owner: currentUser,
                         repo: currentRepoName,
@@ -78068,7 +78191,7 @@ function GitHubModule() {
                         bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
                     });
 
-                    var readmeContent = "# " + currentRepoName + "\n\n![](/project.svg)\n\n";
+                    var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n";
                     _globalvariables2.default.topLevelMolecule.requestReadme().forEach(function (item) {
                         readmeContent = readmeContent + item + "\n\n\n";
                     });
@@ -78260,7 +78383,7 @@ function GitHubModule() {
      * Loads a project from github by its github ID.
      */
     this.getProjectByID = function () {
-        var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(id) {
+        var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(id, saveUserInfo) {
             var repo, user, repoName, result;
             return regeneratorRuntime.wrap(function _callee4$(_context4) {
                 while (1) {
@@ -78286,9 +78409,17 @@ function GitHubModule() {
 
                         case 7:
                             result = _context4.sent;
+
+
+                            //If this is the top level we will save the rep info at the top level
+                            if (saveUserInfo) {
+                                currentUser = user;
+                                currentRepoName = repoName;
+                            }
+
                             return _context4.abrupt('return', result);
 
-                        case 9:
+                        case 10:
                         case 'end':
                             return _context4.stop();
                     }
@@ -78296,7 +78427,7 @@ function GitHubModule() {
             }, _callee4, this);
         }));
 
-        return function (_x6) {
+        return function (_x6, _x7) {
             return _ref6.apply(this, arguments);
         };
     }();
@@ -78636,10 +78767,16 @@ var GlobalVariables = function () {
      */
     this.c = null;
     /** 
-     * The current amount by which the canvas has been scaled.
-     * @type {number}
+     * An array of all of the secret types of atoms which can not be placed by the user.
+     * @type {array}
      */
-    this.scale1 = 1;
+    this.secretTypes = {
+      output: { creator: _output2.default, atomType: 'Output' }
+      /** 
+       * The current amount by which the canvas has been scaled.
+       * @type {number}
+       */
+    };this.scale1 = 1;
     /** 
      * An array of all of the available types of atoms which can be placed with a right click.
      * @type {array}
@@ -78668,12 +78805,6 @@ var GlobalVariables = function () {
       stretch: { creator: _stretch2.default, atomType: 'Stretch' },
       gcode: { creator: _gcode2.default, atomType: 'Gcode' },
       code: { creator: _code2.default, atomType: 'Code' }
-      /** 
-       * An array of all of the secret types of atoms which cannot be placed by the user
-       * @type {array}
-       */
-    };this.secretTypes = {
-      output: { creator: _output2.default, atomType: 'Output' }
       /** 
        * A reference to the molecule curently being displayed on the screen.
        * @type {object}
@@ -78756,8 +78887,8 @@ var GlobalVariables = function () {
     /**
      * Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.
      * @param {number} x1 - The x cordinate of the first point.
-     * @param {number} y1 - The y cordinate of the first point.
      * @param {number} x2 - The x cordinate of the second point.
+     * @param {number} y1 - The y cordinate of the first point.
      * @param {number} y2 - The y cordinate of the second point.
      */
 
@@ -78774,6 +78905,11 @@ var GlobalVariables = function () {
 
   return GlobalVariables;
 }();
+
+/**
+ * Because we want global variables to be the same every time it is imported we export an instance of global variables instead of the constructor.
+ */
+
 
 exports.default = new GlobalVariables();
 
@@ -80875,6 +81011,11 @@ var Menu = function () {
     return Menu;
 }();
 
+/**
+ * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.
+ */
+
+
 exports.default = new Menu();
 
 /***/ }),
@@ -80976,12 +81117,12 @@ var AddBOMTag = function (_Atom) {
         return x.ready;
       })) {
         try {
-          this.value = this.findIOValue('geometry').as(JSON.stringify(this.BOMitem));
+          var values = [this.findIOValue('geometry'), JSON.stringify(this.BOMitem)];
+          this.basicThreadValueProcessing(values, "tag");
           this.clearAlert();
         } catch (err) {
           this.setAlert(err);
         }
-
         _get(AddBOMTag.prototype.__proto__ || Object.getPrototypeOf(AddBOMTag.prototype), 'updateValue', this).call(this);
       }
     }
@@ -82087,6 +82228,9 @@ var Gcode = function (_Atom) {
         value: function updateValue() {
             var _this2 = this;
 
+            /**
+             * Flag that the attom is now processing.
+             */
             this.processing = true;
             this.clearAlert();
 
@@ -82129,7 +82273,9 @@ var Gcode = function (_Atom) {
                         var bounds = input.measureBoundingBox();
                         var partThickness = bounds[1][2] - bounds[0][2];
 
-                        //convert that to gcode
+                        /**
+                         * Assign the atom value to be the new computed results.
+                         */
                         _this2.value = _this2.svg2gcode(result, {
                             passes: _this2.findIOValue('passes'),
                             materialWidth: -1 * partThickness,
@@ -82403,7 +82549,7 @@ var GitHubMolecule = function (_Molecule) {
                         switch (_context.prev = _context.next) {
                             case 0:
                                 _context.next = 2;
-                                return _globalvariables2.default.gitHub.getProjectByID(id);
+                                return _globalvariables2.default.gitHub.getProjectByID(id, this.topLevel);
 
                             case 2:
                                 result = _context.sent;
@@ -82971,7 +83117,9 @@ var Molecule = function (_Atom) {
     }, {
         key: 'backgroundClick',
         value: function backgroundClick() {
-
+            /**
+             * Flag that the attom is now selected.
+             */
             this.selected = true;
             this.updateSidebar();
             this.sendToRender();
@@ -82988,7 +83136,7 @@ var Molecule = function (_Atom) {
         }
 
         /**
-         * Grab values from the inputs and push them out to the input atoms
+         * Grab values from the inputs and push them out to the input atoms.
          */
 
     }, {
@@ -82999,6 +83147,10 @@ var Molecule = function (_Atom) {
             if (!_globalvariables2.default.evalLock && this.inputs.every(function (x) {
                 return x.ready;
             })) {
+                /** 
+                 * Flag that the current molecule is processing.
+                 * @type {boolean}
+                 */
                 this.processing = true;
                 this.clearAlert();
 
@@ -83095,6 +83247,14 @@ var Molecule = function (_Atom) {
                     _globalvariables2.default.gitHub.openGitHubPage();
                 });
 
+                this.createButton(valueList, this, 'README', function () {
+                    _globalvariables2.default.gitHub.openREADMEPage();
+                });
+
+                this.createButton(valueList, this, 'Bill Of Materials', function () {
+                    _globalvariables2.default.gitHub.openBillOfMaterialsPage();
+                });
+
                 this.createEditableValueListItem(valueList, _globalvariables2.default, 'circleSegmentSize', 'Circle Segment Size', true, function (newValue) {
                     _globalvariables2.default.circleSegmentSize = newValue;
                 });
@@ -83145,10 +83305,12 @@ var Molecule = function (_Atom) {
             var _this4 = this;
 
             var bomList = [];
-            try {
-                bomList = (0, _BOM.extractBomTags)(this.value);
-            } catch (err) {
-                this.setAlert("Unable to read BOM");
+            if (this.value != null) {
+                try {
+                    bomList = (0, _BOM.extractBomTags)(this.value);
+                } catch (err) {
+                    this.setAlert("Unable to read BOM");
+                }
             }
 
             if (bomList.length > 0) {
@@ -83249,7 +83411,7 @@ var Molecule = function (_Atom) {
 
         /**
          * Generates and returns a JSON represntation of this molecule and all of its children.
-         * @param {savedObject} A JSON object to append the represntation of this atom to.
+         * @param {object} savedObject - A JSON object to append the represntation of this atom to.
          */
 
     }, {
@@ -83437,7 +83599,7 @@ var Molecule = function (_Atom) {
 
         /**
          * Places a new connector within the molecule
-         * @param {connectorObj} An object represntation of the connector specifying its inputs and outputs.
+         * @param {object} connectorObj - An object represntation of the connector specifying its inputs and outputs.
          */
 
     }, {
@@ -83634,6 +83796,10 @@ var Output = function (_Atom) {
   }, {
     key: 'setID',
     value: function setID(newID) {
+      /**
+       * The unique ID of this atom.
+       * @type {number}
+       */
       this.uniqueID = newID;
     }
 
@@ -84845,6 +85011,9 @@ var Atom = function () {
         this.processing = false;
 
         for (var key in values) {
+            /** 
+             * Assign each of the values in values as this.value
+             */
             this[key] = values[key];
         }
     }
@@ -85134,8 +85303,7 @@ var Atom = function () {
 
         /**
          * Set the atom's response to a key press. Is used to delete the atom if it is selected.
-         * @param {number} x - The X cordinate of the click
-         * @param {number} y - The Y cordinate of the click
+         * @param {string} key - The key which has been pressed.
          */
 
     }, {
@@ -85765,6 +85933,9 @@ var AttachmentPoint = function () {
         this.offsetY = this.defaultOffsetY;
 
         for (var key in values) {
+            /**
+             * Assign values in values as this.x
+             */
             this[key] = values[key];
         }
 
@@ -85788,7 +85959,13 @@ var AttachmentPoint = function () {
                 this.radius = this.parentMolecule.radius / 1.6;
             }
             if (this.parentMolecule.inputs.length < 2 && this.type == 'input') {
+                /**
+                 * The x cordinate of the attachment point.
+                 */
                 this.x = this.parentMolecule.x - this.parentMolecule.radius;
+                /**
+                 * The y cordinate of the attachment point.
+                 */
                 this.y = this.parentMolecule.y;
             } else if (this.parentMolecule.inputs.length < 2 && this.type == 'output') {
                 this.x = this.parentMolecule.x + this.parentMolecule.radius;
@@ -85975,7 +86152,7 @@ var AttachmentPoint = function () {
 
         /**
          * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.
-         * @param {number} x - The x cordinate of the click
+         * @param {number} cursorDistance - The distance the cursor is from the attachment point.
          */
 
     }, {
@@ -86216,6 +86393,9 @@ var Connector = function () {
         this.attachmentPoint2 = null;
 
         for (var key in values) {
+            /**
+             * Assign each of the values in values as this.value
+             */
             this[key] = values[key];
         }
 
@@ -86298,14 +86478,20 @@ var Connector = function () {
         key: 'clickMove',
         value: function clickMove(x, y) {
             if (this.isMoving == true) {
+                /**
+                 * The s cordinate of the end of the connector.
+                 */
                 this.endX = x;
+                /**
+                 * The y cordinate of the end of the connector.
+                 */
                 this.endY = y;
             }
         }
 
         /**
          * Called when any key is pressed. If the key is delete or backspace and the connector is selected then the connector is deleted.
-         * @param {string} x - The key which was pressed
+         * @param {string} key - The key which was pressed
          */
 
     }, {

@@ -1,28 +1,28 @@
 {
   "type": "File",
   "start": 0,
-  "end": 8949,
+  "end": 9091,
   "loc": {
     "start": {
       "line": 1,
       "column": 0
     },
     "end": {
-      "line": 225,
+      "line": 228,
       "column": 25
     }
   },
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 8949,
+    "end": 9091,
     "loc": {
       "start": {
         "line": 1,
         "column": 0
       },
       "end": {
-        "line": 225,
+        "line": 228,
         "column": 25
       }
     },
@@ -16618,51 +16618,52 @@
                 }
               ]
             }
-          ]
+          ],
+          "trailingComments": null
         },
         "leadingComments": [],
-        "name": "_",
-        "trailingComments": []
+        "trailingComments": [],
+        "name": "_"
       },
       {
         "type": "Identifier",
-        "start": 8924,
-        "end": 8949,
+        "start": 9066,
+        "end": 9091,
         "loc": {
           "start": {
-            "line": 225,
+            "line": 228,
             "column": 0
           },
           "end": {
-            "line": 225,
+            "line": 228,
             "column": 25
           }
         },
         "declaration": {
           "type": "NewExpression",
-          "start": 8940,
-          "end": 8948,
+          "start": 9082,
+          "end": 9090,
           "loc": {
             "start": {
-              "line": 225,
+              "line": 228,
               "column": 16
             },
             "end": {
-              "line": 225,
+              "line": 228,
               "column": 24
             }
           },
           "callee": {
             "type": "Identifier",
-            "start": 8944,
-            "end": 8948,
+            "start": 9086,
+            "end": 9090,
             "loc": {
               "start": {
-                "line": 225,
+                "line": 228,
                 "column": 20
               },
               "end": {
-                "line": 225,
+                "line": 228,
                 "column": 24
               },
               "identifierName": "Menu"
@@ -16670,26 +16671,27 @@
             "name": "Menu"
           },
           "arguments": [],
+          "leadingComments": null,
           "extra": {
             "parenthesized": true,
-            "parenStart": 8939
+            "parenStart": 9081
           }
         },
-        "name": "_",
         "leadingComments": [],
+        "name": "_",
         "trailingComments": []
       },
       {
         "type": "ExportDefaultDeclaration",
-        "start": 8924,
-        "end": 8949,
+        "start": 9066,
+        "end": 9091,
         "loc": {
           "start": {
-            "line": 225,
+            "line": 228,
             "column": 0
           },
           "end": {
-            "line": 225,
+            "line": 228,
             "column": 25
           }
         },
@@ -33194,7 +33196,8 @@
                   }
                 ]
               }
-            ]
+            ],
+            "trailingComments": null
           },
           "leadingComments": [
             {
@@ -33214,22 +33217,39 @@
               }
             }
           ],
-          "__PseudoExport__": true,
-          "trailingComments": []
+          "trailingComments": [
+            {
+              "type": "CommentBlock",
+              "value": "*\r\n * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.\r\n ",
+              "start": 8924,
+              "end": 9064,
+              "loc": {
+                "start": {
+                  "line": 225,
+                  "column": 0
+                },
+                "end": {
+                  "line": 227,
+                  "column": 3
+                }
+              }
+            }
+          ],
+          "__PseudoExport__": true
         },
         "leadingComments": null
       },
       {
         "type": "ExportDefaultDeclaration",
-        "start": 8924,
-        "end": 8949,
+        "start": 9066,
+        "end": 9091,
         "loc": {
           "start": {
-            "line": 225,
+            "line": 228,
             "column": 0
           },
           "end": {
-            "line": 225,
+            "line": 228,
             "column": 25
           }
         },
@@ -33238,11 +33258,11 @@
           "kind": "let",
           "loc": {
             "start": {
-              "line": 225,
+              "line": 228,
               "column": 0
             },
             "end": {
-              "line": 225,
+              "line": 228,
               "column": 25
             }
           },
@@ -33262,9 +33282,44 @@
               }
             }
           ],
-          "leadingComments": [],
+          "leadingComments": [
+            {
+              "type": "CommentBlock",
+              "value": "*\r\n * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.\r\n ",
+              "start": 8924,
+              "end": 9064,
+              "loc": {
+                "start": {
+                  "line": 225,
+                  "column": 0
+                },
+                "end": {
+                  "line": 227,
+                  "column": 3
+                }
+              }
+            }
+          ],
           "trailingComments": []
-        }
+        },
+        "leadingComments": [
+          {
+            "type": "CommentBlock",
+            "value": "*\r\n * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.\r\n ",
+            "start": 8924,
+            "end": 9064,
+            "loc": {
+              "start": {
+                "line": 225,
+                "column": 0
+              },
+              "end": {
+                "line": 227,
+                "column": 3
+              }
+            }
+          }
+        ]
       }
     ],
     "directives": []
@@ -33811,6 +33866,22 @@
         "end": {
           "line": 220,
           "column": 87
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\r\n * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.\r\n ",
+      "start": 8924,
+      "end": 9064,
+      "loc": {
+        "start": {
+          "line": 225,
+          "column": 0
+        },
+        "end": {
+          "line": 227,
+          "column": 3
         }
       }
     }
@@ -61688,6 +61759,22 @@
       }
     },
     {
+      "type": "CommentBlock",
+      "value": "*\r\n * Because we want the menu to be the same every time it is imported we export an instance of the menu instead of the constructor.\r\n ",
+      "start": 8924,
+      "end": 9064,
+      "loc": {
+        "start": {
+          "line": 225,
+          "column": 0
+        },
+        "end": {
+          "line": 227,
+          "column": 3
+        }
+      }
+    },
+    {
       "type": {
         "label": "export",
         "keyword": "export",
@@ -61702,15 +61789,15 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 8924,
-      "end": 8930,
+      "start": 9066,
+      "end": 9072,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 0
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 6
         }
       }
@@ -61730,15 +61817,15 @@
         "updateContext": null
       },
       "value": "default",
-      "start": 8931,
-      "end": 8938,
+      "start": 9073,
+      "end": 9080,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 7
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 14
         }
       }
@@ -61755,15 +61842,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 8939,
-      "end": 8940,
+      "start": 9081,
+      "end": 9082,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 15
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 16
         }
       }
@@ -61783,15 +61870,15 @@
         "updateContext": null
       },
       "value": "new",
-      "start": 8940,
-      "end": 8943,
+      "start": 9082,
+      "end": 9085,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 16
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 19
         }
       }
@@ -61809,15 +61896,15 @@
         "binop": null
       },
       "value": "Menu",
-      "start": 8944,
-      "end": 8948,
+      "start": 9086,
+      "end": 9090,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 20
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 24
         }
       }
@@ -61834,15 +61921,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 8948,
-      "end": 8949,
+      "start": 9090,
+      "end": 9091,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 24
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 25
         }
       }
@@ -61860,15 +61947,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 8949,
-      "end": 8949,
+      "start": 9091,
+      "end": 9091,
       "loc": {
         "start": {
-          "line": 225,
+          "line": 228,
           "column": 25
         },
         "end": {
-          "line": 225,
+          "line": 228,
           "column": 25
         }
       }
