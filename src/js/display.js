@@ -238,20 +238,28 @@ export default class Display {
             
             if((this.dist3D(this.camera.position)/this.gridScale) > 5){
                 //this.scene.remove(this.plane)
-                this.gridScale *= 5
+                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
                 this.resizeGrid()
             }
             else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
                 //this.scene.remove(this.plane)
-                this.gridScale /= 5
+                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
                 this.resizeGrid()
             }    
         })
     }
+    /**
+     * This function is intended to calculate the base log of two numbers and round it to an integer
+     * @param {number,number}
+     */ 
+    baseLog(x,y){
+        let baseLog = (Math.round(Math.log(x)/Math.log(y)))
+        return baseLog
+    }
 
     /**
      * This function is intended to calculate the 3d distance between object and camera
-     * @param {position} material - A string to define the material type.
+     * @param {number}
      */ 
     dist3D(position){
         const distance3D = Math.sqrt(Math.pow(position.x,2)
@@ -312,12 +320,9 @@ export default class Display {
 
         /*initializes grid at scale if object loaded is already 
             zoomed out farther than initial grid tier*/ 
-        this.gridScale = 5    
-        while((this.dist3D(this.camera.position)/this.gridScale) > 5){
-            this.gridScale *= 5 
-            // Creates initial grid plane
-            this.resizeGrid()
-        }
+        this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
+        // Creates initial grid plane
+        this.resizeGrid()
     }
 
     /**
