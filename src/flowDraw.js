@@ -10,23 +10,28 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 
 GlobalVariables.canvas.width = innerWidth
 GlobalVariables.canvas.height = innerHeight/2
+/** 
+ * The original width of the canvas before scaling.
+ * @type {number}
+ */
 let originalWidth = GlobalVariables.canvas.width
 
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
 
-let lowerHalfOfScreen = document.querySelector('.flex-parent')
 if(!GlobalVariables.runMode){
-    lowerHalfOfScreen.setAttribute('style','height:'+innerHeight/2+'px')
+    document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight/2+'px')
 }else{
-    lowerHalfOfScreen.setAttribute('style','height:'+innerHeight+'px')
+    document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
 }
-let upperHalfOfScreen = document.querySelector('#flow-canvas')
-upperHalfOfScreen.setAttribute('style','height:'+innerHeight/2+'px')
-let viewer = document.querySelector('.jscad-container')
-viewer.setAttribute('style','width:'+innerWidth/2+'px')
+document.querySelector('#flow-canvas').setAttribute('style','height:'+innerHeight/2+'px')
+document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
 
 
 // Event Listeners
+/** 
+ * The cansvas on which the atoms are placed.
+ * @type {object}
+ */
 let flowCanvas = document.getElementById('flow-canvas')
 
 flowCanvas.addEventListener('mousemove', event => {
@@ -144,12 +149,12 @@ function onWindowResize() {
     GlobalVariables.canvas.height = bounds.height 
     //reset screen parameters 
     if(!GlobalVariables.runMode){
-        lowerHalfOfScreen.setAttribute('style','height:'+innerHeight/2+'px')
+        document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight/2+'px')
     }else{
-        lowerHalfOfScreen.setAttribute('style','height:'+innerHeight+'px')
+        document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
-    upperHalfOfScreen.setAttribute('style','height:'+innerHeight/2+'px')
-    viewer.setAttribute('style','width:'+innerWidth/2+'px')
+    document.querySelector('#flow-canvas').setAttribute('style','height:'+innerHeight/2+'px')
+    document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 

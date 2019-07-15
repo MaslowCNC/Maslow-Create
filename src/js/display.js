@@ -21,6 +21,11 @@ export default class Display {
          */
         this.displayGrid = true
         /** 
+         * Grid scale to keep track of zoom scale
+         * @type {number}
+         */
+        this.gridScale = 5
+        /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
          */
@@ -67,9 +72,17 @@ export default class Display {
         this.targetDiv = document.getElementById('viewerContext')
         
         //Add the JSXCAD window
+        /** 
+         * The camera which controls how the scene is rendered.
+         * @type {object}
+         */
         this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
         [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, -30, 50]
         //
+        /** 
+         * The controls which let the user pan and zoom with the mouse.
+         * @type {object}
+         */
         this.controls = new TrackballControls(this.camera, this.targetDiv)
         this.controls.rotateSpeed = 4.0
         this.controls.zoomSpeed = 4.0
@@ -81,6 +94,10 @@ export default class Display {
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
         //
+        /** 
+         * The threejs scene to which things should be added to show up on the display.
+         * @type {object}
+         */
         this.scene = new THREE.Scene()
         this.scene.background = new THREE.Color(0xB0AEB0)
         this.scene.add(this.camera)
@@ -96,18 +113,13 @@ export default class Display {
         //sets axes
         var axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(axesHelper)
-
-        // Sets initial plane and mesh
-        var planeGeometry = new THREE.PlaneBufferGeometry( 100, 100, 60, 60)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        this.plane.receiveShadow = true
-        this.scene.add( this.plane )
-
+        
         //
+        /** 
+         * The three js webGLRendere object which does the actual rendering to the screen.
+         * @type {object}
+         */
+
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.targetDiv.appendChild(this.renderer.domElement)
@@ -219,6 +231,41 @@ export default class Display {
                 })
             }
         })
+        
+        // This event listener adjusts the gridScale when you zoom in and out
+        
+        this.targetDiv.addEventListener('wheel', () =>{ 
+            
+            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
+                //this.scene.remove(this.plane)
+                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
+                this.resizeGrid()
+            }
+            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
+                //this.scene.remove(this.plane)
+                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
+                this.resizeGrid()
+            }    
+        })
+    }
+    /**
+     * This function is intended to calculate the base log of two numbers and round it to an integer
+     * @param {number,number}
+     */ 
+    baseLog(x,y){
+        let baseLog = (Math.round(Math.log(x)/Math.log(y)))
+        return baseLog
+    }
+
+    /**
+     * This function is intended to calculate the 3d distance between object and camera
+     * @param {number}
+     */ 
+    dist3D(position){
+        const distance3D = Math.sqrt(Math.pow(position.x,2)
+                         + Math.pow(position.y,2)
+                         + Math.pow(position.z,2))
+        return distance3D
     }
     
     /**
@@ -265,12 +312,34 @@ export default class Display {
      * @param {array} bounds - An array of some sort...this comment should be updated.
      */ 
     zoomCameraToFit(bounds){
+
         this.controls.reset()
         this.camera.position.x = 0
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
+
+        /*initializes grid at scale if object loaded is already 
+            zoomed out farther than initial grid tier*/ 
+        this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
+        // Creates initial grid plane
+        this.resizeGrid()
     }
-    
+
+    /**
+     * Redraws the grid with gridscale update value
+     */ 
+    resizeGrid () {
+        this.scene.remove(this.plane)
+        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
+        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
+        planeMaterial.wireframe = true
+        planeMaterial.transparent = true 
+        planeMaterial.opacity = 0.2
+        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
+        this.plane.receiveShadow = true
+        this.scene.add( this.plane )   
+    }
+
     /**
      * Clears the display and writes a threejs geometry to it.
      * @param {object} threejsGeometry - A threejs geometry to write to the display.
@@ -284,6 +353,10 @@ export default class Display {
         // Build new datasets from the written data, and display them.
         this.datasets = []
         
+        /** 
+         * Does this even need to be a global object?
+         * @type {object}
+         */
         this.threeMaterial = new THREE.MeshStandardMaterial({
             color: 0x5f6670,
             roughness: 0.65,
@@ -338,8 +411,7 @@ export default class Display {
     }
     
     /**
-     * Clears the display and writes a threejs geometry to it.
-     * @param {object} threejsGeometry - A threejs geometry to write to the display.
+     * Runs regularly to update the display.
      */ 
     render() {
         this.renderer.render( this.scene, this.camera )
