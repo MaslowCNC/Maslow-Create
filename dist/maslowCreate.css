@@ -3,7 +3,7 @@
  */
 
 .jscad-container {
-  margin: 0px 0px 0px 0px; /* not inherited */
+  margin: 0px 0px 10px 0px; /* not inherited */
   padding: 0px; /* not inherited */
   color: Black;
   font-weight: bold;
@@ -17,12 +17,27 @@
   flex-direction: column;
 }
 
+#head_bar{
+  position:absolute;
+  height:30px;
+  width:100%; 
+  top:0px;
+  left:0px;
+  background: #2C2C2C;
+  color: white;
+  padding:0px 0px 0px 10px;
+  font-size: .7em;
+}
+
 #flow-canvas{
   margin-top: 0;
   flex-shrink: 2; 
 }
 
 .sideBar {
+
+    margin: 10px;
+    margin-left: 15px;
     flex: 3;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -38,7 +53,7 @@
    -webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     -moz-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
-    border-radius: 25px;
+    border-radius: 1px;
 }
 
 #gridDiv, #wireDiv{
@@ -60,6 +75,7 @@
 
 #viewerContext {
   margin: 0px; /* not inherited */
+  margin-right:10px;
   padding: 0px; /* not inherited */
 
   background: white;
@@ -86,7 +102,7 @@ canvas {
 
 body {
     font-family: 'Work Sans', sans-serif;
-    background: #B0AEB0;
+    background: #A8A8A8;
     overflow: hidden;
 }
 
