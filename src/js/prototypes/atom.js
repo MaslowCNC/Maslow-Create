@@ -419,11 +419,14 @@ export default class Atom {
             sideBar.removeChild(sideBar.firstChild)
         }
         
-        //add the name as a title
-        var name = document.createElement('h1')
+        //add the name as a title  -- to the top bar
+        let headerBar_title = document.querySelector('#headerBar_title')
+         while (headerBar_title.firstChild) {
+            headerBar_title.removeChild(headerBar_title.firstChild)
+        }
+        var name = document.createElement('p')
         name.textContent = this.name
-        name.setAttribute('class','doc-title')
-        sideBar.appendChild(name)
+        headerBar_title.appendChild(name)
         
         //Create a list element
         var valueList = document.createElement('ul')

@@ -17,8 +17,14 @@
  	
 </head>
 <body>
-    <div id= "head_bar">
-    <p>Maslow Create - 2019 </p>    
+    <div id= doc-frame>
+        <div id="left_bar"></div>
+        <div id="right_bar"></div>
+        <div id="bottom_bar"></div>
+    </div>
+     <div id= "headerBar">
+        <p> Maslow Create - 2019 </p>   
+        <div id="headerBar_title"></div> 
     </div>
     <!-- The menu for creating a new drawing node -->
     <ul class="menu ">
@@ -50,7 +56,7 @@
     <!-- Draw the canvas for creating the design -->
     <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">
-        
+     <!-- <div id="middle_bar"></div>   -->
         <!-- setup display of the errors as required by OpenJSCAD.js -->
         <div class="jscad-container"> 
             <!-- setup display of the viewer, i.e. canvas -->

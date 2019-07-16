@@ -17,16 +17,65 @@
   flex-direction: column;
 }
 
-#head_bar{
+#headerBar {
   position:absolute;
-  height:30px;
+  height:20px;
   width:100%; 
   top:0px;
   left:0px;
   background: #2C2C2C;
+  padding:10px 0px 5px 10px;
+  display:inline;
+  border-bottom: 1px solid #E5E4E5;
+}
+
+#headerBar p {
   color: white;
-  padding:0px 0px 0px 10px;
-  font-size: .7em;
+  display:inline;
+  font-size: .8em;
+  padding:1em;
+}
+
+#headerBar_title {
+  font-size: 1em;
+  margin:0;
+  margin-right:30px;
+  display:inline;
+  float: right;
+}
+
+#left_bar{
+  position:absolute;
+  height:100%;
+  width:5px; 
+  top:0px;
+  left:0px;
+  background: #2C2C2C;
+}
+
+#right_bar{
+  position:absolute;
+  height:100%;
+  width:5px; 
+  top:0px;
+  right:0px;
+  background: #2C2C2C;
+}
+
+#bottom_bar{
+  position:absolute;
+  height:5px;
+  width:100%; 
+  bottom:0px;
+  left:0px;
+  background: #2C2C2C;
+}
+
+#middle_bar{
+  position: absolute;
+  height:5px;
+  width:100%; 
+  background: #2C2C2C;
 }
 
 #flow-canvas{
@@ -50,10 +99,10 @@
     overflow: auto;
     padding:10px;
     padding-right:10px;
-   -webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
+   /*-webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     -moz-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
-    box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
-    border-radius: 1px;
+    box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61); */
+    border: 2px solid #E5E4E5;
 }
 
 #gridDiv, #wireDiv{
