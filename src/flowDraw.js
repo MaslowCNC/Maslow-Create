@@ -23,8 +23,8 @@ if(!GlobalVariables.runMode){
 }else{
     document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
 }
-document.querySelector('#flow-canvas').setAttribute('style','height:'+innerHeight/2+'px')
-document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
+document.querySelector('#flow-canvas').setAttribute('style','height: 100'+innerHeight/2+'px')
+document.querySelector('.jscad-container').setAttribute('style','width:90%')
 
 
 // Event Listeners

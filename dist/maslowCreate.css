@@ -3,13 +3,12 @@
  */
 
 .jscad-container {
+  flex:3;
   margin: 0px 0px 10px 0px; /* not inherited */
   padding: 0px; /* not inherited */
   color: Black;
   font-weight: bold;
   font-family: Helvetica, Arial, Sans;
-  flex: 5;
-  
 }
 
 .row-flex{
@@ -84,10 +83,8 @@
 }
 
 .sideBar {
-
-    margin: 10px;
-    margin-left: 15px;
-    flex: 3;
+    flex:2;
+    margin: 0px 10px 0px 10px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -124,10 +121,8 @@
 
 #viewerContext {
   margin: 0px; /* not inherited */
-  margin-right:10px;
-  padding: 0px; /* not inherited */
-
-  background: white;
+  padding: 10px; /* not inherited */
+  padding-top: 0px;
 
   top: 0px;
   bottom: 0px;
