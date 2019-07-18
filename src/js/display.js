@@ -335,6 +335,10 @@ export default class Display {
         planeMaterial.wireframe = true
         planeMaterial.transparent = true 
         planeMaterial.opacity = 0.2
+        /** 
+         * The grid which displays under the part.
+         * @type {object}
+         */
         this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
         this.plane.receiveShadow = true
         this.scene.add( this.plane )   
