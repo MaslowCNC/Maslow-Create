@@ -29,6 +29,11 @@ export default class Output extends Atom {
          */
         this.name = 'Output'
         /**
+         * This atom's value
+         * @type {object}
+         */
+        this.value = null
+        /**
          * This atom's type
          * @type {string}
          */
