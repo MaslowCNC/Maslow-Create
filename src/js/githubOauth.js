@@ -480,6 +480,7 @@ export default function GitHubModule(){
             })
         })
         
+        GlobalVariables.evalLock = false
         GlobalVariables.currentMolecule.backgroundClick()
         
         //Clear and hide the popup

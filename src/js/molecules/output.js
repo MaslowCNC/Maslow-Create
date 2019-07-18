@@ -19,11 +19,6 @@ export default class Output extends Atom {
         }
         
         /**
-         * This atom's value
-         * @type {object}
-         */
-        this.value = null
-        /**
          * This atom's type
          * @type {string}
          */
@@ -33,6 +28,11 @@ export default class Output extends Atom {
          * @type {string}
          */
         this.name = 'Output'
+        /**
+         * This atom's value
+         * @type {object}
+         */
+        this.value = null
         /**
          * This atom's type
          * @type {string}
@@ -51,7 +51,7 @@ export default class Output extends Atom {
         
         this.setValues(values)
         
-        this.addIO('input', 'number or geometry', this, 'geometry', '')
+        this.addIO('input', 'number or geometry', this, 'geometry', null)
     }
     
     /**
