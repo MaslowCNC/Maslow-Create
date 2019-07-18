@@ -77427,6 +77427,10 @@ var Display = function () {
             planeMaterial.wireframe = true;
             planeMaterial.transparent = true;
             planeMaterial.opacity = 0.2;
+            /** 
+             * The grid which displays under the part.
+             * @type {object}
+             */
             this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
             this.plane.receiveShadow = true;
             this.scene.add(this.plane);
@@ -78132,6 +78136,7 @@ function GitHubModule() {
             });
         });
 
+        _globalvariables2.default.evalLock = false;
         _globalvariables2.default.currentMolecule.backgroundClick();
 
         //Clear and hide the popup
@@ -83494,6 +83499,10 @@ var Molecule = function (_Atom) {
                     return molecule.uniqueID == moleculeID;
                 })[0];
                 //Place the connectors
+                /**
+                 * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
+                 * @param {array}
+                 */
                 _this5.savedConnectors = moleculeObject.allConnectors; //Save a copy of the connectors so we can use them later if we want
                 _this5.savedConnectors.forEach(function (connector) {
                     _this5.placeConnector(connector);
@@ -83734,11 +83743,6 @@ var Output = function (_Atom) {
     }
 
     /**
-     * This atom's value
-     * @type {object}
-     */
-    _this.value = null;
-    /**
      * This atom's type
      * @type {string}
      */
@@ -83748,6 +83752,11 @@ var Output = function (_Atom) {
      * @type {string}
      */
     _this.name = 'Output';
+    /**
+     * This atom's value
+     * @type {object}
+     */
+    _this.value = null;
     /**
      * This atom's type
      * @type {string}
@@ -83766,7 +83775,7 @@ var Output = function (_Atom) {
 
     _this.setValues(values);
 
-    _this.addIO('input', 'number or geometry', _this, 'geometry', '');
+    _this.addIO('input', 'number or geometry', _this, 'geometry', null);
     return _this;
   }
 

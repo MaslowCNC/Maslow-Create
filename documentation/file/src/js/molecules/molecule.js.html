@@ -499,6 +499,10 @@ export default class Molecule extends Atom{
             //reload the molecule object to prevent persistence issues
             moleculeObject = moleculeList.filter((molecule) =&gt; { return molecule.uniqueID == moleculeID})[0]
             //Place the connectors
+            /**
+             * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
+             * @param {array}
+             */
             this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
             this.savedConnectors.forEach(connector =&gt; {
                 this.placeConnector(connector)
