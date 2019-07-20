@@ -13,8 +13,8 @@ export default class Equation extends Atom {
     constructor(values){
         super(values)
         
-        this.addIO('input', 'x', this, 'number', 0)
         this.addIO('input', 'y', this, 'number', 0)
+        this.addIO('input', 'x', this, 'number', 0)
         this.addIO('output', 'z', this, 'number', 0)
         
         /**
