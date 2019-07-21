@@ -20,7 +20,6 @@
     <div id= doc-frame>
         <div id="left_bar"></div>
         <div id="right_bar"></div>
-        <div id="bottom_bar"></div>
     </div>
      <div id= "headerBar">
         <p> Maslow Create - 2019 </p>   
@@ -55,18 +54,20 @@
     </div>
     <!-- Draw the canvas for creating the design -->
     <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
-    <div class='parent flex-parent' id = "lowerHalf">
+    <div class='parent flex-parent' id = "lowerHalf">     
      <!-- <div id="middle_bar"></div>   -->
         <!-- setup display of the errors as required by OpenJSCAD.js -->
         <div class="jscad-container"> 
             <!-- setup display of the viewer, i.e. canvas -->
             <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
+            <div id="viewer_bar"></div>  
         </div>
         
         
         <div class="sideBar">
             Maslow Create
         </div>
+        <div id="bottom_bar"></div>
     </div>
     
     <!-- CodeMirror -->

@@ -128,15 +128,16 @@ export default class Display {
 
         this.targetDiv.addEventListener('mousedown', () => {
             if(!GlobalVariables.runMode){
-                let sideBar = document.querySelector('.sideBar')
+                let sideBar = document.querySelector('#viewer_bar')
                 while (sideBar.firstChild) {
                     sideBar.removeChild(sideBar.firstChild)
                 }
                 
                 //Grid display html element
-                var name = document.createElement('h1')
+                var name = document.createElement('p')
                 name.textContent = "3D View"
                 name.setAttribute('class','doc-title')
+                //name.setAttribute('style', 'display:inline;')
                 sideBar.appendChild(name)
 
                 var gridDiv = document.createElement('div')
@@ -146,6 +147,7 @@ export default class Display {
                 gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute('type', 'checkbox')
                 gridCheck.setAttribute('id', 'gridCheck')
+                gridDiv.setAttribute('style', 'float:right;')
                
                 if (this.displayGrid){
                     gridCheck.setAttribute('checked', 'true')
@@ -156,6 +158,7 @@ export default class Display {
                 gridCheckLabel.setAttribute('for', 'gridCheck')
                 gridCheckLabel.setAttribute('style', 'margin-right:1em;')
                 gridCheckLabel.textContent= "Grid"
+
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
@@ -185,6 +188,7 @@ export default class Display {
                 axesDiv.appendChild(axesCheckLabel)
                 axesCheckLabel.setAttribute('for', 'axesCheck')
                 axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+                axesDiv.setAttribute('style', 'float:right;')
                 axesCheckLabel.textContent= "Axes"
 
                 axesCheck.addEventListener('change', event => {
@@ -216,7 +220,8 @@ export default class Display {
                 var wireCheckLabel = document.createElement('label')
                 wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
-                wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+                //wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+                wireDiv.setAttribute('style', 'float:right;')
                 wireCheckLabel.textContent= "Wireframe"
 
                 wireCheck.addEventListener('change', event => {
