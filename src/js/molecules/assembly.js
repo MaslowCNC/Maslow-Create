@@ -64,6 +64,9 @@ export default class Assembly extends Atom{
         addOrDeletePorts(this)
     }
     
+    /**
+    * Updates the side bar to add check boxes to turn on and off different elements.
+    */
     updateSidebar(){
         var sideBar = super.updateSidebar()
         
