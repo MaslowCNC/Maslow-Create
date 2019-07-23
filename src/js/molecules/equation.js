@@ -30,7 +30,7 @@ export default class Equation extends Atom {
         /**
          * Evaluate the equation adding and removing inputs as needed
          */ 
-        this.value = 0;
+        this.value = 0
         
         /**
          * The index number of the currently selected option
