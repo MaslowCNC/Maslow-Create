@@ -40,6 +40,7 @@ export default class Assembly extends Atom{
         
         this.updateValue()
     }
+    
     /**
     * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.
     */ 
@@ -56,11 +57,40 @@ export default class Assembly extends Atom{
             })
             
             this.basicThreadValueProcessing(values, "assemble")
+            this.clearAlert()
         }catch(err){this.setAlert(err)}
         
         //Delete or add ports as needed
         addOrDeletePorts(this)
     }
+    
+    updateSidebar(){
+        var sideBar = super.updateSidebar()
+        
+        this.inputs.forEach(input => {
+            this.createCheckbox(sideBar,input.name,(event)=>{
+                var updatedValue = input.getValue()
+                
+                if(!event.target.checked){ //If the box has just been unchecked
+                    if(updatedValue.tags){
+                        updatedValue.tags.push("user/cutAway")
+                    }
+                    else{
+                        updatedValue.tags = ["user/cutAway"]
+                    }
+                    input.setValue(updatedValue)
+                }
+                else{
+                    var index = updatedValue.tags.indexOf("user/cutAway")
+                    if (index > -1) {
+                        updatedValue.tags.splice(index, 1)
+                    }
+                    input.setValue(updatedValue)
+                }
+            })
+        })
+    }
+        
     
     /**
     * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.
