@@ -13,9 +13,7 @@ export default class Equation extends Atom {
     constructor(values){
         super(values)
         
-        this.addIO('input', 'y', this, 'number', 0)
-        this.addIO('input', 'x', this, 'number', 0)
-        this.addIO('output', 'z', this, 'number', 0)
+        this.addIO('output', 'result', this, 'number', 0)
         
         /**
          * This atom's name
@@ -36,10 +34,48 @@ export default class Equation extends Atom {
          * The index number of the currently selected option
          * @type {number}
          */
-        this.currentEquation = 0
+        this.currentEquation = "x + y"
         
         this.setValues(values)
         
+    }
+    
+    /**
+     * Evaluate the equation adding and removing inputs as needed
+     */ 
+    updateValue(){
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            
+            //Find all the letters in this equation
+            var re = /[a-zA-Z]/g;
+            const variables = this.currentEquation.match(re);
+            
+            //Add any inputs which are needed
+            for (var key in variables){
+                if(!this.inputs.some(input => input.Name === variables[key])){
+                    this.addIO('input', variables[key], this, 'number', 1)
+                }
+            }
+            
+            //Remove any inputs which are not needed
+            for (var key in this.inputs){
+                
+                if( !variables.includes(this.inputs[key].name) ){
+                    console.log("Deleting: ")
+                    console.log(this.inputs[key].name)
+                    this.removeIO('input', this.inputs[key].name, this)
+                }
+            }
+            
+            //Substitute numbers into the string
+            
+            //Evaluate the equation
+            //console.log("Equation evaluates to: ")
+            //console.log(eval(this.currentEquation))
+            //this.value = eval(this.currentEquation)
+            
+            super.updateValue()
+        }
     }
     
     /**
@@ -55,52 +91,6 @@ export default class Equation extends Atom {
     }
     
     /**
-     * Check the selection of equation and then apply that to the inputs
-     */
-    updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
-            var x = this.findIOValue('x')
-            var y = this.findIOValue('y')
-            
-            var z
-            switch(this.currentEquation){
-            case 0:
-                z = x+y
-                break
-            case 1:
-                z = x-y
-                break
-            case 2:
-                z = x*y
-                break
-            case 3:
-                z = x/y
-                break
-            case 4:
-                z = Math.cos(x)
-                break
-            case 5:
-                z = Math.sin(x)
-                break
-            case 6:
-                z = Math.pow(x,y)
-                break
-            }
-            
-            //Set the output to be the generated value
-            this.output.setValue(z)
-        }
-    }
-    
-    /**
-     * Called when the equation drop down is changed. Grab the new value and then recompute.
-     */
-    changeEquation(newValue){
-        this.currentEquation = parseInt(newValue)
-        this.updateValue()
-    }
-    
-    /**
      * Add a dropdown to choose the equation type to the sidebar.
      */
     updateSidebar(){
@@ -108,7 +98,12 @@ export default class Equation extends Atom {
         
         var valueList = super.updateSidebar()
         
-        this.createDropDown(valueList, this, this.equationOptions, this.currentEquation, 'z = ')
+        this.createEditableValueListItem(valueList,this,"currentEquation", "output=", false, (newEquation)=>{this.setEquation(newEquation)})
         
-    } 
+    }
+    
+    setEquation(newEquation){
+        this.currentEquation = newEquation
+        this.updateValue()
+    }
 }
