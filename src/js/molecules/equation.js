@@ -47,42 +47,41 @@ export default class Equation extends Atom {
      * Evaluate the equation adding and removing inputs as needed
      */ 
     updateValue(){
-        
-        //Find all the letters in this equation
-        var re = /[a-zA-Z]/g;
-        const variables = this.currentEquation.match(re);
-        
-        //Add any inputs which are needed
-        for (var key in variables){
-            if(!this.inputs.some(input => input.Name === variables[key])){
-                this.addIO('input', variables[key], this, 'number', 1)
-            }
-        }
-        
-        //Remove any inputs which are not needed
-        for (var key in this.inputs){
-            if( !variables.includes(this.inputs[key].name) ){
-                this.removeIO('input', this.inputs[key].name, this)
-            }
-        }
-        
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        try{
+            //Find all the letters in this equation
+            var re = /[a-zA-Z]/g;
+            const variables = this.currentEquation.match(re);
             
-            //Substitute numbers into the string
-            var substitutedEquation = this.currentEquation
+            //Add any inputs which are needed
+            for (var key in variables){
+                if(!this.inputs.some(input => input.Name === variables[key])){
+                    this.addIO('input', variables[key], this, 'number', 1)
+                }
+            }
+            
+            //Remove any inputs which are not needed
             for (var key in this.inputs){
-                substitutedEquation = substitutedEquation.replace(this.inputs[key].name, this.findIOValue(this.inputs[key].name))
+                if( !variables.includes(this.inputs[key].name) ){
+                    this.removeIO('input', this.inputs[key].name, this)
+                }
             }
             
-            
-            //Evaluate the equation
-            try{
+            if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+                
+                //Substitute numbers into the string
+                var substitutedEquation = this.currentEquation
+                for (var key in this.inputs){
+                    substitutedEquation = substitutedEquation.replace(this.inputs[key].name, this.findIOValue(this.inputs[key].name))
+                }
+                
+                
+                //Evaluate the equation
                 this.value = eval(substitutedEquation)
-            }catch(err){this.setAlert(err)}
-            
-            this.output.setValue(this.value)
-            this.output.ready = true
-        }
+                
+                this.output.setValue(this.value)
+                this.output.ready = true
+            }
+        }catch(err){this.setAlert(err)}
     }
     
     /**
