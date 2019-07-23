@@ -1,41 +1,52 @@
-import Atom from '../prototypes/atom'
+import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
+import {BOMEntry} from '../BOM.js'
 
 /**
- * This class creates the cutAway molecule.
+ * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
  */
-export default class CutAway extends Atom {
-    
+export default class CutAway extends Atom{
     /**
      * The constructor function.
      * @param {object} values An array of values passed in which will be assigned to the class as this.x
      */ 
     constructor(values){
-        
         super(values)
         
+        /**
+         * This atom's type
+         * @type {string}
+         */
+        this.atomType = 'Cut Away'
+        /**
+         * This atom's type
+         * @type {string}
+         */
+        this.type = 'cutAway'
         /**
          * This atom's name
          * @type {string}
          */
         this.name = 'Cut Away'
-        /**
-         * This atom's type
-         * @type {string}
-         */
-        this.atomType = 'CutAway'
         
         this.addIO('input', 'geometry', this, 'geometry', null)
-        this.addIO('output', 'geometry', this, 'geometry', '')
+        this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
     }
     
     /**
-     * Super class the default update value function. 
+     * Set the value to be the BOMitem, then call super updateValue()
      */ 
     updateValue(){
-        try{
-            this.basicThreadValueProcessing([this.findIOValue('geometry')], "drop")
-        }catch(err){this.setAlert(err)}
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            try{
+                const values = [this.findIOValue('geometry'), "cutAway"]
+                this.basicThreadValueProcessing(values, "tag")
+                this.clearAlert()
+            }catch(err){this.setAlert(err)}
+            super.updateValue()
+        }
     }
+    
 }
