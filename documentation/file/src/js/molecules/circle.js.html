@@ -42,6 +42,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -96,7 +97,7 @@ export default class Circle extends Atom {
          */
         this.atomType = &apos;Circle&apos;
         
-        this.addIO(&apos;input&apos;, &apos;radius&apos;, this, &apos;number&apos;, 10)
+        this.addIO(&apos;input&apos;, &apos;diameter&apos;, this, &apos;number&apos;, 10)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         this.setValues(values)
@@ -107,10 +108,10 @@ export default class Circle extends Atom {
      */ 
     updateValue(){
         try{
-            const circumference  = 3.14*2*this.findIOValue(&apos;radius&apos;)
+            const circumference  = 3.14*this.findIOValue(&apos;diameter&apos;)
             const numberOfSegments = Math.max(parseInt( circumference / GlobalVariables.circleSegmentSize ),5)
             
-            const values = [this.findIOValue(&apos;radius&apos;), numberOfSegments]
+            const values = [this.findIOValue(&apos;diameter&apos;), numberOfSegments]
             this.basicThreadValueProcessing(values, &quot;circle&quot;)
         }catch(err){this.setAlert(err)}
     }

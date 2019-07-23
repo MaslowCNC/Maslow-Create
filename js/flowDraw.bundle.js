@@ -78645,6 +78645,10 @@ var _assembly = __webpack_require__(/*! ./molecules/assembly.js */ "./src/js/mol
 
 var _assembly2 = _interopRequireDefault(_assembly);
 
+var _cutaway = __webpack_require__(/*! ./molecules/cutaway.js */ "./src/js/molecules/cutaway.js");
+
+var _cutaway2 = _interopRequireDefault(_cutaway);
+
 var _circle = __webpack_require__(/*! ./molecules/circle.js */ "./src/js/molecules/circle.js");
 
 var _circle2 = _interopRequireDefault(_circle);
@@ -78809,7 +78813,8 @@ var GlobalVariables = function () {
       union: { creator: _union2.default, atomType: 'Union' },
       stretch: { creator: _stretch2.default, atomType: 'Stretch' },
       gcode: { creator: _gcode2.default, atomType: 'Gcode' },
-      code: { creator: _code2.default, atomType: 'Code' }
+      code: { creator: _code2.default, atomType: 'Code' },
+      cutAway: { creator: _cutaway2.default, atomType: 'CutAway' }
       /** 
        * A reference to the molecule curently being displayed on the screen.
        * @type {object}
@@ -78871,7 +78876,7 @@ var GlobalVariables = function () {
     });
     (0, _service.createService)({ webWorker: '../maslowWorker.js', agent: agent }).then(function (result) {
       /** 
-       * A worker thread which can do computation.
+       * The threejs renderer which displays things on the screen.
        * @type {object}
        */
       _this.render = result.ask;
@@ -81310,6 +81315,7 @@ var Assembly = function (_Atom) {
         _this.updateValue();
         return _this;
     }
+
     /**
     * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.
     */
@@ -81330,12 +81336,47 @@ var Assembly = function (_Atom) {
                 });
 
                 this.basicThreadValueProcessing(values, "assemble");
+                this.clearAlert();
             } catch (err) {
                 this.setAlert(err);
             }
 
             //Delete or add ports as needed
             (0, _alwaysOneFreeInput.addOrDeletePorts)(this);
+        }
+
+        /**
+        * Updates the side bar to add check boxes to turn on and off different elements.
+        */
+
+    }, {
+        key: 'updateSidebar',
+        value: function updateSidebar() {
+            var _this2 = this;
+
+            var sideBar = _get(Assembly.prototype.__proto__ || Object.getPrototypeOf(Assembly.prototype), 'updateSidebar', this).call(this);
+
+            this.inputs.forEach(function (input) {
+                _this2.createCheckbox(sideBar, input.name, function (event) {
+                    var updatedValue = input.getValue();
+
+                    if (!event.target.checked) {
+                        //If the box has just been unchecked
+                        if (updatedValue.tags) {
+                            updatedValue.tags.push("user/cutAway");
+                        } else {
+                            updatedValue.tags = ["user/cutAway"];
+                        }
+                        input.setValue(updatedValue);
+                    } else {
+                        var index = updatedValue.tags.indexOf("user/cutAway");
+                        if (index > -1) {
+                            updatedValue.tags.splice(index, 1);
+                        }
+                        input.setValue(updatedValue);
+                    }
+                });
+            });
         }
 
         /**
@@ -81431,7 +81472,7 @@ var Circle = function (_Atom) {
      */
     _this.atomType = 'Circle';
 
-    _this.addIO('input', 'radius', _this, 'number', 10);
+    _this.addIO('input', 'diameter', _this, 'number', 10);
     _this.addIO('output', 'geometry', _this, 'geometry', '');
 
     _this.setValues(values);
@@ -81447,10 +81488,10 @@ var Circle = function (_Atom) {
     key: 'updateValue',
     value: function updateValue() {
       try {
-        var circumference = 3.14 * 2 * this.findIOValue('radius');
+        var circumference = 3.14 * this.findIOValue('diameter');
         var numberOfSegments = Math.max(parseInt(circumference / _globalvariables2.default.circleSegmentSize), 5);
 
-        var values = [this.findIOValue('radius'), numberOfSegments];
+        var values = [this.findIOValue('diameter'), numberOfSegments];
         this.basicThreadValueProcessing(values, "circle");
       } catch (err) {
         this.setAlert(err);
@@ -81798,6 +81839,108 @@ exports.default = Constant;
 
 /***/ }),
 
+/***/ "./src/js/molecules/cutaway.js":
+/*!*************************************!*\
+  !*** ./src/js/molecules/cutaway.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _atom = __webpack_require__(/*! ../prototypes/atom.js */ "./src/js/prototypes/atom.js");
+
+var _atom2 = _interopRequireDefault(_atom);
+
+var _globalvariables = __webpack_require__(/*! ../globalvariables.js */ "./src/js/globalvariables.js");
+
+var _globalvariables2 = _interopRequireDefault(_globalvariables);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * The cut away tag adds a tag to a part indicating that it should be cut away from the rest of the model in the next assembly. Essentially it creates a negitive version of itself.
+ */
+var CutAway = function (_Atom) {
+  _inherits(CutAway, _Atom);
+
+  /**
+   * The constructor function.
+   * @param {object} values An array of values passed in which will be assigned to the class as this.x
+   */
+  function CutAway(values) {
+    _classCallCheck(this, CutAway);
+
+    /**
+     * This atom's type
+     * @type {string}
+     */
+    var _this = _possibleConstructorReturn(this, (CutAway.__proto__ || Object.getPrototypeOf(CutAway)).call(this, values));
+
+    _this.atomType = 'Cut Away';
+    /**
+     * This atom's type
+     * @type {string}
+     */
+    _this.type = 'cutAway';
+    /**
+     * This atom's name
+     * @type {string}
+     */
+    _this.name = 'Cut Away';
+
+    _this.addIO('input', 'geometry', _this, 'geometry', null);
+    _this.addIO('output', 'geometry', _this, 'geometry', null);
+
+    _this.setValues(values);
+    return _this;
+  }
+
+  /**
+   * Adds the cutAway tag to the part
+   */
+
+
+  _createClass(CutAway, [{
+    key: 'updateValue',
+    value: function updateValue() {
+      if (!_globalvariables2.default.evalLock && this.inputs.every(function (x) {
+        return x.ready;
+      })) {
+        try {
+          var values = [this.findIOValue('geometry'), "cutAway"];
+          this.basicThreadValueProcessing(values, "tag");
+          this.clearAlert();
+        } catch (err) {
+          this.setAlert(err);
+        }
+        _get(CutAway.prototype.__proto__ || Object.getPrototypeOf(CutAway.prototype), 'updateValue', this).call(this);
+      }
+    }
+  }]);
+
+  return CutAway;
+}(_atom2.default);
+
+exports.default = CutAway;
+
+/***/ }),
+
 /***/ "./src/js/molecules/difference.js":
 /*!****************************************!*\
   !*** ./src/js/molecules/difference.js ***!
@@ -81933,42 +82076,106 @@ var Equation = function (_Atom) {
 
         var _this = _possibleConstructorReturn(this, (Equation.__proto__ || Object.getPrototypeOf(Equation)).call(this, values));
 
-        _this.addIO('input', 'x', _this, 'number', 0);
-        _this.addIO('input', 'y', _this, 'number', 0);
-        _this.addIO('output', 'z', _this, 'number', 0);
+        _this.addIO('output', 'result', _this, 'number', 0);
 
         /**
          * This atom's name
          * @type {string}
          */
         _this.name = 'Equation';
+
         /**
          * This atom's type
          * @type {string}
          */
         _this.atomType = 'Equation';
+
         /**
-         * An array of all of the possible equation selections
-         * @type {array of strings}
+         * Evaluate the equation adding and removing inputs as needed
          */
-        _this.equationOptions = ['x+y', 'x-y', 'x*y', 'x/y', 'cos(x)', 'sin(x)', 'x^y'];
+        _this.value = 0;
+
         /**
          * The index number of the currently selected option
          * @type {number}
          */
-        _this.currentEquation = 0;
+        _this.currentEquation = "x + y";
 
         _this.setValues(values);
+        _this.updateValue();
+        _this.setValues(values); //Set values again to load input values which were saved
+
 
         return _this;
     }
 
     /**
-     * Add the equation choice to the object which is saved for this molecule
+     * Evaluate the equation adding and removing inputs as needed
      */
 
 
     _createClass(Equation, [{
+        key: 'updateValue',
+        value: function updateValue() {
+            var _this2 = this;
+
+            try {
+                var re;
+                var variable;
+                var input;
+                var substitutedEquation;
+                var key;
+
+                (function () {
+                    //Find all the letters in this equation
+                    re = /[a-zA-Z]/g;
+
+                    var variables = _this2.currentEquation.match(re);
+
+                    //Add any inputs which are needed
+                    for (variable in variables) {
+                        if (!_this2.inputs.some(function (input) {
+                            return input.Name === variables[variable];
+                        })) {
+                            _this2.addIO('input', variables[variable], _this2, 'number', 1);
+                        }
+                    }
+
+                    //Remove any inputs which are not needed
+                    for (input in _this2.inputs) {
+                        if (!variables.includes(_this2.inputs[input].name)) {
+                            _this2.removeIO('input', _this2.inputs[input].name, _this2);
+                        }
+                    }
+
+                    if (!_globalvariables2.default.evalLock && _this2.inputs.every(function (x) {
+                        return x.ready;
+                    })) {
+
+                        //Substitute numbers into the string
+                        substitutedEquation = _this2.currentEquation;
+
+                        for (key in _this2.inputs) {
+                            substitutedEquation = substitutedEquation.replace(_this2.inputs[key].name, _this2.findIOValue(_this2.inputs[key].name));
+                        }
+
+                        //Evaluate the equation
+                        _this2.value = eval(substitutedEquation);
+
+                        _this2.output.setValue(_this2.value);
+                        _this2.output.ready = true;
+                    }
+                })();
+            } catch (err) {
+                this.setAlert(err);
+            }
+        }
+
+        /**
+         * Add the equation choice to the object which is saved for this molecule
+         */
+
+    }, {
         key: 'serialize',
         value: function serialize() {
             var superSerialObject = _get(Equation.prototype.__proto__ || Object.getPrototypeOf(Equation.prototype), 'serialize', this).call(this, null);
@@ -81980,71 +82187,32 @@ var Equation = function (_Atom) {
         }
 
         /**
-         * Check the selection of equation and then apply that to the inputs
-         */
-
-    }, {
-        key: 'updateValue',
-        value: function updateValue() {
-            if (!_globalvariables2.default.evalLock && this.inputs.every(function (x) {
-                return x.ready;
-            })) {
-                var x = this.findIOValue('x');
-                var y = this.findIOValue('y');
-
-                var z;
-                switch (this.currentEquation) {
-                    case 0:
-                        z = x + y;
-                        break;
-                    case 1:
-                        z = x - y;
-                        break;
-                    case 2:
-                        z = x * y;
-                        break;
-                    case 3:
-                        z = x / y;
-                        break;
-                    case 4:
-                        z = Math.cos(x);
-                        break;
-                    case 5:
-                        z = Math.sin(x);
-                        break;
-                    case 6:
-                        z = Math.pow(x, y);
-                        break;
-                }
-
-                //Set the output to be the generated value
-                this.output.setValue(z);
-            }
-        }
-
-        /**
-         * Called when the equation drop down is changed. Grab the new value and then recompute.
-         */
-
-    }, {
-        key: 'changeEquation',
-        value: function changeEquation(newValue) {
-            this.currentEquation = parseInt(newValue);
-            this.updateValue();
-        }
-
-        /**
          * Add a dropdown to choose the equation type to the sidebar.
          */
 
     }, {
         key: 'updateSidebar',
         value: function updateSidebar() {
+            var _this3 = this;
+
             //Update the side bar to make it possible to change the molecule name
 
             var valueList = _get(Equation.prototype.__proto__ || Object.getPrototypeOf(Equation.prototype), 'updateSidebar', this).call(this);
 
-            this.createDropDown(valueList, this, this.equationOptions, this.currentEquation, 'z = ');
+            this.createEditableValueListItem(valueList, this, "currentEquation", "output=", false, function (newEquation) {
+                _this3.setEquation(newEquation);
+            });
+        }
+
+        /**
+         * Set the current equation to be a new value.
+         */
+
+    }, {
+        key: 'setEquation',
+        value: function setEquation(newEquation) {
+            this.currentEquation = newEquation.trim(); //remove leading and trailing whitespace
+            this.updateValue();
         }
     }]);
 
@@ -85796,6 +85964,37 @@ var Atom = function () {
             button.addEventListener('mousedown', function () {
                 functionToCall(parent);
             }, false);
+        }
+
+        /**
+         * Creates button. Used in the sidebar.
+         * @param {object} list - The HTML object to attach the new item to.
+         * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
+         * @param {string} buttonText - The text on the button.
+         * @param {object} functionToCall - The function to call when the button is pressed.
+         */
+
+    }, {
+        key: 'createCheckbox',
+        value: function createCheckbox(sideBar, text, callback) {
+            var gridDiv = document.createElement('div');
+            sideBar.appendChild(gridDiv);
+            gridDiv.setAttribute('id', 'gridDiv');
+            var gridCheck = document.createElement('input');
+            gridDiv.appendChild(gridCheck);
+            gridCheck.setAttribute('type', 'checkbox');
+            gridCheck.setAttribute('id', 'gridCheck');
+            gridCheck.setAttribute('checked', 'true');
+
+            var gridCheckLabel = document.createElement('label');
+            gridDiv.appendChild(gridCheckLabel);
+            gridCheckLabel.setAttribute('for', 'gridCheck');
+            gridCheckLabel.setAttribute('style', 'margin-right:1em;');
+            gridCheckLabel.textContent = text;
+
+            gridCheck.addEventListener('change', function (event) {
+                callback(event);
+            });
         }
     }]);
 

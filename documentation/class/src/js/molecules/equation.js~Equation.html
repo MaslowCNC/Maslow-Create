@@ -42,6 +42,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -222,13 +223,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-member-equationOptions">equationOptions</a></span></span><span class="code" data-ice="signature">: <span>array of strings</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-member-name">name</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>An array of all of the possible equation selections</p>
+        <div data-ice="description"><p>This atom&apos;s name</p>
 </div>
       </div>
     </td>
@@ -251,13 +252,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-member-name">name</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-member-value">value</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>This atom&apos;s name</p>
+        <div data-ice="description"><p>Evaluate the equation adding and removing inputs as needed</p>
 </div>
       </div>
     </td>
@@ -287,13 +288,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-method-changeEquation">changeEquation</a></span></span><span class="code" data-ice="signature">(newValue: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-method-serialize">serialize</a></span></span><span class="code" data-ice="signature">(): <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Called when the equation drop down is changed.</p>
+        <div data-ice="description"><p>Add the equation choice to the object which is saved for this molecule</p>
 </div>
       </div>
     </td>
@@ -316,13 +317,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-method-serialize">serialize</a></span></span><span class="code" data-ice="signature">(): <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html#instance-method-setEquation">setEquation</a></span></span><span class="code" data-ice="signature">(newEquation: <span>*</span>)</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Add the equation choice to the object which is saved for this molecule</p>
+        <div data-ice="description"><p>Set the current equation to be a new value.</p>
 </div>
       </div>
     </td>
@@ -380,7 +381,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Check the selection of equation and then apply that to the inputs</p>
+        <div data-ice="description"><p>Evaluate the equation adding and removing inputs as needed</p>
 </div>
       </div>
     </td>
@@ -1136,6 +1137,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-createCheckbox">createCheckbox</a></span></span><span class="code" data-ice="signature">(list: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, parent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, buttonText: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, functionToCall: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Creates button.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-createDropDown">createDropDown</a></span></span><span class="code" data-ice="signature">(list: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, parent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, options: <span>array</span>, selectedOption: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, description: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
         </p>
       </div>
@@ -1786,7 +1816,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber29">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber28">source</a></span></span>
     </span>
   </h3>
 
@@ -1863,50 +1893,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-equationOptions">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">equationOptions</span><span class="code" data-ice="signature">: <span>array of strings</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber34">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>An array of all of the possible equation selections</p>
-</div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-name">
     <span class="access" data-ice="access">public</span>
     
@@ -1918,7 +1904,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber24">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber22">source</a></span></span>
     </span>
   </h3>
 
@@ -1950,50 +1936,31 @@
   
   
 </div>
-</div>
-<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
-
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-changeEquation">
+  <h3 data-ice="anchor" id="instance-member-value">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">changeEquation</span><span class="code" data-ice="signature">(newValue: <span>*</span>)</span>
+    <span class="code" data-ice="name">value</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber98">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber33">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Called when the equation drop down is changed. Grab the new value and then recompute.</p>
+  <div data-ice="description"><p>Evaluate the equation adding and removing inputs as needed</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-member-value">Atom#value</a></span></div>
 
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">newValue</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
+  <div data-ice="properties">
 </div>
 
   
@@ -2013,6 +1980,9 @@
   
   
 </div>
+</div>
+<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
+
 <div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-serialize">
     <span class="access" data-ice="access">public</span>
@@ -2025,7 +1995,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber48">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber92">source</a></span></span>
     </span>
   </h3>
 
@@ -2070,6 +2040,66 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-setEquation">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">setEquation</span><span class="code" data-ice="signature">(newEquation: <span>*</span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber116">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Set the current equation to be a new value.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">newEquation</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-updateSidebar">
     <span class="access" data-ice="access">public</span>
     
@@ -2081,7 +2111,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber106">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber104">source</a></span></span>
     </span>
   </h3>
 
@@ -2125,14 +2155,14 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber60">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/equation.js.html#lineNumber51">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Check the selection of equation and then apply that to the inputs</p>
+  <div data-ice="description"><p>Evaluate the equation adding and removing inputs as needed</p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-updateValue">Atom#updateValue</a></span></div>

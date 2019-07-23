@@ -59,5 +59,54 @@
       "position"
     ],
     "docParams": []
+  },
+  {
+    "name": "Atom#createCheckbox",
+    "filePath": "src/js/prototypes/atom.js",
+    "lines": [
+      {
+        "lineNumber": 794,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 795,
+        "line": "     * Creates button. Used in the sidebar.\r"
+      },
+      {
+        "lineNumber": 796,
+        "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
+      },
+      {
+        "lineNumber": 797,
+        "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
+      },
+      {
+        "lineNumber": 798,
+        "line": "     * @param {string} buttonText - The text on the button.\r"
+      },
+      {
+        "lineNumber": 799,
+        "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
+      },
+      {
+        "lineNumber": 800,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 801,
+        "line": "    createCheckbox(sideBar,text,callback){\r"
+      }
+    ],
+    "codeParams": [
+      "sideBar",
+      "text",
+      "callback"
+    ],
+    "docParams": [
+      "list",
+      "parent",
+      "buttonText",
+      "functionToCall"
+    ]
   }
 ]

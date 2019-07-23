@@ -48,6 +48,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/cutaway.js~cutaway",
+    "class/src/js/molecules/cutaway.js~CutAway.html",
+    "<span>CutAway</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/cutaway.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/difference.js~difference",
     "class/src/js/molecules/difference.js~Difference.html",
     "<span>Difference</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/difference.js</span>",
@@ -954,6 +960,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/assembly.js~assembly#updatesidebar",
+    "class/src/js/molecules/assembly.js~Assembly.html#instance-method-updateSidebar",
+    "src/js/molecules/assembly.js~Assembly#updateSidebar",
+    "method"
+  ],
+  [
     "src/js/molecules/assembly.js~assembly#updatevalue",
     "class/src/js/molecules/assembly.js~Assembly.html#instance-method-updateValue",
     "src/js/molecules/assembly.js~Assembly#updateValue",
@@ -1056,6 +1068,42 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/cutaway.js",
+    "file/src/js/molecules/cutaway.js.html",
+    "src/js/molecules/cutaway.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/cutaway.js~cutaway#atomtype",
+    "class/src/js/molecules/cutaway.js~CutAway.html#instance-member-atomType",
+    "src/js/molecules/cutaway.js~CutAway#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/cutaway.js~cutaway#constructor",
+    "class/src/js/molecules/cutaway.js~CutAway.html#instance-constructor-constructor",
+    "src/js/molecules/cutaway.js~CutAway#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/cutaway.js~cutaway#name",
+    "class/src/js/molecules/cutaway.js~CutAway.html#instance-member-name",
+    "src/js/molecules/cutaway.js~CutAway#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/cutaway.js~cutaway#type",
+    "class/src/js/molecules/cutaway.js~CutAway.html#instance-member-type",
+    "src/js/molecules/cutaway.js~CutAway#type",
+    "member"
+  ],
+  [
+    "src/js/molecules/cutaway.js~cutaway#updatevalue",
+    "class/src/js/molecules/cutaway.js~CutAway.html#instance-method-updateValue",
+    "src/js/molecules/cutaway.js~CutAway#updateValue",
+    "method"
+  ],
+  [
     "src/js/molecules/difference.js",
     "file/src/js/molecules/difference.js.html",
     "src/js/molecules/difference.js",
@@ -1098,12 +1146,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/equation.js~equation#changeequation",
-    "class/src/js/molecules/equation.js~Equation.html#instance-method-changeEquation",
-    "src/js/molecules/equation.js~Equation#changeEquation",
-    "method"
-  ],
-  [
     "src/js/molecules/equation.js~equation#constructor",
     "class/src/js/molecules/equation.js~Equation.html#instance-constructor-constructor",
     "src/js/molecules/equation.js~Equation#constructor",
@@ -1113,12 +1155,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/equation.js~equation#currentequation",
     "class/src/js/molecules/equation.js~Equation.html#instance-member-currentEquation",
     "src/js/molecules/equation.js~Equation#currentEquation",
-    "member"
-  ],
-  [
-    "src/js/molecules/equation.js~equation#equationoptions",
-    "class/src/js/molecules/equation.js~Equation.html#instance-member-equationOptions",
-    "src/js/molecules/equation.js~Equation#equationOptions",
     "member"
   ],
   [
@@ -1134,6 +1170,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/equation.js~equation#setequation",
+    "class/src/js/molecules/equation.js~Equation.html#instance-method-setEquation",
+    "src/js/molecules/equation.js~Equation#setEquation",
+    "method"
+  ],
+  [
     "src/js/molecules/equation.js~equation#updatesidebar",
     "class/src/js/molecules/equation.js~Equation.html#instance-method-updateSidebar",
     "src/js/molecules/equation.js~Equation#updateSidebar",
@@ -1144,6 +1186,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/equation.js~Equation.html#instance-method-updateValue",
     "src/js/molecules/equation.js~Equation#updateValue",
     "method"
+  ],
+  [
+    "src/js/molecules/equation.js~equation#value",
+    "class/src/js/molecules/equation.js~Equation.html#instance-member-value",
+    "src/js/molecules/equation.js~Equation#value",
+    "member"
   ],
   [
     "src/js/molecules/extrude.js",
@@ -2115,6 +2163,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#createbutton",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-createButton",
     "src/js/prototypes/atom.js~Atom#createButton",
+    "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#createcheckbox",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-createCheckbox",
+    "src/js/prototypes/atom.js~Atom#createCheckbox",
     "method"
   ],
   [

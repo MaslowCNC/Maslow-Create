@@ -42,6 +42,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -862,7 +863,34 @@ export default class Atom {
             false
         )
     }
+    
+    /**
+     * Creates button. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
+     * @param {string} buttonText - The text on the button.
+     * @param {object} functionToCall - The function to call when the button is pressed.
+     */ 
+    createCheckbox(sideBar,text,callback){
+        var gridDiv = document.createElement(&apos;div&apos;)
+        sideBar.appendChild(gridDiv)
+        gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)
+        var gridCheck = document.createElement(&apos;input&apos;)
+        gridDiv.appendChild(gridCheck)
+        gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+        gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+        gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
 
+        var gridCheckLabel = document.createElement(&apos;label&apos;)
+        gridDiv.appendChild(gridCheckLabel)
+        gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
+        gridCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+        gridCheckLabel.textContent = text
+
+        gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
+            callback(event)
+        })
+    }
 }
 </code></pre>
 

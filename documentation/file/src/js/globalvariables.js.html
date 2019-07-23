@@ -42,6 +42,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -69,31 +70,32 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/globalvariables.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Assembly from &apos;./molecules/assembly.js&apos;
-import Circle from &apos;./molecules/circle.js&apos;
-import Rectangle from &apos;./molecules/rectangle.js&apos;
-import ShrinkWrap from &apos;./molecules/shrinkwrap.js&apos;
-import Translate from &apos;./molecules/translate.js&apos;
-import Tag from &apos;./molecules/tag.js&apos;
-import RegularPolygon from &apos;./molecules/regularpolygon.js&apos;
-import Extrude from &apos;./molecules/extrude.js&apos;
-import Scale from &apos;./molecules/scale.js&apos;
-import Union from &apos;./molecules/union.js&apos;
-import Intersection from &apos;./molecules/intersection.js&apos;
-import Difference from &apos;./molecules/difference.js&apos;
-import Constant from &apos;./molecules/constant.js&apos;
-import Equation from &apos;./molecules/equation.js&apos;
-import Molecule from &apos;./molecules/molecule.js&apos;
-import Input from &apos;./molecules/input.js&apos;
-import Readme from &apos;./molecules/readme.js&apos;
-import AddBOMTag from &apos;./molecules/BOM.js&apos;
-import Rotate from &apos;./molecules/rotate.js&apos;
-import GitHubMolecule from &apos;./molecules/githubmolecule.js&apos;
-import Output from &apos;./molecules/output.js&apos;
-import Stretch from &apos;./molecules/stretch.js&apos;
-import Gcode from &apos;./molecules/gcode.js&apos;
-import Code from &apos;./molecules/code.js&apos;
-import GitHubModule from &apos;./githubOauth&apos;
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Assembly         from &apos;./molecules/assembly.js&apos;
+import CutAway          from &apos;./molecules/cutaway.js&apos;
+import Circle           from &apos;./molecules/circle.js&apos;
+import Rectangle        from &apos;./molecules/rectangle.js&apos;
+import ShrinkWrap       from &apos;./molecules/shrinkwrap.js&apos;
+import Translate        from &apos;./molecules/translate.js&apos;
+import Tag              from &apos;./molecules/tag.js&apos;
+import RegularPolygon   from &apos;./molecules/regularpolygon.js&apos;
+import Extrude          from &apos;./molecules/extrude.js&apos;
+import Scale            from &apos;./molecules/scale.js&apos;
+import Union            from &apos;./molecules/union.js&apos;
+import Intersection     from &apos;./molecules/intersection.js&apos;
+import Difference       from &apos;./molecules/difference.js&apos;
+import Constant         from &apos;./molecules/constant.js&apos;
+import Equation         from &apos;./molecules/equation.js&apos;
+import Molecule         from &apos;./molecules/molecule.js&apos;
+import Input            from &apos;./molecules/input.js&apos;
+import Readme           from &apos;./molecules/readme.js&apos;
+import AddBOMTag        from &apos;./molecules/BOM.js&apos;
+import Rotate           from &apos;./molecules/rotate.js&apos;
+import GitHubMolecule   from &apos;./molecules/githubmolecule.js&apos;
+import Output           from &apos;./molecules/output.js&apos;
+import Stretch          from &apos;./molecules/stretch.js&apos;
+import Gcode            from &apos;./molecules/gcode.js&apos;
+import Code             from &apos;./molecules/code.js&apos;
+import GitHubModule     from &apos;./githubOauth&apos;
 import { createService } from &apos;./lib/service.js&apos;
 
 /**
@@ -153,7 +155,8 @@ class GlobalVariables{
             union:              {creator: Union, atomType: &apos;Union&apos;},
             stretch:            {creator: Stretch, atomType: &apos;Stretch&apos;},
             gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;},
-            code:               {creator: Code, atomType: &apos;Code&apos;}
+            code:               {creator: Code, atomType: &apos;Code&apos;},
+            cutAway:            {creator: CutAway, atomType: &apos;CutAway&apos;}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.
@@ -196,7 +199,7 @@ class GlobalVariables{
         })
         createService({ webWorker: &apos;../maslowWorker.js&apos;, agent }).then(result =&gt; {
             /** 
-             * A worker thread which can do computation.
+             * The threejs renderer which displays things on the screen.
              * @type {object}
              */
             this.render = result.ask
