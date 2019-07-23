@@ -37,6 +37,9 @@ export default class Equation extends Atom {
         this.currentEquation = "x + y"
         
         this.setValues(values)
+        this.updateValue()
+        this.setValues(values) //Set values again to load input values which were saved
+        
         
     }
     
@@ -44,37 +47,41 @@ export default class Equation extends Atom {
      * Evaluate the equation adding and removing inputs as needed
      */ 
     updateValue(){
+        
+        //Find all the letters in this equation
+        var re = /[a-zA-Z]/g;
+        const variables = this.currentEquation.match(re);
+        
+        //Add any inputs which are needed
+        for (var key in variables){
+            if(!this.inputs.some(input => input.Name === variables[key])){
+                this.addIO('input', variables[key], this, 'number', 1)
+            }
+        }
+        
+        //Remove any inputs which are not needed
+        for (var key in this.inputs){
+            if( !variables.includes(this.inputs[key].name) ){
+                this.removeIO('input', this.inputs[key].name, this)
+            }
+        }
+        
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
             
-            //Find all the letters in this equation
-            var re = /[a-zA-Z]/g;
-            const variables = this.currentEquation.match(re);
-            
-            //Add any inputs which are needed
-            for (var key in variables){
-                if(!this.inputs.some(input => input.Name === variables[key])){
-                    this.addIO('input', variables[key], this, 'number', 1)
-                }
-            }
-            
-            //Remove any inputs which are not needed
-            for (var key in this.inputs){
-                
-                if( !variables.includes(this.inputs[key].name) ){
-                    console.log("Deleting: ")
-                    console.log(this.inputs[key].name)
-                    this.removeIO('input', this.inputs[key].name, this)
-                }
-            }
-            
             //Substitute numbers into the string
+            var substitutedEquation = this.currentEquation
+            for (var key in this.inputs){
+                substitutedEquation = substitutedEquation.replace(this.inputs[key].name, this.findIOValue(this.inputs[key].name))
+            }
+            
             
             //Evaluate the equation
-            //console.log("Equation evaluates to: ")
-            //console.log(eval(this.currentEquation))
-            //this.value = eval(this.currentEquation)
+            try{
+                this.value = eval(substitutedEquation)
+            }catch(err){this.setAlert(err)}
             
-            super.updateValue()
+            this.output.setValue(this.value)
+            this.output.ready = true
         }
     }
     
@@ -103,7 +110,7 @@ export default class Equation extends Atom {
     }
     
     setEquation(newEquation){
-        this.currentEquation = newEquation
+        this.currentEquation = newEquation.trim() //remove leading and trailing whitespace
         this.updateValue()
     }
 }
