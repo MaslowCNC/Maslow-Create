@@ -3,7 +3,7 @@ import GlobalVariables from '../globalvariables.js'
 import {BOMEntry} from '../BOM.js'
 
 /**
- * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way
+ * The cut away tag adds a tag to a part indicating that it should be cut away from the rest of the model in the next assembly. Essentially it creates a negitive version of itself.
  */
 export default class CutAway extends Atom{
     /**
@@ -36,7 +36,7 @@ export default class CutAway extends Atom{
     }
     
     /**
-     * Set the value to be the BOMitem, then call super updateValue()
+     * Adds the cutAway tag to the part
      */ 
     updateValue(){
         if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
