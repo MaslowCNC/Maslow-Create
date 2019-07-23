@@ -1,6 +1,5 @@
 import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
-import {BOMEntry} from '../BOM.js'
 
 /**
  * The cut away tag adds a tag to a part indicating that it should be cut away from the rest of the model in the next assembly. Essentially it creates a negitive version of itself.
