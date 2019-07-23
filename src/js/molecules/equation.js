@@ -49,20 +49,20 @@ export default class Equation extends Atom {
     updateValue(){
         try{
             //Find all the letters in this equation
-            var re = /[a-zA-Z]/g;
-            const variables = this.currentEquation.match(re);
+            var re = /[a-zA-Z]/g
+            const variables = this.currentEquation.match(re)
             
             //Add any inputs which are needed
-            for (var key in variables){
-                if(!this.inputs.some(input => input.Name === variables[key])){
-                    this.addIO('input', variables[key], this, 'number', 1)
+            for (var variable in variables){
+                if(!this.inputs.some(input => input.Name === variables[variable])){
+                    this.addIO('input', variables[variable], this, 'number', 1)
                 }
             }
             
             //Remove any inputs which are not needed
-            for (var key in this.inputs){
-                if( !variables.includes(this.inputs[key].name) ){
-                    this.removeIO('input', this.inputs[key].name, this)
+            for (var input in this.inputs){
+                if( !variables.includes(this.inputs[input].name) ){
+                    this.removeIO('input', this.inputs[input].name, this)
                 }
             }
             
