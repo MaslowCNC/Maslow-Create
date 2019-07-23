@@ -20,16 +20,18 @@ export default class Equation extends Atom {
          * @type {string}
          */
         this.name = 'Equation'
+        
         /**
          * This atom's type
          * @type {string}
          */
         this.atomType = 'Equation'
+        
         /**
-         * An array of all of the possible equation selections
-         * @type {array of strings}
-         */
-        this.equationOptions = ['x+y', 'x-y', 'x*y', 'x/y', 'cos(x)', 'sin(x)', 'x^y']
+         * Evaluate the equation adding and removing inputs as needed
+         */ 
+        this.value = 0;
+        
         /**
          * The index number of the currently selected option
          * @type {number}
@@ -108,6 +110,9 @@ export default class Equation extends Atom {
         
     }
     
+    /**
+     * Set the current equation to be a new value.
+     */
     setEquation(newEquation){
         this.currentEquation = newEquation.trim() //remove leading and trailing whitespace
         this.updateValue()
