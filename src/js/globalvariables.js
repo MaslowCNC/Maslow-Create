@@ -125,7 +125,7 @@ class GlobalVariables{
         })
         createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
             /** 
-             * A worker thread which can do computation.
+             * The threejs renderer which displays things on the screen.
              * @type {object}
              */
             this.render = result.ask
