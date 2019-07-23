@@ -1,28 +1,29 @@
-import Assembly from './molecules/assembly.js'
-import Circle from './molecules/circle.js'
-import Rectangle from './molecules/rectangle.js'
-import ShrinkWrap from './molecules/shrinkwrap.js'
-import Translate from './molecules/translate.js'
-import Tag from './molecules/tag.js'
-import RegularPolygon from './molecules/regularpolygon.js'
-import Extrude from './molecules/extrude.js'
-import Scale from './molecules/scale.js'
-import Union from './molecules/union.js'
-import Intersection from './molecules/intersection.js'
-import Difference from './molecules/difference.js'
-import Constant from './molecules/constant.js'
-import Equation from './molecules/equation.js'
-import Molecule from './molecules/molecule.js'
-import Input from './molecules/input.js'
-import Readme from './molecules/readme.js'
-import AddBOMTag from './molecules/BOM.js'
-import Rotate from './molecules/rotate.js'
-import GitHubMolecule from './molecules/githubmolecule.js'
-import Output from './molecules/output.js'
-import Stretch from './molecules/stretch.js'
-import Gcode from './molecules/gcode.js'
-import Code from './molecules/code.js'
-import GitHubModule from './githubOauth'
+import Assembly         from './molecules/assembly.js'
+import CutAway          from './molecules/cutaway.js'
+import Circle           from './molecules/circle.js'
+import Rectangle        from './molecules/rectangle.js'
+import ShrinkWrap       from './molecules/shrinkwrap.js'
+import Translate        from './molecules/translate.js'
+import Tag              from './molecules/tag.js'
+import RegularPolygon   from './molecules/regularpolygon.js'
+import Extrude          from './molecules/extrude.js'
+import Scale            from './molecules/scale.js'
+import Union            from './molecules/union.js'
+import Intersection     from './molecules/intersection.js'
+import Difference       from './molecules/difference.js'
+import Constant         from './molecules/constant.js'
+import Equation         from './molecules/equation.js'
+import Molecule         from './molecules/molecule.js'
+import Input            from './molecules/input.js'
+import Readme           from './molecules/readme.js'
+import AddBOMTag        from './molecules/BOM.js'
+import Rotate           from './molecules/rotate.js'
+import GitHubMolecule   from './molecules/githubmolecule.js'
+import Output           from './molecules/output.js'
+import Stretch          from './molecules/stretch.js'
+import Gcode            from './molecules/gcode.js'
+import Code             from './molecules/code.js'
+import GitHubModule     from './githubOauth'
 import { createService } from './lib/service.js'
 
 /**
@@ -82,7 +83,8 @@ class GlobalVariables{
             union:              {creator: Union, atomType: 'Union'},
             stretch:            {creator: Stretch, atomType: 'Stretch'},
             gcode:              {creator: Gcode, atomType: 'Gcode'},
-            code:               {creator: Code, atomType: 'Code'}
+            code:               {creator: Code, atomType: 'Code'},
+            cutAway:            {creator: CutAway, atomType: 'CutAway'}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.

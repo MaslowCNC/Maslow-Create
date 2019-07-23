@@ -3,7 +3,7 @@ import Atom from '../prototypes/atom'
 /**
  * This class creates the cutAway molecule.
  */
-export default class cutAway extends Atom {
+export default class CutAway extends Atom {
     
     /**
      * The constructor function.
