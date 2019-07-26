@@ -37,6 +37,7 @@ export default class Color extends Atom {
         try{
             const values = [this.findIOValue('geometry'), "blue"]
             this.basicThreadValueProcessing(values, "color")
+            this.clearAlert()
         }catch(err){this.setAlert(err)}
     }
 }

@@ -56,11 +56,6 @@ export default class Display {
          */
         this.renderer
         /** 
-         * An instance of the threejs mesh material.
-         * @type {object}
-         */
-        this.threeMaterial
-        /** 
          * The applied material type.
          * @type {object}
          */
@@ -70,6 +65,17 @@ export default class Display {
          * @type {object}
          */
         this.targetDiv = document.getElementById('viewerContext')
+        
+        /** 
+         * The default material used if nothing is set
+         * @type {object}
+         */
+        this.threeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5f6670,
+            roughness: 0.65,
+            metalness: 0.40,   
+            wireframe: this.wireDisplay
+        })
         
         this.colorToRgbMapping = {
           'aliceblue': [240, 248, 255],
@@ -575,7 +581,7 @@ export default class Display {
       }
 
       // Else, default to normal material.
-      return new THREE.MeshNormalMaterial();
+      return this.threeMaterial;
     };
     
     /**
@@ -583,7 +589,6 @@ export default class Display {
      * @param {object} threejsGeometry - A threejs geometry to write to the display.
      */ 
     updateDisplayData(threejsGeometry){
-        console.log(threejsGeometry)
         // Delete any previous dataset in the window.
         for (const { mesh } of this.datasets) {
             this.scene.remove(mesh)
@@ -591,22 +596,9 @@ export default class Display {
         
         // Build new datasets from the written data, and display them.
         this.datasets = []
-        
-        /** 
-         * Does this even need to be a global object?
-         * @type {object}
-         */
-        this.threeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x6CFF40,
-            roughness: 0.65,
-            metalness: 0.40,   
-            wireframe: this.wireDisplay
-        })
 
         const walk = (geometry) => {
             const { tags } = geometry;
-            console.log("Tags: ")
-            console.log(tags)
             if (geometry.assembly) {
                 geometry.assembly.forEach(walk)
             } else if (geometry.threejsSegments) {
