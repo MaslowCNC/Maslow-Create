@@ -531,6 +531,9 @@ export default class Display {
         this.scene.add( this.plane )   
     }
     
+    /**
+     * Converts the tag to an RGB value.
+     */ 
     toRgb(tags = [], defaultRgb = [0, 0, 0]){
       let rgb = defaultRgb;
       for (const tag of tags) {
@@ -544,6 +547,9 @@ export default class Display {
       return rgb;
     };
     
+    /**
+     * Sets the the color of the threejs mesh.
+     */ 
     setColor(tags = [], parameters = {}, otherwise = [0, 0, 0]){
       let rgb = this.toRgb(tags, null);
       if (rgb === null) {
@@ -557,7 +563,10 @@ export default class Display {
       parameters.color = color;
       return parameters;
     };
-
+    
+    /**
+     * Sets the material properties of the threejs material.
+     */ 
     setMaterial(tags, parameters){
       for (const tag of tags) {
         if (tag.startsWith('material/')) {
@@ -570,6 +579,9 @@ export default class Display {
       }
     };
     
+    /**
+     * Constructs a new threejs mesh material based on the properties in the tags.
+     */ 
     buildMeshMaterial(tags){
       if (tags !== undefined) {
         const parameters = {};
