@@ -77,6 +77,10 @@ export default class Display {
             wireframe: this.wireDisplay
         })
         
+        /** 
+         * A list of colors to RGB mappings.
+         * @type {object}
+         */
         this.colorToRgbMapping = {
           'aliceblue': [240, 248, 255],
           'antiquewhite': [250, 235, 215],
@@ -228,6 +232,10 @@ export default class Display {
           'yellowgreen': [154, 205, 50]
         };
         
+        /** 
+         * A list of name to properties mappings for materials.
+         * @type {object}
+         */
         this.materialProperties = {
           paper: {
             roughness: 0.5,
