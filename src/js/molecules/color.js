@@ -53,9 +53,11 @@ export default class Color extends Atom {
         }catch(err){this.setAlert(err)}
     }
     
+    /**
+     * Updates the value of the selected color and then the value.
+     */ 
     changeColor(index){
         this.selectedColorIndex = index
-        console.log(this.colorOptions[this.selectedColorIndex])
         this.updateValue()
     }
     
