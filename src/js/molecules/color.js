@@ -68,4 +68,16 @@ export default class Color extends Atom {
         const list = super.updateSidebar()
         this.createDropDown(list, this, this.colorOptions, this.selectedColorIndex, "Color", (index)=>{this.changeColor(index)})
     }
+    
+    /**
+     * Add the color choice to the object which is saved for this molecule
+     */
+    serialize(){
+        var superSerialObject = super.serialize(null)
+        
+        //Write the current color selection to the serialized object
+        superSerialObject.selectedColorIndex = this.selectedColorIndex
+        
+        return superSerialObject
+    }
 }
