@@ -24,6 +24,18 @@ export default class Color extends Atom {
          */
         this.atomType = 'Color'
         
+        /**
+         * The color options to choose from
+         * @type {array}
+         */
+        this.colorOptions = ["blue", "green", "pink", "black"]
+        
+        /**
+         * The index of the currently selected color option.
+         * @type {number}
+         */
+        this.selectedColorIndex = 0
+        
         this.addIO('input', 'geometry', this, 'geometry', null)
         this.addIO('output', 'geometry', this, 'geometry', null)
         
@@ -35,9 +47,23 @@ export default class Color extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry'), "blue"]
+            const values = [this.findIOValue('geometry'), this.colorOptions[this.selectedColorIndex]]
             this.basicThreadValueProcessing(values, "color")
             this.clearAlert()
         }catch(err){this.setAlert(err)}
+    }
+    
+    changeColor(index){
+        this.selectedColorIndex = index
+        console.log(this.colorOptions[this.selectedColorIndex])
+        this.updateValue()
+    }
+    
+    /**
+     * Create a drop down to choose the color.
+     */ 
+    updateSidebar(){
+        const list = super.updateSidebar()
+        this.createDropDown(list, this, this.colorOptions, this.selectedColorIndex, "Color", (index)=>{this.changeColor(index)})
     }
 }
