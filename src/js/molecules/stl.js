@@ -26,6 +26,12 @@ export default class Stl extends Atom {
          */
         this.atomType = 'Stl'
         
+        /**
+         * This atom's value. Contains the value of the input geometry, not the stl
+         * @type {string}
+         */
+        this.value = null
+        
         this.addIO('input', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
@@ -69,11 +75,10 @@ export default class Stl extends Atom {
         computeValue(values, "stl").then(result => {
             if (result != -1 ){
                 const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
-                saveAs(blob, this.name+'.stl')
+                saveAs(blob, GlobalVariables.topLevelMolecule.name+'.stl')
             }else{
                 this.setAlert("Unable to compute")
             }
-            this.processing = false
         })
     }
 }
