@@ -787,7 +787,7 @@ export default class Atom {
         
         button.addEventListener(
             'mousedown',
-            function() { functionToCall(parent) } ,
+            function() { functionToCall() } ,
             false
         )
     }
