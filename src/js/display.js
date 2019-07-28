@@ -233,7 +233,7 @@ export default class Display {
         }
         
         /** 
-         * A list of name to properties mappings for materials.
+         * A description.
          * @type {object}
          */
         this.materialProperties = {
@@ -266,6 +266,7 @@ export default class Display {
         }
         
         //Add the JSXCAD window
+        
         /** 
          * The camera which controls how the scene is rendered.
          * @type {object}
