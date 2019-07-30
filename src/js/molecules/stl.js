@@ -61,7 +61,9 @@ export default class Stl extends Atom {
      * The function which is called when you press the download button.
      */ 
     downloadStl(){
-        const values = [this.findIOValue('geometry')]
+        const values = [this.value]
+        
+        console.log(JSON.stringify(values))
         
         const computeValue = async (values, key) => {
             try{

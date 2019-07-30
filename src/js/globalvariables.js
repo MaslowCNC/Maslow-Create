@@ -9,6 +9,7 @@ import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
 import Scale            from './molecules/scale.js'
 import Stl              from './molecules/stl.js'
+import Svg              from './molecules/svg.js'
 import Union            from './molecules/union.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
@@ -72,6 +73,7 @@ class GlobalVariables{
             extrude:            {creator: Extrude, atomType: 'Extrude'},
             scale:              {creator: Scale, atomType: 'Scale'},
             stl:                {creator: Stl, atomType: 'Stl'},
+            svg:                {creator: Svg, atomType: 'Svg'},
             intersection:       {creator: Intersection, atomType: 'Intersection'},
             difference:         {creator: Difference, atomType: 'Difference'},
             costant:            {creator: Constant, atomType: 'Constant'},
