@@ -63,8 +63,6 @@ export default class Stl extends Atom {
     downloadStl(){
         const values = [this.value]
         
-        console.log(JSON.stringify(values))
-        
         const computeValue = async (values, key) => {
             try{
                 return await GlobalVariables.ask({values: values, key: key})
