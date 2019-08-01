@@ -1,6 +1,7 @@
 import Assembly         from './molecules/assembly.js'
 import CutAway          from './molecules/cutaway.js'
 import Circle           from './molecules/circle.js'
+import Color            from './molecules/color.js'
 import Rectangle        from './molecules/rectangle.js'
 import ShrinkWrap       from './molecules/shrinkwrap.js'
 import Translate        from './molecules/translate.js'
@@ -50,7 +51,7 @@ class GlobalVariables{
          */
         this.secretTypes = {
             output:        {creator: Output, atomType: 'Output'}
-        }
+        };
         /** 
          * The current amount by which the canvas has been scaled.
          * @type {number}
@@ -63,6 +64,7 @@ class GlobalVariables{
         this.availableTypes = {
             assembly:           {creator: Assembly, atomType: 'Assembly'},
             circle:             {creator: Circle, atomType: 'Circle'},
+            color:              {creator: Color, atomType: 'Color'},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap'},
             translate:          {creator: Translate, atomType: 'Translate'},
