@@ -51,7 +51,7 @@ class GlobalVariables{
          */
         this.secretTypes = {
             output:        {creator: Output, atomType: 'Output'}
-        }
+        };
         /** 
          * The current amount by which the canvas has been scaled.
          * @type {number}
