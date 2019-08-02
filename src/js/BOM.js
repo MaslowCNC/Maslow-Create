@@ -71,18 +71,20 @@ export const extractBomTags = (geometry) => {
         walk(geometry)
     }
     
-    var arr = [{ name: 'John', contributions: 2 }, { name: 'Mary', contributions: 4 }, { name: 'John', contributions: 1 }, { name: 'Mary', contributions: 1 }]
-    var result = [];
-
-    bomItems.forEach(function (bomElement) {
-        if (!this[bomElement.name]) {
-            this[bomElement.name] = { name: bomElement.name, contributions: 0 };
-            result.push(this[bomElement.name]);
-        }
-        this[bomElement.name].contributions += bomElement.contributions;
-    }, Object.create(null));
-
-    console.log(result);
     
-    return bomItems
+    //Consolidate similar items into a single item
+    var result = [];
+    bomItems.forEach(function (bomElement) {
+        if (!this[bomElement.BOMitemName]) {
+            this[bomElement.BOMitemName] = new BOMEntry;
+            this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
+            this[bomElement.BOMitemName].source = bomElement.source
+            result.push(this[bomElement.BOMitemName]);
+        }
+        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded;
+        this[bomElement.BOMitemName].costUSD += bomElement.costUSD;
+    }, Object.create(null));
+    
+    
+    return result
 }
