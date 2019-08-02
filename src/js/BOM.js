@@ -74,12 +74,12 @@ export const extractBomTags = (geometry) => {
     var arr = [{ name: 'John', contributions: 2 }, { name: 'Mary', contributions: 4 }, { name: 'John', contributions: 1 }, { name: 'Mary', contributions: 1 }]
     var result = [];
 
-    bomItems.forEach(function (a) {
-        if (!this[a.name]) {
-            this[a.name] = { name: a.name, contributions: 0 };
-            result.push(this[a.name]);
+    bomItems.forEach(function (bomElement) {
+        if (!this[bomElement.name]) {
+            this[bomElement.name] = { name: bomElement.name, contributions: 0 };
+            result.push(this[bomElement.name]);
         }
-        this[a.name].contributions += a.contributions;
+        this[bomElement.name].contributions += bomElement.contributions;
     }, Object.create(null));
 
     console.log(result);
