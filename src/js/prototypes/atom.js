@@ -717,7 +717,7 @@ export default class Atom {
      * @param {number} selectedOption - The zero referenced index of the selected option.
      * @param {string} description - A description of what the dropdown does.
      */ 
-    createDropDown(list,parent,options,selectedOption, description){
+    createDropDown(list,parent,options,selectedOption, description, callback){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         
@@ -752,7 +752,7 @@ export default class Atom {
         
         dropDown.addEventListener(
             'change',
-            function() { parent.changeEquation(dropDown.value) },
+            function() { callback(dropDown.value) },
             false
         )
     }
