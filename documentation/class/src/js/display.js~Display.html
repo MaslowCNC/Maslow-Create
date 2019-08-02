@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -96,7 +97,7 @@
 
   
   
-  <div class="description" data-ice="description"><p>This class handles writing to the 3D preview display</p>
+  <div class="description" data-ice="description"><p>This class handles writing to the 3D preview display. Large parts of this class are copied directly from JSxCAD.</p>
 </div>
   
 
@@ -194,13 +195,41 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-camera">camera</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-camera">camera</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>The camera which controls how the scene is rendered.</p>
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-colorToRgbMapping">colorToRgbMapping</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>A list of colors to RGB mappings.</p>
 </div>
       </div>
     </td>
@@ -318,6 +347,34 @@
         
         <div data-ice="description"><p>Grid scale to keep track of zoom scale</p>
 </div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-member-materialProperties">materialProperties</a></span></span><span class="code" data-ice="signature">: {&quot;paper&quot;: <span>*</span>, &quot;wood&quot;: <span>*</span>, &quot;metal&quot;: <span>*</span>, &quot;glass&quot;: <span>*</span>}</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
       </div>
     </td>
     <td>
@@ -461,7 +518,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Does this even need to be a global object?</p>
+        <div data-ice="description"><p>The default material used if nothing is set</p>
 </div>
       </div>
     </td>
@@ -549,6 +606,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-buildMeshMaterial">buildMeshMaterial</a></span></span><span class="code" data-ice="signature">(tags: <span>*</span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Constructs a new threejs mesh material based on the properties in the tags.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-dist3D">dist3D</a></span></span><span class="code" data-ice="signature">(): <span>*</span></span>
         </p>
       </div>
@@ -585,6 +671,35 @@
         
         
         <div data-ice="description"><p>This function is intended to allow for materials.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-merge">merge</a></span></span><span class="code" data-ice="signature">(properties: <span>*</span>, parameters: <span>*</span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Merges two objects.</p>
 </div>
       </div>
     </td>
@@ -672,6 +787,93 @@
         
         
         <div data-ice="description"><p>Redraws the grid with gridscale update value</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-setColor">setColor</a></span></span><span class="code" data-ice="signature">(tags: <span><span>*</span><span>[]</span></span>, parameters: {}, otherwise: <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Sets the the color of the threejs mesh.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-setMaterial">setMaterial</a></span></span><span class="code" data-ice="signature">(tags: <span>*</span>, parameters: <span>*</span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Sets the material properties of the threejs material.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/display.js~Display.html#instance-method-toRgb">toRgb</a></span></span><span class="code" data-ice="signature">(tags: <span><span>*</span><span>[]</span></span>, defaultRgb: <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Converts the tag to an RGB value.</p>
 </div>
       </div>
     </td>
@@ -876,18 +1078,61 @@
     
     
     
-    <span class="code" data-ice="name">camera</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
+    <span class="code" data-ice="name">camera</span><span class="code" data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber79">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber274">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>The camera which controls how the scene is rendered.</p>
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-colorToRgbMapping">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">colorToRgbMapping</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber84">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>A list of colors to RGB mappings.</p>
 </div>
 
   
@@ -924,7 +1169,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber86">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber281">source</a></span></span>
     </span>
   </h3>
 
@@ -1089,6 +1334,49 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-materialProperties">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">materialProperties</span><span class="code" data-ice="signature">: {&quot;paper&quot;: <span>*</span>, &quot;wood&quot;: <span>*</span>, &quot;metal&quot;: <span>*</span>, &quot;glass&quot;: <span>*</span>}</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber239">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-plane">
     <span class="access" data-ice="access">public</span>
     
@@ -1100,7 +1388,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber342">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber538">source</a></span></span>
     </span>
   </h3>
 
@@ -1144,7 +1432,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber123">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber318">source</a></span></span>
     </span>
   </h3>
 
@@ -1188,7 +1476,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber101">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber296">source</a></span></span>
     </span>
   </h3>
 
@@ -1232,7 +1520,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber72">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber67">source</a></span></span>
     </span>
   </h3>
 
@@ -1276,14 +1564,14 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber364">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber73">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Does this even need to be a global object?</p>
+  <div data-ice="description"><p>The default material used if nothing is set</p>
 </div>
 
   
@@ -1367,7 +1655,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber255">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber451">source</a></span></span>
     </span>
   </h3>
 
@@ -1412,6 +1700,78 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-buildMeshMaterial">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">buildMeshMaterial</span><span class="code" data-ice="signature">(tags: <span>*</span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber603">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Constructs a new threejs mesh material based on the properties in the tags.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">tags</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-dist3D">
     <span class="access" data-ice="access">public</span>
     
@@ -1423,7 +1783,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber264">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber460">source</a></span></span>
     </span>
   </h3>
 
@@ -1479,7 +1839,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber275">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber471">source</a></span></span>
     </span>
   </h3>
 
@@ -1541,6 +1901,72 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-merge">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">merge</span><span class="code" data-ice="signature">(properties: <span>*</span>, parameters: <span>*</span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber579">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Merges two objects.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">properties</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">parameters</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-onWindowResize">
     <span class="access" data-ice="access">public</span>
     
@@ -1552,7 +1978,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber410">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber670">source</a></span></span>
     </span>
   </h3>
 
@@ -1596,7 +2022,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber420">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber680">source</a></span></span>
     </span>
   </h3>
 
@@ -1640,7 +2066,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber331">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber527">source</a></span></span>
     </span>
   </h3>
 
@@ -1673,6 +2099,239 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-setColor">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">setColor</span><span class="code" data-ice="signature">(tags: <span><span>*</span><span>[]</span></span>, parameters: {}, otherwise: <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber562">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Sets the the color of the threejs mesh.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">tags</td>
+      <td data-ice="type" class="code"><span><span>*</span><span>[]</span></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: []</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">parameters</td>
+      <td data-ice="type" class="code">{}</td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: {}</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">otherwise</td>
+      <td data-ice="type" class="code"><span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: [0,0,0]</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-setMaterial">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">setMaterial</span><span class="code" data-ice="signature">(tags: <span>*</span>, parameters: <span>*</span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber588">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Sets the material properties of the threejs material.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">tags</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">parameters</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-toRgb">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">toRgb</span><span class="code" data-ice="signature">(tags: <span><span>*</span><span>[]</span></span>, defaultRgb: <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber546">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Converts the tag to an RGB value.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">tags</td>
+      <td data-ice="type" class="code"><span><span>*</span><span>[]</span></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: []</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">defaultRgb</td>
+      <td data-ice="type" class="code"><span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: [0,0,0]</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-updateDisplayData">
     <span class="access" data-ice="access">public</span>
     
@@ -1684,7 +2343,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber351">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber621">source</a></span></span>
     </span>
   </h3>
 
@@ -1745,7 +2404,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber293">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber489">source</a></span></span>
     </span>
   </h3>
 
@@ -1806,7 +2465,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber314">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/display.js.html#lineNumber510">source</a></span></span>
     </span>
   </h3>
 

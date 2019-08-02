@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -75,7 +76,7 @@ import * as THREE from &apos;three&apos;
 import { TrackballControls } from &apos;three/examples/jsm/controls/TrackballControls.js&apos;
 
 /**
- * This class handles writing to the 3D preview display
+ * This class handles writing to the 3D preview display. Large parts of this class are copied directly from JSxCAD.
  */
 export default class Display {
     /**
@@ -128,11 +129,6 @@ export default class Display {
          */
         this.renderer
         /** 
-         * An instance of the threejs mesh material.
-         * @type {object}
-         */
-        this.threeMaterial
-        /** 
          * The applied material type.
          * @type {object}
          */
@@ -143,7 +139,207 @@ export default class Display {
          */
         this.targetDiv = document.getElementById(&apos;viewerContext&apos;)
         
+        /** 
+         * The default material used if nothing is set
+         * @type {object}
+         */
+        this.threeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5f6670,
+            roughness: 0.65,
+            metalness: 0.40,   
+            wireframe: this.wireDisplay
+        })
+        
+        /** 
+         * A list of colors to RGB mappings.
+         * @type {object}
+         */
+        this.colorToRgbMapping = {
+            &apos;aliceblue&apos;: [240, 248, 255],
+            &apos;antiquewhite&apos;: [250, 235, 215],
+            &apos;aqua&apos;: [0, 255, 255],
+            &apos;aquamarine&apos;: [127, 255, 212],
+            &apos;azure&apos;: [240, 255, 255],
+            &apos;beige&apos;: [245, 245, 220],
+            &apos;bisque&apos;: [255, 228, 196],
+            &apos;black&apos;: [0, 0, 0],
+            &apos;blanchedalmond&apos;: [255, 235, 205],
+            &apos;blue&apos;: [0, 0, 255],
+            &apos;blueviolet&apos;: [138, 43, 226],
+            &apos;brown&apos;: [165, 42, 42],
+            &apos;burlywood&apos;: [222, 184, 135],
+            &apos;cadetblue&apos;: [95, 158, 160],
+            &apos;chartreuse&apos;: [127, 255, 0],
+            &apos;chocolate&apos;: [210, 105, 30],
+            &apos;coral&apos;: [255, 127, 80],
+            &apos;cornflowerblue&apos;: [100, 149, 237],
+            &apos;cornsilk&apos;: [255, 248, 220],
+            &apos;crimson&apos;: [220, 20, 60],
+            &apos;cyan&apos;: [0, 255, 255],
+            &apos;darkblue&apos;: [0, 0, 139],
+            &apos;darkcyan&apos;: [0, 139, 139],
+            &apos;darkgoldenrod&apos;: [184, 134, 11],
+            &apos;darkgray&apos;: [169, 169, 169],
+            &apos;darkgreen&apos;: [0, 100, 0],
+            &apos;darkgrey&apos;: [169, 169, 169],
+            &apos;darkkhaki&apos;: [189, 183, 107],
+            &apos;darkmagenta&apos;: [139, 0, 139],
+            &apos;darkolivegreen&apos;: [85, 107, 47],
+            &apos;darkorange&apos;: [255, 140, 0],
+            &apos;darkorchid&apos;: [153, 50, 204],
+            &apos;darkred&apos;: [139, 0, 0],
+            &apos;darksalmon&apos;: [233, 150, 122],
+            &apos;darkseagreen&apos;: [143, 188, 143],
+            &apos;darkslateblue&apos;: [72, 61, 139],
+            &apos;darkslategray&apos;: [47, 79, 79],
+            &apos;darkslategrey&apos;: [47, 79, 79],
+            &apos;darkturquoise&apos;: [0, 206, 209],
+            &apos;darkviolet&apos;: [148, 0, 211],
+            &apos;deeppink&apos;: [255, 20, 147],
+            &apos;deepskyblue&apos;: [0, 191, 255],
+            &apos;dimgray&apos;: [105, 105, 105],
+            &apos;dimgrey&apos;: [105, 105, 105],
+            &apos;dodgerblue&apos;: [30, 144, 255],
+            &apos;firebrick&apos;: [178, 34, 34],
+            &apos;floralwhite&apos;: [255, 250, 240],
+            &apos;forestgreen&apos;: [34, 139, 34],
+            &apos;fuchsia&apos;: [255, 0, 255],
+            &apos;gainsboro&apos;: [220, 220, 220],
+            &apos;ghostwhite&apos;: [248, 248, 255],
+            &apos;gold&apos;: [255, 215, 0],
+            &apos;goldenrod&apos;: [218, 165, 32],
+            &apos;gray&apos;: [128, 128, 128],
+            &apos;green&apos;: [0, 128, 0],
+            &apos;greenyellow&apos;: [173, 255, 47],
+            &apos;grey&apos;: [128, 128, 128],
+            &apos;honeydew&apos;: [240, 255, 240],
+            &apos;hotpink&apos;: [255, 105, 180],
+            &apos;indianred&apos;: [205, 92, 92],
+            &apos;indigo&apos;: [75, 0, 130],
+            &apos;ivory&apos;: [255, 255, 240],
+            &apos;khaki&apos;: [240, 230, 140],
+            &apos;lavender&apos;: [230, 230, 250],
+            &apos;lavenderblush&apos;: [255, 240, 245],
+            &apos;lawngreen&apos;: [124, 252, 0],
+            &apos;lemonchiffon&apos;: [255, 250, 205],
+            &apos;lightblue&apos;: [173, 216, 230],
+            &apos;lightcoral&apos;: [240, 128, 128],
+            &apos;lightcyan&apos;: [224, 255, 255],
+            &apos;lightgoldenrodyellow&apos;: [250, 250, 210],
+            &apos;lightgray&apos;: [211, 211, 211],
+            &apos;lightgreen&apos;: [144, 238, 144],
+            &apos;lightgrey&apos;: [211, 211, 211],
+            &apos;lightpink&apos;: [255, 182, 193],
+            &apos;lightsalmon&apos;: [255, 160, 122],
+            &apos;lightseagreen&apos;: [32, 178, 170],
+            &apos;lightskyblue&apos;: [135, 206, 250],
+            &apos;lightslategray&apos;: [119, 136, 153],
+            &apos;lightslategrey&apos;: [119, 136, 153],
+            &apos;lightsteelblue&apos;: [176, 196, 222],
+            &apos;lightyellow&apos;: [255, 255, 224],
+            &apos;lime&apos;: [0, 255, 0],
+            &apos;limegreen&apos;: [50, 205, 50],
+            &apos;linen&apos;: [250, 240, 230],
+            &apos;magenta&apos;: [255, 0, 255],
+            &apos;maroon&apos;: [128, 0, 0],
+            &apos;mediumaquamarine&apos;: [102, 205, 170],
+            &apos;mediumblue&apos;: [0, 0, 205],
+            &apos;mediumorchid&apos;: [186, 85, 211],
+            &apos;mediumpurple&apos;: [147, 112, 219],
+            &apos;mediumseagreen&apos;: [60, 179, 113],
+            &apos;mediumslateblue&apos;: [123, 104, 238],
+            &apos;mediumspringgreen&apos;: [0, 250, 154],
+            &apos;mediumturquoise&apos;: [72, 209, 204],
+            &apos;mediumvioletred&apos;: [199, 21, 133],
+            &apos;midnightblue&apos;: [25, 25, 112],
+            &apos;mintcream&apos;: [245, 255, 250],
+            &apos;mistyrose&apos;: [255, 228, 225],
+            &apos;moccasin&apos;: [255, 228, 181],
+            &apos;navajowhite&apos;: [255, 222, 173],
+            &apos;navy&apos;: [0, 0, 128],
+            &apos;oldlace&apos;: [253, 245, 230],
+            &apos;olive&apos;: [128, 128, 0],
+            &apos;olivedrab&apos;: [107, 142, 35],
+            &apos;orange&apos;: [255, 165, 0],
+            &apos;orangered&apos;: [255, 69, 0],
+            &apos;orchid&apos;: [218, 112, 214],
+            &apos;palegoldenrod&apos;: [238, 232, 170],
+            &apos;palegreen&apos;: [152, 251, 152],
+            &apos;paleturquoise&apos;: [175, 238, 238],
+            &apos;palevioletred&apos;: [219, 112, 147],
+            &apos;papayawhip&apos;: [255, 239, 213],
+            &apos;peachpuff&apos;: [255, 218, 185],
+            &apos;peru&apos;: [205, 133, 63],
+            &apos;pink&apos;: [255, 192, 203],
+            &apos;plum&apos;: [221, 160, 221],
+            &apos;powderblue&apos;: [176, 224, 230],
+            &apos;purple&apos;: [128, 0, 128],
+            &apos;rebeccapurple&apos;: [102, 51, 153],
+            &apos;red&apos;: [255, 0, 0],
+            &apos;rosybrown&apos;: [188, 143, 143],
+            &apos;royalblue&apos;: [65, 105, 225],
+            &apos;saddlebrown&apos;: [139, 69, 19],
+            &apos;salmon&apos;: [250, 128, 114],
+            &apos;sandybrown&apos;: [244, 164, 96],
+            &apos;seagreen&apos;: [46, 139, 87],
+            &apos;seashell&apos;: [255, 245, 238],
+            &apos;sienna&apos;: [160, 82, 45],
+            &apos;silver&apos;: [192, 192, 192],
+            &apos;skyblue&apos;: [135, 206, 235],
+            &apos;slateblue&apos;: [106, 90, 205],
+            &apos;slategray&apos;: [112, 128, 144],
+            &apos;slategrey&apos;: [112, 128, 144],
+            &apos;snow&apos;: [255, 250, 250],
+            &apos;springgreen&apos;: [0, 255, 127],
+            &apos;steelblue&apos;: [70, 130, 180],
+            &apos;tan&apos;: [210, 180, 140],
+            &apos;teal&apos;: [0, 128, 128],
+            &apos;thistle&apos;: [216, 191, 216],
+            &apos;tomato&apos;: [255, 99, 71],
+            &apos;turquoise&apos;: [64, 224, 208],
+            &apos;violet&apos;: [238, 130, 238],
+            &apos;wheat&apos;: [245, 222, 179],
+            &apos;white&apos;: [255, 255, 255],
+            &apos;whitesmoke&apos;: [245, 245, 245],
+            &apos;yellow&apos;: [255, 255, 0],
+            &apos;yellowgreen&apos;: [154, 205, 50]
+        }
+        
+        /** 
+         * A description.
+         * @type {object}
+         */
+        this.materialProperties = {
+            paper: {
+                roughness: 0.5,
+                metalness: 0.0,
+                reflectivity: 0.5
+            },
+            wood: {
+                roughness: 0.5,
+                metalness: 0.0,
+                reflectivity: 0.5
+            },
+            metal: {
+                roughness: 0.5,
+                metalness: 0.5,
+                reflectivity: 0.9,
+                clearCoat: 1,
+                clearCoatRoughness: 0
+            },
+            glass: {
+                roughness: 0.5,
+                metalness: 0.5,
+                reflectivity: 0.9,
+                clearCoat: 1,
+                clearCoatRoughness: 0,
+                opacity: 0.5,
+                transparent: true
+            }
+        }
+        
         //Add the JSXCAD window
+        
         /** 
          * The camera which controls how the scene is rendered.
          * @type {object}
@@ -320,6 +516,7 @@ export default class Display {
             }    
         })
     }
+    
     /**
      * This function is intended to calculate the base log of two numbers and round it to an integer
      * @param {number,number}
@@ -339,7 +536,7 @@ export default class Display {
                          + Math.pow(position.z,2))
         return distance3D
     }
-    
+   
     /**
      * This function is intended to allow for materials. It is currently not used and can probably be deleted.
      * @param {object} material - A string to define the material type.
@@ -415,7 +612,81 @@ export default class Display {
         this.plane.receiveShadow = true
         this.scene.add( this.plane )   
     }
+    
+    /**
+     * Converts the tag to an RGB value.
+     */ 
+    toRgb(tags = [], defaultRgb = [0, 0, 0]){
+        let rgb = defaultRgb
+        for (const tag of tags) {
+            if (tag.startsWith(&apos;color/&apos;)) {
+                let entry = this.colorToRgbMapping[tag.substring(6)]
+                if (entry !== undefined) {
+                    rgb = entry
+                }
+            }
+        }
+        return rgb
+    }
+    
+    /**
+     * Sets the the color of the threejs mesh.
+     */ 
+    setColor(tags = [], parameters = {}, otherwise = [0, 0, 0]){
+        let rgb = this.toRgb(tags, null)
+        if (rgb === null) {
+            rgb = otherwise
+        }
+        if (rgb === null) {
+            return
+        }
+        const [r, g, b] = rgb
+        const color = ((r &lt;&lt; 16) | (g &lt;&lt; 8) | b) &gt;&gt;&gt; 0
+        parameters.color = color
+        return parameters
+    }
+    
+    /**
+     * Merges two objects.
+     */ 
+    merge(properties, parameters){
+        for (const key of Object.keys(properties)) {
+            parameters[key] = properties[key]
+        }
+    }
+    
+    /**
+     * Sets the material properties of the threejs material.
+     */ 
+    setMaterial(tags, parameters){
+        for (const tag of tags) {
+            if (tag.startsWith(&apos;material/&apos;)) {
+                const material = tag.substring(9)
+                const properties = this.materialProperties[material]
+                if (properties !== undefined) {
+                    this.merge(properties, parameters)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Constructs a new threejs mesh material based on the properties in the tags.
+     */ 
+    buildMeshMaterial(tags){
+        if (tags !== undefined) {
+            const parameters = {}
+            this.setColor(tags, parameters, null)
+            this.setMaterial(tags, parameters)
+            if (Object.keys(parameters).length &gt; 0) {
+                return new THREE.MeshPhysicalMaterial(parameters)
+            }
+        }
 
+        // Else, default to normal material.
+        return this.threeMaterial
+    }
+    
     /**
      * Clears the display and writes a threejs geometry to it.
      * @param {object} threejsGeometry - A threejs geometry to write to the display.
@@ -428,19 +699,9 @@ export default class Display {
         
         // Build new datasets from the written data, and display them.
         this.datasets = []
-        
-        /** 
-         * Does this even need to be a global object?
-         * @type {object}
-         */
-        this.threeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x5f6670,
-            roughness: 0.65,
-            metalness: 0.40,   
-            wireframe: this.wireDisplay
-        })
 
         const walk = (geometry) =&gt; {
+            const { tags } = geometry
             if (geometry.assembly) {
                 geometry.assembly.forEach(walk)
             } else if (geometry.threejsSegments) {
@@ -450,7 +711,7 @@ export default class Display {
                 for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
                     threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ))
                 }
-                dataset.mesh = new THREE.LineSegments(threejsGeometry, this.threeMaterial)
+                dataset.mesh = new THREE.LineSegments(threejsGeometry, this.buildMeshMaterial(tags))
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
             } else if (geometry.threejsSolid) {
@@ -459,7 +720,7 @@ export default class Display {
                 const threejsGeometry = new THREE.BufferGeometry()
                 threejsGeometry.addAttribute(&apos;position&apos;, new THREE.Float32BufferAttribute(positions, 3))
                 threejsGeometry.addAttribute(&apos;normal&apos;, new THREE.Float32BufferAttribute(normals, 3))
-                dataset.mesh = new THREE.Mesh(threejsGeometry, this.threeMaterial)
+                dataset.mesh = new THREE.Mesh(threejsGeometry, this.buildMeshMaterial(tags))
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
             } else if (geometry.threejsSurface) {
@@ -468,7 +729,7 @@ export default class Display {
                 const threejsGeometry = new THREE.BufferGeometry()
                 threejsGeometry.addAttribute(&apos;position&apos;, new THREE.Float32BufferAttribute(positions, 3))
                 threejsGeometry.addAttribute(&apos;normal&apos;, new THREE.Float32BufferAttribute(normals, 3))
-                dataset.mesh = new THREE.Mesh(threejsGeometry, this.threeMaterial)
+                dataset.mesh = new THREE.Mesh(threejsGeometry, this.buildMeshMaterial(tags))
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
             }

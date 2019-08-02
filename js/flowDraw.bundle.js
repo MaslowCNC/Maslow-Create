@@ -76923,7 +76923,21 @@ var extractBomTags = exports.extractBomTags = function extractBomTags(geometry) 
     if (geometry != null) {
         walk(geometry);
     }
-    return bomItems;
+
+    //Consolidate similar items into a single item
+    var result = [];
+    bomItems.forEach(function (bomElement) {
+        if (!this[bomElement.BOMitemName]) {
+            this[bomElement.BOMitemName] = new BOMEntry();
+            this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName;
+            this[bomElement.BOMitemName].source = bomElement.source;
+            result.push(this[bomElement.BOMitemName]);
+        }
+        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded;
+        this[bomElement.BOMitemName].costUSD += bomElement.costUSD;
+    }, Object.create(null));
+
+    return result;
 };
 
 /***/ }),
@@ -77046,7 +77060,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
- * This class handles writing to the 3D preview display
+ * This class handles writing to the 3D preview display. Large parts of this class are copied directly from JSxCAD.
  */
 var Display = function () {
     /**
@@ -77103,11 +77117,6 @@ var Display = function () {
          */
         this.renderer;
         /** 
-         * An instance of the threejs mesh material.
-         * @type {object}
-         */
-        this.threeMaterial;
-        /** 
          * The applied material type.
          * @type {object}
          */
@@ -77118,12 +77127,210 @@ var Display = function () {
          */
         this.targetDiv = document.getElementById('viewerContext');
 
-        //Add the JSXCAD window
         /** 
-         * The camera which controls how the scene is rendered.
+         * The default material used if nothing is set
          * @type {object}
          */
-        this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
+        this.threeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5f6670,
+            roughness: 0.65,
+            metalness: 0.40,
+            wireframe: this.wireDisplay
+        });
+
+        /** 
+         * A list of colors to RGB mappings.
+         * @type {object}
+         */
+        this.colorToRgbMapping = {
+            'aliceblue': [240, 248, 255],
+            'antiquewhite': [250, 235, 215],
+            'aqua': [0, 255, 255],
+            'aquamarine': [127, 255, 212],
+            'azure': [240, 255, 255],
+            'beige': [245, 245, 220],
+            'bisque': [255, 228, 196],
+            'black': [0, 0, 0],
+            'blanchedalmond': [255, 235, 205],
+            'blue': [0, 0, 255],
+            'blueviolet': [138, 43, 226],
+            'brown': [165, 42, 42],
+            'burlywood': [222, 184, 135],
+            'cadetblue': [95, 158, 160],
+            'chartreuse': [127, 255, 0],
+            'chocolate': [210, 105, 30],
+            'coral': [255, 127, 80],
+            'cornflowerblue': [100, 149, 237],
+            'cornsilk': [255, 248, 220],
+            'crimson': [220, 20, 60],
+            'cyan': [0, 255, 255],
+            'darkblue': [0, 0, 139],
+            'darkcyan': [0, 139, 139],
+            'darkgoldenrod': [184, 134, 11],
+            'darkgray': [169, 169, 169],
+            'darkgreen': [0, 100, 0],
+            'darkgrey': [169, 169, 169],
+            'darkkhaki': [189, 183, 107],
+            'darkmagenta': [139, 0, 139],
+            'darkolivegreen': [85, 107, 47],
+            'darkorange': [255, 140, 0],
+            'darkorchid': [153, 50, 204],
+            'darkred': [139, 0, 0],
+            'darksalmon': [233, 150, 122],
+            'darkseagreen': [143, 188, 143],
+            'darkslateblue': [72, 61, 139],
+            'darkslategray': [47, 79, 79],
+            'darkslategrey': [47, 79, 79],
+            'darkturquoise': [0, 206, 209],
+            'darkviolet': [148, 0, 211],
+            'deeppink': [255, 20, 147],
+            'deepskyblue': [0, 191, 255],
+            'dimgray': [105, 105, 105],
+            'dimgrey': [105, 105, 105],
+            'dodgerblue': [30, 144, 255],
+            'firebrick': [178, 34, 34],
+            'floralwhite': [255, 250, 240],
+            'forestgreen': [34, 139, 34],
+            'fuchsia': [255, 0, 255],
+            'gainsboro': [220, 220, 220],
+            'ghostwhite': [248, 248, 255],
+            'gold': [255, 215, 0],
+            'goldenrod': [218, 165, 32],
+            'gray': [128, 128, 128],
+            'green': [0, 128, 0],
+            'greenyellow': [173, 255, 47],
+            'grey': [128, 128, 128],
+            'honeydew': [240, 255, 240],
+            'hotpink': [255, 105, 180],
+            'indianred': [205, 92, 92],
+            'indigo': [75, 0, 130],
+            'ivory': [255, 255, 240],
+            'khaki': [240, 230, 140],
+            'lavender': [230, 230, 250],
+            'lavenderblush': [255, 240, 245],
+            'lawngreen': [124, 252, 0],
+            'lemonchiffon': [255, 250, 205],
+            'lightblue': [173, 216, 230],
+            'lightcoral': [240, 128, 128],
+            'lightcyan': [224, 255, 255],
+            'lightgoldenrodyellow': [250, 250, 210],
+            'lightgray': [211, 211, 211],
+            'lightgreen': [144, 238, 144],
+            'lightgrey': [211, 211, 211],
+            'lightpink': [255, 182, 193],
+            'lightsalmon': [255, 160, 122],
+            'lightseagreen': [32, 178, 170],
+            'lightskyblue': [135, 206, 250],
+            'lightslategray': [119, 136, 153],
+            'lightslategrey': [119, 136, 153],
+            'lightsteelblue': [176, 196, 222],
+            'lightyellow': [255, 255, 224],
+            'lime': [0, 255, 0],
+            'limegreen': [50, 205, 50],
+            'linen': [250, 240, 230],
+            'magenta': [255, 0, 255],
+            'maroon': [128, 0, 0],
+            'mediumaquamarine': [102, 205, 170],
+            'mediumblue': [0, 0, 205],
+            'mediumorchid': [186, 85, 211],
+            'mediumpurple': [147, 112, 219],
+            'mediumseagreen': [60, 179, 113],
+            'mediumslateblue': [123, 104, 238],
+            'mediumspringgreen': [0, 250, 154],
+            'mediumturquoise': [72, 209, 204],
+            'mediumvioletred': [199, 21, 133],
+            'midnightblue': [25, 25, 112],
+            'mintcream': [245, 255, 250],
+            'mistyrose': [255, 228, 225],
+            'moccasin': [255, 228, 181],
+            'navajowhite': [255, 222, 173],
+            'navy': [0, 0, 128],
+            'oldlace': [253, 245, 230],
+            'olive': [128, 128, 0],
+            'olivedrab': [107, 142, 35],
+            'orange': [255, 165, 0],
+            'orangered': [255, 69, 0],
+            'orchid': [218, 112, 214],
+            'palegoldenrod': [238, 232, 170],
+            'palegreen': [152, 251, 152],
+            'paleturquoise': [175, 238, 238],
+            'palevioletred': [219, 112, 147],
+            'papayawhip': [255, 239, 213],
+            'peachpuff': [255, 218, 185],
+            'peru': [205, 133, 63],
+            'pink': [255, 192, 203],
+            'plum': [221, 160, 221],
+            'powderblue': [176, 224, 230],
+            'purple': [128, 0, 128],
+            'rebeccapurple': [102, 51, 153],
+            'red': [255, 0, 0],
+            'rosybrown': [188, 143, 143],
+            'royalblue': [65, 105, 225],
+            'saddlebrown': [139, 69, 19],
+            'salmon': [250, 128, 114],
+            'sandybrown': [244, 164, 96],
+            'seagreen': [46, 139, 87],
+            'seashell': [255, 245, 238],
+            'sienna': [160, 82, 45],
+            'silver': [192, 192, 192],
+            'skyblue': [135, 206, 235],
+            'slateblue': [106, 90, 205],
+            'slategray': [112, 128, 144],
+            'slategrey': [112, 128, 144],
+            'snow': [255, 250, 250],
+            'springgreen': [0, 255, 127],
+            'steelblue': [70, 130, 180],
+            'tan': [210, 180, 140],
+            'teal': [0, 128, 128],
+            'thistle': [216, 191, 216],
+            'tomato': [255, 99, 71],
+            'turquoise': [64, 224, 208],
+            'violet': [238, 130, 238],
+            'wheat': [245, 222, 179],
+            'white': [255, 255, 255],
+            'whitesmoke': [245, 245, 245],
+            'yellow': [255, 255, 0],
+            'yellowgreen': [154, 205, 50]
+
+            /** 
+             * A description.
+             * @type {object}
+             */
+        };this.materialProperties = {
+            paper: {
+                roughness: 0.5,
+                metalness: 0.0,
+                reflectivity: 0.5
+            },
+            wood: {
+                roughness: 0.5,
+                metalness: 0.0,
+                reflectivity: 0.5
+            },
+            metal: {
+                roughness: 0.5,
+                metalness: 0.5,
+                reflectivity: 0.9,
+                clearCoat: 1,
+                clearCoatRoughness: 0
+            },
+            glass: {
+                roughness: 0.5,
+                metalness: 0.5,
+                reflectivity: 0.9,
+                clearCoat: 1,
+                clearCoatRoughness: 0,
+                opacity: 0.5,
+                transparent: true
+            }
+
+            //Add the JSXCAD window
+
+            /** 
+             * The camera which controls how the scene is rendered.
+             * @type {object}
+             */
+        };this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
 
         //
         /** 
@@ -77297,6 +77504,7 @@ var Display = function () {
             }
         });
     }
+
     /**
      * This function is intended to calculate the base log of two numbers and round it to an integer
      * @param {number,number}
@@ -77437,29 +77645,31 @@ var Display = function () {
         }
 
         /**
-         * Clears the display and writes a threejs geometry to it.
-         * @param {object} threejsGeometry - A threejs geometry to write to the display.
+         * Converts the tag to an RGB value.
          */
 
     }, {
-        key: 'updateDisplayData',
-        value: function updateDisplayData(threejsGeometry) {
-            var _this3 = this;
+        key: 'toRgb',
+        value: function toRgb() {
+            var tags = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+            var defaultRgb = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [0, 0, 0];
 
-            // Delete any previous dataset in the window.
+            var rgb = defaultRgb;
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = this.datasets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var _ref3 = _step.value;
-                    var mesh = _ref3.mesh;
+                for (var _iterator = tags[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var tag = _step.value;
 
-                    this.scene.remove(mesh);
+                    if (tag.startsWith('color/')) {
+                        var entry = this.colorToRgbMapping[tag.substring(6)];
+                        if (entry !== undefined) {
+                            rgb = entry;
+                        }
+                    }
                 }
-
-                // Build new datasets from the written data, and display them.
             } catch (err) {
                 _didIteratorError = true;
                 _iteratorError = err;
@@ -77475,33 +77685,188 @@ var Display = function () {
                 }
             }
 
+            return rgb;
+        }
+
+        /**
+         * Sets the the color of the threejs mesh.
+         */
+
+    }, {
+        key: 'setColor',
+        value: function setColor() {
+            var tags = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+            var parameters = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+            var otherwise = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [0, 0, 0];
+
+            var rgb = this.toRgb(tags, null);
+            if (rgb === null) {
+                rgb = otherwise;
+            }
+            if (rgb === null) {
+                return;
+            }
+
+            var _rgb = rgb,
+                _rgb2 = _slicedToArray(_rgb, 3),
+                r = _rgb2[0],
+                g = _rgb2[1],
+                b = _rgb2[2];
+
+            var color = (r << 16 | g << 8 | b) >>> 0;
+            parameters.color = color;
+            return parameters;
+        }
+
+        /**
+         * Merges two objects.
+         */
+
+    }, {
+        key: 'merge',
+        value: function merge(properties, parameters) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = Object.keys(properties)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var key = _step2.value;
+
+                    parameters[key] = properties[key];
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Sets the material properties of the threejs material.
+         */
+
+    }, {
+        key: 'setMaterial',
+        value: function setMaterial(tags, parameters) {
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = tags[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var tag = _step3.value;
+
+                    if (tag.startsWith('material/')) {
+                        var material = tag.substring(9);
+                        var properties = this.materialProperties[material];
+                        if (properties !== undefined) {
+                            this.merge(properties, parameters);
+                        }
+                    }
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Constructs a new threejs mesh material based on the properties in the tags.
+         */
+
+    }, {
+        key: 'buildMeshMaterial',
+        value: function buildMeshMaterial(tags) {
+            if (tags !== undefined) {
+                var parameters = {};
+                this.setColor(tags, parameters, null);
+                this.setMaterial(tags, parameters);
+                if (Object.keys(parameters).length > 0) {
+                    return new THREE.MeshPhysicalMaterial(parameters);
+                }
+            }
+
+            // Else, default to normal material.
+            return this.threeMaterial;
+        }
+
+        /**
+         * Clears the display and writes a threejs geometry to it.
+         * @param {object} threejsGeometry - A threejs geometry to write to the display.
+         */
+
+    }, {
+        key: 'updateDisplayData',
+        value: function updateDisplayData(threejsGeometry) {
+            var _this3 = this;
+
+            // Delete any previous dataset in the window.
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = this.datasets[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var _ref3 = _step4.value;
+                    var mesh = _ref3.mesh;
+
+                    this.scene.remove(mesh);
+                }
+
+                // Build new datasets from the written data, and display them.
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
+                    }
+                }
+            }
+
             this.datasets = [];
 
-            /** 
-             * Does this even need to be a global object?
-             * @type {object}
-             */
-            this.threeMaterial = new THREE.MeshStandardMaterial({
-                color: 0x5f6670,
-                roughness: 0.65,
-                metalness: 0.40,
-                wireframe: this.wireDisplay
-            });
-
             var walk = function walk(geometry) {
+                var tags = geometry.tags;
+
                 if (geometry.assembly) {
                     geometry.assembly.forEach(walk);
                 } else if (geometry.threejsSegments) {
                     var segments = geometry.threejsSegments;
                     var dataset = {};
                     var _threejsGeometry = new THREE.Geometry();
-                    var _iteratorNormalCompletion2 = true;
-                    var _didIteratorError2 = false;
-                    var _iteratorError2 = undefined;
+                    var _iteratorNormalCompletion5 = true;
+                    var _didIteratorError5 = false;
+                    var _iteratorError5 = undefined;
 
                     try {
-                        for (var _iterator2 = segments[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                            var _ref4 = _step2.value;
+                        for (var _iterator5 = segments[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                            var _ref4 = _step5.value;
 
                             var _ref5 = _slicedToArray(_ref4, 2);
 
@@ -77520,21 +77885,21 @@ var Display = function () {
                             _threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
                         }
                     } catch (err) {
-                        _didIteratorError2 = true;
-                        _iteratorError2 = err;
+                        _didIteratorError5 = true;
+                        _iteratorError5 = err;
                     } finally {
                         try {
-                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                _iterator2.return();
+                            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                _iterator5.return();
                             }
                         } finally {
-                            if (_didIteratorError2) {
-                                throw _iteratorError2;
+                            if (_didIteratorError5) {
+                                throw _iteratorError5;
                             }
                         }
                     }
 
-                    dataset.mesh = new THREE.LineSegments(_threejsGeometry, _this3.threeMaterial);
+                    dataset.mesh = new THREE.LineSegments(_threejsGeometry, _this3.buildMeshMaterial(tags));
                     _this3.scene.add(dataset.mesh);
                     _this3.datasets.push(dataset);
                 } else if (geometry.threejsSolid) {
@@ -77546,7 +77911,7 @@ var Display = function () {
                     var _threejsGeometry2 = new THREE.BufferGeometry();
                     _threejsGeometry2.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
                     _threejsGeometry2.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-                    _dataset.mesh = new THREE.Mesh(_threejsGeometry2, _this3.threeMaterial);
+                    _dataset.mesh = new THREE.Mesh(_threejsGeometry2, _this3.buildMeshMaterial(tags));
                     _this3.scene.add(_dataset.mesh);
                     _this3.datasets.push(_dataset);
                 } else if (geometry.threejsSurface) {
@@ -77558,7 +77923,7 @@ var Display = function () {
                     var _threejsGeometry3 = new THREE.BufferGeometry();
                     _threejsGeometry3.addAttribute('position', new THREE.Float32BufferAttribute(_positions, 3));
                     _threejsGeometry3.addAttribute('normal', new THREE.Float32BufferAttribute(_normals, 3));
-                    _dataset2.mesh = new THREE.Mesh(_threejsGeometry3, _this3.threeMaterial);
+                    _dataset2.mesh = new THREE.Mesh(_threejsGeometry3, _this3.buildMeshMaterial(tags));
                     _this3.scene.add(_dataset2.mesh);
                     _this3.datasets.push(_dataset2);
                 }
@@ -78155,11 +78520,12 @@ function GitHubModule() {
         //Save the current project into the github repo
         if (currentRepoName != null) {
             var shape = null;
-            if (_typeof(_globalvariables2.default.topLevelMolecule.value) == "object") {
+            if (_globalvariables2.default.topLevelMolecule.value != null) {
                 shape = _globalvariables2.default.topLevelMolecule.value;
             } else {
-                console.warn("Unable to save");
-                return -1;
+                shape = {
+                    "solid": [[[[5.000000000000001, 5, 10], [-5, 5.000000000000001, 10], [-5.000000000000002, -4.999999999999999, 10], [4.999999999999999, -5.000000000000002, 10]]], [[[4.999999999999999, -5.000000000000002, 0], [-5.000000000000002, -4.999999999999999, 0], [-5, 5.000000000000001, 0], [5.000000000000001, 5, 0]]], [[[4.999999999999999, -5.000000000000002, 0], [4.999999999999999, -5.000000000000002, 10], [-5.000000000000002, -4.999999999999999, 10], [-5.000000000000002, -4.999999999999999, 0]]], [[[-5.000000000000002, -4.999999999999999, 0], [-5.000000000000002, -4.999999999999999, 10], [-5, 5.000000000000001, 10], [-5, 5.000000000000001, 0]]], [[[-5, 5.000000000000001, 0], [-5, 5.000000000000001, 10], [5.000000000000001, 5, 10], [5.000000000000001, 5, 0]]], [[[5.000000000000001, 5, 0], [5.000000000000001, 5, 10], [4.999999999999999, -5.000000000000002, 10], [4.999999999999999, -5.000000000000002, 0]]]]
+                };
             }
 
             var threadCompute = function () {
@@ -78192,9 +78558,14 @@ function GitHubModule() {
 
                     var bomContent = bomHeader;
                     var bomItems = (0, _BOM.extractBomTags)(_globalvariables2.default.topLevelMolecule.value);
+                    var totalParts = 0;
+                    var totalCost = 0;
                     bomItems.forEach(function (item) {
-                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|";
+                        totalParts += item.numberNeeded;
+                        totalCost += item.costUSD;
+                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|";
                     });
+                    bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|";
 
                     var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n";
                     _globalvariables2.default.topLevelMolecule.requestReadme().forEach(function (item) {
@@ -78653,6 +79024,10 @@ var _circle = __webpack_require__(/*! ./molecules/circle.js */ "./src/js/molecul
 
 var _circle2 = _interopRequireDefault(_circle);
 
+var _color = __webpack_require__(/*! ./molecules/color.js */ "./src/js/molecules/color.js");
+
+var _color2 = _interopRequireDefault(_color);
+
 var _rectangle = __webpack_require__(/*! ./molecules/rectangle.js */ "./src/js/molecules/rectangle.js");
 
 var _rectangle2 = _interopRequireDefault(_rectangle);
@@ -78793,6 +79168,7 @@ var GlobalVariables = function () {
     this.availableTypes = {
       assembly: { creator: _assembly2.default, atomType: 'Assembly' },
       circle: { creator: _circle2.default, atomType: 'Circle' },
+      color: { creator: _color2.default, atomType: 'Color' },
       rectangle: { creator: _rectangle2.default, atomType: 'Rectangle' },
       shirinkwrap: { creator: _shrinkwrap2.default, atomType: 'ShrinkWrap' },
       translate: { creator: _translate2.default, atomType: 'Translate' },
@@ -81672,6 +82048,147 @@ var Code = function (_Atom) {
 }(_atom2.default);
 
 exports.default = Code;
+
+/***/ }),
+
+/***/ "./src/js/molecules/color.js":
+/*!***********************************!*\
+  !*** ./src/js/molecules/color.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _atom = __webpack_require__(/*! ../prototypes/atom */ "./src/js/prototypes/atom.js");
+
+var _atom2 = _interopRequireDefault(_atom);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * This class creates the color atom which can be used to give a part a color.
+ */
+var Color = function (_Atom) {
+  _inherits(Color, _Atom);
+
+  /**
+   * The constructor function.
+   * @param {object} values An array of values passed in which will be assigned to the class as this.x
+   */
+  function Color(values) {
+    _classCallCheck(this, Color);
+
+    /**
+     * This atom's name
+     * @type {string}
+     */
+    var _this = _possibleConstructorReturn(this, (Color.__proto__ || Object.getPrototypeOf(Color)).call(this, values));
+
+    _this.name = 'Color';
+    /**
+     * This atom's type
+     * @type {string}
+     */
+    _this.atomType = 'Color';
+
+    /**
+     * The color options to choose from
+     * @type {array}
+     */
+    _this.colorOptions = ["blue", "green", "pink", "black", "gray", "silver"];
+
+    /**
+     * The index of the currently selected color option.
+     * @type {number}
+     */
+    _this.selectedColorIndex = 0;
+
+    _this.addIO('input', 'geometry', _this, 'geometry', null);
+    _this.addIO('output', 'geometry', _this, 'geometry', null);
+
+    _this.setValues(values);
+    return _this;
+  }
+
+  /**
+   * Applies a color tag to the object in a worker thread.
+   */
+
+
+  _createClass(Color, [{
+    key: 'updateValue',
+    value: function updateValue() {
+      try {
+        var values = [this.findIOValue('geometry'), this.colorOptions[this.selectedColorIndex]];
+        this.basicThreadValueProcessing(values, "color");
+        this.clearAlert();
+      } catch (err) {
+        this.setAlert(err);
+      }
+    }
+
+    /**
+     * Updates the value of the selected color and then the value.
+     */
+
+  }, {
+    key: 'changeColor',
+    value: function changeColor(index) {
+      this.selectedColorIndex = index;
+      this.updateValue();
+    }
+
+    /**
+     * Create a drop down to choose the color.
+     */
+
+  }, {
+    key: 'updateSidebar',
+    value: function updateSidebar() {
+      var _this2 = this;
+
+      var list = _get(Color.prototype.__proto__ || Object.getPrototypeOf(Color.prototype), 'updateSidebar', this).call(this);
+      this.createDropDown(list, this, this.colorOptions, this.selectedColorIndex, "Color", function (index) {
+        _this2.changeColor(index);
+      });
+    }
+
+    /**
+     * Add the color choice to the object which is saved for this molecule
+     */
+
+  }, {
+    key: 'serialize',
+    value: function serialize() {
+      var superSerialObject = _get(Color.prototype.__proto__ || Object.getPrototypeOf(Color.prototype), 'serialize', this).call(this, null);
+
+      //Write the current color selection to the serialized object
+      superSerialObject.selectedColorIndex = this.selectedColorIndex;
+
+      return superSerialObject;
+    }
+  }]);
+
+  return Color;
+}(_atom2.default);
+
+exports.default = Color;
 
 /***/ }),
 
@@ -85894,7 +86411,7 @@ var Atom = function () {
 
     }, {
         key: 'createDropDown',
-        value: function createDropDown(list, parent, options, selectedOption, description) {
+        value: function createDropDown(list, parent, options, selectedOption, description, callback) {
             var listElement = document.createElement('LI');
             list.appendChild(listElement);
 
@@ -85928,7 +86445,7 @@ var Atom = function () {
             dropDown.selectedIndex = selectedOption; //display the current selection
 
             dropDown.addEventListener('change', function () {
-                parent.changeEquation(dropDown.value);
+                callback(dropDown.value);
             }, false);
         }
 

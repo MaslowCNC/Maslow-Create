@@ -36,6 +36,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/color.js~color",
+    "class/src/js/molecules/color.js~Color.html",
+    "<span>Color</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/color.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/prototypes/connector.js~connector",
     "class/src/js/prototypes/connector.js~Connector.html",
     "<span>Connector</span> <span class=\"search-result-import-path\">canvas-template/src/js/prototypes/connector.js</span>",
@@ -570,9 +576,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/display.js~display#buildmeshmaterial",
+    "class/src/js/display.js~Display.html#instance-method-buildMeshMaterial",
+    "src/js/display.js~Display#buildMeshMaterial",
+    "method"
+  ],
+  [
     "src/js/display.js~display#camera",
     "class/src/js/display.js~Display.html#instance-member-camera",
     "src/js/display.js~Display#camera",
+    "member"
+  ],
+  [
+    "src/js/display.js~display#colortorgbmapping",
+    "class/src/js/display.js~Display.html#instance-member-colorToRgbMapping",
+    "src/js/display.js~Display#colorToRgbMapping",
     "member"
   ],
   [
@@ -618,6 +636,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/display.js~display#materialproperties",
+    "class/src/js/display.js~Display.html#instance-member-materialProperties",
+    "src/js/display.js~Display#materialProperties",
+    "member"
+  ],
+  [
+    "src/js/display.js~display#merge",
+    "class/src/js/display.js~Display.html#instance-method-merge",
+    "src/js/display.js~Display#merge",
+    "method"
+  ],
+  [
     "src/js/display.js~display#onwindowresize",
     "class/src/js/display.js~Display.html#instance-method-onWindowResize",
     "src/js/display.js~Display#onWindowResize",
@@ -654,6 +684,18 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/display.js~display#setcolor",
+    "class/src/js/display.js~Display.html#instance-method-setColor",
+    "src/js/display.js~Display#setColor",
+    "method"
+  ],
+  [
+    "src/js/display.js~display#setmaterial",
+    "class/src/js/display.js~Display.html#instance-method-setMaterial",
+    "src/js/display.js~Display#setMaterial",
+    "method"
+  ],
+  [
     "src/js/display.js~display#targetdiv",
     "class/src/js/display.js~Display.html#instance-member-targetDiv",
     "src/js/display.js~Display#targetDiv",
@@ -664,6 +706,12 @@ window.esdocSearchIndex = [
     "class/src/js/display.js~Display.html#instance-member-threeMaterial",
     "src/js/display.js~Display#threeMaterial",
     "member"
+  ],
+  [
+    "src/js/display.js~display#torgb",
+    "class/src/js/display.js~Display.html#instance-method-toRgb",
+    "src/js/display.js~Display#toRgb",
+    "method"
   ],
   [
     "src/js/display.js~display#updatedisplaydata",
@@ -999,6 +1047,66 @@ window.esdocSearchIndex = [
     "src/js/molecules/circle.js~circle#updatevalue",
     "class/src/js/molecules/circle.js~Circle.html#instance-method-updateValue",
     "src/js/molecules/circle.js~Circle#updateValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/color.js",
+    "file/src/js/molecules/color.js.html",
+    "src/js/molecules/color.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/color.js~color#atomtype",
+    "class/src/js/molecules/color.js~Color.html#instance-member-atomType",
+    "src/js/molecules/color.js~Color#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/color.js~color#changecolor",
+    "class/src/js/molecules/color.js~Color.html#instance-method-changeColor",
+    "src/js/molecules/color.js~Color#changeColor",
+    "method"
+  ],
+  [
+    "src/js/molecules/color.js~color#coloroptions",
+    "class/src/js/molecules/color.js~Color.html#instance-member-colorOptions",
+    "src/js/molecules/color.js~Color#colorOptions",
+    "member"
+  ],
+  [
+    "src/js/molecules/color.js~color#constructor",
+    "class/src/js/molecules/color.js~Color.html#instance-constructor-constructor",
+    "src/js/molecules/color.js~Color#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/color.js~color#name",
+    "class/src/js/molecules/color.js~Color.html#instance-member-name",
+    "src/js/molecules/color.js~Color#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/color.js~color#selectedcolorindex",
+    "class/src/js/molecules/color.js~Color.html#instance-member-selectedColorIndex",
+    "src/js/molecules/color.js~Color#selectedColorIndex",
+    "member"
+  ],
+  [
+    "src/js/molecules/color.js~color#serialize",
+    "class/src/js/molecules/color.js~Color.html#instance-method-serialize",
+    "src/js/molecules/color.js~Color#serialize",
+    "method"
+  ],
+  [
+    "src/js/molecules/color.js~color#updatesidebar",
+    "class/src/js/molecules/color.js~Color.html#instance-method-updateSidebar",
+    "src/js/molecules/color.js~Color#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/color.js~color#updatevalue",
+    "class/src/js/molecules/color.js~Color.html#instance-method-updateValue",
+    "src/js/molecules/color.js~Color#updateValue",
     "method"
   ],
   [

@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -571,11 +572,37 @@ export default function GitHubModule(){
         //Save the current project into the github repo
         if(currentRepoName != null){
             var shape = null
-            if(typeof GlobalVariables.topLevelMolecule.value == &quot;object&quot;){
+            if(GlobalVariables.topLevelMolecule.value != null){
                 shape = GlobalVariables.topLevelMolecule.value
             }else{
-                console.warn(&quot;Unable to save&quot;)
-                return -1
+                shape = {
+                    &quot;solid&quot;: [
+                        [ [ [ 5.000000000000001, 5, 10 ],
+                            [ -5, 5.000000000000001, 10 ],
+                            [ -5.000000000000002, -4.999999999999999, 10 ],
+                            [ 4.999999999999999, -5.000000000000002, 10 ] ] ],
+                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
+                            [ -5.000000000000002, -4.999999999999999, 0 ],
+                            [ -5, 5.000000000000001, 0 ],
+                            [ 5.000000000000001, 5, 0 ] ] ],
+                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
+                            [ 4.999999999999999, -5.000000000000002, 10 ],
+                            [ -5.000000000000002, -4.999999999999999, 10 ],
+                            [ -5.000000000000002, -4.999999999999999, 0 ] ] ],
+                        [ [ [ -5.000000000000002, -4.999999999999999, 0 ],
+                            [ -5.000000000000002, -4.999999999999999, 10 ],
+                            [ -5, 5.000000000000001, 10 ],
+                            [ -5, 5.000000000000001, 0 ] ] ],
+                        [ [ [ -5, 5.000000000000001, 0 ],
+                            [ -5, 5.000000000000001, 10 ],
+                            [ 5.000000000000001, 5, 10 ],
+                            [ 5.000000000000001, 5, 0 ] ] ],
+                        [ [ [ 5.000000000000001, 5, 0 ],
+                            [ 5.000000000000001, 5, 10 ],
+                            [ 4.999999999999999, -5.000000000000002, 10 ],
+                            [ 4.999999999999999, -5.000000000000002, 0 ] ] ]
+                    ]
+                }
             }
             
             const threadCompute = async (values, key) =&gt; {
@@ -587,9 +614,15 @@ export default function GitHubModule(){
                     
                     var bomContent = bomHeader
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
+                    var totalParts = 0
+                    var totalCost  = 0
                     bomItems.forEach(item =&gt; {
-                        bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|&quot; + item.costUSD + &quot;|&quot; + item.source + &quot;|&quot;
+                        totalParts += item.numberNeeded
+                        totalCost  += item.costUSD
+                        bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
                     })
+                    bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
+                    
                     
                     var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + currentRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
                     GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {

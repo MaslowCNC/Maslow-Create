@@ -4,23 +4,23 @@
     "filePath": "src/js/display.js",
     "lines": [
       {
-        "lineNumber": 250,
+        "lineNumber": 446,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 251,
+        "lineNumber": 447,
         "line": "     * This function is intended to calculate the base log of two numbers and round it to an integer\r"
       },
       {
-        "lineNumber": 252,
+        "lineNumber": 448,
         "line": "     * @param {number,number}\r"
       },
       {
-        "lineNumber": 253,
+        "lineNumber": 449,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 254,
+        "lineNumber": 450,
         "line": "    baseLog(x,y){\r"
       }
     ],
@@ -35,23 +35,23 @@
     "filePath": "src/js/display.js",
     "lines": [
       {
-        "lineNumber": 259,
+        "lineNumber": 455,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 260,
+        "lineNumber": 456,
         "line": "     * This function is intended to calculate the 3d distance between object and camera\r"
       },
       {
-        "lineNumber": 261,
+        "lineNumber": 457,
         "line": "     * @param {number}\r"
       },
       {
-        "lineNumber": 262,
+        "lineNumber": 458,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 263,
+        "lineNumber": 459,
         "line": "    dist3D(position){\r"
       }
     ],
@@ -59,6 +59,63 @@
       "position"
     ],
     "docParams": []
+  },
+  {
+    "name": "Atom#createDropDown",
+    "filePath": "src/js/prototypes/atom.js",
+    "lines": [
+      {
+        "lineNumber": 711,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 712,
+        "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
+      },
+      {
+        "lineNumber": 713,
+        "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
+      },
+      {
+        "lineNumber": 714,
+        "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
+      },
+      {
+        "lineNumber": 715,
+        "line": "     * @param {array} options - A list of options to display in the drop down.\r"
+      },
+      {
+        "lineNumber": 716,
+        "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
+      },
+      {
+        "lineNumber": 717,
+        "line": "     * @param {string} description - A description of what the dropdown does.\r"
+      },
+      {
+        "lineNumber": 718,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 719,
+        "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
+      }
+    ],
+    "codeParams": [
+      "list",
+      "parent",
+      "options",
+      "selectedOption",
+      "description",
+      "callback"
+    ],
+    "docParams": [
+      "list",
+      "parent",
+      "options",
+      "selectedOption",
+      "description"
+    ]
   },
   {
     "name": "Atom#createCheckbox",
