@@ -73,17 +73,17 @@ export const extractBomTags = (geometry) => {
     
     
     //Consolidate similar items into a single item
-    var result = [];
+    var result = []
     bomItems.forEach(function (bomElement) {
         if (!this[bomElement.BOMitemName]) {
-            this[bomElement.BOMitemName] = new BOMEntry;
+            this[bomElement.BOMitemName] = new BOMEntry
             this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
             this[bomElement.BOMitemName].source = bomElement.source
-            result.push(this[bomElement.BOMitemName]);
+            result.push(this[bomElement.BOMitemName])
         }
-        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded;
-        this[bomElement.BOMitemName].costUSD += bomElement.costUSD;
-    }, Object.create(null));
+        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
+        this[bomElement.BOMitemName].costUSD += bomElement.costUSD
+    }, Object.create(null))
     
     
     return result

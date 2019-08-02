@@ -230,7 +230,7 @@ export default class Display {
             'whitesmoke': [245, 245, 245],
             'yellow': [255, 255, 0],
             'yellowgreen': [154, 205, 50]
-        };
+        }
         
         /** 
          * A description.
@@ -263,7 +263,7 @@ export default class Display {
                 opacity: 0.5,
                 transparent: true
             }
-        };
+        }
         
         //Add the JSXCAD window
         
