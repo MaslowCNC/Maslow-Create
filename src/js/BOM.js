@@ -71,13 +71,18 @@ export const extractBomTags = (geometry) => {
         walk(geometry)
     }
     
-    // Combigne similar items
-    console.log(bomItems.length)
-    var i = 0
-    while(i < bomItems.length){
-        console.log(bomItems[i])
-        i++
-    }
+    var arr = [{ name: 'John', contributions: 2 }, { name: 'Mary', contributions: 4 }, { name: 'John', contributions: 1 }, { name: 'Mary', contributions: 1 }]
+    var result = [];
+
+    bomItems.forEach(function (a) {
+        if (!this[a.name]) {
+            this[a.name] = { name: a.name, contributions: 0 };
+            result.push(this[a.name]);
+        }
+        this[a.name].contributions += a.contributions;
+    }, Object.create(null));
+
+    console.log(result);
     
     return bomItems
 }
