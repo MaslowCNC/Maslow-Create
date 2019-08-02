@@ -70,5 +70,14 @@ export const extractBomTags = (geometry) => {
     if(geometry != null){
         walk(geometry)
     }
+    
+    // Combigne similar items
+    console.log(bomItems.length)
+    var i = 0
+    while(i < bomItems.length){
+        console.log(bomItems[i])
+        i++
+    }
+    
     return bomItems
 }
