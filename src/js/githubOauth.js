@@ -549,6 +549,7 @@ export default function GitHubModule(){
                         bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
                     })
                     bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                    bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                     
                     
                     var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n"
