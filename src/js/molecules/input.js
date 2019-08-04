@@ -133,6 +133,13 @@ export default class Input extends Atom {
     }
     
     /**
+     * Set's the output value and shows the atom output on the 3D view.
+     */ 
+    updateValue(){
+        this.displayAndPropogate()
+    }
+    
+    /**
      * Set's the input's value after locking everything downstream to ensure optimal computation.
      * @param {number} newOutput - The new value to be used
      */ 
