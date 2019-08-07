@@ -13,7 +13,7 @@ export default class RegularPolygon extends Atom {
         super(values)
         
         this.addIO('input', 'number of sides', this, 'number', 6)
-        this.addIO('input', 'radius', this, 'number', 10)
+        this.addIO('input', 'diameter', this, 'number', 10)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         /**
@@ -38,8 +38,9 @@ export default class RegularPolygon extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('radius'), this.findIOValue('number of sides')]
-            this.basicThreadValueProcessing(values, "regular polygon")
-        }catch(err){this.setAlert(err)} 
+            
+            const values = [this.findIOValue('diameter'), this.findIOValue('number of sides')]
+            this.basicThreadValueProcessing(values, "circle")
+        }catch(err){this.setAlert(err)}
     }  
 }
