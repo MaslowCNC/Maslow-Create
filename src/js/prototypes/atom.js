@@ -418,15 +418,24 @@ export default class Atom {
         while (sideBar.firstChild) {
             sideBar.removeChild(sideBar.firstChild)
         }
-        
-        //add the name as a title  -- to the top bar
-        let headerBar_title = document.querySelector('#headerBar_title')
-         while (headerBar_title.firstChild) {
-            headerBar_title.removeChild(headerBar_title.firstChild)
+
+        var name2 = document.createElement('p')
+        name2.textContent = this.name
+        sideBar.appendChild(name2)
+
+        //add the name as of parent molecule title  -- to the top bar -- permanently
+        if (this.atomType == 'Molecule' ){
+            let headerBar_title = document.querySelector('#headerBar_title')
+             while (headerBar_title.firstChild) {
+                headerBar_title.removeChild(headerBar_title.firstChild)
+            }
+            console.log(this.atomType)
+           
+            var name1 = document.createElement('p')
+            name1.textContent = this.name
+            headerBar_title.appendChild(name1)
         }
-        var name = document.createElement('p')
-        name.textContent = this.name
-        headerBar_title.appendChild(name)
+        
         
         //Create a list element
         var valueList = document.createElement('ul')
