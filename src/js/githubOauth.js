@@ -480,6 +480,7 @@ export default function GitHubModule(){
             })
         })
         
+        GlobalVariables.evalLock = false
         GlobalVariables.currentMolecule.backgroundClick()
         
         //Clear and hide the popup
@@ -498,11 +499,37 @@ export default function GitHubModule(){
         //Save the current project into the github repo
         if(currentRepoName != null){
             var shape = null
-            if(typeof GlobalVariables.topLevelMolecule.value == "object"){
+            if(GlobalVariables.topLevelMolecule.value != null){
                 shape = GlobalVariables.topLevelMolecule.value
             }else{
-                console.warn("Unable to save")
-                return -1
+                shape = {
+                    "solid": [
+                        [ [ [ 5.000000000000001, 5, 10 ],
+                            [ -5, 5.000000000000001, 10 ],
+                            [ -5.000000000000002, -4.999999999999999, 10 ],
+                            [ 4.999999999999999, -5.000000000000002, 10 ] ] ],
+                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
+                            [ -5.000000000000002, -4.999999999999999, 0 ],
+                            [ -5, 5.000000000000001, 0 ],
+                            [ 5.000000000000001, 5, 0 ] ] ],
+                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
+                            [ 4.999999999999999, -5.000000000000002, 10 ],
+                            [ -5.000000000000002, -4.999999999999999, 10 ],
+                            [ -5.000000000000002, -4.999999999999999, 0 ] ] ],
+                        [ [ [ -5.000000000000002, -4.999999999999999, 0 ],
+                            [ -5.000000000000002, -4.999999999999999, 10 ],
+                            [ -5, 5.000000000000001, 10 ],
+                            [ -5, 5.000000000000001, 0 ] ] ],
+                        [ [ [ -5, 5.000000000000001, 0 ],
+                            [ -5, 5.000000000000001, 10 ],
+                            [ 5.000000000000001, 5, 10 ],
+                            [ 5.000000000000001, 5, 0 ] ] ],
+                        [ [ [ 5.000000000000001, 5, 0 ],
+                            [ 5.000000000000001, 5, 10 ],
+                            [ 4.999999999999999, -5.000000000000002, 10 ],
+                            [ 4.999999999999999, -5.000000000000002, 0 ] ] ]
+                    ]
+                }
             }
             
             const threadCompute = async (values, key) => {
@@ -514,9 +541,16 @@ export default function GitHubModule(){
                     
                     var bomContent = bomHeader
                     const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
+                    var totalParts = 0
+                    var totalCost  = 0
                     bomItems.forEach(item => {
-                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|" + item.costUSD + "|" + item.source + "|"
+                        totalParts += item.numberNeeded
+                        totalCost  += item.costUSD
+                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
                     })
+                    bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                    bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
+                    
                     
                     var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n"
                     GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
