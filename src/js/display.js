@@ -330,9 +330,8 @@ export default class Display {
                 
                 //Grid display html element
                 var name = document.createElement('p')
-                name.textContent = "3D View"
-                name.setAttribute('class','doc-title')
-                //name.setAttribute('style', 'display:inline;')
+                name.textContent = "3D VIEW"
+                name.setAttribute('style', 'padding-right:0px;')
                 sideBar.appendChild(name)
 
                 var gridDiv = document.createElement('div')

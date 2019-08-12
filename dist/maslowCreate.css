@@ -18,14 +18,32 @@
 
 #headerBar {
   position:absolute;
-  height:20px;
+  height:17px;
   width:100%; 
   top:0px;
   left:0px;
   background: #2C2C2C;
-  padding:10px 0px 5px 10px;
+  padding:5px 0px 5px 5px;
   display:inline;
   border-bottom: 1px solid #E5E4E5;
+}
+
+#viewer_bar{
+  background-color: white;
+  color:black;
+  float:right;
+  position:relative;
+  height:30px;
+  width:40%; 
+  bottom:35px;
+  left:0px;
+  font-size:.7em;
+  margin-right:10px;
+}
+
+#viewer_bar p, #viewer_bar input{
+  display:inline;
+  padding:4px;
 }
 
 #headerBar p {
