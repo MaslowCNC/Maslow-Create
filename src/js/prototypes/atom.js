@@ -429,13 +429,11 @@ export default class Atom {
              while (headerBar_title.firstChild) {
                 headerBar_title.removeChild(headerBar_title.firstChild)
             }
-            console.log(this.atomType)
            
             var name1 = document.createElement('p')
             name1.textContent = this.name
             headerBar_title.appendChild(name1)
         }
-        
         
         //Create a list element
         var valueList = document.createElement('ul')
