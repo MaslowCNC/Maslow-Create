@@ -1,28 +1,32 @@
-import Assembly from './molecules/assembly.js'
-import Circle from './molecules/circle.js'
-import Rectangle from './molecules/rectangle.js'
-import ShrinkWrap from './molecules/shrinkwrap.js'
-import Translate from './molecules/translate.js'
-import Tag from './molecules/tag.js'
-import RegularPolygon from './molecules/regularpolygon.js'
-import Extrude from './molecules/extrude.js'
-import Scale from './molecules/scale.js'
-import Union from './molecules/union.js'
-import Intersection from './molecules/intersection.js'
-import Difference from './molecules/difference.js'
-import Constant from './molecules/constant.js'
-import Equation from './molecules/equation.js'
-import Molecule from './molecules/molecule.js'
-import Input from './molecules/input.js'
-import Readme from './molecules/readme.js'
-import AddBOMTag from './molecules/BOM.js'
-import Rotate from './molecules/rotate.js'
-import GitHubMolecule from './molecules/githubmolecule.js'
-import Output from './molecules/output.js'
-import Stretch from './molecules/stretch.js'
-import Gcode from './molecules/gcode.js'
-import Code from './molecules/code.js'
-import GitHubModule from './githubOauth'
+import Assembly         from './molecules/assembly.js'
+import CutAway          from './molecules/cutaway.js'
+import Circle           from './molecules/circle.js'
+import Color            from './molecules/color.js'
+import Rectangle        from './molecules/rectangle.js'
+import ShrinkWrap       from './molecules/shrinkwrap.js'
+import Translate        from './molecules/translate.js'
+import Tag              from './molecules/tag.js'
+import RegularPolygon   from './molecules/regularpolygon.js'
+import Extrude          from './molecules/extrude.js'
+import Scale            from './molecules/scale.js'
+import Stl              from './molecules/stl.js'
+import Svg              from './molecules/svg.js'
+import Union            from './molecules/union.js'
+import Intersection     from './molecules/intersection.js'
+import Difference       from './molecules/difference.js'
+import Constant         from './molecules/constant.js'
+import Equation         from './molecules/equation.js'
+import Molecule         from './molecules/molecule.js'
+import Input            from './molecules/input.js'
+import Readme           from './molecules/readme.js'
+import AddBOMTag        from './molecules/BOM.js'
+import Rotate           from './molecules/rotate.js'
+import GitHubMolecule   from './molecules/githubmolecule.js'
+import Output           from './molecules/output.js'
+import Stretch          from './molecules/stretch.js'
+import Gcode            from './molecules/gcode.js'
+import Code             from './molecules/code.js'
+import GitHubModule     from './githubOauth'
 import { createService } from './lib/service.js'
 
 /**
@@ -62,6 +66,7 @@ class GlobalVariables{
         this.availableTypes = {
             assembly:           {creator: Assembly, atomType: 'Assembly'},
             circle:             {creator: Circle, atomType: 'Circle'},
+            color:              {creator: Color, atomType: 'Color'},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap'},
             translate:          {creator: Translate, atomType: 'Translate'},
@@ -69,6 +74,8 @@ class GlobalVariables{
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon'},
             extrude:            {creator: Extrude, atomType: 'Extrude'},
             scale:              {creator: Scale, atomType: 'Scale'},
+            stl:                {creator: Stl, atomType: 'Stl'},
+            svg:                {creator: Svg, atomType: 'Svg'},
             intersection:       {creator: Intersection, atomType: 'Intersection'},
             difference:         {creator: Difference, atomType: 'Difference'},
             costant:            {creator: Constant, atomType: 'Constant'},
@@ -82,7 +89,8 @@ class GlobalVariables{
             union:              {creator: Union, atomType: 'Union'},
             stretch:            {creator: Stretch, atomType: 'Stretch'},
             gcode:              {creator: Gcode, atomType: 'Gcode'},
-            code:               {creator: Code, atomType: 'Code'}
+            code:               {creator: Code, atomType: 'Code'},
+            cutAway:            {creator: CutAway, atomType: 'CutAway'}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.
@@ -125,7 +133,7 @@ class GlobalVariables{
         })
         createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
             /** 
-             * A worker thread which can do computation.
+             * The threejs renderer which displays things on the screen.
              * @type {object}
              */
             this.render = result.ask

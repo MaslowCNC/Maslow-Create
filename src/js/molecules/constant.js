@@ -47,6 +47,14 @@ export default class Constant extends Atom{
             this.output.setValue(this.ioValues[0].ioValue)
         }
     }
+    
+    /**
+     * Set's the output value and shows the atom output on the 3D view.
+     */ 
+    updateValue(){
+        this.displayAndPropogate()
+    }
+    
     /**
      * Add entries for name and value to the side bar. Note: I think that should happen automatically and this function can be deleted. Please test that future self.
      */ 

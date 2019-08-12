@@ -507,7 +507,7 @@ export default class Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        this.displayAndPropogate()
+        
     }
     
     /**
@@ -717,7 +717,7 @@ export default class Atom {
      * @param {number} selectedOption - The zero referenced index of the selected option.
      * @param {string} description - A description of what the dropdown does.
      */ 
-    createDropDown(list,parent,options,selectedOption, description){
+    createDropDown(list,parent,options,selectedOption, description, callback){
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         
@@ -752,7 +752,7 @@ export default class Atom {
         
         dropDown.addEventListener(
             'change',
-            function() { parent.changeEquation(dropDown.value) },
+            function() { callback(dropDown.value) },
             false
         )
     }
@@ -787,9 +787,36 @@ export default class Atom {
         
         button.addEventListener(
             'mousedown',
-            function() { functionToCall(parent) } ,
+            function() { functionToCall() } ,
             false
         )
     }
+    
+    /**
+     * Creates button. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
+     * @param {string} buttonText - The text on the button.
+     * @param {object} functionToCall - The function to call when the button is pressed.
+     */ 
+    createCheckbox(sideBar,text,callback){
+        var gridDiv = document.createElement('div')
+        sideBar.appendChild(gridDiv)
+        gridDiv.setAttribute('id', 'gridDiv')
+        var gridCheck = document.createElement('input')
+        gridDiv.appendChild(gridCheck)
+        gridCheck.setAttribute('type', 'checkbox')
+        gridCheck.setAttribute('id', 'gridCheck')
+        gridCheck.setAttribute('checked', 'true')
 
+        var gridCheckLabel = document.createElement('label')
+        gridDiv.appendChild(gridCheckLabel)
+        gridCheckLabel.setAttribute('for', 'gridCheck')
+        gridCheckLabel.setAttribute('style', 'margin-right:1em;')
+        gridCheckLabel.textContent = text
+
+        gridCheck.addEventListener('change', event => {
+            callback(event)
+        })
+    }
 }
