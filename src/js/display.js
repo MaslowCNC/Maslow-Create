@@ -323,19 +323,19 @@ export default class Display {
 
         this.targetDiv.addEventListener('mousedown', () => {
             if(!GlobalVariables.runMode){
-                let sideBar = document.querySelector('#viewer_bar')
-                while (sideBar.firstChild) {
-                    sideBar.removeChild(sideBar.firstChild)
+                let viewerBar = document.querySelector('#viewer_bar')
+                while (viewerBar.firstChild) {
+                    viewerBar.removeChild(viewerBar.firstChild)
                 }
                 
                 //Grid display html element
                 var name = document.createElement('p')
                 name.textContent = "3D VIEW"
                 name.setAttribute('style', 'padding-right:0px;')
-                sideBar.appendChild(name)
+                viewerBar.appendChild(name)
 
                 var gridDiv = document.createElement('div')
-                sideBar.appendChild(gridDiv)
+                viewerBar.appendChild(gridDiv)
                 gridDiv.setAttribute('id', 'gridDiv')
                 var gridCheck = document.createElement('input')
                 gridDiv.appendChild(gridCheck)
@@ -368,7 +368,7 @@ export default class Display {
                 //Axes Html
 
                 var axesDiv = document.createElement('div')
-                sideBar.appendChild(axesDiv)
+                viewerBar.appendChild(axesDiv)
                 var axesCheck = document.createElement('input')
                 axesDiv.appendChild(axesCheck)
                 axesCheck.setAttribute('type', 'checkbox')
@@ -399,7 +399,7 @@ export default class Display {
                 //Wireframe HTML element
 
                 var wireDiv = document.createElement('div')
-                sideBar.appendChild(wireDiv)
+                viewerBar.appendChild(wireDiv)
                 wireDiv.setAttribute('id', 'wireDiv')
                 var wireCheck = document.createElement('input')
                 wireDiv.appendChild(wireCheck)
