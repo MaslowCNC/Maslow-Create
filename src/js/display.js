@@ -324,10 +324,7 @@ export default class Display {
         this.targetDiv.addEventListener('mousedown', () => {
             if(!GlobalVariables.runMode){
                 let viewerBar = document.querySelector('#viewer_bar')
-                while (viewerBar.firstChild) {
-                    viewerBar.removeChild(viewerBar.firstChild)
-                }
-
+                
                 //Set viewer bar to only appear when other elements are created
                 viewerBar.setAttribute('style', 'background-color:white;')
                 

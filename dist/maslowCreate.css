@@ -19,25 +19,45 @@
 #headerBar {
   position:absolute;
   height:17px;
-  width:100%; 
+  width:40%; 
   top:0px;
-  left:0px;
-  background: #2C2C2C;
+  right:0px;
+  background: #2C2C2C80 ;
   padding:5px 0px 5px 5px;
   display:inline;
-  border-bottom: 1px solid #E5E4E5;
 }
+
+#headerBar p {
+  color: white;
+  display:inline;
+  font-size: .8em;
+  padding:1em;
+}
+
+#headerBar_title {
+  font-size: 1em;
+  margin:0;
+  margin-right:5px;
+  display:inline;
+  float: left;
+}
+
 #top_button_wrap{
+  opacity:0.5;
   margin-top: -5px;
   padding:3px;
   display:inline;
-  background:grey;
   float:right;
 }
+
+#top_button_wrap:hover {
+   opacity:1;
+   }
 
 .top_buttons{
   display:inline;
   margin-right:5px;
+  border:none;
 }
 
 #viewer_bar{
@@ -56,21 +76,6 @@
   display:inline-block;
   margin-top:0px;
   padding:5px;
-}
-
-#headerBar p {
-  color: white;
-  display:inline;
-  font-size: .8em;
-  padding:1em;
-}
-
-#headerBar_title {
-  font-size: 1em;
-  margin:0;
-  margin-right:30px;
-  display:inline;
-  float: right;
 }
 
 #left_bar{
