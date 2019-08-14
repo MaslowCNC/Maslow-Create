@@ -27,6 +27,18 @@
   display:inline;
   border-bottom: 1px solid #E5E4E5;
 }
+#top_button_wrap{
+  margin-top: -5px;
+  padding:3px;
+  display:inline;
+  background:grey;
+  float:right;
+}
+
+.top_buttons{
+  display:inline;
+  margin-right:5px;
+}
 
 #viewer_bar{
   color:black;
@@ -39,9 +51,6 @@
   font-size:.7em;
   margin-right:5%;
 }
-
-
-
 
 #viewer_bar p, #viewer_bar div{
   display:inline-block;

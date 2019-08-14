@@ -251,8 +251,7 @@ export default class Molecule extends Atom{
                 }
             })
         }
-        
-                
+                    
         this.displaySimpleBOM(valueList)
         
         return valueList
