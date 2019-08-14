@@ -426,7 +426,7 @@ export default class Atom {
         //add the name as of parent molecule title  -- to the top bar -- permanently
         if (this.atomType == 'Molecule' ){
             let headerBar_title = document.querySelector('#headerBar_title')
-             while (headerBar_title.firstChild) {
+            while (headerBar_title.firstChild) {
                 headerBar_title.removeChild(headerBar_title.firstChild)
             }
            

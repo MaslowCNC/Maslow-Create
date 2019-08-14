@@ -101,24 +101,26 @@ window.addEventListener('keydown', event => {
     })
 })
 
-//Top Button menu event listeners 
+/**
+ * Top Button menu event listeners 
+ */ 
 
 let githubButton = document.getElementById('github_top')
-githubButton.addEventListener('mousedown', event => {
+githubButton.addEventListener('mousedown', () => {
     GlobalVariables.gitHub.openGitHubPage()
-    })
+})
 let otherProjectsButton = document.getElementById('projectmenu_top')
-githubButton.addEventListener('mousedown', event => {
+otherProjectsButton.addEventListener('mousedown', () => {
     GlobalVariables.gitHub.showProjectsToLoad()
-    })
+})
 let shareButton = document.getElementById('share_top')
-githubButton.addEventListener('mousedown', event => {
+shareButton.addEventListener('mousedown', () => {
     GlobalVariables.gitHub.shareOpenedProject()
-    })
+})
 let bomButton = document.getElementById('bom_top')
-githubButton.addEventListener('mousedown', event => {
+bomButton.addEventListener('mousedown', () => {
     GlobalVariables.gitHub.openBillOfMaterialsPage()
-    })
+})
 
 // Implementation
 /**
