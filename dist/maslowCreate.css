@@ -29,24 +29,24 @@
 }
 
 #viewer_bar{
-  background-color: white;
   color:black;
   float:right;
   position:relative;
-  height:30px;
+  height:35px;
   width:40%; 
   bottom:35px;
   left:0px;
   font-size:.7em;
-  margin-right:10px;
+  margin-right:5%;
 }
 
 
 
 
-#viewer_bar p, #viewer_bar input{
-  display:inline;
-  padding:4px;
+#viewer_bar p, #viewer_bar div{
+  display:inline-block;
+  margin-top:0px;
+  padding:5px;
 }
 
 #headerBar p {
@@ -444,6 +444,7 @@ input.menu_search:focus {
     align-items: center;
     flex-flow: column;
     transform: translate(-50%, -50%);
+    z-index:10;
 }
 
 .login-popup.off{

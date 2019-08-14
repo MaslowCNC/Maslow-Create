@@ -327,11 +327,14 @@ export default class Display {
                 while (viewerBar.firstChild) {
                     viewerBar.removeChild(viewerBar.firstChild)
                 }
+
+                //Set viewer bar to only appear when other elements are created
+                viewerBar.setAttribute('style', 'background-color:white;')
                 
                 //Grid display html element
                 var name = document.createElement('p')
                 name.textContent = "3D VIEW"
-                name.setAttribute('style', 'padding-right:0px;')
+                name.setAttribute('style', 'padding: 5px 0px 0px 5px')
                 viewerBar.appendChild(name)
 
                 var gridDiv = document.createElement('div')
