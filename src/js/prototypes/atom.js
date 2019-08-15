@@ -431,7 +431,7 @@ export default class Atom {
             }
            
             var name1 = document.createElement('p')
-            name1.textContent = this.name
+            name1.textContent = "- " + this.name
             headerBar_title.appendChild(name1)
         }
         
