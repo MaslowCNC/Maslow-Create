@@ -193,7 +193,7 @@ export default class Molecule extends Atom{
         if(!this.topLevel){
             this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
             
-            this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
+            //this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
         }
         else{ //If we are the top level molecule and not in run mode
             this.createButton(valueList,this,'Load A Different Project',() => {
