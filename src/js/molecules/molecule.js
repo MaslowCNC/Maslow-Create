@@ -244,10 +244,10 @@ export default class Molecule extends Atom{
         
         //removes 3d view menu on background click
         let viewerBar = document.querySelector('#viewer_bar')
-                while (viewerBar.firstChild) {
-                    viewerBar.removeChild(viewerBar.firstChild)
-                    viewerBar.setAttribute('style', 'background-color:none;')
-                }
+            while (viewerBar.firstChild) {
+                viewerBar.removeChild(viewerBar.firstChild)
+                viewerBar.setAttribute('style', 'background-color:none;')
+            }
 
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
             //Add options to set all of the inputs
