@@ -78,26 +78,28 @@ export default class Assembly extends Atom{
         var sideBar = super.updateSidebar()
         
         this.inputs.forEach(input => {
-            this.createCheckbox(sideBar,input.name,true,(event)=>{
-                var updatedValue = input.getValue()
-                
-                if(!event.target.checked){ //If the box has just been unchecked
-                    if(updatedValue.tags){
-                        updatedValue.tags.push("user/cutAway")
+            if(input.connectors.length != 0){
+                this.createCheckbox(sideBar,input.name,true,(event)=>{
+                    var updatedValue = input.getValue()
+                    
+                    if(!event.target.checked){ //If the box has just been unchecked
+                        if(updatedValue.tags){
+                            updatedValue.tags.push("user/cutAway")
+                        }
+                        else{
+                            updatedValue.tags = ["user/cutAway"]
+                        }
+                        input.setValue(updatedValue)
                     }
                     else{
-                        updatedValue.tags = ["user/cutAway"]
+                        var index = updatedValue.tags.indexOf("user/cutAway")
+                        if (index > -1) {
+                            updatedValue.tags.splice(index, 1)
+                        }
+                        input.setValue(updatedValue)
                     }
-                    input.setValue(updatedValue)
-                }
-                else{
-                    var index = updatedValue.tags.indexOf("user/cutAway")
-                    if (index > -1) {
-                        updatedValue.tags.splice(index, 1)
-                    }
-                    input.setValue(updatedValue)
-                }
-            })
+                })
+            }
         })
         
         //Add a checkbox for deciding if the cutaway geometry should be kept
