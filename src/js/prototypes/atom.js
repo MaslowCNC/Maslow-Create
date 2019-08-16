@@ -809,7 +809,7 @@ export default class Atom {
      * @param {string} buttonText - The text on the button.
      * @param {object} functionToCall - The function to call when the button is pressed.
      */ 
-    createCheckbox(sideBar,text,callback){
+    createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement('div')
         sideBar.appendChild(gridDiv)
         gridDiv.setAttribute('id', 'gridDiv')
@@ -817,7 +817,11 @@ export default class Atom {
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
         gridCheck.setAttribute('id', 'gridCheck')
-        gridCheck.setAttribute('checked', 'true')
+        
+        if (isChecked){
+            gridCheck.setAttribute('checked', 'true')
+        }
+        
 
         var gridCheckLabel = document.createElement('label')
         gridDiv.appendChild(gridCheckLabel)
