@@ -1,3 +1,4 @@
+import { create, all }  from 'mathjs'
 import Assembly         from './molecules/assembly.js'
 import CutAway          from './molecules/cutaway.js'
 import Circle           from './molecules/circle.js'
@@ -138,6 +139,21 @@ class GlobalVariables{
              */
             this.render = result.ask
         })
+        
+        const math = create(all)
+        /** 
+         * An evaluator for strings as mathmatical equations which is sandboxed and secure.
+         * @type {function}
+         */
+        this.limitedEvaluate = math.evaluate
+        math.import({
+            'import':     function () { throw new Error('Function import is disabled') },
+            'createUnit': function () { throw new Error('Function createUnit is disabled') },
+            'evaluate':   function () { throw new Error('Function evaluate is disabled') },
+            'parse':      function () { throw new Error('Function parse is disabled') },
+            'simplify':   function () { throw new Error('Function simplify is disabled') },
+            'derivative': function () { throw new Error('Function derivative is disabled') }
+        }, { override: true })
     }
     
     /** 

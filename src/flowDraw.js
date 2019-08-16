@@ -67,6 +67,8 @@ flowCanvas.addEventListener('mousedown', event => {
     
 })
 
+
+
 flowCanvas.addEventListener('dblclick', event => {
     //every time the mouse button goes down
     
@@ -99,6 +101,28 @@ window.addEventListener('keydown', event => {
     })
 })
 
+/**
+ * Top Button menu event listeners if not in run mode
+ */ 
+
+if (!GlobalVariables.runMode){
+    let githubButton = document.getElementById('github_top')
+    githubButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.openGitHubPage()
+    })
+    let otherProjectsButton = document.getElementById('projectmenu_top')
+    otherProjectsButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.showProjectsToLoad()
+    })
+    let shareButton = document.getElementById('share_top')
+    shareButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.shareOpenedProject()
+    })
+    let bomButton = document.getElementById('bom_top')
+    bomButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.openBillOfMaterialsPage()
+    })
+}
 
 // Implementation
 /**

@@ -190,12 +190,18 @@ export default class Molecule extends Atom{
         
         var valueList = super.initializeSideBar() 
         
+        this.createEditableValueListItem(valueList,this,'name', 'Name', false)
+
         if(!this.topLevel){
             this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
             
-            this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
+            //this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
         }
         else{ //If we are the top level molecule and not in run mode
+
+            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
+            
+            
             this.createButton(valueList,this,'Load A Different Project',() => {
                 GlobalVariables.gitHub.showProjectsToLoad()
             })
@@ -216,7 +222,6 @@ export default class Molecule extends Atom{
                 GlobalVariables.gitHub.openBillOfMaterialsPage()
             })
             
-            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
             
         }
         
@@ -237,8 +242,12 @@ export default class Molecule extends Atom{
         // })
         // })
         
-        this.createEditableValueListItem(valueList,this,'name', 'Name', false)
-        
+        //removes 3d view menu on background click
+        let viewerBar = document.querySelector('#viewer_bar')
+        while (viewerBar.firstChild) {
+            viewerBar.removeChild(viewerBar.firstChild)
+            viewerBar.setAttribute('style', 'background-color:none;')
+        }
 
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
             //Add options to set all of the inputs
@@ -248,8 +257,7 @@ export default class Molecule extends Atom{
                 }
             })
         }
-        
-                
+                    
         this.displaySimpleBOM(valueList)
         
         return valueList
