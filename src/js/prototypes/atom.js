@@ -658,7 +658,7 @@ export default class Atom {
         document.getElementById(thisID).addEventListener('focusout', () => {
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
-                valueInBox = parseFloat(valueInBox)
+                valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
             }
             
             //If the target is an attachmentPoint then call the setter function

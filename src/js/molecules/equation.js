@@ -78,7 +78,7 @@ export default class Equation extends Atom {
                 
                 
                 //Evaluate the equation
-                this.value = eval(substitutedEquation)
+                this.value = GlobalVariables.limitedEvaluate(substitutedEquation)
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
