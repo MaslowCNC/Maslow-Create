@@ -8,3 +8,4 @@ dist/documentation/*
 dist/index.html
 coverage
 .nyc_output/*
+/.gtm/

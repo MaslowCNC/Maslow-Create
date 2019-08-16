@@ -294,7 +294,7 @@ export default class Display {
          * @type {object}
          */
         this.scene = new THREE.Scene()
-        this.scene.background = new THREE.Color(0xB0AEB0)
+        this.scene.background = new THREE.Color(0xE5E4E5)
         this.scene.add(this.camera)
         //
         var ambientLight = new THREE.AmbientLight(0x222222)
@@ -323,24 +323,25 @@ export default class Display {
 
         this.targetDiv.addEventListener('mousedown', () => {
             if(!GlobalVariables.runMode){
-                let sideBar = document.querySelector('.sideBar')
-                while (sideBar.firstChild) {
-                    sideBar.removeChild(sideBar.firstChild)
-                }
+                let viewerBar = document.querySelector('#viewer_bar')
+                
+                //Set viewer bar to only appear when other elements are created
+                viewerBar.setAttribute('style', 'background-color:white;')
                 
                 //Grid display html element
-                var name = document.createElement('h1')
-                name.textContent = "3D View"
-                name.setAttribute('class','doc-title')
-                sideBar.appendChild(name)
+                var name = document.createElement('p')
+                name.textContent = "3D VIEW"
+                name.setAttribute('style', 'padding: 5px 0px 0px 5px')
+                viewerBar.appendChild(name)
 
                 var gridDiv = document.createElement('div')
-                sideBar.appendChild(gridDiv)
+                viewerBar.appendChild(gridDiv)
                 gridDiv.setAttribute('id', 'gridDiv')
                 var gridCheck = document.createElement('input')
                 gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute('type', 'checkbox')
                 gridCheck.setAttribute('id', 'gridCheck')
+                gridDiv.setAttribute('style', 'float:right;')
                
                 if (this.displayGrid){
                     gridCheck.setAttribute('checked', 'true')
@@ -351,6 +352,7 @@ export default class Display {
                 gridCheckLabel.setAttribute('for', 'gridCheck')
                 gridCheckLabel.setAttribute('style', 'margin-right:1em;')
                 gridCheckLabel.textContent= "Grid"
+
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
@@ -366,7 +368,7 @@ export default class Display {
                 //Axes Html
 
                 var axesDiv = document.createElement('div')
-                sideBar.appendChild(axesDiv)
+                viewerBar.appendChild(axesDiv)
                 var axesCheck = document.createElement('input')
                 axesDiv.appendChild(axesCheck)
                 axesCheck.setAttribute('type', 'checkbox')
@@ -380,6 +382,7 @@ export default class Display {
                 axesDiv.appendChild(axesCheckLabel)
                 axesCheckLabel.setAttribute('for', 'axesCheck')
                 axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+                axesDiv.setAttribute('style', 'float:right;')
                 axesCheckLabel.textContent= "Axes"
 
                 axesCheck.addEventListener('change', event => {
@@ -396,7 +399,7 @@ export default class Display {
                 //Wireframe HTML element
 
                 var wireDiv = document.createElement('div')
-                sideBar.appendChild(wireDiv)
+                viewerBar.appendChild(wireDiv)
                 wireDiv.setAttribute('id', 'wireDiv')
                 var wireCheck = document.createElement('input')
                 wireDiv.appendChild(wireCheck)
@@ -411,7 +414,8 @@ export default class Display {
                 var wireCheckLabel = document.createElement('label')
                 wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute('for', 'wireCheck')
-                wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+                //wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+                wireDiv.setAttribute('style', 'float:right;')
                 wireCheckLabel.textContent= "Wireframe"
 
                 wireCheck.addEventListener('change', event => {

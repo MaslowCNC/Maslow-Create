@@ -37,7 +37,7 @@ export default class Atom {
          * This atom's radius as displayed on the screen
          * @type {number}
          */
-        this.radius = 20
+        this.radius = 16
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}
@@ -418,12 +418,22 @@ export default class Atom {
         while (sideBar.firstChild) {
             sideBar.removeChild(sideBar.firstChild)
         }
-        
-        //add the name as a title
-        var name = document.createElement('h1')
-        name.textContent = this.name
-        name.setAttribute('class','doc-title')
-        sideBar.appendChild(name)
+
+        var name2 = document.createElement('p')
+        name2.textContent = this.name
+        sideBar.appendChild(name2)
+
+        //add the name as of parent molecule title  -- to the top bar -- permanently
+        if (this.atomType == 'Molecule' ){
+            let headerBar_title = document.querySelector('#headerBar_title')
+            while (headerBar_title.firstChild) {
+                headerBar_title.removeChild(headerBar_title.firstChild)
+            }
+           
+            var name1 = document.createElement('p')
+            name1.textContent = "- " + this.name
+            headerBar_title.appendChild(name1)
+        }
         
         //Create a list element
         var valueList = document.createElement('ul')
