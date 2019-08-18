@@ -413,6 +413,7 @@ export default class Atom {
      * Initialized the sidebar with a title and create the HTML object.
      */ 
     initializeSideBar(){
+
         //remove everything in the sideBar now
         let sideBar = document.querySelector('.sideBar')
         while (sideBar.firstChild) {

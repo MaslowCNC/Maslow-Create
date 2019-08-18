@@ -201,7 +201,7 @@ export default class Molecule extends Atom{
 
             this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
             
-            
+            /*
             this.createButton(valueList,this,'Load A Different Project',() => {
                 GlobalVariables.gitHub.showProjectsToLoad()
             })
@@ -221,6 +221,7 @@ export default class Molecule extends Atom{
             this.createButton(valueList,this,'Bill Of Materials',() => {
                 GlobalVariables.gitHub.openBillOfMaterialsPage()
             })
+            */
             
             
         }

@@ -122,6 +122,10 @@ if (!GlobalVariables.runMode){
     bomButton.addEventListener('mousedown', () => {
         GlobalVariables.gitHub.openBillOfMaterialsPage()
     })
+    let readButton = document.getElementById('read_top')
+    readButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.openREADMEPage()
+    })
 }
 
 // Implementation
