@@ -174,9 +174,21 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/stl.js~stl",
+    "class/src/js/molecules/stl.js~Stl.html",
+    "<span>Stl</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/stl.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/stretch.js~stretch",
     "class/src/js/molecules/stretch.js~Stretch.html",
     "<span>Stretch</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/stretch.js</span>",
+    "class"
+  ],
+  [
+    "canvas-template/src/js/molecules/svg.js~svg",
+    "class/src/js/molecules/svg.js~Svg.html",
+    "<span>Svg</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/svg.js</span>",
     "class"
   ],
   [
@@ -810,6 +822,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#limitedevaluate",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-limitedEvaluate",
+    "src/js/globalvariables.js~GlobalVariables#limitedEvaluate",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#render",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-render",
     "src/js/globalvariables.js~GlobalVariables#render",
@@ -1002,6 +1020,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/assembly.js~assembly#removecutawaygeometry",
+    "class/src/js/molecules/assembly.js~Assembly.html#instance-member-removeCutawayGeometry",
+    "src/js/molecules/assembly.js~Assembly#removeCutawayGeometry",
+    "member"
+  ],
+  [
     "src/js/molecules/assembly.js~assembly#serialize",
     "class/src/js/molecules/assembly.js~Assembly.html#instance-method-serialize",
     "src/js/molecules/assembly.js~Assembly#serialize",
@@ -1173,6 +1197,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/constant.js~constant#updatesidebar",
     "class/src/js/molecules/constant.js~Constant.html#instance-method-updateSidebar",
     "src/js/molecules/constant.js~Constant#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#updatevalue",
+    "class/src/js/molecules/constant.js~Constant.html#instance-method-updateValue",
+    "src/js/molecules/constant.js~Constant#updateValue",
     "method"
   ],
   [
@@ -1539,6 +1569,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/input.js~input#updatesidebar",
     "class/src/js/molecules/input.js~Input.html#instance-method-updateSidebar",
     "src/js/molecules/input.js~Input#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/input.js~input#updatevalue",
+    "class/src/js/molecules/input.js~Input.html#instance-method-updateValue",
+    "src/js/molecules/input.js~Input#updateValue",
     "method"
   ],
   [
@@ -2076,6 +2112,54 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/stl.js",
+    "file/src/js/molecules/stl.js.html",
+    "src/js/molecules/stl.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#atomtype",
+    "class/src/js/molecules/stl.js~Stl.html#instance-member-atomType",
+    "src/js/molecules/stl.js~Stl#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#constructor",
+    "class/src/js/molecules/stl.js~Stl.html#instance-constructor-constructor",
+    "src/js/molecules/stl.js~Stl#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#downloadstl",
+    "class/src/js/molecules/stl.js~Stl.html#instance-method-downloadStl",
+    "src/js/molecules/stl.js~Stl#downloadStl",
+    "method"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#name",
+    "class/src/js/molecules/stl.js~Stl.html#instance-member-name",
+    "src/js/molecules/stl.js~Stl#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#updatesidebar",
+    "class/src/js/molecules/stl.js~Stl.html#instance-method-updateSidebar",
+    "src/js/molecules/stl.js~Stl#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#updatevalue",
+    "class/src/js/molecules/stl.js~Stl.html#instance-method-updateValue",
+    "src/js/molecules/stl.js~Stl#updateValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#value",
+    "class/src/js/molecules/stl.js~Stl.html#instance-member-value",
+    "src/js/molecules/stl.js~Stl#value",
+    "member"
+  ],
+  [
     "src/js/molecules/stretch.js",
     "file/src/js/molecules/stretch.js.html",
     "src/js/molecules/stretch.js",
@@ -2104,6 +2188,54 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/stretch.js~Stretch.html#instance-method-updateValue",
     "src/js/molecules/stretch.js~Stretch#updateValue",
     "method"
+  ],
+  [
+    "src/js/molecules/svg.js",
+    "file/src/js/molecules/svg.js.html",
+    "src/js/molecules/svg.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#atomtype",
+    "class/src/js/molecules/svg.js~Svg.html#instance-member-atomType",
+    "src/js/molecules/svg.js~Svg#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#constructor",
+    "class/src/js/molecules/svg.js~Svg.html#instance-constructor-constructor",
+    "src/js/molecules/svg.js~Svg#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#downloadsvg",
+    "class/src/js/molecules/svg.js~Svg.html#instance-method-downloadSvg",
+    "src/js/molecules/svg.js~Svg#downloadSvg",
+    "method"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#name",
+    "class/src/js/molecules/svg.js~Svg.html#instance-member-name",
+    "src/js/molecules/svg.js~Svg#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#updatesidebar",
+    "class/src/js/molecules/svg.js~Svg.html#instance-method-updateSidebar",
+    "src/js/molecules/svg.js~Svg#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#updatevalue",
+    "class/src/js/molecules/svg.js~Svg.html#instance-method-updateValue",
+    "src/js/molecules/svg.js~Svg#updateValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/svg.js~svg#value",
+    "class/src/js/molecules/svg.js~Svg.html#instance-member-value",
+    "src/js/molecules/svg.js~Svg#value",
+    "member"
   ],
   [
     "src/js/molecules/tag.js",

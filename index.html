@@ -17,7 +17,25 @@
  	
 </head>
 <body>
-    
+    <div id= doc-frame>
+        <div id="left_bar"></div>
+        <div id="right_bar"></div>
+    </div>
+     <div id= "headerBar">
+        <img class="thumnail-logo" src='/imgs/maslow-logo.png' alt="logo">
+        <p> Maslow Create</p> 
+        <div id="headerBar_title"></div> 
+        <div id="top_button_wrap">
+            <button class="top_buttons" type="button" id = "projectmenu_top" title="Open projects"> <img class="thumnail-logo" src='/imgs/open-logo.png' alt="Load" style=" transform: scale(.67); border-radius: 0px;"> </button>
+            <button class="top_buttons" type="button" id = "save_top" title="Save"> <img class="thumnail-logo" src='/imgs/save-image.png' alt="Save" style=" transform: scale(.67); border-radius: 0px;"> </button>            
+            <button class="top_buttons" type="button" id = "share_top" title="Share" > <img class="thumnail-logo" src='/imgs/share-img.png' alt="Share"> </button>
+            <button class="top_buttons" type="button" id = "goup_top" title="Go up a level"> <img class="thumnail-logo" src='/imgs/goup_img.png' alt="Go-up" style=" transform: scale(.67); border-radius: 0px;"> </button> 
+            <button class="top_buttons" type="button" id = "bom_top" title="Bill of Materials" > <img class="thumnail-logo" src='/imgs/bom-logo.png' alt="BOM"> </button>
+            <button class="top_buttons" type="button" id = "read_top" title="Read Me"> <img class="thumnail-logo" src='/imgs/read_img.png' alt="Read-me" style=" transform: scale(.67); border-radius: 0px;"> </button> 
+            <button class="top_buttons" type="button" id = "github_top" title="GitHub"> <img class="thumnail-logo" src='/imgs/github-logo.png' alt="Git" > </button>
+        </div>  
+        
+    </div> 
     <!-- The menu for creating a new drawing node -->
     <ul class="menu ">
         <div class="tab">
@@ -46,19 +64,20 @@
         </div>
     </div>
     <!-- Draw the canvas for creating the design -->
-    <canvas id = "flow-canvas" style="background-image: linear-gradient(#949294, #B0AEB0);;"></canvas>
-    <div class='parent flex-parent' id = "lowerHalf">
-        
+    <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
+    <div class='parent flex-parent' id = "lowerHalf">     
         <!-- setup display of the errors as required by OpenJSCAD.js -->
         <div class="jscad-container"> 
             <!-- setup display of the viewer, i.e. canvas -->
             <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
+            <div id="viewer_bar"></div>  
         </div>
         
         
         <div class="sideBar">
             Maslow Create
         </div>
+        <div id="bottom_bar"></div>
     </div>
     
     <!-- CodeMirror -->

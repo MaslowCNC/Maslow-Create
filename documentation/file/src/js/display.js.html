@@ -59,7 +59,9 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stl.js~Stl.html">Stl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
@@ -367,7 +369,7 @@ export default class Display {
          * @type {object}
          */
         this.scene = new THREE.Scene()
-        this.scene.background = new THREE.Color(0xB0AEB0)
+        this.scene.background = new THREE.Color(0xE5E4E5)
         this.scene.add(this.camera)
         //
         var ambientLight = new THREE.AmbientLight(0x222222)
@@ -396,24 +398,25 @@ export default class Display {
 
         this.targetDiv.addEventListener(&apos;mousedown&apos;, () =&gt; {
             if(!GlobalVariables.runMode){
-                let sideBar = document.querySelector(&apos;.sideBar&apos;)
-                while (sideBar.firstChild) {
-                    sideBar.removeChild(sideBar.firstChild)
-                }
+                let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
+                
+                //Set viewer bar to only appear when other elements are created
+                viewerBar.setAttribute(&apos;style&apos;, &apos;background-color:white;&apos;)
                 
                 //Grid display html element
-                var name = document.createElement(&apos;h1&apos;)
-                name.textContent = &quot;3D View&quot;
-                name.setAttribute(&apos;class&apos;,&apos;doc-title&apos;)
-                sideBar.appendChild(name)
+                var name = document.createElement(&apos;p&apos;)
+                name.textContent = &quot;3D VIEW&quot;
+                name.setAttribute(&apos;style&apos;, &apos;padding: 5px 0px 0px 5px&apos;)
+                viewerBar.appendChild(name)
 
                 var gridDiv = document.createElement(&apos;div&apos;)
-                sideBar.appendChild(gridDiv)
+                viewerBar.appendChild(gridDiv)
                 gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)
                 var gridCheck = document.createElement(&apos;input&apos;)
                 gridDiv.appendChild(gridCheck)
                 gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
                 gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+                gridDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
                
                 if (this.displayGrid){
                     gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
@@ -424,6 +427,7 @@ export default class Display {
                 gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
                 gridCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
                 gridCheckLabel.textContent= &quot;Grid&quot;
+
 
                 gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
                     if(event.target.checked){
@@ -439,7 +443,7 @@ export default class Display {
                 //Axes Html
 
                 var axesDiv = document.createElement(&apos;div&apos;)
-                sideBar.appendChild(axesDiv)
+                viewerBar.appendChild(axesDiv)
                 var axesCheck = document.createElement(&apos;input&apos;)
                 axesDiv.appendChild(axesCheck)
                 axesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
@@ -453,6 +457,7 @@ export default class Display {
                 axesDiv.appendChild(axesCheckLabel)
                 axesCheckLabel.setAttribute(&apos;for&apos;, &apos;axesCheck&apos;)
                 axesCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+                axesDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
                 axesCheckLabel.textContent= &quot;Axes&quot;
 
                 axesCheck.addEventListener(&apos;change&apos;, event =&gt; {
@@ -469,7 +474,7 @@ export default class Display {
                 //Wireframe HTML element
 
                 var wireDiv = document.createElement(&apos;div&apos;)
-                sideBar.appendChild(wireDiv)
+                viewerBar.appendChild(wireDiv)
                 wireDiv.setAttribute(&apos;id&apos;, &apos;wireDiv&apos;)
                 var wireCheck = document.createElement(&apos;input&apos;)
                 wireDiv.appendChild(wireCheck)
@@ -484,7 +489,8 @@ export default class Display {
                 var wireCheckLabel = document.createElement(&apos;label&apos;)
                 wireDiv.appendChild(wireCheckLabel)
                 wireCheckLabel.setAttribute(&apos;for&apos;, &apos;wireCheck&apos;)
-                wireCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:10em;&apos;)
+                //wireCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:10em;&apos;)
+                wireDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
                 wireCheckLabel.textContent= &quot;Wireframe&quot;
 
                 wireCheck.addEventListener(&apos;change&apos;, event =&gt; {

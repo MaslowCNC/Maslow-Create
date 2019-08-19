@@ -59,7 +59,9 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stl.js~Stl.html">Stl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
@@ -140,6 +142,8 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     
 })
 
+
+
 flowCanvas.addEventListener(&apos;dblclick&apos;, event =&gt; {
     //every time the mouse button goes down
     
@@ -172,6 +176,28 @@ window.addEventListener(&apos;keydown&apos;, event =&gt; {
     })
 })
 
+/**
+ * Top Button menu event listeners if not in run mode
+ */ 
+
+if (!GlobalVariables.runMode){
+    let githubButton = document.getElementById(&apos;github_top&apos;)
+    githubButton.addEventListener(&apos;mousedown&apos;, () =&gt; {
+        GlobalVariables.gitHub.openGitHubPage()
+    })
+    let otherProjectsButton = document.getElementById(&apos;projectmenu_top&apos;)
+    otherProjectsButton.addEventListener(&apos;mousedown&apos;, () =&gt; {
+        GlobalVariables.gitHub.showProjectsToLoad()
+    })
+    let shareButton = document.getElementById(&apos;share_top&apos;)
+    shareButton.addEventListener(&apos;mousedown&apos;, () =&gt; {
+        GlobalVariables.gitHub.shareOpenedProject()
+    })
+    let bomButton = document.getElementById(&apos;bom_top&apos;)
+    bomButton.addEventListener(&apos;mousedown&apos;, () =&gt; {
+        GlobalVariables.gitHub.openBillOfMaterialsPage()
+    })
+}
 
 // Implementation
 /**

@@ -1,7 +1,7 @@
 {
-  "coverage": "99.25%",
-  "expectCount": 402,
-  "actualCount": 399,
+  "coverage": "99.28%",
+  "expectCount": 422,
+  "actualCount": 419,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 5,
@@ -32,10 +32,10 @@
       "undocumentLines": []
     },
     "src/js/globalvariables.js": {
-      "expectCount": 16,
-      "actualCount": 15,
+      "expectCount": 17,
+      "actualCount": 16,
       "undocumentLines": [
-        59
+        62
       ]
     },
     "src/js/menu.js": {
@@ -44,8 +44,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/assembly.js": {
-      "expectCount": 8,
-      "actualCount": 8,
+      "expectCount": 9,
+      "actualCount": 9,
       "undocumentLines": []
     },
     "src/js/molecules/BOM.js": {
@@ -64,8 +64,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/constant.js": {
-      "expectCount": 11,
-      "actualCount": 11,
+      "expectCount": 12,
+      "actualCount": 12,
       "undocumentLines": []
     },
     "src/js/molecules/cutaway.js": {
@@ -99,8 +99,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/input.js": {
-      "expectCount": 17,
-      "actualCount": 17,
+      "expectCount": 18,
+      "actualCount": 18,
       "undocumentLines": []
     },
     "src/js/molecules/intersection.js": {
@@ -148,9 +148,19 @@
       "actualCount": 9,
       "undocumentLines": []
     },
+    "src/js/molecules/stl.js": {
+      "expectCount": 8,
+      "actualCount": 8,
+      "undocumentLines": []
+    },
     "src/js/molecules/stretch.js": {
       "expectCount": 5,
       "actualCount": 5,
+      "undocumentLines": []
+    },
+    "src/js/molecules/svg.js": {
+      "expectCount": 8,
+      "actualCount": 8,
       "undocumentLines": []
     },
     "src/js/molecules/tag.js": {
