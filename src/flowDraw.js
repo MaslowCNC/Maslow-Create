@@ -126,6 +126,16 @@ if (!GlobalVariables.runMode){
     readButton.addEventListener('mousedown', () => {
         GlobalVariables.gitHub.openREADMEPage()
     })
+    let saveButton = document.getElementById('save_top')
+    saveButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.saveProject()
+    })
+    let parentButton = document.getElementById('goup_top')
+    parentButton.addEventListener('mousedown', () => {
+        if(!GlobalVariables.currentMolecule.topLevel){
+            GlobalVariables.currentMolecule.goToParentMolecule()  
+        }
+    })
 }
 
 // Implementation
