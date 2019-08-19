@@ -37,7 +37,7 @@ export default class Atom {
          * This atom's radius as displayed on the screen
          * @type {number}
          */
-        this.radius = 20
+        this.radius = 16
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}
@@ -418,12 +418,22 @@ export default class Atom {
         while (sideBar.firstChild) {
             sideBar.removeChild(sideBar.firstChild)
         }
-        
-        //add the name as a title
-        var name = document.createElement('h1')
-        name.textContent = this.name
-        name.setAttribute('class','doc-title')
-        sideBar.appendChild(name)
+
+        var name2 = document.createElement('p')
+        name2.textContent = this.name
+        sideBar.appendChild(name2)
+
+        //add the name as of parent molecule title  -- to the top bar -- permanently
+        if (this.atomType == 'Molecule' ){
+            let headerBar_title = document.querySelector('#headerBar_title')
+            while (headerBar_title.firstChild) {
+                headerBar_title.removeChild(headerBar_title.firstChild)
+            }
+           
+            var name1 = document.createElement('p')
+            name1.textContent = "- " + this.name
+            headerBar_title.appendChild(name1)
+        }
         
         //Create a list element
         var valueList = document.createElement('ul')
@@ -507,7 +517,7 @@ export default class Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        this.displayAndPropogate()
+        
     }
     
     /**
@@ -648,7 +658,7 @@ export default class Atom {
         document.getElementById(thisID).addEventListener('focusout', () => {
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
-                valueInBox = parseFloat(valueInBox)
+                valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
             }
             
             //If the target is an attachmentPoint then call the setter function
@@ -787,7 +797,7 @@ export default class Atom {
         
         button.addEventListener(
             'mousedown',
-            function() { functionToCall(parent) } ,
+            function() { functionToCall() } ,
             false
         )
     }
@@ -799,7 +809,7 @@ export default class Atom {
      * @param {string} buttonText - The text on the button.
      * @param {object} functionToCall - The function to call when the button is pressed.
      */ 
-    createCheckbox(sideBar,text,callback){
+    createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement('div')
         sideBar.appendChild(gridDiv)
         gridDiv.setAttribute('id', 'gridDiv')
@@ -807,7 +817,11 @@ export default class Atom {
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
         gridCheck.setAttribute('id', 'gridCheck')
-        gridCheck.setAttribute('checked', 'true')
+        
+        if (isChecked){
+            gridCheck.setAttribute('checked', 'true')
+        }
+        
 
         var gridCheckLabel = document.createElement('label')
         gridDiv.appendChild(gridCheckLabel)

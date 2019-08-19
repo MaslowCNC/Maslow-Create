@@ -1,3 +1,4 @@
+import { create, all }  from 'mathjs'
 import Assembly         from './molecules/assembly.js'
 import CutAway          from './molecules/cutaway.js'
 import Circle           from './molecules/circle.js'
@@ -9,6 +10,8 @@ import Tag              from './molecules/tag.js'
 import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
 import Scale            from './molecules/scale.js'
+import Stl              from './molecules/stl.js'
+import Svg              from './molecules/svg.js'
 import Union            from './molecules/union.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
@@ -72,6 +75,8 @@ class GlobalVariables{
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon'},
             extrude:            {creator: Extrude, atomType: 'Extrude'},
             scale:              {creator: Scale, atomType: 'Scale'},
+            stl:                {creator: Stl, atomType: 'Stl'},
+            svg:                {creator: Svg, atomType: 'Svg'},
             intersection:       {creator: Intersection, atomType: 'Intersection'},
             difference:         {creator: Difference, atomType: 'Difference'},
             costant:            {creator: Constant, atomType: 'Constant'},
@@ -134,6 +139,21 @@ class GlobalVariables{
              */
             this.render = result.ask
         })
+        
+        const math = create(all)
+        /** 
+         * An evaluator for strings as mathmatical equations which is sandboxed and secure.
+         * @type {function}
+         */
+        this.limitedEvaluate = math.evaluate
+        math.import({
+            'import':     function () { throw new Error('Function import is disabled') },
+            'createUnit': function () { throw new Error('Function createUnit is disabled') },
+            'evaluate':   function () { throw new Error('Function evaluate is disabled') },
+            'parse':      function () { throw new Error('Function parse is disabled') },
+            'simplify':   function () { throw new Error('Function simplify is disabled') },
+            'derivative': function () { throw new Error('Function derivative is disabled') }
+        }, { override: true })
     }
     
     /** 

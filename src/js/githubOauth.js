@@ -89,6 +89,17 @@ export default function GitHubModule(){
         popup.classList.remove('off')
         popup.setAttribute("style", "text-align: center")
         
+        if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
+            var closeButton = document.createElement("button")
+            closeButton.appendChild(document.createTextNode("X"))
+            closeButton.setAttribute("class", "closeButton")
+            closeButton.style.fontSize = "xx-large"
+            closeButton.addEventListener("click", () => {
+                popup.classList.add('off')
+            })
+            popup.appendChild(closeButton)
+        }
+        
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
         tabButtons.setAttribute("style", "display: inline-block;")
@@ -549,6 +560,7 @@ export default function GitHubModule(){
                         bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
                     })
                     bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                    bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                     
                     
                     var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n"
