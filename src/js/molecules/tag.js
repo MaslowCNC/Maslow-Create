@@ -13,7 +13,7 @@ export default class Tag extends Atom{
         super(values)
         
         this.addIO('input', 'geometry', this, 'geometry', '')
-        this.addIO('input', 'tag', this, 'string', 'cutList')
+        this.addIO('input', 'tag', this, 'string', 'Tag String')
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         /**
