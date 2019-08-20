@@ -1,9 +1,10 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 /**
- * This class creates the tag atom.
+ * This class creates the Add To Cutlist atom.
  */
-export default class Tag extends Atom{
+export default class CutList extends Atom{
     
     /**
      * The constructor function.
@@ -13,19 +14,18 @@ export default class Tag extends Atom{
         super(values)
         
         this.addIO('input', 'geometry', this, 'geometry', '')
-        this.addIO('input', 'tag', this, 'string', 'Tag String')
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         /**
          * This atom's name
          * @type {string}
          */
-        this.name = 'Add Tag'
+        this.name = 'Add To Cutlist'
         /**
          * This atom's type
          * @type {string}
          */
-        this.atomType = 'Tag'
+        this.atomType = 'cutList'
         
         this.setValues(values)
     }
@@ -35,7 +35,7 @@ export default class Tag extends Atom{
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry'), this.findIOValue('tag')]
+            const values = [this.findIOValue('geometry'), "cutList"+GlobalVariables.generateUniqueID()]
             this.basicThreadValueProcessing(values, "tag")
         }catch(err){this.setAlert(err)}
         super.updateValue()
