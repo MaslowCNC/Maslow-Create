@@ -631,6 +631,12 @@ export default function GitHubModule(){
         })
       
         console.warn("Project saved")
+        //alert
+        let popUp = document.querySelector('#popUp')
+        popUp.setAttribute("style","display:block")
+        setTimeout(function() {
+            popUp.setAttribute("style","display:none")
+            }, 4000);
 
     }
     

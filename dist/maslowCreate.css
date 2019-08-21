@@ -18,8 +18,7 @@
 
 #headerBar {
   position:absolute;
-  height:17px;
-  width:40%; 
+  height:17px; 
   top:0px;
   right:0px;
   background: #2C2C2C80 ;
@@ -41,9 +40,20 @@
 #headerBar_title {
   font-size: 1em;
   margin:0;
-  margin-left:0px;
+  margin-left:3px;
+  margin-right: 10px;
   display:inline;
-  
+}
+
+#popUp{
+  position:absolute;
+  color:white;
+  right:10px;
+  top:30px;
+  font-size: 1em;
+  background-color:#484848;
+  border: 2px solid white;
+  padding:3px;
 }
 
 .thumnail-logo{
