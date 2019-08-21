@@ -638,7 +638,7 @@ export default class Atom {
         div.setAttribute('class', 'sidebar-item sidebar-editable-div')
         
         //Left div which displays the label
-        var labelDiv = document.createElement('div')
+        var labelDiv = document.createElement('label')
         div.appendChild(labelDiv)
         var labelText = document.createTextNode(label + ':')
         labelDiv.appendChild(labelText)
@@ -646,12 +646,12 @@ export default class Atom {
         
         
         //Right div which is editable and displays the value
-        var valueTextDiv = document.createElement('div')
-        div.appendChild(valueTextDiv)
+        var valueTextDiv = document.createElement('span')
+        labelDiv.appendChild(valueTextDiv)
         var valueText = document.createTextNode(object[key])
         valueTextDiv.appendChild(valueText)
         valueTextDiv.setAttribute('contenteditable', 'true')
-        valueTextDiv.setAttribute('class', 'sidebar-subitem editing-item')
+        valueTextDiv.setAttribute('class', 'editing-item')
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         

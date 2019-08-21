@@ -393,8 +393,10 @@ input.menu_search:focus {
 }
 
 .sidebar-item{
+    overflow: hidden;
+    margin-bottom: 30px;
     text-align:center;
-    height: 1.5rem;
+    height: 3rem;
     line-height: 1.5rem;
     font-size: 1rem;
     font-weight: 100;
@@ -422,11 +424,13 @@ input.menu_search:focus {
 .sidebar-subitem{
     display:block;
     margin-bottom: 10px;
+    height:1.5em;
 }
 
 .label-item{
-  display:inline-block;
+  display:block;
   font-size:1.1rem;
+  font-weight: 700;
   margin-left:0;
   margin-right: 5px;
   text-transform: capitalize
@@ -441,9 +445,12 @@ input.menu_search:focus {
  }
 
 .editing-item{
-  display:inline-block;
+  overflow: hidden;
+  display:inline;
+  margin-left:5px;
   padding-bottom:5px;
   min-width: 10px;
+  max-height: 1.5em;
   border-radius: 5px;
  }
 
