@@ -1,6 +1,7 @@
 import { create, all }  from 'mathjs'
 import Assembly         from './molecules/assembly.js'
 import CutAway          from './molecules/cutaway.js'
+import CutList          from './molecules/cutlist.js'
 import Circle           from './molecules/circle.js'
 import Color            from './molecules/color.js'
 import Rectangle        from './molecules/rectangle.js'
@@ -91,7 +92,8 @@ class GlobalVariables{
             stretch:            {creator: Stretch, atomType: 'Stretch'},
             gcode:              {creator: Gcode, atomType: 'Gcode'},
             code:               {creator: Code, atomType: 'Code'},
-            cutAway:            {creator: CutAway, atomType: 'CutAway'}
+            cutAway:            {creator: CutAway, atomType: 'CutAway'},
+            CutList:            {creator: CutList, atomType: 'CutList'}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.
