@@ -647,8 +647,7 @@ export default function GitHubModule(){
         popUp.setAttribute("style","display:block")
         setTimeout(function() {
             popUp.setAttribute("style","display:none")
-            }, 4000);
-
+        }, 4000)
     }
     
     /** 
