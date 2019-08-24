@@ -18,8 +18,7 @@
 
 #headerBar {
   position:absolute;
-  height:17px;
-  width:40%; 
+  height:17px; 
   top:0px;
   right:0px;
   background: #2C2C2C80 ;
@@ -41,9 +40,20 @@
 #headerBar_title {
   font-size: 1em;
   margin:0;
-  margin-left:0px;
+  margin-left:3px;
+  margin-right: 10px;
   display:inline;
-  
+}
+
+#popUp{
+  position:absolute;
+  color:white;
+  right:10px;
+  top:30px;
+  font-size: 1em;
+  background-color:#484848;
+  border: 2px solid white;
+  padding:3px;
 }
 
 .thumnail-logo{
@@ -54,7 +64,6 @@
 }
 
 #top_button_wrap{
-  opacity:0.5;
   margin-top:-5px;
   margin-left:auto;
   margin-right:10px;
@@ -62,11 +71,12 @@
   display:inline;
 }
 
-#top_button_wrap:hover {
-   opacity:1;
-   }
+.top_buttons:hover {
+  opacity:1;
+}
 
 .top_buttons{
+  opacity:.6;
   padding: 0px;
   width:20px;
   height:20px;
@@ -81,7 +91,7 @@
   float:right;
   position:relative;
   height:35px;
-  width:40%; 
+  
   bottom:35px;
   left:0px;
   font-size:.7em;
@@ -383,8 +393,10 @@ input.menu_search:focus {
 }
 
 .sidebar-item{
+    overflow: hidden;
+    margin-bottom: 30px;
     text-align:center;
-    height: 1.5rem;
+    height: 3rem;
     line-height: 1.5rem;
     font-size: 1rem;
     font-weight: 100;
@@ -412,11 +424,13 @@ input.menu_search:focus {
 .sidebar-subitem{
     display:block;
     margin-bottom: 10px;
+    height:1.5em;
 }
 
 .label-item{
-  display:inline-block;
+  display:block;
   font-size:1.1rem;
+  font-weight: 700;
   margin-left:0;
   margin-right: 5px;
   text-transform: capitalize
@@ -431,9 +445,12 @@ input.menu_search:focus {
  }
 
 .editing-item{
-  display:inline-block;
+  overflow: hidden;
+  display:inline;
+  margin-left:5px;
   padding-bottom:5px;
   min-width: 10px;
+  max-height: 1.5em;
   border-radius: 5px;
  }
 

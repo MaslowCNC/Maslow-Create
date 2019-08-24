@@ -190,7 +190,7 @@ export default class Molecule extends Atom{
         
         var valueList = super.initializeSideBar() 
         
-        this.createEditableValueListItem(valueList,this,'name', 'Name', false)
+        this.createEditableValueListItem(valueList,this,'name','Name', false)
 
         if(!this.topLevel){
             this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
@@ -200,28 +200,6 @@ export default class Molecule extends Atom{
         else{ //If we are the top level molecule and not in run mode
 
             this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
-            
-            
-            this.createButton(valueList,this,'Load A Different Project',() => {
-                GlobalVariables.gitHub.showProjectsToLoad()
-            })
-            
-            this.createButton(valueList,this,'Share This Project',() => {
-                GlobalVariables.gitHub.shareOpenedProject()
-            })
-            
-            this.createButton(valueList,this,'GitHub',() => {
-                GlobalVariables.gitHub.openGitHubPage()
-            })
-            
-            this.createButton(valueList,this,'README',() => {
-                GlobalVariables.gitHub.openREADMEPage()
-            })
-            
-            this.createButton(valueList,this,'Bill Of Materials',() => {
-                GlobalVariables.gitHub.openBillOfMaterialsPage()
-            })
-            
             
         }
         

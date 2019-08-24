@@ -322,18 +322,15 @@ export default class Display {
         this.onWindowResize()
 
         this.targetDiv.addEventListener('mousedown', () => {
-            if(!GlobalVariables.runMode){
-                let viewerBar = document.querySelector('#viewer_bar')
-                
+            let viewerBar = document.querySelector('#viewer_bar')
+
+            if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+
+                //viewerBar.removeChild(viewerBar.firstChild)
                 //Set viewer bar to only appear when other elements are created
                 viewerBar.setAttribute('style', 'background-color:white;')
                 
                 //Grid display html element
-                var name = document.createElement('p')
-                name.textContent = "3D VIEW"
-                name.setAttribute('style', 'padding: 5px 0px 0px 5px')
-                viewerBar.appendChild(name)
-
                 var gridDiv = document.createElement('div')
                 viewerBar.appendChild(gridDiv)
                 gridDiv.setAttribute('id', 'gridDiv')
