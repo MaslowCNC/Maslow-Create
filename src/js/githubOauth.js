@@ -509,6 +509,9 @@ export default function GitHubModule(){
     this.saveProject = function(){
         //Save the current project into the github repo
         if(currentRepoName != null){
+            let popUp = document.querySelector('#popUp')
+            popUp.textContent = "...saving"
+            popUp.setAttribute("style","display:block")
             var shape = null
             if(GlobalVariables.topLevelMolecule.value != null){
                 shape = GlobalVariables.topLevelMolecule.value
@@ -644,6 +647,7 @@ export default function GitHubModule(){
         console.warn("Project saved")
         //alert
         let popUp = document.querySelector('#popUp')
+        popUp.textContent = "Project Saved"
         popUp.setAttribute("style","display:block")
         setTimeout(function() {
             popUp.setAttribute("style","display:none")
