@@ -544,7 +544,7 @@ export default function GitHubModule(){
             }
             
             const threadCompute = async (values, key) => {
-                return await GlobalVariables.ask({values: values, key: key})
+                return await GlobalVariables.saveWorker({values: values, key: key})
             }
             threadCompute([shape], "stl").then( stlContent => {
                 
