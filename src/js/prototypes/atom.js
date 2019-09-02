@@ -413,6 +413,7 @@ export default class Atom {
      * Initialized the sidebar with a title and create the HTML object.
      */ 
     initializeSideBar(){
+
         //remove everything in the sideBar now
         let sideBar = document.querySelector('.sideBar')
         while (sideBar.firstChild) {
@@ -423,7 +424,7 @@ export default class Atom {
         name2.textContent = this.name
         sideBar.appendChild(name2)
 
-        //add the name as of parent molecule title  -- to the top bar -- permanently
+        //add the name as of project title  -- to the top bar -- permanently
         if (this.atomType == 'Molecule' ){
             let headerBar_title = document.querySelector('#headerBar_title')
             while (headerBar_title.firstChild) {
@@ -431,7 +432,7 @@ export default class Atom {
             }
            
             var name1 = document.createElement('p')
-            name1.textContent = "- " + this.name
+            name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
         }
         
@@ -637,7 +638,7 @@ export default class Atom {
         div.setAttribute('class', 'sidebar-item sidebar-editable-div')
         
         //Left div which displays the label
-        var labelDiv = document.createElement('div')
+        var labelDiv = document.createElement('label')
         div.appendChild(labelDiv)
         var labelText = document.createTextNode(label + ':')
         labelDiv.appendChild(labelText)
@@ -645,12 +646,12 @@ export default class Atom {
         
         
         //Right div which is editable and displays the value
-        var valueTextDiv = document.createElement('div')
-        div.appendChild(valueTextDiv)
+        var valueTextDiv = document.createElement('span')
+        labelDiv.appendChild(valueTextDiv)
         var valueText = document.createTextNode(object[key])
         valueTextDiv.appendChild(valueText)
         valueTextDiv.setAttribute('contenteditable', 'true')
-        valueTextDiv.setAttribute('class', 'sidebar-subitem editing-item')
+        valueTextDiv.setAttribute('class', 'editing-item')
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         
