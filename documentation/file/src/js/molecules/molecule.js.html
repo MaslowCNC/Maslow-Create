@@ -44,6 +44,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -265,7 +266,7 @@ export default class Molecule extends Atom{
         
         var valueList = super.initializeSideBar() 
         
-        this.createEditableValueListItem(valueList,this,&apos;name&apos;, &apos;Name&apos;, false)
+        this.createEditableValueListItem(valueList,this,&apos;name&apos;,&apos;Name&apos;, false)
 
         if(!this.topLevel){
             this.createButton(valueList,this,&apos;Go To Parent&apos;,this.goToParentMolecule)
@@ -275,28 +276,6 @@ export default class Molecule extends Atom{
         else{ //If we are the top level molecule and not in run mode
 
             this.createEditableValueListItem(valueList,GlobalVariables,&apos;circleSegmentSize&apos;, &apos;Circle Segment Size&apos;, true, (newValue) =&gt; {GlobalVariables.circleSegmentSize = newValue})
-            
-            
-            this.createButton(valueList,this,&apos;Load A Different Project&apos;,() =&gt; {
-                GlobalVariables.gitHub.showProjectsToLoad()
-            })
-            
-            this.createButton(valueList,this,&apos;Share This Project&apos;,() =&gt; {
-                GlobalVariables.gitHub.shareOpenedProject()
-            })
-            
-            this.createButton(valueList,this,&apos;GitHub&apos;,() =&gt; {
-                GlobalVariables.gitHub.openGitHubPage()
-            })
-            
-            this.createButton(valueList,this,&apos;README&apos;,() =&gt; {
-                GlobalVariables.gitHub.openREADMEPage()
-            })
-            
-            this.createButton(valueList,this,&apos;Bill Of Materials&apos;,() =&gt; {
-                GlobalVariables.gitHub.openBillOfMaterialsPage()
-            })
-            
             
         }
         

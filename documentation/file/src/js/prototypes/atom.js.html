@@ -44,6 +44,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -488,6 +489,7 @@ export default class Atom {
      * Initialized the sidebar with a title and create the HTML object.
      */ 
     initializeSideBar(){
+
         //remove everything in the sideBar now
         let sideBar = document.querySelector(&apos;.sideBar&apos;)
         while (sideBar.firstChild) {
@@ -498,7 +500,7 @@ export default class Atom {
         name2.textContent = this.name
         sideBar.appendChild(name2)
 
-        //add the name as of parent molecule title  -- to the top bar -- permanently
+        //add the name as of project title  -- to the top bar -- permanently
         if (this.atomType == &apos;Molecule&apos; ){
             let headerBar_title = document.querySelector(&apos;#headerBar_title&apos;)
             while (headerBar_title.firstChild) {
@@ -506,7 +508,7 @@ export default class Atom {
             }
            
             var name1 = document.createElement(&apos;p&apos;)
-            name1.textContent = &quot;- &quot; + this.name
+            name1.textContent = &quot;- &quot; + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
         }
         
@@ -712,7 +714,7 @@ export default class Atom {
         div.setAttribute(&apos;class&apos;, &apos;sidebar-item sidebar-editable-div&apos;)
         
         //Left div which displays the label
-        var labelDiv = document.createElement(&apos;div&apos;)
+        var labelDiv = document.createElement(&apos;label&apos;)
         div.appendChild(labelDiv)
         var labelText = document.createTextNode(label + &apos;:&apos;)
         labelDiv.appendChild(labelText)
@@ -720,12 +722,12 @@ export default class Atom {
         
         
         //Right div which is editable and displays the value
-        var valueTextDiv = document.createElement(&apos;div&apos;)
-        div.appendChild(valueTextDiv)
+        var valueTextDiv = document.createElement(&apos;span&apos;)
+        labelDiv.appendChild(valueTextDiv)
         var valueText = document.createTextNode(object[key])
         valueTextDiv.appendChild(valueText)
         valueTextDiv.setAttribute(&apos;contenteditable&apos;, &apos;true&apos;)
-        valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem editing-item&apos;)
+        valueTextDiv.setAttribute(&apos;class&apos;, &apos;editing-item&apos;)
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute(&apos;id&apos;, thisID)
         

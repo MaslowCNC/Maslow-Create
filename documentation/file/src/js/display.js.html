@@ -44,6 +44,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -397,18 +398,15 @@ export default class Display {
         this.onWindowResize()
 
         this.targetDiv.addEventListener(&apos;mousedown&apos;, () =&gt; {
-            if(!GlobalVariables.runMode){
-                let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
-                
+            let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
+
+            if(!GlobalVariables.runMode &amp;&amp; viewerBar.innerHTML.trim().length == 0){
+
+                //viewerBar.removeChild(viewerBar.firstChild)
                 //Set viewer bar to only appear when other elements are created
                 viewerBar.setAttribute(&apos;style&apos;, &apos;background-color:white;&apos;)
                 
                 //Grid display html element
-                var name = document.createElement(&apos;p&apos;)
-                name.textContent = &quot;3D VIEW&quot;
-                name.setAttribute(&apos;style&apos;, &apos;padding: 5px 0px 0px 5px&apos;)
-                viewerBar.appendChild(name)
-
                 var gridDiv = document.createElement(&apos;div&apos;)
                 viewerBar.appendChild(gridDiv)
                 gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)

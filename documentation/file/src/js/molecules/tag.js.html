@@ -44,6 +44,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -88,7 +89,7 @@ export default class Tag extends Atom{
         super(values)
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
-        this.addIO(&apos;input&apos;, &apos;tag&apos;, this, &apos;string&apos;, &apos;cutList&apos;)
+        this.addIO(&apos;input&apos;, &apos;tag&apos;, this, &apos;string&apos;, &apos;Tag String&apos;)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         /**

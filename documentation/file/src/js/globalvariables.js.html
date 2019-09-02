@@ -44,6 +44,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
@@ -76,6 +77,7 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { create, all }  from &apos;mathjs&apos;
 import Assembly         from &apos;./molecules/assembly.js&apos;
 import CutAway          from &apos;./molecules/cutaway.js&apos;
+import CutList          from &apos;./molecules/cutlist.js&apos;
 import Circle           from &apos;./molecules/circle.js&apos;
 import Color            from &apos;./molecules/color.js&apos;
 import Rectangle        from &apos;./molecules/rectangle.js&apos;
@@ -166,7 +168,8 @@ class GlobalVariables{
             stretch:            {creator: Stretch, atomType: &apos;Stretch&apos;},
             gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;},
             code:               {creator: Code, atomType: &apos;Code&apos;},
-            cutAway:            {creator: CutAway, atomType: &apos;CutAway&apos;}
+            cutAway:            {creator: CutAway, atomType: &apos;CutAway&apos;},
+            CutList:            {creator: CutList, atomType: &apos;CutList&apos;}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.
