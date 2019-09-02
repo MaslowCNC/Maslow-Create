@@ -141,6 +141,13 @@ class GlobalVariables{
              */
             this.render = result.ask
         })
+        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
+            /** 
+             * The worker which is used during the saving process.
+             * @type {object}
+             */
+            this.saveWorker = result.ask
+        })
         
         const math = create(all)
         /** 
