@@ -81,7 +81,7 @@ export default class Display {
          * A list of colors to RGB mappings.
          * @type {object}
          */
-        this.colorToRgbMapping = {
+        this.colorToRgbMapping = { 
             'aliceblue': [240, 248, 255],
             'antiquewhite': [250, 235, 215],
             'aqua': [0, 255, 255],
