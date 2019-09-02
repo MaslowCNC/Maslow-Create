@@ -193,11 +193,11 @@ export default class Molecule extends Atom{
         this.createEditableValueListItem(valueList,this,'name','Name', false)
 
         if(!this.topLevel){
-            this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
+            //this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
             
             //this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
         }
-        else{ //If we are the top level molecule and not in run mode
+        else{ //If we are the top level molecule
 
             this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
             
@@ -222,9 +222,11 @@ export default class Molecule extends Atom{
         
         //removes 3d view menu on background click
         let viewerBar = document.querySelector('#viewer_bar')
-        while (viewerBar.firstChild) {
-            viewerBar.removeChild(viewerBar.firstChild)
-            viewerBar.setAttribute('style', 'background-color:none;')
+        if(viewerBar && viewerBar.firstChild){
+            while (viewerBar.firstChild) {
+                viewerBar.removeChild(viewerBar.firstChild)
+                viewerBar.setAttribute('style', 'background-color:none;')
+            }
         }
 
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
