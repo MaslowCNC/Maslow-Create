@@ -164,8 +164,7 @@
     background-color: #484848 ;
     color: white;
     overflow: auto;
-    padding:10px;
-    padding-right:10px;
+    padding:0px;
    /*-webkit-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     -moz-box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61);
     box-shadow: inset -2px 2px 26px 5px rgba(0,0,0,0.61); */
@@ -377,6 +376,16 @@ input.menu_search:focus {
   display: none;
 }
 
+.molecule_title {
+  background-color:#ddd;
+  color:black;
+  text-align:right;
+  margin:0px;
+  padding:10px;
+  border-bottom: 2px solid black;
+
+}
+
 .sidebar-list{
     list-style: none;
     padding:10px;
@@ -394,7 +403,6 @@ input.menu_search:focus {
 
 .sidebar-item{
     overflow: hidden;
-    margin-bottom: 30px;
     text-align:center;
     height: 3rem;
     line-height: 1.5rem;
@@ -409,11 +417,9 @@ input.menu_search:focus {
     padding-bottom:10px;
 }
 .sidebar-editable-div:hover{
-  color: #000;
+  font-weight: 200;
 }
 
-
-.label-item:hover,
 .editing-item:hover
 .laber-item:active
 .editing-item:active{
@@ -423,7 +429,6 @@ input.menu_search:focus {
 
 .sidebar-subitem{
     display:block;
-    margin-bottom: 10px;
     height:1.5em;
 }
 
@@ -456,6 +461,8 @@ input.menu_search:focus {
 
 .editing-item:hover{
   background-color: #ffffff;
+  color: black;
+  padding: 3px;
 }
 
 .sidebar_button {
