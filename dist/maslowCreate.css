@@ -403,7 +403,6 @@ input.menu_search:focus {
 
 .sidebar-item{
     overflow: hidden;
-    text-align:center;
     height: 3rem;
     line-height: 1.5rem;
     font-size: 1rem;
@@ -428,8 +427,20 @@ input.menu_search:focus {
 } 
 
 .sidebar-subitem{
-    display:block;
+    display:inline-block;
     height:1.5em;
+}
+
+.sidebar-subitem select{
+    background-color: white;
+    margin-left: 10px;
+    border-style: none;
+    width: 200%;
+    display: inline-block;
+    color: #000;
+    border-radius: 0px;
+    border-width: 0px;
+    height: 110%;
 }
 
 .label-item{
