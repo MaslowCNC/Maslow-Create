@@ -420,9 +420,11 @@ export default class Atom {
             sideBar.removeChild(sideBar.firstChild)
         }
 
+        //adds the name of the molecule to sideBar
         var name2 = document.createElement('p')
         name2.textContent = this.name
         sideBar.appendChild(name2)
+        name2.setAttribute('class','molecule_title')
 
         //add the name as of project title  -- to the top bar -- permanently
         if (this.atomType == 'Molecule' ){

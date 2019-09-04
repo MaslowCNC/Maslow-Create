@@ -28,7 +28,7 @@ export default class Color extends Atom {
          * The color options to choose from
          * @type {array}
          */
-        this.colorOptions = ["blue", "green", "pink", "black", "gray", "silver"]
+        this.colorOptions = ['Powder blue','Tomato','Steel blue','Yellow','Brown','Cyan', "Green", "Pink", "Gray", "Silver"]
         
         /**
          * The index of the currently selected color option.
@@ -66,7 +66,9 @@ export default class Color extends Atom {
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
-        this.createDropDown(list, this, this.colorOptions, this.selectedColorIndex, "Color", (index)=>{this.changeColor(index)})
+        const dropdown= document.createElement('div')
+        list.appendChild(dropdown)
+        this.createDropDown(dropdown, this, this.colorOptions, this.selectedColorIndex, "Color", (index)=>{this.changeColor(index)})
     }
     
     /**
