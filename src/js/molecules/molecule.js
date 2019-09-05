@@ -141,7 +141,6 @@ export default class Molecule extends Atom{
                 })
             })
             
-            this.processing = false
         }
     }
     
