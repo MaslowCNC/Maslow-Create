@@ -317,8 +317,8 @@ export default class Display {
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
-        this.renderer.inputGamma = true;
-        this.renderer.outputGamma = true;
+        this.renderer.inputGamma = true
+        this.renderer.outputGamma = true
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
