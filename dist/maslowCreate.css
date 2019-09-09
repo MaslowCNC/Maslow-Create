@@ -281,9 +281,9 @@ body {
 }
 
 .menu{
-    width: 12rem;
-    max-height: 9rem;
-    overflow: hidden;
+    width: 14rem;
+    max-height: 8rem;
+    overflow: scroll;
     background-color: #f4f4f4;
     color: #333;
     border: 1px solid #aaa;
@@ -297,6 +297,8 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    padding: 10px;
+    padding-bottom: 0px;
 }
 
 .doc-title{
@@ -333,8 +335,11 @@ body {
 }
 
 .menu_search{
+    text-align: center;
     border-radius: 5px;
     height: 1.6rem;
+    width: 100%;
+    margin-bottom: 4px;
 }
 
 input.menu_search:focus {
@@ -352,13 +357,15 @@ input.menu_search:focus {
 
 /* Style the buttons that are used to open the tab content */
 .tab button {
-  background-color: none;
-  float: left;
-  border: 2px white solid;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
+    float: left;
+    vertical-align: middle;
+    width: 50%;
+    border: 0px white solid;
+    outline: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-bottom: 5px;
+    transition: 0.3s;
 }
 
 /* Change background color of buttons on hover */
