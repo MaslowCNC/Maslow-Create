@@ -18,6 +18,7 @@ import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
 import Equation         from './molecules/equation.js'
+import ExtractTag       from './molecules/extracttag.js'
 import Molecule         from './molecules/molecule.js'
 import Input            from './molecules/input.js'
 import Readme           from './molecules/readme.js'
@@ -75,6 +76,7 @@ class GlobalVariables{
             tag:                {creator: Tag, atomType: 'Tag'},
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon'},
             extrude:            {creator: Extrude, atomType: 'Extrude'},
+            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag'},
             scale:              {creator: Scale, atomType: 'Scale'},
             stl:                {creator: Stl, atomType: 'Stl'},
             svg:                {creator: Svg, atomType: 'Svg'},
