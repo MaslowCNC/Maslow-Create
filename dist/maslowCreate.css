@@ -428,7 +428,6 @@ input.menu_search:focus {
 
 .sidebar-subitem{
     display:inline-block;
-    height:1.5em;
 }
 
 .sidebar-subitem select{
@@ -449,7 +448,11 @@ input.menu_search:focus {
   font-weight: 700;
   margin-left:0;
   margin-right: 5px;
-  text-transform: capitalize
+  background: whitesmoke;
+  color: #4d4d4d;
+  border-radius: 5px;
+  padding: 2px;
+  padding-left: 5px;
   
 }
 
@@ -467,11 +470,11 @@ input.menu_search:focus {
   padding-bottom:5px;
   min-width: 10px;
   max-height: 1.5em;
-  border-radius: 5px;
+  border-radius: 3px;
  }
 
 .editing-item:hover{
-  background-color: #ffffff;
+  background-color: #bfbfbf;
   color: black;
   padding: 3px;
 }
