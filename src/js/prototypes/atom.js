@@ -1,6 +1,6 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
-
+import Menu from '../menu'
 /**
  * This class is the prototype for all atoms.
  */
@@ -431,6 +431,7 @@ export default class Atom {
         sideBar.appendChild(name2)
         name2.setAttribute('class','molecule_title')
 
+
         //add the name as of project title  -- to the top bar -- permanently
         if (this.atomType == 'Molecule' ){
             let headerBar_title = document.querySelector('#headerBar_title')
@@ -442,14 +443,39 @@ export default class Atom {
             name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
         }
-        
+
         //Create a list element
         var valueList = document.createElement('ul')
         sideBar.appendChild(valueList)
         valueList.setAttribute('class', 'sidebar-list')
+
+        var availableMolecules = document.createElement('div')
+        availableMolecules.textContent = "Available Local Molecules"
+        sideBar.appendChild(availableMolecules)
+        var availableMoleculesSelect = document.createElement('select')
+        availableMolecules.appendChild(availableMoleculesSelect)
+
+        availableMolecules.setAttribute('class','available_molecules')
+        availableMolecules.addEventListener('click', (e) => {
+            Menu.showmenu(e)
+            //We are searching the local tab
+            document.getElementById('menuInput').setAttribute('style','display:none')
+            var input, filter, ul, li, a, i, txtValue
+            ul = document.getElementById('menuList')
+            li = ul.getElementsByTagName('li')
+            // Loop through all list items, and hide those who don't match the search query
+            for (i = 0; i < li.length; i++) {
+                a = li[i] //this is the link part of the list item
+                li[i].style.display = ''                
+            }
+        
+        })
         
         return valueList
+
+
     }
+
     
     /**
      * Delete this atom.
