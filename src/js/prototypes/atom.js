@@ -385,14 +385,7 @@ export default class Atom {
                 this.deleteNode()
             }
         }
-        else if (key==='Enter') {
                 
-            this.color = this.defaultColor
-            this.strokeColor = this.selectedColor
-            this.selected = true
-                
-            }
-        
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
@@ -637,6 +630,7 @@ export default class Atom {
      * @param {object} callBack - Optional. A function to call with the new value when the value changes.
      */ 
     createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
+
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         
@@ -678,6 +672,12 @@ export default class Atom {
             else{
                 object[key] = valueInBox
                 callBack(valueInBox)
+            }
+
+            if(object.parentMolecule.selected == true){
+                object.parentMolecule.strokeColor = this.defaultColor
+                object.parentMolecule.color = this.selectedColor
+                console.log("this.selectedColor")
             }
         })
         
