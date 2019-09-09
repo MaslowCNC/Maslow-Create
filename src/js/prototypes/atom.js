@@ -673,11 +673,11 @@ export default class Atom {
                 object[key] = valueInBox
                 callBack(valueInBox)
             }
-
+            
+            //sets the color of the molecule correctly after focus out of editable box
             if(object.parentMolecule.selected == true){
                 object.parentMolecule.strokeColor = this.defaultColor
                 object.parentMolecule.color = this.selectedColor
-                console.log("this.selectedColor")
             }
         })
         
@@ -687,7 +687,7 @@ export default class Atom {
                 evt.preventDefault()
                 
                 document.getElementById(thisID).blur() 
-                 //shift focus away if someone presses enter
+                //shift focus away if someone presses enter
             }
         })
 
