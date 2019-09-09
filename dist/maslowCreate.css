@@ -154,7 +154,7 @@
 
 .sideBar {
     flex:2;
-    margin: 0px 10px 0px 0px;
+    margin: 0px 10px 0px 0.3%;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
