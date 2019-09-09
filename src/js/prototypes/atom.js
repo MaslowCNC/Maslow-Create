@@ -385,6 +385,13 @@ export default class Atom {
                 this.deleteNode()
             }
         }
+        else if (key==='Enter') {
+                
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+            this.selected = true
+                
+            }
         
         this.inputs.forEach(child => {
             child.keyPress(key)
@@ -678,7 +685,9 @@ export default class Atom {
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
                 evt.preventDefault()
-                document.getElementById(thisID).blur()  //shift focus away if someone presses enter
+                
+                document.getElementById(thisID).blur() 
+                 //shift focus away if someone presses enter
             }
         })
 
