@@ -402,7 +402,12 @@ export default class Atom {
         //Add options to set all of the inputs
         this.inputs.forEach(input => {
             if(input.type == 'input' && input.valueType != 'geometry' && input.connectors.length == 0){
-                this.createEditableValueListItem(valueList,input,'value', input.name, true)
+                if(input.valueType == 'number'){
+                    this.createEditableValueListItem(valueList,input,'value', input.name, true)
+                }
+                else{
+                    this.createEditableValueListItem(valueList,input,'value', input.name, false)
+                }
             }
         })
         
@@ -420,9 +425,11 @@ export default class Atom {
             sideBar.removeChild(sideBar.firstChild)
         }
 
+        //adds the name of the molecule to sideBar
         var name2 = document.createElement('p')
         name2.textContent = this.name
         sideBar.appendChild(name2)
+        name2.setAttribute('class','molecule_title')
 
         //add the name as of project title  -- to the top bar -- permanently
         if (this.atomType == 'Molecule' ){
@@ -484,7 +491,7 @@ export default class Atom {
         
         var ioValues = []
         this.inputs.forEach(io => {
-            if (typeof io.getValue() == 'number'){
+            if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
