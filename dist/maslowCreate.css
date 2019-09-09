@@ -402,8 +402,8 @@ input.menu_search:focus {
 }
 
 .sidebar-item{
-    overflow: hidden;
-    height: 3rem;
+    overflow: visible;
+    height: auto;
     line-height: 1.5rem;
     font-size: 1rem;
     font-weight: 100;
