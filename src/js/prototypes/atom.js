@@ -488,15 +488,15 @@ export default class Atom {
                 availableMoleculesSelect.style.display = 'block'
             })
            
-            //Add function to call when atom is selected
+            //Add function to call when atom is selected and place atom
             newElement.addEventListener('click', (e) => {
 
                 let clr = e.target.id
-                const place = GlobalVariables.scale1/1.1
+                const placement = GlobalVariables.scale1/1.1
 
                 GlobalVariables.currentMolecule.placeAtom({
-                    x: GlobalVariables.canvas.width * place, 
-                    y: GlobalVariables.canvas.height * place, 
+                    x: GlobalVariables.canvas.width * placement, 
+                    y: GlobalVariables.canvas.height * placement, 
                     parent: GlobalVariables.currentMolecule,
                     atomType: clr,
                     uniqueID: GlobalVariables.generateUniqueID()
@@ -504,6 +504,7 @@ export default class Atom {
                 }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
                 
                 //hide menu if molecule is placed
+                console.log('running after placement')
                 availableMoleculesSelect.style.display = 'none'
             })
         }
@@ -512,7 +513,7 @@ export default class Atom {
               if (!event.target.matches('select-menu')) {
                 //availableMoleculesSelect.style.display = 'none'
               }
-            }
+        }
     }
 
     /**
