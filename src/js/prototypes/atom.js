@@ -450,6 +450,7 @@ export default class Atom {
         valueList.setAttribute('class', 'sidebar-list')
 
         //Menu of local available molecules
+
         var availableMolecules = document.createElement('button')
         availableMolecules.textContent = "Local Molecules"
         sideBar.appendChild(availableMolecules)
@@ -458,6 +459,7 @@ export default class Atom {
 
         availableMolecules.setAttribute('class','available_molecules')
         availableMolecules.setAttribute('style','width:200px')
+        availableMolecules.setAttribute('title','or Right-Click on Canvas')
             
             for(var key in GlobalVariables.availableTypes) {
             var newElement = document.createElement('li')
@@ -467,17 +469,37 @@ export default class Atom {
             newElement.setAttribute('id', instance.atomType)
             newElement.appendChild(text) 
             availableMoleculesSelect.appendChild(newElement) 
-            
 
             availableMolecules.addEventListener('click', (e) => {
                 availableMoleculesSelect.style.display = 'block'
             })
            
-            
             //Add function to call when atom is selected
-            document.getElementById(instance.atomType).addEventListener('click', (e) => {
-                Menu.placeNewNode(e)
+            newElement.addEventListener('click', (e) => {
+
+                let clr = e.target.id
+                const place = GlobalVariables.scale1/1.1
+
+                GlobalVariables.currentMolecule.placeAtom({
+                    x: GlobalVariables.canvas.width * place, 
+                    y: GlobalVariables.canvas.height * place, 
+                    parent: GlobalVariables.currentMolecule,
+                    atomType: clr,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                    
+                }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
+                
+                //hide menu if molecule is placed
+                newElement.style.display = 'none'
             })
+
+            // Close the dropdown menu if the user clicks outside of it
+            window.onclick = function(event) {
+              if (!event.target.matches('select-menu')) {
+                //availableMoleculesSelect.style.display = 'none'
+              }
+            }
+
             
         }
 
