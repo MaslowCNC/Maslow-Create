@@ -88,11 +88,6 @@ export default class Atom {
          */
         this.isMoving = false
         /** 
-         * A flag to indicate if the editable box has stopped being in focus.
-         * @type {boolean}
-         */
-        this.focusout = false
-        /** 
          * The X cordinate of this atom now
          * @type {number}
          */
@@ -155,8 +150,6 @@ export default class Atom {
       
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
-        }else{
-            GlobalVariables.c.fillStyle = this.color
         }
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
@@ -690,7 +683,8 @@ export default class Atom {
             }
             
             //sets the color of the molecule correctly after focus out of editable box
-            this.focusout = true
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value
