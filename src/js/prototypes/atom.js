@@ -432,7 +432,7 @@ export default class Atom {
         name2.setAttribute('class','molecule_title')
 
 
-        //add the name as of project title  -- to the top bar -- permanently
+        //add the name as of project title 
         if (this.atomType == 'Molecule' ){
             let headerBar_title = document.querySelector('#headerBar_title')
             while (headerBar_title.firstChild) {
@@ -449,8 +449,21 @@ export default class Atom {
         sideBar.appendChild(valueList)
         valueList.setAttribute('class', 'sidebar-list')
 
+        this.localMoleculesMenu()
+        
+        return valueList
+
+
+    }
+
+    /**
+     * Initializes button to see all local molecules.
+     */
+    localMoleculesMenu(){
         //Menu of local available molecules
 
+        
+        let sideBar = document.querySelector('.sideBar')
         var availableMolecules = document.createElement('button')
         availableMolecules.textContent = "Local Molecules"
         sideBar.appendChild(availableMolecules)
@@ -461,7 +474,7 @@ export default class Atom {
         availableMolecules.setAttribute('style','width:200px')
         availableMolecules.setAttribute('title','or Right-Click on Canvas')
             
-            for(var key in GlobalVariables.availableTypes) {
+        for(var key in GlobalVariables.availableTypes) {
             var newElement = document.createElement('li')
             var instance = GlobalVariables.availableTypes[key]
             var text = document.createTextNode(instance.atomType)
@@ -469,6 +482,7 @@ export default class Atom {
             newElement.setAttribute('id', instance.atomType)
             newElement.appendChild(text) 
             availableMoleculesSelect.appendChild(newElement) 
+            
 
             availableMolecules.addEventListener('click', (e) => {
                 availableMoleculesSelect.style.display = 'block'
@@ -490,28 +504,17 @@ export default class Atom {
                 }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
                 
                 //hide menu if molecule is placed
-                newElement.style.display = 'none'
+                availableMoleculesSelect.style.display = 'none'
             })
-
-            // Close the dropdown menu if the user clicks outside of it
-            window.onclick = function(event) {
+        }
+        // Close the dropdown menu if the user clicks outside of it
+        window.onclick = function(event) {
               if (!event.target.matches('select-menu')) {
                 //availableMoleculesSelect.style.display = 'none'
               }
             }
-
-            
-        }
-
-        
-       
-        
-        return valueList
-
-
     }
 
-    
     /**
      * Delete this atom.
      */ 
