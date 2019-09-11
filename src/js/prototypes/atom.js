@@ -1,6 +1,5 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
-import Menu from '../menu'
 /**
  * This class is the prototype for all atoms.
  */
@@ -486,7 +485,7 @@ export default class Atom {
             availableMoleculesSelect.appendChild(newElement) 
             
 
-            availableMolecules.addEventListener('click', (e) => {
+            availableMolecules.addEventListener('click', () => {
                 availableMoleculesSelect.style.display = 'block'
             })
            
