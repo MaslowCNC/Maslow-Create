@@ -465,7 +465,6 @@ export default class Atom {
     localMoleculesMenu(){
         //Menu of local available molecules
 
-        
         let sideBar = document.querySelector('.sideBar')
         var availableMolecules = document.createElement('button')
         availableMolecules.textContent = "Local Molecules"
@@ -506,16 +505,9 @@ export default class Atom {
                     
                 }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
                 
-                //hide menu if molecule is placed
-                console.log('running after placement')
-                availableMoleculesSelect.style.display = 'none'
+                //hides menu if molecule is selected
+                GlobalVariables.currentMolecule.backgroundClick()
             })
-        }
-        // Close the dropdown menu if the user clicks outside of it
-        window.onclick = function(event) {
-              if (!event.target.matches('select-menu')) {
-                //availableMoleculesSelect.style.display = 'none'
-              }
         }
     }
 
