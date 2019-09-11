@@ -506,15 +506,18 @@ input.menu_search:focus {
 }
 
 .available_molecules{
-  margin:auto;
-  background-color: #3498DB;
-  color: white;
-  padding: 8px;
-  font-size: 15px;
-  border: none;
-  cursor: pointer;
-  float:right;
-  margin-right: 10px;
+    position: absolute;
+    bottom: 150px;
+    right: 35px;
+    margin: auto;
+    background-color: #DA70D690;
+    color: white;
+    padding: 8px;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    border-radius: 5px;
 }
 
 .available_molecules div {

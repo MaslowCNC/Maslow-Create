@@ -434,6 +434,7 @@ export default class Atom {
 
         //add the name as of project title 
         if (this.atomType == 'Molecule' ){
+            
             let headerBar_title = document.querySelector('#headerBar_title')
             while (headerBar_title.firstChild) {
                 headerBar_title.removeChild(headerBar_title.firstChild)
@@ -442,6 +443,9 @@ export default class Atom {
             var name1 = document.createElement('p')
             name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
+
+            //add available molecules dropdown
+            this.localMoleculesMenu()
         }
 
         //Create a list element
@@ -449,7 +453,6 @@ export default class Atom {
         sideBar.appendChild(valueList)
         valueList.setAttribute('class', 'sidebar-list')
 
-        this.localMoleculesMenu()
         
         return valueList
 
