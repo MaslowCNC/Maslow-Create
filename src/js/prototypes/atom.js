@@ -199,11 +199,6 @@ export default class Atom {
             GlobalVariables.c.fillText(this.alertMessage, this.x + this.radius, this.y - this.radius) 
             GlobalVariables.c.closePath()
         }
-
-        if(this.focusout){
-            this.strokeColor = this.defaultColor
-            this.color = this.selectedColor
-        }
     }
     
     /**
