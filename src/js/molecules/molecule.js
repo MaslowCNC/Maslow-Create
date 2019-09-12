@@ -191,15 +191,21 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name','Name', false)
 
-        if(!this.topLevel){
-            //this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
-            
-            //this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
-        }
-        else{ //If we are the top level molecule
+        if(this.topLevel){
+             //If we are the top level molecule
 
             this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
             
+            var rangeElement = document.createElement('input')
+            //Div which contains the entire element
+            var div = document.createElement('div')
+            div.appendChild(rangeElement)
+            valueList.appendChild(div)
+            rangeElement.setAttribute('type', 'range')
+            rangeElement.setAttribute('min', '1')
+            rangeElement.setAttribute('max', '100')
+            rangeElement.setAttribute('class', 'slider')
+
         }
         
         // this.createButton(valueList,this,'Download STL',() => {
