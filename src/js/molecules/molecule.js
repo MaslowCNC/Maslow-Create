@@ -374,7 +374,7 @@ export default class Molecule extends Atom{
         
         
         this.nodesOnTheScreen.forEach(atom => {
-            //Store a represnetation of the atom
+            //Store a representation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom's connectors
             if(atom.output){
