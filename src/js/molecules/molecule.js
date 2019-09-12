@@ -196,11 +196,17 @@ export default class Molecule extends Atom{
 
             this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
             
+            
+            //Creates value slider
             var rangeElement = document.createElement('input')
             //Div which contains the entire element
             var div = document.createElement('div')
-            div.appendChild(rangeElement)
+            div.setAttribute('class', 'slider-container')
             valueList.appendChild(div)
+            var rangeLabel = document.createElement('label')
+            rangeLabel.textContent = "Number of Segments"
+            div.appendChild(rangeLabel)
+            rangeLabel.appendChild(rangeElement)
             rangeElement.setAttribute('type', 'range')
             rangeElement.setAttribute('min', '1')
             rangeElement.setAttribute('max', '100')
