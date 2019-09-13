@@ -61,6 +61,7 @@
   height:20px;
   border-radius:50%;
   display:inline;
+  padding: 1px;
 }
 
 #top_button_wrap{
