@@ -111,7 +111,7 @@ window.addEventListener('keydown', event => {
 
 if (!GlobalVariables.runMode){
     let moleculeButton = document.getElementById('localMolecules_top')
-    moleculeButton.addEventListener('mousedown', () => {
+    moleculeButton.addEventListener('mouseover', () => {
         
          //add available molecules dropdown
         localMoleculesMenu()
@@ -173,10 +173,12 @@ if (!GlobalVariables.runMode){
             newElement.setAttribute('id', instance.atomType)
             newElement.appendChild(text) 
             availableMoleculesSelect.appendChild(newElement) 
-              availableMoleculesSelect.style.display = 'block'
+            availableMoleculesSelect.style.display = 'block'
            
             //Add function to call when atom is selected and place atom
             newElement.addEventListener('click', (e) => {
+
+                console.log("meme")
 
                 let clr = e.target.id
                 const placement = GlobalVariables.scale1/1.1
