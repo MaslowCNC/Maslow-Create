@@ -249,31 +249,38 @@ export default class Molecule extends Atom{
      */ 
     displaySimpleBOM(list){
         var bomList = []
+        
         if(this.value != null){
-            try{
-                bomList = extractBomTags(this.value)
-            }catch(err){
-                this.setAlert("Unable to read BOM")
+            if(this.topLevel){
+                GlobalVariables.ask({values: [this.value], key: "getBOM"}).then(result => {
+                    if (result != -1 ){
+                        bomList = result.map(JSON.parse)
+                        bomList = bomList.map(JSON.parse)
+                        
+                        if(bomList.length > 0){
+                            console.log("bomlist seen")
+                            list.appendChild(document.createElement('br'))
+                            list.appendChild(document.createElement('br'))
+                            
+                            var div = document.createElement('h3')
+                            div.setAttribute('style','text-align:center;')
+                            list.appendChild(div)
+                            var valueText = document.createTextNode('Bill Of Materials')
+                            div.appendChild(valueText)
+                            
+                            var x = document.createElement('HR')
+                            list.appendChild(x)
+                            
+                            bomList.forEach(bomEntry => {
+                                this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
+                            })
+                        }
+                        
+                    }else{
+                        console.warn("Unable to compute BOM")
+                    }
+                })
             }
-        }
-        
-        if(bomList.length > 0){
-        
-            list.appendChild(document.createElement('br'))
-            list.appendChild(document.createElement('br'))
-            
-            var div = document.createElement('h3')
-            div.setAttribute('style','text-align:center;')
-            list.appendChild(div)
-            var valueText = document.createTextNode('Bill Of Materials')
-            div.appendChild(valueText)
-            
-            var x = document.createElement('HR')
-            list.appendChild(x)
-            
-            bomList.forEach(bomEntry => {
-                this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
-            })
         }
     }
 
