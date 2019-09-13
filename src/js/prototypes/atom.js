@@ -150,8 +150,6 @@ export default class Atom {
       
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
-        }else{
-            GlobalVariables.c.fillStyle = this.color
         }
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
@@ -385,7 +383,7 @@ export default class Atom {
                 this.deleteNode()
             }
         }
-        
+                
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
@@ -635,6 +633,7 @@ export default class Atom {
      * @param {object} callBack - Optional. A function to call with the new value when the value changes.
      */ 
     createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
+
         var listElement = document.createElement('LI')
         list.appendChild(listElement)
         
@@ -677,13 +676,19 @@ export default class Atom {
                 object[key] = valueInBox
                 callBack(valueInBox)
             }
+            
+            //sets the color of the molecule correctly after focus out of editable box
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
                 evt.preventDefault()
-                document.getElementById(thisID).blur()  //shift focus away if someone presses enter
+                
+                document.getElementById(thisID).blur() 
+                //shift focus away if someone presses enter
             }
         })
 
