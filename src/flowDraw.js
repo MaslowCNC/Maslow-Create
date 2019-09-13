@@ -64,6 +64,10 @@ flowCanvas.addEventListener('mousedown', event => {
     if (!document.querySelector('.menu').contains(event.target)) {
         Menu.hidemenu()
     }
+    //hide the menu if it is visible
+    if (!document.querySelector('#localMolecules_top').contains(event.target)) {
+        
+    }
     
 })
 
@@ -106,6 +110,13 @@ window.addEventListener('keydown', event => {
  */ 
 
 if (!GlobalVariables.runMode){
+    let moleculeButton = document.getElementById('localMolecules_top')
+    moleculeButton.addEventListener('mousedown', () => {
+        
+         //add available molecules dropdown
+        localMoleculesMenu()
+    })
+
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
         GlobalVariables.gitHub.openGitHubPage()
@@ -138,6 +149,52 @@ if (!GlobalVariables.runMode){
     })
 }
 
+
+ /**
+     * Initializes button to see all local molecules.
+     */
+    function localMoleculesMenu(){
+        //Menu of local available molecules
+
+        var availableMolecules = document.getElementById('localMolecules_top')
+        var availableMoleculesSelect = document.createElement('div')
+        availableMolecules.appendChild(availableMoleculesSelect)
+
+        availableMolecules.setAttribute('class','available_molecules')
+        availableMolecules.setAttribute('style','width:200px')
+        availableMolecules.setAttribute('title','or Right-Click on Canvas')
+
+            
+        for(var key in GlobalVariables.availableTypes) {
+            var newElement = document.createElement('li')
+            var instance = GlobalVariables.availableTypes[key]
+            var text = document.createTextNode(instance.atomType)
+            newElement.setAttribute('class', 'select-menu')
+            newElement.setAttribute('id', instance.atomType)
+            newElement.appendChild(text) 
+            availableMoleculesSelect.appendChild(newElement) 
+              availableMoleculesSelect.style.display = 'block'
+           
+            //Add function to call when atom is selected and place atom
+            newElement.addEventListener('click', (e) => {
+
+                let clr = e.target.id
+                const placement = GlobalVariables.scale1/1.1
+
+                GlobalVariables.currentMolecule.placeAtom({
+                    x: GlobalVariables.canvas.width * placement, 
+                    y: GlobalVariables.canvas.height * placement, 
+                    parent: GlobalVariables.currentMolecule,
+                    atomType: clr,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                    
+                }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
+                
+                //hides menu if molecule is selected
+                GlobalVariables.currentMolecule.backgroundClick()
+            })
+        }
+    }
 // Implementation
 /**
  * Runs once when the program begins to initialize variables.
