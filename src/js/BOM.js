@@ -63,6 +63,9 @@ export const extractBomTags = async(geometry) => {
             this[bomElement.BOMitemName].costUSD += bomElement.costUSD
         }, Object.create(null))
         
+        //Alphabetize by source
+        compiledArray = compiledArray.sort((a,b) => (a.source > b.source) ? 1 : ((b.source > a.source) ? -1 : 0)) 
+        
         return compiledArray
     }
 }
