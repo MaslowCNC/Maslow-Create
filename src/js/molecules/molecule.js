@@ -251,11 +251,7 @@ export default class Molecule extends Atom{
         
         if(this.value != null){
             try{
-                extractBomTags(this.value).then(result => {
-                    console.log("Extracted list result:")
-                    console.log(result)
-                    
-                    var bomList = result
+                extractBomTags(this.value).then(bomList => {
                     
                     if(bomList.length > 0){
                     
