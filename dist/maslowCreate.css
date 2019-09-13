@@ -17,14 +17,14 @@
 }
 
 #headerBar {
-  position:absolute;
-  height:17px; 
-  top:0px;
-  right:0px;
-  background: #2C2C2C80 ;
-  padding:5px 0px 5px 5px;
-  display:flex;
-  justify-content: flex-start;
+    position: absolute;
+    width: 99%;
+    height: 17px;
+    top: 0px;
+    right: 0px;
+    padding: 5px 0px 5px 5px;
+    display: flex;
+    justify-content: flex-start;
 }
 
 #headerBar p {
@@ -61,6 +61,7 @@
   height:20px;
   border-radius:50%;
   display:inline;
+  padding: 1px;
 }
 
 #top_button_wrap{
@@ -72,18 +73,18 @@
 }
 
 .top_buttons:hover {
-  opacity:1;
+    opacity: 1;
+    width: 30px;
 }
 
 .top_buttons{
-  opacity:.6;
-  padding: 0px;
-  width:20px;
-  height:20px;
-  display:inline;
-  margin-right:5px;
-  border:none;
-  border-radius:50%;
+    opacity: 0.8;
+    padding: 0px;
+    width: 25px;
+    height: 25px;
+    display: inline;
+    border: 1px solid #767b7b;
+    border-radius: 50%;
 }
 
 #viewer_bar{

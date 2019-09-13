@@ -149,8 +149,6 @@ export default class Atom {
       
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
-        }else{
-            GlobalVariables.c.fillStyle = this.color
         }
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
@@ -739,10 +737,8 @@ export default class Atom {
             }
             
             //sets the color of the molecule correctly after focus out of editable box
-            if(object.parentMolecule.selected == true){
-                object.parentMolecule.strokeColor = this.defaultColor
-                object.parentMolecule.color = this.selectedColor
-            }
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value
