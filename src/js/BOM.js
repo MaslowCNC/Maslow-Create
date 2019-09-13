@@ -1,3 +1,5 @@
+import GlobalVariables from './globalvariables.js'
+
 /**
  * This class defines a BOMEntry object which is used to define one entry in a bill of materials.
  */ 
@@ -38,53 +40,32 @@ export class BOMEntry {
  * Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.
  * @param {object} geometry - The geometry which should be scanned for tags.
  */ 
-export const extractBomTags = (geometry) => {
+export const extractBomTags = async(geometry) => {
     
     var bomItems = []
     
-    const walk = (geometry) => {
-        //Grab any available tags
-        if(geometry.tags){
-            geometry.tags.forEach(tag => {
-                if(tag.substring(0,11) == 'user/{"BOMi'){
-                    bomItems.push(JSON.parse(tag.substring(5)))
-                }
-            })
-        }
+    var result = await GlobalVariables.ask({values: [geometry], key: "getBOM"})
+    
+    if (result != -1 ){
+        bomItems = result.map(JSON.parse)
+        bomItems = bomItems.map(JSON.parse)
         
-        //Walk deeper if there is deeper to go
-        if (geometry.disjointAssembly) {
-            geometry.disjointAssembly.forEach(walk)
-        }
-        else if (geometry.lazyGeometry) {
-            walk(geometry.lazyGeometry)
-        }
-        else if (geometry.geometry) {
-            walk(geometry.geometry)
-        }
-        else{
-            return
-        }
+        //Consolidate similar items into a single item
+        var compiledArray = []
+        bomItems.forEach(function (bomElement) {
+            if (!this[bomElement.BOMitemName]) {
+                this[bomElement.BOMitemName] = new BOMEntry
+                this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
+                this[bomElement.BOMitemName].source = bomElement.source
+                compiledArray.push(this[bomElement.BOMitemName])
+            }
+            this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
+            this[bomElement.BOMitemName].costUSD += bomElement.costUSD
+        }, Object.create(null))
+        
+        //Alphabetize by source
+        compiledArray = compiledArray.sort((a,b) => (a.source > b.source) ? 1 : ((b.source > a.source) ? -1 : 0)) 
+        
+        return compiledArray
     }
-    
-    if(geometry != null){
-        walk(geometry)
-    }
-    
-    
-    //Consolidate similar items into a single item
-    var result = []
-    bomItems.forEach(function (bomElement) {
-        if (!this[bomElement.BOMitemName]) {
-            this[bomElement.BOMitemName] = new BOMEntry
-            this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
-            this[bomElement.BOMitemName].source = bomElement.source
-            result.push(this[bomElement.BOMitemName])
-        }
-        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
-        this[bomElement.BOMitemName].costUSD += bomElement.costUSD
-    }, Object.create(null))
-    
-    
-    return result
 }
