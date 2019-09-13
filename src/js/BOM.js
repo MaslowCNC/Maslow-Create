@@ -63,9 +63,6 @@ export const extractBomTags = async(geometry) => {
             this[bomElement.BOMitemName].costUSD += bomElement.costUSD
         }, Object.create(null))
         
-        console.log("Compiled array: ")
-        console.log(compiledArray)
-        
         return compiledArray
     }
 }
