@@ -74,7 +74,8 @@
 
 .top_buttons:hover {
     opacity: 1;
-    width: 30px;
+    width: 28px;
+    height: 28px;
 }
 
 .top_buttons{

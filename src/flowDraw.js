@@ -113,7 +113,7 @@ window.addEventListener('keydown', event => {
 if (!GlobalVariables.runMode){
     let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
-         //add available molecules dropdown
+        //add available molecules dropdown
         LocalMenu.showMenu()
     })
 
