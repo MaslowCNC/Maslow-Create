@@ -111,8 +111,7 @@ window.addEventListener('keydown', event => {
 
 if (!GlobalVariables.runMode){
     let moleculeButton = document.getElementById('localMolecules_top')
-    moleculeButton.addEventListener('mouseover', () => {
-        
+    moleculeButton.addEventListener('mousedown', () => {
          //add available molecules dropdown
         localMoleculesMenu()
     })
@@ -157,11 +156,11 @@ if (!GlobalVariables.runMode){
         //Menu of local available molecules
 
         var availableMolecules = document.getElementById('localMolecules_top')
+        var availableMoleculesDiv = document.getElementById('top_button_wrap')
         var availableMoleculesSelect = document.createElement('div')
-        availableMolecules.appendChild(availableMoleculesSelect)
+        availableMoleculesDiv.appendChild(availableMoleculesSelect)
 
-        availableMolecules.setAttribute('class','available_molecules')
-        availableMolecules.setAttribute('style','width:200px')
+        availableMoleculesSelect.setAttribute('class','available_molecules')
         availableMolecules.setAttribute('title','or Right-Click on Canvas')
 
             
