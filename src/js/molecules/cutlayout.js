@@ -63,12 +63,16 @@ export default class CutLayout extends Atom{
             }
         }
         
-        computeValue(values, "getLayoutSvgs").then(result => {
-            if (result != -1 ){
+        computeValue(values, "getLayoutSvgs").then(arrayOfSvgs => {
+            if (arrayOfSvgs != -1 ){
                 console.log("Returned from worker: ")
-                console.log(result)
-                //const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
-                //saveAs(blob, GlobalVariables.topLevelMolecule.name+'.svg')
+                console.log(arrayOfSvgs)
+                
+                //Mo, at this point arrayOfSvgs cointains an array of .svg file strings which we want to lay out in an optimal way on a single sheet. The code to do that goes in here. 
+                
+                //To test it connect something to a "Cut Layout" atom and then click the button.
+                
+                
             }else{
                 this.setAlert("Unable to compute")
             }
