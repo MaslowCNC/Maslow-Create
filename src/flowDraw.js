@@ -3,7 +3,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-import localMoleculesMenu from './js/localmenu.js'
+import LocalMenu from './js/localmenu.js'
 
 GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
@@ -67,8 +67,7 @@ flowCanvas.addEventListener('mousedown', event => {
     }
     //hide the menu if it is visible
     if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
-        var availableMoleculesSelect = document.querySelector('.available_molecules')
-        availableMoleculesSelect.style.display = 'none'
+        LocalMenu.hideMenu()
     }
     
 })
@@ -115,7 +114,7 @@ if (!GlobalVariables.runMode){
     let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
          //add available molecules dropdown
-        localMoleculesMenu()
+        LocalMenu.showMenu()
     })
 
     let githubButton = document.getElementById('github_top')
