@@ -47,7 +47,9 @@ export const extractBomTags = async(geometry) => {
     var result = await GlobalVariables.ask({values: [geometry], key: "getBOM"})
     
     if (result != -1 ){
-        bomItems = result.map(JSON.parse)
+        //Filter for only bomItems
+        bomItems = result.filter(item => {return item.substring(5, 12) == "BOMitem"})
+        bomItems = bomItems.map(JSON.parse)
         bomItems = bomItems.map(JSON.parse)
         
         //Consolidate similar items into a single item
