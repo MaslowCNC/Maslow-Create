@@ -65,8 +65,8 @@ export default class CutLayout extends Atom{
         
         computeValue(values, "getLayoutSvgs").then(arrayOfSvgs => {
             if (arrayOfSvgs != -1 ){
-                console.log("Returned from worker: ")
-                console.log(arrayOfSvgs)
+                //console.log("Returned from worker: ")
+                //console.log(arrayOfSvgs)
                 
                 //Mo, at this point arrayOfSvgs cointains an array of .svg file strings which we want to lay out in an optimal way on a single sheet. The code to do that goes in here. 
                 
