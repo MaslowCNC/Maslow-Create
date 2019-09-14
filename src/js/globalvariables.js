@@ -4,6 +4,7 @@ import CutAway          from './molecules/cutaway.js'
 import CutList          from './molecules/cutlist.js'
 import Circle           from './molecules/circle.js'
 import Color            from './molecules/color.js'
+import CutLayout        from './molecules/cutlayout.js'
 import Rectangle        from './molecules/rectangle.js'
 import ShrinkWrap       from './molecules/shrinkwrap.js'
 import Translate        from './molecules/translate.js'
@@ -70,6 +71,7 @@ class GlobalVariables{
             assembly:           {creator: Assembly, atomType: 'Assembly'},
             circle:             {creator: Circle, atomType: 'Circle'},
             color:              {creator: Color, atomType: 'Color'},
+            cutLayout:          {creator: CutLayout, atomType: "Cut Layout"},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap'},
             translate:          {creator: Translate, atomType: 'Translate'},

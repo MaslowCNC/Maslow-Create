@@ -440,6 +440,9 @@ export default class Atom {
             var name1 = document.createElement('p')
             name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
+
+            //add available molecules dropdown
+            this.localMoleculesMenu()
         }
 
         //Create a list element
@@ -452,7 +455,6 @@ export default class Atom {
 
 
     }
-
 
     /**
      * Delete this atom.
