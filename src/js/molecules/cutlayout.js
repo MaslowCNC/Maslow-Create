@@ -34,12 +34,28 @@ export default class CutLayout extends Atom{
     }
     
     /**
-     * Extracts all of the elements with the cutList tag, centers each one, generates a .svg file from each one, then lays out all the .svg files on a sheet
+     * A placeholder to keep updateValue from doing anything
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
-            console.log("Would do something with cutlayout here")
-        }
+        
+    }
+    
+    /**
+     * Create a button to download the .svg file.
+     */ 
+    updateSidebar(){
+        const list = super.updateSidebar()
+        this.createButton(list, this, "Download .SVG Sheet", ()=>{this.generateStl()})
+    }
+    
+    /**
+     * Extracts all of the elements with the cutList tag, centers each one, generates a .svg file from each one, then lays out all the .svg files on a sheet
+     */ 
+    generateStl(){
+        try{
+            const values = [this.findIOValue('geometry')]
+            this.basicThreadValueProcessing(values, "getLayoutSvgs")
+        }catch(err){this.setAlert(err)}
     }
     
 }
