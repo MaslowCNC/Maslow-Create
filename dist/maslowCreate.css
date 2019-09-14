@@ -507,7 +507,7 @@ input.menu_search:focus {
 }
 
 #localMolecules_top{
-  background-color: #a563bb;
+  background-color: black;
 }
 
 .available_molecules{
@@ -531,10 +531,11 @@ input.menu_search:focus {
 }
 
 .available_molecules li {
-  color: black;
+  color: #444;
   padding: 6px 6px;
   text-decoration: none;
   display: block;
+  border-bottom:1px solid white;
 }
 
 
