@@ -47,6 +47,8 @@ export const extractBomTags = async(geometry) => {
     var result = await GlobalVariables.ask({values: [geometry], key: "getBOM"})
     
     if (result != -1 ){
+        console.log("Raw return from worker: ")
+        console.log(result)
         bomItems = result.map(JSON.parse)
         bomItems = bomItems.map(JSON.parse)
         
