@@ -24,7 +24,7 @@ if(!GlobalVariables.runMode){
     document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
 }
 document.querySelector('#flow-canvas').setAttribute('style','height:'+innerHeight/2+'px')
-document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
+document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.5+'px')
 
 
 // Event Listeners
@@ -48,7 +48,7 @@ flowCanvas.addEventListener('mousedown', event => {
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         
-        if (molecule.clickDown(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
+        if (molecule.clickDown(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1,clickHandledByMolecule) == true){
             clickHandledByMolecule = true
         }
 
@@ -66,8 +66,6 @@ flowCanvas.addEventListener('mousedown', event => {
     }
     
 })
-
-
 
 flowCanvas.addEventListener('dblclick', event => {
     //every time the mouse button goes down

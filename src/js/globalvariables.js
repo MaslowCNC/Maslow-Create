@@ -4,6 +4,7 @@ import CutAway          from './molecules/cutaway.js'
 import CutList          from './molecules/cutlist.js'
 import Circle           from './molecules/circle.js'
 import Color            from './molecules/color.js'
+import CutLayout        from './molecules/cutlayout.js'
 import Rectangle        from './molecules/rectangle.js'
 import ShrinkWrap       from './molecules/shrinkwrap.js'
 import Translate        from './molecules/translate.js'
@@ -18,6 +19,7 @@ import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
 import Equation         from './molecules/equation.js'
+import ExtractTag       from './molecules/extracttag.js'
 import Molecule         from './molecules/molecule.js'
 import Input            from './molecules/input.js'
 import Readme           from './molecules/readme.js'
@@ -69,12 +71,14 @@ class GlobalVariables{
             assembly:           {creator: Assembly, atomType: 'Assembly'},
             circle:             {creator: Circle, atomType: 'Circle'},
             color:              {creator: Color, atomType: 'Color'},
+            cutLayout:          {creator: CutLayout, atomType: "Cut Layout"},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap'},
             translate:          {creator: Translate, atomType: 'Translate'},
             tag:                {creator: Tag, atomType: 'Tag'},
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon'},
             extrude:            {creator: Extrude, atomType: 'Extrude'},
+            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag'},
             scale:              {creator: Scale, atomType: 'Scale'},
             stl:                {creator: Stl, atomType: 'Stl'},
             svg:                {creator: Svg, atomType: 'Svg'},
@@ -140,6 +144,13 @@ class GlobalVariables{
              * @type {object}
              */
             this.render = result.ask
+        })
+        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
+            /** 
+             * The worker which is used during the saving process.
+             * @type {object}
+             */
+            this.saveWorker = result.ask
         })
         
         const math = create(all)

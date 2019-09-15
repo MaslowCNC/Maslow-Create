@@ -82,7 +82,7 @@ export default class Display {
          * @type {object}
          */
         this.colorToRgbMapping = {
-            'aliceblue': [240, 248, 255],
+            'Aliceblue': [240, 248, 255],
             'antiquewhite': [250, 235, 215],
             'aqua': [0, 255, 255],
             'aquamarine': [127, 255, 212],
@@ -102,7 +102,7 @@ export default class Display {
             'cornflowerblue': [100, 149, 237],
             'cornsilk': [255, 248, 220],
             'crimson': [220, 20, 60],
-            'cyan': [0, 255, 255],
+            'Cyan': [0, 255, 255],
             'darkblue': [0, 0, 139],
             'darkcyan': [0, 139, 139],
             'darkgoldenrod': [184, 134, 11],
@@ -135,10 +135,10 @@ export default class Display {
             'ghostwhite': [248, 248, 255],
             'gold': [255, 215, 0],
             'goldenrod': [218, 165, 32],
-            'gray': [128, 128, 128],
-            'green': [0, 128, 0],
+            'Gray': [128, 128, 128],
+            'Green': [0, 128, 0],
             'greenyellow': [173, 255, 47],
-            'grey': [128, 128, 128],
+            'Grey': [128, 128, 128],
             'honeydew': [240, 255, 240],
             'hotpink': [255, 105, 180],
             'indianred': [205, 92, 92],
@@ -196,10 +196,10 @@ export default class Display {
             'palevioletred': [219, 112, 147],
             'papayawhip': [255, 239, 213],
             'peachpuff': [255, 218, 185],
-            'peru': [205, 133, 63],
-            'pink': [255, 192, 203],
+            'Brown': [205, 133, 63],
+            'Pink': [255, 192, 203],
             'plum': [221, 160, 221],
-            'powderblue': [176, 224, 230],
+            'Powder blue': [176, 224, 230],
             'purple': [128, 0, 128],
             'rebeccapurple': [102, 51, 153],
             'red': [255, 0, 0],
@@ -211,24 +211,24 @@ export default class Display {
             'seagreen': [46, 139, 87],
             'seashell': [255, 245, 238],
             'sienna': [160, 82, 45],
-            'silver': [192, 192, 192],
+            'Silver': [192, 192, 192],
             'skyblue': [135, 206, 235],
-            'slateblue': [106, 90, 205],
+            'Slate blue': [106, 90, 205],
             'slategray': [112, 128, 144],
             'slategrey': [112, 128, 144],
             'snow': [255, 250, 250],
             'springgreen': [0, 255, 127],
-            'steelblue': [70, 130, 180],
+            'Steel blue': [70, 130, 180],
             'tan': [210, 180, 140],
             'teal': [0, 128, 128],
             'thistle': [216, 191, 216],
-            'tomato': [255, 99, 71],
+            'Tomato': [255, 99, 71],
             'turquoise': [64, 224, 208],
             'violet': [238, 130, 238],
             'wheat': [245, 222, 179],
             'white': [255, 255, 255],
             'whitesmoke': [245, 245, 245],
-            'yellow': [255, 255, 0],
+            'Yellow': [255, 255, 0],
             'yellowgreen': [154, 205, 50]
         }
         
@@ -317,6 +317,8 @@ export default class Display {
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
+        this.renderer.inputGamma = true
+        this.renderer.outputGamma = true
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
@@ -632,6 +634,8 @@ export default class Display {
             const { tags } = geometry
             if (geometry.assembly) {
                 geometry.assembly.forEach(walk)
+            } else if (geometry.item) {
+                walk(geometry.item)
             } else if (geometry.threejsSegments) {
                 const segments = geometry.threejsSegments
                 const dataset = {}
