@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -217,7 +219,6 @@ export default class Molecule extends Atom{
                 })
             })
             
-            this.processing = false
         }
     }
     
@@ -269,11 +270,11 @@ export default class Molecule extends Atom{
         this.createEditableValueListItem(valueList,this,&apos;name&apos;,&apos;Name&apos;, false)
 
         if(!this.topLevel){
-            this.createButton(valueList,this,&apos;Go To Parent&apos;,this.goToParentMolecule)
+            //this.createButton(valueList,this,&apos;Go To Parent&apos;,this.goToParentMolecule)
             
             //this.createButton(valueList,this,&apos;Export To GitHub&apos;, this.exportToGithub)
         }
-        else{ //If we are the top level molecule and not in run mode
+        else{ //If we are the top level molecule
 
             this.createEditableValueListItem(valueList,GlobalVariables,&apos;circleSegmentSize&apos;, &apos;Circle Segment Size&apos;, true, (newValue) =&gt; {GlobalVariables.circleSegmentSize = newValue})
             
@@ -298,9 +299,11 @@ export default class Molecule extends Atom{
         
         //removes 3d view menu on background click
         let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
-        while (viewerBar.firstChild) {
-            viewerBar.removeChild(viewerBar.firstChild)
-            viewerBar.setAttribute(&apos;style&apos;, &apos;background-color:none;&apos;)
+        if(viewerBar &amp;&amp; viewerBar.firstChild){
+            while (viewerBar.firstChild) {
+                viewerBar.removeChild(viewerBar.firstChild)
+                viewerBar.setAttribute(&apos;style&apos;, &apos;background-color:none;&apos;)
+            }
         }
 
         if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
@@ -323,33 +326,35 @@ export default class Molecule extends Atom{
      * @param {object} list - The HTML object to append the created element to.
      */ 
     displaySimpleBOM(list){
-        var bomList = []
+        
         if(this.value != null){
             try{
-                bomList = extractBomTags(this.value)
+                extractBomTags(this.value).then(bomList =&gt; {
+                    
+                    if(bomList.length &gt; 0){
+                    
+                        list.appendChild(document.createElement(&apos;br&apos;))
+                        list.appendChild(document.createElement(&apos;br&apos;))
+                        
+                        var div = document.createElement(&apos;h3&apos;)
+                        div.setAttribute(&apos;style&apos;,&apos;text-align:center;&apos;)
+                        list.appendChild(div)
+                        var valueText = document.createTextNode(&apos;Bill Of Materials&apos;)
+                        div.appendChild(valueText)
+                        
+                        var x = document.createElement(&apos;HR&apos;)
+                        list.appendChild(x)
+                        
+                        bomList.forEach(bomEntry =&gt; {
+                            this.createNonEditableValueListItem(list,bomEntry,&apos;numberNeeded&apos;, bomEntry.BOMitemName, false)
+                        })
+                    }
+                })
             }catch(err){
                 this.setAlert(&quot;Unable to read BOM&quot;)
             }
         }
         
-        if(bomList.length &gt; 0){
-        
-            list.appendChild(document.createElement(&apos;br&apos;))
-            list.appendChild(document.createElement(&apos;br&apos;))
-            
-            var div = document.createElement(&apos;h3&apos;)
-            div.setAttribute(&apos;style&apos;,&apos;text-align:center;&apos;)
-            list.appendChild(div)
-            var valueText = document.createTextNode(&apos;Bill Of Materials&apos;)
-            div.appendChild(valueText)
-            
-            var x = document.createElement(&apos;HR&apos;)
-            list.appendChild(x)
-            
-            bomList.forEach(bomEntry =&gt; {
-                this.createNonEditableValueListItem(list,bomEntry,&apos;numberNeeded&apos;, bomEntry.BOMitemName, false)
-            })
-        }
     }
 
     /**

@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -76,7 +78,6 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/prototypes/atom.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import AttachmentPoint from &apos;./attachmentpoint&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
-
 /**
  * This class is the prototype for all atoms.
  */
@@ -226,8 +227,6 @@ export default class Atom {
       
         if(this.processing){
             GlobalVariables.c.fillStyle = &apos;blue&apos;
-        }else{
-            GlobalVariables.c.fillStyle = this.color
         }
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = &apos;10px Work Sans&apos;
@@ -461,7 +460,7 @@ export default class Atom {
                 this.deleteNode()
             }
         }
-        
+                
         this.inputs.forEach(child =&gt; {
             child.keyPress(key)
         })
@@ -478,7 +477,12 @@ export default class Atom {
         //Add options to set all of the inputs
         this.inputs.forEach(input =&gt; {
             if(input.type == &apos;input&apos; &amp;&amp; input.valueType != &apos;geometry&apos; &amp;&amp; input.connectors.length == 0){
-                this.createEditableValueListItem(valueList,input,&apos;value&apos;, input.name, true)
+                if(input.valueType == &apos;number&apos;){
+                    this.createEditableValueListItem(valueList,input,&apos;value&apos;, input.name, true)
+                }
+                else{
+                    this.createEditableValueListItem(valueList,input,&apos;value&apos;, input.name, false)
+                }
             }
         })
         
@@ -496,12 +500,16 @@ export default class Atom {
             sideBar.removeChild(sideBar.firstChild)
         }
 
+        //adds the name of the molecule to sideBar
         var name2 = document.createElement(&apos;p&apos;)
         name2.textContent = this.name
         sideBar.appendChild(name2)
+        name2.setAttribute(&apos;class&apos;,&apos;molecule_title&apos;)
 
-        //add the name as of project title  -- to the top bar -- permanently
+
+        //add the name as of project title 
         if (this.atomType == &apos;Molecule&apos; ){
+            
             let headerBar_title = document.querySelector(&apos;#headerBar_title&apos;)
             while (headerBar_title.firstChild) {
                 headerBar_title.removeChild(headerBar_title.firstChild)
@@ -510,16 +518,74 @@ export default class Atom {
             var name1 = document.createElement(&apos;p&apos;)
             name1.textContent = &quot;- &quot; + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
+
+            //add available molecules dropdown
+            this.localMoleculesMenu()
         }
-        
+
         //Create a list element
         var valueList = document.createElement(&apos;ul&apos;)
         sideBar.appendChild(valueList)
         valueList.setAttribute(&apos;class&apos;, &apos;sidebar-list&apos;)
+
         
         return valueList
+
+
     }
-    
+
+    /**
+     * Initializes button to see all local molecules.
+     */
+    localMoleculesMenu(){
+        //Menu of local available molecules
+
+        let sideBar = document.querySelector(&apos;.sideBar&apos;)
+        var availableMolecules = document.createElement(&apos;button&apos;)
+        availableMolecules.textContent = &quot;Local Molecules&quot;
+        sideBar.appendChild(availableMolecules)
+        var availableMoleculesSelect = document.createElement(&apos;div&apos;)
+        availableMolecules.appendChild(availableMoleculesSelect)
+
+        availableMolecules.setAttribute(&apos;class&apos;,&apos;available_molecules&apos;)
+        availableMolecules.setAttribute(&apos;style&apos;,&apos;width:200px&apos;)
+        availableMolecules.setAttribute(&apos;title&apos;,&apos;or Right-Click on Canvas&apos;)
+            
+        for(var key in GlobalVariables.availableTypes) {
+            var newElement = document.createElement(&apos;li&apos;)
+            var instance = GlobalVariables.availableTypes[key]
+            var text = document.createTextNode(instance.atomType)
+            newElement.setAttribute(&apos;class&apos;, &apos;select-menu&apos;)
+            newElement.setAttribute(&apos;id&apos;, instance.atomType)
+            newElement.appendChild(text) 
+            availableMoleculesSelect.appendChild(newElement) 
+            
+
+            availableMolecules.addEventListener(&apos;click&apos;, () =&gt; {
+                availableMoleculesSelect.style.display = &apos;block&apos;
+            })
+           
+            //Add function to call when atom is selected and place atom
+            newElement.addEventListener(&apos;click&apos;, (e) =&gt; {
+
+                let clr = e.target.id
+                const placement = GlobalVariables.scale1/1.1
+
+                GlobalVariables.currentMolecule.placeAtom({
+                    x: GlobalVariables.canvas.width * placement, 
+                    y: GlobalVariables.canvas.height * placement, 
+                    parent: GlobalVariables.currentMolecule,
+                    atomType: clr,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                    
+                }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
+                
+                //hides menu if molecule is selected
+                GlobalVariables.currentMolecule.backgroundClick()
+            })
+        }
+    }
+
     /**
      * Delete this atom.
      */ 
@@ -560,7 +626,7 @@ export default class Atom {
         
         var ioValues = []
         this.inputs.forEach(io =&gt; {
-            if (typeof io.getValue() == &apos;number&apos;){
+            if (typeof io.getValue() == &apos;number&apos; || typeof io.getValue() == &apos;string&apos;){
                 var saveIO = {
                     name: io.name,
                     ioValue: io.getValue()
@@ -704,6 +770,7 @@ export default class Atom {
      * @param {object} callBack - Optional. A function to call with the new value when the value changes.
      */ 
     createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
+
         var listElement = document.createElement(&apos;LI&apos;)
         list.appendChild(listElement)
         
@@ -746,13 +813,19 @@ export default class Atom {
                 object[key] = valueInBox
                 callBack(valueInBox)
             }
+            
+            //sets the color of the molecule correctly after focus out of editable box
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value
         document.getElementById(thisID).addEventListener(&apos;keypress&apos;, function(evt) {
             if (evt.which === 13) {
                 evt.preventDefault()
-                document.getElementById(thisID).blur()  //shift focus away if someone presses enter
+                
+                document.getElementById(thisID).blur() 
+                //shift focus away if someone presses enter
             }
         })
 

@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -104,7 +106,7 @@ export default class Color extends Atom {
          * The color options to choose from
          * @type {array}
          */
-        this.colorOptions = [&quot;blue&quot;, &quot;green&quot;, &quot;pink&quot;, &quot;black&quot;, &quot;gray&quot;, &quot;silver&quot;]
+        this.colorOptions = [&apos;Powder blue&apos;,&apos;Tomato&apos;,&apos;Steel blue&apos;,&apos;Yellow&apos;,&apos;Brown&apos;,&apos;Cyan&apos;, &quot;Green&quot;, &quot;Pink&quot;, &quot;Gray&quot;, &quot;Silver&quot;]
         
         /**
          * The index of the currently selected color option.
@@ -142,7 +144,9 @@ export default class Color extends Atom {
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
-        this.createDropDown(list, this, this.colorOptions, this.selectedColorIndex, &quot;Color&quot;, (index)=&gt;{this.changeColor(index)})
+        const dropdown= document.createElement(&apos;div&apos;)
+        list.appendChild(dropdown)
+        this.createDropDown(dropdown, this, this.colorOptions, this.selectedColorIndex, &quot;Color&quot;, (index)=&gt;{this.changeColor(index)})
     }
     
     /**

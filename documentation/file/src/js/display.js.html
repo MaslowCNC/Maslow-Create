@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -158,7 +160,7 @@ export default class Display {
          * @type {object}
          */
         this.colorToRgbMapping = {
-            &apos;aliceblue&apos;: [240, 248, 255],
+            &apos;Aliceblue&apos;: [240, 248, 255],
             &apos;antiquewhite&apos;: [250, 235, 215],
             &apos;aqua&apos;: [0, 255, 255],
             &apos;aquamarine&apos;: [127, 255, 212],
@@ -178,7 +180,7 @@ export default class Display {
             &apos;cornflowerblue&apos;: [100, 149, 237],
             &apos;cornsilk&apos;: [255, 248, 220],
             &apos;crimson&apos;: [220, 20, 60],
-            &apos;cyan&apos;: [0, 255, 255],
+            &apos;Cyan&apos;: [0, 255, 255],
             &apos;darkblue&apos;: [0, 0, 139],
             &apos;darkcyan&apos;: [0, 139, 139],
             &apos;darkgoldenrod&apos;: [184, 134, 11],
@@ -211,10 +213,10 @@ export default class Display {
             &apos;ghostwhite&apos;: [248, 248, 255],
             &apos;gold&apos;: [255, 215, 0],
             &apos;goldenrod&apos;: [218, 165, 32],
-            &apos;gray&apos;: [128, 128, 128],
-            &apos;green&apos;: [0, 128, 0],
+            &apos;Gray&apos;: [128, 128, 128],
+            &apos;Green&apos;: [0, 128, 0],
             &apos;greenyellow&apos;: [173, 255, 47],
-            &apos;grey&apos;: [128, 128, 128],
+            &apos;Grey&apos;: [128, 128, 128],
             &apos;honeydew&apos;: [240, 255, 240],
             &apos;hotpink&apos;: [255, 105, 180],
             &apos;indianred&apos;: [205, 92, 92],
@@ -272,10 +274,10 @@ export default class Display {
             &apos;palevioletred&apos;: [219, 112, 147],
             &apos;papayawhip&apos;: [255, 239, 213],
             &apos;peachpuff&apos;: [255, 218, 185],
-            &apos;peru&apos;: [205, 133, 63],
-            &apos;pink&apos;: [255, 192, 203],
+            &apos;Brown&apos;: [205, 133, 63],
+            &apos;Pink&apos;: [255, 192, 203],
             &apos;plum&apos;: [221, 160, 221],
-            &apos;powderblue&apos;: [176, 224, 230],
+            &apos;Powder blue&apos;: [176, 224, 230],
             &apos;purple&apos;: [128, 0, 128],
             &apos;rebeccapurple&apos;: [102, 51, 153],
             &apos;red&apos;: [255, 0, 0],
@@ -287,24 +289,24 @@ export default class Display {
             &apos;seagreen&apos;: [46, 139, 87],
             &apos;seashell&apos;: [255, 245, 238],
             &apos;sienna&apos;: [160, 82, 45],
-            &apos;silver&apos;: [192, 192, 192],
+            &apos;Silver&apos;: [192, 192, 192],
             &apos;skyblue&apos;: [135, 206, 235],
-            &apos;slateblue&apos;: [106, 90, 205],
+            &apos;Slate blue&apos;: [106, 90, 205],
             &apos;slategray&apos;: [112, 128, 144],
             &apos;slategrey&apos;: [112, 128, 144],
             &apos;snow&apos;: [255, 250, 250],
             &apos;springgreen&apos;: [0, 255, 127],
-            &apos;steelblue&apos;: [70, 130, 180],
+            &apos;Steel blue&apos;: [70, 130, 180],
             &apos;tan&apos;: [210, 180, 140],
             &apos;teal&apos;: [0, 128, 128],
             &apos;thistle&apos;: [216, 191, 216],
-            &apos;tomato&apos;: [255, 99, 71],
+            &apos;Tomato&apos;: [255, 99, 71],
             &apos;turquoise&apos;: [64, 224, 208],
             &apos;violet&apos;: [238, 130, 238],
             &apos;wheat&apos;: [245, 222, 179],
             &apos;white&apos;: [255, 255, 255],
             &apos;whitesmoke&apos;: [245, 245, 245],
-            &apos;yellow&apos;: [255, 255, 0],
+            &apos;Yellow&apos;: [255, 255, 0],
             &apos;yellowgreen&apos;: [154, 205, 50]
         }
         
@@ -393,6 +395,8 @@ export default class Display {
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio)
+        this.renderer.inputGamma = true
+        this.renderer.outputGamma = true
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
@@ -708,6 +712,8 @@ export default class Display {
             const { tags } = geometry
             if (geometry.assembly) {
                 geometry.assembly.forEach(walk)
+            } else if (geometry.item) {
+                walk(geometry.item)
             } else if (geometry.threejsSegments) {
                 const segments = geometry.threejsSegments
                 const dataset = {}

@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -551,7 +553,7 @@ export default function GitHubModule(){
                         message: &quot;initialize README&quot;, 
                         content: content
                     }).then(() =&gt; {
-                        intervalTimer = setInterval(() =&gt; { this.saveProject() }, 60000) //Save the project regularly
+                        intervalTimer = setInterval(() =&gt; { this.saveProject() }, 120000) //Save the project regularly
                     })
                 })
             })
@@ -585,6 +587,9 @@ export default function GitHubModule(){
     this.saveProject = function(){
         //Save the current project into the github repo
         if(currentRepoName != null){
+            let popUp = document.querySelector(&apos;#popUp&apos;)
+            popUp.textContent = &quot;...saving&quot;
+            popUp.setAttribute(&quot;style&quot;,&quot;display:block&quot;)
             var shape = null
             if(GlobalVariables.topLevelMolecule.value != null){
                 shape = GlobalVariables.topLevelMolecule.value
@@ -620,47 +625,48 @@ export default function GitHubModule(){
             }
             
             const threadCompute = async (values, key) =&gt; {
-                return await GlobalVariables.ask({values: values, key: key})
+                return await GlobalVariables.saveWorker({values: values, key: key})
             }
             threadCompute([shape], &quot;stl&quot;).then( stlContent =&gt; {
                 
                 threadCompute([shape], &quot;SVG Picture&quot;).then(contentSvg =&gt; {
                     
                     var bomContent = bomHeader
-                    const bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
-                    var totalParts = 0
-                    var totalCost  = 0
-                    bomItems.forEach(item =&gt; {
-                        totalParts += item.numberNeeded
-                        totalCost  += item.costUSD
-                        bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
+                    extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
+                        var totalParts = 0
+                        var totalCost  = 0
+                        bomItems.forEach(item =&gt; {
+                            totalParts += item.numberNeeded
+                            totalCost  += item.costUSD
+                            bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
+                        })
+                        bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
+                        bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
+                        
+                        
+                        var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + currentRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
+                        GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
+                            readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+                        })
+                        
+                        const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
+                        
+                        this.createCommit(octokit,{
+                            owner: currentUser,
+                            repo: currentRepoName,
+                            base: &apos;master&apos;, /* optional: defaults to default branch */
+                            changes: {
+                                files: {
+                                    &apos;project.stl&apos;: stlContent,
+                                    &apos;project.svg&apos;: contentSvg,
+                                    &apos;BillOfMaterials.md&apos;: bomContent,
+                                    &apos;README.md&apos;: readmeContent,
+                                    &apos;project.maslowcreate&apos;: projectContent
+                                },
+                                commit: &apos;Autosave&apos;
+                            }
+                        })
                     })
-                    bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
-                    bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
-                    
-                    
-                    var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + currentRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
-                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
-                        readmeContent = readmeContent + item + &quot;\n\n\n&quot;
-                    })
-                    
-                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
-                    
-                    this.createCommit(octokit,{
-                        owner: currentUser,
-                        repo: currentRepoName,
-                        base: &apos;master&apos;, /* optional: defaults to default branch */
-                        changes: {
-                            files: {
-                                &apos;project.stl&apos;: stlContent,
-                                &apos;project.svg&apos;: contentSvg,
-                                &apos;BillOfMaterials.md&apos;: bomContent,
-                                &apos;README.md&apos;: readmeContent,
-                                &apos;project.maslowcreate&apos;: projectContent
-                            },
-                            commit: &apos;Autosave&apos;
-                        }
-                    }) 
                 })
             })
         }
@@ -720,6 +726,7 @@ export default function GitHubModule(){
         console.warn(&quot;Project saved&quot;)
         //alert
         let popUp = document.querySelector(&apos;#popUp&apos;)
+        popUp.textContent = &quot;Project Saved&quot;
         popUp.setAttribute(&quot;style&quot;,&quot;display:block&quot;)
         setTimeout(function() {
             popUp.setAttribute(&quot;style&quot;,&quot;display:none&quot;)
@@ -779,7 +786,7 @@ export default function GitHubModule(){
                 GlobalVariables.topLevelMolecule.backgroundClick()
             })
             
-            intervalTimer = setInterval(() =&gt; this.saveProject(), 60000) //Save the project regularly
+            intervalTimer = setInterval(() =&gt; this.saveProject(), 120000) //Save the project regularly
         })
         
     }

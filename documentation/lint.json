@@ -4,23 +4,23 @@
     "filePath": "src/js/display.js",
     "lines": [
       {
-        "lineNumber": 447,
+        "lineNumber": 449,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 448,
+        "lineNumber": 450,
         "line": "     * This function is intended to calculate the base log of two numbers and round it to an integer\r"
       },
       {
-        "lineNumber": 449,
+        "lineNumber": 451,
         "line": "     * @param {number,number}\r"
       },
       {
-        "lineNumber": 450,
+        "lineNumber": 452,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 451,
+        "lineNumber": 453,
         "line": "    baseLog(x,y){\r"
       }
     ],
@@ -35,23 +35,23 @@
     "filePath": "src/js/display.js",
     "lines": [
       {
-        "lineNumber": 456,
+        "lineNumber": 458,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 457,
+        "lineNumber": 459,
         "line": "     * This function is intended to calculate the 3d distance between object and camera\r"
       },
       {
-        "lineNumber": 458,
+        "lineNumber": 460,
         "line": "     * @param {number}\r"
       },
       {
-        "lineNumber": 459,
+        "lineNumber": 461,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 460,
+        "lineNumber": 462,
         "line": "    dist3D(position){\r"
       }
     ],
@@ -65,39 +65,39 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 722,
+        "lineNumber": 793,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 723,
+        "lineNumber": 794,
         "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 724,
+        "lineNumber": 795,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 725,
+        "lineNumber": 796,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 726,
+        "lineNumber": 797,
         "line": "     * @param {array} options - A list of options to display in the drop down.\r"
       },
       {
-        "lineNumber": 727,
+        "lineNumber": 798,
         "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
       },
       {
-        "lineNumber": 728,
+        "lineNumber": 799,
         "line": "     * @param {string} description - A description of what the dropdown does.\r"
       },
       {
-        "lineNumber": 729,
+        "lineNumber": 800,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 730,
+        "lineNumber": 801,
         "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
       }
     ],
@@ -122,35 +122,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 805,
+        "lineNumber": 876,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 806,
+        "lineNumber": 877,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 807,
+        "lineNumber": 878,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 808,
+        "lineNumber": 879,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 809,
+        "lineNumber": 880,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 810,
+        "lineNumber": 881,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 811,
+        "lineNumber": 882,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 812,
+        "lineNumber": 883,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],

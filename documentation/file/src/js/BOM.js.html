@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -74,7 +76,9 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/BOM.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./globalvariables.js&apos;
+
+/**
  * This class defines a BOMEntry object which is used to define one entry in a bill of materials.
  */ 
 export class BOMEntry {
@@ -114,55 +118,36 @@ export class BOMEntry {
  * Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.
  * @param {object} geometry - The geometry which should be scanned for tags.
  */ 
-export const extractBomTags = (geometry) =&gt; {
+export const extractBomTags = async(geometry) =&gt; {
     
     var bomItems = []
     
-    const walk = (geometry) =&gt; {
-        //Grab any available tags
-        if(geometry.tags){
-            geometry.tags.forEach(tag =&gt; {
-                if(tag.substring(0,11) == &apos;user/{&quot;BOMi&apos;){
-                    bomItems.push(JSON.parse(tag.substring(5)))
-                }
-            })
-        }
+    var result = await GlobalVariables.ask({values: [geometry], key: &quot;getBOM&quot;})
+    
+    if (result != -1 ){
+        //Filter for only bomItems
+        bomItems = result.filter(item =&gt; {return item.substring(5, 12) == &quot;BOMitem&quot;})
+        bomItems = bomItems.map(JSON.parse)
+        bomItems = bomItems.map(JSON.parse)
         
-        //Walk deeper if there is deeper to go
-        if (geometry.disjointAssembly) {
-            geometry.disjointAssembly.forEach(walk)
-        }
-        else if (geometry.lazyGeometry) {
-            walk(geometry.lazyGeometry)
-        }
-        else if (geometry.geometry) {
-            walk(geometry.geometry)
-        }
-        else{
-            return
-        }
+        //Consolidate similar items into a single item
+        var compiledArray = []
+        bomItems.forEach(function (bomElement) {
+            if (!this[bomElement.BOMitemName]) {
+                this[bomElement.BOMitemName] = new BOMEntry
+                this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
+                this[bomElement.BOMitemName].source = bomElement.source
+                compiledArray.push(this[bomElement.BOMitemName])
+            }
+            this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
+            this[bomElement.BOMitemName].costUSD += bomElement.costUSD
+        }, Object.create(null))
+        
+        //Alphabetize by source
+        compiledArray = compiledArray.sort((a,b) =&gt; (a.source &gt; b.source) ? 1 : ((b.source &gt; a.source) ? -1 : 0)) 
+        
+        return compiledArray
     }
-    
-    if(geometry != null){
-        walk(geometry)
-    }
-    
-    
-    //Consolidate similar items into a single item
-    var result = []
-    bomItems.forEach(function (bomElement) {
-        if (!this[bomElement.BOMitemName]) {
-            this[bomElement.BOMitemName] = new BOMEntry
-            this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
-            this[bomElement.BOMitemName].source = bomElement.source
-            result.push(this[bomElement.BOMitemName])
-        }
-        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
-        this[bomElement.BOMitemName].costUSD += bomElement.costUSD
-    }, Object.create(null))
-    
-    
-    return result
 }
 </code></pre>
 

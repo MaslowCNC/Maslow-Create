@@ -60,6 +60,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/cutlayout.js~cutlayout",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html",
+    "<span>CutLayout</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/cutlayout.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/cutlist.js~cutlist",
     "class/src/js/molecules/cutlist.js~CutList.html",
     "<span>CutList</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/cutlist.js</span>",
@@ -81,6 +87,12 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/molecules/equation.js~equation",
     "class/src/js/molecules/equation.js~Equation.html",
     "<span>Equation</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/equation.js</span>",
+    "class"
+  ],
+  [
+    "canvas-template/src/js/molecules/extracttag.js~extracttag",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html",
+    "<span>ExtractTag</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/extracttag.js</span>",
     "class"
   ],
   [
@@ -846,6 +858,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#saveworker",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-saveWorker",
+    "src/js/globalvariables.js~GlobalVariables#saveWorker",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#scale1",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-scale1",
     "src/js/globalvariables.js~GlobalVariables#scale1",
@@ -1248,6 +1266,54 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/cutlayout.js",
+    "file/src/js/molecules/cutlayout.js.html",
+    "src/js/molecules/cutlayout.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#atomtype",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-member-atomType",
+    "src/js/molecules/cutlayout.js~CutLayout#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#constructor",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-constructor-constructor",
+    "src/js/molecules/cutlayout.js~CutLayout#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#generatestl",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-generateStl",
+    "src/js/molecules/cutlayout.js~CutLayout#generateStl",
+    "method"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#name",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-member-name",
+    "src/js/molecules/cutlayout.js~CutLayout#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#type",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-member-type",
+    "src/js/molecules/cutlayout.js~CutLayout#type",
+    "member"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#updatesidebar",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-updateSidebar",
+    "src/js/molecules/cutlayout.js~CutLayout#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/cutlayout.js~cutlayout#updatevalue",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-updateValue",
+    "src/js/molecules/cutlayout.js~CutLayout#updateValue",
+    "method"
+  ],
+  [
     "src/js/molecules/cutlist.js",
     "file/src/js/molecules/cutlist.js.html",
     "src/js/molecules/cutlist.js",
@@ -1366,6 +1432,42 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/equation.js~Equation.html#instance-member-value",
     "src/js/molecules/equation.js~Equation#value",
     "member"
+  ],
+  [
+    "src/js/molecules/extracttag.js",
+    "file/src/js/molecules/extracttag.js.html",
+    "src/js/molecules/extracttag.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/extracttag.js~extracttag#atomtype",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-member-atomType",
+    "src/js/molecules/extracttag.js~ExtractTag#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/extracttag.js~extracttag#constructor",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-constructor-constructor",
+    "src/js/molecules/extracttag.js~ExtractTag#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/extracttag.js~extracttag#name",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-member-name",
+    "src/js/molecules/extracttag.js~ExtractTag#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/extracttag.js~extracttag#type",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-member-type",
+    "src/js/molecules/extracttag.js~ExtractTag#type",
+    "member"
+  ],
+  [
+    "src/js/molecules/extracttag.js~extracttag#updatevalue",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-method-updateValue",
+    "src/js/molecules/extracttag.js~ExtractTag#updateValue",
+    "method"
   ],
   [
     "src/js/molecules/extrude.js",
@@ -2523,6 +2625,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#keypress",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-keyPress",
     "src/js/prototypes/atom.js~Atom#keyPress",
+    "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#localmoleculesmenu",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-localMoleculesMenu",
+    "src/js/prototypes/atom.js~Atom#localMoleculesMenu",
     "method"
   ],
   [

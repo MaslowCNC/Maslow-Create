@@ -44,9 +44,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
@@ -80,6 +82,7 @@ import CutAway          from &apos;./molecules/cutaway.js&apos;
 import CutList          from &apos;./molecules/cutlist.js&apos;
 import Circle           from &apos;./molecules/circle.js&apos;
 import Color            from &apos;./molecules/color.js&apos;
+import CutLayout        from &apos;./molecules/cutlayout.js&apos;
 import Rectangle        from &apos;./molecules/rectangle.js&apos;
 import ShrinkWrap       from &apos;./molecules/shrinkwrap.js&apos;
 import Translate        from &apos;./molecules/translate.js&apos;
@@ -94,6 +97,7 @@ import Intersection     from &apos;./molecules/intersection.js&apos;
 import Difference       from &apos;./molecules/difference.js&apos;
 import Constant         from &apos;./molecules/constant.js&apos;
 import Equation         from &apos;./molecules/equation.js&apos;
+import ExtractTag       from &apos;./molecules/extracttag.js&apos;
 import Molecule         from &apos;./molecules/molecule.js&apos;
 import Input            from &apos;./molecules/input.js&apos;
 import Readme           from &apos;./molecules/readme.js&apos;
@@ -145,12 +149,14 @@ class GlobalVariables{
             assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;},
             circle:             {creator: Circle, atomType: &apos;Circle&apos;},
             color:              {creator: Color, atomType: &apos;Color&apos;},
+            cutLayout:          {creator: CutLayout, atomType: &quot;Cut Layout&quot;},
             rectangle:          {creator: Rectangle, atomType: &apos;Rectangle&apos;},
             shirinkwrap:        {creator: ShrinkWrap, atomType: &apos;ShrinkWrap&apos;},
             translate:          {creator: Translate, atomType: &apos;Translate&apos;},
             tag:                {creator: Tag, atomType: &apos;Tag&apos;},
             regularPolygon:     {creator: RegularPolygon, atomType: &apos;RegularPolygon&apos;},
             extrude:            {creator: Extrude, atomType: &apos;Extrude&apos;},
+            extracttag:         {creator: ExtractTag, atomType: &apos;ExtractTag&apos;},
             scale:              {creator: Scale, atomType: &apos;Scale&apos;},
             stl:                {creator: Stl, atomType: &apos;Stl&apos;},
             svg:                {creator: Svg, atomType: &apos;Svg&apos;},
@@ -216,6 +222,13 @@ class GlobalVariables{
              * @type {object}
              */
             this.render = result.ask
+        })
+        createService({ webWorker: &apos;../maslowWorker.js&apos;, agent }).then(result =&gt; {
+            /** 
+             * The worker which is used during the saving process.
+             * @type {object}
+             */
+            this.saveWorker = result.ask
         })
         
         const math = create(all)
