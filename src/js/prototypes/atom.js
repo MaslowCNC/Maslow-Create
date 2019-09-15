@@ -441,8 +441,6 @@ export default class Atom {
             name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
 
-            //add available molecules dropdown
-            this.localMoleculesMenu()
         }
 
         //Create a list element

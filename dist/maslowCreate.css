@@ -285,7 +285,8 @@ body {
 .menu{
     width: 14rem;
     max-height: 8rem;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
     background-color: #f4f4f4;
     color: #333;
     border: 1px solid #aaa;
@@ -526,7 +527,8 @@ input.menu_search:focus {
     margin-right: 10px;
     border-radius: 5px;
     max-height: 10rem;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
     list-style: none;
     z-index: 1;
 }
@@ -606,17 +608,18 @@ input.menu_search:focus {
 
 /* width */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 1em;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888; 
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
 }
 
 /* Handle on hover */
