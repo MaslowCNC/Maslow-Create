@@ -207,11 +207,19 @@ export default class Molecule extends Atom{
             rangeElement.setAttribute('type', 'range')
             rangeElement.setAttribute('min', '.1')
             rangeElement.setAttribute('max', '10')
+            rangeElement.setAttribute('step', '.3')
             rangeElement.setAttribute('class', 'slider')
             rangeElement.setAttribute('value', GlobalVariables.circleSegmentSize)
+            
+            var rangeValueLabel = document.createElement('ul')
+            rangeValueLabel.innerHTML= '<li>Export</li><li>Draft</li> '
+            rangeValueLabel.setAttribute('class', 'range-labels')
+            rangeLabel.appendChild(rangeValueLabel)
+
             var rangeValue = document.createElement('p')
             rangeValue.textContent = rangeElement.value
             rangeLabel.appendChild(rangeValue)
+          
 
             //on slider change send value to global variables
             rangeElement.oninput = function() {

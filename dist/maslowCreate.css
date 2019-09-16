@@ -175,12 +175,21 @@
 }
 
 .slider-container {
-  text-align:center;
+    text-align: left;
+    font-size: 12px;
+    padding: 0 20px;
+}
+
+.slider-container label p {
+  text-align: center;
+  color: #b2b2b2;
+  font-size: 10px;
+  margin-top:-10px;
 }
 
 .slider {
   -webkit-appearance: none;
-  width: 90%;
+  width: 100%;
   height: 13px;
   border-radius: 2px;  
   background: "whitesmoke";
@@ -207,6 +216,22 @@
   background: #4CAF50;
   cursor: pointer;
 }
+
+/* Labels below slider */
+.range-labels {
+  padding: 0;
+  list-style: none;
+  width:90%;
+  display: flex;
+  justify-content: space-between;
+}
+  
+.range-labels li {
+  text-align: center;
+  color: #b2b2b2;
+  font-size: 10px;
+  cursor: pointer;
+  }
 
 #gridDiv, #wireDiv{
  display: block;
