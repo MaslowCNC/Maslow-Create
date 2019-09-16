@@ -192,10 +192,7 @@ export default class Molecule extends Atom{
         this.createEditableValueListItem(valueList,this,'name','Name', false)
 
         if(this.topLevel){
-             //If we are the top level molecule
-
-            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
-            
+             //If we are the top level molecule 
             
             //Creates value slider
             var rangeElement = document.createElement('input')
@@ -211,10 +208,12 @@ export default class Molecule extends Atom{
             rangeElement.setAttribute('min', '.1')
             rangeElement.setAttribute('max', '10')
             rangeElement.setAttribute('class', 'slider')
+            rangeElement.setAttribute('value', GlobalVariables.circleSegmentSize)
             var rangeValue = document.createElement('p')
             rangeValue.textContent = rangeElement.value
             rangeLabel.appendChild(rangeValue)
 
+            //on slider change send value to global variables
             rangeElement.oninput = function() {
             rangeValue.textContent = this.value
             GlobalVariables.circleSegmentSize = this.value
