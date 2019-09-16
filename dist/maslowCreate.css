@@ -539,6 +539,41 @@ input.menu_search:focus {
   border: 2px (0, 0, 0, 0.8) solid;
 }
 
+.available_molecules{
+    position: absolute;
+    bottom: 150px;
+    right: 35px;
+    margin: auto;
+    background-color: #DA70D690;
+    color: white;
+    padding: 8px;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    border-radius: 5px;
+}
+
+.available_molecules div {
+  display: none; /*hide original SELECT element: */
+  margin-left: -8px;
+  margin-top: 8px;
+  position: absolute;
+  background-color: #f1f1f1;
+  width: 200px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  max-height: 10rem;
+  overflow: scroll;
+}
+
+.available_molecules div li {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
 .login-popup{
     width: 12rem;
     background-color: #f4f4f4;

@@ -1,6 +1,5 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
-
 /**
  * This class is the prototype for all atoms.
  */
@@ -429,8 +428,10 @@ export default class Atom {
         sideBar.appendChild(name2)
         name2.setAttribute('class','molecule_title')
 
-        //add the name as of project title  -- to the top bar -- permanently
+
+        //add the name as of project title 
         if (this.atomType == 'Molecule' ){
+            
             let headerBar_title = document.querySelector('#headerBar_title')
             while (headerBar_title.firstChild) {
                 headerBar_title.removeChild(headerBar_title.firstChild)
@@ -439,16 +440,74 @@ export default class Atom {
             var name1 = document.createElement('p')
             name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
+
+            //add available molecules dropdown
+            this.localMoleculesMenu()
         }
-        
+
         //Create a list element
         var valueList = document.createElement('ul')
         sideBar.appendChild(valueList)
         valueList.setAttribute('class', 'sidebar-list')
+
         
         return valueList
+
+
     }
-    
+
+    /**
+     * Initializes button to see all local molecules.
+     */
+    localMoleculesMenu(){
+        //Menu of local available molecules
+
+        let sideBar = document.querySelector('.sideBar')
+        var availableMolecules = document.createElement('button')
+        availableMolecules.textContent = "Local Molecules"
+        sideBar.appendChild(availableMolecules)
+        var availableMoleculesSelect = document.createElement('div')
+        availableMolecules.appendChild(availableMoleculesSelect)
+
+        availableMolecules.setAttribute('class','available_molecules')
+        availableMolecules.setAttribute('style','width:200px')
+        availableMolecules.setAttribute('title','or Right-Click on Canvas')
+            
+        for(var key in GlobalVariables.availableTypes) {
+            var newElement = document.createElement('li')
+            var instance = GlobalVariables.availableTypes[key]
+            var text = document.createTextNode(instance.atomType)
+            newElement.setAttribute('class', 'select-menu')
+            newElement.setAttribute('id', instance.atomType)
+            newElement.appendChild(text) 
+            availableMoleculesSelect.appendChild(newElement) 
+            
+
+            availableMolecules.addEventListener('click', () => {
+                availableMoleculesSelect.style.display = 'block'
+            })
+           
+            //Add function to call when atom is selected and place atom
+            newElement.addEventListener('click', (e) => {
+
+                let clr = e.target.id
+                const placement = GlobalVariables.scale1/1.1
+
+                GlobalVariables.currentMolecule.placeAtom({
+                    x: GlobalVariables.canvas.width * placement, 
+                    y: GlobalVariables.canvas.height * placement, 
+                    parent: GlobalVariables.currentMolecule,
+                    atomType: clr,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                    
+                }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
+                
+                //hides menu if molecule is selected
+                GlobalVariables.currentMolecule.backgroundClick()
+            })
+        }
+    }
+
     /**
      * Delete this atom.
      */ 
