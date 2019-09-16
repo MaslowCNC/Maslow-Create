@@ -204,13 +204,22 @@ export default class Molecule extends Atom{
             div.setAttribute('class', 'slider-container')
             valueList.appendChild(div)
             var rangeLabel = document.createElement('label')
-            rangeLabel.textContent = "Number of Segments"
+            rangeLabel.textContent = "Display quality/Length of Segments"
             div.appendChild(rangeLabel)
             rangeLabel.appendChild(rangeElement)
             rangeElement.setAttribute('type', 'range')
-            rangeElement.setAttribute('min', '1')
-            rangeElement.setAttribute('max', '100')
+            rangeElement.setAttribute('min', '.1')
+            rangeElement.setAttribute('max', '10')
             rangeElement.setAttribute('class', 'slider')
+            var rangeValue = document.createElement('p')
+            rangeValue.textContent = rangeElement.value
+            rangeLabel.appendChild(rangeValue)
+
+            rangeElement.oninput = function() {
+            rangeValue.textContent = this.value
+            GlobalVariables.circleSegmentSize = this.value
+            
+            }
 
         }
         
