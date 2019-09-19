@@ -509,6 +509,11 @@ export default function GitHubModule(){
     this.saveProject = function(){
         //Save the current project into the github repo
         if(currentRepoName != null){
+            
+            //Store the target repo incase a new project is loaded during the save
+            const saveRepoName = currentRepoName
+            const saveUser = currentUser
+            
             let popUp = document.querySelector('#popUp')
             popUp.textContent = "...saving"
             popUp.setAttribute("style","display:block")
@@ -566,7 +571,7 @@ export default function GitHubModule(){
                         bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                         
                         
-                        var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n"
+                        var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
                         GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
                             readmeContent = readmeContent + item + "\n\n\n"
                         })
@@ -574,8 +579,8 @@ export default function GitHubModule(){
                         const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
                         
                         this.createCommit(octokit,{
-                            owner: currentUser,
-                            repo: currentRepoName,
+                            owner: saveUser,
+                            repo: saveRepoName,
                             base: 'master', /* optional: defaults to default branch */
                             changes: {
                                 files: {
