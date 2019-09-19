@@ -1,5 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the Assembly atom instance.
@@ -42,33 +43,33 @@ export default class Assembly extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
-        
-        this.updateValue()
     }
     
     /**
     * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.
     */ 
     updateValue(){
-        try{
-            var inputs = []
-            this.inputs.forEach( io => {
-                if(io.connectors.length > 0 && io.type == 'input'){
-                    inputs.push(io.getValue())
-                }
-            })
-            const mappedInputs = inputs.map(x => {
-                return x
-            })
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            try{
+                var inputs = []
+                this.inputs.forEach( io => {
+                    if(io.connectors.length > 0 && io.type == 'input'){
+                        inputs.push(io.getValue())
+                    }
+                })
+                const mappedInputs = inputs.map(x => {
+                    return x
+                })
+                
+                const values = [mappedInputs, this.removeCutawayGeometry]
+                
+                this.basicThreadValueProcessing(values, "assemble")
+                this.clearAlert()
+            }catch(err){this.setAlert(err)}
             
-            const values = [mappedInputs, this.removeCutawayGeometry]
-            
-            this.basicThreadValueProcessing(values, "assemble")
-            this.clearAlert()
-        }catch(err){this.setAlert(err)}
-        
-        //Delete or add ports as needed
-        addOrDeletePorts(this)
+            //Delete or add ports as needed
+            addOrDeletePorts(this)
+        }
     }
     
     /**
@@ -115,7 +116,6 @@ export default class Assembly extends Atom{
             }
         })
     }
-        
     
     /**
     * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.
