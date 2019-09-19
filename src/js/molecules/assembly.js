@@ -123,7 +123,6 @@ export default class Assembly extends Atom{
             }
         })
     }
-        
     
     /**
     * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.
