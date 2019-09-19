@@ -249,11 +249,10 @@ export default class Atom {
      */ 
     removeIO(type, name, target){
         //Remove the target IO attachment point
-        
-        target.inputs.forEach(io => {
-            if(io.name == name && io.type == type){
-                io.deleteSelf()
-                target.inputs.splice(target.inputs.indexOf(io),1)
+        target.inputs.forEach(input => {
+            if(input.name == name && input.type == type){
+                target.inputs.splice(target.inputs.indexOf(input),1)
+                input.deleteSelf()
             }
         })
     }

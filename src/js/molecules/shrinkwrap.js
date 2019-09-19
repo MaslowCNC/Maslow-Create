@@ -1,5 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the shrinkwrap atom. This behavior can also be called 'hull'
@@ -56,22 +57,24 @@ export default class ShrinkWrap extends Atom{
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 
     updateValue(){
-        try{
-            var inputsList = []
-            this.inputs.forEach( io => {
-                if(io.connectors.length > 0){
-                    inputsList.push(io.getValue())
-                }
-            })
-            const values = inputsList.map(x => {
-                return x
-            })
+        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            try{
+                var inputsList = []
+                this.inputs.forEach( io => {
+                    if(io.connectors.length > 0){
+                        inputsList.push(io.getValue())
+                    }
+                })
+                const values = inputsList.map(x => {
+                    return x
+                })
+                
+                this.basicThreadValueProcessing(values, "hull")
+            }catch(err){this.setAlert(err)}
             
-            this.basicThreadValueProcessing(values, "hull")
-        }catch(err){this.setAlert(err)}
-        
-        //Delete or add ports as needed
-        addOrDeletePorts(this)
+            //Delete or add ports as needed
+            addOrDeletePorts(this)
+        }
     }
      
     /**
