@@ -255,7 +255,6 @@ export default class Atom {
                 input.deleteSelf()
             }
         })
-        target.inputs.forEach(input => {console.log(input.name)})
     }
     
     /**
