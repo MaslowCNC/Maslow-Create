@@ -514,6 +514,10 @@ export default function GitHubModule(){
             const saveRepoName = currentRepoName
             const saveUser = currentUser
             
+            if(typeof intervalTimer != undefined){
+                clearInterval(intervalTimer) //Turn off auto saving to prevent it from saving again during this save
+            }
+            
             let popUp = document.querySelector('#popUp')
             popUp.textContent = "...saving"
             popUp.setAttribute("style","display:block")
