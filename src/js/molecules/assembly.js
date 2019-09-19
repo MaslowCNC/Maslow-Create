@@ -79,7 +79,15 @@ export default class Assembly extends Atom{
         
         this.inputs.forEach(input => {
             if(input.connectors.length != 0){
-                this.createCheckbox(sideBar,input.name,true,(event)=>{
+                
+                var shouldThisBeChecked = true
+                if(input.getValue().tags){  //Check to see if this part is currently being cut away
+                    if(input.getValue().tags.indexOf("user/cutAway") > -1){
+                        shouldThisBeChecked = false
+                    }
+                }
+                
+                this.createCheckbox(sideBar,input.name,shouldThisBeChecked,(event)=>{
                     var updatedValue = input.getValue()
                     
                     if(!event.target.checked){ //If the box has just been unchecked
@@ -115,7 +123,6 @@ export default class Assembly extends Atom{
             }
         })
     }
-        
     
     /**
     * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.
