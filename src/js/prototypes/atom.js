@@ -514,8 +514,12 @@ export default class Atom {
     deleteNode(){
         //deletes this node and all of it's inputs
         
-        this.inputs.forEach(child => {
-            child.deleteSelf()       
+        this.inputs.forEach(input => { //disable the inputs before deleting
+            input.ready = false
+        })
+        
+        this.inputs.forEach(input => {
+            input.deleteSelf()
         })
         if(this.output){
             this.output.deleteSelf()
