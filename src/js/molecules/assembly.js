@@ -80,7 +80,7 @@ export default class Assembly extends Atom{
         this.inputs.forEach(input => {
             if(input.connectors.length != 0){
                 
-                var shouldThisBeChecked = true;
+                var shouldThisBeChecked = true
                 if(input.getValue().tags){  //Check to see if this part is currently being cut away
                     if(input.getValue().tags.indexOf("user/cutAway") > -1){
                         shouldThisBeChecked = false
