@@ -29,13 +29,12 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "function main(){\n  return Sphere(40)//return must be geometry;\n}\n\nmain()"
+        this.code = "function main(Input1, Input2){\n  return Sphere(40)//return must be geometry;\n}\n\nmain(Input1, Input2)"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
         this.setValues(values)
         
-        //generate the correct codeblock for this atom on creation
         this.updateValue()
     }
     
@@ -44,6 +43,28 @@ export default class Code extends Atom {
      */ 
     updateValue(){
         try{
+            //Parse this.code for the line "\nmain(input1, input2....) and add those as inputs if needed
+            var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code);
+            if (variables[1]) {
+              variables = variables[1].split(/\s*,\s*/);
+            }
+            console.log(variables)
+            
+            //Add any inputs which are needed
+            for (var variable in variables){
+                if(!this.inputs.some(input => input.Name === variables[variable])){
+                    this.addIO('input', variables[variable], this, 'number', 1)
+                }
+            }
+            
+            //Remove any inputs which are not needed
+            for (var input in this.inputs){
+                if( !variables.includes(this.inputs[input].name) ){
+                    this.removeIO('input', this.inputs[input].name, this)
+                }
+            }
+            
+            
             const values = [this.code]
             this.basicThreadValueProcessing(values, "code")
         }catch(err){this.setAlert(err)}
@@ -63,7 +84,7 @@ export default class Code extends Atom {
             }
             
             popup.classList.remove('off')
-            popup.setAttribute("style", "text-align: center")
+            //popup.setAttribute("style", "text-align: center")
 
             
             //Add a title
@@ -91,7 +112,7 @@ export default class Code extends Atom {
     }
     
     /**
-     * Save the input code
+     * Save the input code to be loaded next time
      */ 
     serialize(values){
         //Save the readme text to the serial stream
