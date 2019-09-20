@@ -29,7 +29,7 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.value = 10;"
+        this.code = "function main(){\n  return Sphere(40)//return must be geometry;\n}\n\nmain()"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
@@ -43,19 +43,10 @@ export default class Code extends Atom {
      * Grab the code as a text string and execute it. This really needs to be moved to a worker for security.
      */ 
     updateValue(){
-        //This should pull and run the code in the editor
-        
-        //reset the IOs to the default state
-        const code = new Function('$',
-            `const { ${Object.keys({...GlobalVariables.api, ...{This: this}}).join(', ')} } = $;\n\n` + 
-                                  this.code)
         try{
-            code({...GlobalVariables.api, ...{This: this}})
-        }catch(err){
-            console.warn(err)
-        }
-        
-        super.updateValue()
+            const values = [this.code]
+            this.basicThreadValueProcessing(values, "code")
+        }catch(err){this.setAlert(err)}
     }
     
     /**
