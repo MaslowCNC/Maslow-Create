@@ -29,7 +29,7 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "function main(Input1, Input2){\n  return Sphere(40)//return must be geometry;\n}\n\nmain(Input1, Input2)"
+        this.code = "function main(Input1, Input2){\n  return Sphere(40)        //return must be geometry;\n}\n\nmain(inputs.Input1, inputs.Input2)"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
@@ -48,7 +48,6 @@ export default class Code extends Atom {
             if (variables[1]) {
               variables = variables[1].split(/\s*,\s*/);
             }
-            console.log(variables)
             
             //Add any inputs which are needed
             for (var variable in variables){
@@ -68,9 +67,6 @@ export default class Code extends Atom {
             variables.forEach(variable => {
                 argumentsArray[variable] = this.findIOValue(String(variable))
             })
-            
-            console.log("Sending: ")
-            console.log(argumentsArray)
             
             const values = [this.code, argumentsArray]
             this.basicThreadValueProcessing(values, "code")
