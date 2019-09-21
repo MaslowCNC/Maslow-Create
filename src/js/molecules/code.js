@@ -1,6 +1,5 @@
 import Atom from '../prototypes/atom.js'
 import CodeMirror from 'codemirror'
-import GlobalVariables from '../globalvariables.js'
 
 /**
  * The Code molecule type adds support for executing arbirary jsxcad code.
@@ -44,9 +43,9 @@ export default class Code extends Atom {
     updateValue(){
         try{
             //Parse this.code for the line "\nmain(input1, input2....) and add those as inputs if needed
-            var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code);
+            var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code)
             if (variables[1]) {
-              variables = variables[1].split(/\s*,\s*/);
+                variables = variables[1].split(/\s*,\s*/)
             }
             
             //Add any inputs which are needed
