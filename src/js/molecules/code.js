@@ -53,7 +53,7 @@ export default class Code extends Atom {
             //Add any inputs which are needed
             for (var variable in variables){
                 if(!this.inputs.some(input => input.Name === variables[variable])){
-                    this.addIO('input', variables[variable], this, 'number', 1)
+                    this.addIO('input', variables[variable], this, 'geometry', null)
                 }
             }
             
@@ -64,8 +64,15 @@ export default class Code extends Atom {
                 }
             }
             
+            var argumentsArray = {}
+            variables.forEach(variable => {
+                argumentsArray[variable] = this.findIOValue(String(variable))
+            })
             
-            const values = [this.code]
+            console.log("Sending: ")
+            console.log(argumentsArray)
+            
+            const values = [this.code, argumentsArray]
             this.basicThreadValueProcessing(values, "code")
         }catch(err){this.setAlert(err)}
     }
