@@ -86,11 +86,8 @@ export default class Code extends Atom {
             }
             
             popup.classList.remove('off')
-            //popup.setAttribute("style", "text-align: center")
 
-            
             //Add a title
-            
             var codeMirror = CodeMirror(popup, {
                 value: this.code,
                 mode:  "javascript",
