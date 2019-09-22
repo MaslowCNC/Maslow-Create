@@ -566,11 +566,13 @@ export default function GitHubModule(){
                     extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
                         var totalParts = 0
                         var totalCost  = 0
-                        bomItems.forEach(item => {
-                            totalParts += item.numberNeeded
-                            totalCost  += item.costUSD
-                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
-                        })
+                        if(bomItems != undefined){
+                            bomItems.forEach(item => {
+                                totalParts += item.numberNeeded
+                                totalCost  += item.costUSD
+                                bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
+                            })
+                        }
                         bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
                         bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                         
