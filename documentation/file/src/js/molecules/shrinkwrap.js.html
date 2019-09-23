@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
@@ -78,6 +79,7 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/shrinkwrap.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
 import { addOrDeletePorts } from &apos;../alwaysOneFreeInput.js&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * This class creates the shrinkwrap atom. This behavior can also be called &apos;hull&apos;
@@ -134,22 +136,24 @@ export default class ShrinkWrap extends Atom{
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 
     updateValue(){
-        try{
-            var inputsList = []
-            this.inputs.forEach( io =&gt; {
-                if(io.connectors.length &gt; 0){
-                    inputsList.push(io.getValue())
-                }
-            })
-            const values = inputsList.map(x =&gt; {
-                return x
-            })
+        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+            try{
+                var inputsList = []
+                this.inputs.forEach( io =&gt; {
+                    if(io.connectors.length &gt; 0){
+                        inputsList.push(io.getValue())
+                    }
+                })
+                const values = inputsList.map(x =&gt; {
+                    return x
+                })
+                
+                this.basicThreadValueProcessing(values, &quot;hull&quot;)
+            }catch(err){this.setAlert(err)}
             
-            this.basicThreadValueProcessing(values, &quot;hull&quot;)
-        }catch(err){this.setAlert(err)}
-        
-        //Delete or add ports as needed
-        addOrDeletePorts(this)
+            //Delete or add ports as needed
+            addOrDeletePorts(this)
+        }
     }
      
     /**

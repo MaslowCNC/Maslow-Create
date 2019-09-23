@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
@@ -167,10 +168,17 @@ export default class AttachmentPoint {
          */
         this.type = &apos;output&apos;
         /** 
-         * The attachment point current value. Default is 10.
+         * The attachment point current value.
          * @type {number}
          */
         this.value = 10
+        
+        /**
+         * The default value to be used by the ap when nothing is attached
+         * @type {string}
+         */
+        this.defaultValue = 10
+        
         /** 
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
@@ -489,6 +497,13 @@ export default class AttachmentPoint {
      */ 
     setDefault(){
         this.setValue(this.defaultValue)
+    }
+    
+    /**
+     * Updates the default value for the ap.
+     */ 
+    updateDefault(newDefault){
+        this.defaultValue = newDefault
     }
     
     /**

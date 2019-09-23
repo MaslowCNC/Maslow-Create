@@ -65,39 +65,39 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 793,
+        "lineNumber": 804,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 794,
+        "lineNumber": 805,
         "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 795,
+        "lineNumber": 806,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 796,
+        "lineNumber": 807,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 797,
+        "lineNumber": 808,
         "line": "     * @param {array} options - A list of options to display in the drop down.\r"
       },
       {
-        "lineNumber": 798,
+        "lineNumber": 809,
         "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
       },
       {
-        "lineNumber": 799,
+        "lineNumber": 810,
         "line": "     * @param {string} description - A description of what the dropdown does.\r"
       },
       {
-        "lineNumber": 800,
+        "lineNumber": 811,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 801,
+        "lineNumber": 812,
         "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
       }
     ],
@@ -122,35 +122,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 876,
+        "lineNumber": 887,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 877,
+        "lineNumber": 888,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 878,
+        "lineNumber": 889,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 879,
+        "lineNumber": 890,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 880,
+        "lineNumber": 891,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 881,
+        "lineNumber": 892,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 882,
+        "lineNumber": 893,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 883,
+        "lineNumber": 894,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],

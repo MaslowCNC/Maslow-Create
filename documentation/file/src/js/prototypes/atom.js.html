@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
@@ -224,10 +225,7 @@ export default class Atom {
         this.inputs.forEach(child =&gt; {
             child.draw()       
         })
-      
-        if(this.processing){
-            GlobalVariables.c.fillStyle = &apos;blue&apos;
-        }
+        
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = &apos;10px Work Sans&apos;
 
@@ -245,6 +243,24 @@ export default class Atom {
         }
         else if (this.y + this.radius &gt; canvasFlow.height/GlobalVariables.scale1){
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
+        }
+        
+        
+        
+        if(this.processing){
+            GlobalVariables.c.fillStyle = &apos;blue&apos;
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
         }
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = &apos;start&apos; 
@@ -327,11 +343,10 @@ export default class Atom {
      */ 
     removeIO(type, name, target){
         //Remove the target IO attachment point
-        
-        target.inputs.forEach(io =&gt; {
-            if(io.name == name &amp;&amp; io.type == type){
-                io.deleteSelf()
-                target.inputs.splice(target.inputs.indexOf(io),1)
+        target.inputs.forEach(input =&gt; {
+            if(input.name == name &amp;&amp; input.type == type){
+                target.inputs.splice(target.inputs.indexOf(input),1)
+                input.deleteSelf()
             }
         })
     }
@@ -376,17 +391,13 @@ export default class Atom {
         
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed &amp;&amp; GlobalVariables.distBetweenPoints(x, this.x, y, this.y) &lt; this.radius){
-            this.color = this.selectedColor
             this.isMoving = true
             this.selected = true
-            this.strokeColor = this.defaultColor
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
         }
         else{
-            this.color = this.defaultColor
-            this.strokeColor = this.selectedColor
             this.selected = false
         }
         
@@ -592,8 +603,12 @@ export default class Atom {
     deleteNode(){
         //deletes this node and all of it&apos;s inputs
         
-        this.inputs.forEach(child =&gt; {
-            child.deleteSelf()       
+        this.inputs.forEach(input =&gt; { //disable the inputs before deleting
+            input.ready = false
+        })
+        
+        this.inputs.forEach(input =&gt; {
+            input.deleteSelf()
         })
         if(this.output){
             this.output.deleteSelf()
@@ -814,9 +829,6 @@ export default class Atom {
                 callBack(valueInBox)
             }
             
-            //sets the color of the molecule correctly after focus out of editable box
-            this.color = this.selectedColor
-            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value

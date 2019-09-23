@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
@@ -99,7 +100,7 @@ const howManyInputPortsAvailable = function(target){
  */ 
 const deleteEmptyPort = function(target){
     target.inputs.forEach(io =&gt; {
-        if(io.type == &apos;input&apos; &amp;&amp; io.connectors.length == 0 &amp;&amp; howManyInputPortsAvailable(target) &gt;= 2){
+        if(io.type == &apos;input&apos; &amp;&amp; io.connectors.length == 0){
             target.removeIO(&apos;input&apos;, io.name, target)
         }
     })
@@ -111,7 +112,7 @@ const deleteEmptyPort = function(target){
  */ 
 export const addOrDeletePorts = (target) =&gt; {
     //Because a molecule loads with no connectors attached to the ports and we don&apos;t want them to delete before
-    //They are conencted to we use the ioValues list to keep track of them
+    //They are connected to we use the ioValues list to keep track of them
     target.inputs.forEach(child =&gt; {
         target.ioValues.forEach(ioValue =&gt; {
             if (child.name == ioValue.name &amp;&amp; child.connectors.length &gt; 0){
@@ -124,7 +125,7 @@ export const addOrDeletePorts = (target) =&gt; {
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available
         target.addIO(&apos;input&apos;, &apos;3D shape &apos; + GlobalVariables.generateUniqueID(), target, &apos;geometry&apos;, &apos;&apos;)
     }
-    if(howManyInputPortsAvailable(target) &gt;= 2 &amp;&amp; target.ioValues.length &lt;= 1){  //We need to remove the empty port
+    if(howManyInputPortsAvailable(target) &gt;= 2){  //We need to remove the empty port
         deleteEmptyPort(target)
         target.updateValue()
     }

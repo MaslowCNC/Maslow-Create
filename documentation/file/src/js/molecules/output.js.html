@@ -41,6 +41,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
@@ -164,7 +165,35 @@ export default class Output extends Atom {
 
         this.height= this.radius
         
-
+        //Set colors
+        if(this.processing){
+            GlobalVariables.c.fillStyle = &apos;blue&apos;
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            /**
+             * This background color
+             * @type {string}
+             */
+            this.color = this.selectedColor
+            /**
+             * This atoms accent color
+             * @type {string}
+             */
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
+        
+        this.inputs.forEach(child =&gt; {
+            child.draw()       
+        })
+        
         GlobalVariables.c.beginPath()
         GlobalVariables.c.textAlign = &apos;end&apos; 
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
@@ -192,11 +221,6 @@ export default class Output extends Atom {
         GlobalVariables.c.lineJoin = &quot;round&quot;
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
-
-        this.inputs.forEach(child =&gt; {
-            child.draw()       
-        })
-        
     }
 }</code></pre>
 

@@ -36,6 +36,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/code.js~code",
+    "class/src/js/molecules/code.js~Code.html",
+    "<span>Code</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/code.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/color.js~color",
     "class/src/js/molecules/color.js~Color.html",
     "<span>Color</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/color.js</span>",
@@ -1098,6 +1104,54 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/code.js",
+    "file/src/js/molecules/code.js.html",
+    "src/js/molecules/code.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/code.js~code#atomtype",
+    "class/src/js/molecules/code.js~Code.html#instance-member-atomType",
+    "src/js/molecules/code.js~Code#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/code.js~code#code",
+    "class/src/js/molecules/code.js~Code.html#instance-member-code",
+    "src/js/molecules/code.js~Code#code",
+    "member"
+  ],
+  [
+    "src/js/molecules/code.js~code#constructor",
+    "class/src/js/molecules/code.js~Code.html#instance-constructor-constructor",
+    "src/js/molecules/code.js~Code#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/code.js~code#name",
+    "class/src/js/molecules/code.js~Code.html#instance-member-name",
+    "src/js/molecules/code.js~Code#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/code.js~code#serialize",
+    "class/src/js/molecules/code.js~Code.html#instance-method-serialize",
+    "src/js/molecules/code.js~Code#serialize",
+    "method"
+  ],
+  [
+    "src/js/molecules/code.js~code#updatesidebar",
+    "class/src/js/molecules/code.js~Code.html#instance-method-updateSidebar",
+    "src/js/molecules/code.js~Code#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/code.js~code#updatevalue",
+    "class/src/js/molecules/code.js~Code.html#instance-method-updateValue",
+    "src/js/molecules/code.js~Code#updateValue",
+    "method"
+  ],
+  [
     "src/js/molecules/color.js",
     "file/src/js/molecules/color.js.html",
     "src/js/molecules/color.js",
@@ -1170,6 +1224,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/constant.js~constant#color",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-color",
+    "src/js/molecules/constant.js~Constant#color",
+    "member"
+  ],
+  [
     "src/js/molecules/constant.js~constant#constructor",
     "class/src/js/molecules/constant.js~Constant.html#instance-constructor-constructor",
     "src/js/molecules/constant.js~Constant#constructor",
@@ -1210,6 +1270,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/constant.js~Constant.html#instance-method-serialize",
     "src/js/molecules/constant.js~Constant#serialize",
     "method"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#strokecolor",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-strokeColor",
+    "src/js/molecules/constant.js~Constant#strokeColor",
+    "member"
   ],
   [
     "src/js/molecules/constant.js~constant#type",
@@ -1632,6 +1698,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/input.js~input#color",
+    "class/src/js/molecules/input.js~Input.html#instance-member-color",
+    "src/js/molecules/input.js~Input#color",
+    "member"
+  ],
+  [
     "src/js/molecules/input.js~input#constructor",
     "class/src/js/molecules/input.js~Input.html#instance-constructor-constructor",
     "src/js/molecules/input.js~Input#constructor",
@@ -1690,6 +1762,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/input.js~Input.html#instance-method-setOutput",
     "src/js/molecules/input.js~Input#setOutput",
     "method"
+  ],
+  [
+    "src/js/molecules/input.js~input#strokecolor",
+    "class/src/js/molecules/input.js~Input.html#instance-member-strokeColor",
+    "src/js/molecules/input.js~Input#strokeColor",
+    "member"
   ],
   [
     "src/js/molecules/input.js~input#type",
@@ -1944,6 +2022,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/output.js~output#color",
+    "class/src/js/molecules/output.js~Output.html#instance-member-color",
+    "src/js/molecules/output.js~Output#color",
+    "member"
+  ],
+  [
     "src/js/molecules/output.js~output#constructor",
     "class/src/js/molecules/output.js~Output.html#instance-constructor-constructor",
     "src/js/molecules/output.js~Output#constructor",
@@ -1978,6 +2062,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/output.js~Output.html#instance-method-setID",
     "src/js/molecules/output.js~Output#setID",
     "method"
+  ],
+  [
+    "src/js/molecules/output.js~output#strokecolor",
+    "class/src/js/molecules/output.js~Output.html#instance-member-strokeColor",
+    "src/js/molecules/output.js~Output#strokeColor",
+    "member"
   ],
   [
     "src/js/molecules/output.js~output#type",
@@ -2832,6 +2922,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#defaultvalue",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-defaultValue",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#defaultValue",
+    "member"
+  ],
+  [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#deleteself",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-deleteSelf",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#deleteSelf",
@@ -2955,6 +3051,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#update",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-update",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#update",
+    "method"
+  ],
+  [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#updatedefault",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-updateDefault",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#updateDefault",
     "method"
   ],
   [
