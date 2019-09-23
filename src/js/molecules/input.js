@@ -36,7 +36,7 @@ export default class Input extends Atom {
          * This atom's height for drawing
          * @type {number}
          */
-        this.height = 16
+        this.height = 20
         /** 
          * This atom's radius for drawing
          * @type {string}
@@ -85,27 +85,51 @@ export default class Input extends Atom {
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
         
-        GlobalVariables.c.fillStyle = this.color
-        GlobalVariables.c.strokeStyle = this.parent.strokeColor
-        GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height)
-        GlobalVariables.c.lineTo(this.x - this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
-        GlobalVariables.c.lineWidth = 1
-        GlobalVariables.c.fill()
-        GlobalVariables.c.closePath()
-        GlobalVariables.c.stroke()
-
+        //Set colors
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            /**
+             * This background color
+             * @type {string}
+             */
+            this.color = this.selectedColor
+            /**
+             * This atoms accent color
+             * @type {string}
+             */
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
+        
         this.inputs.forEach(input => {
             input.draw()       
         })
         if(this.output){
             this.output.draw()
         }
+        
+        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        GlobalVariables.c.stroke()
+
     }
     
     /**
@@ -137,6 +161,14 @@ export default class Input extends Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
+        
+        this.parent.inputs.forEach(input => {
+            if(input.name == this.name){
+                input.updateDefault(this.findIOValue('default value'))
+            }
+        })
+        
+        this.setOutput(this.findIOValue('default value'))
         this.displayAndPropogate()
     }
     

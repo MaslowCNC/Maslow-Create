@@ -89,10 +89,17 @@ export default class AttachmentPoint {
          */
         this.type = 'output'
         /** 
-         * The attachment point current value. Default is 10.
+         * The attachment point current value.
          * @type {number}
          */
         this.value = 10
+        
+        /**
+         * The default value to be used by the ap when nothing is attached
+         * @type {string}
+         */
+        this.defaultValue = 10
+        
         /** 
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
@@ -411,6 +418,13 @@ export default class AttachmentPoint {
      */ 
     setDefault(){
         this.setValue(this.defaultValue)
+    }
+    
+    /**
+     * Updates the default value for the ap.
+     */ 
+    updateDefault(newDefault){
+        this.defaultValue = newDefault
     }
     
     /**
