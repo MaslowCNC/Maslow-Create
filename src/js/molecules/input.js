@@ -36,7 +36,7 @@ export default class Input extends Atom {
          * This atom's height for drawing
          * @type {number}
          */
-        this.height = 16
+        this.height = 20
         /** 
          * This atom's radius for drawing
          * @type {string}
@@ -153,6 +153,14 @@ export default class Input extends Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
+        
+        this.parent.inputs.forEach(input => {
+            if(input.name == this.name){
+                input.updateDefault(this.findIOValue('default value'))
+            }
+        })
+        
+        this.setOutput(this.findIOValue('default value'))
         this.displayAndPropogate()
     }
     

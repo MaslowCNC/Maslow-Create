@@ -414,6 +414,13 @@ export default class AttachmentPoint {
     }
     
     /**
+     * Updates the default value for the ap.
+     */ 
+    updateDefault(newDefault){
+        this.defaultValue = newDefault
+    }
+    
+    /**
      * Reads and returns the curent value of the ap.
      */ 
     getValue(){
