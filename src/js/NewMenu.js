@@ -21,34 +21,26 @@ import GlobalVariables from './globalvariables'
                                 title: 'Actions',
                                 icon: '',
                                 href: '#5',
-                                menus: [
-                                    {
-                                        title: 'menu1-1',
-                                        icon: 'fa fa-circle'
-                                    },
-                                    {
-                                        title: 'menu1-2',
-                                        icon: 'fa fa-cc-visa'
-                                    }
-                                ]
+                                menus: makeArray('Actions')
+
                             },
                             {
                                 title: 'Shapes',
                                 icon: '',
                                 //href: '#5',
-                                menus: makeArray()
+                                menus: makeArray('Shapes')
                             },
                             {
                                 title: 'Properties',
                                 icon: '',
                                 //href: '#5',
-                                menus: makeArray()
+                                menus: makeArray('Properties')
                             },
                             {
                                 title: 'Interactions',
                                 icon: '',
                                 //href: '#5',
-                                menus: makeArray()
+                                menus: makeArray('Interactions')
                             },
                             {
                                 title: 'GitHub',
@@ -60,38 +52,20 @@ import GlobalVariables from './globalvariables'
                     });
             
 
-            function makeArray() {
-                var menuArray = []
-                var subMenu = {}
-                subMenu.title = "circle"
-                menuArray.push(subMenu);
+            function makeArray(group) {
                 
-                return menuArray;
+                var menuArray = [];
+                for(var key in GlobalVariables.availableTypes){
+                    var instance = GlobalVariables.availableTypes[key] 
+                    if(instance.atomCategory === group){
+                        var subMenu = new Object()
+                        subMenu.title = instance.atomType;
+                        menuArray.push(subMenu)
+                    }
+                }
+                 return menuArray;
             }
 
-            let configMenu = cmenu._creator._config.menus
-            
-            for (var i = 0; i < configMenu.length; i++) {
-            
-            var subMenu = {}
-            subMenu.title = "circle"
-            //configMenu[i].menus.push(subMenu)
-            }
- 
-     //Add function to call when atom is selected
-       
-        for(var key in GlobalVariables.availableTypes) {         
-             //change to filter later
-            var instance = GlobalVariables.availableTypes[key]         
-            //let configMenu = cmenu._creator._config.menus
-            instance.title = instance.atomType
-            /*instance.click: function (e, data) {
-                                    console.log(123);} */
-            delete instance.creator
-            delete instance.atomType;
-            //configMenu.push(instance);
-         }
-        
             /*/Add function to call when atom is selected
             document.getElementById(instance.atomType).addEventListener('click', (e) => {
                 this.placeNewNode(e)
