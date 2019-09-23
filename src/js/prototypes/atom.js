@@ -174,10 +174,14 @@ export default class Atom {
         else if(this.selected){
             GlobalVariables.c.fillStyle = this.selectedColor
             GlobalVariables.c.strokeStyle = this.defaultColor
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
         }
         else{
             GlobalVariables.c.fillStyle = this.defaultColor
             GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
         }
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = 'start' 

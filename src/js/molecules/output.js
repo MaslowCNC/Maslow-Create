@@ -86,7 +86,27 @@ export default class Output extends Atom {
 
         this.height= this.radius
         
-
+        //Set colors
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
+        
+        this.inputs.forEach(child => {
+            child.draw()       
+        })
+        
         GlobalVariables.c.beginPath()
         GlobalVariables.c.textAlign = 'end' 
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
@@ -114,10 +134,5 @@ export default class Output extends Atom {
         GlobalVariables.c.lineJoin = "round"
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
-
-        this.inputs.forEach(child => {
-            child.draw()       
-        })
-        
     }
 }

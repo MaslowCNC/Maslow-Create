@@ -87,9 +87,31 @@ export default class Constant extends Atom{
      */ 
     draw() {
         
+        //Set colors
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
+        
+        this.inputs.forEach(input => {
+            input.draw()       
+        })
+        if(this.output){
+            this.output.draw()
+        }
+        
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.strokeStyle = this.parent.strokeColor
-        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height)
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
@@ -97,13 +119,6 @@ export default class Constant extends Atom{
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
-
-        this.inputs.forEach(input => {
-            input.draw()       
-        })
-        if(this.output){
-            this.output.draw()
-        }
     }
     
     /**
