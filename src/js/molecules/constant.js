@@ -94,7 +94,15 @@ export default class Constant extends Atom{
         else if(this.selected){
             GlobalVariables.c.fillStyle = this.selectedColor
             GlobalVariables.c.strokeStyle = this.defaultColor
+            /**
+             * This background color
+             * @type {string}
+             */
             this.color = this.selectedColor
+            /**
+             * This atoms accent color
+             * @type {string}
+             */
             this.strokeColor = this.defaultColor
         }
         else{
