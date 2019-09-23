@@ -509,6 +509,15 @@ export default function GitHubModule(){
     this.saveProject = function(){
         //Save the current project into the github repo
         if(currentRepoName != null){
+            
+            //Store the target repo incase a new project is loaded during the save
+            const saveRepoName = currentRepoName
+            const saveUser = currentUser
+            
+            if(typeof intervalTimer != undefined){
+                clearInterval(intervalTimer) //Turn off auto saving to prevent it from saving again during this save
+            }
+            
             let popUp = document.querySelector('#popUp')
             popUp.textContent = "...saving"
             popUp.setAttribute("style","display:block")
@@ -557,16 +566,18 @@ export default function GitHubModule(){
                     extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
                         var totalParts = 0
                         var totalCost  = 0
-                        bomItems.forEach(item => {
-                            totalParts += item.numberNeeded
-                            totalCost  += item.costUSD
-                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
-                        })
+                        if(bomItems != undefined){
+                            bomItems.forEach(item => {
+                                totalParts += item.numberNeeded
+                                totalCost  += item.costUSD
+                                bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
+                            })
+                        }
                         bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
                         bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                         
                         
-                        var readmeContent = readmeHeader + "\n\n" + "# " + currentRepoName + "\n\n![](/project.svg)\n\n"
+                        var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
                         GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
                             readmeContent = readmeContent + item + "\n\n\n"
                         })
@@ -574,8 +585,8 @@ export default function GitHubModule(){
                         const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
                         
                         this.createCommit(octokit,{
-                            owner: currentUser,
-                            repo: currentRepoName,
+                            owner: saveUser,
+                            repo: saveRepoName,
                             base: 'master', /* optional: defaults to default branch */
                             changes: {
                                 files: {
