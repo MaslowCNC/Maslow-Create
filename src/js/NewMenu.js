@@ -11,9 +11,9 @@ import GlobalVariables from './globalvariables'
                         background: "#32323285",
                         backgroundHover: "#123321",
                         percent: 0.50,//%
-                        diameter: 130,//px
+                        diameter: 120,//px
                         position: 'top',
-                        horizontal: true,
+                        horizontal: false,
                         //start: -45,//deg
                         animation: "into",
                         menus: [
@@ -21,8 +21,8 @@ import GlobalVariables from './globalvariables'
                                 title: 'Actions',
                                 icon: '',
                                 href: '#5',
-                                menus: makeArray('Actions')
-
+                                menus: makeArray('Actions'),
+                                click: function a(){console.log('123')}
                             },
                             {
                                 title: 'Shapes',
@@ -52,37 +52,38 @@ import GlobalVariables from './globalvariables'
                     });
             
 
-            function makeArray(group) {
+    function makeArray(group) {
                 
-                var menuArray = [];
-                for(var key in GlobalVariables.availableTypes){
-                    var instance = GlobalVariables.availableTypes[key] 
-                    if(instance.atomCategory === group){
-                        var subMenu = new Object()
-                        subMenu.title = instance.atomType;
-                        menuArray.push(subMenu)
-                    }
-                }
-                 return menuArray;
-            }
+        var menuArray = [];
+        for(var key in GlobalVariables.availableTypes){
+            var instance = GlobalVariables.availableTypes[key] 
+            if(instance.atomCategory === group){
+                var subMenu = new Object()
+                subMenu.title = instance.atomType;      
+                subMenu.click = function menuClick(e, title){ 
+                
+                e.target.id = title.title
+                console.log(title.title)
+                console.log(e.target.id)
+                placeNewNode(e)
 
-            /*/Add function to call when atom is selected
-            document.getElementById(instance.atomType).addEventListener('click', (e) => {
-                this.placeNewNode(e)
-            })
-             */
-            
-        
-          document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
-            e.preventDefault()
-            cmenu.show([e.clientX, e.clientY])
-        }) 
+                }
+                menuArray.push(subMenu)
+            }
+        }
+         return menuArray;
+    }
+
+    document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
+        e.preventDefault()
+        cmenu.show([e.clientX, e.clientY])
+     }) 
     /**
      * Runs when a menu option is clicked to place a new atom from the local atoms list.
      * @param {object} ev - The event triggered by clicking on a menu item.
      */ 
-    function placeNewNode(ev){
-        let clr = ev.target.id
+    function placeNewNode(e){
+        let clr = e.target.id
         cmenu.hide()
         const invertScale = 1 / GlobalVariables.scale1
         GlobalVariables.currentMolecule.placeAtom({
