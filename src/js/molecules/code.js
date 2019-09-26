@@ -1,6 +1,5 @@
 import Atom from '../prototypes/atom.js'
 import CodeMirror from 'codemirror'
-import GlobalVariables from '../globalvariables.js'
 
 /**
  * The Code molecule type adds support for executing arbirary jsxcad code.
@@ -29,13 +28,12 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.value = 10;"
+        this.code = "//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \n\n\nfunction main(Input1, Input2){\n  return Sphere(40)        //return must be geometry;\n}\n\nreturn main(Input1, Input2)"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
         this.setValues(values)
         
-        //generate the correct codeblock for this atom on creation
         this.updateValue()
     }
     
@@ -43,19 +41,35 @@ export default class Code extends Atom {
      * Grab the code as a text string and execute it. This really needs to be moved to a worker for security.
      */ 
     updateValue(){
-        //This should pull and run the code in the editor
-        
-        //reset the IOs to the default state
-        const code = new Function('$',
-            `const { ${Object.keys({...GlobalVariables.api, ...{This: this}}).join(', ')} } = $;\n\n` + 
-                                  this.code)
         try{
-            code({...GlobalVariables.api, ...{This: this}})
-        }catch(err){
-            console.warn(err)
-        }
-        
-        super.updateValue()
+            //Parse this.code for the line "\nmain(input1, input2....) and add those as inputs if needed
+            var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code)
+            if (variables[1]) {
+                variables = variables[1].split(/\s*,\s*/)
+            }
+            
+            //Add any inputs which are needed
+            for (var variable in variables){
+                if(!this.inputs.some(input => input.Name === variables[variable])){
+                    this.addIO('input', variables[variable], this, 'geometry', null)
+                }
+            }
+            
+            //Remove any inputs which are not needed
+            for (var input in this.inputs){
+                if( !variables.includes(this.inputs[input].name) ){
+                    this.removeIO('input', this.inputs[input].name, this)
+                }
+            }
+            
+            var argumentsArray = {}
+            variables.forEach(variable => {
+                argumentsArray[variable] = this.findIOValue(String(variable))
+            })
+            
+            const values = [this.code, argumentsArray]
+            this.basicThreadValueProcessing(values, "code")
+        }catch(err){this.setAlert(err)}
     }
     
     /**
@@ -72,11 +86,8 @@ export default class Code extends Atom {
             }
             
             popup.classList.remove('off')
-            popup.setAttribute("style", "text-align: center")
 
-            
             //Add a title
-            
             var codeMirror = CodeMirror(popup, {
                 value: this.code,
                 mode:  "javascript",
@@ -100,7 +111,7 @@ export default class Code extends Atom {
     }
     
     /**
-     * Save the input code
+     * Save the input code to be loaded next time
      */ 
     serialize(values){
         //Save the readme text to the serial stream

@@ -94,8 +94,8 @@ class GlobalVariables{
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule'},
             union:              {creator: Union, atomType: 'Union'},
             stretch:            {creator: Stretch, atomType: 'Stretch'},
-            gcode:              {creator: Gcode, atomType: 'Gcode'},
             code:               {creator: Code, atomType: 'Code'},
+            gcode:              {creator: Gcode, atomType: 'Gcode'},
             cutAway:            {creator: CutAway, atomType: 'CutAway'},
             CutList:            {creator: CutList, atomType: 'CutList'}
         }
