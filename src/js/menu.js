@@ -1,5 +1,4 @@
 import GlobalVariables from './globalvariables'
-import cmenu from './NewMenu.js'
 
 /**
  * This class creates the right click menu behavior for placing atoms.
@@ -46,11 +45,11 @@ class Menu {
         document.getElementById('githubTab').addEventListener('click', (e) => {
             this.openTab(e, 'githubList')
         })
-        //Add function call when background is right clicked
+        /*Add function call when background is right clicked
         document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
             //this.showmenu(e)
             //cmenu.show();
-        })
+        })*/
         //Add function call to search when typing
         document.getElementById('menuInput').addEventListener('keyup', (e) => {
             this.searchMenu(e)
