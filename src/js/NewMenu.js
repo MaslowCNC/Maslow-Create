@@ -1,6 +1,7 @@
 import CMenu from './lib/circularmenu.js'
 import GlobalVariables from './globalvariables'
 
+export default placeNewNode 
     
     var ele = document.querySelector('#circle-menu1');
 
@@ -10,8 +11,8 @@ import GlobalVariables from './globalvariables'
                         spaceDeg: 1,//deg
                         background: "#32323285",
                         backgroundHover: "#123321",
-                        percent: 0.20,//%
-                        diameter: 120,//px
+                        percent: 0.35,//%
+                        diameter: 130,//px
                         position: 'top',
                         horizontal: false,
                         //start: -45,//deg
@@ -38,8 +39,9 @@ import GlobalVariables from './globalvariables'
                                 menus: makeArray('Interactions')
                             },
                             {
-                                title: 'GitHub',
+                                title: 'Import/Export',
                                 icon: '',
+                                menus: makeArray('Import/Export')
                                 
                             }
                         ]
@@ -53,12 +55,9 @@ import GlobalVariables from './globalvariables'
             var instance = GlobalVariables.availableTypes[key] 
             if(instance.atomCategory === group){
                 var subMenu = new Object()
-                subMenu.title = instance.atomType;      
+                subMenu.title = instance.atomType;     
                 subMenu.click = function menuClick(e, title){ 
-                
                 e.target.id = title.title
-                console.log(title.title)
-                console.log(e.target.id)
                 placeNewNode(e)
 
                 }

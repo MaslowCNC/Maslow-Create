@@ -9,7 +9,6 @@ class Menu {
      * The constructor creates a new menu. The menu is only created once when the program launches and is hidden and displayed when the menu is needed.
      */
     constructor(){
-        console.log(cmenu)
         /** 
          * The HTML object which contains the menu
          * @type {object}
