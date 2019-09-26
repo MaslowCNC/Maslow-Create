@@ -4,6 +4,7 @@ import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
 import LocalMenu from './js/localmenu.js'
+import {cmenu} from './js/NewMenu.js'
 
 GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
@@ -62,8 +63,8 @@ flowCanvas.addEventListener('mousedown', event => {
         GlobalVariables.currentMolecule.deselect()
     }
     //hide the menu if it is visible
-    if (!document.querySelector('.menu').contains(event.target)) {
-        Menu.hidemenu()
+    if (!document.querySelector('#circle-menu1').contains(event.target)) {
+        cmenu.hide()
     }
     //hide the menu if it is visible
     if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
