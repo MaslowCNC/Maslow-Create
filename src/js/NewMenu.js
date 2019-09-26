@@ -10,7 +10,7 @@ import GlobalVariables from './globalvariables'
                         spaceDeg: 1,//deg
                         background: "#32323285",
                         backgroundHover: "#123321",
-                        percent: 0.50,//%
+                        percent: 0.20,//%
                         diameter: 120,//px
                         position: 'top',
                         horizontal: false,
@@ -20,32 +20,26 @@ import GlobalVariables from './globalvariables'
                             {
                                 title: 'Actions',
                                 icon: '',
-                                href: '#5',
-                                menus: makeArray('Actions'),
-                                click: function a(){console.log('123')}
+                                menus: makeArray('Actions')        
                             },
                             {
                                 title: 'Shapes',
                                 icon: '',
-                                //href: '#5',
                                 menus: makeArray('Shapes')
                             },
                             {
                                 title: 'Properties',
                                 icon: '',
-                                //href: '#5',
                                 menus: makeArray('Properties')
                             },
                             {
                                 title: 'Interactions',
                                 icon: '',
-                                //href: '#5',
                                 menus: makeArray('Interactions')
                             },
                             {
                                 title: 'GitHub',
                                 icon: '',
-                                //href: '#5',
                                 
                             }
                         ]
