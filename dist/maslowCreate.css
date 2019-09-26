@@ -221,7 +221,7 @@
 .range-labels {
   padding: 0;
   list-style: none;
-  width:90%;
+  width:100%;
   display: flex;
   justify-content: space-between;
 }
