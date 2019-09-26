@@ -45,6 +45,10 @@ var cmenu = CMenu(ele)
         ]
     })
 
+/**
+     * Runs to create submenus from Global Variables atomCategories. Populates menu objects
+     * @param {object} group - Name of the category to find appropriate atoms
+     */ 
 function makeArray(group) {
                 
     var menuArray = []
@@ -64,13 +68,15 @@ function makeArray(group) {
     return menuArray
 }
 
+/* Right click to open circular menu */
 document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
     e.preventDefault()
     cmenu.show([e.clientX, e.clientY])
 }) 
+
 /**
      * Runs when a menu option is clicked to place a new atom from the local atoms list.
-     * @param {object} ev - The event triggered by clicking on a menu item.
+     * @param {object} ev - The event triggered by click event on a menu item.
      */ 
 function placeNewNode(e){
     let clr = e.target.id
