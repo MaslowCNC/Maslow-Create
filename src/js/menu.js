@@ -14,6 +14,7 @@ class Menu {
          */
         this.menu = document.querySelector('.menu')
         this.menu.classList.add('off')
+
         /** 
          * An array which lists all of the options in the menu.
          * @type {array}

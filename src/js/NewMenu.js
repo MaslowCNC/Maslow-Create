@@ -7,8 +7,8 @@ var cmenu = CMenu(ele)
     .config({
         totalAngle: 360,//deg,
         spaceDeg: 1,//deg
-        background: "#32323285",
-        backgroundHover: "#123321",
+        background: "#323232E8",
+        backgroundHover: "black",
         percent: 0.35,//%
         diameter: 130,//px
         position: 'top',
