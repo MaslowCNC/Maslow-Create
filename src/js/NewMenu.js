@@ -85,5 +85,5 @@ function placeNewNode(e){
     }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
 }
 
-export {cmenu};
+export {cmenu}
  
