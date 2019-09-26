@@ -363,7 +363,6 @@ input.menu_search:focus {
 .tab button {
     float: left;
     vertical-align: middle;
-    width: 50%;
     border: 0px white solid;
     outline: none;
     cursor: pointer;

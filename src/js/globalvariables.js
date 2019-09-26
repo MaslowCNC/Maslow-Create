@@ -68,6 +68,7 @@ class GlobalVariables{
          * @type {array}
          */
         this.availableTypes = {
+
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
