@@ -90,8 +90,9 @@ export default class Display {
             'beige': [245, 245, 220],
             'bisque': [255, 228, 196],
             'black': [0, 0, 0],
+            'Black': [70, 70, 70], // Dark gray
             'blanchedalmond': [255, 235, 205],
-            'blue': [0, 0, 255],
+            'Blue': [0, 0, 255],
             'blueviolet': [138, 43, 226],
             'brown': [165, 42, 42],
             'burlywood': [222, 184, 135],
@@ -106,7 +107,7 @@ export default class Display {
             'darkblue': [0, 0, 139],
             'darkcyan': [0, 139, 139],
             'darkgoldenrod': [184, 134, 11],
-            'darkgray': [169, 169, 169],
+            'Darkgray': [169, 169, 169],
             'darkgreen': [0, 100, 0],
             'darkgrey': [169, 169, 169],
             'darkkhaki': [189, 183, 107],
@@ -203,6 +204,7 @@ export default class Display {
             'purple': [128, 0, 128],
             'rebeccapurple': [102, 51, 153],
             'red': [255, 0, 0],
+            'Red': [255, 99, 71], //Tomato
             'rosybrown': [188, 143, 143],
             'royalblue': [65, 105, 225],
             'saddlebrown': [139, 69, 19],
@@ -222,11 +224,10 @@ export default class Display {
             'tan': [210, 180, 140],
             'teal': [0, 128, 128],
             'thistle': [216, 191, 216],
-            'Tomato': [255, 99, 71],
             'turquoise': [64, 224, 208],
             'violet': [238, 130, 238],
             'wheat': [245, 222, 179],
-            'white': [255, 255, 255],
+            'White': [255, 255, 255],
             'whitesmoke': [245, 245, 245],
             'Yellow': [255, 255, 0],
             'yellowgreen': [154, 205, 50]
@@ -571,7 +572,7 @@ export default class Display {
             return
         }
         const [r, g, b] = rgb
-        const color = ((r << 16) | (g << 8) | b) >>> 0
+        const color = ((1 << 24) + (r << 16) + (g << 8) + b)
         parameters.color = color
         return parameters
     }

@@ -191,15 +191,10 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name','Name', false)
 
-        if(!this.topLevel){
-            //this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
-            
-            //this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
-        }
-        else{ //If we are the top level molecule
+        if(this.topLevel){
+            //If we are the top level molecule 
+            this.createSegmentSlider(valueList)
 
-            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
-            
         }
         
         // this.createButton(valueList,this,'Download STL',() => {
@@ -241,6 +236,45 @@ export default class Molecule extends Atom{
         
         return valueList
         
+    }
+
+    /**
+     * Creates segment length slider and passes value to Global Variables
+     */ 
+    createSegmentSlider(valueList){
+        //Creates value slider
+        var rangeElement = document.createElement('input')
+        //Div which contains the entire element
+        var div = document.createElement('div')
+        div.setAttribute('class', 'slider-container')
+        valueList.appendChild(div)
+        var rangeLabel = document.createElement('label')
+        rangeLabel.textContent = "Display quality/Length of Segments"
+        div.appendChild(rangeLabel)
+        rangeLabel.appendChild(rangeElement)
+        rangeElement.setAttribute('type', 'range')
+        rangeElement.setAttribute('min', '.1')
+        rangeElement.setAttribute('max', '10')
+        rangeElement.setAttribute('step', '.3')
+        rangeElement.setAttribute('class', 'slider')
+        rangeElement.setAttribute('value', GlobalVariables.circleSegmentSize)
+            
+        var rangeValueLabel = document.createElement('ul')
+        rangeValueLabel.innerHTML= '<li>Export</li><li>Draft</li> '
+        rangeValueLabel.setAttribute('class', 'range-labels')
+        rangeLabel.appendChild(rangeValueLabel)
+
+        var rangeValue = document.createElement('p')
+        rangeValue.textContent = rangeElement.value
+        rangeLabel.appendChild(rangeValue)
+
+
+        //on slider change send value to global variables
+        rangeElement.oninput = function() {
+            rangeValue.textContent = this.value
+            GlobalVariables.circleSegmentSize = this.value
+            
+        }
     }
     
     /**
@@ -364,7 +398,7 @@ export default class Molecule extends Atom{
         
         
         this.nodesOnTheScreen.forEach(atom => {
-            //Store a represnetation of the atom
+            //Store a representation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom's connectors
             if(atom.output){
