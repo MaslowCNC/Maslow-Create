@@ -735,7 +735,8 @@ input.menu_search:focus {
 /* line 85, ../../sass/circular-menu.scss */
 .circular-menu ul li a span.text {
   display: block;
-  font-size: 10px;
+  font-size: 8px;
+  letter-spacing: 0.1em;
   line-height: 1;
   position: relative;
   font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", "STHeitiSC-Light", "Microsoft YaHei", Arial, sans-serif;

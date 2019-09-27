@@ -17,27 +17,27 @@ var cmenu = CMenu(ele)
         animation: "into",
         menus: [
             {
-                title: 'Actions',
+                title: 'ACTIONS',
                 icon: '',
                 menus: makeArray('Actions')        
             },
             {
-                title: 'Shapes',
+                title: 'SHAPES',
                 icon: '',
                 menus: makeArray('Shapes')
             },
             {
-                title: 'Properties',
+                title: 'PROPERTY',
                 icon: '',
                 menus: makeArray('Properties')
             },
             {
-                title: 'Interactions',
+                title: 'INTERACTION',
                 icon: '',
                 menus: makeArray('Interactions')
             },
             {
-                title: 'Import/Export',
+                title: 'EX/IM',
                 icon: '',
                 menus: makeArray('Import/Export')
                                 
@@ -55,7 +55,7 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            subMenu.title = instance.atomType     
+            subMenu.title = instance.atomType.toUpperCase()     
             subMenu.click = function menuClick(e, title){ 
                 e.target.id = title.title
                 placeNewNode(e)
