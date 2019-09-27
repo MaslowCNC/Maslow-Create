@@ -44,7 +44,6 @@ var cmenu = CMenu(ele)
             }
         ]
     })
-
 /**
      * Runs to create submenus from Global Variables atomCategories. Populates menu objects
      * @param {object} group - Name of the category to find appropriate atoms
@@ -80,10 +79,12 @@ document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
      */ 
 function placeNewNode(e){
     let clr = e.target.id
+    const containerX = parseInt(cmenu._container.style.left, 10)
+    const containerY = parseInt(cmenu._container.style.top, 10)
     const invertScale = 1 / GlobalVariables.scale1
     GlobalVariables.currentMolecule.placeAtom({
-        x: e.clientX * invertScale, 
-        y: e.clientY * invertScale, 
+        x: containerX * invertScale, 
+        y: containerY * invertScale, 
         parent: GlobalVariables.currentMolecule,
         atomType: clr,
         uniqueID: GlobalVariables.generateUniqueID()

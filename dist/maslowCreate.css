@@ -635,10 +635,10 @@ input.menu_search:focus {
 
 /* line 3, ../../sass/circular-menu.scss */
 
- .cn-menu1 {
-            position: absolute;
-            
-        }
+.cn-menu1 {
+          position: absolute;        
+}
+
 .circular-menu {
   font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", "STHeitiSC-Light", "Microsoft YaHei", Arial, sans-serif;
   z-index: 1040;
