@@ -439,9 +439,7 @@ export default class AttachmentPoint {
      */ 
     setValue(newValue){
         this.value = newValue
-        if(!GlobalVariables.evalLock){
-            this.ready = true
-        }
+        this.ready = true
         //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node

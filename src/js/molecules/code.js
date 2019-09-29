@@ -77,17 +77,6 @@ export default class Code extends Atom {
         }
     }
     
-    unlock(){
-        super.unlock()
-        
-        console.log("At unlock code has inputs: ")
-        this.inputs.forEach(input => {
-            console.log(input.name)
-            console.log(input.ready)
-            input.ready = true
-        })
-    }
-    
     /**
      * Add a button to open the code editor to the side bar
      */ 

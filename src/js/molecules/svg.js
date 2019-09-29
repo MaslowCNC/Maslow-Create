@@ -41,7 +41,7 @@ export default class Svg extends Atom {
      * Set the value to be the input geometry, then call super updateValue()
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        if(this.inputs.every(x => x.ready)){
             try{
                 this.value = this.findIOValue('geometry')
             }catch(err){this.setAlert(err)}

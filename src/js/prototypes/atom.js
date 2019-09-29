@@ -245,7 +245,7 @@ export default class Atom {
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint',
-                ready: !GlobalVariables.evalLock
+                ready: false
             })
             
             if(type == 'input'){
@@ -317,6 +317,9 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
+            this.inputs.forEach(input => {
+                console.log(input.ready)
+            })
         }
         else{
             this.selected = false
@@ -610,8 +613,8 @@ export default class Atom {
         
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
-            this.output.setValue(this.value)
             this.output.ready = true
+            this.output.setValue(this.value)
         }
     }
     
@@ -619,7 +622,7 @@ export default class Atom {
      * Calls a worker thread to compute the atom's value.
      */ 
     basicThreadValueProcessing(values, key){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        if(this.inputs.every(x => x.ready)){
             this.processing = true
             this.clearAlert()
             
@@ -645,7 +648,7 @@ export default class Atom {
     }
     
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before begining to process.
+     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
     unlock(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
@@ -654,13 +657,9 @@ export default class Atom {
                 input.ready = true
             }
         })
-    }
-    
-    /**
-     * This function will trigger the tips of the tree branches to start generating values.
-     */ 
-    beginPropogation(){
-        if(this.inputs.every(x => x.connectors.length == 0) || this.inputs.length == 0){ //If this atom has nothing upstream of it, and if it does not trigger propogation from it
+        
+        //If the inputs are all ready then we update the value
+        if(this.inputs.every(x => x.ready)){
             this.updateValue()
         }
     }

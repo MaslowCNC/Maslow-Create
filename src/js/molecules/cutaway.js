@@ -38,7 +38,7 @@ export default class CutAway extends Atom{
      * Adds the cutAway tag to the part
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        if(this.inputs.every(x => x.ready)){
             try{
                 const values = [this.findIOValue('geometry'), "cutAway"]
                 this.basicThreadValueProcessing(values, "tag")

@@ -122,7 +122,7 @@ export default class Molecule extends Atom{
      * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        if(this.inputs.every(x => x.ready)){
             /** 
              * Flag that the current molecule is processing.
              * @type {boolean}
@@ -168,16 +168,6 @@ export default class Molecule extends Atom{
         
         this.nodesOnTheScreen.forEach(node => {
             node.unlock()
-        })
-    }
-    
-    /**
-     * Trigger the beginning of the propogation process for all of the atoms in this molecule.
-     */ 
-    beginPropogation(){
-        super.beginPropogation()
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropogation()
         })
     }
     

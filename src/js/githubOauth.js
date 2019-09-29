@@ -491,7 +491,6 @@ export default function GitHubModule(){
             })
         })
         
-        GlobalVariables.evalLock = false
         GlobalVariables.currentMolecule.backgroundClick()
         
         //Clear and hide the popup
@@ -670,7 +669,6 @@ export default function GitHubModule(){
      * Loads a project from github by name.
      */
     this.loadProject = function(projectName){
-        GlobalVariables.evalLock = true //Lock evaluation of anything
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
@@ -713,9 +711,7 @@ export default function GitHubModule(){
             const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
             allAtomsPlaced.then( ()=> {
-                GlobalVariables.evalLock = false
                 GlobalVariables.topLevelMolecule.unlock()
-                GlobalVariables.topLevelMolecule.beginPropogation()
                 GlobalVariables.topLevelMolecule.backgroundClick()
             })
             
