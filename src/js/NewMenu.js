@@ -79,16 +79,17 @@ document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
 
 function showGitHubSearch(ev){
 
-    const menu = document.querySelector('.menu')
+    const menu = document.querySelector('#canvas_menu')
+    console.log(cmenu._container.style)
+    const containerX = parseInt(cmenu._container.style.left, 10)
+    const containerY = parseInt(cmenu._container.style.top, 10)
+    const containerWidth = parseInt(cmenu._container.style.width, 10)
     menu.style.display = 'block'
-    menu.style.top = `${ev.clientY - 20}px`
-    menu.style.left = `${ev.clientX - 20}px`
-    menu.x = ev.clientX
-    menu.y = ev.clientY
+    menu.style.top = `${containerY}px`
+    menu.style.left = `${containerX}px`
     menu.classList.remove('off')
 
     const menuInput = document.getElementById('menuInput')
-    menuInput.focus()
     menuInput.setAttribute('style','display:block')
     
     //Add function call to search when typing
@@ -111,7 +112,6 @@ function searchMenu(evt) {
         
         GlobalVariables.gitHub.searchGithub(input).then(result => {
             result.data.items.forEach(item => {
-                console.log(result.data.items)
                 var newElement = document.createElement('LI')
                 var text = document.createTextNode(item.name)
                 newElement.setAttribute('class', 'menu-item')
@@ -121,7 +121,6 @@ function searchMenu(evt) {
                 githubList.setAttribute('style','display:block;')
                 
                 document.getElementById(item.id).addEventListener('click', (e) => {
-                    console.log("123")
                     placeGitHubMolecule(e)
                 })
             })
@@ -152,7 +151,12 @@ function placeNewNode(e){
      * @param {object} ev - The event triggered by clicking on a menu item.
      */ 
 function placeGitHubMolecule(ev){
-        
+
+        const menu = document.querySelector('#canvas_menu')
+        menu.classList.add('off')
+        menu.style.top = '-200%'
+        menu.style.left = '-200%'  
+
         let clr = ev.target.id
         const containerX = parseInt(cmenu._container.style.left, 10)
         const containerY = parseInt(cmenu._container.style.top, 10)
@@ -165,6 +169,13 @@ function placeGitHubMolecule(ev){
             projectID: clr,
             uniqueID: GlobalVariables.generateUniqueID()
         }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
+    
+        //remove old results every time menu closes
+        var oldResults = githubList.getElementsByClassName('menu-item')
+        for (let i = 0; i < oldResults.length; i++) {
+            githubList.removeChild(oldResults[i])
+            githubList.setAttribute('style','display:none;')
+        }
     }
 
 export {cmenu}
