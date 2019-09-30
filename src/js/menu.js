@@ -183,7 +183,8 @@ class Menu {
                         newElement.setAttribute('class', 'menu-item')
                         newElement.setAttribute('id', item.id)
                         newElement.appendChild(text) 
-                        githubList.appendChild(newElement) 
+                        githubList.appendChild(newElement)
+                        githubList.setAttribute('style', 'display:block') 
                         
                         document.getElementById(item.id).addEventListener('click', (e) => {
                             this.placeGitHubMolecule(e)

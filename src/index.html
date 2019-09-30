@@ -38,7 +38,7 @@
         <div id="popUp" style="display: none;"> Project Saved </div>
         
     </div> 
-    <!-- The menu for creating a new drawing node -->
+    <!-- The menu for creating a new drawing node 
     <ul class="menu ">
         <div class="tab">
             <button class="tablinks" id="localTab" >Local</button>
@@ -50,7 +50,15 @@
         <ul id="githubList" class = "menu_list tabcontent">
         </ul>
     </ul>
-    <div id="circle-menu1" class="cn-menu1"></div>
+    -->
+    <div>
+        <div id="circle-menu1" class="cn-menu1"></div>
+        <div class="menu ">
+        <input type="text" id="menuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search">
+        <ul id="githubList" class = "menu_list tabcontent">
+        </ul>
+        </div>
+    </div>
     <!-- The login popup -->
     <div class = "login-popup " id = "projects-popup">
         <div class="login-page">
