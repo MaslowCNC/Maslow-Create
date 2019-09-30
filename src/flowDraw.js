@@ -65,6 +65,13 @@ flowCanvas.addEventListener('mousedown', event => {
     if (!document.querySelector('#circle-menu1').contains(event.target)) {
         cmenu.hide()
     }
+    //hide search menu if it is visible
+    if (!document.querySelector('#canvas_menu').contains(event.target)) {
+        const menu = document.querySelector('#canvas_menu')
+        menu.classList.add('off')
+        menu.style.top = '-200%'
+        menu.style.left = '-200%'
+    }
     //hide the menu if it is visible
     if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
         LocalMenu.hideMenu()
