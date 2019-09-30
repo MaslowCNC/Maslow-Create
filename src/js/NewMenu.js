@@ -55,13 +55,15 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            subMenu.title = instance.atomType.toUpperCase()     
+            subMenu.title = instance.atomType.toUpperCase() 
+            subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
-                if (title.title == 'GITHUBMOLECULE'){
+                if (title.title === 'GITHUBMOLECULE'){
                     showGitHubSearch(e)
                 }
                 else{
-                e.target.id = title.title
+                console.log(title.name)
+                e.target.id = title.name
                 placeNewNode(e)
                 }
             }  
@@ -79,6 +81,13 @@ document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
 
 function showGitHubSearch(ev){
 
+     //remove old results everytime
+    var oldResults = githubList.getElementsByClassName('menu-item')
+    for (let i = 0; i < oldResults.length; i++) {
+            githubList.removeChild(oldResults[i])
+            githubList.setAttribute('style','display:none;')
+    }
+    
     const menu = document.querySelector('#canvas_menu')
     console.log(cmenu._container.style)
     const containerX = parseInt(cmenu._container.style.left, 10)
@@ -91,6 +100,7 @@ function showGitHubSearch(ev){
 
     const menuInput = document.getElementById('menuInput')
     menuInput.setAttribute('style','display:block')
+
     
     //Add function call to search when typing
     document.getElementById('menuInput').addEventListener('keyup', (e) => {
@@ -170,12 +180,6 @@ function placeGitHubMolecule(ev){
             uniqueID: GlobalVariables.generateUniqueID()
         }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
     
-        //remove old results every time menu closes
-        var oldResults = githubList.getElementsByClassName('menu-item')
-        for (let i = 0; i < oldResults.length; i++) {
-            githubList.removeChild(oldResults[i])
-            githubList.setAttribute('style','display:none;')
-        }
     }
 
 export {cmenu}
