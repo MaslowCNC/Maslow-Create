@@ -1,6 +1,5 @@
 import Atom from '../prototypes/atom.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
-import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the Assembly atom instance.
