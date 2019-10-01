@@ -361,10 +361,21 @@ export default class AttachmentPoint {
     deleteSelf(){
         //remove any connectors which were attached to this attachment point
         
-        this.connectors.forEach(connector => {
-            connector.deleteSelf()       
+        this.connectors.forEach( connector => {
+            connector.deleteSelf()
+            this.deleteSelf()  //This is a bit of a hack. It calls itself recursively until there are no connectors left because a single call will fail for multiple connectors. Each time one is removed from the list it messes up the forEach...There must be a better way
         })
         
+    }
+    
+    deleteConnector(connector = "all"){
+        const connectorIndex = this.connectors.indexOf(connector)
+        if(connectorIndex != -1){
+            this.connectors.splice(connectorIndex,1) //Remove the target connector
+        }
+        else{
+            this.connectors = [] //Remove all of the connectors
+        }
     }
     
     /**
