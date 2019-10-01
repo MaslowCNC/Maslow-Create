@@ -132,7 +132,7 @@ export default class Atom {
             this.ioValues.forEach(ioValue => { //for each saved value
                 this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
                     if(ioValue.name == io.name && io.type == 'input'){
-                        io.setValue(ioValue.ioValue)
+                        io.value = ioValue.ioValue
                     }
                 })
             })
@@ -223,7 +223,7 @@ export default class Atom {
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 
-    addIO(type, name, target, valueType, defaultValue){
+    addIO(type, name, target, valueType, defaultValue, ready = false){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
@@ -245,7 +245,7 @@ export default class Atom {
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint',
-                ready: false
+                ready: ready
             })
             
             if(type == 'input'){
@@ -622,7 +622,15 @@ export default class Atom {
      * Calls a worker thread to compute the atom's value.
      */ 
     basicThreadValueProcessing(values, key){
-        if(this.inputs.every(x => x.ready)){
+        
+        //If the inputs are all ready
+        var go = true
+        this.inputs.forEach(input => {
+            if(!input.ready){
+                go = false
+            }
+        })
+        if(go){     //Then we update the value
             this.processing = true
             this.clearAlert()
             
@@ -651,6 +659,7 @@ export default class Atom {
      * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
     unlock(){
+        
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){
@@ -658,8 +667,14 @@ export default class Atom {
             }
         })
         
-        //If the inputs are all ready then we update the value
-        if(this.inputs.every(x => x.ready)){
+        //If the inputs are all ready
+        var go = true
+        this.inputs.forEach(input => {
+            if(!input.ready){
+                go = false
+            }
+        })
+        if(go){     //Then we update the value
             this.updateValue()
         }
     }

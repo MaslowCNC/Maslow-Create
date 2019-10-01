@@ -41,6 +41,7 @@ export default class Code extends Atom {
      * Grab the code as a text string and execute it. 
      */ 
     updateValue(){
+        console.log("Code updating values runs...but are the inputs unlocked?")
         try{
             this.parseInputs()
             
@@ -65,7 +66,7 @@ export default class Code extends Atom {
         //Add any inputs which are needed
         for (var variable in variables){
             if(!this.inputs.some(input => input.Name === variables[variable])){
-                this.addIO('input', variables[variable], this, 'geometry', null)
+                this.addIO('input', variables[variable], this, 'geometry', null, true)
             }
         }
         

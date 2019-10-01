@@ -60,7 +60,6 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, null, GlobalVariables.secretTypes)
         
-        this.updateValue()
     }
     
     /**
@@ -134,13 +133,12 @@ export default class Molecule extends Atom{
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue()){                //Dont update the input if it hasn't changed
-                            atom.setOutput(moleculeInput.getValue())
+                        if(atom.getOutput() != moleculeInput.getValue()){                //Don't update the input if it hasn't changed
+                            atom.updateValue()
                         }
                     }
                 })
             })
-            
         }
     }
     
@@ -418,7 +416,10 @@ export default class Molecule extends Atom{
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
-            this.updateValue()
+            if(this.topLevel){
+                this.unlock()
+                this.backgroundClick()
+            }
         })
     }
     
@@ -450,7 +451,7 @@ export default class Molecule extends Atom{
                 
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
-                    promise = await atom.loadProjectByID(atom.projectID)
+                    promise = atom.loadProjectByID(atom.projectID)
                 }
                 
                 if(unlock){

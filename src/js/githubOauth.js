@@ -668,7 +668,7 @@ export default function GitHubModule(){
     /** 
      * Loads a project from github by name.
      */
-    this.loadProject = function(projectName){
+    this.loadProject = async function(projectName){
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
@@ -710,10 +710,9 @@ export default function GitHubModule(){
             //Load the top level molecule from the file
             const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             
-            allAtomsPlaced.then( ()=> {
-                GlobalVariables.topLevelMolecule.unlock()
-                GlobalVariables.topLevelMolecule.backgroundClick()
-            })
+            // allAtomsPlaced.then( ()=> {
+                // console.log("unlocking")
+            // })
             
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
         })
