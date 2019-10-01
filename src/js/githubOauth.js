@@ -709,11 +709,6 @@ export default function GitHubModule(){
             
             //Load the top level molecule from the file
             const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
-            
-            // allAtomsPlaced.then( ()=> {
-                // console.log("unlocking")
-            // })
-            
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
         })
         

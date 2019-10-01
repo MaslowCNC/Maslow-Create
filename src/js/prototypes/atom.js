@@ -317,9 +317,6 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            this.inputs.forEach(input => {
-                console.log(input.ready)
-            })
         }
         else{
             this.selected = false

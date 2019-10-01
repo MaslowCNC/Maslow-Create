@@ -182,16 +182,6 @@ export default class Input extends Atom {
     }
     
     /**
-     * Set's the input's value after locking everything downstream to ensure optimal computation.
-     * @param {number} newOutput - The new value to be used
-     */ 
-    // setOutput(newOutput){
-        // this.value = newOutput  //Set the code block so that clicking on the input previews what it is 
-        // Set the output to be the new value
-        // this.output.setValue(newOutput)
-    // }
-    
-    /**
      * If this atom is a top level input it begins propogation here. Is this used?
      */ 
     beginPropogation(){
@@ -207,10 +197,4 @@ export default class Input extends Atom {
         return this.output.getValue()
     }
     
-    /**
-     * Sets the output to be the current value...why?
-     */ 
-    displayAndPropogate(){
-        // this.setOutput(this.getOutput())
-    }
 }
