@@ -368,6 +368,9 @@ export default class AttachmentPoint {
         
     }
     
+    /**
+     * Delete a target connector which is passed in. The default option is to delete all of the connectors.
+     */ 
     deleteConnector(connector = "all"){
         const connectorIndex = this.connectors.indexOf(connector)
         if(connectorIndex != -1){
