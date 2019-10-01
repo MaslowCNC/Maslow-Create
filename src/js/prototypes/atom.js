@@ -132,7 +132,7 @@ export default class Atom {
             this.ioValues.forEach(ioValue => { //for each saved value
                 this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
                     if(ioValue.name == io.name && io.type == 'input'){
-                        io.setValue(ioValue.ioValue)
+                        io.value = ioValue.ioValue
                     }
                 })
             })
@@ -223,7 +223,7 @@ export default class Atom {
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 
-    addIO(type, name, target, valueType, defaultValue){
+    addIO(type, name, target, valueType, defaultValue, ready = false){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
@@ -245,7 +245,7 @@ export default class Atom {
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint',
-                ready: !GlobalVariables.evalLock
+                ready: ready
             })
             
             if(type == 'input'){
@@ -451,8 +451,6 @@ export default class Atom {
             name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
             headerBar_title.appendChild(name1)
 
-            //add available molecules dropdown
-            this.localMoleculesMenu()
         }
 
         //Create a list element
@@ -464,58 +462,6 @@ export default class Atom {
         return valueList
 
 
-    }
-
-    /**
-     * Initializes button to see all local molecules.
-     */
-    localMoleculesMenu(){
-        //Menu of local available molecules
-
-        let sideBar = document.querySelector('.sideBar')
-        var availableMolecules = document.createElement('button')
-        availableMolecules.textContent = "Local Molecules"
-        sideBar.appendChild(availableMolecules)
-        var availableMoleculesSelect = document.createElement('div')
-        availableMolecules.appendChild(availableMoleculesSelect)
-
-        availableMolecules.setAttribute('class','available_molecules')
-        availableMolecules.setAttribute('style','width:200px')
-        availableMolecules.setAttribute('title','or Right-Click on Canvas')
-            
-        for(var key in GlobalVariables.availableTypes) {
-            var newElement = document.createElement('li')
-            var instance = GlobalVariables.availableTypes[key]
-            var text = document.createTextNode(instance.atomType)
-            newElement.setAttribute('class', 'select-menu')
-            newElement.setAttribute('id', instance.atomType)
-            newElement.appendChild(text) 
-            availableMoleculesSelect.appendChild(newElement) 
-            
-
-            availableMolecules.addEventListener('click', () => {
-                availableMoleculesSelect.style.display = 'block'
-            })
-           
-            //Add function to call when atom is selected and place atom
-            newElement.addEventListener('click', (e) => {
-
-                let clr = e.target.id
-                const placement = GlobalVariables.scale1/1.1
-
-                GlobalVariables.currentMolecule.placeAtom({
-                    x: GlobalVariables.canvas.width * placement, 
-                    y: GlobalVariables.canvas.height * placement, 
-                    parent: GlobalVariables.currentMolecule,
-                    atomType: clr,
-                    uniqueID: GlobalVariables.generateUniqueID()
-                    
-                }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
-                
-                //hides menu if molecule is selected
-                GlobalVariables.currentMolecule.backgroundClick()
-            })
-        }
     }
 
     /**
@@ -610,8 +556,8 @@ export default class Atom {
         
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
-            this.output.setValue(this.value)
             this.output.ready = true
+            this.output.setValue(this.value)
         }
     }
     
@@ -619,7 +565,15 @@ export default class Atom {
      * Calls a worker thread to compute the atom's value.
      */ 
     basicThreadValueProcessing(values, key){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        
+        //If the inputs are all ready
+        var go = true
+        this.inputs.forEach(input => {
+            if(!input.ready){
+                go = false
+            }
+        })
+        if(go){     //Then we update the value
             this.processing = true
             this.clearAlert()
             
@@ -645,22 +599,25 @@ export default class Atom {
     }
     
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before begining to process.
+     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
     unlock(){
+        
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){
                 input.ready = true
             }
         })
-    }
-    
-    /**
-     * This function will trigger the tips of the tree branches to start generating values.
-     */ 
-    beginPropogation(){
-        if(this.inputs.every(x => x.connectors.length == 0) || this.inputs.length == 0){ //If this atom has nothing upstream of it, and if it does not trigger propogation from it
+        
+        //If the inputs are all ready
+        var go = true
+        this.inputs.forEach(input => {
+            if(!input.ready){
+                go = false
+            }
+        })
+        if(go){     //Then we update the value
             this.updateValue()
         }
     }
