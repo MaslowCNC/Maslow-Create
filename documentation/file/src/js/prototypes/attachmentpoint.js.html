@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -440,10 +442,24 @@ export default class AttachmentPoint {
     deleteSelf(){
         //remove any connectors which were attached to this attachment point
         
-        this.connectors.forEach(connector =&gt; {
-            connector.deleteSelf()       
+        this.connectors.forEach( connector =&gt; {
+            connector.deleteSelf()
+            this.deleteSelf()  //This is a bit of a hack. It calls itself recursively until there are no connectors left because a single call will fail for multiple connectors. Each time one is removed from the list it messes up the forEach...There must be a better way
         })
         
+    }
+    
+    /**
+     * Delete a target connector which is passed in. The default option is to delete all of the connectors.
+     */ 
+    deleteConnector(connector = &quot;all&quot;){
+        const connectorIndex = this.connectors.indexOf(connector)
+        if(connectorIndex != -1){
+            this.connectors.splice(connectorIndex,1) //Remove the target connector
+        }
+        else{
+            this.connectors = [] //Remove all of the connectors
+        }
     }
     
     /**
@@ -518,9 +534,7 @@ export default class AttachmentPoint {
      */ 
     setValue(newValue){
         this.value = newValue
-        if(!GlobalVariables.evalLock){
-            this.ready = true
-        }
+        this.ready = true
         //propagate the change to linked elements if this is an output
         if (this.type == &apos;output&apos;){
             this.connectors.forEach(connector =&gt; {     //select any connectors attached to this node

@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -139,7 +141,6 @@ export default class Molecule extends Atom{
             atomType: &apos;Output&apos;
         }, null, GlobalVariables.secretTypes)
         
-        this.updateValue()
     }
     
     /**
@@ -201,7 +202,7 @@ export default class Molecule extends Atom{
      * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+        if(this.inputs.every(x =&gt; x.ready)){
             /** 
              * Flag that the current molecule is processing.
              * @type {boolean}
@@ -213,13 +214,12 @@ export default class Molecule extends Atom{
             this.inputs.forEach(moleculeInput =&gt; {
                 this.nodesOnTheScreen.forEach(atom =&gt; {
                     if(atom.atomType == &apos;Input&apos; &amp;&amp; moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue()){                //Dont update the input if it hasn&apos;t changed
-                            atom.setOutput(moleculeInput.getValue())
+                        if(atom.getOutput() != moleculeInput.getValue()){                //Don&apos;t update the input if it hasn&apos;t changed
+                            atom.updateValue()
                         }
                     }
                 })
             })
-            
         }
     }
     
@@ -251,16 +251,6 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Trigger the beginning of the propogation process for all of the atoms in this molecule.
-     */ 
-    beginPropogation(){
-        super.beginPropogation()
-        this.nodesOnTheScreen.forEach(node =&gt; {
-            node.beginPropogation()
-        })
-    }
-    
-    /**
      * Updates the side bar to display options like &apos;go to parent&apos; and &apos;load a different project&apos;. What is displayed depends on if this atom is the top level, and if we are using run mode.
      */ 
     updateSidebar(){
@@ -270,15 +260,10 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,&apos;name&apos;,&apos;Name&apos;, false)
 
-        if(!this.topLevel){
-            //this.createButton(valueList,this,&apos;Go To Parent&apos;,this.goToParentMolecule)
-            
-            //this.createButton(valueList,this,&apos;Export To GitHub&apos;, this.exportToGithub)
-        }
-        else{ //If we are the top level molecule
+        if(this.topLevel){
+            //If we are the top level molecule 
+            this.createSegmentSlider(valueList)
 
-            this.createEditableValueListItem(valueList,GlobalVariables,&apos;circleSegmentSize&apos;, &apos;Circle Segment Size&apos;, true, (newValue) =&gt; {GlobalVariables.circleSegmentSize = newValue})
-            
         }
         
         // this.createButton(valueList,this,&apos;Download STL&apos;,() =&gt; {
@@ -320,6 +305,45 @@ export default class Molecule extends Atom{
         
         return valueList
         
+    }
+
+    /**
+     * Creates segment length slider and passes value to Global Variables
+     */ 
+    createSegmentSlider(valueList){
+        //Creates value slider
+        var rangeElement = document.createElement(&apos;input&apos;)
+        //Div which contains the entire element
+        var div = document.createElement(&apos;div&apos;)
+        div.setAttribute(&apos;class&apos;, &apos;slider-container&apos;)
+        valueList.appendChild(div)
+        var rangeLabel = document.createElement(&apos;label&apos;)
+        rangeLabel.textContent = &quot;Display quality/Length of Segments&quot;
+        div.appendChild(rangeLabel)
+        rangeLabel.appendChild(rangeElement)
+        rangeElement.setAttribute(&apos;type&apos;, &apos;range&apos;)
+        rangeElement.setAttribute(&apos;min&apos;, &apos;.1&apos;)
+        rangeElement.setAttribute(&apos;max&apos;, &apos;10&apos;)
+        rangeElement.setAttribute(&apos;step&apos;, &apos;.3&apos;)
+        rangeElement.setAttribute(&apos;class&apos;, &apos;slider&apos;)
+        rangeElement.setAttribute(&apos;value&apos;, GlobalVariables.circleSegmentSize)
+            
+        var rangeValueLabel = document.createElement(&apos;ul&apos;)
+        rangeValueLabel.innerHTML= &apos;&lt;li&gt;Export&lt;/li&gt;&lt;li&gt;Draft&lt;/li&gt; &apos;
+        rangeValueLabel.setAttribute(&apos;class&apos;, &apos;range-labels&apos;)
+        rangeLabel.appendChild(rangeValueLabel)
+
+        var rangeValue = document.createElement(&apos;p&apos;)
+        rangeValue.textContent = rangeElement.value
+        rangeLabel.appendChild(rangeValue)
+
+
+        //on slider change send value to global variables
+        rangeElement.oninput = function() {
+            rangeValue.textContent = this.value
+            GlobalVariables.circleSegmentSize = this.value
+            
+        }
     }
     
     /**
@@ -443,7 +467,7 @@ export default class Molecule extends Atom{
         
         
         this.nodesOnTheScreen.forEach(atom =&gt; {
-            //Store a represnetation of the atom
+            //Store a representation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom&apos;s connectors
             if(atom.output){
@@ -507,7 +531,10 @@ export default class Molecule extends Atom{
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
-            this.updateValue()
+            if(this.topLevel){
+                this.unlock()
+                this.backgroundClick()
+            }
         })
     }
     
@@ -539,7 +566,7 @@ export default class Molecule extends Atom{
                 
                 //If this is a github molecule load it from the web
                 if(atom.atomType == &apos;GitHubMolecule&apos;){
-                    promise = await atom.loadProjectByID(atom.projectID)
+                    promise = atom.loadProjectByID(atom.projectID)
                 }
                 
                 if(unlock){

@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -79,7 +81,6 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/shrinkwrap.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
 import { addOrDeletePorts } from &apos;../alwaysOneFreeInput.js&apos;
-import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * This class creates the shrinkwrap atom. This behavior can also be called &apos;hull&apos;
@@ -136,7 +137,7 @@ export default class ShrinkWrap extends Atom{
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock &amp;&amp; this.inputs.every(x =&gt; x.ready)){
+        if(this.inputs.every(x =&gt; x.ready)){
             try{
                 var inputsList = []
                 this.inputs.forEach( io =&gt; {

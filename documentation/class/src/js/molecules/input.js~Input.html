@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -498,35 +500,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-method-displayAndPropogate">displayAndPropogate</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Sets the output to be the current value...why?</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-method-draw">draw</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
@@ -585,13 +558,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-method-setOutput">setOutput</a></span></span><span class="code" data-ice="signature">(newOutput: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-method-unlock">unlock</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Set&apos;s the input&apos;s value after locking everything downstream to ensure optimal computation.</p>
+        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.</p>
 </div>
       </div>
     </td>
@@ -678,7 +651,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Set&apos;s the output value and shows the atom output on the 3D view.</p>
+        <div data-ice="description"><p>Grabs the new value from the parent molecule&apos;s input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. </p>
 </div>
       </div>
     </td>
@@ -1260,35 +1233,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>This function will trigger the tips of the tree branches to start generating values.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert">clearAlert</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
@@ -1753,35 +1697,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-localMoleculesMenu">localMoleculesMenu</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Initializes button to see all local molecules.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-removeIO">removeIO</a></span></span><span class="code" data-ice="signature">(type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, target: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
@@ -1962,7 +1877,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before begining to process.</p>
+        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.</p>
 </div>
       </div>
     </td>
@@ -2541,7 +2456,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber190">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber188">source</a></span></span>
     </span>
   </h3>
 
@@ -2551,7 +2466,7 @@
   <div data-ice="description"><p>If this atom is a top level input it begins propogation here. Is this used?</p>
 </div>
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">Atom#beginPropogation</a></span></div>
+  
 
   <div data-ice="properties">
 </div>
@@ -2596,50 +2511,6 @@
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-deleteNode">Atom#deleteNode</a></span></div>
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-displayAndPropogate">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">displayAndPropogate</span><span class="code" data-ice="signature">()</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber206">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Sets the output to be the current value...why?</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-displayAndPropogate">Atom#displayAndPropogate</a></span></div>
 
   <div data-ice="properties">
 </div>
@@ -2717,7 +2588,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber199">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber197">source</a></span></span>
     </span>
   </h3>
 
@@ -2762,47 +2633,30 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-setOutput">
+  <h3 data-ice="anchor" id="instance-method-unlock">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">setOutput</span><span class="code" data-ice="signature">(newOutput: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
+    <span class="code" data-ice="name">unlock</span><span class="code" data-ice="signature">()</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber179">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber176">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Set&apos;s the input&apos;s value after locking everything downstream to ensure optimal computation.</p>
+  <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process. Split from atom version because we don&apos;t want this to run if nothing is connected.</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-unlock">Atom#unlock</a></span></div>
 
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">newOutput</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>The new value to be used</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
+  <div data-ice="properties">
 </div>
 
   
@@ -2929,7 +2783,7 @@
   
   
   
-  <div data-ice="description"><p>Set&apos;s the output value and shows the atom output on the 3D view.</p>
+  <div data-ice="description"><p>Grabs the new value from the parent molecule&apos;s input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. </p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-updateValue">Atom#updateValue</a></span></div>

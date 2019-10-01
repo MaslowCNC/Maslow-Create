@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -113,42 +115,47 @@ export default class Code extends Atom {
         
         this.setValues(values)
         
-        this.updateValue()
+        this.parseInputs()
     }
     
     /**
-     * Grab the code as a text string and execute it. This really needs to be moved to a worker for security.
+     * Grab the code as a text string and execute it. 
      */ 
     updateValue(){
         try{
-            //Parse this.code for the line &quot;\nmain(input1, input2....) and add those as inputs if needed
-            var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code)
-            if (variables[1]) {
-                variables = variables[1].split(/\s*,\s*/)
-            }
-            
-            //Add any inputs which are needed
-            for (var variable in variables){
-                if(!this.inputs.some(input =&gt; input.Name === variables[variable])){
-                    this.addIO(&apos;input&apos;, variables[variable], this, &apos;geometry&apos;, null)
-                }
-            }
-            
-            //Remove any inputs which are not needed
-            for (var input in this.inputs){
-                if( !variables.includes(this.inputs[input].name) ){
-                    this.removeIO(&apos;input&apos;, this.inputs[input].name, this)
-                }
-            }
+            this.parseInputs()
             
             var argumentsArray = {}
-            variables.forEach(variable =&gt; {
-                argumentsArray[variable] = this.findIOValue(String(variable))
+            this.inputs.forEach(input =&gt; {
+                argumentsArray[input.name] = input.value
             })
             
             const values = [this.code, argumentsArray]
+            
             this.basicThreadValueProcessing(values, &quot;code&quot;)
         }catch(err){this.setAlert(err)}
+    }
+    
+    parseInputs(){
+        //Parse this.code for the line &quot;\nmain(input1, input2....) and add those as inputs if needed
+        var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code)
+        if (variables[1]) {
+            variables = variables[1].split(/\s*,\s*/)
+        }
+        
+        //Add any inputs which are needed
+        for (var variable in variables){
+            if(!this.inputs.some(input =&gt; input.Name === variables[variable])){
+                this.addIO(&apos;input&apos;, variables[variable], this, &apos;geometry&apos;, null, true)
+            }
+        }
+        
+        //Remove any inputs which are not needed
+        for (var input in this.inputs){
+            if( !variables.includes(this.inputs[input].name) ){
+                this.removeIO(&apos;input&apos;, this.inputs[input].name, this)
+            }
+        }
     }
     
     /**

@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -911,6 +913,35 @@
         
         
         <div data-ice="description"><p>Handles mouse click up.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-deleteConnector">deleteConnector</a></span></span><span class="code" data-ice="signature">(connector: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Delete a target connector which is passed in.</p>
 </div>
       </div>
     </td>
@@ -2324,7 +2355,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber395">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber409">source</a></span></span>
     </span>
   </h3>
 
@@ -2597,6 +2628,67 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-deleteConnector">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">deleteConnector</span><span class="code" data-ice="signature">(connector: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber374">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Delete a target connector which is passed in. The default option is to delete all of the connectors.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">connector</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: all</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-deleteSelf">
     <span class="access" data-ice="access">public</span>
     
@@ -2757,7 +2849,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber433">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber447">source</a></span></span>
     </span>
   </h3>
 
@@ -2874,7 +2966,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber402">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber416">source</a></span></span>
     </span>
   </h3>
 
@@ -2962,7 +3054,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber419">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber433">source</a></span></span>
     </span>
   </h3>
 
@@ -3006,7 +3098,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber440">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber454">source</a></span></span>
     </span>
   </h3>
 
@@ -3066,7 +3158,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber460">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber472">source</a></span></span>
     </span>
   </h3>
 
@@ -3110,7 +3202,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber426">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber440">source</a></span></span>
     </span>
   </h3>
 
@@ -3170,7 +3262,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber375">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/attachmentpoint.js.html#lineNumber389">source</a></span></span>
     </span>
   </h3>
 

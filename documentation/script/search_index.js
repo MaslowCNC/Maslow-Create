@@ -144,6 +144,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/localmenu.js~localmenu",
+    "class/src/js/localmenu.js~Localmenu.html",
+    "<span>Localmenu</span> <span class=\"search-result-import-path\">canvas-template/src/js/localmenu.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/menu.js~menu",
     "class/src/js/menu.js~Menu.html",
     "<span>Menu</span> <span class=\"search-result-import-path\">canvas-template/src/js/menu.js</span>",
@@ -249,6 +255,12 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/globalvariables.js~globalvariables",
     "variable/index.html#static-variable-globalVariables",
     "<span>globalVariables</span> <span class=\"search-result-import-path\">canvas-template/src/js/globalvariables.js</span>",
+    "variable"
+  ],
+  [
+    "canvas-template/src/js/localmenu.js~localmenu",
+    "variable/index.html#static-variable-localmenu",
+    "<span>localmenu</span> <span class=\"search-result-import-path\">canvas-template/src/js/localmenu.js</span>",
     "variable"
   ],
   [
@@ -828,12 +840,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/globalvariables.js~globalvariables#evallock",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-evalLock",
-    "src/js/globalvariables.js~GlobalVariables#evalLock",
-    "member"
-  ],
-  [
     "src/js/globalvariables.js~globalvariables#generateuniqueid",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-generateUniqueID",
     "src/js/globalvariables.js~GlobalVariables#generateUniqueID",
@@ -880,6 +886,54 @@ window.esdocSearchIndex = [
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-secretTypes",
     "src/js/globalvariables.js~GlobalVariables#secretTypes",
     "member"
+  ],
+  [
+    "src/js/localmenu.js",
+    "file/src/js/localmenu.js.html",
+    "src/js/localmenu.js",
+    "file"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#availablemolecules",
+    "class/src/js/localmenu.js~Localmenu.html#instance-member-availableMolecules",
+    "src/js/localmenu.js~Localmenu#availableMolecules",
+    "member"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#availablemoleculesdiv",
+    "class/src/js/localmenu.js~Localmenu.html#instance-member-availableMoleculesDiv",
+    "src/js/localmenu.js~Localmenu#availableMoleculesDiv",
+    "member"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#availablemoleculesselect",
+    "class/src/js/localmenu.js~Localmenu.html#instance-member-availableMoleculesSelect",
+    "src/js/localmenu.js~Localmenu#availableMoleculesSelect",
+    "member"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#constructor",
+    "class/src/js/localmenu.js~Localmenu.html#instance-constructor-constructor",
+    "src/js/localmenu.js~Localmenu#constructor",
+    "method"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#hidemenu",
+    "class/src/js/localmenu.js~Localmenu.html#instance-method-hideMenu",
+    "src/js/localmenu.js~Localmenu#hideMenu",
+    "method"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#placeatom",
+    "class/src/js/localmenu.js~Localmenu.html#instance-method-placeAtom",
+    "src/js/localmenu.js~Localmenu#placeAtom",
+    "method"
+  ],
+  [
+    "src/js/localmenu.js~localmenu#showmenu",
+    "class/src/js/localmenu.js~Localmenu.html#instance-method-showMenu",
+    "src/js/localmenu.js~Localmenu#showMenu",
+    "method"
   ],
   [
     "src/js/menu.js",
@@ -1132,6 +1186,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/code.js~Code.html#instance-member-name",
     "src/js/molecules/code.js~Code#name",
     "member"
+  ],
+  [
+    "src/js/molecules/code.js~code#parseinputs",
+    "class/src/js/molecules/code.js~Code.html#instance-method-parseInputs",
+    "src/js/molecules/code.js~Code#parseInputs",
+    "method"
   ],
   [
     "src/js/molecules/code.js~code#serialize",
@@ -1716,12 +1776,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/input.js~input#displayandpropogate",
-    "class/src/js/molecules/input.js~Input.html#instance-method-displayAndPropogate",
-    "src/js/molecules/input.js~Input#displayAndPropogate",
-    "method"
-  ],
-  [
     "src/js/molecules/input.js~input#draw",
     "class/src/js/molecules/input.js~Input.html#instance-method-draw",
     "src/js/molecules/input.js~Input#draw",
@@ -1758,12 +1812,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/input.js~input#setoutput",
-    "class/src/js/molecules/input.js~Input.html#instance-method-setOutput",
-    "src/js/molecules/input.js~Input#setOutput",
-    "method"
-  ],
-  [
     "src/js/molecules/input.js~input#strokecolor",
     "class/src/js/molecules/input.js~Input.html#instance-member-strokeColor",
     "src/js/molecules/input.js~Input#strokeColor",
@@ -1774,6 +1822,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/input.js~Input.html#instance-member-type",
     "src/js/molecules/input.js~Input#type",
     "member"
+  ],
+  [
+    "src/js/molecules/input.js~input#unlock",
+    "class/src/js/molecules/input.js~Input.html#instance-method-unlock",
+    "src/js/molecules/input.js~Input#unlock",
+    "method"
   ],
   [
     "src/js/molecules/input.js~input#updateparentname",
@@ -1848,12 +1902,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#beginpropogation",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropogation",
-    "src/js/molecules/molecule.js~Molecule#beginPropogation",
-    "method"
-  ],
-  [
     "src/js/molecules/molecule.js~molecule#centercolor",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-centerColor",
     "src/js/molecules/molecule.js~Molecule#centerColor",
@@ -1863,6 +1911,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/molecule.js~molecule#constructor",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-constructor-constructor",
     "src/js/molecules/molecule.js~Molecule#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#createsegmentslider",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-createSegmentSlider",
+    "src/js/molecules/molecule.js~Molecule#createSegmentSlider",
     "method"
   ],
   [
@@ -2586,12 +2640,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/prototypes/atom.js~atom#beginpropogation",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation",
-    "src/js/prototypes/atom.js~Atom#beginPropogation",
-    "method"
-  ],
-  [
     "src/js/prototypes/atom.js~atom#clearalert",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert",
     "src/js/prototypes/atom.js~Atom#clearAlert",
@@ -2715,12 +2763,6 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#keypress",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-keyPress",
     "src/js/prototypes/atom.js~Atom#keyPress",
-    "method"
-  ],
-  [
-    "src/js/prototypes/atom.js~atom#localmoleculesmenu",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-localMoleculesMenu",
-    "src/js/prototypes/atom.js~Atom#localMoleculesMenu",
     "method"
   ],
   [
@@ -2926,6 +2968,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-defaultValue",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#defaultValue",
     "member"
+  ],
+  [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#deleteconnector",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-deleteConnector",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#deleteConnector",
+    "method"
   ],
   [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#deleteself",

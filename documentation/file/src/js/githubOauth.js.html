@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -570,7 +572,6 @@ export default function GitHubModule(){
             })
         })
         
-        GlobalVariables.evalLock = false
         GlobalVariables.currentMolecule.backgroundClick()
         
         //Clear and hide the popup
@@ -748,8 +749,7 @@ export default function GitHubModule(){
     /** 
      * Loads a project from github by name.
      */
-    this.loadProject = function(projectName){
-        GlobalVariables.evalLock = true //Lock evaluation of anything
+    this.loadProject = async function(projectName){
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
@@ -789,15 +789,7 @@ export default function GitHubModule(){
             }
             
             //Load the top level molecule from the file
-            const allAtomsPlaced = GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) =&gt; { return molecule.topLevel == true })[0].uniqueID)
-            
-            allAtomsPlaced.then( ()=&gt; {
-                GlobalVariables.evalLock = false
-                GlobalVariables.topLevelMolecule.unlock()
-                GlobalVariables.topLevelMolecule.beginPropogation()
-                GlobalVariables.topLevelMolecule.backgroundClick()
-            })
-            
+            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) =&gt; { return molecule.topLevel == true })[0].uniqueID)
             intervalTimer = setInterval(() =&gt; this.saveProject(), 120000) //Save the project regularly
         })
         

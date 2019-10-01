@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -169,8 +171,9 @@ export default class Display {
             &apos;beige&apos;: [245, 245, 220],
             &apos;bisque&apos;: [255, 228, 196],
             &apos;black&apos;: [0, 0, 0],
+            &apos;Black&apos;: [70, 70, 70], // Dark gray
             &apos;blanchedalmond&apos;: [255, 235, 205],
-            &apos;blue&apos;: [0, 0, 255],
+            &apos;Blue&apos;: [0, 0, 255],
             &apos;blueviolet&apos;: [138, 43, 226],
             &apos;brown&apos;: [165, 42, 42],
             &apos;burlywood&apos;: [222, 184, 135],
@@ -185,7 +188,7 @@ export default class Display {
             &apos;darkblue&apos;: [0, 0, 139],
             &apos;darkcyan&apos;: [0, 139, 139],
             &apos;darkgoldenrod&apos;: [184, 134, 11],
-            &apos;darkgray&apos;: [169, 169, 169],
+            &apos;Darkgray&apos;: [169, 169, 169],
             &apos;darkgreen&apos;: [0, 100, 0],
             &apos;darkgrey&apos;: [169, 169, 169],
             &apos;darkkhaki&apos;: [189, 183, 107],
@@ -282,6 +285,7 @@ export default class Display {
             &apos;purple&apos;: [128, 0, 128],
             &apos;rebeccapurple&apos;: [102, 51, 153],
             &apos;red&apos;: [255, 0, 0],
+            &apos;Red&apos;: [255, 99, 71], //Tomato
             &apos;rosybrown&apos;: [188, 143, 143],
             &apos;royalblue&apos;: [65, 105, 225],
             &apos;saddlebrown&apos;: [139, 69, 19],
@@ -301,11 +305,10 @@ export default class Display {
             &apos;tan&apos;: [210, 180, 140],
             &apos;teal&apos;: [0, 128, 128],
             &apos;thistle&apos;: [216, 191, 216],
-            &apos;Tomato&apos;: [255, 99, 71],
             &apos;turquoise&apos;: [64, 224, 208],
             &apos;violet&apos;: [238, 130, 238],
             &apos;wheat&apos;: [245, 222, 179],
-            &apos;white&apos;: [255, 255, 255],
+            &apos;White&apos;: [255, 255, 255],
             &apos;whitesmoke&apos;: [245, 245, 245],
             &apos;Yellow&apos;: [255, 255, 0],
             &apos;yellowgreen&apos;: [154, 205, 50]
@@ -650,7 +653,7 @@ export default class Display {
             return
         }
         const [r, g, b] = rgb
-        const color = ((r &lt;&lt; 16) | (g &lt;&lt; 8) | b) &gt;&gt;&gt; 0
+        const color = ((1 &lt;&lt; 24) + (r &lt;&lt; 16) + (g &lt;&lt; 8) + b)
         parameters.color = color
         return parameters
     }

@@ -32,11 +32,13 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -469,13 +471,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html#instance-method-createSegmentSlider">createSegmentSlider</a></span></span><span class="code" data-ice="signature">(valueList: <span>*</span>)</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Trigger the beginning of the propogation process for all of the atoms in this molecule.</p>
+        <div data-ice="description"><p>Creates segment length slider and passes value to Global Variables</p>
 </div>
       </div>
     </td>
@@ -1550,35 +1552,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>This function will trigger the tips of the tree branches to start generating values.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert">clearAlert</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
@@ -2043,35 +2016,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-localMoleculesMenu">localMoleculesMenu</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Initializes button to see all local molecules.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-removeIO">removeIO</a></span></span><span class="code" data-ice="signature">(type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, target: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
@@ -2252,7 +2196,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before begining to process.</p>
+        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.</p>
 </div>
       </div>
     </td>
@@ -2652,7 +2596,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber130">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber129">source</a></span></span>
     </span>
   </h3>
 
@@ -2696,7 +2640,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber424">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber446">source</a></span></span>
     </span>
   </h3>
 
@@ -2740,7 +2684,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber109">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber108">source</a></span></span>
     </span>
   </h3>
 
@@ -2831,7 +2775,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber105">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber104">source</a></span></span>
     </span>
   </h3>
 
@@ -2864,30 +2808,46 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-beginPropogation">
+  <h3 data-ice="anchor" id="instance-method-createSegmentSlider">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">beginPropogation</span><span class="code" data-ice="signature">()</span>
+    <span class="code" data-ice="name">createSegmentSlider</span><span class="code" data-ice="signature">(valueList: <span>*</span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber177">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber232">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Trigger the beginning of the propogation process for all of the atoms in this molecule.</p>
+  <div data-ice="description"><p>Creates segment length slider and passes value to Global Variables</p>
 </div>
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">Atom#beginPropogation</a></span></div>
+  
 
-  <div data-ice="properties">
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">valueList</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
 </div>
 
   
@@ -2919,7 +2879,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber117">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber116">source</a></span></span>
     </span>
   </h3>
 
@@ -2963,7 +2923,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber402">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber424">source</a></span></span>
     </span>
   </h3>
 
@@ -3043,7 +3003,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber250">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber272">source</a></span></span>
     </span>
   </h3>
 
@@ -3104,7 +3064,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber85">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber84">source</a></span></span>
     </span>
   </h3>
 
@@ -3184,7 +3144,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber69">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber68">source</a></span></span>
     </span>
   </h3>
 
@@ -3228,7 +3188,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber297">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber319">source</a></span></span>
     </span>
   </h3>
 
@@ -3289,7 +3249,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber285">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber307">source</a></span></span>
     </span>
   </h3>
 
@@ -3333,7 +3293,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber442">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber467">source</a></span></span>
     </span>
   </h3>
 
@@ -3427,7 +3387,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber482">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber507">source</a></span></span>
     </span>
   </h3>
 
@@ -3488,7 +3448,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber150">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber148">source</a></span></span>
     </span>
   </h3>
 
@@ -3532,7 +3492,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber306">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber328">source</a></span></span>
     </span>
   </h3>
 
@@ -3593,7 +3553,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber333">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber355">source</a></span></span>
     </span>
   </h3>
 
@@ -3649,7 +3609,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber532">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber557">source</a></span></span>
     </span>
   </h3>
 
@@ -3693,7 +3653,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber350">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber372">source</a></span></span>
     </span>
   </h3>
 
@@ -3766,7 +3726,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber165">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber163">source</a></span></span>
     </span>
   </h3>
 
@@ -3810,7 +3770,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber187">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber175">source</a></span></span>
     </span>
   </h3>
 
@@ -3866,7 +3826,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber124">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/molecule.js.html#lineNumber123">source</a></span></span>
     </span>
   </h3>
 
