@@ -490,9 +490,8 @@ export default class Molecule extends Atom{
                 
                 if(unlock){
                     //Make it spawn ready to update right away
-                    promise.then(result => {
+                    promise.then( ()=> {
                         atom.unlock()
-                        console.log("Unlocking")
                     })
                 }
                 
