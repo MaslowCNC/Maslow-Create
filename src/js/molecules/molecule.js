@@ -466,7 +466,7 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, moleculeList, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
-        var promise
+        var promise = null
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
@@ -490,9 +490,14 @@ export default class Molecule extends Atom{
                 
                 if(unlock){
                     //Make it spawn ready to update right away
-                    promise.then( ()=> {
+                    if(promise != null){
+                        promise.then( ()=> {
+                            atom.unlock()
+                        })
+                    }
+                    else{
                         atom.unlock()
-                    })
+                    }
                 }
                 
                 this.nodesOnTheScreen.push(atom)
