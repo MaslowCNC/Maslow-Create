@@ -490,8 +490,9 @@ export default class Molecule extends Atom{
                 
                 if(unlock){
                     //Make it spawn ready to update right away
-                    atom.unlock()
-                    atom.updateValue() //setup the initial value
+                    promise.then( ()=> {
+                        atom.unlock()
+                    })
                 }
                 
                 this.nodesOnTheScreen.push(atom)
