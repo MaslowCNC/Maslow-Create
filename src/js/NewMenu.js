@@ -62,9 +62,8 @@ function makeArray(group) {
                     showGitHubSearch(e)
                 }
                 else{
-                console.log(title.name)
-                e.target.id = title.name
-                placeNewNode(e)
+                    e.target.id = title.name
+                    placeNewNode(e)
                 }
             }  
             menuArray.push(subMenu)
@@ -80,16 +79,18 @@ document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
 }) 
 
 function showGitHubSearch(ev){
-
-     //remove old results everytime
+    //remove old results everytime
+ 
+    var githubList = document.getElementById('githubList')
     var oldResults = githubList.getElementsByClassName('menu-item')
-    for (let i = 0; i < oldResults.length; i++) {
-            githubList.removeChild(oldResults[i])
-            githubList.setAttribute('style','display:none;')
-    }
+
+        for (var i = oldResults.length - 1; i >= 0; --i) {
+           oldResults[i].remove();
+           githubList.setAttribute('style','display:none')
+        }
+        
     
     const menu = document.querySelector('#canvas_menu')
-    console.log(cmenu._container.style)
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
     const containerWidth = parseInt(cmenu._container.style.width, 10)
@@ -105,31 +106,32 @@ function showGitHubSearch(ev){
     //Add function call to search when typing
     document.getElementById('menuInput').addEventListener('keyup', (e) => {
         searchMenu(e)
-        })
+    })
 }
 
 function searchMenu(evt) {
     //We are searching on github
     if(evt.code == 'Enter'){
         let input = document.getElementById('menuInput').value
-        
         var githubList = document.getElementById('githubList')
-        
         var oldResults = githubList.getElementsByClassName('menu-item')
-        for (let i = 0; i < oldResults.length; i++) {
-            githubList.removeChild(oldResults[i])
+        //new search
+        for (var i = oldResults.length - 1; i >= 0; --i) {
+           oldResults[i].remove();
         }
         
         GlobalVariables.gitHub.searchGithub(input).then(result => {
             result.data.items.forEach(item => {
                 var newElement = document.createElement('LI')
                 var text = document.createTextNode(item.name)
+                const menu = document.querySelector('#canvas_menu')
                 newElement.setAttribute('class', 'menu-item')
                 newElement.setAttribute('id', item.id)
                 newElement.appendChild(text) 
                 githubList.appendChild(newElement) 
                 githubList.setAttribute('style','display:block;')
-                
+                menu.style.borderRadius = '30px 30px 20px 20px;'
+ 
                 document.getElementById(item.id).addEventListener('click', (e) => {
                     placeGitHubMolecule(e)
                 })
@@ -162,25 +164,25 @@ function placeNewNode(e){
      */ 
 function placeGitHubMolecule(ev){
 
-        const menu = document.querySelector('#canvas_menu')
-        menu.classList.add('off')
-        menu.style.top = '-200%'
-        menu.style.left = '-200%'  
+    const menu = document.querySelector('#canvas_menu')
+    menu.classList.add('off')
+    menu.style.top = '-200%'
+    menu.style.left = '-200%'  
 
-        let clr = ev.target.id
-        const containerX = parseInt(cmenu._container.style.left, 10)
-        const containerY = parseInt(cmenu._container.style.top, 10)
-        const invertScale = 1 / GlobalVariables.scale1
-        GlobalVariables.currentMolecule.placeAtom({
-            x: containerX * invertScale, 
-            y: containerY * invertScale, 
-            parent: GlobalVariables.currentMolecule,
-            atomType: 'GitHubMolecule',
-            projectID: clr,
-            uniqueID: GlobalVariables.generateUniqueID()
-        }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
+    let clr = ev.target.id
+    const containerX = parseInt(cmenu._container.style.left, 10)
+    const containerY = parseInt(cmenu._container.style.top, 10)
+    const invertScale = 1 / GlobalVariables.scale1
+    GlobalVariables.currentMolecule.placeAtom({
+        x: containerX * invertScale, 
+        y: containerY * invertScale, 
+        parent: GlobalVariables.currentMolecule,
+        atomType: 'GitHubMolecule',
+        projectID: clr,
+        uniqueID: GlobalVariables.generateUniqueID()
+    }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
     
-    }
+}
 
 export {cmenu}
  
