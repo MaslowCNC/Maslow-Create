@@ -28,15 +28,15 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "//Add an input\nThis.addIO('input', 'input name', This, 'geometry', 10);\n\n//Read back from the input\nThis.findIOValue('radius');\n\n//Set the output\nThis.value = 10;"
+        this.code = "//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \n\n\nfunction main(Input1, Input2){\n  return Sphere(40)        //return must be geometry;\n}\n\nreturn main(Input1, Input2)"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
         this.setValues(values)
         
-
         this.parseInputs()
     }
+    
     /**
      * Grab the code as a text string and execute it. 
      */ 
@@ -77,7 +77,6 @@ export default class Code extends Atom {
         }
     }
     
-    
     /**
      * Add a button to open the code editor to the side bar
      */ 
@@ -92,11 +91,8 @@ export default class Code extends Atom {
             }
             
             popup.classList.remove('off')
-            popup.setAttribute("style", "text-align: center")
 
-            
             //Add a title
-            
             var codeMirror = CodeMirror(popup, {
                 value: this.code,
                 mode:  "javascript",
@@ -120,7 +116,7 @@ export default class Code extends Atom {
     }
     
     /**
-     * Save the input code
+     * Save the input code to be loaded next time
      */ 
     serialize(values){
         //Save the readme text to the serial stream
