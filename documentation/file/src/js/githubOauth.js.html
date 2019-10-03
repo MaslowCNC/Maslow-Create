@@ -637,48 +637,44 @@ export default function GitHubModule(){
             
             const threadCompute = async (values, key) =&gt; {
                 return await GlobalVariables.saveWorker({values: values, key: key})
-            }
-            threadCompute([shape], &quot;stl&quot;).then( stlContent =&gt; {
+            } 
+            threadCompute([shape], &quot;SVG Picture&quot;).then(contentSvg =&gt; {
                 
-                threadCompute([shape], &quot;SVG Picture&quot;).then(contentSvg =&gt; {
+                var bomContent = bomHeader
+                extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
+                    var totalParts = 0
+                    var totalCost  = 0
+                    if(bomItems != undefined){
+                        bomItems.forEach(item =&gt; {
+                            totalParts += item.numberNeeded
+                            totalCost  += item.costUSD
+                            bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
+                        })
+                    }
+                    bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
+                    bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
                     
-                    var bomContent = bomHeader
-                    extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
-                        var totalParts = 0
-                        var totalCost  = 0
-                        if(bomItems != undefined){
-                            bomItems.forEach(item =&gt; {
-                                totalParts += item.numberNeeded
-                                totalCost  += item.costUSD
-                                bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
-                            })
+                    
+                    var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + saveRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
+                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
+                        readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+                    })
+                    
+                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
+                    
+                    this.createCommit(octokit,{
+                        owner: saveUser,
+                        repo: saveRepoName,
+                        base: &apos;master&apos;, /* optional: defaults to default branch */
+                        changes: {
+                            files: {
+                                &apos;project.svg&apos;: contentSvg,
+                                &apos;BillOfMaterials.md&apos;: bomContent,
+                                &apos;README.md&apos;: readmeContent,
+                                &apos;project.maslowcreate&apos;: projectContent
+                            },
+                            commit: &apos;Autosave&apos;
                         }
-                        bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
-                        bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
-                        
-                        
-                        var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + saveRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
-                        GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
-                            readmeContent = readmeContent + item + &quot;\n\n\n&quot;
-                        })
-                        
-                        const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
-                        
-                        this.createCommit(octokit,{
-                            owner: saveUser,
-                            repo: saveRepoName,
-                            base: &apos;master&apos;, /* optional: defaults to default branch */
-                            changes: {
-                                files: {
-                                    &apos;project.stl&apos;: stlContent,
-                                    &apos;project.svg&apos;: contentSvg,
-                                    &apos;BillOfMaterials.md&apos;: bomContent,
-                                    &apos;README.md&apos;: readmeContent,
-                                    &apos;project.maslowcreate&apos;: projectContent
-                                },
-                                commit: &apos;Autosave&apos;
-                            }
-                        })
                     })
                 })
             })

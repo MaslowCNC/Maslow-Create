@@ -1950,6 +1950,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#dumpbuffer",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-dumpBuffer",
+    "src/js/molecules/molecule.js~Molecule#dumpBuffer",
+    "method"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#exporttogithub",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-exportToGithub",
     "src/js/molecules/molecule.js~Molecule#exportToGithub",
@@ -2736,6 +2742,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#dumpbuffer",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-dumpBuffer",
+    "src/js/prototypes/atom.js~Atom#dumpBuffer",
+    "method"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#findiovalue",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-findIOValue",
     "src/js/prototypes/atom.js~Atom#findIOValue",
@@ -2985,6 +2997,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#draw",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-draw",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#draw",
+    "method"
+  ],
+  [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#dumpbuffer",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-dumpBuffer",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#dumpBuffer",
     "method"
   ],
   [
