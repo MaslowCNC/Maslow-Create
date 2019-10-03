@@ -42,15 +42,12 @@ export default class Assembly extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
-        
-        this.updateValue()
     }
     
     /**
     * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.
     */ 
     updateValue(){
-
         if(this.inputs.every(x => x.ready)){
             try{
                 var inputs = []
@@ -69,14 +66,9 @@ export default class Assembly extends Atom{
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
             
-            const values = [mappedInputs, this.removeCutawayGeometry]
-            
-            this.basicThreadValueProcessing(values, "assemble")
-            this.clearAlert()
-        }catch(err){this.setAlert(err)}
-        
-        //Delete or add ports as needed
-        addOrDeletePorts(this)
+            //Delete or add ports as needed
+            addOrDeletePorts(this)
+        }
     }
     
     /**
@@ -87,7 +79,15 @@ export default class Assembly extends Atom{
         
         this.inputs.forEach(input => {
             if(input.connectors.length != 0){
-                this.createCheckbox(sideBar,input.name,true,(event)=>{
+                
+                var shouldThisBeChecked = true
+                if(input.getValue().tags){  //Check to see if this part is currently being cut away
+                    if(input.getValue().tags.indexOf("user/cutAway") > -1){
+                        shouldThisBeChecked = false
+                    }
+                }
+                
+                this.createCheckbox(sideBar,input.name,shouldThisBeChecked,(event)=>{
                     var updatedValue = input.getValue()
                     
                     if(!event.target.checked){ //If the box has just been unchecked
@@ -123,7 +123,6 @@ export default class Assembly extends Atom{
             }
         })
     }
-        
     
     /**
     * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.
