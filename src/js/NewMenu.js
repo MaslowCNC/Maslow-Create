@@ -2,6 +2,7 @@ import CMenu from './lib/circularmenu.js'
 import GlobalVariables from './globalvariables'
     
 var ele = document.querySelector('#circle-menu1')
+let githubList = document.getElementById('githubList')
 
 var cmenu = CMenu(ele)
     .config({
@@ -37,7 +38,7 @@ var cmenu = CMenu(ele)
                 menus: makeArray('Interactions')
             },
             {
-                title: 'EX/IM',
+                title: 'Import/Export',
                 icon: '',
                 menus: makeArray('Import/Export')
                                 
@@ -81,24 +82,23 @@ document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
 //Add function call to search when typing
 document.getElementById('menuInput').addEventListener('keyup', (e) => {
     if(e.code == 'Enter'){
-        searchMenu(e)}
-    })
+        searchMenu()}
+})
 
 
-function showGitHubSearch(ev){
+function showGitHubSearch(){
     //remove old results everytime           
     var oldResults = githubList.getElementsByClassName('menu-item')
     const menu = document.querySelector('#canvas_menu')
 
-        for (let i = 0; i < oldResults.length; i++) {
-            githubList.removeChild(oldResults[i])
-            githubList.style.display = "none"
-            menu.style.borderRadius = '50px'
-        }
+    for (let i = 0; i < oldResults.length; i++) {
+        githubList.removeChild(oldResults[i])
+        githubList.style.display = "none"
+        menu.style.borderRadius = '50px'
+    }
 
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
-    const containerWidth = parseInt(cmenu._container.style.width, 10)
     menu.style.display = 'block'
     menu.style.top = `${containerY}px`
     menu.style.left = `${containerX}px`
@@ -109,32 +109,32 @@ function showGitHubSearch(ev){
     
 }
 
-function searchMenu(e) {
+function searchMenu() {
     //We are searching on github
-        let input = document.getElementById('menuInput').value
+    let input = document.getElementById('menuInput').value
 
-        var oldResults = githubList.getElementsByClassName('menu-item')
-        for (let i = 0; i < oldResults.length; i++) {
-            githubList.removeChild(oldResults[i])
-        }
-        GlobalVariables.gitHub.searchGithub(input).then(result => {
-            result.data.items.forEach(item => {
-                var newElement = document.createElement('LI')
-                var text = document.createTextNode(item.name)
-                const menu = document.querySelector('#canvas_menu')
-                menu.style.borderRadius = '30px 30px 20px 20px'
-                newElement.setAttribute('class', 'menu-item')
-                newElement.setAttribute('id', item.id)
-                newElement.appendChild(text) 
-                githubList.appendChild(newElement) 
-                githubList.setAttribute('style','display:block;')
+    var oldResults = githubList.getElementsByClassName('menu-item')
+    for (let i = 0; i < oldResults.length; i++) {
+        githubList.removeChild(oldResults[i])
+    }
+    GlobalVariables.gitHub.searchGithub(input).then(result => {
+        result.data.items.forEach(item => {
+            var newElement = document.createElement('LI')
+            var text = document.createTextNode(item.name)
+            const menu = document.querySelector('#canvas_menu')
+            menu.style.borderRadius = '30px 30px 20px 20px'
+            newElement.setAttribute('class', 'menu-item')
+            newElement.setAttribute('id', item.id)
+            newElement.appendChild(text) 
+            githubList.appendChild(newElement) 
+            githubList.setAttribute('style','display:block;')
 
  
-                document.getElementById(item.id).addEventListener('click', (e) => {
-                    placeGitHubMolecule(e)
-                })
+            document.getElementById(item.id).addEventListener('click', (e) => {
+                placeGitHubMolecule(e)
             })
         })
+    })
     
 }
 /**
