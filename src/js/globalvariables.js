@@ -116,11 +116,6 @@ class GlobalVariables{
          */
         this.runMode = false
         /** 
-         * A flag to indicate if the evaluation of molecules is blocked. Used to prevent evaluation until all molecules have been placed.
-         * @type {boolean}
-         */
-        this.evalLock = true
-        /** 
          * The github object which is used to interact with GitHub.
          * @type {object}
          */

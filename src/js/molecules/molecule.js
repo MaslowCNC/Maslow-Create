@@ -60,7 +60,6 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, null, GlobalVariables.secretTypes)
         
-        this.updateValue()
     }
     
     /**
@@ -122,7 +121,7 @@ export default class Molecule extends Atom{
      * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        if(this.inputs.every(x => x.ready)){
             /** 
              * Flag that the current molecule is processing.
              * @type {boolean}
@@ -134,13 +133,12 @@ export default class Molecule extends Atom{
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue()){                //Dont update the input if it hasn't changed
-                            atom.setOutput(moleculeInput.getValue())
+                        if(atom.getOutput() != moleculeInput.getValue()){                //Don't update the input if it hasn't changed
+                            atom.updateValue()
                         }
                     }
                 })
             })
-            
         }
     }
     
@@ -172,16 +170,6 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Trigger the beginning of the propogation process for all of the atoms in this molecule.
-     */ 
-    beginPropogation(){
-        super.beginPropogation()
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropogation()
-        })
-    }
-    
-    /**
      * Updates the side bar to display options like 'go to parent' and 'load a different project'. What is displayed depends on if this atom is the top level, and if we are using run mode.
      */ 
     updateSidebar(){
@@ -191,15 +179,10 @@ export default class Molecule extends Atom{
         
         this.createEditableValueListItem(valueList,this,'name','Name', false)
 
-        if(!this.topLevel){
-            //this.createButton(valueList,this,'Go To Parent',this.goToParentMolecule)
-            
-            //this.createButton(valueList,this,'Export To GitHub', this.exportToGithub)
-        }
-        else{ //If we are the top level molecule
+        if(this.topLevel){
+            //If we are the top level molecule 
+            this.createSegmentSlider(valueList)
 
-            this.createEditableValueListItem(valueList,GlobalVariables,'circleSegmentSize', 'Circle Segment Size', true, (newValue) => {GlobalVariables.circleSegmentSize = newValue})
-            
         }
         
         // this.createButton(valueList,this,'Download STL',() => {
@@ -241,6 +224,45 @@ export default class Molecule extends Atom{
         
         return valueList
         
+    }
+
+    /**
+     * Creates segment length slider and passes value to Global Variables
+     */ 
+    createSegmentSlider(valueList){
+        //Creates value slider
+        var rangeElement = document.createElement('input')
+        //Div which contains the entire element
+        var div = document.createElement('div')
+        div.setAttribute('class', 'slider-container')
+        valueList.appendChild(div)
+        var rangeLabel = document.createElement('label')
+        rangeLabel.textContent = "Display quality/Length of Segments"
+        div.appendChild(rangeLabel)
+        rangeLabel.appendChild(rangeElement)
+        rangeElement.setAttribute('type', 'range')
+        rangeElement.setAttribute('min', '.1')
+        rangeElement.setAttribute('max', '10')
+        rangeElement.setAttribute('step', '.3')
+        rangeElement.setAttribute('class', 'slider')
+        rangeElement.setAttribute('value', GlobalVariables.circleSegmentSize)
+            
+        var rangeValueLabel = document.createElement('ul')
+        rangeValueLabel.innerHTML= '<li>Export</li><li>Draft</li> '
+        rangeValueLabel.setAttribute('class', 'range-labels')
+        rangeLabel.appendChild(rangeValueLabel)
+
+        var rangeValue = document.createElement('p')
+        rangeValue.textContent = rangeElement.value
+        rangeLabel.appendChild(rangeValue)
+
+
+        //on slider change send value to global variables
+        rangeElement.oninput = function() {
+            rangeValue.textContent = this.value
+            GlobalVariables.circleSegmentSize = this.value
+            
+        }
     }
     
     /**
@@ -364,7 +386,7 @@ export default class Molecule extends Atom{
         
         
         this.nodesOnTheScreen.forEach(atom => {
-            //Store a represnetation of the atom
+            //Store a representation of the atom
             allAtoms.push(atom.serialize(savedObject))
             //Store a representation of the atom's connectors
             if(atom.output){
@@ -428,7 +450,25 @@ export default class Molecule extends Atom{
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
-            this.updateValue()
+            if(this.topLevel){
+                this.unlock()
+                this.backgroundClick()
+            }
+        })
+    }
+    
+    /**
+     * Dump the stored copies of any geometry in this molecule to free up ram.
+     */ 
+    dumpBuffer(keepThisValue){
+        
+        //Preserve the output of this molecule if we need to keep using it
+        if(!keepThisValue){
+            super.dumpBuffer()
+        }
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            atom.dumpBuffer()
         })
     }
     
@@ -441,7 +481,7 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, moleculeList, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
-        var promise
+        var promise = null
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
@@ -460,13 +500,19 @@ export default class Molecule extends Atom{
                 
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
-                    promise = await atom.loadProjectByID(atom.projectID)
+                    promise = atom.loadProjectByID(atom.projectID)
                 }
                 
                 if(unlock){
                     //Make it spawn ready to update right away
-                    atom.unlock()
-                    atom.updateValue() //setup the initial value
+                    if(promise != null){
+                        promise.then( ()=> {
+                            atom.unlock()
+                        })
+                    }
+                    else{
+                        atom.unlock()
+                    }
                 }
                 
                 this.nodesOnTheScreen.push(atom)
