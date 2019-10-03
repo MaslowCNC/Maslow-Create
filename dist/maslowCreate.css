@@ -355,9 +355,10 @@ body {
 }
 
 .menu-item{
+    color: whitesmoke;
     height: 1.5rem;
-    line-height: 1.5rem;
-    font-size: 1rem;
+    line-height: 1rem;
+    font-size: .8rem;
     font-weight: 100;
     padding: 0 1rem;
     cursor: pointer;

@@ -93,7 +93,7 @@ function showGitHubSearch(ev){
         for (let i = 0; i < oldResults.length; i++) {
             githubList.removeChild(oldResults[i])
             githubList.style.display = "none"
-            menu.style.borderRadius = '30px 30px 20px 20px'
+            menu.style.borderRadius = '50px'
         }
 
     const containerX = parseInt(cmenu._container.style.left, 10)
