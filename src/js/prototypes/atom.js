@@ -392,7 +392,7 @@ export default class Atom {
                 this.deleteNode()
             }
         }
-                
+        
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
@@ -651,6 +651,19 @@ export default class Atom {
         })
         
         return ioValue
+    }
+    
+    /**
+     * Dump the stored copies of any geometry in this atom to free up ram.
+     */ 
+    dumpBuffer(){
+        this.inputs.forEach(input => {
+            input.dumpBuffer()
+        })
+        if(this.output){
+            this.output.dumpBuffer()
+        }
+        this.value = null
     }
     
     /**
