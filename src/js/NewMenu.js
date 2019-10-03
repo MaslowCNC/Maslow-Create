@@ -78,19 +78,24 @@ document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
     cmenu.show([e.clientX, e.clientY])
 }) 
 
-function showGitHubSearch(ev){
-    //remove old results everytime
- 
-    var githubList = document.getElementById('githubList')
-    var oldResults = githubList.getElementsByClassName('menu-item')
+//Add function call to search when typing
+document.getElementById('menuInput').addEventListener('keyup', (e) => {
+    if(e.code == 'Enter'){
+        searchMenu(e)}
+    })
 
-        for (var i = oldResults.length - 1; i >= 0; --i) {
-           oldResults[i].remove();
-           githubList.setAttribute('style','display:none')
-        }
-        
-    
+
+function showGitHubSearch(ev){
+    //remove old results everytime           
+    var oldResults = githubList.getElementsByClassName('menu-item')
     const menu = document.querySelector('#canvas_menu')
+
+        for (let i = 0; i < oldResults.length; i++) {
+            githubList.removeChild(oldResults[i])
+            githubList.style.display = "none"
+            menu.style.borderRadius = '30px 30px 20px 20px'
+        }
+
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
     const containerWidth = parseInt(cmenu._container.style.width, 10)
@@ -101,43 +106,36 @@ function showGitHubSearch(ev){
 
     const menuInput = document.getElementById('menuInput')
     menuInput.setAttribute('style','display:block')
-
     
-    //Add function call to search when typing
-    document.getElementById('menuInput').addEventListener('keyup', (e) => {
-        searchMenu(e)
-    })
 }
 
-function searchMenu(evt) {
+function searchMenu(e) {
     //We are searching on github
-    if(evt.code == 'Enter'){
         let input = document.getElementById('menuInput').value
-        var githubList = document.getElementById('githubList')
+
         var oldResults = githubList.getElementsByClassName('menu-item')
-        //new search
-        for (var i = oldResults.length - 1; i >= 0; --i) {
-           oldResults[i].remove();
+        for (let i = 0; i < oldResults.length; i++) {
+            githubList.removeChild(oldResults[i])
         }
-        
         GlobalVariables.gitHub.searchGithub(input).then(result => {
             result.data.items.forEach(item => {
                 var newElement = document.createElement('LI')
                 var text = document.createTextNode(item.name)
                 const menu = document.querySelector('#canvas_menu')
+                menu.style.borderRadius = '30px 30px 20px 20px'
                 newElement.setAttribute('class', 'menu-item')
                 newElement.setAttribute('id', item.id)
                 newElement.appendChild(text) 
                 githubList.appendChild(newElement) 
                 githubList.setAttribute('style','display:block;')
-                menu.style.borderRadius = '30px 30px 20px 20px;'
+
  
                 document.getElementById(item.id).addEventListener('click', (e) => {
                     placeGitHubMolecule(e)
                 })
             })
         })
-    }
+    
 }
 /**
      * Runs when a menu option is clicked to place a new atom from the local atoms list.
