@@ -1,6 +1,5 @@
 import GlobalVariables from './globalvariables'
 
-
 /**
  * This class creates the top menu behavior for looking at list of molecules and placing atoms.
  */
@@ -45,8 +44,7 @@ class Localmenu {
             newElement.addEventListener('click', (e) => {
                 this.placeAtom(e)
             })
-        }
-            
+        }        
     }
     /**
      * Runs when menu button is clicked to display local menu element

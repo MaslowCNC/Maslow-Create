@@ -77,10 +77,6 @@ flowCanvas.addEventListener('mousedown', event => {
     if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
         LocalMenu.hideMenu()
     }
-    //hide the menu if it is visible
-    if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
-        LocalMenu.hideMenu()
-    }
     
 })
 
@@ -121,6 +117,7 @@ window.addEventListener('keydown', event => {
  */ 
 
 if (!GlobalVariables.runMode){
+    
     let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
