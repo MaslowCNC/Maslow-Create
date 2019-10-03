@@ -8,7 +8,7 @@ var ele = document.querySelector('#circle-menu1')
 /**
  * This creates a new instance of the circular menu. 
  */
- var cmenu = CMenu(ele)
+var cmenu = CMenu(ele)
     .config({
         totalAngle: 360,//deg,
         spaceDeg: 1,//deg
