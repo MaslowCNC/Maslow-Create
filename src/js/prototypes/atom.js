@@ -393,13 +393,6 @@ export default class Atom {
             }
         }
         
-        if (['k'].includes(key)){
-            if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
-                //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.dumpBuffer()
-            }
-        }
-                
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
