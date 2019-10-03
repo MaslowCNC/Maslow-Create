@@ -1,10 +1,14 @@
 import CMenu from './lib/circularmenu.js'
 import GlobalVariables from './globalvariables'
-    
-var ele = document.querySelector('#circle-menu1')
-let githubList = document.getElementById('githubList')
 
-var cmenu = CMenu(ele)
+/**
+ * Html element that cointains the circular menu
+ */    
+var ele = document.querySelector('#circle-menu1')
+/**
+ * This creates a new instance of the circular menu. 
+ */
+ var cmenu = CMenu(ele)
     .config({
         totalAngle: 360,//deg,
         spaceDeg: 1,//deg
@@ -85,7 +89,12 @@ document.getElementById('menuInput').addEventListener('keyup', (e) => {
         searchMenu()}
 })
 
+/**  List that contains results of gitHub search */
+let githubList = document.getElementById('githubList')
 
+/**
+ * Runs when a gitHub molecule menu option is clicked to show search bar.
+ */ 
 function showGitHubSearch(){
     //remove old results everytime           
     var oldResults = githubList.getElementsByClassName('menu-item')
@@ -109,6 +118,9 @@ function showGitHubSearch(){
     
 }
 
+/**
+* Runs when enter key is clicked and the input is focused to show results from search.
+*/ 
 function searchMenu() {
     //We are searching on github
     let input = document.getElementById('menuInput').value
