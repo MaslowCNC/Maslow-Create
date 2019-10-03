@@ -5,6 +5,7 @@ import Display from './js/display.js'
 import LocalMenu from './js/localmenu.js'
 import {cmenu} from './js/NewMenu.js'
 
+
 GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
@@ -71,6 +72,10 @@ flowCanvas.addEventListener('mousedown', event => {
         menu.classList.add('off')
         menu.style.top = '-200%'
         menu.style.left = '-200%'
+    }
+    //hide the menu if it is visible
+    if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
+        LocalMenu.hideMenu()
     }
     //hide the menu if it is visible
     if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {

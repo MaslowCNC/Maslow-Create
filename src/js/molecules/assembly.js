@@ -50,16 +50,24 @@ export default class Assembly extends Atom{
     * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.
     */ 
     updateValue(){
-        try{
-            var inputs = []
-            this.inputs.forEach( io => {
-                if(io.connectors.length > 0 && io.type == 'input'){
-                    inputs.push(io.getValue())
-                }
-            })
-            const mappedInputs = inputs.map(x => {
-                return x
-            })
+
+        if(this.inputs.every(x => x.ready)){
+            try{
+                var inputs = []
+                this.inputs.forEach( io => {
+                    if(io.connectors.length > 0 && io.type == 'input'){
+                        inputs.push(io.getValue())
+                    }
+                })
+                const mappedInputs = inputs.map(x => {
+                    return x
+                })
+                
+                const values = [mappedInputs, this.removeCutawayGeometry]
+                
+                this.basicThreadValueProcessing(values, "assemble")
+                this.clearAlert()
+            }catch(err){this.setAlert(err)}
             
             const values = [mappedInputs, this.removeCutawayGeometry]
             
