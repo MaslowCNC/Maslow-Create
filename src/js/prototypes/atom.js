@@ -392,6 +392,13 @@ export default class Atom {
                 this.deleteNode()
             }
         }
+        
+        if (['k'].includes(key)){
+            if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
+                //If this atom is selected AND the body is active (meaning we are not typing in a text box)
+                this.dumpBuffer()
+            }
+        }
                 
         this.inputs.forEach(child => {
             child.keyPress(key)
@@ -651,6 +658,17 @@ export default class Atom {
         })
         
         return ioValue
+    }
+    
+    dumpBuffer(){
+        console.log(this.name + " Dumping buffer")
+        this.inputs.forEach(input => {
+            input.dumpBuffer()
+        })
+        if(this.output){
+            this.output.dumpBuffer()
+        }
+        this.value = null
     }
     
     /**

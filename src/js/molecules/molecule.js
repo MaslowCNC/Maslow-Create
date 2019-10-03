@@ -457,6 +457,18 @@ export default class Molecule extends Atom{
         })
     }
     
+    dumpBuffer(keepThisValue){
+        
+        //Preserve the output of this molecule if we need to keep using it
+        if(!keepThisValue){
+            super.dumpBuffer()
+        }
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            atom.dumpBuffer()
+        })
+    }
+    
     /**
      * Places a new atom inside the molecule
      * @param {object} newAtomObj - An object defining the new atom to be placed

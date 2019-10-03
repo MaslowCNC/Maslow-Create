@@ -442,7 +442,7 @@ export default class AttachmentPoint {
     }
     
     /**
-     * Reads and returns the curent value of the ap.
+     * Reads and returns the current value of the ap.
      */ 
     getValue(){
         return this.value
@@ -464,6 +464,10 @@ export default class AttachmentPoint {
         else{   //update the code block to reflect the new values
             this.parentMolecule.updateValue()
         }
+    }
+    
+    dumpBuffer(){
+        this.value = null
     }
     
     /**

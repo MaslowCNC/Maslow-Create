@@ -507,6 +507,7 @@ export default function GitHubModule(){
      */
     this.saveProject = function(){
         //Save the current project into the github repo
+        return
         if(currentRepoName != null){
             
             //Store the target repo incase a new project is loaded during the save

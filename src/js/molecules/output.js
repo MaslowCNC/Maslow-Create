@@ -64,6 +64,14 @@ export default class Output extends Atom {
             this.parent.propogate()
             this.parent.processing = false
             
+            let popUp = document.querySelector('#popUp')
+            
+            
+            console.log(this.parent)
+            if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule"){
+                this.parent.dumpBuffer(true)
+            }
+            
             super.updateValue()
         }
     }
