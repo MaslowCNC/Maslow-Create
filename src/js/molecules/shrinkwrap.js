@@ -52,11 +52,10 @@ export default class ShrinkWrap extends Atom{
         this.updateValue()
     }
     
-    /**
+     /**
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 
     updateValue(){
-
         if(this.inputs.every(x => x.ready)){
             try{
                 var inputsList = []
@@ -72,11 +71,9 @@ export default class ShrinkWrap extends Atom{
                 this.basicThreadValueProcessing(values, "hull")
             }catch(err){this.setAlert(err)}
             
-            this.basicThreadValueProcessing(values, "hull")
-        }catch(err){this.setAlert(err)}
-        
-        //Delete or add ports as needed
-        addOrDeletePorts(this)
+            //Delete or add ports as needed
+            addOrDeletePorts(this)
+        }
     }
      
     /**

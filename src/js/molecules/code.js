@@ -38,19 +38,11 @@ export default class Code extends Atom {
 
         this.parseInputs()
     }
-    
     /**
      * Grab the code as a text string and execute it. 
      */ 
     updateValue(){
-        //This should pull and run the code in the editor
-        
-        //reset the IOs to the default state
-        const code = new Function('$',
-            `const { ${Object.keys({...GlobalVariables.api, ...{This: this}}).join(', ')} } = $;\n\n` + 
-                                  this.code)
         try{
-          
             this.parseInputs()
             
             var argumentsArray = {}
@@ -62,7 +54,6 @@ export default class Code extends Atom {
             
             this.basicThreadValueProcessing(values, "code")
         }catch(err){this.setAlert(err)}
-
     }
     
     parseInputs(){
@@ -86,6 +77,7 @@ export default class Code extends Atom {
             }
         }
     }
+    
     
     /**
      * Add a button to open the code editor to the side bar
