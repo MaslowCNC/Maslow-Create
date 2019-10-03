@@ -458,21 +458,6 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Dump the stored copies of any geometry in this molecule to free up ram.
-     */ 
-    dumpBuffer(keepThisValue){
-        
-        //Preserve the output of this molecule if we need to keep using it
-        if(!keepThisValue){
-            super.dumpBuffer()
-        }
-        
-        this.nodesOnTheScreen.forEach(atom => {
-            atom.dumpBuffer()
-        })
-    }
-    
-    /**
      * Places a new atom inside the molecule
      * @param {object} newAtomObj - An object defining the new atom to be placed
      * @param {array} moleculeList - Only pased if we are placing an instance of Molecule.

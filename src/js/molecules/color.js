@@ -28,7 +28,7 @@ export default class Color extends Atom {
          * The color options to choose from
          * @type {array}
          */
-        this.colorOptions = ['Powder blue','White','Red','Steel blue','Yellow','Brown','Cyan', "Green", "Pink", "Blue", "Silver", "Black", "Keep Out"]
+        this.colorOptions = ['Powder blue','White','Red','Steel blue','Yellow','Brown','Cyan', "Green", "Pink", "Blue", "Silver", "Black"]
         
         /**
          * The index of the currently selected color option.

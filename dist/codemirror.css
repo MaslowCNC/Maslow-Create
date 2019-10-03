@@ -4,8 +4,6 @@
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
   height:90%;
-  width: 100%;
-  text-align: left;
   color: black;
   direction: ltr;
 }

@@ -263,13 +263,6 @@ export default class Display {
                 clearCoatRoughness: 0,
                 opacity: 0.5,
                 transparent: true
-            },
-            keepout: {
-                roughness: 0.5,
-                metalness: 0.0,
-                reflectivity: 0.0,
-                opacity: 0.2,
-                transparent: true
             }
         }
         
