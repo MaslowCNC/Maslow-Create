@@ -58,7 +58,7 @@ export default class Output extends Atom {
      * Take the input value of this function and pass it to the parent Molecule to go up one level.
      */ 
     updateValue(){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        if(this.inputs.every(x => x.ready)){
             this.value = this.findIOValue('number or geometry')
             this.parent.value = this.value
             this.parent.propogate()
