@@ -543,6 +543,7 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.ready = true
+            this.output.lock() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. This prevents 
             this.output.setValue(this.value)
         }
     }
