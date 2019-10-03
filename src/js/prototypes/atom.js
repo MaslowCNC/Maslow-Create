@@ -660,8 +660,10 @@ export default class Atom {
         return ioValue
     }
     
+    /**
+     * Dump the stored copies of any geometry in this atom to free up ram.
+     */ 
     dumpBuffer(){
-        console.log(this.name + " Dumping buffer")
         this.inputs.forEach(input => {
             input.dumpBuffer()
         })

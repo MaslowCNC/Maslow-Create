@@ -457,6 +457,9 @@ export default class Molecule extends Atom{
         })
     }
     
+    /**
+     * Dump the stored copies of any geometry in this molecule to free up ram.
+     */ 
     dumpBuffer(keepThisValue){
         
         //Preserve the output of this molecule if we need to keep using it

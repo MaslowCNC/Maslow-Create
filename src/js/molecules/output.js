@@ -64,10 +64,7 @@ export default class Output extends Atom {
             this.parent.propogate()
             this.parent.processing = false
             
-            let popUp = document.querySelector('#popUp')
-            
-            
-            console.log(this.parent)
+            //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
             if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule"){
                 this.parent.dumpBuffer(true)
             }
