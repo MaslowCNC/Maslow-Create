@@ -1,6 +1,5 @@
 import Atom from '../prototypes/atom.js'
 import CodeMirror from 'codemirror'
-import GlobalVariables from '../globalvariables.js'
 
 /**
  * The Code molecule type adds support for executing arbirary jsxcad code.
