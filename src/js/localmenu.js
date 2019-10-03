@@ -1,5 +1,6 @@
 import GlobalVariables from './globalvariables'
 
+
 /**
  * This class creates the top menu behavior for looking at list of molecules and placing atoms.
  */
@@ -44,25 +45,20 @@ class Localmenu {
             newElement.addEventListener('click', (e) => {
                 this.placeAtom(e)
             })
-        }        
+        }
+            
     }
-    /**
-     * Runs when menu button is clicked to display local menu element
-     */ 
+
     showMenu(){
         this.availableMoleculesSelect.style.display = 'block'
     }
-    /**
-     * Toggles off menu if molecule is selected or if there's a background click
-     */ 
+
+    //toggles off menu if molecule is selected or if there's a background click
     hideMenu(){
         this.availableMoleculesSelect.style.display = 'none'
     }
 
-    /**
-     * Runs when a menu option is clicked to place a new atom from the local atoms list.
-     * @param {object} ev - The event triggered by click event on a menu item.
-     */ 
+    //place new atom when selected and hide menu
     placeAtom(e){
 
         let clr = e.target.id
