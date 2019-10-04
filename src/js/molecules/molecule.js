@@ -263,6 +263,7 @@ export default class Molecule extends Atom{
             GlobalVariables.circleSegmentSize = this.value
             
         }
+<<<<<<< HEAD
         
         rangeElement.addEventListener('mouseup', () => {
             GlobalVariables.topLevelMolecule.refreshCircles()
@@ -281,6 +282,8 @@ export default class Molecule extends Atom{
                 atom.refreshCircles()
             }
         })
+=======
+>>>>>>> parent of 53678f2... Make slider work
     }
     
     /**
