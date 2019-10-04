@@ -76,16 +76,14 @@ export default class Equation extends Atom {
                     substitutedEquation = substitutedEquation.replace(this.inputs[key].name, this.findIOValue(this.inputs[key].name))
                 }
                 
+                
                 //Evaluate the equation
                 this.value = GlobalVariables.limitedEvaluate(substitutedEquation)
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
             }
-        }catch(err){
-            console.warn(err)
-            this.setAlert(err)
-        }
+        }catch(err){this.setAlert(err)}
     }
     
     /**

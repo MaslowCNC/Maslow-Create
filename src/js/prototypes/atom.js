@@ -146,7 +146,10 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.draw()       
         })
-        
+      
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
 
@@ -164,24 +167,6 @@ export default class Atom {
         }
         else if (this.y + this.radius > canvasFlow.height/GlobalVariables.scale1){
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
-        }
-        
-        
-        
-        if(this.processing){
-            GlobalVariables.c.fillStyle = 'blue'
-        }
-        else if(this.selected){
-            GlobalVariables.c.fillStyle = this.selectedColor
-            GlobalVariables.c.strokeStyle = this.defaultColor
-            this.color = this.selectedColor
-            this.strokeColor = this.defaultColor
-        }
-        else{
-            GlobalVariables.c.fillStyle = this.defaultColor
-            GlobalVariables.c.strokeStyle = this.selectedColor
-            this.color = this.defaultColor
-            this.strokeColor = this.selectedColor
         }
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = 'start' 
@@ -264,10 +249,11 @@ export default class Atom {
      */ 
     removeIO(type, name, target){
         //Remove the target IO attachment point
-        target.inputs.forEach(input => {
-            if(input.name == name && input.type == type){
-                target.inputs.splice(target.inputs.indexOf(input),1)
-                input.deleteSelf()
+        
+        target.inputs.forEach(io => {
+            if(io.name == name && io.type == type){
+                io.deleteSelf()
+                target.inputs.splice(target.inputs.indexOf(io),1)
             }
         })
     }
@@ -312,13 +298,17 @@ export default class Atom {
         
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
+            this.color = this.selectedColor
             this.isMoving = true
             this.selected = true
+            this.strokeColor = this.defaultColor
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
         }
         else{
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
             this.selected = false
         }
         
@@ -392,7 +382,7 @@ export default class Atom {
                 this.deleteNode()
             }
         }
-        
+                
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
@@ -470,12 +460,8 @@ export default class Atom {
     deleteNode(){
         //deletes this node and all of it's inputs
         
-        this.inputs.forEach(input => { //disable the inputs before deleting
-            input.ready = false
-        })
-        
-        this.inputs.forEach(input => {
-            input.deleteSelf()
+        this.inputs.forEach(child => {
+            child.deleteSelf()       
         })
         if(this.output){
             this.output.deleteSelf()
@@ -654,19 +640,6 @@ export default class Atom {
     }
     
     /**
-     * Dump the stored copies of any geometry in this atom to free up ram.
-     */ 
-    dumpBuffer(){
-        this.inputs.forEach(input => {
-            input.dumpBuffer()
-        })
-        if(this.output){
-            this.output.dumpBuffer()
-        }
-        this.value = null
-    }
-    
-    /**
      * Creates an editable HTML item to set the value of an object element. Used in the sidebar.
      * @param {object} list - The HTML object to attach the new item to.
      * @param {object} object - The object with the element we are editing.
@@ -720,6 +693,9 @@ export default class Atom {
                 callBack(valueInBox)
             }
             
+            //sets the color of the molecule correctly after focus out of editable box
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value

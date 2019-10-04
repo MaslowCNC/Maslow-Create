@@ -263,27 +263,6 @@ export default class Molecule extends Atom{
             GlobalVariables.circleSegmentSize = this.value
             
         }
-<<<<<<< HEAD
-        
-        rangeElement.addEventListener('mouseup', () => {
-            GlobalVariables.topLevelMolecule.refreshCircles()
-        })
-    }
-    
-    /**
-     * Used to trigger all of the circle atoms within a molecule and all of the molecules within it to update their value. Used when the number of segments changes.
-     */ 
-    refreshCircles(){
-        this.nodesOnTheScreen.forEach(atom => {
-            if(atom.atomType == "Circle"){
-                atom.updateValue()
-            }
-            else if(atom.atomType == "Molecule" || atom.atomType == "GitHubMolecule"){
-                atom.refreshCircles()
-            }
-        })
-=======
->>>>>>> parent of 53678f2... Make slider work
     }
     
     /**
@@ -475,21 +454,6 @@ export default class Molecule extends Atom{
                 this.unlock()
                 this.backgroundClick()
             }
-        })
-    }
-    
-    /**
-     * Dump the stored copies of any geometry in this molecule to free up ram.
-     */ 
-    dumpBuffer(keepThisValue){
-        
-        //Preserve the output of this molecule if we need to keep using it
-        if(!keepThisValue){
-            super.dumpBuffer()
-        }
-        
-        this.nodesOnTheScreen.forEach(atom => {
-            atom.dumpBuffer()
         })
     }
     

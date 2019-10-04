@@ -36,7 +36,7 @@ export default class Input extends Atom {
          * This atom's height for drawing
          * @type {number}
          */
-        this.height = 20
+        this.height = 16
         /** 
          * This atom's radius for drawing
          * @type {string}
@@ -52,7 +52,6 @@ export default class Input extends Atom {
         this.oldName = this.name
         
         this.addIO('output', 'number or geometry', this, 'number or geometry', 10)
-        this.addIO('input', 'default value', this, 'number or geometry', 10)
         
         //Add a new input to the current molecule
         if (typeof this.parent !== 'undefined') {
@@ -85,51 +84,27 @@ export default class Input extends Atom {
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
         
-        //Set colors
-        if(this.processing){
-            GlobalVariables.c.fillStyle = 'blue'
-        }
-        else if(this.selected){
-            GlobalVariables.c.fillStyle = this.selectedColor
-            GlobalVariables.c.strokeStyle = this.defaultColor
-            /**
-             * This background color
-             * @type {string}
-             */
-            this.color = this.selectedColor
-            /**
-             * This atoms accent color
-             * @type {string}
-             */
-            this.strokeColor = this.defaultColor
-        }
-        else{
-            GlobalVariables.c.fillStyle = this.defaultColor
-            GlobalVariables.c.strokeStyle = this.selectedColor
-            this.color = this.defaultColor
-            this.strokeColor = this.selectedColor
-        }
-        
+        GlobalVariables.c.fillStyle = this.color
+        GlobalVariables.c.strokeStyle = this.parent.strokeColor
+        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height)
+        GlobalVariables.c.lineTo(this.x - this.radius + 10, this.y)
+        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height)
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        GlobalVariables.c.stroke()
+
         this.inputs.forEach(input => {
             input.draw()       
         })
         if(this.output){
             this.output.draw()
         }
-        
-        GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y - this.height/2)
-        GlobalVariables.c.lineWidth = 1
-        GlobalVariables.c.fill()
-        GlobalVariables.c.closePath()
-        GlobalVariables.c.stroke()
-
     }
     
     /**
@@ -161,6 +136,7 @@ export default class Input extends Atom {
      * Grabs the new value from the parent molecule's input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. 
      */ 
     updateValue(){
+
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
                 this.value = input.getValue()

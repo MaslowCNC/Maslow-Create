@@ -89,17 +89,10 @@ export default class AttachmentPoint {
          */
         this.type = 'output'
         /** 
-         * The attachment point current value.
+         * The attachment point current value. Default is 10.
          * @type {number}
          */
         this.value = 10
-        
-        /**
-         * The default value to be used by the ap when nothing is attached
-         * @type {string}
-         */
-        this.defaultValue = 10
-        
         /** 
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
@@ -435,14 +428,7 @@ export default class AttachmentPoint {
     }
     
     /**
-     * Updates the default value for the ap.
-     */ 
-    updateDefault(newDefault){
-        this.defaultValue = newDefault
-    }
-    
-    /**
-     * Reads and returns the current value of the ap.
+     * Reads and returns the curent value of the ap.
      */ 
     getValue(){
         return this.value
@@ -464,13 +450,6 @@ export default class AttachmentPoint {
         else{   //update the code block to reflect the new values
             this.parentMolecule.updateValue()
         }
-    }
-    
-    /**
-     * Clears any references to geometry this ap is holding onto to free up ram.
-     */
-    dumpBuffer(){
-        this.value = null
     }
     
     /**

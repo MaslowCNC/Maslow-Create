@@ -343,6 +343,8 @@ body {
 }
 
 .menu{
+    /* old menu.. keeping for search bar features */
+    display:none;
     width: 14rem;
     max-height: 8rem;
     overflow-y: scroll;
@@ -364,6 +366,41 @@ body {
     padding-bottom: 0px;
 }
 
+#canvas_menu{   
+    display: none;
+    max-height: 8rem;
+    overflow-x: hidden;
+    background-color: #323232;
+    color: #333;
+    border: 1px solid #aaa;
+    box-shadow: 2px 2px 2px #999;
+    border-radius: 50px;
+    list-style: none;
+    position: fixed;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    padding: 8px;
+    transform: translate(-50%, -50%);
+    transition: opacity .5s ease, transform .3s ease;
+}
+
+.menu_search_canvas{
+    background-color: #323232E8;
+    margin: auto;
+    text-align: center;
+    border-radius: 15px;
+    height: 1.6rem;
+}
+
+.menu_search_canvas:focus{
+  background-color: white;
+  outline: none;
+}
+
 .doc-title{
   font-size: 1.3rem;
   padding:10px;
@@ -377,9 +414,10 @@ body {
 }
 
 .menu-item{
+    color: whitesmoke;
     height: 1.5rem;
-    line-height: 1.5rem;
-    font-size: 1rem;
+    line-height: 1rem;
+    font-size: .8rem;
     font-weight: 100;
     padding: 0 1rem;
     cursor: pointer;
@@ -395,14 +433,6 @@ body {
     list-style: none;
     float: left;
     padding-inline-start: 0px;
-}
-
-.menu_search{
-    text-align: center;
-    border-radius: 5px;
-    height: 1.6rem;
-    width: 100%;
-    margin-bottom: 4px;
 }
 
 input.menu_search:focus {
@@ -422,6 +452,7 @@ input.menu_search:focus {
 .tab button {
     float: left;
     vertical-align: middle;
+    width: 50%;
     border: 0px white solid;
     outline: none;
     cursor: pointer;
@@ -691,10 +722,10 @@ input.menu_search:focus {
 
 /* line 3, ../../sass/circular-menu.scss */
 
- .cn-menu1 {
-            position: absolute;
-            
-        }
+.cn-menu1 {
+          position: absolute;        
+}
+
 .circular-menu {
   font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", "STHeitiSC-Light", "Microsoft YaHei", Arial, sans-serif;
   z-index: 1040;
@@ -735,7 +766,7 @@ input.menu_search:focus {
 
 .circular-menu.opened-nav {
   opacity: 1;
-  transition: opacity .3s ease, transform .3s ease;
+  transition: opacity .5s ease, transform .3s ease;
   transform: scale(1);
   pointer-events: auto;
 }
@@ -791,7 +822,8 @@ input.menu_search:focus {
 /* line 85, ../../sass/circular-menu.scss */
 .circular-menu ul li a span.text {
   display: block;
-  font-size: 12px;
+  font-size: 8px;
+  letter-spacing: 0.1em;
   line-height: 1;
   position: relative;
   font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", "STHeitiSC-Light", "Microsoft YaHei", Arial, sans-serif;
