@@ -1,3 +1,11 @@
+ .maslow-icon{
+            background-color: 'black';
+            background: url("/imgs/maslow-logo.png");
+            border-radius: 50%;
+            width:22px;
+            height:22px;
+        }
+
 /*
  * min.css for OpenJSCAD.org viewer
  */

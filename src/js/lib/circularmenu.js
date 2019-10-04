@@ -452,8 +452,8 @@
 
         var l = this._calc.clickZoneRadius * sizeRatio - fontHeight + "px",
             m = this._calc.clickZoneRadius * marginTopRatio - fontHeight + "px";
-        style(span, 'width', l);
-        style(span, 'height', l);
+        //style(span, 'width', l);
+        //style(span, 'height', l);
         style(span, 'font-size', l);
         style(span, 'margin-top', m);
 

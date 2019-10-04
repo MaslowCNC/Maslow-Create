@@ -12,38 +12,38 @@ var mainMenu = CMenu(ele)
     .config({
         totalAngle: 90,//deg,
         spaceDeg: 1,//deg
-        background: "#323232E8",
+        background: "#32323270",
         backgroundHover: "black",
-        percent: 0.35,//%
-        diameter: 130,//px
+        percent: 0.1,//%
+        diameter: 200,//px
         position: 'top',
-        horizontal: false,
+        horizontal: true,
         start: -90,//deg
         animation: "into",
         menus: [
             {
-                title: 'ACTIONS',
-                icon: '',
+                title: '',
+                icon: 'maslow-icon',
                 //menus: makeArray('Actions')        
             },
             {
-                title: 'SHAPES',
-                icon: '',
+                title: '',
+                icon: 'maslow-icon',
                 //menus: makeArray('Shapes')
             },
             {
-                title: 'PROPERTY',
-                icon: '',
+                title: '',
+                icon: 'maslow-icon',
                 //menus: makeArray('Properties')
             },
             {
-                title: 'INTERACTION',
-                icon: '',
+                title: '',
+                icon: 'maslow-icon',
                 //menus: makeArray('Interactions')
             },
             {
-                title: 'Import/Export',
-                icon: '',
+                title: '',
+                icon: 'maslow-icon',
                 //menus: makeArray('Import/Export')
                                 
             }

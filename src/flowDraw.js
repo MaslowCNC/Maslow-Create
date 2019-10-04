@@ -122,14 +122,15 @@ if (!GlobalVariables.runMode){
     let mainMenuButton = document.getElementById('main_menu_top')
     mainMenuButton.addEventListener('mousedown', (e) => {
         //add available molecules dropdown
-        mainMenu.show([e.clientX, e.clientY])
+        var rect = mainMenuButton.getBoundingClientRect();
+        mainMenu.show([rect.left+rect.width/2, rect.top+rect.height/2])
     })
     
-    let moleculeButton = document.getElementById('localMolecules_top')
+    /*let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
         LocalMenu.showMenu()
-    })
+    })*/
 
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
