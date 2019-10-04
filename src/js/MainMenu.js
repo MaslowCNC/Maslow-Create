@@ -22,9 +22,11 @@ var mainMenu = CMenu(ele)
         animation: "into",
         menus: [
             {
-                title: '',
+                title: 'm',
                 icon: 'maslow-icon',
-                //menus: makeArray('Actions')        
+                click: function menuClick(){
+                    GlobalVariables.gitHub.openGitHubPage()
+                }      
             },
             {
                 title: '',

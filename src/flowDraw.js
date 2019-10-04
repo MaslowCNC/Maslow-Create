@@ -130,7 +130,7 @@ if (!GlobalVariables.runMode){
     moleculeButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
         LocalMenu.showMenu()
-    })*/
+    })
 
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
@@ -161,7 +161,7 @@ if (!GlobalVariables.runMode){
         if(!GlobalVariables.currentMolecule.topLevel){
             GlobalVariables.currentMolecule.goToParentMolecule()  
         }
-    })
+    }) */
 }
 
 // Implementation
