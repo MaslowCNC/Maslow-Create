@@ -263,6 +263,24 @@ export default class Molecule extends Atom{
             GlobalVariables.circleSegmentSize = this.value
             
         }
+        
+        rangeElement.addEventListener('mouseup', () => {
+            GlobalVariables.topLevelMolecule.refreshCircles()
+        })
+    }
+    
+    /**
+     * Used to trigger all of the circle atoms within a molecule and all of the molecules within it to update their value. Used when the number of segments changes.
+     */ 
+    refreshCircles(){
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.atomType == "Circle"){
+                atom.updateValue()
+            }
+            else if(atom.atomType == "Molecule" || atom.atomType == "GitHubMolecule"){
+                atom.refreshCircles()
+            }
+        })
     }
     
     /**
@@ -458,6 +476,21 @@ export default class Molecule extends Atom{
     }
     
     /**
+     * Dump the stored copies of any geometry in this molecule to free up ram.
+     */ 
+    dumpBuffer(keepThisValue){
+        
+        //Preserve the output of this molecule if we need to keep using it
+        if(!keepThisValue){
+            super.dumpBuffer()
+        }
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            atom.dumpBuffer()
+        })
+    }
+    
+    /**
      * Places a new atom inside the molecule
      * @param {object} newAtomObj - An object defining the new atom to be placed
      * @param {array} moleculeList - Only pased if we are placing an instance of Molecule.
@@ -575,4 +608,3 @@ export default class Molecule extends Atom{
         }
     }
 }
-

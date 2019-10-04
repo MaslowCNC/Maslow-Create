@@ -44,7 +44,7 @@ export default class Connector {
         
         for(var key in values) {
             /**
-             * Assign each of the values in values as this.value
+             * Assign each of the values in values as this.key
              */
             this[key] = values[key]
         }
