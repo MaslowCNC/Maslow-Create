@@ -145,6 +145,7 @@ export default class Connector {
         
         //Free up the input to which this was attached
         this.attachmentPoint2.deleteConnector(this)
+        this.attachmentPoint2.setDefault()
     }
     
     /**
