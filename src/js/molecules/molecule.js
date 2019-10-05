@@ -608,4 +608,3 @@ export default class Molecule extends Atom{
         }
     }
 }
-
