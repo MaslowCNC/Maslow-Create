@@ -479,8 +479,9 @@
 
         var div = document.createElement('div');
         classed(div, "horizontal", true);
-
-        if(this._config.horizontal) style(div, 'transform', 'rotate('+ this._calc.horizontalDeg(index) +'deg)');
+        /*Has been modified to show text aligning rotation. Previously:
+        if(this._config.horizontal) style(div, 'transform', 'rotate('+ this._calc.horizontalDeg(index) +'deg)');*/
+        if(this._config.horizontal) style(div, 'transform', 'rotate('+ 88 +'deg)');
 
         parent.appendChild(div);
 

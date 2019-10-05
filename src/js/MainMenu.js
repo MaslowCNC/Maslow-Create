@@ -12,42 +12,41 @@ var mainMenu = CMenu(ele)
     .config({
         totalAngle: 90,//deg,
         spaceDeg: 1,//deg
-        background: "#32323270",
+        background: "#323232E8",
         backgroundHover: "black",
-        percent: 0.1,//%
-        diameter: 200,//px
+        percent: 0.2,//%
+        diameter: 250,//px
         position: 'top',
         horizontal: true,
         start: -90,//deg
         animation: "into",
         menus: [
             {
-                title: 'm',
-                icon: 'maslow-icon',
+                title: 'TO PARENT',
+                icon: '',
+                //menus: makeArray('Interactions')
+            },
+            {
+                title: 'GITHUB',
+                icon: '',
                 click: function menuClick(){
                     GlobalVariables.gitHub.openGitHubPage()
                 }      
             },
             {
-                title: '',
-                icon: 'maslow-icon',
+                title: 'SAVE',
+                icon: '',
                 //menus: makeArray('Shapes')
             },
             {
-                title: '',
-                icon: 'maslow-icon',
+                title: 'B.O.M',
+                icon: '',
                 //menus: makeArray('Properties')
             },
             {
-                title: '',
-                icon: 'maslow-icon',
-                //menus: makeArray('Interactions')
-            },
-            {
-                title: '',
-                icon: 'maslow-icon',
-                //menus: makeArray('Import/Export')
-                                
+                title: 'OPEN',
+                icon: '',
+                //menus: makeArray('Import/Export')                    
             }
         ]
     })

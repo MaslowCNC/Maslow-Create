@@ -123,7 +123,7 @@ if (!GlobalVariables.runMode){
     mainMenuButton.addEventListener('mousedown', (e) => {
         //add available molecules dropdown
         var rect = mainMenuButton.getBoundingClientRect();
-        mainMenu.show([rect.left+rect.width/2, rect.top+rect.height/2])
+        mainMenu.show([rect.left+rect.width, rect.top])
     })
     
     /*let moleculeButton = document.getElementById('localMolecules_top')

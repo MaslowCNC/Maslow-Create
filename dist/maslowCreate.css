@@ -1,10 +1,17 @@
- .maslow-icon{
-            background-color: 'black';
-            background: url("/imgs/maslow-logo.png");
-            border-radius: 50%;
-            width:22px;
-            height:22px;
-        }
+ 
+ #main_menu_top{background-color: black;}
+
+.git-icon{ background: url("/imgs/github-logo.png"); }
+.bom-icon{ background: url("/imgs/bom-logo.png"); }
+.goup-icon{ background: url("/imgs/goup_img.png"); }
+.open-icon{ background: url("/imgs/open-logo.png"); }
+.save-icon{ background: url("/imgs/save-image.png"); }
+
+.icon{
+  border-radius: 50%;
+  width: 20px;
+  height:20px;
+}
 
 /*
  * min.css for OpenJSCAD.org viewer
@@ -830,7 +837,7 @@ input.menu_search:focus {
 /* line 85, ../../sass/circular-menu.scss */
 .circular-menu ul li a span.text {
   display: block;
-  font-size: 8px;
+  font-size: 9.5px;
   letter-spacing: 0.1em;
   line-height: 1;
   position: relative;
