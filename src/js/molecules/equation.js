@@ -54,17 +54,21 @@ export default class Equation extends Atom {
             var re = /[a-zA-Z]/g
             const variables = this.currentEquation.match(re)
             
+            //Remove any inputs which are not needed
+            const deleteExtraInputs = () => {
+                this.inputs.forEach( input => {
+                    if( !variables.includes(input.name) ){
+                        this.removeIO('input', input.name, this)
+                        deleteExtraInputs() //This needs to be called recursively to make sure all the inputs are deleted
+                    }
+                })
+            }
+            deleteExtraInputs()
+            
             //Add any inputs which are needed
             for (var variable in variables){
                 if(!this.inputs.some(input => input.Name === variables[variable])){
                     this.addIO('input', variables[variable], this, 'number', 1)
-                }
-            }
-            
-            //Remove any inputs which are not needed
-            for (var input in this.inputs){
-                if( !variables.includes(this.inputs[input].name) ){
-                    this.removeIO('input', this.inputs[input].name, this)
                 }
             }
             
