@@ -2,7 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-import LocalMenu from './js/localmenu.js'
+//import LocalMenu from './js/localmenu.js'
 import {cmenu} from './js/NewMenu.js'
 import {mainMenu} from './js/MainMenu.js'
 
@@ -124,9 +124,9 @@ window.addEventListener('keydown', event => {
 if (!GlobalVariables.runMode){
 
     let mainMenuButton = document.getElementById('main_menu_top')
-    mainMenuButton.addEventListener('mousedown', (e) => {
+    mainMenuButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
-        var rect = mainMenuButton.getBoundingClientRect();
+        var rect = mainMenuButton.getBoundingClientRect()
         mainMenu.show([rect.left+rect.width, rect.top])
     })
     

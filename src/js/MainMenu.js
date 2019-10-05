@@ -41,7 +41,7 @@ var mainMenu = CMenu(ele)
                 title: 'READ ME',
                 icon: '',
                 click: function menuClick(){
-                    GGlobalVariables.gitHub.openREADMEPage()
+                    GlobalVariables.gitHub.openREADMEPage()
                 }      
             },
             {
