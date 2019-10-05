@@ -24,28 +24,48 @@ var mainMenu = CMenu(ele)
             {
                 title: 'TO PARENT',
                 icon: '',
+                click: function menuClick(){
+                    GlobalVariables.currentMolecule.goToParentMolecule() 
+                }     
                 //menus: makeArray('Interactions')
             },
             {
-                title: 'GITHUB',
+                title: 'SHARE',
                 icon: '',
                 click: function menuClick(){
-                    GlobalVariables.gitHub.openGitHubPage()
+                    GlobalVariables.gitHub.shareOpenedProject()
+                }     
+                //menus: makeArray('Interactions')
+            },
+            {
+                title: 'READ ME',
+                icon: '',
+                click: function menuClick(){
+                    GGlobalVariables.gitHub.openREADMEPage()
                 }      
             },
             {
                 title: 'SAVE',
                 icon: '',
+                click: function menuClick(){
+                    GlobalVariables.gitHub.saveProject()
+                }     
                 //menus: makeArray('Shapes')
             },
             {
                 title: 'B.O.M',
                 icon: '',
+                click: function menuClick(){
+                    GlobalVariables.gitHub.openBillOfMaterialsPage()
+                }     
                 //menus: makeArray('Properties')
             },
             {
                 title: 'OPEN',
                 icon: '',
+                click: function menuClick(){
+                    GlobalVariables.gitHub.showProjectsToLoad()
+                }     
                 //menus: makeArray('Import/Export')                    
             }
         ]

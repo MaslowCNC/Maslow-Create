@@ -74,9 +74,13 @@ flowCanvas.addEventListener('mousedown', event => {
         menu.style.top = '-200%'
         menu.style.left = '-200%'
     }
-    //hide the menu if it is visible
+    /*hide the menu if it is visible
     if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
         LocalMenu.hideMenu()
+    }*/
+    //hide corner menu 
+    if (!document.querySelector('.circular-menu' || "#main_menu_wrap").contains(event.target)) {
+        mainMenu.hide()
     }
     
 })
