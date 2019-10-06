@@ -93,7 +93,6 @@ class GlobalVariables{
             
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
-            equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             scale:              {creator: Scale, atomType: 'Scale', atomCategory: 'Actions'},
