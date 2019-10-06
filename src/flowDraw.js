@@ -112,17 +112,31 @@ window.addEventListener('keydown', event => {
     })
 })
 
+/* Button to open top menu */
+document.getElementById('straight_menu').addEventListener('mousedown', (e) => {
+    document.querySelector('#toggle_wrap').style.display = "inline"
+    let options = document.querySelectorAll('.option')
+    var step = -150
+        Array.prototype.forEach.call(options, a => {
+            a.style.display = `inline`
+            a.style.transition = `transform 3s`
+            a.style.transform = `translateX(${step}%)` 
+            step-=100
+        });
+    //document.getElementById('straight_menu').style.display = "none"
+}) 
+
 /**
  * Top Button menu event listeners if not in run mode
  */ 
 
 if (!GlobalVariables.runMode){
     
-    let moleculeButton = document.getElementById('localMolecules_top')
+    /*let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
         LocalMenu.showMenu()
-    })
+    })*/
 
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
