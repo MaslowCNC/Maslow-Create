@@ -46,6 +46,18 @@ flowCanvas.addEventListener('mousemove', event => {
 flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down
     
+    var isRightMB;
+    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = event.which == 3
+    }
+    else if ("button" in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        return
+    }
+ 
+    
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {

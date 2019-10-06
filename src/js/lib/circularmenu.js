@@ -294,7 +294,7 @@
         style(p, 'margin-left', this._calc.menuSize.marginLeft);
         
         var self = this;
-        on(p, "click", function(e){
+        on(p, "mouseup", function(e){
             if(e.toElement === p){
                 self._cMenu.hide();
             }
@@ -378,7 +378,7 @@
             }
         }
 
-        on(a, 'click', clickCallBack, data);
+        on(a, 'mouseup', clickCallBack, data);
 
         parent.appendChild(a);
 
@@ -532,7 +532,11 @@
 
     function createSubMenu(creator, menus, index) {
         var subMenu = document.createElement('div');
-
+        /*Mask the default context menu on the main canvas*/
+        subMenu.addEventListener('contextmenu', (e) => {
+            e.preventDefault()
+        })
+        
         classed(subMenu, 'circular-sub-menu', true);
 
         this._container.parentNode.insertBefore(subMenu, this._container);
