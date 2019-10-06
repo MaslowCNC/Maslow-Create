@@ -46,7 +46,7 @@ flowCanvas.addEventListener('mousemove', event => {
 flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down
     
-    var isRightMB;
+    var isRightMB
     if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
         isRightMB = event.which == 3
     }
