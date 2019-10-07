@@ -543,7 +543,8 @@
 
     function createSubMenu(creator, menus, index) {
         var subMenu = document.createElement('div');
-        /*Mask the default context menu on the main canvas*/
+        
+        /*Mask the default context menu on the menu so that right click up doesn't spawn the copy past stuff*/
         subMenu.addEventListener('contextmenu', (e) => {
             e.preventDefault()
         })
