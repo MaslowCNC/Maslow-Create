@@ -76,6 +76,12 @@ class GlobalVariables{
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Interactions'},
             
+            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
+            color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
+            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
+            cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
+            
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
             costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
             circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},
@@ -84,12 +90,6 @@ class GlobalVariables{
             input:              {creator: Input, atomType: 'Input', atomCategory: 'Shapes'},
             equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
             code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
-            
-            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
-            color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
-            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
-            cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
             
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},

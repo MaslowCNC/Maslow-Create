@@ -27,25 +27,25 @@ var cmenu = CMenu(ele)
                 menus: makeArray('Actions')        
             },
             {
-                title: 'SHAPES',
-                icon: '',
-                menus: makeArray('Shapes')
-            },
-            {
                 title: 'PROPERTY',
                 icon: '',
                 menus: makeArray('Properties')
-            },
-            {
-                title: 'INTERACTION',
-                icon: '',
-                menus: makeArray('Interactions')
             },
             {
                 title: 'Import/Export',
                 icon: '',
                 menus: makeArray('Import/Export')
                                 
+            },
+            {
+                title: 'SHAPES',
+                icon: '',
+                menus: makeArray('Shapes')
+            },
+            {
+                title: 'INTERACTION',
+                icon: '',
+                menus: makeArray('Interactions')
             }
         ]
     })
