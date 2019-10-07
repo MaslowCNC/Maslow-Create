@@ -41,7 +41,6 @@ export default class Assembly extends Atom{
         if (typeof this.ioValues !== 'undefined'){
             this.ioValues.forEach(ioValue => { //for each saved value
                 this.addIO('input', ioValue.name, this, 'geometry', '')
-                console.log("Adding: " + ioValue.name)
             })
         }
     }
