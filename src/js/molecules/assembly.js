@@ -37,9 +37,11 @@ export default class Assembly extends Atom{
         
         this.setValues(values)
         
+        //This loads any inputs which this atom had when last saved.
         if (typeof this.ioValues !== 'undefined'){
             this.ioValues.forEach(ioValue => { //for each saved value
                 this.addIO('input', ioValue.name, this, 'geometry', '')
+                console.log("Adding: " + ioValue.name)
             })
         }
     }
@@ -134,7 +136,7 @@ export default class Assembly extends Atom{
         
         var ioValues = []
         this.inputs.forEach(io => {
-            if (io.type == 'input'){
+            if (io.connectors.length > 0){
                 var saveIO = {
                     name: io.name,
                     ioValue: 10
@@ -143,9 +145,7 @@ export default class Assembly extends Atom{
             }
         })
         
-        ioValues.forEach(ioValue => {
-            thisAsObject.ioValues.push(ioValue)
-        })
+        thisAsObject.ioValues = ioValues
         
         return thisAsObject
         
