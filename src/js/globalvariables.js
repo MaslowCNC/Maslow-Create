@@ -69,19 +69,19 @@ class GlobalVariables{
          */
         this.availableTypes = {
 
-            assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
-            difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
+            difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
+            assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Interactions'},
             
-            circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},
-            rectangle:          {creator: Rectangle, atomType: 'Rectangle', atomCategory: 'Shapes'},
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
             costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
-            input:              {creator: Input, atomType: 'Input', atomCategory: 'Shapes'},
+            circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},
+            rectangle:          {creator: Rectangle, atomType: 'Rectangle', atomCategory: 'Shapes'},
             molecule:           {creator: Molecule, atomType: 'Molecule', atomCategory: 'Shapes'},
+            input:              {creator: Input, atomType: 'Input', atomCategory: 'Shapes'},
             equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
             code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
             

@@ -119,6 +119,7 @@
         this.skewDeg = 90 - this.centralDeg;
         this.unskewDeg = - (90 - this.centralDeg / 2);
         this.textTop = textTop(this.clickZoneRadius);
+        this.textTopSubMenu = textTop(this.clickZoneRadius*22);  //22 Here is a bit of a hack to make this represent right on the sub menu which has all the empty space outside it
     }
 
     Calculation.prototype = {
@@ -363,13 +364,8 @@
         classed(a, 'disabled', ifDisabled(data.disabled));
 
 
-        //var percent = this._config.percent * 100 + "%";
-        var percent = .2 * 100 + "%";
+        var percent = this._config.percent * 100 + "%";
         
-        console.log("The string is: ")
-        console.log('radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')')
-        
-        //styleSheet(a, 'background', 'blue');
         if (!hasSubMenus(data.menus)) {
             styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, #323232E8 20%, #323232E8 30%, transparent 30%, transparent)');
             styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, black 20%, black 30%, transparent 30%, transparent)', 'hover');
@@ -393,7 +389,7 @@
 
         parent.appendChild(a);
 
-        this._createHorizontal(a, data, index);
+        this._createHorizontal(a, data, index, hasSubMenus(data.menus));
         
         
         //toggle subMenu
@@ -402,7 +398,6 @@
 
             on(a, 'mouseenter', function () {
                 delayShow = setTimeout(function () {
-                    console.log("Mouse enter a")
                     subMenu
                         .styles({
                                     top: self._container.offsetTop + self._calc.radius + 'px',
@@ -413,7 +408,6 @@
             });
 
             on(a, 'mouseleave', function (e) {
-                console.log("Mouse leave a")
                 if (!subMenu._container.contains(e.toElement)) {
                     delayHide = setTimeout(function () {
                         subMenu.hide();
@@ -422,13 +416,11 @@
             });
 
             on(subMenu._container, 'mouseenter', function () {
-                console.log("Mouse enter subMenu._container")
                 clearTimeout(delayShow);
                 clearTimeout(delayHide);
             });
 
             on(subMenu._container, 'mouseleave', function (e) {
-                console.log("Mouse leave subMenu._container")
                 if (!a.contains(e.toElement) || e.toElement.children[0] === a) {
                     subMenu.hide();
                 }
@@ -478,19 +470,23 @@
     const withIconMarginTop = "3px";
     const withIconTop = "-3px";
 
-    function createText (parent, data, index) {
+    function createText (parent, data, index, hasSubMenus = true) {
 
         var span = document.createElement('span');
         span.textContent = data.title;
 
         classed(span, 'text', true);
-        style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
+        if(hasSubMenus){
+            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
+        }else{
+            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTopSubMenu);
+        }
         style(span, 'top', hasIcon(data.icon)? withIconTop : 0);
 
         parent.appendChild(span);
     }
 
-    function createHorizontal (parent, data, index) {
+    function createHorizontal (parent, data, index, hasSubMenus = true) {
 
         var div = document.createElement('div');
         classed(div, "horizontal", true);
@@ -500,7 +496,7 @@
         parent.appendChild(div);
 
         this._createIcon(div, data, index);
-        this._createText(div, data, index);
+        this._createText(div, data, index, hasSubMenus);
     }
 
     function extend$1 () {
