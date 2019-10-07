@@ -339,6 +339,7 @@
 
     var delayShow = null;// delayShow reference the last setTimeout triggered by any one of menu item(anchor)
 
+    //This seems to create the pie slices which the mouse can interact with
     function createAnchor (parent, data, index) {
         var self = this;
 
@@ -352,8 +353,7 @@
             classed(a, 'disabled', ifDisabled(data.disabled));
         };
         this._anchors.push(a);
-
-
+        
         style(a, 'width', this._calc.clickZoneSize.width);
         style(a, 'height', this._calc.clickZoneSize.height);
         style(a, 'right', this._calc.clickZoneSize.marginRight);
@@ -363,9 +363,20 @@
         classed(a, 'disabled', ifDisabled(data.disabled));
 
 
-        var percent = this._config.percent * 100 + "%";
-        styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.background + ' ' + percent + ')');
-        styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')', 'hover');
+        //var percent = this._config.percent * 100 + "%";
+        var percent = .2 * 100 + "%";
+        
+        console.log("The string is: ")
+        console.log('radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')')
+        
+        //styleSheet(a, 'background', 'blue');
+        if (!hasSubMenus(data.menus)) {
+            styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, #323232E8 20%, #323232E8 30%, transparent 30%, transparent)');
+            styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, black 20%, black 30%, transparent 30%, transparent)', 'hover');
+        }else{
+            styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.background + ' ' + percent + ')');
+            styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')', 'hover');
+        }
 
 
         function clickCallBack(e, data){
@@ -391,6 +402,7 @@
 
             on(a, 'mouseenter', function () {
                 delayShow = setTimeout(function () {
+                    console.log("Mouse enter a")
                     subMenu
                         .styles({
                                     top: self._container.offsetTop + self._calc.radius + 'px',
@@ -401,6 +413,7 @@
             });
 
             on(a, 'mouseleave', function (e) {
+                console.log("Mouse leave a")
                 if (!subMenu._container.contains(e.toElement)) {
                     delayHide = setTimeout(function () {
                         subMenu.hide();
@@ -409,11 +422,13 @@
             });
 
             on(subMenu._container, 'mouseenter', function () {
+                console.log("Mouse enter subMenu._container")
                 clearTimeout(delayShow);
                 clearTimeout(delayHide);
             });
 
             on(subMenu._container, 'mouseleave', function (e) {
+                console.log("Mouse leave subMenu._container")
                 if (!a.contains(e.toElement) || e.toElement.children[0] === a) {
                     subMenu.hide();
                 }
@@ -421,7 +436,7 @@
         }
     }
 
-    const sizeRatio = 0.65;
+    const sizeRatio = 0.85;
     const marginTopRatio = 0.2;
     const fontHeight = 13;
 
@@ -525,8 +540,8 @@
 
     };
 
-    const sizeRatio$1 = 5 / 3;
-    const percentRatio = 0.45;
+    const sizeRatio$1 = 12 / 3;
+    const percentRatio = 0.65;
     const centralDegRatio = 0.618;
 
 
