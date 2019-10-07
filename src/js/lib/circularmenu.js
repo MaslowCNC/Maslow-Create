@@ -119,6 +119,7 @@
         this.skewDeg = 90 - this.centralDeg;
         this.unskewDeg = - (90 - this.centralDeg / 2);
         this.textTop = textTop(this.clickZoneRadius);
+        this.textTopSubMenu = textTop(this.clickZoneRadius*22);  //22 Here is a bit of a hack to make this represent right on the sub menu which has all the empty space outside it
     }
 
     Calculation.prototype = {
@@ -294,7 +295,7 @@
         style(p, 'margin-left', this._calc.menuSize.marginLeft);
         
         var self = this;
-        on(p, "click", function(e){
+        on(p, "mouseup", function(e){
             if(e.toElement === p){
                 self._cMenu.hide();
             }
@@ -339,6 +340,7 @@
 
     var delayShow = null;// delayShow reference the last setTimeout triggered by any one of menu item(anchor)
 
+    //This seems to create the pie slices which the mouse can interact with
     function createAnchor (parent, data, index) {
         var self = this;
 
@@ -352,8 +354,7 @@
             classed(a, 'disabled', ifDisabled(data.disabled));
         };
         this._anchors.push(a);
-
-
+        
         style(a, 'width', this._calc.clickZoneSize.width);
         style(a, 'height', this._calc.clickZoneSize.height);
         style(a, 'right', this._calc.clickZoneSize.marginRight);
@@ -364,8 +365,14 @@
 
 
         var percent = this._config.percent * 100 + "%";
-        styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.background + ' ' + percent + ')');
-        styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')', 'hover');
+        
+        if (!hasSubMenus(data.menus)) {
+            styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, #323232E8 20%, #323232E8 30%, transparent 30%, transparent)');
+            styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, black 20%, black 30%, transparent 30%, transparent)', 'hover');
+        }else{
+            styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.background + ' ' + percent + ')');
+            styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')', 'hover');
+        }
 
 
         function clickCallBack(e, data){
@@ -378,11 +385,11 @@
             }
         }
 
-        on(a, 'click', clickCallBack, data);
+        on(a, 'mouseup', clickCallBack, data);
 
         parent.appendChild(a);
 
-        this._createHorizontal(a, data, index);
+        this._createHorizontal(a, data, index, hasSubMenus(data.menus));
         
         
         //toggle subMenu
@@ -421,7 +428,7 @@
         }
     }
 
-    const sizeRatio = 0.65;
+    const sizeRatio = 0.85;
     const marginTopRatio = 0.2;
     const fontHeight = 13;
 
@@ -463,19 +470,23 @@
     const withIconMarginTop = "3px";
     const withIconTop = "-3px";
 
-    function createText (parent, data, index) {
+    function createText (parent, data, index, hasSubMenus = true) {
 
         var span = document.createElement('span');
         span.textContent = data.title;
 
         classed(span, 'text', true);
-        style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
+        if(hasSubMenus){
+            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
+        }else{
+            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTopSubMenu);
+        }
         style(span, 'top', hasIcon(data.icon)? withIconTop : 0);
 
         parent.appendChild(span);
     }
 
-    function createHorizontal (parent, data, index) {
+    function createHorizontal (parent, data, index, hasSubMenus = true) {
 
         var div = document.createElement('div');
         classed(div, "horizontal", true);
@@ -485,7 +496,7 @@
         parent.appendChild(div);
 
         this._createIcon(div, data, index);
-        this._createText(div, data, index);
+        this._createText(div, data, index, hasSubMenus);
     }
 
     function extend$1 () {
@@ -525,14 +536,19 @@
 
     };
 
-    const sizeRatio$1 = 5 / 3;
-    const percentRatio = 0.45;
+    const sizeRatio$1 = 12 / 3;
+    const percentRatio = 0.65;
     const centralDegRatio = 0.618;
 
 
     function createSubMenu(creator, menus, index) {
         var subMenu = document.createElement('div');
-
+        
+        /*Mask the default context menu on the menu so that right click up doesn't spawn the copy past stuff*/
+        subMenu.addEventListener('contextmenu', (e) => {
+            e.preventDefault()
+        })
+        
         classed(subMenu, 'circular-sub-menu', true);
 
         this._container.parentNode.insertBefore(subMenu, this._container);
