@@ -20,11 +20,14 @@ const howManyInputPortsAvailable = function(target){
  * @param {object} target - The atom which should have one input deleted (if there are more than two free).
  */ 
 const deleteEmptyPort = function(target){
-    target.inputs.forEach(io => {
+    var i
+    for (i = 0; i < target.inputs.length - 1; i++) {
+        var io = target.inputs[i]
         if(io.type == 'input' && io.connectors.length == 0){
             target.removeIO('input', io.name, target)
+            return
         }
-    })
+    }
 }
 
 /**
