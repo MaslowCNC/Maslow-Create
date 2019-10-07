@@ -296,9 +296,7 @@
         
         var self = this;
         on(p, "mouseup", function(e){
-            if(e.toElement === p){
-                self._cMenu.hide();
-            }
+            self._cMenu.hide();
         });
         setTimeout(function(){
             style(p, 'display', 'block');
