@@ -410,7 +410,7 @@ export default class Molecule extends Atom{
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes, false)
             promiseArray.push(promise)
         })
         
