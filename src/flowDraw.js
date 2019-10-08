@@ -136,10 +136,10 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
             a.classList.remove("openMenu")
         }
         else{
-        a.classList.add("openMenu");
-        a.style.transition = `transform 0.5s`
-        a.style.transform = `translateX(${step}%)` 
-        step-=100
+            a.classList.add("openMenu")
+            a.style.transition = `transform 0.5s`
+            a.style.transform = `translateX(${step}%)` 
+            step-=100
         }
         /*var name = document.createElement("div")
                 name.innerHTML= "groundcake"
@@ -162,11 +162,11 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
  */ 
 function closeMainMenu(){
     let options = document.querySelectorAll('.option')
-        var step = 0
-        Array.prototype.forEach.call(options, a => {
-            a.style.transition = `transform 0.5s`
-            a.style.transform = `translateX(${step}%)`          
-        }) 
+    var step = 0
+    Array.prototype.forEach.call(options, a => {
+        a.style.transition = `transform 0.5s`
+        a.style.transform = `translateX(${step}%)`          
+    }) 
 }
 
 /**
