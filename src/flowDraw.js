@@ -2,7 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-import LocalMenu from './js/localmenu.js'
+//import LocalMenu from './js/localmenu.js'
 import {cmenu} from './js/NewMenu.js'
 
 
@@ -86,8 +86,8 @@ flowCanvas.addEventListener('mousedown', event => {
         menu.style.left = '-200%'
     }
     //hide the menu if it is visible
-    if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
-        LocalMenu.hideMenu()
+    if (!document.querySelector('#straight_menu').contains(event.target)) {
+        closeMainMenu()
     }
     
 })
@@ -124,17 +124,62 @@ window.addEventListener('keydown', event => {
     })
 })
 
+/* Button to open top menu */
+document.getElementById('straight_menu').addEventListener('mousedown', () => {
+
+    document.querySelector('#toggle_wrap').style.display = "inline"
+    let options = document.querySelectorAll('.option')
+    var step = -150
+    Array.prototype.forEach.call(options, a => {
+        if (a.classList.contains("openMenu")){
+            closeMainMenu()
+            a.classList.remove("openMenu")
+        }
+        else{
+            a.classList.add("openMenu")
+            a.style.transition = `transform 0.5s`
+            a.style.transform = `translateX(${step}%)` 
+            step-=100
+        }
+        /*var name = document.createElement("div")
+                name.innerHTML= "groundcake"
+                name.style.backgroundColor = "black"
+                name.setAttribute('class','drop')
+                a.appendChild(name)
+
+            a.addEventListener('mouseover', (e) => {
+               name.style.display = "inline"
+            });
+            a.addEventListener('mouseout', (e) => {
+               name.style.display = "none"
+            });*/
+           
+    }) 
+}) 
+
+/**
+ * Closes main menu on background click or on button click if open
+ */ 
+function closeMainMenu(){
+    let options = document.querySelectorAll('.option')
+    var step = 0
+    Array.prototype.forEach.call(options, a => {
+        a.style.transition = `transform 0.5s`
+        a.style.transform = `translateX(${step}%)`          
+    }) 
+}
+
 /**
  * Top Button menu event listeners if not in run mode
  */ 
 
 if (!GlobalVariables.runMode){
     
-    let moleculeButton = document.getElementById('localMolecules_top')
+    /*let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
         LocalMenu.showMenu()
-    })
+    })*/
 
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
