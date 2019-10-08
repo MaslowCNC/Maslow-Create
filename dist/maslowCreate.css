@@ -77,21 +77,36 @@
 
 #straight_menu{
   background-color: black;
-  z-index: 1
+  z-index: 30;
+  opacity:1;
 }
 
 .option{
 }
 
+.drop{
+  display: none;
+  color: whitesmoke;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  width: 100%;
+  margin-top: -50%;
+  background-color: black;
+  border-radius: 0 0 10px 10px;
+  padding: 15px 0px 10px 0;
+}
+
 .top_buttons:hover {
-  
+  opacity: 1;
+  border: 2px solid black;
 }
 
 .top_buttons{ 
+    background-color: whitesmoke;
     position: fixed;
     top: 10px;
     right: 10px;
-    opacity: 0.8;
+    opacity: 0.7;
     padding: 0px;
     width: 25px;
     height: 25px;
