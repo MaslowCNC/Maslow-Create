@@ -41,7 +41,7 @@ export default class GitHubMolecule extends Molecule {
      * This replaces the default Molecule double click behavior to prevent you from being able to double click into a github molecule
      * @param {number} x - The x coordinate of the click
      * @param {number} y - The y coordinate of the click
-     */ 
+     // */ 
     doubleClick(x,y){
         var clickProcessed = false
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
