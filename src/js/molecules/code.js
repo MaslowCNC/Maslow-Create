@@ -49,9 +49,6 @@ export default class Code extends Atom {
                 argumentsArray[input.name] = input.value
             })
             
-            console.log("Arguments passed: ")
-            console.log(argumentsArray)
-            
             const values = [this.code, argumentsArray]
             
             this.basicThreadValueProcessing(values, "code")
