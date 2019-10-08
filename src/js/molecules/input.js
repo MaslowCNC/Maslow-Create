@@ -162,27 +162,6 @@ export default class Input extends Atom {
     }
     
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process. Split from atom version because we don't want this to run if nothing is connected.
-     */ 
-    unlock(){
-        //Runs right after the loading process to unlock attachment points which have no connectors attached
-        this.inputs.forEach(input => {
-            if(input.connectors.length == 0){
-                input.ready = true
-            }
-        })
-    }
-    
-    /**
-     * If this atom is a top level input it begins propogation here. Is this used?
-     */ 
-    beginPropogation(){
-        if(this.parent.topLevel){
-            this.updateValue()
-        }
-    }
-    
-    /**
      * Returns the current value being output
      */ 
     getOutput(){

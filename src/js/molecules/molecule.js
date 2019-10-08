@@ -48,8 +48,6 @@ export default class Molecule extends Atom{
          */
         this.topLevel = false //a flag to signal if this node is the top level node
         
-        this.setValues(values)
-        
         //Add the molecule's output
         this.placeAtom({
             parentMolecule: this, 
@@ -60,6 +58,7 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, null, GlobalVariables.secretTypes)
         
+        this.setValues(values)
     }
     
     /**
