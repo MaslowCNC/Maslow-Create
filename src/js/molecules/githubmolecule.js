@@ -81,6 +81,11 @@ export default class GitHubMolecule extends Molecule {
         return promsie
     }
     
+    unlock(){
+        console.log("GitHub molecule unlock")
+        super.unlock()
+    }
+    
     /**
      * Save the project information to be loaded. This should use super.serialize() to maintain a connection with Molecule, but it doesn't...should be fixed
      */ 

@@ -48,6 +48,8 @@ export default class Molecule extends Atom{
          */
         this.topLevel = false //a flag to signal if this node is the top level node
         
+        this.setValues(values)
+        
         //Add the molecule's output
         this.placeAtom({
             parentMolecule: this, 
@@ -58,7 +60,6 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, null, GlobalVariables.secretTypes)
         
-        this.setValues(values)
     }
     
     /**
@@ -327,43 +328,6 @@ export default class Molecule extends Atom{
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
         }
-    }
-    
-    /**
-     * Create a new project on GitHub with this atom as it's top level, then replace this molecule with githubMolecule referencing that project.
-     * @param {object} self - A passed reference to self...why are we doing this?
-     */
-    exportToGithub(self){
-        //Export this molecule to github
-        GlobalVariables.gitHub.exportCurrentMoleculeToGithub(self)
-    }
-    
-    /**
-     * Replaces this molecule with a github molecule pointing to the passed reference.
-     * @param {number} githubID - The ID number of the github project to replace this
-     */
-    replaceThisMoleculeWithGithub(githubID){
-        
-        //If we are currently inside the molecule targeted for replacement, go up one
-        if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){
-            GlobalVariables.currentMolecule = this.parent
-        }
-        
-        //Create a new github molecule in the same spot
-        GlobalVariables.currentMolecule.placeAtom({
-            x: this.x, 
-            y: this.y, 
-            parent: GlobalVariables.currentMolecule,
-            name: this.name,
-            atomType: 'GitHubMolecule',
-            projectID: githubID,
-            uniqueID: GlobalVariables.generateUniqueID()
-        }, null, GlobalVariables.availableTypes)
-        
-        
-        //Then delete the old molecule which has been replaced
-        this.deleteNode()
-
     }
     
     /**
