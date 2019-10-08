@@ -150,12 +150,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/menu.js~menu",
-    "class/src/js/menu.js~Menu.html",
-    "<span>Menu</span> <span class=\"search-result-import-path\">canvas-template/src/js/menu.js</span>",
-    "class"
-  ],
-  [
     "canvas-template/src/js/molecules/molecule.js~molecule",
     "class/src/js/molecules/molecule.js~Molecule.html",
     "<span>Molecule</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/molecule.js</span>",
@@ -246,6 +240,12 @@ window.esdocSearchIndex = [
     "function"
   ],
   [
+    "canvas-template/src/js/newmenu.js~cmenu",
+    "variable/index.html#static-variable-cmenu",
+    "<span>cmenu</span> <span class=\"search-result-import-path\">canvas-template/src/js/NewMenu.js</span>",
+    "variable"
+  ],
+  [
     "canvas-template/src/js/bom.js~extractbomtags",
     "function/index.html#static-function-extractBomTags",
     "<span>extractBomTags</span> <span class=\"search-result-import-path\">canvas-template/src/js/BOM.js</span>",
@@ -261,12 +261,6 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/localmenu.js~localmenu",
     "variable/index.html#static-variable-localmenu",
     "<span>localmenu</span> <span class=\"search-result-import-path\">canvas-template/src/js/localmenu.js</span>",
-    "variable"
-  ],
-  [
-    "canvas-template/src/js/menu.js~menu",
-    "variable/index.html#static-variable-menu",
-    "<span>menu</span> <span class=\"search-result-import-path\">canvas-template/src/js/menu.js</span>",
     "variable"
   ],
   [
@@ -598,6 +592,12 @@ window.esdocSearchIndex = [
     "class/src/js/BOM.js~BOMEntry.html#instance-member-totalNeeded",
     "src/js/BOM.js~BOMEntry#totalNeeded",
     "member"
+  ],
+  [
+    "src/js/newmenu.js",
+    "file/src/js/NewMenu.js.html",
+    "src/js/NewMenu.js",
+    "file"
   ],
   [
     "src/js/alwaysonefreeinput.js",
@@ -933,66 +933,6 @@ window.esdocSearchIndex = [
     "src/js/localmenu.js~localmenu#showmenu",
     "class/src/js/localmenu.js~Localmenu.html#instance-method-showMenu",
     "src/js/localmenu.js~Localmenu#showMenu",
-    "method"
-  ],
-  [
-    "src/js/menu.js",
-    "file/src/js/menu.js.html",
-    "src/js/menu.js",
-    "file"
-  ],
-  [
-    "src/js/menu.js~menu#constructor",
-    "class/src/js/menu.js~Menu.html#instance-constructor-constructor",
-    "src/js/menu.js~Menu#constructor",
-    "method"
-  ],
-  [
-    "src/js/menu.js~menu#hidemenu",
-    "class/src/js/menu.js~Menu.html#instance-method-hidemenu",
-    "src/js/menu.js~Menu#hidemenu",
-    "method"
-  ],
-  [
-    "src/js/menu.js~menu#menu",
-    "class/src/js/menu.js~Menu.html#instance-member-menu",
-    "src/js/menu.js~Menu#menu",
-    "member"
-  ],
-  [
-    "src/js/menu.js~menu#menulist",
-    "class/src/js/menu.js~Menu.html#instance-member-menuList",
-    "src/js/menu.js~Menu#menuList",
-    "member"
-  ],
-  [
-    "src/js/menu.js~menu#opentab",
-    "class/src/js/menu.js~Menu.html#instance-method-openTab",
-    "src/js/menu.js~Menu#openTab",
-    "method"
-  ],
-  [
-    "src/js/menu.js~menu#placegithubmolecule",
-    "class/src/js/menu.js~Menu.html#instance-method-placeGitHubMolecule",
-    "src/js/menu.js~Menu#placeGitHubMolecule",
-    "method"
-  ],
-  [
-    "src/js/menu.js~menu#placenewnode",
-    "class/src/js/menu.js~Menu.html#instance-method-placeNewNode",
-    "src/js/menu.js~Menu#placeNewNode",
-    "method"
-  ],
-  [
-    "src/js/menu.js~menu#searchmenu",
-    "class/src/js/menu.js~Menu.html#instance-method-searchMenu",
-    "src/js/menu.js~Menu#searchMenu",
-    "method"
-  ],
-  [
-    "src/js/menu.js~menu#showmenu",
-    "class/src/js/menu.js~Menu.html#instance-method-showmenu",
-    "src/js/menu.js~Menu#showmenu",
     "method"
   ],
   [
@@ -1818,12 +1758,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/input.js~input#type",
-    "class/src/js/molecules/input.js~Input.html#instance-member-type",
-    "src/js/molecules/input.js~Input#type",
-    "member"
-  ],
-  [
     "src/js/molecules/input.js~input#unlock",
     "class/src/js/molecules/input.js~Input.html#instance-method-unlock",
     "src/js/molecules/input.js~Input#unlock",
@@ -2007,6 +1941,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/molecule.js~molecule#propogate",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-propogate",
     "src/js/molecules/molecule.js~Molecule#propogate",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#refreshcircles",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-refreshCircles",
+    "src/js/molecules/molecule.js~Molecule#refreshCircles",
     "method"
   ],
   [
@@ -2856,6 +2796,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#showhover",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-member-showHover",
+    "src/js/prototypes/atom.js~Atom#showHover",
+    "member"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#strokecolor",
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-strokeColor",
     "src/js/prototypes/atom.js~Atom#strokeColor",
@@ -3286,6 +3232,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/connector.js~Connector.html#instance-method-update",
     "src/js/prototypes/connector.js~Connector#update",
     "method"
+  ],
+  [
+    "src/straightmenu.js",
+    "file/src/straightMenu.js.html",
+    "src/straightMenu.js",
+    "file"
   ],
   [
     "src/utils.js",

@@ -33,14 +33,12 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -82,10 +80,14 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/NewMenu.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import CMenu from &apos;./lib/circularmenu.js&apos;
 import GlobalVariables from &apos;./globalvariables&apos;
-    
-var ele = document.querySelector(&apos;#circle-menu1&apos;)
-let githubList = document.getElementById(&apos;githubList&apos;)
 
+/**
+ * Html element that cointains the circular menu
+ */    
+var ele = document.querySelector(&apos;#circle-menu1&apos;)
+/**
+ * This creates a new instance of the circular menu. 
+ */
 var cmenu = CMenu(ele)
     .config({
         totalAngle: 360,//deg,
@@ -105,25 +107,25 @@ var cmenu = CMenu(ele)
                 menus: makeArray(&apos;Actions&apos;)        
             },
             {
-                title: &apos;SHAPES&apos;,
-                icon: &apos;&apos;,
-                menus: makeArray(&apos;Shapes&apos;)
-            },
-            {
                 title: &apos;PROPERTY&apos;,
                 icon: &apos;&apos;,
                 menus: makeArray(&apos;Properties&apos;)
-            },
-            {
-                title: &apos;INTERACTION&apos;,
-                icon: &apos;&apos;,
-                menus: makeArray(&apos;Interactions&apos;)
             },
             {
                 title: &apos;Import/Export&apos;,
                 icon: &apos;&apos;,
                 menus: makeArray(&apos;Import/Export&apos;)
                                 
+            },
+            {
+                title: &apos;SHAPES&apos;,
+                icon: &apos;&apos;,
+                menus: makeArray(&apos;Shapes&apos;)
+            },
+            {
+                title: &apos;INTERACTION&apos;,
+                icon: &apos;&apos;,
+                menus: makeArray(&apos;Interactions&apos;)
             }
         ]
     })
@@ -155,11 +157,49 @@ function makeArray(group) {
     return menuArray
 }
 
-/* Right click to open circular menu */
+/*Mask the default context menu on the main canvas*/
 document.getElementById(&apos;flow-canvas&apos;).addEventListener(&apos;contextmenu&apos;, (e) =&gt; {
     e.preventDefault()
-    cmenu.show([e.clientX, e.clientY])
 }) 
+
+/*Mask the default context menu on the menu*/
+ele.addEventListener(&apos;contextmenu&apos;, (e) =&gt; {
+    e.preventDefault()
+}) 
+
+/* Right click to open circular menu */
+document.getElementById(&apos;flow-canvas&apos;).addEventListener(&apos;mousedown&apos;, event =&gt; {
+    //every time the mouse button goes down
+    
+    var isRightMB
+    if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
+        isRightMB = event.which == 3
+    }
+    else if (&quot;button&quot; in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        cmenu.show([event.clientX, event.clientY])
+        return
+    }
+})
+
+/* Hide the menu on a right click mouse up*/
+document.getElementById(&apos;flow-canvas&apos;).addEventListener(&apos;mouseup&apos;, event =&gt; {
+    //every time the mouse button goes down
+    
+    var isRightMB
+    if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
+        isRightMB = event.which == 3
+    }
+    else if (&quot;button&quot; in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        cmenu.hide()
+        return
+    }
+})
 
 //Add function call to search when typing
 document.getElementById(&apos;menuInput&apos;).addEventListener(&apos;keyup&apos;, (e) =&gt; {
@@ -167,7 +207,12 @@ document.getElementById(&apos;menuInput&apos;).addEventListener(&apos;keyup&apos
         searchMenu()}
 })
 
+/**  List that contains results of gitHub search */
+let githubList = document.getElementById(&apos;githubList&apos;)
 
+/**
+ * Runs when a gitHub molecule menu option is clicked to show search bar.
+ */ 
 function showGitHubSearch(){
     //remove old results everytime           
     var oldResults = githubList.getElementsByClassName(&apos;menu-item&apos;)
@@ -191,6 +236,9 @@ function showGitHubSearch(){
     
 }
 
+/**
+* Runs when enter key is clicked and the input is focused to show results from search.
+*/ 
 function searchMenu() {
     //We are searching on github
     let input = document.getElementById(&apos;menuInput&apos;).value

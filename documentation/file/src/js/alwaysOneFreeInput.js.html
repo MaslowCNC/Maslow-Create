@@ -33,13 +33,12 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -101,11 +100,14 @@ const howManyInputPortsAvailable = function(target){
  * @param {object} target - The atom which should have one input deleted (if there are more than two free).
  */ 
 const deleteEmptyPort = function(target){
-    target.inputs.forEach(io =&gt; {
+    var i
+    for (i = 0; i &lt; target.inputs.length - 1; i++) {
+        var io = target.inputs[i]
         if(io.type == &apos;input&apos; &amp;&amp; io.connectors.length == 0){
             target.removeIO(&apos;input&apos;, io.name, target)
+            return
         }
-    })
+    }
 }
 
 /**
@@ -113,15 +115,6 @@ const deleteEmptyPort = function(target){
  * @param {object} target - The atom which should have it&apos;s number of inputs adjusted.
  */ 
 export const addOrDeletePorts = (target) =&gt; {
-    //Because a molecule loads with no connectors attached to the ports and we don&apos;t want them to delete before
-    //They are connected to we use the ioValues list to keep track of them
-    target.inputs.forEach(child =&gt; {
-        target.ioValues.forEach(ioValue =&gt; {
-            if (child.name == ioValue.name &amp;&amp; child.connectors.length &gt; 0){
-                target.ioValues.splice(target.ioValues.indexOf(ioValue),1) //Let&apos;s remove it from the ioValues list
-            }
-        })
-    })
     
     //Add or delete ports as needed
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available

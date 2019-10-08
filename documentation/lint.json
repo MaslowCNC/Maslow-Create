@@ -61,43 +61,107 @@
     "docParams": []
   },
   {
+    "name": "Localmenu#placeAtom",
+    "filePath": "src/js/localmenu.js",
+    "lines": [
+      {
+        "lineNumber": 61,
+        "line": "    /**\r"
+      },
+      {
+        "lineNumber": 62,
+        "line": "     * Runs when a menu option is clicked to place a new atom from the local atoms list.\r"
+      },
+      {
+        "lineNumber": 63,
+        "line": "     * @param {object} ev - The event triggered by click event on a menu item.\r"
+      },
+      {
+        "lineNumber": 64,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 65,
+        "line": "    placeAtom(e){\r"
+      }
+    ],
+    "codeParams": [
+      "e"
+    ],
+    "docParams": [
+      "ev"
+    ]
+  },
+  {
+    "name": "placeNewNode",
+    "filePath": "src/js/NewMenu.js",
+    "lines": [
+      {
+        "lineNumber": 189,
+        "line": "/**\r"
+      },
+      {
+        "lineNumber": 190,
+        "line": "     * Runs when a menu option is clicked to place a new atom from the local atoms list.\r"
+      },
+      {
+        "lineNumber": 191,
+        "line": "     * @param {object} ev - The event triggered by click event on a menu item.\r"
+      },
+      {
+        "lineNumber": 192,
+        "line": "     */ \r"
+      },
+      {
+        "lineNumber": 193,
+        "line": "function placeNewNode(e){\r"
+      }
+    ],
+    "codeParams": [
+      "e"
+    ],
+    "docParams": [
+      "ev"
+    ]
+  },
+  {
     "name": "Atom#addIO",
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 217,
+        "lineNumber": 227,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 218,
+        "lineNumber": 228,
         "line": "     * Adds a new attachment point to this atom\r"
       },
       {
-        "lineNumber": 219,
+        "lineNumber": 229,
         "line": "     * @param {boolean} type - The type of the IO (input or output)\r"
       },
       {
-        "lineNumber": 220,
+        "lineNumber": 230,
         "line": "     * @param {string} name - The name of the new attachment point\r"
       },
       {
-        "lineNumber": 221,
+        "lineNumber": 231,
         "line": "     * @param {object} target - The attom to attach the new attachment point to. Should we force this to always be this one?\r"
       },
       {
-        "lineNumber": 222,
+        "lineNumber": 232,
         "line": "     * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array\r"
       },
       {
-        "lineNumber": 223,
+        "lineNumber": 233,
         "line": "     * @param {object} defaultValue - The default value to be used when the value is not yet set\r"
       },
       {
-        "lineNumber": 224,
+        "lineNumber": 234,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 225,
+        "lineNumber": 235,
         "line": "    addIO(type, name, target, valueType, defaultValue, ready = false){\r"
       }
     ],
@@ -122,39 +186,39 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 774,
+        "lineNumber": 793,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 775,
+        "lineNumber": 794,
         "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 776,
+        "lineNumber": 795,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 777,
+        "lineNumber": 796,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 778,
+        "lineNumber": 797,
         "line": "     * @param {array} options - A list of options to display in the drop down.\r"
       },
       {
-        "lineNumber": 779,
+        "lineNumber": 798,
         "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
       },
       {
-        "lineNumber": 780,
+        "lineNumber": 799,
         "line": "     * @param {string} description - A description of what the dropdown does.\r"
       },
       {
-        "lineNumber": 781,
+        "lineNumber": 800,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 782,
+        "lineNumber": 801,
         "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
       }
     ],
@@ -179,35 +243,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 857,
+        "lineNumber": 876,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 858,
+        "lineNumber": 877,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 859,
+        "lineNumber": 878,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 860,
+        "lineNumber": 879,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 861,
+        "lineNumber": 880,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 862,
+        "lineNumber": 881,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 863,
+        "lineNumber": 882,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 864,
+        "lineNumber": 883,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],

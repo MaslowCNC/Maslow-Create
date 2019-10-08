@@ -33,13 +33,12 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -149,36 +148,41 @@ class GlobalVariables{
          * @type {array}
          */
         this.availableTypes = {
-            assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;},
-            circle:             {creator: Circle, atomType: &apos;Circle&apos;},
-            color:              {creator: Color, atomType: &apos;Color&apos;},
-            cutLayout:          {creator: CutLayout, atomType: &quot;Cut Layout&quot;},
-            rectangle:          {creator: Rectangle, atomType: &apos;Rectangle&apos;},
-            shirinkwrap:        {creator: ShrinkWrap, atomType: &apos;ShrinkWrap&apos;},
-            translate:          {creator: Translate, atomType: &apos;Translate&apos;},
-            tag:                {creator: Tag, atomType: &apos;Tag&apos;},
-            regularPolygon:     {creator: RegularPolygon, atomType: &apos;RegularPolygon&apos;},
-            extrude:            {creator: Extrude, atomType: &apos;Extrude&apos;},
-            extracttag:         {creator: ExtractTag, atomType: &apos;ExtractTag&apos;},
-            scale:              {creator: Scale, atomType: &apos;Scale&apos;},
-            stl:                {creator: Stl, atomType: &apos;Stl&apos;},
-            svg:                {creator: Svg, atomType: &apos;Svg&apos;},
-            intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;},
-            difference:         {creator: Difference, atomType: &apos;Difference&apos;},
-            costant:            {creator: Constant, atomType: &apos;Constant&apos;},
-            equation:           {creator: Equation, atomType: &apos;Equation&apos;},
-            molecule:           {creator: Molecule, atomType: &apos;Molecule&apos;},
-            input:              {creator: Input, atomType: &apos;Input&apos;},
-            readme:             {creator: Readme, atomType: &apos;Readme&apos;},
-            addBOMTag:          {creator: AddBOMTag, atomType: &apos;Add BOM Tag&apos;},
-            rotate:             {creator: Rotate, atomType: &apos;Rotate&apos;},
-            githubmolecule:     {creator: GitHubMolecule, atomType: &apos;GitHubMolecule&apos;},
-            union:              {creator: Union, atomType: &apos;Union&apos;},
-            stretch:            {creator: Stretch, atomType: &apos;Stretch&apos;},
-            code:               {creator: Code, atomType: &apos;Code&apos;},
-            gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;},
-            cutAway:            {creator: CutAway, atomType: &apos;CutAway&apos;},
-            CutList:            {creator: CutList, atomType: &apos;CutList&apos;}
+
+            intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;, atomCategory: &apos;Interactions&apos;},
+            union:              {creator: Union, atomType: &apos;Union&apos;, atomCategory: &apos;Interactions&apos;},
+            difference:         {creator: Difference, atomType: &apos;Difference&apos;, atomCategory: &apos;Interactions&apos;},
+            assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;, atomCategory: &apos;Interactions&apos;},
+            shirinkwrap:        {creator: ShrinkWrap, atomType: &apos;ShrinkWrap&apos;, atomCategory: &apos;Interactions&apos;},
+            extracttag:         {creator: ExtractTag, atomType: &apos;ExtractTag&apos;, atomCategory: &apos;Interactions&apos;},
+            
+            readme:             {creator: Readme, atomType: &apos;Readme&apos;, atomCategory: &apos;Properties&apos;},
+            addBOMTag:          {creator: AddBOMTag, atomType: &apos;Add BOM Tag&apos;, atomCategory: &apos;Properties&apos;},
+            color:              {creator: Color, atomType: &apos;Color&apos;, atomCategory: &apos;Properties&apos;},
+            tag:                {creator: Tag, atomType: &apos;Tag&apos;, atomCategory: &apos;Properties&apos;},
+            cutAway:            {creator: CutAway, atomType: &apos;CutAway&apos;, atomCategory: &apos;Properties&apos;},
+            
+            regularPolygon:     {creator: RegularPolygon, atomType: &apos;RegularPolygon&apos;, atomCategory: &apos;Shapes&apos;},
+            costant:            {creator: Constant, atomType: &apos;Constant&apos;, atomCategory: &apos;Shapes&apos;},
+            circle:             {creator: Circle, atomType: &apos;Circle&apos;, atomCategory: &apos;Shapes&apos;},
+            rectangle:          {creator: Rectangle, atomType: &apos;Rectangle&apos;, atomCategory: &apos;Shapes&apos;},
+            molecule:           {creator: Molecule, atomType: &apos;Molecule&apos;, atomCategory: &apos;Shapes&apos;},
+            input:              {creator: Input, atomType: &apos;Input&apos;, atomCategory: &apos;Shapes&apos;},
+            equation:           {creator: Equation, atomType: &apos;Equation&apos;, atomCategory: &apos;Shapes&apos;},
+            code:               {creator: Code, atomType: &apos;Code&apos;, atomCategory: &apos;Shapes&apos;},
+            
+            rotate:             {creator: Rotate, atomType: &apos;Rotate&apos;, atomCategory: &apos;Actions&apos;},
+            stretch:            {creator: Stretch, atomType: &apos;Stretch&apos;, atomCategory: &apos;Actions&apos;},
+            extrude:            {creator: Extrude, atomType: &apos;Extrude&apos;, atomCategory: &apos;Actions&apos;},
+            translate:          {creator: Translate, atomType: &apos;Translate&apos;, atomCategory: &apos;Actions&apos;},
+            scale:              {creator: Scale, atomType: &apos;Scale&apos;, atomCategory: &apos;Actions&apos;},
+            
+            stl:                {creator: Stl, atomType: &apos;Stl&apos;, atomCategory: &apos;Import/Export&apos;},
+            svg:                {creator: Svg, atomType: &apos;Svg&apos;, atomCategory: &apos;Import/Export&apos;},
+            gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;, atomCategory: &apos;Import/Export&apos;},
+            githubmolecule:     {creator: GitHubMolecule, atomType: &apos;GitHubMolecule&apos;, atomCategory: &apos;Import/Export&apos;},
+            cutLayout:          {creator: CutLayout, atomType: &quot;Cut Layout&quot;, atomCategory: &apos;Import/Export&apos;},
+            CutList:            {creator: CutList, atomType: &apos;CutList&apos;, atomCategory: &apos;Import/Export&apos;}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.

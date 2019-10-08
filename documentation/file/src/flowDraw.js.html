@@ -33,13 +33,12 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -79,12 +78,13 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/flowDraw.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Menu from &apos;./js/menu&apos;
-import GlobalVariables from &apos;./js/globalvariables&apos;
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./js/globalvariables&apos;
 import Molecule from &apos;./js/molecules/molecule.js&apos;
 import GitHubMolecule from &apos;./js/molecules/githubmolecule.js&apos;
 import Display from &apos;./js/display.js&apos;
-import LocalMenu from &apos;./js/localmenu.js&apos;
+//import LocalMenu from &apos;./js/localmenu.js&apos;
+import {cmenu} from &apos;./js/NewMenu.js&apos;
+
 
 GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector(&apos;canvas&apos;)
@@ -126,6 +126,18 @@ flowCanvas.addEventListener(&apos;mousemove&apos;, event =&gt; {
 flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     //every time the mouse button goes down
     
+    var isRightMB
+    if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
+        isRightMB = event.which == 3
+    }
+    else if (&quot;button&quot; in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        return
+    }
+ 
+    
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
@@ -143,12 +155,19 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
         GlobalVariables.currentMolecule.deselect()
     }
     //hide the menu if it is visible
-    if (!document.querySelector(&apos;.menu&apos;).contains(event.target)) {
-        Menu.hidemenu()
+    if (!document.querySelector(&apos;#circle-menu1&apos;).contains(event.target)) {
+        cmenu.hide()
+    }
+    //hide search menu if it is visible
+    if (!document.querySelector(&apos;#canvas_menu&apos;).contains(event.target)) {
+        const menu = document.querySelector(&apos;#canvas_menu&apos;)
+        menu.classList.add(&apos;off&apos;)
+        menu.style.top = &apos;-200%&apos;
+        menu.style.left = &apos;-200%&apos;
     }
     //hide the menu if it is visible
-    if (!document.querySelector(&apos;#localMolecules_top&apos; || &quot;.available_molecules&quot;).contains(event.target)) {
-        LocalMenu.hideMenu()
+    if (!document.querySelector(&apos;#straight_menu&apos;).contains(event.target)) {
+        closeMainMenu()
     }
     
 })
@@ -185,16 +204,62 @@ window.addEventListener(&apos;keydown&apos;, event =&gt; {
     })
 })
 
+/* Button to open top menu */
+document.getElementById(&apos;straight_menu&apos;).addEventListener(&apos;mousedown&apos;, () =&gt; {
+
+    document.querySelector(&apos;#toggle_wrap&apos;).style.display = &quot;inline&quot;
+    let options = document.querySelectorAll(&apos;.option&apos;)
+    var step = -150
+    Array.prototype.forEach.call(options, a =&gt; {
+        if (a.classList.contains(&quot;openMenu&quot;)){
+            closeMainMenu()
+            a.classList.remove(&quot;openMenu&quot;)
+        }
+        else{
+            a.classList.add(&quot;openMenu&quot;)
+            a.style.transition = `transform 0.5s`
+            a.style.transform = `translateX(${step}%)` 
+            step-=100
+        }
+        /*var name = document.createElement(&quot;div&quot;)
+                name.innerHTML= &quot;groundcake&quot;
+                name.style.backgroundColor = &quot;black&quot;
+                name.setAttribute(&apos;class&apos;,&apos;drop&apos;)
+                a.appendChild(name)
+
+            a.addEventListener(&apos;mouseover&apos;, (e) =&gt; {
+               name.style.display = &quot;inline&quot;
+            });
+            a.addEventListener(&apos;mouseout&apos;, (e) =&gt; {
+               name.style.display = &quot;none&quot;
+            });*/
+           
+    }) 
+}) 
+
+/**
+ * Closes main menu on background click or on button click if open
+ */ 
+function closeMainMenu(){
+    let options = document.querySelectorAll(&apos;.option&apos;)
+    var step = 0
+    Array.prototype.forEach.call(options, a =&gt; {
+        a.style.transition = `transform 0.5s`
+        a.style.transform = `translateX(${step}%)`          
+    }) 
+}
+
 /**
  * Top Button menu event listeners if not in run mode
  */ 
 
 if (!GlobalVariables.runMode){
-    let moleculeButton = document.getElementById(&apos;localMolecules_top&apos;)
+    
+    /*let moleculeButton = document.getElementById(&apos;localMolecules_top&apos;)
     moleculeButton.addEventListener(&apos;mousedown&apos;, () =&gt; {
         //add available molecules dropdown
         LocalMenu.showMenu()
-    })
+    })*/
 
     let githubButton = document.getElementById(&apos;github_top&apos;)
     githubButton.addEventListener(&apos;mousedown&apos;, () =&gt; {

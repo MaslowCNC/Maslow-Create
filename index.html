@@ -25,32 +25,35 @@
         <img class="thumnail-logo" src='/imgs/maslow-logo.png' alt="logo">
         <p> Maslow Create</p> 
         <div id="headerBar_title"></div> 
+        
+        
         <div id="top_button_wrap">
-            <button class="top_buttons" type="button" id = "localMolecules_top" title="Available Molecules">  </button>
-            <button class="top_buttons" type="button" id = "projectmenu_top" title="Open projects"> <img class="thumnail-logo" src='/imgs/open-logo.png' alt="Load" style=" transform: scale(.67); border-radius: 0px;"> </button>
-            <button class="top_buttons" type="button" id = "save_top" title="Save"> <img class="thumnail-logo" src='/imgs/save-image.png' alt="Save" style=" transform: scale(.67); border-radius: 0px;"> </button>            
-            <button class="top_buttons" type="button" id = "share_top" title="Share" > <img class="thumnail-logo" src='/imgs/share-img.png' alt="Share"> </button>
-            <button class="top_buttons" type="button" id = "goup_top" title="Go up a level"> <img class="thumnail-logo" src='/imgs/goup_img.png' alt="Go-up" style=" transform: scale(.67); border-radius: 0px;"> </button> 
-            <button class="top_buttons" type="button" id = "bom_top" title="Bill of Materials" > <img class="thumnail-logo" src='/imgs/bom-logo.png' alt="BOM"> </button>
-            <button class="top_buttons" type="button" id = "read_top" title="Read Me"> <img class="thumnail-logo" src='/imgs/read_img.png' alt="Read-me" style=" transform: scale(.67); border-radius: 0px;"> </button> 
-            <button class="top_buttons" type="button" id = "github_top" title="GitHub"> <img class="thumnail-logo" src='/imgs/github-logo.png' alt="Git" > </button>
+            <button class="top_buttons" type="button" id = "straight_menu" title=""> </button>
+            <div id ="toggle_wrap">
+                <!-- 
+                <button class="top_buttons" type="button" id = "localMolecules_top" title="Available Molecules">  </button>  -->
+                <button class="top_buttons option" type="button" id = "projectmenu_top" title="Open projects"> <img class="thumnail-logo" src='/imgs/open-logo.png' alt="Load" style=" transform: scale(.67); border-radius: 0px;"> </button>
+                <button class="top_buttons option" type="button" id = "save_top" title="Save"> <img class="thumnail-logo" src='/imgs/save-image.png' alt="Save" style=" transform: scale(.67); border-radius: 0px;"> </button>            
+                <button class="top_buttons option" type="button" id = "share_top" title="Share" > <img class="thumnail-logo" src='/imgs/share-img.png' alt="Share"> </button>
+                <button class="top_buttons option" type="button" id = "goup_top" title="Go up a level"> <img class="thumnail-logo" src='/imgs/goup_img.png' alt="Go-up" style=" transform: scale(.67); border-radius: 0px;"> </button> 
+                <button class="top_buttons option" type="button" id = "bom_top" title="Bill of Materials" > <img class="thumnail-logo" src='/imgs/bom-logo.png' alt="BOM"> </button>
+                <button class="top_buttons option" type="button" id = "read_top" title="Read Me"> <img class="thumnail-logo" src='/imgs/read_img.png' alt="Read-me" style=" transform: scale(.67); border-radius: 0px;"> </button> 
+                <button class="top_buttons option" type="button" id = "github_top" title="GitHub"> <img class="thumnail-logo" src='/imgs/github-logo.png' alt="Git" > </button>
+
+            </div>
         </div>  
         <div id="popUp" style="display: none;"> Project Saved </div>
         
     </div> 
-    <!-- The menu for creating a new drawing node -->
-    <ul class="menu ">
-        <div class="tab">
-            <button class="tablinks" id="localTab" >Local</button>
-            <button class="tablinks" id="githubTab" >GitHub</button>
-        </div>
-        <input type="text" id="menuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search">
-        <ul id="menuList" class = "menu_list tabcontent">
-        </ul>
+    <!-- Circular menu on canvas -->
+    <div>
+        <div id="circle-menu1" class="cn-menu1"></div>
+        <div id="canvas_menu">
+        <input type="text" id="menuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search_canvas">
         <ul id="githubList" class = "menu_list tabcontent">
         </ul>
-    </ul>
-    
+        </div>
+    </div>
     <!-- The login popup -->
     <div class = "login-popup " id = "projects-popup">
         <div class="login-page">

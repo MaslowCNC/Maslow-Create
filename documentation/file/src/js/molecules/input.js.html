@@ -33,13 +33,12 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/menu.js~Menu.html">Menu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-menu">menu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -107,11 +106,6 @@ export default class Input extends Atom {
          * This atom&apos;s type
          * @type {string}
          */
-        this.type = &apos;input&apos;
-        /** 
-         * This atom&apos;s type
-         * @type {string}
-         */
         this.atomType = &apos;Input&apos;
         /** 
          * This atom&apos;s height for drawing
@@ -124,8 +118,6 @@ export default class Input extends Atom {
          */
         this.radius = 15
         
-        this.setValues(values)
-        
         /** 
          * This atom&apos;s old name, used during name changes
          * @type {string}
@@ -133,12 +125,14 @@ export default class Input extends Atom {
         this.oldName = this.name
         
         this.addIO(&apos;output&apos;, &apos;number or geometry&apos;, this, &apos;number or geometry&apos;, 10)
-        this.addIO(&apos;input&apos;, &apos;default value&apos;, this, &apos;number or geometry&apos;, 10)
+        this.addIO(&apos;input&apos;, &apos;default value&apos;, this, &apos;number&apos;, 10)
         
         //Add a new input to the current molecule
         if (typeof this.parent !== &apos;undefined&apos;) {
             this.parent.addIO(&apos;input&apos;, this.name, this.parent, &apos;number or geometry&apos;, 10)
         }
+        
+        this.setValues(values)
     }
     
     /**
@@ -151,11 +145,6 @@ export default class Input extends Atom {
         
         this.createEditableValueListItem(valueList,this,&apos;name&apos;, &apos;Name&apos;, false)
         
-        this.parent.inputs.forEach(child =&gt; {
-            if (child.name == this.name){
-                this.createEditableValueListItem(valueList,child,&apos;value&apos;, &apos;Value&apos;, true)
-            }
-        })
     }
     
     /**
@@ -244,6 +233,7 @@ export default class Input extends Atom {
     updateValue(){
         this.parent.inputs.forEach(input =&gt; { //Grab the value for this input from the parent&apos;s inputs list
             if(input.name == this.name){        //If we have found the matching input
+                input.updateDefault(this.findIOValue(&apos;default value&apos;))    //Set the default value of the input to be the default
                 this.value = input.getValue()
                 this.output.lock()              //Lock all of the dependents
                 this.output.setValue(this.value)
@@ -279,8 +269,7 @@ export default class Input extends Atom {
         return this.output.getValue()
     }
     
-}
-</code></pre>
+}</code></pre>
 
 </div>
 
