@@ -26,11 +26,6 @@ export default class Input extends Atom {
          * This atom's type
          * @type {string}
          */
-        this.type = 'input'
-        /** 
-         * This atom's type
-         * @type {string}
-         */
         this.atomType = 'Input'
         /** 
          * This atom's height for drawing
@@ -43,8 +38,6 @@ export default class Input extends Atom {
          */
         this.radius = 15
         
-        this.setValues(values)
-        
         /** 
          * This atom's old name, used during name changes
          * @type {string}
@@ -52,12 +45,14 @@ export default class Input extends Atom {
         this.oldName = this.name
         
         this.addIO('output', 'number or geometry', this, 'number or geometry', 10)
-        this.addIO('input', 'default value', this, 'number or geometry', 10)
+        this.addIO('input', 'default value', this, 'number', 10)
         
         //Add a new input to the current molecule
         if (typeof this.parent !== 'undefined') {
             this.parent.addIO('input', this.name, this.parent, 'number or geometry', 10)
         }
+        
+        this.setValues(values)
     }
     
     /**
@@ -70,11 +65,6 @@ export default class Input extends Atom {
         
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         
-        this.parent.inputs.forEach(child => {
-            if (child.name == this.name){
-                this.createEditableValueListItem(valueList,child,'value', 'Value', true)
-            }
-        })
     }
     
     /**
@@ -163,6 +153,7 @@ export default class Input extends Atom {
     updateValue(){
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
+                input.updateDefault(this.findIOValue('default value'))    //Set the default value of the input to be the default
                 this.value = input.getValue()
                 this.output.lock()              //Lock all of the dependents
                 this.output.setValue(this.value)
