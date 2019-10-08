@@ -27,25 +27,25 @@ var cmenu = CMenu(ele)
                 menus: makeArray('Actions')        
             },
             {
-                title: 'SHAPES',
-                icon: '',
-                menus: makeArray('Shapes')
-            },
-            {
                 title: 'PROPERTY',
                 icon: '',
                 menus: makeArray('Properties')
-            },
-            {
-                title: 'INTERACTION',
-                icon: '',
-                menus: makeArray('Interactions')
             },
             {
                 title: 'Import/Export',
                 icon: '',
                 menus: makeArray('Import/Export')
                                 
+            },
+            {
+                title: 'SHAPES',
+                icon: '',
+                menus: makeArray('Shapes')
+            },
+            {
+                title: 'INTERACTION',
+                icon: '',
+                menus: makeArray('Interactions')
             }
         ]
     })
@@ -77,11 +77,49 @@ function makeArray(group) {
     return menuArray
 }
 
-/* Right click to open circular menu */
+/*Mask the default context menu on the main canvas*/
 document.getElementById('flow-canvas').addEventListener('contextmenu', (e) => {
     e.preventDefault()
-    cmenu.show([e.clientX, e.clientY])
 }) 
+
+/*Mask the default context menu on the menu*/
+ele.addEventListener('contextmenu', (e) => {
+    e.preventDefault()
+}) 
+
+/* Right click to open circular menu */
+document.getElementById('flow-canvas').addEventListener('mousedown', event => {
+    //every time the mouse button goes down
+    
+    var isRightMB
+    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = event.which == 3
+    }
+    else if ("button" in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        cmenu.show([event.clientX, event.clientY])
+        return
+    }
+})
+
+/* Hide the menu on a right click mouse up*/
+document.getElementById('flow-canvas').addEventListener('mouseup', event => {
+    //every time the mouse button goes down
+    
+    var isRightMB
+    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = event.which == 3
+    }
+    else if ("button" in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        cmenu.hide()
+        return
+    }
+})
 
 //Add function call to search when typing
 document.getElementById('menuInput').addEventListener('keyup', (e) => {
