@@ -2,7 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-import LocalMenu from './js/localmenu.js'
+//import LocalMenu from './js/localmenu.js'
 import {cmenu} from './js/NewMenu.js'
 
 
@@ -92,7 +92,7 @@ flowCanvas.addEventListener('mousedown', event => {
         Array.prototype.forEach.call(options, a => {
             a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)`          
-        }); 
+        }) 
     }
     
 })
@@ -130,15 +130,15 @@ window.addEventListener('keydown', event => {
 })
 
 /* Button to open top menu */
-document.getElementById('straight_menu').addEventListener('mousedown', (e) => {
+document.getElementById('straight_menu').addEventListener('mousedown', () => {
     document.querySelector('#toggle_wrap').style.display = "inline"
     let options = document.querySelectorAll('.option')
     var step = -150
-        Array.prototype.forEach.call(options, a => {
-            a.style.transition = `transform 0.5s`
-            a.style.transform = `translateX(${step}%)` 
-            step-=100
-             /*var name = document.createElement("div")
+    Array.prototype.forEach.call(options, a => {
+        a.style.transition = `transform 0.5s`
+        a.style.transform = `translateX(${step}%)` 
+        step-=100
+        /*var name = document.createElement("div")
                 name.innerHTML= "groundcake"
                 name.style.backgroundColor = "black"
                 name.setAttribute('class','drop')
@@ -151,7 +151,7 @@ document.getElementById('straight_menu').addEventListener('mousedown', (e) => {
                name.style.display = "none"
             });*/
            
-        }); 
+    }) 
 }) 
 
 /**
