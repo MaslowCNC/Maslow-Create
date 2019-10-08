@@ -87,12 +87,7 @@ flowCanvas.addEventListener('mousedown', event => {
     }
     //hide the menu if it is visible
     if (!document.querySelector('#straight_menu').contains(event.target)) {
-        let options = document.querySelectorAll('.option')
-        var step = 0
-        Array.prototype.forEach.call(options, a => {
-            a.style.transition = `transform 0.5s`
-            a.style.transform = `translateX(${step}%)`          
-        }) 
+        closeMainMenu()
     }
     
 })
@@ -131,13 +126,21 @@ window.addEventListener('keydown', event => {
 
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
+
     document.querySelector('#toggle_wrap').style.display = "inline"
     let options = document.querySelectorAll('.option')
     var step = -150
     Array.prototype.forEach.call(options, a => {
+        if (a.classList.contains("openMenu")){
+            closeMainMenu()
+            a.classList.remove("openMenu")
+        }
+        else{
+        a.classList.add("openMenu");
         a.style.transition = `transform 0.5s`
         a.style.transform = `translateX(${step}%)` 
         step-=100
+        }
         /*var name = document.createElement("div")
                 name.innerHTML= "groundcake"
                 name.style.backgroundColor = "black"
@@ -153,6 +156,18 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
            
     }) 
 }) 
+
+/**
+ * Closes main menu on background click or on button click if open
+ */ 
+function closeMainMenu(){
+    let options = document.querySelectorAll('.option')
+        var step = 0
+        Array.prototype.forEach.call(options, a => {
+            a.style.transition = `transform 0.5s`
+            a.style.transform = `translateX(${step}%)`          
+        }) 
+}
 
 /**
  * Top Button menu event listeners if not in run mode
