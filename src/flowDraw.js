@@ -86,8 +86,13 @@ flowCanvas.addEventListener('mousedown', event => {
         menu.style.left = '-200%'
     }
     //hide the menu if it is visible
-    if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
-        LocalMenu.hideMenu()
+    if (!document.querySelector('#straight_menu').contains(event.target)) {
+        let options = document.querySelectorAll('.option')
+        var step = 0
+        Array.prototype.forEach.call(options, a => {
+            a.style.transition = `transform 0.5s`
+            a.style.transform = `translateX(${step}%)`          
+        }); 
     }
     
 })
@@ -133,8 +138,20 @@ document.getElementById('straight_menu').addEventListener('mousedown', (e) => {
             a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)` 
             step-=100
-        });
-    //document.getElementById('straight_menu').style.display = "none"
+             /*var name = document.createElement("div")
+                name.innerHTML= "groundcake"
+                name.style.backgroundColor = "black"
+                name.setAttribute('class','drop')
+                a.appendChild(name)
+
+            a.addEventListener('mouseover', (e) => {
+               name.style.display = "inline"
+            });
+            a.addEventListener('mouseout', (e) => {
+               name.style.display = "none"
+            });*/
+           
+        }); 
 }) 
 
 /**
