@@ -118,8 +118,7 @@ document.getElementById('straight_menu').addEventListener('mousedown', (e) => {
     let options = document.querySelectorAll('.option')
     var step = -150
         Array.prototype.forEach.call(options, a => {
-            a.style.display = `inline`
-            a.style.transition = `transform 3s`
+            a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)` 
             step-=100
         });
