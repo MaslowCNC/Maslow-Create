@@ -86,7 +86,7 @@ export default class Atom {
          * @type {boolean}
          */
         this.isMoving = false
-         /** 
+        /** 
          * A flag to indicate if we are hovering over this atom.
          * @type {boolean}
          */
@@ -145,7 +145,7 @@ export default class Atom {
         }
     }
     
-   /**
+    /**
      * Draws the atom on the screen
      */ 
     draw() {   
