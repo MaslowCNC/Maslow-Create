@@ -153,8 +153,10 @@ export default class Input extends Atom {
     updateValue(){
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
-                input.updateDefault(this.findIOValue('default value'))    //Set the default value of the input to be the default
                 this.value = input.getValue()
+                
+                input.updateDefault(this.findIOValue('default value'))    //Set the default value of the input to be the default
+                
                 this.output.lock()              //Lock all of the dependents
                 this.output.setValue(this.value)
             }
