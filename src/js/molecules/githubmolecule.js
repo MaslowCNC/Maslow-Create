@@ -41,15 +41,15 @@ export default class GitHubMolecule extends Molecule {
      * This replaces the default Molecule double click behavior to prevent you from being able to double click into a github molecule
      * @param {number} x - The x coordinate of the click
      * @param {number} y - The y coordinate of the click
-     */ 
-    // doubleClick(x,y){
-        // var clickProcessed = false
-        // var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
-        // if (distFromClick < this.radius){
-            // clickProcessed = true
-        // }
-        // return clickProcessed 
-    // }
+     // */ 
+    doubleClick(x,y){
+        var clickProcessed = false
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        if (distFromClick < this.radius){
+            clickProcessed = true
+        }
+        return clickProcessed 
+    }
     
     /**
      * Loads a project into this GitHub molecule from github based on the passed github ID. This function is async and execution time depends on project complexity, and network speed.
@@ -73,17 +73,9 @@ export default class GitHubMolecule extends Molecule {
         }
         var promsie = this.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
         
-        
-        console.log("Setting values for github molecule with: ")
-        console.log(preservedValues)
         this.setValues(preservedValues)
         
         return promsie
-    }
-    
-    unlock(){
-        console.log("GitHub molecule unlock")
-        super.unlock()
     }
     
     /**
