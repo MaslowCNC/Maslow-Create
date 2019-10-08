@@ -360,12 +360,10 @@ export default class AttachmentPoint {
      */ 
     deleteSelf(){
         //remove any connectors which were attached to this attachment point
-        
-        this.connectors.forEach( connector => {
+        var connectorsList = this.connectors //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list
+        connectorsList.forEach( connector => {
             connector.deleteSelf()
-            this.deleteSelf()  //This is a bit of a hack. It calls itself recursively until there are no connectors left because a single call will fail for multiple connectors. Each time one is removed from the list it messes up the forEach...There must be a better way
         })
-        
     }
     
     /**
@@ -439,6 +437,9 @@ export default class AttachmentPoint {
      */ 
     updateDefault(newDefault){
         this.defaultValue = newDefault
+        if(this.connectors.length == 0){    //Update the value to be the default if there is nothing attached
+            this.value = this.defaultValue
+        }
     }
     
     /**

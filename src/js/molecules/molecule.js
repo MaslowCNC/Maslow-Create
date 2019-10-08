@@ -263,6 +263,24 @@ export default class Molecule extends Atom{
             GlobalVariables.circleSegmentSize = this.value
             
         }
+        
+        rangeElement.addEventListener('mouseup', () => {
+            GlobalVariables.topLevelMolecule.refreshCircles()
+        })
+    }
+    
+    /**
+     * Used to trigger all of the circle atoms within a molecule and all of the molecules within it to update their value. Used when the number of segments changes.
+     */ 
+    refreshCircles(){
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.atomType == "Circle"){
+                atom.updateValue()
+            }
+            else if(atom.atomType == "Molecule" || atom.atomType == "GitHubMolecule"){
+                atom.refreshCircles()
+            }
+        })
     }
     
     /**
@@ -590,4 +608,3 @@ export default class Molecule extends Atom{
         }
     }
 }
-

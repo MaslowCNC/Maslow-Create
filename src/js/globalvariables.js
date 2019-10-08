@@ -68,36 +68,41 @@ class GlobalVariables{
          * @type {array}
          */
         this.availableTypes = {
-            assembly:           {creator: Assembly, atomType: 'Assembly'},
-            circle:             {creator: Circle, atomType: 'Circle'},
-            color:              {creator: Color, atomType: 'Color'},
-            cutLayout:          {creator: CutLayout, atomType: "Cut Layout"},
-            rectangle:          {creator: Rectangle, atomType: 'Rectangle'},
-            shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap'},
-            translate:          {creator: Translate, atomType: 'Translate'},
-            tag:                {creator: Tag, atomType: 'Tag'},
-            regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon'},
-            extrude:            {creator: Extrude, atomType: 'Extrude'},
-            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag'},
-            scale:              {creator: Scale, atomType: 'Scale'},
-            stl:                {creator: Stl, atomType: 'Stl'},
-            svg:                {creator: Svg, atomType: 'Svg'},
-            intersection:       {creator: Intersection, atomType: 'Intersection'},
-            difference:         {creator: Difference, atomType: 'Difference'},
-            costant:            {creator: Constant, atomType: 'Constant'},
-            equation:           {creator: Equation, atomType: 'Equation'},
-            molecule:           {creator: Molecule, atomType: 'Molecule'},
-            input:              {creator: Input, atomType: 'Input'},
-            readme:             {creator: Readme, atomType: 'Readme'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag'},
-            rotate:             {creator: Rotate, atomType: 'Rotate'},
-            githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule'},
-            union:              {creator: Union, atomType: 'Union'},
-            stretch:            {creator: Stretch, atomType: 'Stretch'},
-            code:               {creator: Code, atomType: 'Code'},
-            gcode:              {creator: Gcode, atomType: 'Gcode'},
-            cutAway:            {creator: CutAway, atomType: 'CutAway'},
-            CutList:            {creator: CutList, atomType: 'CutList'}
+
+            intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
+            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
+            difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
+            assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
+            shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
+            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Interactions'},
+            
+            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
+            color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
+            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
+            cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
+            
+            regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
+            costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
+            circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},
+            rectangle:          {creator: Rectangle, atomType: 'Rectangle', atomCategory: 'Shapes'},
+            molecule:           {creator: Molecule, atomType: 'Molecule', atomCategory: 'Shapes'},
+            input:              {creator: Input, atomType: 'Input', atomCategory: 'Shapes'},
+            equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
+            code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
+            
+            rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
+            stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
+            extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
+            translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
+            scale:              {creator: Scale, atomType: 'Scale', atomCategory: 'Actions'},
+            
+            stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
+            svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
+            gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Import/Export'},
+            githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Import/Export'},
+            cutLayout:          {creator: CutLayout, atomType: "Cut Layout", atomCategory: 'Import/Export'},
+            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Import/Export'}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.

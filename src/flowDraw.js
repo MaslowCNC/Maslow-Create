@@ -1,9 +1,10 @@
-import Menu from './js/menu'
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-import LocalMenu from './js/localmenu.js'
+//import LocalMenu from './js/localmenu.js'
+import {cmenu} from './js/NewMenu.js'
+
 
 GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
@@ -45,6 +46,18 @@ flowCanvas.addEventListener('mousemove', event => {
 flowCanvas.addEventListener('mousedown', event => {
     //every time the mouse button goes down
     
+    var isRightMB
+    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = event.which == 3
+    }
+    else if ("button" in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        return
+    }
+ 
+    
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
@@ -62,12 +75,19 @@ flowCanvas.addEventListener('mousedown', event => {
         GlobalVariables.currentMolecule.deselect()
     }
     //hide the menu if it is visible
-    if (!document.querySelector('.menu').contains(event.target)) {
-        Menu.hidemenu()
+    if (!document.querySelector('#circle-menu1').contains(event.target)) {
+        cmenu.hide()
+    }
+    //hide search menu if it is visible
+    if (!document.querySelector('#canvas_menu').contains(event.target)) {
+        const menu = document.querySelector('#canvas_menu')
+        menu.classList.add('off')
+        menu.style.top = '-200%'
+        menu.style.left = '-200%'
     }
     //hide the menu if it is visible
-    if (!document.querySelector('#localMolecules_top' || ".available_molecules").contains(event.target)) {
-        LocalMenu.hideMenu()
+    if (!document.querySelector('#straight_menu').contains(event.target)) {
+        closeMainMenu()
     }
     
 })
@@ -104,16 +124,62 @@ window.addEventListener('keydown', event => {
     })
 })
 
+/* Button to open top menu */
+document.getElementById('straight_menu').addEventListener('mousedown', () => {
+
+    document.querySelector('#toggle_wrap').style.display = "inline"
+    let options = document.querySelectorAll('.option')
+    var step = -150
+    Array.prototype.forEach.call(options, a => {
+        if (a.classList.contains("openMenu")){
+            closeMainMenu()
+            a.classList.remove("openMenu")
+        }
+        else{
+            a.classList.add("openMenu")
+            a.style.transition = `transform 0.5s`
+            a.style.transform = `translateX(${step}%)` 
+            step-=100
+        }
+        /*var name = document.createElement("div")
+                name.innerHTML= "groundcake"
+                name.style.backgroundColor = "black"
+                name.setAttribute('class','drop')
+                a.appendChild(name)
+
+            a.addEventListener('mouseover', (e) => {
+               name.style.display = "inline"
+            });
+            a.addEventListener('mouseout', (e) => {
+               name.style.display = "none"
+            });*/
+           
+    }) 
+}) 
+
+/**
+ * Closes main menu on background click or on button click if open
+ */ 
+function closeMainMenu(){
+    let options = document.querySelectorAll('.option')
+    var step = 0
+    Array.prototype.forEach.call(options, a => {
+        a.style.transition = `transform 0.5s`
+        a.style.transform = `translateX(${step}%)`          
+    }) 
+}
+
 /**
  * Top Button menu event listeners if not in run mode
  */ 
 
 if (!GlobalVariables.runMode){
-    let moleculeButton = document.getElementById('localMolecules_top')
+    
+    /*let moleculeButton = document.getElementById('localMolecules_top')
     moleculeButton.addEventListener('mousedown', () => {
         //add available molecules dropdown
         LocalMenu.showMenu()
-    })
+    })*/
 
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
