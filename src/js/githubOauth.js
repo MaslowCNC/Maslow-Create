@@ -89,6 +89,7 @@ export default function GitHubModule(){
         popup.classList.remove('off')
         popup.setAttribute("style", "text-align: center")
         
+        //Close button (Mac style)
         if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
             var closeButton = document.createElement("button")
             closeButton.setAttribute("class", "closeButton")
@@ -136,6 +137,13 @@ export default function GitHubModule(){
             this.loadProjectsBySearch(e, searchBar.value)
         })
         
+         var createNewProject = document.createElement("div")
+        createNewProject.setAttribute("class", "newProject")
+        popup.appendChild(createNewProject)
+        this.NewProject("New Project", null, true, "newProject.svg")
+
+
+
         
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
@@ -210,10 +218,41 @@ export default function GitHubModule(){
     /** 
      * Adds a new project to the load projects display.
      */
+    this.NewProject = function(projectName, id, owned, thumbnailPath){
+        //create a project element to display
+        
+        var project = document.createElement("DIV")
+        project.classList.add("newProjectdiv")
+        
+        var projectPicture = document.createElement("IMG")
+        projectPicture.setAttribute("src", thumbnailPath)
+        projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+        projectPicture.setAttribute("style", "height: 80%; float: left;")
+        project.appendChild(projectPicture)
+        //project.appendChild(document.createElement("BR"))
+        
+        var projectText = document.createElement("span")
+        projectText.innerHTML = "Start a new project"
+        project.appendChild(projectText)
+
+        //project.setAttribute("class", "project")
+        //project.setAttribute("id", projectName)
+        //project.appendChild(shortProjectName) 
+         document.querySelector(".newProject").appendChild(project) 
+        
+        project.addEventListener('click', () => {
+            this.projectClicked(projectName, id, owned)
+        })
+
+    }
+    /** 
+     * Adds a new project to the load projects display.
+     */
     this.addProject = function(projectName, id, owned, thumbnailPath){
         //create a project element to display
         
         var project = document.createElement("DIV")
+        project.classList.add("newProject")
         
         var projectPicture = document.createElement("IMG")
         projectPicture.setAttribute("src", thumbnailPath)
