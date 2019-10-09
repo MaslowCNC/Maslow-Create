@@ -98,6 +98,12 @@ export default function GitHubModule(){
             })
             popup.appendChild(closeButton)
         }
+
+        var welcome = document.createElement("div")
+        welcome.innerHTML = "Welcome to Maslow Create"
+        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%")
+        popup.appendChild(welcome)
+
         
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
@@ -106,8 +112,7 @@ export default function GitHubModule(){
         
         var yoursButton = document.createElement("button")
         yoursButton.setAttribute("class", "tablinks")
-        yoursButton.appendChild(document.createTextNode("Your Projects"))
-        yoursButton.style.fontSize = "xx-large"
+        yoursButton.appendChild(document.createTextNode("Back to my projects"))
         yoursButton.setAttribute("id", "yoursButton")
         yoursButton.addEventListener("click", (e) => {
             this.openTab(e, "yoursButton")
@@ -142,11 +147,11 @@ export default function GitHubModule(){
             this.openTab(e, "githubButton")
         })
        
-       topBrowseDiv.appendChild(browseDiv) 
-       topBrowseDiv.setAttribute("class", "topBrowse")
-       //tabButtons.appendChild(githubButton)
+        topBrowseDiv.appendChild(browseDiv) 
+        topBrowseDiv.setAttribute("class", "topBrowse")
+        //tabButtons.appendChild(githubButton)
 
-       var searchBar = document.createElement("input")
+        var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
