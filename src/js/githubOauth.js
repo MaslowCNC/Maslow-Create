@@ -114,19 +114,39 @@ export default function GitHubModule(){
         })
         tabButtons.appendChild(yoursButton)
         
+        //popup.appendChild(document.createElement("br"))
+        var topBrowseDiv = document.createElement("div")
+        popup.appendChild(topBrowseDiv)
+
+        var createNewProject = document.createElement("div")
+        createNewProject.setAttribute("class", "newProject")
+        topBrowseDiv.appendChild(createNewProject) 
+        this.NewProject("New Project", null, true, "newProject.svg")
+
+        //Browse all projects box
+        var browseDiv = document.createElement("div")
+        //popup.appendChild(browseDiv)
+        browseDiv.classList.add("newProject")
         var githubButton = document.createElement("button")
-        githubButton.setAttribute("class", "tablinks")
         githubButton.appendChild(document.createTextNode("All Projects"))
-        githubButton.style.fontSize = "xx-large"
-        githubButton.setAttribute("id", "githubButton")
+        
+        var projectPicture = document.createElement("IMG")
+        projectPicture.setAttribute("src", '/defaultThumbnail.svg')
+        projectPicture.setAttribute("style", "height: 80%; float: left;")
+        browseDiv.appendChild(projectPicture)
+        //githubButton.setAttribute("class", "tablinks")
+        //githubButton.style.fontSize = "xx-large"
+        //githubButton.setAttribute("id", "githubButton")
+        browseDiv.appendChild(githubButton)
         githubButton.addEventListener("click", (e) => {
             this.openTab(e, "githubButton")
         })
-        tabButtons.appendChild(githubButton)
-        
-        popup.appendChild(document.createElement("br"))
-        
-        var searchBar = document.createElement("input")
+       
+       topBrowseDiv.appendChild(browseDiv) 
+       topBrowseDiv.setAttribute("class", "topBrowse")
+       //tabButtons.appendChild(githubButton)
+
+       var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
@@ -136,15 +156,13 @@ export default function GitHubModule(){
         searchBar.addEventListener('keyup', (e) => {
             this.loadProjectsBySearch(e, searchBar.value)
         })
-        
-         var createNewProject = document.createElement("div")
-        createNewProject.setAttribute("class", "newProject")
-        popup.appendChild(createNewProject)
-        this.NewProject("New Project", null, true, "newProject.svg")
+        var mine = document.createElement("div")
+        mine.innerHTML = "My Projects"
+        mine.setAttribute("style", "justify-content:flex-start; display: inline; width: 20%")
+
+        popup.appendChild(mine)
 
 
-
-        
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
         this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
@@ -163,9 +181,6 @@ export default function GitHubModule(){
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
-            
-            //Add the create a new project button
-            this.addProject("New Project", null, true, "newProject.svg")
             
             //Load projects
             var query
@@ -238,7 +253,7 @@ export default function GitHubModule(){
         //project.setAttribute("class", "project")
         //project.setAttribute("id", projectName)
         //project.appendChild(shortProjectName) 
-         document.querySelector(".newProject").appendChild(project) 
+        document.querySelector(".newProject").appendChild(project) 
         
         project.addEventListener('click', () => {
             this.projectClicked(projectName, id, owned)
