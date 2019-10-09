@@ -172,13 +172,26 @@
 }
 
 .closeButton{
+  padding:0;
     position: absolute;
+    width: 23px;
+    height: 23px;
+    border: 2px solid #eef5df;
+    background-color: #ff5248;
+    border-radius: 50%;
     top: 10px;
-    right: 10px;
-    padding: 0;
-    border: none;
-    background: none;
+    left: 10px;
 }
+.closeButton::before {
+  content: "\2715";
+  color:black;
+  display: none;
+
+  }
+
+.closeButton:hover { cursor: pointer; }
+.closeButton:hover::before{ display: block; }
+
 
 .sideBar {
     flex:2;

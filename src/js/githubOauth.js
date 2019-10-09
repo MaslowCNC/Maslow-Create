@@ -91,9 +91,7 @@ export default function GitHubModule(){
         
         if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
             var closeButton = document.createElement("button")
-            closeButton.appendChild(document.createTextNode("X"))
             closeButton.setAttribute("class", "closeButton")
-            closeButton.style.fontSize = "xx-large"
             closeButton.addEventListener("click", () => {
                 popup.classList.add('off')
             })
