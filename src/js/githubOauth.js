@@ -171,7 +171,8 @@ export default function GitHubModule(){
         browseDisplay1.appendChild(listPicture)
         middleBrowseDiv.appendChild(browseDisplay1)
         var browseDisplay2 = document.createElement("div")
-        browseDisplay2.setAttribute("class", "browseDisplay")
+        browseDisplay2.setAttribute("class", "browseDisplay active_filter")
+        browseDisplay2.setAttribute("id", "thumb")
         var listPicture2 = document.createElement("IMG")
         listPicture2.setAttribute("src", '/imgs/thumb_icon.png') 
         listPicture2.setAttribute("style", "height: 80%;padding: 3px;")
@@ -197,6 +198,12 @@ export default function GitHubModule(){
         githubButton.addEventListener("click", (e) => {
             mine.innerHTML = "All Maslow Create Projects"
             this.openTab(e, "githubButton")
+        })
+        browseDisplay1.addEventListener("click", (e) => {
+            browseDisplay2.classList.remove("active_filter")
+        })
+        browseDisplay2.addEventListener("click", (e) => {
+            browseDisplay2.classList.add("active_filter")
         })
 
         this.projectsSpaceDiv = document.createElement("DIV")
@@ -302,32 +309,55 @@ export default function GitHubModule(){
      */
     this.addProject = function(projectName, id, owned, thumbnailPath){
         //create a project element to display
-        
-        var project = document.createElement("DIV")
-        project.classList.add("newProject")
-        
-        var projectPicture = document.createElement("IMG")
-        projectPicture.setAttribute("src", thumbnailPath)
-        projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
-        projectPicture.setAttribute("style", "width: 100%; height: 100%;")
-        project.appendChild(projectPicture)
-        project.appendChild(document.createElement("BR"))
-        
-        var shortProjectName
-        if(projectName.length > 15){
-            shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
+        if (document.getElementById("thumb").classList.contains("active_filter")){
+            var project = document.createElement("DIV")
+            project.classList.add("newProject")
+            
+            var projectPicture = document.createElement("IMG")
+            projectPicture.setAttribute("src", thumbnailPath)
+            projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+            projectPicture.setAttribute("style", "width: 100%; height: 100%;")
+            project.appendChild(projectPicture)
+            project.appendChild(document.createElement("BR"))
+            
+            var shortProjectName
+            if(projectName.length > 15){
+                shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
+            }
+            else{
+                shortProjectName = document.createTextNode(projectName)
+            }
+            project.setAttribute("class", "project")
+            project.setAttribute("id", projectName)
+            project.appendChild(shortProjectName) 
+            this.projectsSpaceDiv.appendChild(project) 
+            
+            document.getElementById(projectName).addEventListener('click', () => {
+                this.projectClicked(projectName, id, owned)
+            })
         }
         else{
+            this.projectsSpaceDiv.classList.add("float-left-div-thumb")
+            var project = document.createElement("DIV")
+            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap")
+            var projectPicture = document.createElement("IMG")
+            projectPicture.setAttribute("src", thumbnailPath)
+            //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+            projectPicture.setAttribute("style", "width: 30px; height: 30px;")
+            project.appendChild(projectPicture)
+            
+            var shortProjectName
             shortProjectName = document.createTextNode(projectName)
+            
+            project.setAttribute("class", "project")
+            project.setAttribute("id", projectName)
+            project.appendChild(shortProjectName) 
+            this.projectsSpaceDiv.appendChild(project) 
+            
+            document.getElementById(projectName).addEventListener('click', () => {
+                this.projectClicked(projectName, id, owned)
+            })
         }
-        project.setAttribute("class", "project")
-        project.setAttribute("id", projectName)
-        project.appendChild(shortProjectName) 
-        this.projectsSpaceDiv.appendChild(project) 
-        
-        document.getElementById(projectName).addEventListener('click', () => {
-            this.projectClicked(projectName, id, owned)
-        })
 
     }
     

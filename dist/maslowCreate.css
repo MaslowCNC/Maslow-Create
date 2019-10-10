@@ -712,6 +712,12 @@ input.menu_search:focus {
   float: left;
   overflow: auto;
 }
+.float-left-div-thumb{
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    width: 100%;
+}
 
 .github-login-display{
     width: 50%;
