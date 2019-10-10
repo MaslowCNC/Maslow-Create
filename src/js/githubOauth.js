@@ -136,7 +136,7 @@ export default function GitHubModule(){
         projectPicture.setAttribute("src", '/defaultThumbnail.svg')
         projectPicture.setAttribute("style", "height: 80%; float: left;")
         browseDivInner.appendChild(projectPicture)
-         //Browse Prompt
+        //Browse Prompt
         var checkOut = document.createElement("div")
         browseDivInner.appendChild(checkOut)
         checkOut.innerHTML = "Check out what others have made on Maslow Create"
@@ -166,12 +166,16 @@ export default function GitHubModule(){
         var browseDisplay1 = document.createElement("div")
         browseDisplay1.setAttribute("class", "browseDisplay")
         var listPicture = document.createElement("IMG")
-        listPicture.setAttribute("src", '/imgs/list-with-dots.svg')
-        listPicture.setAttribute("style", "height: 80%;padding: 3px;")
+        listPicture.setAttribute("src", '/imgs/list-with-dots.svg') //https://www.freeiconspng.com/img/1454
+        listPicture.setAttribute("style", "height: 75%;padding: 3px;")
         browseDisplay1.appendChild(listPicture)
         middleBrowseDiv.appendChild(browseDisplay1)
         var browseDisplay2 = document.createElement("div")
         browseDisplay2.setAttribute("class", "browseDisplay")
+        var listPicture2 = document.createElement("IMG")
+        listPicture2.setAttribute("src", '/imgs/thumb_icon.png') 
+        listPicture2.setAttribute("style", "height: 80%;padding: 3px;")
+        browseDisplay2.appendChild(listPicture2)
         middleBrowseDiv.appendChild(browseDisplay2)
 
         var searchBar = document.createElement("input")
@@ -185,7 +189,7 @@ export default function GitHubModule(){
             this.loadProjectsBySearch(e, searchBar.value)
         })
         
-         yoursButton.addEventListener("click", (e) => {
+        yoursButton.addEventListener("click", (e) => {
             mine.innerHTML = "My Projects"
             yoursButton.setAttribute("style", "display:block")
             this.openTab(e, "yoursButton")
@@ -365,11 +369,11 @@ export default function GitHubModule(){
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         if (tabName == "yoursButton"){
-         document.getElementById(tabName).style.display = "none"
+            document.getElementById(tabName).style.display = "none"
         }
         else{
-        document.getElementById("yoursButton").style.display = "block"
-        document.getElementById(tabName).style.display = "block"}
+            document.getElementById("yoursButton").style.display = "block"
+            document.getElementById(tabName).style.display = "block"}
         evt.currentTarget.className += " active"
       
         //Click on the search bar so that when you start typing it shows updateCommands
