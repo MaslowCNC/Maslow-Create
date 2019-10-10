@@ -114,12 +114,8 @@ export default function GitHubModule(){
         yoursButton.setAttribute("class", "tablinks")
         yoursButton.appendChild(document.createTextNode("Back to my projects"))
         yoursButton.setAttribute("id", "yoursButton")
-        yoursButton.addEventListener("click", (e) => {
-            this.openTab(e, "yoursButton")
-        })
         tabButtons.appendChild(yoursButton)
         
-        //popup.appendChild(document.createElement("br"))
         var topBrowseDiv = document.createElement("div")
         popup.appendChild(topBrowseDiv)
 
@@ -149,31 +145,21 @@ export default function GitHubModule(){
         var githubButton = document.createElement("button")
         githubButton.appendChild(document.createTextNode("Browse Projects"))
         githubButton.classList.add("browseButton")
-        
-        //githubButton.setAttribute("class", "tablinks")
-        //githubButton.style.fontSize = "xx-large"
-        //githubButton.setAttribute("id", "githubButton")
+        githubButton.classList.add("tablinks")    
+        githubButton.setAttribute("id", "githubButton")
         browseDivInner.appendChild(githubButton)
-        githubButton.addEventListener("click", (e) => {
-            this.openTab(e, "githubButton")
-        })
        
         topBrowseDiv.appendChild(browseDiv) 
         topBrowseDiv.setAttribute("class", "topBrowse")
-        //tabButtons.appendChild(githubButton)
-
+        
         //My projects title
         var mine = document.createElement("div")
         mine.innerHTML = "My Projects"
-        mine.setAttribute("style", "justify-content:flex-start; display: inline; width: 20%; margin-top: 20px")
-
+        mine.setAttribute("style", "justify-content:flex-start;display: inline; align-self: flex-start; margin-left: 30px; margin-top: 20px;")
         popup.appendChild(mine)
-
-         //popup.appendChild(document.createElement("br"))
+     
         var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
-
-        //middleBrowseDiv.setAttribute("class", "topBrowse")
         popup.appendChild(middleBrowseDiv)
 
         //My projects title
@@ -199,6 +185,14 @@ export default function GitHubModule(){
             this.loadProjectsBySearch(e, searchBar.value)
         })
         
+         yoursButton.addEventListener("click", (e) => {
+            mine.innerHTML = "My Projects"
+            this.openTab(e, "yoursButton")
+        })
+        githubButton.addEventListener("click", (e) => {
+            mine.innerHTML = "All Maslow Create Projects"
+            this.openTab(e, "githubButton")
+        })
 
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
@@ -315,8 +309,8 @@ export default function GitHubModule(){
         project.appendChild(document.createElement("BR"))
         
         var shortProjectName
-        if(projectName.length > 9){
-            shortProjectName = document.createTextNode(projectName.substr(0,7)+"..")
+        if(projectName.length > 15){
+            shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
         }
         else{
             shortProjectName = document.createTextNode(projectName)
