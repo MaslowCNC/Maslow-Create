@@ -187,6 +187,7 @@ export default function GitHubModule(){
         
          yoursButton.addEventListener("click", (e) => {
             mine.innerHTML = "My Projects"
+            yoursButton.setAttribute("style", "display:block")
             this.openTab(e, "yoursButton")
         })
         githubButton.addEventListener("click", (e) => {
@@ -363,7 +364,12 @@ export default function GitHubModule(){
         }
 
         // Show the current tab, and add an "active" class to the button that opened the tab
-        document.getElementById(tabName).style.display = "block"
+        if (tabName == "yoursButton"){
+         document.getElementById(tabName).style.display = "none"
+        }
+        else{
+        document.getElementById("yoursButton").style.display = "block"
+        document.getElementById(tabName).style.display = "block"}
         evt.currentTarget.className += " active"
       
         //Click on the search bar so that when you start typing it shows updateCommands
