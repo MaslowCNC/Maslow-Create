@@ -708,8 +708,9 @@ input.menu_search:focus {
 }
 
 .float-left-div{
-    float: left;
-    overflow: auto;
+  margin-top: 20px;
+  float: left;
+  overflow: auto;
 }
 
 .github-login-display{
@@ -734,20 +735,21 @@ input.menu_search:focus {
 }
 
 .middleBrowse{
-  align-self: flex-end;
+    align-self: flex-end;
     position: relative;
     right: 10px;
     display: flex;
     width: 50%;
     flex-flow: row;
     justify-content: flex-end;
-    margin-top: -15px;
+    margin-top: -25px;
+    margin-right: 10px;
 }
 
 .browseDisplay {
     align-self: flex-end;
     margin-right: 10px;
-    border: 2px solid red;
+    background-color: #ddd;
     display: inline-block;
     width: 30px;
     height: 30px;
@@ -757,8 +759,8 @@ input.menu_search:focus {
     left:10px;
     width: 48%;
     height: 150px;
-    border: 2px solid grey;
   }
+
 .newProjectdiv{
     position: relative;
     padding: 20px;
@@ -768,7 +770,25 @@ input.menu_search:focus {
     display: flex;
     align-content: center;
     justify-content: space-around;
+    background-color: #ddd;
+    flex-wrap: wrap;
   }
+  .newProjectdiv:hover, .browseDisplay:hover{
+    background-color: white;
+  }
+
+ .browseButton{
+  width: 156px;
+    height: 32px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-family: sans-serif;
+    align-self: flex-end;
+    background-color: #444;
+    color: white;
+    text-align: center;
+    margin-left: 30%;
+ } 
 .project{
     width: 100px;
     height: 100px;

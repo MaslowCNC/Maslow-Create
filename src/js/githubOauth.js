@@ -101,7 +101,7 @@ export default function GitHubModule(){
 
         var welcome = document.createElement("div")
         welcome.innerHTML = "Welcome to Maslow Create"
-        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%")
+        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
         popup.appendChild(welcome)
 
         
@@ -132,17 +132,28 @@ export default function GitHubModule(){
         var browseDiv = document.createElement("div")
         //popup.appendChild(browseDiv)
         browseDiv.classList.add("newProject")
-        var githubButton = document.createElement("button")
-        githubButton.appendChild(document.createTextNode("All Projects"))
-        
+        var browseDivInner = document.createElement("div")
+        browseDiv.appendChild(browseDivInner)
+        browseDivInner.classList.add("newProjectdiv")
+
         var projectPicture = document.createElement("IMG")
         projectPicture.setAttribute("src", '/defaultThumbnail.svg')
         projectPicture.setAttribute("style", "height: 80%; float: left;")
-        browseDiv.appendChild(projectPicture)
+        browseDivInner.appendChild(projectPicture)
+         //Browse Prompt
+        var checkOut = document.createElement("div")
+        browseDivInner.appendChild(checkOut)
+        checkOut.innerHTML = "Check out what others have made on Maslow Create"
+        checkOut.setAttribute("style", "justify-content:flex-start; display: inline; width: 70%; margin-top: 20px")
+
+        var githubButton = document.createElement("button")
+        githubButton.appendChild(document.createTextNode("Browse Projects"))
+        githubButton.classList.add("browseButton")
+        
         //githubButton.setAttribute("class", "tablinks")
         //githubButton.style.fontSize = "xx-large"
         //githubButton.setAttribute("id", "githubButton")
-        browseDiv.appendChild(githubButton)
+        browseDivInner.appendChild(githubButton)
         githubButton.addEventListener("click", (e) => {
             this.openTab(e, "githubButton")
         })
@@ -154,7 +165,7 @@ export default function GitHubModule(){
         //My projects title
         var mine = document.createElement("div")
         mine.innerHTML = "My Projects"
-        mine.setAttribute("style", "justify-content:flex-start; display: inline; width: 20%")
+        mine.setAttribute("style", "justify-content:flex-start; display: inline; width: 20%; margin-top: 20px")
 
         popup.appendChild(mine)
 
@@ -168,6 +179,10 @@ export default function GitHubModule(){
         //My projects title
         var browseDisplay1 = document.createElement("div")
         browseDisplay1.setAttribute("class", "browseDisplay")
+        var listPicture = document.createElement("IMG")
+        listPicture.setAttribute("src", '/imgs/list-with-dots.svg')
+        listPicture.setAttribute("style", "height: 80%;padding: 3px;")
+        browseDisplay1.appendChild(listPicture)
         middleBrowseDiv.appendChild(browseDisplay1)
         var browseDisplay2 = document.createElement("div")
         browseDisplay2.setAttribute("class", "browseDisplay")
@@ -178,7 +193,7 @@ export default function GitHubModule(){
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
-        searchBar.setAttribute("style", "width: 25%; margin-top: 10px; margin-right: 17px")
+        searchBar.setAttribute("style", "width: 25%; margin-top: -20px; margin-right: 115px;")
         popup.appendChild(searchBar)
         searchBar.addEventListener('keyup', (e) => {
             this.loadProjectsBySearch(e, searchBar.value)
