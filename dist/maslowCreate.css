@@ -732,6 +732,26 @@ input.menu_search:focus {
   width:40%;
   margin-right:10px; 
 }
+
+.middleBrowse{
+  align-self: flex-end;
+    position: relative;
+    right: 10px;
+    display: flex;
+    width: 50%;
+    flex-flow: row;
+    justify-content: flex-end;
+    margin-top: -15px;
+}
+
+.browseDisplay {
+    align-self: flex-end;
+    margin-right: 10px;
+    border: 2px solid red;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+}
 .newProject{
     position:relative;
     left:10px;

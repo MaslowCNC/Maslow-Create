@@ -151,22 +151,39 @@ export default function GitHubModule(){
         topBrowseDiv.setAttribute("class", "topBrowse")
         //tabButtons.appendChild(githubButton)
 
-        var searchBar = document.createElement("input")
-        searchBar.setAttribute("type", "text")
-        searchBar.setAttribute("placeholder", "Search for project..")
-        searchBar.setAttribute("class", "menu_search")
-        searchBar.setAttribute("id", "project_search")
-        searchBar.setAttribute("style", "width: 50%")
-        popup.appendChild(searchBar)
-        searchBar.addEventListener('keyup', (e) => {
-            this.loadProjectsBySearch(e, searchBar.value)
-        })
+        //My projects title
         var mine = document.createElement("div")
         mine.innerHTML = "My Projects"
         mine.setAttribute("style", "justify-content:flex-start; display: inline; width: 20%")
 
         popup.appendChild(mine)
 
+         //popup.appendChild(document.createElement("br"))
+        var middleBrowseDiv = document.createElement("div")
+        middleBrowseDiv.setAttribute("class", "middleBrowse")
+
+        //middleBrowseDiv.setAttribute("class", "topBrowse")
+        popup.appendChild(middleBrowseDiv)
+
+        //My projects title
+        var browseDisplay1 = document.createElement("div")
+        browseDisplay1.setAttribute("class", "browseDisplay")
+        middleBrowseDiv.appendChild(browseDisplay1)
+        var browseDisplay2 = document.createElement("div")
+        browseDisplay2.setAttribute("class", "browseDisplay")
+        middleBrowseDiv.appendChild(browseDisplay2)
+
+        var searchBar = document.createElement("input")
+        searchBar.setAttribute("type", "text")
+        searchBar.setAttribute("placeholder", "Search for project..")
+        searchBar.setAttribute("class", "menu_search")
+        searchBar.setAttribute("id", "project_search")
+        searchBar.setAttribute("style", "width: 25%; margin-top: 10px; margin-right: 17px")
+        popup.appendChild(searchBar)
+        searchBar.addEventListener('keyup', (e) => {
+            this.loadProjectsBySearch(e, searchBar.value)
+        })
+        
 
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
@@ -253,6 +270,7 @@ export default function GitHubModule(){
         
         var projectText = document.createElement("span")
         projectText.innerHTML = "Start a new project"
+        projectText.setAttribute("style","align-self: center")
         project.appendChild(projectText)
 
         //project.setAttribute("class", "project")
