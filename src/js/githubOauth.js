@@ -256,8 +256,9 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
+                    console.log(repo)
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
-                    this.addProject(repo.name, repo.id, owned, thumbnailPath)
+                    this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
                 if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
                     this.cloneExampleProjectPopup()
@@ -307,7 +308,7 @@ export default function GitHubModule(){
     /** 
      * Adds a new project to the load projects display.
      */
-    this.addProject = function(projectName, id, owned, thumbnailPath){
+    this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
         //create a project element to display
         if (document.getElementById("thumb").classList.contains("active_filter")){
             var project = document.createElement("DIV")
@@ -339,19 +340,44 @@ export default function GitHubModule(){
         else{
             this.projectsSpaceDiv.classList.add("float-left-div-thumb")
             var project = document.createElement("DIV")
-            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap")
+            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; justify-content: flex-start; width: 100%;")
             var projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
-            projectPicture.setAttribute("style", "width: 30px; height: 30px;")
+            projectPicture.setAttribute("class", "browseColumn")
             project.appendChild(projectPicture)
             
-            var shortProjectName
-            shortProjectName = document.createTextNode(projectName)
+            var shortProjectName = document.createElement("DIV")
+            shortProjectName.innerHTML = projectName
+            shortProjectName.setAttribute("class", "browseColumn")
             
-            project.setAttribute("class", "project")
             project.setAttribute("id", projectName)
+            project.setAttribute("class", "project")
             project.appendChild(shortProjectName) 
+
+            var ownerName = document.createElement("DIV")
+            var ownerNameIn = document.createTextNode(owner)
+            ownerName.appendChild(ownerNameIn) 
+            ownerName.setAttribute("class", "browseColumn")
+            project.appendChild(ownerName) 
+            
+
+            var date = new Date(createdAt);
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var createdTime = document.createElement("DIV")
+            createdTime.setAttribute("class", "browseColumn")
+            var createdTimeIn = document.createTextNode(months[date.getMonth()] + " " + date.getFullYear())
+            createdTime.appendChild(createdTimeIn) 
+            project.appendChild(createdTime) 
+
+            var updated = new Date(updatedAt);
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var updatedTime = document.createElement("DIV")
+            var updatedTimeIn = document.createTextNode(months[date.getMonth()] + " " + date.getFullYear())
+            updatedTime.appendChild(updatedTimeIn)
+            updatedTime.setAttribute("class", "browseColumn")
+            project.appendChild(updatedTime) 
+
             this.projectsSpaceDiv.appendChild(project) 
             
             document.getElementById(projectName).addEventListener('click', () => {
@@ -381,7 +407,8 @@ export default function GitHubModule(){
      * Runs when you switch tabs up top.
      */
     this.openTab = function(evt, tabName) {
-      
+
+
         // Declare all variables
         var i, tabcontent, tablinks
 
@@ -403,7 +430,9 @@ export default function GitHubModule(){
         }
         else{
             document.getElementById("yoursButton").style.display = "block"
-            document.getElementById(tabName).style.display = "block"}
+            document.getElementById(tabName).style.display = "block"
+        }
+        
         evt.currentTarget.className += " active"
       
         //Click on the search bar so that when you start typing it shows updateCommands

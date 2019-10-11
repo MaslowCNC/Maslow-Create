@@ -760,6 +760,13 @@ input.menu_search:focus {
     width: 30px;
     height: 30px;
 }
+.browseColumn{
+  width: 150px; 
+  height: 30px;
+  margin-right: 10px;
+
+}
+
 .newProject{
     position:relative;
     left:10px;
@@ -801,6 +808,7 @@ input.menu_search:focus {
     display: inline-block;
     padding: 10px;
     font-size:13px;
+    border-bottom: 1px solid darkgrey;
 }
 
 .project:hover{
