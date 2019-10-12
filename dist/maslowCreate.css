@@ -761,6 +761,7 @@ input.menu_search:focus {
     height: 30px;
 }
 .browseColumn{
+  text-align: left;
   width: 150px; 
   height: 30px;
   margin-right: 10px;
@@ -808,7 +809,6 @@ input.menu_search:focus {
     display: inline-block;
     padding: 10px;
     font-size:13px;
-    border-bottom: 1px solid darkgrey;
 }
 
 .project:hover{

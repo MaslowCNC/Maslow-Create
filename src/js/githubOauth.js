@@ -310,10 +310,14 @@ export default function GitHubModule(){
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
         //create a project element to display
+        console.log(document.getElementById("thumb").classList)
         if (document.getElementById("thumb").classList.contains("active_filter")){
-            var project = document.createElement("DIV")
-            project.classList.add("newProject")
             
+            this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
+            var project = document.createElement("DIV")
+            //
+            //project.classList.add("newProject")
+            console.log(project.classList)
             var projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
@@ -328,7 +332,7 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
-            project.setAttribute("class", "project")
+            project.classList.add("project")
             project.setAttribute("id", projectName)
             project.appendChild(shortProjectName) 
             this.projectsSpaceDiv.appendChild(project) 
@@ -340,7 +344,7 @@ export default function GitHubModule(){
         else{
             this.projectsSpaceDiv.classList.add("float-left-div-thumb")
             var project = document.createElement("DIV")
-            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; justify-content: flex-start; width: 100%;")
+            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; justify-content: flex-start; width: 100%; border-bottom: 1px solid darkgrey;")
             var projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
@@ -352,7 +356,7 @@ export default function GitHubModule(){
             shortProjectName.setAttribute("class", "browseColumn")
             
             project.setAttribute("id", projectName)
-            project.setAttribute("class", "project")
+            project.classList.add("project")
             project.appendChild(shortProjectName) 
 
             var ownerName = document.createElement("DIV")
