@@ -48,9 +48,10 @@ export default function GitHubModule(){
 
     /** 
      * Flag for active tab
-     * @type {boolean}
+     * @type {string}
      */
     var myTab = "yoursButton"
+
     
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
@@ -104,7 +105,7 @@ export default function GitHubModule(){
             })
             popup.appendChild(closeButton)
         }
-
+        //Welcome title
         var welcome = document.createElement("div")
         welcome.innerHTML = "Welcome to Maslow Create"
         welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
@@ -116,6 +117,7 @@ export default function GitHubModule(){
         tabButtons.setAttribute("style", "display: inline-block;")
         popup.appendChild(tabButtons)
         
+        //My projects button
         var yoursButton = document.createElement("button")
         yoursButton.setAttribute("class", "tablinks active")
         yoursButton.appendChild(document.createTextNode("Back to my projects"))
@@ -125,6 +127,7 @@ export default function GitHubModule(){
         var topBrowseDiv = document.createElement("div")
         popup.appendChild(topBrowseDiv)
 
+        //New project div
         var createNewProject = document.createElement("div")
         createNewProject.setAttribute("class", "newProject")
         topBrowseDiv.appendChild(createNewProject) 
@@ -132,7 +135,6 @@ export default function GitHubModule(){
 
         //Browse all projects box
         var browseDiv = document.createElement("div")
-        //popup.appendChild(browseDiv)
         browseDiv.classList.add("newProject")
         var browseDivInner = document.createElement("div")
         browseDiv.appendChild(browseDivInner)
@@ -142,12 +144,14 @@ export default function GitHubModule(){
         projectPicture.setAttribute("src", '/defaultThumbnail.svg')
         projectPicture.setAttribute("style", "height: 80%; float: left;")
         browseDivInner.appendChild(projectPicture)
+        
         //Browse Prompt
         var checkOut = document.createElement("div")
         browseDivInner.appendChild(checkOut)
         checkOut.innerHTML = "Check out what others have made on Maslow Create"
         checkOut.setAttribute("style", "justify-content:flex-start; display: inline; width: 70%; margin-top: 20px")
 
+        //Browse all button
         var githubButton = document.createElement("button")
         githubButton.appendChild(document.createTextNode("Browse Projects"))
         githubButton.classList.add("browseButton")
@@ -168,7 +172,7 @@ export default function GitHubModule(){
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
-        //My projects title
+        //Display option buttons
         var browseDisplay1 = document.createElement("div")
         browseDisplay1.setAttribute("class", "browseDisplay")
         var listPicture = document.createElement("IMG")
@@ -185,6 +189,7 @@ export default function GitHubModule(){
         browseDisplay2.appendChild(listPicture2)
         middleBrowseDiv.appendChild(browseDisplay2)
 
+        //Input to search for projects
         var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
@@ -195,6 +200,7 @@ export default function GitHubModule(){
             this.loadProjectsBySearch(e, searchBar.value)
         })
 
+        //header for project list style display
         var titlesDiv = document.createElement("div")
         titlesDiv.setAttribute("id","titlesDiv")
         var titles = document.createElement("div")
@@ -220,6 +226,7 @@ export default function GitHubModule(){
 
         popup.appendChild(titlesDiv)
 
+        //Event listeners 
 
         yoursButton.addEventListener("click", (e) => {
             mine.innerHTML = "My Projects"
@@ -233,12 +240,12 @@ export default function GitHubModule(){
             myTab = "githubButton"
             this.openTab(e, "githubButton")
         })
-        browseDisplay1.addEventListener("click", (e) => {
+        browseDisplay1.addEventListener("click", () => {
             titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
             this.openTab(document.getElementById(myTab), myTab)
         })
-        browseDisplay2.addEventListener("click", (e) => {
+        browseDisplay2.addEventListener("click", () => {
             titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
             this.openTab(document.getElementById(myTab), myTab)
@@ -266,7 +273,6 @@ export default function GitHubModule(){
             //Load projects
             var query
             var owned
-            console.log(document.getElementsByClassName("tablinks active")[0].id)
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
@@ -326,16 +332,12 @@ export default function GitHubModule(){
         projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
         projectPicture.setAttribute("style", "height: 80%; float: left;")
         project.appendChild(projectPicture)
-        //project.appendChild(document.createElement("BR"))
         
         var projectText = document.createElement("span")
         projectText.innerHTML = "Start a new project"
         projectText.setAttribute("style","align-self: center")
         project.appendChild(projectText)
 
-        //project.setAttribute("class", "project")
-        //project.setAttribute("id", projectName)
-        //project.appendChild(shortProjectName) 
         document.querySelector(".newProject").appendChild(project) 
         
         project.addEventListener('click', () => {
@@ -377,15 +379,15 @@ export default function GitHubModule(){
         }
         else{
             this.projectsSpaceDiv.classList.add("float-left-div-thumb")
-            var project = document.createElement("DIV")
+            project = document.createElement("DIV")
             project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; justify-content: flex-start; width: 100%; border-bottom: 1px solid darkgrey;")
-            var projectPicture = document.createElement("IMG")
+            projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
             projectPicture.setAttribute("class", "browseColumn")
             project.appendChild(projectPicture)
             
-            var shortProjectName = document.createElement("DIV")
+            shortProjectName = document.createElement("DIV")
             shortProjectName.innerHTML = projectName
             shortProjectName.setAttribute("class", "browseColumn")
             
@@ -400,18 +402,17 @@ export default function GitHubModule(){
             project.appendChild(ownerName) 
             
 
-            var date = new Date(createdAt);
-            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var date = new Date(createdAt)
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
             var createdTime = document.createElement("DIV")
             createdTime.setAttribute("class", "browseColumn")
             var createdTimeIn = document.createTextNode(months[date.getMonth()] + " " + date.getFullYear())
             createdTime.appendChild(createdTimeIn) 
             project.appendChild(createdTime) 
 
-            var updated = new Date(updatedAt);
-            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var updated = new Date(updatedAt)
             var updatedTime = document.createElement("DIV")
-            var updatedTimeIn = document.createTextNode(months[date.getMonth()] + " " + date.getFullYear())
+            var updatedTimeIn = document.createTextNode(months[updated.getMonth()] + " " + date.getFullYear())
             updatedTime.appendChild(updatedTimeIn)
             updatedTime.setAttribute("class", "browseColumn")
             project.appendChild(updatedTime) 
@@ -470,7 +471,7 @@ export default function GitHubModule(){
             document.getElementById("yoursButton").style.display = "block"
             document.getElementById(tabName).style.display = "block"
         }
-       document.getElementById(myTab).className += " active"
+        document.getElementById(myTab).className += " active"
       
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
