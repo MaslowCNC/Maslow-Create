@@ -45,6 +45,12 @@ export default function GitHubModule(){
      * @type {object}
      */
     var intervalTimer
+
+    /** 
+     * Flag for active tab
+     * @type {boolean}
+     */
+    var myTab = "yoursButton"
     
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
@@ -111,7 +117,7 @@ export default function GitHubModule(){
         popup.appendChild(tabButtons)
         
         var yoursButton = document.createElement("button")
-        yoursButton.setAttribute("class", "tablinks")
+        yoursButton.setAttribute("class", "tablinks active")
         yoursButton.appendChild(document.createTextNode("Back to my projects"))
         yoursButton.setAttribute("id", "yoursButton")
         tabButtons.appendChild(yoursButton)
@@ -188,21 +194,51 @@ export default function GitHubModule(){
         searchBar.addEventListener('keyup', (e) => {
             this.loadProjectsBySearch(e, searchBar.value)
         })
-        
+
+        var titlesDiv = document.createElement("div")
+        titlesDiv.setAttribute("id","titlesDiv")
+        var titles = document.createElement("div")
+        titles.innerHTML = ""
+        titles.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles)
+        var titles2 = document.createElement("div")
+        titles2.innerHTML = "Project"
+        titles2.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles2)
+        var titles3 = document.createElement("div")
+        titles3.innerHTML = "Creator"
+        titles3.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles3)
+        var titles4 = document.createElement("div")
+        titles4.innerHTML = "Created on"
+        titles4.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles4)
+        var titles5 = document.createElement("div")
+        titles5.innerHTML = "Last Modified"
+        titles5.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles5)
+
+        popup.appendChild(titlesDiv)
+
+
         yoursButton.addEventListener("click", (e) => {
             mine.innerHTML = "My Projects"
             yoursButton.setAttribute("style", "display:block")
+            myTab = "yoursButton"
             this.openTab(e, "yoursButton")
         })
         githubButton.addEventListener("click", (e) => {
             mine.innerHTML = "All Maslow Create Projects"
+            myTab = "githubButton"
             this.openTab(e, "githubButton")
         })
         browseDisplay1.addEventListener("click", (e) => {
             browseDisplay2.classList.remove("active_filter")
+            this.openTab(document.getElementById(myTab), myTab)
         })
         browseDisplay2.addEventListener("click", (e) => {
             browseDisplay2.classList.add("active_filter")
+            this.openTab(document.getElementById(myTab), myTab)
         })
 
         this.projectsSpaceDiv = document.createElement("DIV")
@@ -227,6 +263,7 @@ export default function GitHubModule(){
             //Load projects
             var query
             var owned
+            console.log(document.getElementsByClassName("tablinks active")[0].id)
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
@@ -430,8 +467,7 @@ export default function GitHubModule(){
             document.getElementById("yoursButton").style.display = "block"
             document.getElementById(tabName).style.display = "block"
         }
-        
-        evt.currentTarget.className += " active"
+       document.getElementById(myTab).className += " active"
       
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()

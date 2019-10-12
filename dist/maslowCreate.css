@@ -798,6 +798,20 @@ input.menu_search:focus {
     margin-right: 115px;
   }
 
+  #titlesDiv{
+    font-size: 13px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: #a9a9a957;
+    padding: 5px 10px;
+    margin: 0;
+    height: 4%;
+    box-sizing: border-box;
+}
+
  .browseButton{
   width: 156px;
     height: 32px;
