@@ -800,7 +800,7 @@ input.menu_search:focus {
 
   #titlesDiv{
     font-size: 13px;
-    display: flex;
+    display: none;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-start;

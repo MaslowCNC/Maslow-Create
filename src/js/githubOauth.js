@@ -228,15 +228,18 @@ export default function GitHubModule(){
             this.openTab(e, "yoursButton")
         })
         githubButton.addEventListener("click", (e) => {
+
             mine.innerHTML = "All Maslow Create Projects"
             myTab = "githubButton"
             this.openTab(e, "githubButton")
         })
         browseDisplay1.addEventListener("click", (e) => {
+            titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
             this.openTab(document.getElementById(myTab), myTab)
         })
         browseDisplay2.addEventListener("click", (e) => {
+            titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
             this.openTab(document.getElementById(myTab), myTab)
         })
