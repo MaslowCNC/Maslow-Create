@@ -791,6 +791,13 @@ input.menu_search:focus {
     background-color: white;
   }
 
+  #project_search{
+    position: relative;
+    width: 25%;
+    top: -20px;
+    margin-right: 115px;
+  }
+
  .browseButton{
   width: 156px;
     height: 32px;

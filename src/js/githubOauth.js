@@ -184,7 +184,6 @@ export default function GitHubModule(){
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
-        searchBar.setAttribute("style", "width: 25%; margin-top: -20px; margin-right: 115px;")
         popup.appendChild(searchBar)
         searchBar.addEventListener('keyup', (e) => {
             this.loadProjectsBySearch(e, searchBar.value)
@@ -256,7 +255,6 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    console.log(repo)
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
@@ -310,14 +308,10 @@ export default function GitHubModule(){
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
         //create a project element to display
-        console.log(document.getElementById("thumb").classList)
         if (document.getElementById("thumb").classList.contains("active_filter")){
             
             this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
             var project = document.createElement("DIV")
-            //
-            //project.classList.add("newProject")
-            console.log(project.classList)
             var projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
