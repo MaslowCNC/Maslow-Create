@@ -52,8 +52,11 @@ export default function GitHubModule(){
      */
     var myTab = "yoursButton"
 
-    
+    //Github pop up event listeners
     document.getElementById("loginButton").addEventListener("mousedown", () => {
+        this.tryLogin()
+    })
+    document.getElementById("browseNonGit").addEventListener("mousedown", () => {
         this.tryLogin()
     })
     
