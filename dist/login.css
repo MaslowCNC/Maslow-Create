@@ -28,7 +28,6 @@
 }
 .logindiv{
   margin: 0 10px 0 10px;
-  height: 300px;
   position: relative;
   width: 100%;
     box-sizing: border-box;
@@ -47,7 +46,6 @@
   display:flex;
   position: relative;
   z-index: 1;
-  
   max-width: 80%;
   margin: 0 auto 100px;
   padding: 45px;
@@ -80,7 +78,9 @@
   cursor: pointer;
 }
 .form button:hover,.form button:active,.form button:focus {
-  background: #765c7b;
+    background: #f1eff1;
+    border: 2px solid #444;
+    color: #444;
 }
 .form .message {
   margin: 15px 0 0;
@@ -289,7 +289,9 @@
  } 
 
 .browseButton:hover {
-   background: #765c7b;
+    background: #f1eff1;
+    border: 2px solid #444;
+    color: #444;
 }
 
 .project{
