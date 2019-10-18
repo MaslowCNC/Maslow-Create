@@ -273,6 +273,11 @@ export default function GitHubModule(){
         
         popup.classList.remove('off')
         popup.setAttribute("style", "text-align: center")
+         //Welcome title
+        var welcome = document.createElement("div")
+        welcome.innerHTML = "Maslow Create User Projects"
+        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
+        popup.appendChild(welcome)
         
         var topBrowseDiv = document.createElement("div")
         popup.appendChild(topBrowseDiv)
@@ -307,7 +312,7 @@ export default function GitHubModule(){
         searchBar.setAttribute("id", "project_search")
         popup.appendChild(searchBar)
         searchBar.addEventListener('keyup', (e) => {
-            this.loadProjectsBySearch(e, searchBar.value)
+            this.loadNonGit(searchBar.value)
         })
 
         //header for project list style display
@@ -358,7 +363,7 @@ export default function GitHubModule(){
     
         }
     
-    this.loadNonGit = function(){
+    this.loadNonGit = function(searchString){    
         //Load All projects
 
          while (this.projectsSpaceDiv.firstChild) {
@@ -372,9 +377,13 @@ export default function GitHubModule(){
             var query
             var owned
             owned = false
-            query = 'topic:maslowcreate'
+            query = ' topic:maslowcreate'
             var sortMethod = "stars"  //replace with dropdown input!
             
+             if(searchString !== undefined){ //If the empty search returned no results on loading
+                    query = searchString + ' topic:maslowcreate'
+                }    
+
             octokit.search.repos({
                 q: query,
                 sort: sortMethod,
@@ -390,9 +399,7 @@ export default function GitHubModule(){
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
-                if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
-                    
-                }
+               
             }) 
     }
     /** 
