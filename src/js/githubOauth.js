@@ -57,7 +57,7 @@ export default function GitHubModule(){
         this.tryLogin()
     })
     document.getElementById("browseNonGit").addEventListener("mousedown", () => {
-        this.tryLogin()
+        this.browseNonGit()
     })
     
     /** 
@@ -171,7 +171,7 @@ export default function GitHubModule(){
         mine.setAttribute("style", "justify-content:flex-start;display: inline; align-self: flex-start; margin-left: 30px; margin-top: 20px;")
         popup.appendChild(mine)
      
-        var middleBrowseDiv = document.createElement("div")
+         var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
@@ -229,6 +229,7 @@ export default function GitHubModule(){
 
         popup.appendChild(titlesDiv)
 
+
         //Event listeners 
 
         yoursButton.addEventListener("click", (e) => {
@@ -261,6 +262,115 @@ export default function GitHubModule(){
         
         yoursButton.click()
     }
+
+    /** 
+     * Create a page pop up that displays all projects without logging into github  */
+    this.browseNonGit = function(ev, searchString){
+         //Remove everything in the popup now
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        
+        popup.classList.remove('off')
+        popup.setAttribute("style", "text-align: center")
+        
+        var topBrowseDiv = document.createElement("div")
+        popup.appendChild(topBrowseDiv)
+
+         var middleBrowseDiv = document.createElement("div")
+        middleBrowseDiv.setAttribute("class", "middleBrowse")
+        popup.appendChild(middleBrowseDiv)
+
+        //Display option buttons
+        var browseDisplay1 = document.createElement("div")
+        browseDisplay1.setAttribute("class", "browseDisplay")
+        var listPicture = document.createElement("IMG")
+        listPicture.setAttribute("src", '/imgs/list-with-dots.svg') //https://www.freeiconspng.com/img/1454
+        listPicture.setAttribute("style", "height: 75%;padding: 3px;")
+        browseDisplay1.appendChild(listPicture)
+        middleBrowseDiv.appendChild(browseDisplay1)
+        var browseDisplay2 = document.createElement("div")
+        browseDisplay2.setAttribute("class", "browseDisplay active_filter")
+        browseDisplay2.setAttribute("id", "thumb")
+        var listPicture2 = document.createElement("IMG")
+        listPicture2.setAttribute("src", '/imgs/thumb_icon.png') 
+        listPicture2.setAttribute("style", "height: 80%;padding: 3px;")
+        browseDisplay2.appendChild(listPicture2)
+        middleBrowseDiv.appendChild(browseDisplay2)
+
+        //Input to search for projects
+        var searchBar = document.createElement("input")
+        searchBar.setAttribute("type", "text")
+        searchBar.setAttribute("placeholder", "Search for project..")
+        searchBar.setAttribute("class", "menu_search")
+        searchBar.setAttribute("id", "project_search")
+        popup.appendChild(searchBar)
+        searchBar.addEventListener('keyup', (e) => {
+            this.loadProjectsBySearch(e, searchBar.value)
+        })
+
+        //header for project list style display
+        var titlesDiv = document.createElement("div")
+        titlesDiv.setAttribute("id","titlesDiv")
+        var titles = document.createElement("div")
+        titles.innerHTML = ""
+        titles.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles)
+        var titles2 = document.createElement("div")
+        titles2.innerHTML = "Project"
+        titles2.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles2)
+        var titles3 = document.createElement("div")
+        titles3.innerHTML = "Creator"
+        titles3.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles3)
+        var titles4 = document.createElement("div")
+        titles4.innerHTML = "Created on"
+        titles4.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles4)
+        var titles5 = document.createElement("div")
+        titles5.innerHTML = "Last Modified"
+        titles5.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles5)
+
+        popup.appendChild(titlesDiv)
+
+        this.projectsSpaceDiv = document.createElement("DIV")
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div")
+        this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
+        popup.appendChild(this.projectsSpaceDiv)
+        //Load projects
+            
+            var octokit = new Octokit({
+                userAgent: 'Maslow-Create'
+            })
+
+            var query
+            var owned
+            owned = false
+            query = 'topic:maslowcreate'
+            
+            octokit.search.repos({
+                q: query,
+                sort: "stars",
+                per_page: 100,
+                page: 1,
+                headers: {
+                    accept: 'application/vnd.github.mercy-preview+json'
+                }
+            }).then(result => {
+                console.log(result)
+                result.data.items.forEach(repo => {
+                   
+                    const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
+                    this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
+                })
+                if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
+                    
+                }
+            }) 
+    
+        }
     
     /** 
      * Search for the name of a project and then return results which match that search.
