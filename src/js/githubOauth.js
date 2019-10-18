@@ -279,6 +279,7 @@ export default function GitHubModule(){
 
          var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
+        middleBrowseDiv.style.marginTop = "25px"
         popup.appendChild(middleBrowseDiv)
 
         //Display option buttons
