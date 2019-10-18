@@ -175,6 +175,31 @@ export default function GitHubModule(){
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
+        //Filter Dropdown
+        var filterDiv = document.createElement("div")
+        var filterLabel = document.createElement("LABEL")
+        filterLabel.textContent = "Filter by"
+        middleBrowseDiv.appendChild(filterLabel)
+        filterDiv.setAttribute("class","custom-select")
+        filterDiv.setAttribute("style","width:200px")
+        var filterDrop = document.createElement("select")
+        
+        var filterDrop1 = document.createElement("option")
+        filterDrop1.textContent = "Stars"
+        filterDrop.appendChild(filterDrop1)
+        var filterDrop2 = document.createElement("option")
+        filterDrop2.textContent = "Date Updated"
+        filterDrop.appendChild(filterDrop2)
+        var filterDrop3 = document.createElement("option")
+        filterDrop3.textContent = "Owner"
+        filterDrop.appendChild(filterDrop3)
+        var filterDrop4 = document.createElement("option")
+        filterDrop4.textContent = "Forks"
+        filterDrop.appendChild(filterDrop4)
+
+        middleBrowseDiv.appendChild(filterDiv)
+        filterDiv.appendChild(filterDrop)
+
         //Display option buttons
         var browseDisplay1 = document.createElement("div")
         browseDisplay1.setAttribute("class", "browseDisplay")

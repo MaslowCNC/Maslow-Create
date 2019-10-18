@@ -198,7 +198,9 @@
 #project_search{
   align-self: flex-end;
   width:40%;
-  margin-right:10px; 
+  margin-right:30px; 
+  position: relative;
+  top: 10px;
 }
 
 .middleBrowse{
@@ -253,12 +255,6 @@
     background-color: white;
   }
 
-  #project_search{
-    position: relative;
-    width: 25%;
-    top: -20px;
-    margin-right: 115px;
-  }
 
   #titlesDiv{
     font-size: 13px;
