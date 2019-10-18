@@ -339,7 +339,30 @@ export default function GitHubModule(){
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
         this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
         popup.appendChild(this.projectsSpaceDiv)
-        //Load projects
+        
+        this.loadNonGit()
+
+            //display options event listeners
+
+            browseDisplay1.addEventListener("click", () => {
+            titlesDiv.style.display = "flex"
+            browseDisplay2.classList.remove("active_filter")
+            this.loadNonGit()
+            })
+            browseDisplay2.addEventListener("click", () => {
+            titlesDiv.style.display = "none"
+            browseDisplay2.classList.add("active_filter")
+            this.loadNonGit()
+            })
+    
+        }
+    
+    this.loadNonGit = function(){
+        //Load All projects
+
+         while (this.projectsSpaceDiv.firstChild) {
+                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+            }
             
             var octokit = new Octokit({
                 userAgent: 'Maslow-Create'
@@ -349,10 +372,11 @@ export default function GitHubModule(){
             var owned
             owned = false
             query = 'topic:maslowcreate'
+            var sortMethod = "stars"  //replace with dropdown input!
             
             octokit.search.repos({
                 q: query,
-                sort: "stars",
+                sort: sortMethod,
                 per_page: 100,
                 page: 1,
                 headers: {
@@ -369,9 +393,7 @@ export default function GitHubModule(){
                     
                 }
             }) 
-    
-        }
-    
+    }
     /** 
      * Search for the name of a project and then return results which match that search.
      */
@@ -386,6 +408,7 @@ export default function GitHubModule(){
             //Load projects
             var query
             var owned
+            var sortMethod = "stars"  //replace with dropdown input!
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
@@ -406,7 +429,7 @@ export default function GitHubModule(){
             
             octokit.search.repos({
                 q: query,
-                sort: "stars",
+                sort: sortMethod,
                 per_page: 100,
                 page: 1,
                 headers: {
@@ -559,7 +582,6 @@ export default function GitHubModule(){
      * Runs when you switch tabs up top.
      */
     this.openTab = function(evt, tabName) {
-
 
         // Declare all variables
         var i, tabcontent, tablinks
