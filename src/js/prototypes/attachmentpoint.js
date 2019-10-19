@@ -436,8 +436,10 @@ export default class AttachmentPoint {
      * Updates the default value for the ap.
      */ 
     updateDefault(newDefault){
+        var oldDefault = this.defaultValue
         this.defaultValue = newDefault
-        if(this.connectors.length == 0){    //Update the value to be the default if there is nothing attached
+        
+        if(this.connectors.length == 0 && this.value == oldDefault){    //Update the value to be the default if there is nothing attached
             this.value = this.defaultValue
         }
     }
