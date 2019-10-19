@@ -178,7 +178,7 @@ export default function GitHubModule(){
         //Filter Dropdown
         var filterDiv = document.createElement("div")
         var filterLabel = document.createElement("LABEL")
-        filterLabel.textContent = "Filter by"
+        filterLabel.textContent = "Sort by"
         filterLabel.setAttribute("style","padding-top: 12px; font-size: 12px")
         middleBrowseDiv.appendChild(filterLabel)
         filterDiv.setAttribute("class","custom-select")
@@ -196,13 +196,9 @@ export default function GitHubModule(){
         filterDrop2.setAttribute("value","2")
         filterDrop.appendChild(filterDrop2)
         var filterDrop3 = document.createElement("option")
-        filterDrop3.textContent = "author-date"
+        filterDrop3.textContent = "Forks"
         filterDrop3.setAttribute("value","3")
         filterDrop.appendChild(filterDrop3)
-        var filterDrop4 = document.createElement("option")
-        filterDrop4.textContent = "Forks"
-        filterDrop4.setAttribute("value","4")
-        filterDrop.appendChild(filterDrop4)
 
         middleBrowseDiv.appendChild(filterDiv)
         filterDiv.appendChild(filterDrop)
@@ -226,17 +222,21 @@ export default function GitHubModule(){
 
         //Input to search for projects
 
+         var middleBrowseDiv2 = document.createElement("div")
+        middleBrowseDiv2.setAttribute("class", "middleBrowse2")
+        popup.appendChild(middleBrowseDiv2)
+
         var searchIcon = document.createElement("IMG")
         searchIcon.setAttribute("src", '/imgs/search_icon.svg')
-        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;top: 30px; right: 47%;")
-        popup.appendChild(searchIcon)
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
+        middleBrowseDiv2.appendChild(searchIcon)
 
         var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
-        popup.appendChild(searchBar)
+        middleBrowseDiv2.appendChild(searchBar)
 
         searchBar.addEventListener('keyup', (e) => {
             var opt = document.getElementById("filterDrop")
@@ -331,10 +331,38 @@ export default function GitHubModule(){
         var topBrowseDiv = document.createElement("div")
         popup.appendChild(topBrowseDiv)
 
-         var middleBrowseDiv = document.createElement("div")
+        var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
-        middleBrowseDiv.style.marginTop = "25px"
+        middleBrowseDiv.setAttribute("style", "margin-top:20px")
         popup.appendChild(middleBrowseDiv)
+
+        //Filter Dropdown
+        var filterDiv = document.createElement("div")
+        var filterLabel = document.createElement("LABEL")
+        filterLabel.textContent = "Sort by"
+        filterLabel.setAttribute("style","padding-top: 12px; font-size: 12px")
+        middleBrowseDiv.appendChild(filterLabel)
+        filterDiv.setAttribute("class","custom-select")
+        //filterDiv.setAttribute("style","margin-right:0; width:200px")
+        var filterDrop = document.createElement("select")
+        filterDrop.setAttribute("id","filterDrop")
+        filterDrop.setAttribute("class","select-box1")
+
+        var filterDrop1 = document.createElement("option")
+        filterDrop1.textContent = "stars"
+        filterDrop1.setAttribute("value","1")
+        filterDrop.appendChild(filterDrop1)
+        var filterDrop2 = document.createElement("option")
+        filterDrop2.textContent = "updated"
+        filterDrop2.setAttribute("value","2")
+        filterDrop.appendChild(filterDrop2)
+        var filterDrop3 = document.createElement("option")
+        filterDrop3.textContent = "Forks"
+        filterDrop3.setAttribute("value","3")
+        filterDrop.appendChild(filterDrop3)
+
+        middleBrowseDiv.appendChild(filterDiv)
+        filterDiv.appendChild(filterDrop)
 
         //Display option buttons
         var browseDisplay1 = document.createElement("div")
@@ -354,16 +382,36 @@ export default function GitHubModule(){
         middleBrowseDiv.appendChild(browseDisplay2)
 
         //Input to search for projects
+
+         var middleBrowseDiv2 = document.createElement("div")
+        middleBrowseDiv2.setAttribute("class", "middleBrowse2")
+        popup.appendChild(middleBrowseDiv2)
+
+        var searchIcon = document.createElement("IMG")
+        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
+        middleBrowseDiv2.appendChild(searchIcon)
+
         var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
-        popup.appendChild(searchBar)
-        searchBar.addEventListener('keyup', (e) => {
-            this.loadNonGit(searchBar.value)
-        })
+        middleBrowseDiv2.appendChild(searchBar)
 
+        searchBar.addEventListener('keyup', (e) => {
+            var opt = document.getElementById("filterDrop")
+            var strUser = opt.options[opt.selectedIndex].textContent;
+            this.loadNonGit(strUser)
+        })
+        
+        filterDiv.addEventListener("change", (e) => {
+
+        var opt = document.getElementById("filterDrop")
+        var strUser = opt.options[opt.selectedIndex].textContent;
+        console.log(e.target)
+           this.loadNonGit(strUser)
+        })
         //header for project list style display
         var titlesDiv = document.createElement("div")
         titlesDiv.setAttribute("id","titlesDiv")

@@ -196,7 +196,7 @@
     box-sizing: border-box;
 }
 #project_search{
-  background: #444;
+    background: #444;
     color: white;
     border: none;
     padding: 4px;
@@ -204,8 +204,7 @@
     width: 40%;
     margin-right: 30px;
     position: relative;
-    top: 10px;
-}
+    }
 
 .middleBrowse{
     align-self: flex-end;
@@ -217,6 +216,14 @@
     justify-content: flex-end;
     margin-top: -25px;
     margin-right: 10px;
+}
+
+.middleBrowse2{
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
 }
 
 .custom-select{
@@ -262,6 +269,7 @@
     height: 30px;
 }
 .browseColumn{
+  overflow:hidden;
   text-align: left;
   width: 150px; 
   height: 30px;
