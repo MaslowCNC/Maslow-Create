@@ -181,21 +181,22 @@ export default function GitHubModule(){
         filterLabel.textContent = "Filter by"
         middleBrowseDiv.appendChild(filterLabel)
         filterDiv.setAttribute("class","custom-select")
-        filterDiv.setAttribute("style","width:200px")
+        filterDiv.setAttribute("style","margin-right:0; width:200px")
         var filterDrop = document.createElement("select")
-        
+        filterDrop.setAttribute("id","filterDrop")
+
         var filterDrop1 = document.createElement("option")
-        filterDrop1.textContent = "Stars"
+        filterDrop1.textContent = "stars"
+        filterDrop1.setAttribute("value","1")
         filterDrop.appendChild(filterDrop1)
         var filterDrop2 = document.createElement("option")
-        filterDrop2.textContent = "Date Updated"
+        filterDrop2.textContent = "updated"
+        filterDrop2.setAttribute("value","2")
         filterDrop.appendChild(filterDrop2)
         var filterDrop3 = document.createElement("option")
-        filterDrop3.textContent = "Owner"
+        filterDrop3.textContent = "forks"
+        filterDrop3.setAttribute("value","3")
         filterDrop.appendChild(filterDrop3)
-        var filterDrop4 = document.createElement("option")
-        filterDrop4.textContent = "Forks"
-        filterDrop.appendChild(filterDrop4)
 
         middleBrowseDiv.appendChild(filterDiv)
         filterDiv.appendChild(filterDrop)
@@ -224,10 +225,20 @@ export default function GitHubModule(){
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
         popup.appendChild(searchBar)
-        searchBar.addEventListener('keyup', (e) => {
-            this.loadProjectsBySearch(e, searchBar.value)
-        })
 
+        searchBar.addEventListener('keyup', (e) => {
+            var opt = document.getElementById("filterDrop")
+            var strUser = opt.options[opt.selectedIndex].textContent;
+            this.loadProjectsBySearch(e, searchBar.value, strUser)
+        })
+        filterDiv.addEventListener("change", (e) => {
+
+        var opt = document.getElementById("filterDrop")
+        var strUser = opt.options[opt.selectedIndex].textContent;
+        console.log(e.target)
+            this.loadProjectsBySearch(e, searchBar.value, strUser)
+            
+        })
         //header for project list style display
         var titlesDiv = document.createElement("div")
         titlesDiv.setAttribute("id","titlesDiv")
@@ -430,18 +441,19 @@ export default function GitHubModule(){
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(ev, searchString){
+    this.loadProjectsBySearch = function(ev, searchString, sorting){
 
-        if(ev.key == "Enter"){
+        if(ev.key == "Enter" || ev.target == document.getElementById("filterDrop")){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
+            console.log(sorting)
             
             //Load projects
             var query
             var owned
-            var sortMethod = "stars"  //replace with dropdown input!
+            var sortMethod = sorting  //replace with dropdown input!
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
