@@ -312,7 +312,8 @@ export default function GitHubModule(){
     }
 
     /** 
-     * Create a page pop up that displays all projects without logging into github  */
+     * Create a page pop up that displays all projects without logging into github  
+     */
     this.browseNonGit = function(){
         //Remove everything in the popup now
         while (popup.firstChild) {
@@ -458,6 +459,9 @@ export default function GitHubModule(){
     
     }
     
+    /** 
+     * Search query without authentication
+      */
     this.loadNonGit = function(searchString){    
         //Load All projects
 
