@@ -228,7 +228,7 @@ function placeGitHubMolecule(ev){
         atomType: 'GitHubMolecule',
         projectID: clr,
         uniqueID: GlobalVariables.generateUniqueID()
-    }, null, GlobalVariables.availableTypes) //null indicates that there is nothing to load from the molecule list for this one
+    }, null, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one
     
 }
 

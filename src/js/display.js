@@ -359,6 +359,7 @@ export default class Display {
                 gridCheckLabel.setAttribute('for', 'gridCheck')
                 gridCheckLabel.setAttribute('style', 'margin-right:1em;')
                 gridCheckLabel.textContent= "Grid"
+                gridCheckLabel.setAttribute('style', 'user-select: none;')
 
 
                 gridCheck.addEventListener('change', event => {
@@ -391,6 +392,7 @@ export default class Display {
                 axesCheckLabel.setAttribute('style', 'margin-right:1em;')
                 axesDiv.setAttribute('style', 'float:right;')
                 axesCheckLabel.textContent= "Axes"
+                axesCheckLabel.setAttribute('style', 'user-select: none;')
 
                 axesCheck.addEventListener('change', event => {
                     if(event.target.checked){
@@ -424,6 +426,7 @@ export default class Display {
                 //wireCheckLabel.setAttribute('style', 'margin-right:10em;')
                 wireDiv.setAttribute('style', 'float:right;')
                 wireCheckLabel.textContent= "Wireframe"
+                wireCheckLabel.setAttribute('style', 'user-select: none;')
 
                 wireCheck.addEventListener('change', event => {
                     if( event.target.checked){
