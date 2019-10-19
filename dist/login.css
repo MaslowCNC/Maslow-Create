@@ -196,11 +196,15 @@
     box-sizing: border-box;
 }
 #project_search{
-  align-self: flex-end;
-  width:40%;
-  margin-right:30px; 
-  position: relative;
-  top: 10px;
+  background: #444;
+    color: white;
+    border: none;
+    padding: 4px;
+    align-self: flex-end;
+    width: 40%;
+    margin-right: 30px;
+    position: relative;
+    top: 10px;
 }
 
 .middleBrowse{
@@ -213,6 +217,38 @@
     justify-content: flex-end;
     margin-top: -25px;
     margin-right: 10px;
+}
+
+.custom-select{
+    position: relative;
+    display: inline-block;
+    margin: 4px 10px 0 5px;
+    width: 45%;
+}
+
+.custom-select select{
+    display:inline-block;
+    width: 100%;
+    height: 30px;
+    cursor: pointer;
+    padding: 10px 15px;
+    outline: 0;
+    border: 1 px solid #444;
+    border-radius: none;
+    background: light-grey
+    color: darkgrey
+    margin: 6px;
+  }
+      
+.select__arrow{
+  position: absolute;
+  top: 16px
+  right: 15px
+  width: 0
+  height: 0
+  pointer-events: none
+  border-style: solid
+  border-width: 8px 5px 0 5px
 }
 
 .browseDisplay {
@@ -265,7 +301,7 @@
     width: 100%;
     background-color: #a9a9a957;
     padding: 5px 10px;
-    margin: 0;
+    margin: 10px 0;
     height: 4%;
     box-sizing: border-box;
 }

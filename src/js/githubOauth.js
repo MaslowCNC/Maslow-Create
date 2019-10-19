@@ -179,11 +179,13 @@ export default function GitHubModule(){
         var filterDiv = document.createElement("div")
         var filterLabel = document.createElement("LABEL")
         filterLabel.textContent = "Filter by"
+        filterLabel.setAttribute("style","padding-top: 12px; font-size: 12px")
         middleBrowseDiv.appendChild(filterLabel)
         filterDiv.setAttribute("class","custom-select")
-        filterDiv.setAttribute("style","margin-right:0; width:200px")
+        //filterDiv.setAttribute("style","margin-right:0; width:200px")
         var filterDrop = document.createElement("select")
         filterDrop.setAttribute("id","filterDrop")
+        filterDrop.setAttribute("class","select-box1")
 
         var filterDrop1 = document.createElement("option")
         filterDrop1.textContent = "stars"
@@ -194,9 +196,13 @@ export default function GitHubModule(){
         filterDrop2.setAttribute("value","2")
         filterDrop.appendChild(filterDrop2)
         var filterDrop3 = document.createElement("option")
-        filterDrop3.textContent = "forks"
+        filterDrop3.textContent = "author-date"
         filterDrop3.setAttribute("value","3")
         filterDrop.appendChild(filterDrop3)
+        var filterDrop4 = document.createElement("option")
+        filterDrop4.textContent = "Forks"
+        filterDrop4.setAttribute("value","4")
+        filterDrop.appendChild(filterDrop4)
 
         middleBrowseDiv.appendChild(filterDiv)
         filterDiv.appendChild(filterDrop)
@@ -219,6 +225,12 @@ export default function GitHubModule(){
         middleBrowseDiv.appendChild(browseDisplay2)
 
         //Input to search for projects
+
+        var searchIcon = document.createElement("IMG")
+        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;top: 30px; right: 47%;")
+        popup.appendChild(searchIcon)
+
         var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
@@ -234,6 +246,7 @@ export default function GitHubModule(){
         filterDiv.addEventListener("change", (e) => {
 
         var opt = document.getElementById("filterDrop")
+        opt.classList.toggle("open")
         var strUser = opt.options[opt.selectedIndex].textContent;
         console.log(e.target)
             this.loadProjectsBySearch(e, searchBar.value, strUser)
