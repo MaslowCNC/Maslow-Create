@@ -171,7 +171,7 @@ export default function GitHubModule(){
         mine.setAttribute("style", "justify-content:flex-start;display: inline; align-self: flex-start; margin-left: 30px; margin-top: 20px;")
         popup.appendChild(mine)
      
-         var middleBrowseDiv = document.createElement("div")
+        var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
@@ -222,7 +222,7 @@ export default function GitHubModule(){
 
         //Input to search for projects
 
-         var middleBrowseDiv2 = document.createElement("div")
+        var middleBrowseDiv2 = document.createElement("div")
         middleBrowseDiv2.setAttribute("class", "middleBrowse2")
         popup.appendChild(middleBrowseDiv2)
 
@@ -240,15 +240,14 @@ export default function GitHubModule(){
 
         searchBar.addEventListener('keyup', (e) => {
             var opt = document.getElementById("filterDrop")
-            var strUser = opt.options[opt.selectedIndex].textContent;
+            var strUser = opt.options[opt.selectedIndex].textContent
             this.loadProjectsBySearch(e, searchBar.value, strUser)
         })
         filterDiv.addEventListener("change", (e) => {
 
-        var opt = document.getElementById("filterDrop")
-        opt.classList.toggle("open")
-        var strUser = opt.options[opt.selectedIndex].textContent;
-        console.log(e.target)
+            var opt = document.getElementById("filterDrop")
+            opt.classList.toggle("open")
+            var strUser = opt.options[opt.selectedIndex].textContent
             this.loadProjectsBySearch(e, searchBar.value, strUser)
             
         })
@@ -314,15 +313,15 @@ export default function GitHubModule(){
 
     /** 
      * Create a page pop up that displays all projects without logging into github  */
-    this.browseNonGit = function(ev, searchString){
-         //Remove everything in the popup now
+    this.browseNonGit = function(){
+        //Remove everything in the popup now
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
         }
         
         popup.classList.remove('off')
         popup.setAttribute("style", "text-align: center")
-         //Welcome title
+        //Welcome title
         var welcome = document.createElement("div")
         welcome.innerHTML = "Maslow Create User Projects"
         welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
@@ -383,7 +382,7 @@ export default function GitHubModule(){
 
         //Input to search for projects
 
-         var middleBrowseDiv2 = document.createElement("div")
+        var middleBrowseDiv2 = document.createElement("div")
         middleBrowseDiv2.setAttribute("class", "middleBrowse2")
         popup.appendChild(middleBrowseDiv2)
 
@@ -399,18 +398,17 @@ export default function GitHubModule(){
         searchBar.setAttribute("id", "project_search")
         middleBrowseDiv2.appendChild(searchBar)
 
-        searchBar.addEventListener('keyup', (e) => {
+        searchBar.addEventListener('keyup', () => {
             var opt = document.getElementById("filterDrop")
-            var strUser = opt.options[opt.selectedIndex].textContent;
+            var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
         
-        filterDiv.addEventListener("change", (e) => {
+        filterDiv.addEventListener("change", () => {
 
-        var opt = document.getElementById("filterDrop")
-        var strUser = opt.options[opt.selectedIndex].textContent;
-        console.log(e.target)
-           this.loadNonGit(strUser)
+            var opt = document.getElementById("filterDrop")
+            var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadNonGit(strUser)
         })
         //header for project list style display
         var titlesDiv = document.createElement("div")
@@ -445,59 +443,58 @@ export default function GitHubModule(){
         
         this.loadNonGit()
 
-            //display options event listeners
+        //display options event listeners
 
-            browseDisplay1.addEventListener("click", () => {
+        browseDisplay1.addEventListener("click", () => {
             titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
             this.loadNonGit()
-            })
-            browseDisplay2.addEventListener("click", () => {
+        })
+        browseDisplay2.addEventListener("click", () => {
             titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
             this.loadNonGit()
-            })
+        })
     
-        }
+    }
     
     this.loadNonGit = function(searchString){    
         //Load All projects
 
-         while (this.projectsSpaceDiv.firstChild) {
-                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+        while (this.projectsSpaceDiv.firstChild) {
+            this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+        }
+            
+        var octokit = new Octokit({
+            userAgent: 'Maslow-Create'
+        })
+
+        var query
+        var owned
+        owned = false
+        query = ' topic:maslowcreate'
+        var sortMethod = "stars"  //replace with dropdown input!
+            
+        if(searchString !== undefined){ //If the empty search returned no results on loading
+            query = searchString + ' topic:maslowcreate'
+        }    
+
+        octokit.search.repos({
+            q: query,
+            sort: sortMethod,
+            per_page: 100,
+            page: 1,
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
             }
-            
-            var octokit = new Octokit({
-                userAgent: 'Maslow-Create'
-            })
-
-            var query
-            var owned
-            owned = false
-            query = ' topic:maslowcreate'
-            var sortMethod = "stars"  //replace with dropdown input!
-            
-             if(searchString !== undefined){ //If the empty search returned no results on loading
-                    query = searchString + ' topic:maslowcreate'
-                }    
-
-            octokit.search.repos({
-                q: query,
-                sort: sortMethod,
-                per_page: 100,
-                page: 1,
-                headers: {
-                    accept: 'application/vnd.github.mercy-preview+json'
-                }
-            }).then(result => {
-                console.log(result)
-                result.data.items.forEach(repo => {
+        }).then(result => {
+            result.data.items.forEach(repo => {
                    
-                    const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
-                    this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
-                })
+                const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
+                this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
+            })
                
-            }) 
+        }) 
     }
     /** 
      * Search for the name of a project and then return results which match that search.
@@ -509,8 +506,6 @@ export default function GitHubModule(){
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
-            console.log(sorting)
-            
             //Load projects
             var query
             var owned
