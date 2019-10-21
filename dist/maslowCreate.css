@@ -113,6 +113,10 @@
   border: 2px solid black;
 }
 
+.top_buttons:focus {
+  outline: none;
+}
+
 .top_buttons{ 
     background-color: whitesmoke;
     position: fixed;
