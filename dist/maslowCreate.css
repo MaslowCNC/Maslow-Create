@@ -46,15 +46,25 @@
 }
 
 #popUp{
-  position:absolute;
   color:white;
-  right:10px;
-  top:30px;
+  width: 1%; 
   font-size: 1em;
-  background-color:#484848;
-  border: 2px solid white;
+  border: 1px solid white;
   padding:3px;
+  height: 15px; 
+  background-color: #4CAF50; 
+  text-align: center; 
+  line-height: 13px; 
+  color: black; 
 }
+
+#Progress_Status { 
+  position:absolute;
+  width: 200px; 
+  background-color: #ddd; 
+  right:10px;
+  top:40px;
+} 
 
 .thumnail-logo{
   width:20px;
