@@ -1040,9 +1040,9 @@ export default function GitHubModule(){
             popUp.style.width = progress + '%'; 
             popUp.textContent = "Project Saved"
             setTimeout(function() {
-            clearInterval(identity); 
             popUp.setAttribute("style","display:none")
-             popUpBox.setAttribute("style","display:none")
+            popUpBox.setAttribute("style","display:none")
+            clearInterval(intervalTimer)
         }, 4000)
         } else { 
             popUp.textContent = "Saving..."
@@ -1062,7 +1062,7 @@ export default function GitHubModule(){
             response = await octokit.repos.get({ owner, repo })
             base = response.data.default_branch
         }
-
+        this.progressSave(40)
         response = await octokit.repos.listCommits({
             owner,
             repo,
@@ -1071,7 +1071,7 @@ export default function GitHubModule(){
         })
         let latestCommitSha = response.data[0].sha
         const treeSha = response.data[0].commit.tree.sha
-         this.progressSave(75)
+        this.progressSave(60)
       
         response = await octokit.git.createTree({
             owner,
@@ -1086,7 +1086,7 @@ export default function GitHubModule(){
             })
         })
         const newTreeSha = response.data.sha
-         this.progressSave(86)
+        this.progressSave(80)
 
         response = await octokit.git.createCommit({
             owner,
@@ -1097,7 +1097,7 @@ export default function GitHubModule(){
         })
         latestCommitSha = response.data.sha
 
-         this.progressSave(90)
+        this.progressSave(90)
       
         await octokit.git.updateRef({
             owner,
@@ -1107,9 +1107,7 @@ export default function GitHubModule(){
             force: true
         })
         this.progressSave(100)
-      
         console.warn("Project saved")
-        this.progressSave(100)
        
     }
     

@@ -48,14 +48,16 @@
 #popUp{
   color:white;
   width: 1%; 
-  font-size: 1em;
-  border: 1px solid white;
-  padding:3px;
-  height: 15px; 
+  font-family: "Roboto", sans-serif;
+  font-weight: 200;
+  font-size: .7em;
+  padding:2px;
+  height: 10px; 
   background-color: #4CAF50; 
   text-align: center; 
-  line-height: 13px; 
+  line-height: 10px; 
   color: black; 
+
 }
 
 #Progress_Status { 
