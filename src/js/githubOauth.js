@@ -1044,11 +1044,9 @@ export default function GitHubModule(){
             setTimeout(function() {
                 popUp.setAttribute("style","display:none")
                 popUpBox.setAttribute("style","display:none")
-                clearInterval(intervalTimer)
             }, 4000)
         } else { 
             popUp.textContent = "Saving..."
-            //progress++;  
             popUp.style.width = progress + '%'  
         } 
     } 
