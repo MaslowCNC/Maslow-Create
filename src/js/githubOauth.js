@@ -986,7 +986,7 @@ export default function GitHubModule(){
                 return await GlobalVariables.saveWorker({values: values, key: key})
             } 
             threadCompute([shape], "SVG Picture").then(contentSvg => {
-            this.progressSave(10)
+                this.progressSave(10)
                 
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
@@ -1028,28 +1028,28 @@ export default function GitHubModule(){
             })
         }
     }
-      /** 
+    /** 
      * Creates saving/saved pop up
      */
-   this.progressSave = function (progress) { 
-      var popUp = document.getElementById("popUp");   
+    this.progressSave = function (progress) { 
+        var popUp = document.getElementById("popUp")   
         let popUpBox = document.querySelector('#Progress_Status') 
-      //var width = 1; 
+        //var width = 1; 
         popUp.setAttribute("style","display:block")
         popUpBox.setAttribute("style","display:block")
         
         if (progress >= 100) { 
-            popUp.style.width = progress + '%'; 
+            popUp.style.width = progress + '%' 
             popUp.textContent = "Project Saved"
             setTimeout(function() {
-            popUp.setAttribute("style","display:none")
-            popUpBox.setAttribute("style","display:none")
-            clearInterval(intervalTimer)
-        }, 4000)
+                popUp.setAttribute("style","display:none")
+                popUpBox.setAttribute("style","display:none")
+                clearInterval(intervalTimer)
+            }, 4000)
         } else { 
             popUp.textContent = "Saving..."
             //progress++;  
-            popUp.style.width = progress + '%';  
+            popUp.style.width = progress + '%'  
         } 
     } 
         
