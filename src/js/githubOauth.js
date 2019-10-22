@@ -1028,7 +1028,9 @@ export default function GitHubModule(){
             })
         }
     }
-
+      /** 
+     * Creates saving/saved pop up
+     */
    this.progressSave = function (progress) { 
       var popUp = document.getElementById("popUp");   
         let popUpBox = document.querySelector('#Progress_Status') 
