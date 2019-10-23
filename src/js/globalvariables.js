@@ -129,11 +129,6 @@ class GlobalVariables{
          * @type {number}
          */
         this.circleSegmentSize = 2
-        /** 
-         * The number by which the screensize will be divided to set atom radius size
-         * @type {number}
-         */
-        this.atomScale = 1
         
         const agent = async ({ question }) => `Secret ${question}`
         createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
