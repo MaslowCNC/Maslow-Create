@@ -52,9 +52,12 @@ export default function GitHubModule(){
      */
     var myTab = "yoursButton"
 
-    
+    //Github pop up event listeners
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
+    })
+    document.getElementById("browseNonGit").addEventListener("mousedown", () => {
+        this.browseNonGit()
     })
     
     /** 
@@ -172,6 +175,34 @@ export default function GitHubModule(){
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
+        //Filter Dropdown
+        var filterDiv = document.createElement("div")
+        var filterLabel = document.createElement("LABEL")
+        filterLabel.textContent = "Sort by"
+        filterLabel.setAttribute("style","padding-top: 12px; font-size: 12px")
+        middleBrowseDiv.appendChild(filterLabel)
+        filterDiv.setAttribute("class","custom-select")
+        //filterDiv.setAttribute("style","margin-right:0; width:200px")
+        var filterDrop = document.createElement("select")
+        filterDrop.setAttribute("id","filterDrop")
+        filterDrop.setAttribute("class","select-box1")
+
+        var filterDrop1 = document.createElement("option")
+        filterDrop1.textContent = "stars"
+        filterDrop1.setAttribute("value","1")
+        filterDrop.appendChild(filterDrop1)
+        var filterDrop2 = document.createElement("option")
+        filterDrop2.textContent = "updated"
+        filterDrop2.setAttribute("value","2")
+        filterDrop.appendChild(filterDrop2)
+        var filterDrop3 = document.createElement("option")
+        filterDrop3.textContent = "Forks"
+        filterDrop3.setAttribute("value","3")
+        filterDrop.appendChild(filterDrop3)
+
+        middleBrowseDiv.appendChild(filterDiv)
+        filterDiv.appendChild(filterDrop)
+
         //Display option buttons
         var browseDisplay1 = document.createElement("div")
         browseDisplay1.setAttribute("class", "browseDisplay")
@@ -190,16 +221,36 @@ export default function GitHubModule(){
         middleBrowseDiv.appendChild(browseDisplay2)
 
         //Input to search for projects
+
+        var middleBrowseDiv2 = document.createElement("div")
+        middleBrowseDiv2.setAttribute("class", "middleBrowse2")
+        popup.appendChild(middleBrowseDiv2)
+
+        var searchIcon = document.createElement("IMG")
+        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
+        middleBrowseDiv2.appendChild(searchIcon)
+
         var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
-        popup.appendChild(searchBar)
-        searchBar.addEventListener('keyup', (e) => {
-            this.loadProjectsBySearch(e, searchBar.value)
-        })
+        middleBrowseDiv2.appendChild(searchBar)
 
+        searchBar.addEventListener('keyup', (e) => {
+            var opt = document.getElementById("filterDrop")
+            var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadProjectsBySearch(e, searchBar.value, strUser)
+        })
+        filterDiv.addEventListener("change", (e) => {
+
+            var opt = document.getElementById("filterDrop")
+            opt.classList.toggle("open")
+            var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadProjectsBySearch(e, searchBar.value, strUser)
+            
+        })
         //header for project list style display
         var titlesDiv = document.createElement("div")
         titlesDiv.setAttribute("id","titlesDiv")
@@ -225,6 +276,7 @@ export default function GitHubModule(){
         titlesDiv.appendChild(titles5)
 
         popup.appendChild(titlesDiv)
+
 
         //Event listeners 
 
@@ -258,21 +310,210 @@ export default function GitHubModule(){
         
         yoursButton.click()
     }
+
+    /** 
+     * Create a page pop up that displays all projects without logging into github  
+     */
+    this.browseNonGit = function(){
+        //Remove everything in the popup now
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        
+        popup.classList.remove('off')
+        popup.setAttribute("style", "text-align: center")
+        //Welcome title
+        var welcome = document.createElement("div")
+        welcome.innerHTML = "Maslow Create User Projects"
+        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
+        popup.appendChild(welcome)
+        
+        var topBrowseDiv = document.createElement("div")
+        popup.appendChild(topBrowseDiv)
+
+        var middleBrowseDiv = document.createElement("div")
+        middleBrowseDiv.setAttribute("class", "middleBrowse")
+        middleBrowseDiv.setAttribute("style", "margin-top:20px")
+        popup.appendChild(middleBrowseDiv)
+
+        //Filter Dropdown
+        var filterDiv = document.createElement("div")
+        var filterLabel = document.createElement("LABEL")
+        filterLabel.textContent = "Sort by"
+        filterLabel.setAttribute("style","padding-top: 12px; font-size: 12px")
+        middleBrowseDiv.appendChild(filterLabel)
+        filterDiv.setAttribute("class","custom-select")
+        //filterDiv.setAttribute("style","margin-right:0; width:200px")
+        var filterDrop = document.createElement("select")
+        filterDrop.setAttribute("id","filterDrop")
+        filterDrop.setAttribute("class","select-box1")
+
+        var filterDrop1 = document.createElement("option")
+        filterDrop1.textContent = "stars"
+        filterDrop1.setAttribute("value","1")
+        filterDrop.appendChild(filterDrop1)
+        var filterDrop2 = document.createElement("option")
+        filterDrop2.textContent = "updated"
+        filterDrop2.setAttribute("value","2")
+        filterDrop.appendChild(filterDrop2)
+        var filterDrop3 = document.createElement("option")
+        filterDrop3.textContent = "Forks"
+        filterDrop3.setAttribute("value","3")
+        filterDrop.appendChild(filterDrop3)
+
+        middleBrowseDiv.appendChild(filterDiv)
+        filterDiv.appendChild(filterDrop)
+
+        //Display option buttons
+        var browseDisplay1 = document.createElement("div")
+        browseDisplay1.setAttribute("class", "browseDisplay")
+        var listPicture = document.createElement("IMG")
+        listPicture.setAttribute("src", '/imgs/list-with-dots.svg') //https://www.freeiconspng.com/img/1454
+        listPicture.setAttribute("style", "height: 75%;padding: 3px;")
+        browseDisplay1.appendChild(listPicture)
+        middleBrowseDiv.appendChild(browseDisplay1)
+        var browseDisplay2 = document.createElement("div")
+        browseDisplay2.setAttribute("class", "browseDisplay active_filter")
+        browseDisplay2.setAttribute("id", "thumb")
+        var listPicture2 = document.createElement("IMG")
+        listPicture2.setAttribute("src", '/imgs/thumb_icon.png') 
+        listPicture2.setAttribute("style", "height: 80%;padding: 3px;")
+        browseDisplay2.appendChild(listPicture2)
+        middleBrowseDiv.appendChild(browseDisplay2)
+
+        //Input to search for projects
+
+        var middleBrowseDiv2 = document.createElement("div")
+        middleBrowseDiv2.setAttribute("class", "middleBrowse2")
+        popup.appendChild(middleBrowseDiv2)
+
+        var searchIcon = document.createElement("IMG")
+        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
+        middleBrowseDiv2.appendChild(searchIcon)
+
+        var searchBar = document.createElement("input")
+        searchBar.setAttribute("type", "text")
+        searchBar.setAttribute("placeholder", "Search for project..")
+        searchBar.setAttribute("class", "menu_search")
+        searchBar.setAttribute("id", "project_search")
+        middleBrowseDiv2.appendChild(searchBar)
+
+        searchBar.addEventListener('keyup', () => {
+            var opt = document.getElementById("filterDrop")
+            var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadNonGit(strUser)
+        })
+        
+        filterDiv.addEventListener("change", () => {
+
+            var opt = document.getElementById("filterDrop")
+            var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadNonGit(strUser)
+        })
+        //header for project list style display
+        var titlesDiv = document.createElement("div")
+        titlesDiv.setAttribute("id","titlesDiv")
+        var titles = document.createElement("div")
+        titles.innerHTML = ""
+        titles.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles)
+        var titles2 = document.createElement("div")
+        titles2.innerHTML = "Project"
+        titles2.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles2)
+        var titles3 = document.createElement("div")
+        titles3.innerHTML = "Creator"
+        titles3.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles3)
+        var titles4 = document.createElement("div")
+        titles4.innerHTML = "Created on"
+        titles4.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles4)
+        var titles5 = document.createElement("div")
+        titles5.innerHTML = "Last Modified"
+        titles5.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles5)
+
+        popup.appendChild(titlesDiv)
+
+        this.projectsSpaceDiv = document.createElement("DIV")
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div")
+        this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
+        popup.appendChild(this.projectsSpaceDiv)
+        
+        this.loadNonGit()
+
+        //display options event listeners
+
+        browseDisplay1.addEventListener("click", () => {
+            titlesDiv.style.display = "flex"
+            browseDisplay2.classList.remove("active_filter")
+            this.loadNonGit()
+        })
+        browseDisplay2.addEventListener("click", () => {
+            titlesDiv.style.display = "none"
+            browseDisplay2.classList.add("active_filter")
+            this.loadNonGit()
+        })
     
+    }
+    
+    /** 
+     * Search query without authentication
+      */
+    this.loadNonGit = function(searchString){    
+        //Load All projects
+
+        while (this.projectsSpaceDiv.firstChild) {
+            this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+        }
+            
+        var octokit = new Octokit({
+            userAgent: 'Maslow-Create'
+        })
+
+        var query
+        var owned
+        owned = false
+        query = ' topic:maslowcreate'
+        var sortMethod = "stars"  //replace with dropdown input!
+            
+        if(searchString !== undefined){ //If the empty search returned no results on loading
+            query = searchString + ' topic:maslowcreate'
+        }    
+
+        octokit.search.repos({
+            q: query,
+            sort: sortMethod,
+            per_page: 100,
+            page: 1,
+            headers: {
+                accept: 'application/vnd.github.mercy-preview+json'
+            }
+        }).then(result => {
+            result.data.items.forEach(repo => {
+                   
+                const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
+                this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
+            })
+               
+        }) 
+    }
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(ev, searchString){
+    this.loadProjectsBySearch = function(ev, searchString, sorting){
 
-        if(ev.key == "Enter"){
+        if(ev.key == "Enter" || ev.target == document.getElementById("filterDrop")){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
-            
             //Load projects
             var query
             var owned
+            var sortMethod = sorting  //replace with dropdown input!
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
@@ -293,7 +534,7 @@ export default function GitHubModule(){
             
             octokit.search.repos({
                 q: query,
-                sort: "stars",
+                sort: sortMethod,
                 per_page: 100,
                 page: 1,
                 headers: {
@@ -446,7 +687,6 @@ export default function GitHubModule(){
      * Runs when you switch tabs up top.
      */
     this.openTab = function(evt, tabName) {
-
 
         // Declare all variables
         var i, tabcontent, tablinks
