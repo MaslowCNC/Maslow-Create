@@ -1,5 +1,6 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
+
 /**
  * This class is the prototype for all atoms.
  */
@@ -36,7 +37,7 @@ export default class Atom {
          * This atom's radius as displayed on the screen
          * @type {number}
          */
-        this.radius = 16
+        this.radius = GlobalVariables.canvas.width/70 * GlobalVariables.scale1
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}

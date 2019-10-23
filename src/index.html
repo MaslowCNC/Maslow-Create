@@ -84,6 +84,11 @@
           </div>
         </div>
     </div>
+    <!-- Rounded switch for changing atom size -->
+        <label class="switch">
+          <input type="checkbox">
+          <span class="sliderAtom round"></span>
+        </label>
     <!-- Draw the canvas for creating the design -->
     <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">     
@@ -93,8 +98,6 @@
             <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
             <div id="viewer_bar"></div>  
         </div>
-        
-        
         <div class="sideBar">
             Maslow Create
         </div>
