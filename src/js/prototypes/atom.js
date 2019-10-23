@@ -37,7 +37,7 @@ export default class Atom {
          * This atom's radius as displayed on the screen
          * @type {number}
          */
-        this.radius = GlobalVariables.canvas.width/70 * GlobalVariables.scale1
+        this.radius = GlobalVariables.canvas.width/70 
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}
@@ -153,7 +153,7 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.draw()       
         })
-        
+
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
 
@@ -173,8 +173,7 @@ export default class Atom {
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
         }
         
-        
-        
+
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
         }

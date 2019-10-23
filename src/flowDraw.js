@@ -161,12 +161,6 @@ function closeMainMenu(){
 
 if (!GlobalVariables.runMode){
     
-    /*let moleculeButton = document.getElementById('localMolecules_top')
-    moleculeButton.addEventListener('mousedown', () => {
-        //add available molecules dropdown
-        LocalMenu.showMenu()
-    })*/
-
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
         GlobalVariables.gitHub.openGitHubPage()
@@ -256,7 +250,18 @@ function onWindowResize() {
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-    console.log( GlobalVariables.scale1)
+
+    let switchButton = document.getElementById('atomSwitch')
+    switchButton.addEventListener('change', (event) => {
+
+          if (event.target.checked) {
+           GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+
+          } else {
+            GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
+          }
+        })
+
     GlobalVariables.display.onWindowResize()
 }
 
