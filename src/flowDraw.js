@@ -93,8 +93,7 @@ flowCanvas.addEventListener('mousedown', event => {
 })
 
 flowCanvas.addEventListener('dblclick', event => {
-    //every time the mouse button goes down
-    
+    //every time the mouse button goes down    
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
@@ -140,20 +139,7 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
             a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)` 
             step-=100
-        }
-        /*var name = document.createElement("div")
-                name.innerHTML= "groundcake"
-                name.style.backgroundColor = "black"
-                name.setAttribute('class','drop')
-                a.appendChild(name)
-
-            a.addEventListener('mouseover', (e) => {
-               name.style.display = "inline"
-            });
-            a.addEventListener('mouseout', (e) => {
-               name.style.display = "none"
-            });*/
-           
+        }  
     }) 
 }) 
 
@@ -175,12 +161,6 @@ function closeMainMenu(){
 
 if (!GlobalVariables.runMode){
     
-    /*let moleculeButton = document.getElementById('localMolecules_top')
-    moleculeButton.addEventListener('mousedown', () => {
-        //add available molecules dropdown
-        LocalMenu.showMenu()
-    })*/
-
     let githubButton = document.getElementById('github_top')
     githubButton.addEventListener('mousedown', () => {
         GlobalVariables.gitHub.openGitHubPage()
@@ -270,6 +250,17 @@ function onWindowResize() {
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
 
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+
+    let switchButton = document.getElementById('atomSwitch')
+    switchButton.addEventListener('change', (event) => {
+
+        if (event.target.checked) {
+            GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+
+        } else {
+            GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
+        }
+    })
 
     GlobalVariables.display.onWindowResize()
 }
