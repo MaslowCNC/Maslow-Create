@@ -46,15 +46,30 @@
 }
 
 #popUp{
-  position:absolute;
   color:white;
-  right:10px;
-  top:30px;
-  font-size: 1em;
-  background-color:#484848;
-  border: 2px solid white;
-  padding:3px;
+  width: 1%; 
+  font-family: "Roboto", sans-serif;
+  
+  font-weight: 200;
+  font-size: .7em;
+  padding: 2px 0;
+  height: 10px; 
+  background-color: #4CAF50; 
+  text-align: center; 
+  line-height: 10px; 
+  color: black; 
+  border-radius: 5px;
+
 }
+
+#Progress_Status { 
+  position:absolute;
+  width: 200px; 
+  background-color: #ddd; 
+  right:1%;
+  top:40px;
+  border-radius: 5px;
+} 
 
 .thumnail-logo{
   width:20px;
@@ -160,6 +175,10 @@ input:checked + .sliderAtom:before {
 .top_buttons:hover {
   opacity: 1;
   border: 2px solid black;
+}
+
+.top_buttons:focus {
+  outline: none;
 }
 
 .top_buttons{ 
