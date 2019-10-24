@@ -97,7 +97,7 @@ export default function GitHubModule(){
         }
         
         popup.classList.remove('off')
-        popup.setAttribute("style", "text-align: center")
+        popup.setAttribute("style", "text-align: center; background-color: whitesmoke")
         
         //Close button (Mac style)
         if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
@@ -111,7 +111,7 @@ export default function GitHubModule(){
         //Welcome title
         var welcome = document.createElement("div")
         welcome.innerHTML = "Welcome to Maslow Create"
-        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
+        welcome.setAttribute("style", " justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
         popup.appendChild(welcome)
 
         
