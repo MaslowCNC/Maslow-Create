@@ -97,7 +97,7 @@ export default function GitHubModule(){
         }
         
         popup.classList.remove('off')
-        popup.setAttribute("style", "text-align: center; background-color: whitesmoke")
+        popup.setAttribute("style", "text-align: center; background-color: #f9f6f6")
         
         //Close button (Mac style)
         if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
@@ -117,7 +117,7 @@ export default function GitHubModule(){
         
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
-        tabButtons.setAttribute("style", "display: inline-block;")
+        tabButtons.setAttribute("style", "display: none;")
         popup.appendChild(tabButtons)
         
         //My projects button

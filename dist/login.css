@@ -12,6 +12,7 @@
     display:flex;
     flex-wrap: wrap;
     width: 100%;
+    height: 100%;
     padding: 10px;
     box-sizing: border-box;
     background-color: #efecec;
@@ -74,7 +75,6 @@
   background: #444;
   width: 100%;
   border: 0;
-  padding: 15px;
   color: #FFFFFF;
   font-size: 14px;
   -webkit-transition: all 0.3 ease;
@@ -298,6 +298,7 @@
     align-content: center;
     justify-content: space-around;
     background-color: #ddd;
+    border: 2px solid #ccc8c8;
     flex-wrap: wrap;
 
   }
@@ -321,17 +322,17 @@
 }
 
  .browseButton{
-    width: 156px;
-    height: 32px;
-    border-radius: 50px;
-    font-size: 13px;
     font-family: "Roboto", sans-serif;
     text-transform: uppercase;
-    align-self: flex-end;
-    background-color: #444;
-    color: white;
-    text-align: center;
-    margin-left: 30%;
+    outline: 0;
+    background: #444;
+    width: 100%;
+    border: 0;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
  } 
 
 .browseButton:hover {
