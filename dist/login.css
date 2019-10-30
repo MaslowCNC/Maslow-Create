@@ -137,7 +137,7 @@
 /* Browse login and open projects styling */
 
 .login-popup{
-  
+
     padding:2% 0;
     width: 12rem;
     box-sizing: border-box;
@@ -188,6 +188,15 @@
     height: 30px;
     margin-top: -10px;
     margin-left: 30%;
+}
+
+.githubSign{
+    text-align: center;
+    padding: 5px;
+    margin: 0;
+    display: flex;
+    text-align: center;
+    align-items: center;
 }
 
 .github-login-display{

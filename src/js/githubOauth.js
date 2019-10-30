@@ -211,9 +211,9 @@ export default function GitHubModule(){
         middleBrowseDiv.appendChild(filterDiv)
         filterDiv.appendChild(filterDrop) */
 
-         var searchIcon = document.createElement("IMG")
+        var searchIcon = document.createElement("IMG")
         searchIcon.setAttribute("src", '/imgs/search_icon.svg')
-        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: center; position: relative;right: 3px; opacity: 0.5;")
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; position: relative;right: 3px; opacity: 0.5;")
         middleBrowseDiv.appendChild(searchIcon)
 
         var searchBar = document.createElement("input")
@@ -344,7 +344,21 @@ export default function GitHubModule(){
         welcome2.setAttribute("src", "/imgs/maslowcreate.svg" )
         welcome2.setAttribute("style", "height:20px; padding: 10px;")
         welcome.appendChild(welcome2)
-       
+
+        var githubSign = document.createElement("button")
+        githubSign.setAttribute("id", "loginButton" )
+        githubSign.setAttribute("class", "form browseButton githubSign")
+        githubSign.setAttribute("style", "width: 90px; font-size: .7rem; margin-left: auto;")
+        githubSign.textContent = "Login"
+        welcome.appendChild(githubSign)   
+
+        var githubSignUp = document.createElement("button")
+        githubSignUp.setAttribute("class", "form browseButton githubSign")
+        githubSignUp.setAttribute("onclick", "window.open('https://github.com/join')");
+        githubSignUp.setAttribute("style", "width: 130px; font-size: .7rem;margin-left: 5px;")
+        githubSignUp.textContent = "Create an account"
+        welcome.appendChild(githubSignUp)  
+
         //Welcome title
         var welcome3 = document.createElement("div")
         welcome3.innerHTML = "Maslow Create User Projects"
