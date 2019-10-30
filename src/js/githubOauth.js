@@ -97,7 +97,7 @@ export default function GitHubModule(){
         }
         
         popup.classList.remove('off')
-        popup.setAttribute("style", "text-align: center; background-color: #f9f6f6")
+        popup.setAttribute("style", "padding: 0;text-align: center; background-color: #f9f6f6; border: 10px solid #3e3d3d;")
         
         //Close button (Mac style)
         if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
@@ -110,19 +110,26 @@ export default function GitHubModule(){
         }
         //Welcome title
         var welcome = document.createElement("div")
-        welcome.innerHTML = "Welcome to Maslow Create"
-        welcome.setAttribute("style", " justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
+        welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
         popup.appendChild(welcome)
 
-        
+         var welcome1 = document.createElement("IMG")
+        welcome1.setAttribute("src", "/imgs/maslow-logo.png" )
+        welcome1.setAttribute("style", " height:25px; border-radius:50%;")
+        welcome.appendChild(welcome1)
+        var welcome2 = document.createElement("IMG")
+        welcome2.setAttribute("src", "/imgs/maslowcreate.svg" )
+        welcome2.setAttribute("style", "height:20px; padding: 10px;")
+        welcome.appendChild(welcome2)
+ 
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
-        tabButtons.setAttribute("style", "display: none;")
+        //tabButtons.setAttribute("style", "display: none;")
         popup.appendChild(tabButtons)
         
         //My projects button
         var yoursButton = document.createElement("button")
-        yoursButton.setAttribute("class", "tablinks active")
+        yoursButton.setAttribute("class", "tablinks active browseButton")
         yoursButton.appendChild(document.createTextNode("Back to my projects"))
         yoursButton.setAttribute("id", "yoursButton")
         tabButtons.appendChild(yoursButton)
@@ -145,14 +152,14 @@ export default function GitHubModule(){
 
         var projectPicture = document.createElement("IMG")
         projectPicture.setAttribute("src", '/defaultThumbnail.svg')
-        projectPicture.setAttribute("style", "height: 80%; float: left;")
+        projectPicture.setAttribute("style", "height: 80%;")
         browseDivInner.appendChild(projectPicture)
         
         //Browse Prompt
         var checkOut = document.createElement("div")
         browseDivInner.appendChild(checkOut)
         checkOut.innerHTML = "Check out what others have made on Maslow Create"
-        checkOut.setAttribute("style", "justify-content:flex-start; display: inline; width: 70%; margin-top: 20px")
+        checkOut.setAttribute("style", "justify-content:flex-start; display: inline; width: 70%; margin-top: 20px ")
 
         //Browse all button
         var githubButton = document.createElement("button")
@@ -161,20 +168,21 @@ export default function GitHubModule(){
         githubButton.classList.add("tablinks")    
         githubButton.setAttribute("id", "githubButton")
         browseDivInner.appendChild(githubButton)
-       
+
         topBrowseDiv.appendChild(browseDiv) 
         topBrowseDiv.setAttribute("class", "topBrowse")
         
         //My projects title
         var mine = document.createElement("div")
         mine.innerHTML = "My Projects"
-        mine.setAttribute("style", "justify-content:flex-start;display: inline; align-self: flex-start; margin-left: 30px; margin-top: 20px;")
+        mine.setAttribute("style", "justify-content:flex-start;display: inline; align-self: flex-start; margin-left: 30px; margin-top: 15px;")
         popup.appendChild(mine)
      
         var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
+        /*
         //Filter Dropdown
         var filterDiv = document.createElement("div")
         var filterLabel = document.createElement("LABEL")
@@ -185,7 +193,7 @@ export default function GitHubModule(){
         //filterDiv.setAttribute("style","margin-right:0; width:200px")
         var filterDrop = document.createElement("select")
         filterDrop.setAttribute("id","filterDrop")
-        filterDrop.setAttribute("class","select-box1")
+
 
         var filterDrop1 = document.createElement("option")
         filterDrop1.textContent = "stars"
@@ -198,10 +206,22 @@ export default function GitHubModule(){
         var filterDrop3 = document.createElement("option")
         filterDrop3.textContent = "Forks"
         filterDrop3.setAttribute("value","3")
-        filterDrop.appendChild(filterDrop3)
+        filterDrop.appendChild(filterDrop3)  
 
         middleBrowseDiv.appendChild(filterDiv)
-        filterDiv.appendChild(filterDrop)
+        filterDiv.appendChild(filterDrop) */
+
+         var searchIcon = document.createElement("IMG")
+        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: center; position: relative;right: 3px; opacity: 0.5;")
+        middleBrowseDiv.appendChild(searchIcon)
+
+        var searchBar = document.createElement("input")
+        searchBar.setAttribute("type", "text")
+        searchBar.setAttribute("placeholder", "Search for project..")
+        searchBar.setAttribute("class", "menu_search")
+        searchBar.setAttribute("id", "project_search")
+        middleBrowseDiv.appendChild(searchBar)
 
         //Display option buttons
         var browseDisplay1 = document.createElement("div")
@@ -222,35 +242,23 @@ export default function GitHubModule(){
 
         //Input to search for projects
 
-        var middleBrowseDiv2 = document.createElement("div")
+        /*var middleBrowseDiv2 = document.createElement("div")
         middleBrowseDiv2.setAttribute("class", "middleBrowse2")
-        popup.appendChild(middleBrowseDiv2)
-
-        var searchIcon = document.createElement("IMG")
-        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
-        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
-        middleBrowseDiv2.appendChild(searchIcon)
-
-        var searchBar = document.createElement("input")
-        searchBar.setAttribute("type", "text")
-        searchBar.setAttribute("placeholder", "Search for project..")
-        searchBar.setAttribute("class", "menu_search")
-        searchBar.setAttribute("id", "project_search")
-        middleBrowseDiv2.appendChild(searchBar)
+        popup.appendChild(middleBrowseDiv2) */
 
         searchBar.addEventListener('keyup', (e) => {
             var opt = document.getElementById("filterDrop")
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadProjectsBySearch(e, searchBar.value, strUser)
         })
-        filterDiv.addEventListener("change", (e) => {
+        /*filterDiv.addEventListener("change", (e) => {
 
             var opt = document.getElementById("filterDrop")
             opt.classList.toggle("open")
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadProjectsBySearch(e, searchBar.value, strUser)
             
-        })
+        })*/
         //header for project list style display
         var titlesDiv = document.createElement("div")
         titlesDiv.setAttribute("id","titlesDiv")
@@ -305,7 +313,7 @@ export default function GitHubModule(){
 
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
-        this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
+        this.projectsSpaceDiv.setAttribute("style", "overflow-x: hidden; margin-top: 10px; border-top: 1px solid #44444442;")
         popup.appendChild(this.projectsSpaceDiv)
         
         yoursButton.click()
@@ -321,12 +329,27 @@ export default function GitHubModule(){
         }
         
         popup.classList.remove('off')
-        popup.setAttribute("style", "text-align: center")
+        popup.setAttribute("style", "text-align: center; padding: 0")
+
         //Welcome title
         var welcome = document.createElement("div")
-        welcome.innerHTML = "Maslow Create User Projects"
-        welcome.setAttribute("style", "justify-content:flex-start; display: inline; width: 100%;margin-top: 30px;font-size: 24px")
+        welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
         popup.appendChild(welcome)
+
+         var welcome1 = document.createElement("IMG")
+        welcome1.setAttribute("src", "/imgs/maslow-logo.png" )
+        welcome1.setAttribute("style", " height:25px; border-radius:50%;")
+        welcome.appendChild(welcome1)
+        var welcome2 = document.createElement("IMG")
+        welcome2.setAttribute("src", "/imgs/maslowcreate.svg" )
+        welcome2.setAttribute("style", "height:20px; padding: 10px;")
+        welcome.appendChild(welcome2)
+       
+        //Welcome title
+        var welcome3 = document.createElement("div")
+        welcome3.innerHTML = "Maslow Create User Projects"
+        welcome3.setAttribute("style", "justify-content: flex-start; display: inline; width: 100%; font-size: 18px;")
+        popup.appendChild(welcome3)
         
         var topBrowseDiv = document.createElement("div")
         popup.appendChild(topBrowseDiv)
@@ -336,7 +359,19 @@ export default function GitHubModule(){
         middleBrowseDiv.setAttribute("style", "margin-top:20px")
         popup.appendChild(middleBrowseDiv)
 
-        //Filter Dropdown
+        var searchIcon = document.createElement("IMG")
+        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
+        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
+        middleBrowseDiv.appendChild(searchIcon)
+
+        var searchBar = document.createElement("input")
+        searchBar.setAttribute("type", "text")
+        searchBar.setAttribute("placeholder", "Search for project..")
+        searchBar.setAttribute("class", "menu_search")
+        searchBar.setAttribute("id", "project_search")
+        middleBrowseDiv.appendChild(searchBar)
+
+        /*temporarily removed //Filter Dropdown
         var filterDiv = document.createElement("div")
         var filterLabel = document.createElement("LABEL")
         filterLabel.textContent = "Sort by"
@@ -363,6 +398,7 @@ export default function GitHubModule(){
 
         middleBrowseDiv.appendChild(filterDiv)
         filterDiv.appendChild(filterDrop)
+        */
 
         //Display option buttons
         var browseDisplay1 = document.createElement("div")
@@ -387,30 +423,22 @@ export default function GitHubModule(){
         middleBrowseDiv2.setAttribute("class", "middleBrowse2")
         popup.appendChild(middleBrowseDiv2)
 
-        var searchIcon = document.createElement("IMG")
-        searchIcon.setAttribute("src", '/imgs/search_icon.svg')
-        searchIcon.setAttribute("style", "width: 20px; float: right; color: white; align-self: flex-end; position: relative;right: 3px; opacity: 0.5;")
-        middleBrowseDiv2.appendChild(searchIcon)
-
-        var searchBar = document.createElement("input")
-        searchBar.setAttribute("type", "text")
-        searchBar.setAttribute("placeholder", "Search for project..")
-        searchBar.setAttribute("class", "menu_search")
-        searchBar.setAttribute("id", "project_search")
-        middleBrowseDiv2.appendChild(searchBar)
+        
 
         searchBar.addEventListener('keyup', () => {
             var opt = document.getElementById("filterDrop")
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
-        
+        /*
         filterDiv.addEventListener("change", () => {
 
             var opt = document.getElementById("filterDrop")
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
+        */
+
         //header for project list style display
         var titlesDiv = document.createElement("div")
         titlesDiv.setAttribute("id","titlesDiv")
@@ -439,7 +467,7 @@ export default function GitHubModule(){
 
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
-        this.projectsSpaceDiv.setAttribute("style", "overflow: auto")
+        this.projectsSpaceDiv.setAttribute("style", "overflow-x: hidden; margin-top: 10px; border-top: 1px solid #44444442;")
         popup.appendChild(this.projectsSpaceDiv)
         
         this.loadNonGit()
@@ -621,7 +649,7 @@ export default function GitHubModule(){
         else{
             this.projectsSpaceDiv.classList.add("float-left-div-thumb")
             project = document.createElement("DIV")
-            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; justify-content: flex-start; width: 100%; border-bottom: 1px solid darkgrey;")
+            project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; width: 100%; border-bottom: 1px solid darkgrey;")
             projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
@@ -706,10 +734,13 @@ export default function GitHubModule(){
         // Show the current tab, and add an "active" class to the button that opened the tab
         if (tabName == "yoursButton"){
             document.getElementById(tabName).style.display = "none"
+            console.log(document.querySelector(".topBrowse"))
+            document.querySelector(".topBrowse").style.display = "flex"
         }
         else{
             document.getElementById("yoursButton").style.display = "block"
             document.getElementById(tabName).style.display = "block"
+            document.querySelector(".topBrowse").style.display = "none"
         }
         document.getElementById(myTab).className += " active"
       
@@ -729,11 +760,12 @@ export default function GitHubModule(){
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
         }
-        
+        popup.setAttribute("style", "padding:2% 0")
         //Project name
         // <div class="form">
         var createNewProjectDiv = document.createElement("DIV")
         createNewProjectDiv.setAttribute("class", "form")
+        createNewProjectDiv.setAttribute("style", "color:whitesmoke")
         
         //Add a title
         var header = document.createElement("H1")
@@ -763,6 +795,7 @@ export default function GitHubModule(){
         //Add the button
         var createButton = document.createElement("button")
         createButton.setAttribute("type", "button")
+        createButton.setAttribute("style", "height: 50px; border: 1px solid whitesmoke;")
         createButton.addEventListener('click', () => {
             this.createNewProject()
         })

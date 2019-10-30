@@ -479,11 +479,13 @@ input.menu_search:focus {
 
 /* Style the tabs in the menu*/
 .tab {
-  padding-top:5px;
-  padding-bottom:5px;
-  height: 100%
-  overflow: hidden;
-  background-color: #f1f1f1;
+    float: right;
+    right: 10px;
+    width: 32%;
+    margin-top: -30px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    align-self: flex-end;
 }
 
 /* Style the buttons that are used to open the tab content */
@@ -500,7 +502,7 @@ input.menu_search:focus {
 
 /* Change background color of buttons on hover */
 .tab button:hover {
-  background-color: #ddd;
+  background-color: #f4f2f2;;
 }
 
 /* Create an active/current tablink class */
