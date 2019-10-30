@@ -113,7 +113,7 @@ export default function GitHubModule(){
         welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
         popup.appendChild(welcome)
 
-         var welcome1 = document.createElement("IMG")
+        var welcome1 = document.createElement("IMG")
         welcome1.setAttribute("src", "/imgs/maslow-logo.png" )
         welcome1.setAttribute("style", " height:25px; border-radius:50%;")
         welcome.appendChild(welcome1)
@@ -336,7 +336,7 @@ export default function GitHubModule(){
         welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
         popup.appendChild(welcome)
 
-         var welcome1 = document.createElement("IMG")
+        var welcome1 = document.createElement("IMG")
         welcome1.setAttribute("src", "/imgs/maslow-logo.png" )
         welcome1.setAttribute("style", " height:25px; border-radius:50%;")
         welcome.appendChild(welcome1)
@@ -354,7 +354,7 @@ export default function GitHubModule(){
 
         var githubSignUp = document.createElement("button")
         githubSignUp.setAttribute("class", "form browseButton githubSign")
-        githubSignUp.setAttribute("onclick", "window.open('https://github.com/join')");
+        githubSignUp.setAttribute("onclick", "window.open('https://github.com/join')")
         githubSignUp.setAttribute("style", "width: 130px; font-size: .7rem;margin-left: 5px;")
         githubSignUp.textContent = "Create an account"
         welcome.appendChild(githubSignUp)  
@@ -439,7 +439,7 @@ export default function GitHubModule(){
 
         //login to github button event listenr
         document.getElementById("loginButton2").addEventListener("mousedown", () => {
-        this.tryLogin()
+            this.tryLogin()
         })
 
         searchBar.addEventListener('keyup', () => {
@@ -751,7 +751,6 @@ export default function GitHubModule(){
         // Show the current tab, and add an "active" class to the button that opened the tab
         if (tabName == "yoursButton"){
             document.getElementById(tabName).style.display = "none"
-            console.log(document.querySelector(".topBrowse"))
             document.querySelector(".topBrowse").style.display = "flex"
         }
         else{
@@ -819,8 +818,7 @@ export default function GitHubModule(){
         var buttonText = document.createTextNode("Create Project")
         createButton.appendChild(buttonText)
         form.appendChild(createButton)
-        
-
+    
         popup.appendChild(createNewProjectDiv)
 
     }
