@@ -346,7 +346,7 @@ export default function GitHubModule(){
         welcome.appendChild(welcome2)
 
         var githubSign = document.createElement("button")
-        githubSign.setAttribute("id", "loginButton" )
+        githubSign.setAttribute("id", "loginButton2" )
         githubSign.setAttribute("class", "form browseButton githubSign")
         githubSign.setAttribute("style", "width: 90px; font-size: .7rem; margin-left: auto;")
         githubSign.textContent = "Login"
@@ -370,7 +370,7 @@ export default function GitHubModule(){
 
         var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
-        middleBrowseDiv.setAttribute("style", "margin-top:20px")
+        middleBrowseDiv.setAttribute("style", "margin-top:10px")
         popup.appendChild(middleBrowseDiv)
 
         var searchIcon = document.createElement("IMG")
@@ -437,7 +437,10 @@ export default function GitHubModule(){
         middleBrowseDiv2.setAttribute("class", "middleBrowse2")
         popup.appendChild(middleBrowseDiv2)
 
-        
+        //login to github button event listenr
+        document.getElementById("loginButton2").addEventListener("mousedown", () => {
+        this.tryLogin()
+        })
 
         searchBar.addEventListener('keyup', () => {
             var opt = document.getElementById("filterDrop")
