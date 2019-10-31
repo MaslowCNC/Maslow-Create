@@ -26,23 +26,24 @@
         <p> Maslow Create</p> 
         <div id="headerBar_title"></div> 
         
-        
+        <!-- Top menu -->
         <div id="top_button_wrap">
             <button class="top_buttons" type="button" id = "straight_menu" title=""> </button>
             <div id ="toggle_wrap">
                 <!-- 
                 <button class="top_buttons" type="button" id = "localMolecules_top" title="Available Molecules">  </button>  -->
+                 <button class="top_buttons option" type="button" id = "github_top" title="GitHub"> <img class="thumnail-logo" src='/imgs/github-logo.png' alt="Git" > </button>
+                 <button class="top_buttons option" type="button" id = "read_top" title="Read Me"> <img class="thumnail-logo" src='/imgs/read_img.png' alt="Read-me" style=" transform: scale(.67); border-radius: 0px;"> </button> 
+                 <button class="top_buttons option" type="button" id = "bom_top" title="Bill of Materials" > <img class="thumnail-logo" src='/imgs/bom-logo.png' alt="BOM"> </button>
+                 <button class="top_buttons option" type="button" id = "goup_top" title="Go up a level"> <img class="thumnail-logo" src='/imgs/goup_img.png' alt="Go-up" style=" transform: scale(.67); border-radius: 0px;"> </button> 
+                 <button class="top_buttons option" type="button" id = "share_top" title="Share" > <img class="thumnail-logo" src='/imgs/share-img.png' alt="Share"> </button>
+                 <button class="top_buttons option" type="button" id = "save_top" title="Save"> <img class="thumnail-logo" src='/imgs/save-image.png' alt="Save" style=" transform: scale(.67); border-radius: 0px;"> </button>  
                 <button class="top_buttons option" type="button" id = "projectmenu_top" title="Open projects"> <img class="thumnail-logo" src='/imgs/open-logo.png' alt="Load" style=" transform: scale(.67); border-radius: 0px;"> </button>
-                <button class="top_buttons option" type="button" id = "save_top" title="Save"> <img class="thumnail-logo" src='/imgs/save-image.png' alt="Save" style=" transform: scale(.67); border-radius: 0px;"> </button>            
-                <button class="top_buttons option" type="button" id = "share_top" title="Share" > <img class="thumnail-logo" src='/imgs/share-img.png' alt="Share"> </button>
-                <button class="top_buttons option" type="button" id = "goup_top" title="Go up a level"> <img class="thumnail-logo" src='/imgs/goup_img.png' alt="Go-up" style=" transform: scale(.67); border-radius: 0px;"> </button> 
-                <button class="top_buttons option" type="button" id = "bom_top" title="Bill of Materials" > <img class="thumnail-logo" src='/imgs/bom-logo.png' alt="BOM"> </button>
-                <button class="top_buttons option" type="button" id = "read_top" title="Read Me"> <img class="thumnail-logo" src='/imgs/read_img.png' alt="Read-me" style=" transform: scale(.67); border-radius: 0px;"> </button> 
-                <button class="top_buttons option" type="button" id = "github_top" title="GitHub"> <img class="thumnail-logo" src='/imgs/github-logo.png' alt="Git" > </button>
-
             </div>
         </div>  
-        <div id="popUp" style="display: none;"> Project Saved </div>
+        <div id="Progress_Status">
+            <div id="popUp" style="display: none;"> Project Saved </div>
+        </div>
         
     </div> 
     <!-- Circular menu on canvas -->
@@ -57,17 +58,32 @@
     <!-- The login popup -->
     <div class = "login-popup " id = "projects-popup">
         <div class="login-page">
-          <div class="form">
-            <h1>Maslow Create uses GitHub to store your projects</h1>
-            <br>
-            <form class="login-form">
-              <!--Credit to https://codepen.io/colorlib/pen/rxddKy -->
-              <button type="button" id = "loginButton" >Login To GitHub</button>
-              <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
-            </form>
+          <div class="form animate fadeInUp one">
+
+                <div id="gitSide" class="logindiv">
+                <img class="logo" src='/imgs/maslow-logo.png' alt="logo">
+                <div id="welcome"><img src='/imgs/maslowcreate.svg' alt="logo" style="width: 300px;padding: 10px; margin-bottom: 0;"></div>
+                <p style= "padding: 0 20px">Maslow Create projects are stored through GitHub. Login to start your own! </p>
+                <form class="login-form">
+                  <!--Credit to https://codepen.io/colorlib/pen/rxddKy -->
+                  <button type="button" id = "loginButton" style ="height: 40px;">Login To GitHub</button>
+                  <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
+                </form>
+                </div>
+                <div id="nonGitSide" class="logindiv curiousBrowse">
+                   
+                    <p style="justify-content:flex-start; display: inline; width: 80%; ">Check out what others have made on Maslow Create</p>   
+                    <button type="button" class= "browseButton" id = "browseNonGit" style ="padding: 0px; height: 30px; width: 70%">Browse all projects</button>
+                </div>
           </div>
         </div>
+        <div class="browse"></div>
     </div>
+    <!-- Rounded switch for changing atom size -->
+        <label class="switch">
+          <input type="checkbox" id="atomSwitch" checked >
+          <span class="sliderAtom round"></span>
+        </label>
     <!-- Draw the canvas for creating the design -->
     <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">     
@@ -77,8 +93,6 @@
             <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
             <div id="viewer_bar"></div>  
         </div>
-        
-        
         <div class="sideBar">
             Maslow Create
         </div>

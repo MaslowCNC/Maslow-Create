@@ -46,15 +46,30 @@
 }
 
 #popUp{
-  position:absolute;
   color:white;
-  right:10px;
-  top:30px;
-  font-size: 1em;
-  background-color:#484848;
-  border: 2px solid white;
-  padding:3px;
+  width: 1%; 
+  font-family: "Roboto", sans-serif;
+  
+  font-weight: 200;
+  font-size: .7em;
+  padding: 2px 0;
+  height: 10px; 
+  background-color: #4CAF50; 
+  text-align: center; 
+  line-height: 10px; 
+  color: black; 
+  border-radius: 5px;
+
 }
+
+#Progress_Status { 
+  position:absolute;
+  width: 200px; 
+  background-color: #ddd; 
+  right:1%;
+  top:40px;
+  border-radius: 5px;
+} 
 
 .thumnail-logo{
   width:20px;
@@ -80,8 +95,69 @@
   z-index: 30;
   opacity:1;
 }
+.switch{
 
-.option{
+  position: fixed;
+  bottom: 50.5%;
+  left: 1%;
+  width: 30px;
+  height: 15px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.sliderAtom {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.sliderAtom:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 0px;
+  bottom: 0px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+
+input:checked + .sliderAtom {
+  background-color: #444;
+}
+
+input:focus + .sliderAtom {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .sliderAtom:before {
+  -webkit-transform: translateX(15px);
+  -ms-transform: translateX(15px);
+  transform: translateX(15px);
+}
+
+/* Rounded sliders */
+.sliderAtom.round {
+  border-radius: 34px;
+}
+
+.sliderAtom.round:before {
+  border-radius: 50%;
 }
 
 .drop{
@@ -99,6 +175,10 @@
 .top_buttons:hover {
   opacity: 1;
   border: 2px solid black;
+}
+
+.top_buttons:focus {
+  outline: none;
 }
 
 .top_buttons{ 
@@ -172,13 +252,26 @@
 }
 
 .closeButton{
+  padding:0;
     position: absolute;
+    width: 23px;
+    height: 23px;
+    border: 2px solid #eef5df;
+    background-color: #ff5248;
+    border-radius: 50%;
     top: 10px;
-    right: 10px;
-    padding: 0;
-    border: none;
-    background: none;
+    left: 10px;
 }
+.closeButton::before {
+  content: "\2715";
+  color:black;
+  display: none;
+
+  }
+
+.closeButton:hover { cursor: pointer; }
+.closeButton:hover::before{ display: block; }
+
 
 .sideBar {
     flex:2;
@@ -466,11 +559,13 @@ input.menu_search:focus {
 
 /* Style the tabs in the menu*/
 .tab {
-  padding-top:5px;
-  padding-bottom:5px;
-  height: 100%
-  overflow: hidden;
-  background-color: #f1f1f1;
+    float: right;
+    right: 10px;
+    width: 32%;
+    margin-top: -30px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    align-self: flex-end;
 }
 
 /* Style the buttons that are used to open the tab content */
@@ -487,7 +582,7 @@ input.menu_search:focus {
 
 /* Change background color of buttons on hover */
 .tab button:hover {
-  background-color: #ddd;
+  background-color: #f4f2f2;;
 }
 
 /* Create an active/current tablink class */
@@ -654,93 +749,6 @@ input.menu_search:focus {
   display: block;
   border-bottom:1px solid white;
 }
-
-
-.login-popup{
-    width: 12rem;
-    background-color: #f4f4f4;
-    color: #333;
-    border: 1px solid #aaa;
-    box-shadow: 2px 2px 2px #999;
-    border-radius: 0.2rem;
-    list-style: none;
-    position: fixed;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    width: 90%;
-    height: 90%;
-    top: 50%;
-    left: 50%;
-    display: flex;
-    align-items: center;
-    flex-flow: column;
-    transform: translate(-50%, -50%);
-    z-index:10;
-}
-
-.login-popup.off{
-    top: -200%;
-    left: -200%;
-}
-
-.centered-div{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    height: 100%;
-}
-
-.float-left-div{
-    float: left;
-    overflow: auto;
-}
-
-.github-login-display{
-    width: 50%;
-    height: 90%;
-    border: 1px solid black;
-    text-align: center;
-}
-
-.project{
-    width: 100px;
-    height: 100px;
-    boarder: 1px solid black;
-    display: inline-block;
-    padding: 10px;
-    font-weight:bold;
-}
-
-.project:hover{
-    background-color: #ffffff;
-}
-
-/* width */
-::-webkit-scrollbar {
-  width: 1em;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #555; 
-}
-
 
 /*menu new arc*/
 

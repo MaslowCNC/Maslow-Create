@@ -55,6 +55,9 @@ export default class Code extends Atom {
         }catch(err){this.setAlert(err)}
     }
     
+    /**
+     * This function reads the string of inputs the user specifies and adds them to the atom.
+     */ 
     parseInputs(){
         //Parse this.code for the line "\nmain(input1, input2....) and add those as inputs if needed
         var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code)

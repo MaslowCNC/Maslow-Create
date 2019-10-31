@@ -331,43 +331,6 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Create a new project on GitHub with this atom as it's top level, then replace this molecule with githubMolecule referencing that project.
-     * @param {object} self - A passed reference to self...why are we doing this?
-     */
-    exportToGithub(self){
-        //Export this molecule to github
-        GlobalVariables.gitHub.exportCurrentMoleculeToGithub(self)
-    }
-    
-    /**
-     * Replaces this molecule with a github molecule pointing to the passed reference.
-     * @param {number} githubID - The ID number of the github project to replace this
-     */
-    replaceThisMoleculeWithGithub(githubID){
-        
-        //If we are currently inside the molecule targeted for replacement, go up one
-        if (GlobalVariables.currentMolecule.uniqueID == this.uniqueID){
-            GlobalVariables.currentMolecule = this.parent
-        }
-        
-        //Create a new github molecule in the same spot
-        GlobalVariables.currentMolecule.placeAtom({
-            x: this.x, 
-            y: this.y, 
-            parent: GlobalVariables.currentMolecule,
-            name: this.name,
-            atomType: 'GitHubMolecule',
-            projectID: githubID,
-            uniqueID: GlobalVariables.generateUniqueID()
-        }, null, GlobalVariables.availableTypes)
-        
-        
-        //Then delete the old molecule which has been replaced
-        this.deleteNode()
-
-    }
-    
-    /**
      * Check to see if any of this molecules children have contributions to make to the README file. Children closer to the top left will be applied first. TODO: No contribution should be made if it's just a title.
      */
     requestReadme(){
@@ -447,7 +410,7 @@ export default class Molecule extends Atom{
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
-            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes)
+            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes, false)
             promiseArray.push(promise)
         })
         
@@ -521,6 +484,9 @@ export default class Molecule extends Atom{
                     promise = atom.loadProjectByID(atom.projectID)
                 }
                 
+                //Add the atom to the list to display
+                this.nodesOnTheScreen.push(atom)
+                
                 if(unlock){
                     //Make it spawn ready to update right away
                     if(promise != null){
@@ -531,9 +497,20 @@ export default class Molecule extends Atom{
                     else{
                         atom.unlock()
                     }
+                    
+                    //Fake a click on the newly placed atom
+                    const downEvt = new MouseEvent('mousedown', {
+                        clientX: atom.x,
+                        clientY: atom.y
+                    })
+                    const upEvt = new MouseEvent('mouseup', {
+                        clientX: atom.x,
+                        clientY: atom.y
+                    })
+                    
+                    document.getElementById('flow-canvas').dispatchEvent(downEvt)
+                    document.getElementById('flow-canvas').dispatchEvent(upEvt)
                 }
-                
-                this.nodesOnTheScreen.push(atom)
             }
         }
         return promise
