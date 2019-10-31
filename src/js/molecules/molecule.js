@@ -484,6 +484,9 @@ export default class Molecule extends Atom{
                     promise = atom.loadProjectByID(atom.projectID)
                 }
                 
+                //Add the atom to the list to display
+                this.nodesOnTheScreen.push(atom)
+                
                 if(unlock){
                     //Make it spawn ready to update right away
                     if(promise != null){
@@ -494,9 +497,20 @@ export default class Molecule extends Atom{
                     else{
                         atom.unlock()
                     }
+                    
+                    //Fake a click on the newly placed atom
+                    const downEvt = new MouseEvent('mousedown', {
+                        clientX: atom.x,
+                        clientY: atom.y
+                    })
+                    const upEvt = new MouseEvent('mouseup', {
+                        clientX: atom.x,
+                        clientY: atom.y
+                    })
+                    
+                    document.getElementById('flow-canvas').dispatchEvent(downEvt)
+                    document.getElementById('flow-canvas').dispatchEvent(upEvt)
                 }
-                
-                this.nodesOnTheScreen.push(atom)
             }
         }
         return promise
