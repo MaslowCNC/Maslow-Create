@@ -220,7 +220,6 @@ function init() {
             GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
                 GlobalVariables.evalLock = false
                 GlobalVariables.topLevelMolecule.unlock()
-                GlobalVariables.topLevelMolecule.beginPropogation()
                 GlobalVariables.topLevelMolecule.backgroundClick()
             })
         }
@@ -252,15 +251,17 @@ function onWindowResize() {
     GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 
     let switchButton = document.getElementById('atomSwitch')
-    switchButton.addEventListener('change', (event) => {
+    if(switchButton != null){
+        switchButton.addEventListener('change', (event) => {
 
-        if (event.target.checked) {
-            GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+            if (event.target.checked) {
+                GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
 
-        } else {
-            GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
-        }
-    })
+            } else {
+                GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
+            }
+        })
+    }
 
     GlobalVariables.display.onWindowResize()
 }
