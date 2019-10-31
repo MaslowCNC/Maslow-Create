@@ -888,6 +888,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/initialpopup.js",
+    "file/src/js/initialPopup.js.html",
+    "src/js/initialPopup.js",
+    "file"
+  ],
+  [
     "src/js/localmenu.js",
     "file/src/js/localmenu.js.html",
     "src/js/localmenu.js",
@@ -1692,12 +1698,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/input.js~input#beginpropogation",
-    "class/src/js/molecules/input.js~Input.html#instance-method-beginPropogation",
-    "src/js/molecules/input.js~Input#beginPropogation",
-    "method"
-  ],
-  [
     "src/js/molecules/input.js~input#color",
     "class/src/js/molecules/input.js~Input.html#instance-member-color",
     "src/js/molecules/input.js~Input#color",
@@ -1756,12 +1756,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/input.js~Input.html#instance-member-strokeColor",
     "src/js/molecules/input.js~Input#strokeColor",
     "member"
-  ],
-  [
-    "src/js/molecules/input.js~input#unlock",
-    "class/src/js/molecules/input.js~Input.html#instance-method-unlock",
-    "src/js/molecules/input.js~Input#unlock",
-    "method"
   ],
   [
     "src/js/molecules/input.js~input#updateparentname",
@@ -1890,12 +1884,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#exporttogithub",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-exportToGithub",
-    "src/js/molecules/molecule.js~Molecule#exportToGithub",
-    "method"
-  ],
-  [
     "src/js/molecules/molecule.js~molecule#gotoparentmolecule",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-goToParentMolecule",
     "src/js/molecules/molecule.js~Molecule#goToParentMolecule",
@@ -1947,12 +1935,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/molecule.js~molecule#refreshcircles",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-refreshCircles",
     "src/js/molecules/molecule.js~Molecule#refreshCircles",
-    "method"
-  ],
-  [
-    "src/js/molecules/molecule.js~molecule#replacethismoleculewithgithub",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-replaceThisMoleculeWithGithub",
-    "src/js/molecules/molecule.js~Molecule#replaceThisMoleculeWithGithub",
     "method"
   ],
   [

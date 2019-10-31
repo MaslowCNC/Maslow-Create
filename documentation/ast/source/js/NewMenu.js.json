@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 7919,
+  "end": 7925,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 7919,
+    "end": 7925,
     "loc": {
       "start": {
         "line": 1,
@@ -13769,7 +13769,7 @@
       {
         "type": "FunctionDeclaration",
         "start": 7068,
-        "end": 7898,
+        "end": 7904,
         "loc": {
           "start": {
             "line": 213,
@@ -13823,7 +13823,7 @@
         "body": {
           "type": "BlockStatement",
           "start": 7100,
-          "end": 7898,
+          "end": 7904,
           "loc": {
             "start": {
               "line": 213,
@@ -15087,7 +15087,7 @@
             {
               "type": "ExpressionStatement",
               "start": 7473,
-              "end": 7806,
+              "end": 7812,
               "loc": {
                 "start": {
                   "line": 224,
@@ -15095,13 +15095,13 @@
                 },
                 "end": {
                   "line": 231,
-                  "column": 44
+                  "column": 50
                 }
               },
               "expression": {
                 "type": "CallExpression",
                 "start": 7473,
-                "end": 7806,
+                "end": 7812,
                 "loc": {
                   "start": {
                     "line": 224,
@@ -15109,7 +15109,7 @@
                   },
                   "end": {
                     "line": 231,
-                    "column": 44
+                    "column": 50
                   }
                 },
                 "callee": {
@@ -15740,6 +15740,22 @@
                       "name": "availableTypes"
                     },
                     "computed": false
+                  },
+                  {
+                    "type": "BooleanLiteral",
+                    "start": 7807,
+                    "end": 7811,
+                    "loc": {
+                      "start": {
+                        "line": 231,
+                        "column": 45
+                      },
+                      "end": {
+                        "line": 231,
+                        "column": 49
+                      }
+                    },
+                    "value": true
                   }
                 ],
                 "trailingComments": null
@@ -15748,16 +15764,16 @@
                 {
                   "type": "CommentLine",
                   "value": "null indicates that there is nothing to load from the molecule list for this one",
-                  "start": 7807,
-                  "end": 7889,
+                  "start": 7813,
+                  "end": 7895,
                   "loc": {
                     "start": {
                       "line": 231,
-                      "column": 45
+                      "column": 51
                     },
                     "end": {
                       "line": 231,
-                      "column": 127
+                      "column": 133
                     }
                   }
                 }
@@ -15787,8 +15803,8 @@
       },
       {
         "type": "ExportNamedDeclaration",
-        "start": 7902,
-        "end": 7916,
+        "start": 7908,
+        "end": 7922,
         "loc": {
           "start": {
             "line": 235,
@@ -15803,8 +15819,8 @@
         "specifiers": [
           {
             "type": "ExportSpecifier",
-            "start": 7910,
-            "end": 7915,
+            "start": 7916,
+            "end": 7921,
             "loc": {
               "start": {
                 "line": 235,
@@ -15817,8 +15833,8 @@
             },
             "local": {
               "type": "Identifier",
-              "start": 7910,
-              "end": 7915,
+              "start": 7916,
+              "end": 7921,
               "loc": {
                 "start": {
                   "line": 235,
@@ -15834,8 +15850,8 @@
             },
             "exported": {
               "type": "Identifier",
-              "start": 7910,
-              "end": 7915,
+              "start": 7916,
+              "end": 7921,
               "loc": {
                 "start": {
                   "line": 235,
@@ -15855,8 +15871,8 @@
       },
       {
         "type": "ExportNamedDeclaration",
-        "start": 7902,
-        "end": 7916,
+        "start": 7908,
+        "end": 7922,
         "loc": {
           "start": {
             "line": 235,
@@ -18236,16 +18252,16 @@
     {
       "type": "CommentLine",
       "value": "null indicates that there is nothing to load from the molecule list for this one",
-      "start": 7807,
-      "end": 7889,
+      "start": 7813,
+      "end": 7895,
       "loc": {
         "start": {
           "line": 231,
-          "column": 45
+          "column": 51
         },
         "end": {
           "line": 231,
-          "column": 127
+          "column": 133
         }
       }
     }
@@ -45904,15 +45920,16 @@
     },
     {
       "type": {
-        "label": ")",
-        "beforeExpr": false,
+        "label": ",",
+        "beforeExpr": true,
         "startsExpr": false,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
         "prefix": false,
         "postfix": false,
-        "binop": null
+        "binop": null,
+        "updateContext": null
       },
       "start": 7805,
       "end": 7806,
@@ -45928,10 +45945,22 @@
       }
     },
     {
-      "type": "CommentLine",
-      "value": "null indicates that there is nothing to load from the molecule list for this one",
+      "type": {
+        "label": "true",
+        "keyword": "true",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "true",
       "start": 7807,
-      "end": 7889,
+      "end": 7811,
       "loc": {
         "start": {
           "line": 231,
@@ -45939,7 +45968,48 @@
         },
         "end": {
           "line": 231,
-          "column": 127
+          "column": 49
+        }
+      }
+    },
+    {
+      "type": {
+        "label": ")",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 7811,
+      "end": 7812,
+      "loc": {
+        "start": {
+          "line": 231,
+          "column": 49
+        },
+        "end": {
+          "line": 231,
+          "column": 50
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": "null indicates that there is nothing to load from the molecule list for this one",
+      "start": 7813,
+      "end": 7895,
+      "loc": {
+        "start": {
+          "line": 231,
+          "column": 51
+        },
+        "end": {
+          "line": 231,
+          "column": 133
         }
       }
     },
@@ -45955,8 +46025,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 7897,
-      "end": 7898,
+      "start": 7903,
+      "end": 7904,
       "loc": {
         "start": {
           "line": 233,
@@ -45983,8 +46053,8 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 7902,
-      "end": 7908,
+      "start": 7908,
+      "end": 7914,
       "loc": {
         "start": {
           "line": 235,
@@ -46008,8 +46078,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 7909,
-      "end": 7910,
+      "start": 7915,
+      "end": 7916,
       "loc": {
         "start": {
           "line": 235,
@@ -46034,8 +46104,8 @@
         "binop": null
       },
       "value": "cmenu",
-      "start": 7910,
-      "end": 7915,
+      "start": 7916,
+      "end": 7921,
       "loc": {
         "start": {
           "line": 235,
@@ -46059,8 +46129,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 7915,
-      "end": 7916,
+      "start": 7921,
+      "end": 7922,
       "loc": {
         "start": {
           "line": 235,
@@ -46085,8 +46155,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 7919,
-      "end": 7919,
+      "start": 7925,
+      "end": 7925,
       "loc": {
         "start": {
           "line": 236,

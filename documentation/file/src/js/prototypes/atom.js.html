@@ -80,6 +80,7 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/prototypes/atom.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import AttachmentPoint from &apos;./attachmentpoint&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
+
 /**
  * This class is the prototype for all atoms.
  */
@@ -116,7 +117,7 @@ export default class Atom {
          * This atom&apos;s radius as displayed on the screen
          * @type {number}
          */
-        this.radius = 16
+        this.radius = GlobalVariables.canvas.width/65 
         /** 
          * This atom&apos;s default color (ie when not selected or processing)
          * @type {string}
@@ -232,7 +233,7 @@ export default class Atom {
         this.inputs.forEach(child =&gt; {
             child.draw()       
         })
-        
+
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = &apos;10px Work Sans&apos;
 
@@ -252,8 +253,7 @@ export default class Atom {
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
         }
         
-        
-        
+
         if(this.processing){
             GlobalVariables.c.fillStyle = &apos;blue&apos;
         }
