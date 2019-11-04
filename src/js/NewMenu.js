@@ -14,7 +14,7 @@ var cmenu = CMenu(ele)
         spaceDeg: 1,//deg
         background: "#323232E8",
         backgroundHover: "black",
-        percent: 0.35,//%
+        percent: 0.30,//%
         diameter: 130,//px
         position: 'top',
         horizontal: false,
@@ -23,7 +23,7 @@ var cmenu = CMenu(ele)
         menus: [
             {
                 title: 'ACTIONS',
-                icon: '',
+                icon: 'Extrude',
                 menus: makeArray('Actions')        
             },
             {
@@ -39,7 +39,7 @@ var cmenu = CMenu(ele)
             },
             {
                 title: 'SHAPES',
-                icon: '',
+                icon: 'Shapes',
                 menus: makeArray('Shapes')
             },
             {
@@ -61,6 +61,8 @@ function makeArray(group) {
         if(instance.atomCategory === group){
             var subMenu = new Object()
             subMenu.title = instance.atomType.toUpperCase() 
+            console.log(`${instance.atomType}`)
+            //subMenu.icon = `${instance.atomType}`
             subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
                 if (title.title === 'GITHUBMOLECULE'){
