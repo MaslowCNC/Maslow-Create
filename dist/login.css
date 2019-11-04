@@ -1,19 +1,19 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
 #welcome{
-  display: block;
-  width: 100%;
-  margin-bottom:30px;
-  font-size: 24px;
-  text-align:center;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 24px;
+    text-align: center;
 }
 
 .curiousBrowse{
     display:flex;
     flex-wrap: wrap;
     width: 100%;
+    height: 100%;
     padding: 10px;
-    margin: 10px;
     box-sizing: border-box;
     background-color: #efecec;
 }
@@ -27,31 +27,88 @@
   border-radius: 50%;
 }
 .logindiv{
-  margin: 0 10px 0 10px;
-  position: relative;
-  width: 100%;
+    margin: 10px 10px 0 10px;
+    position: relative;
+    width: 95%;
     box-sizing: border-box;
     display: flex;
     align-content: center;
     justify-content: space-around;
-    background-color: #ddd;
+    background-color: #f9f6f6;
     flex-wrap: wrap;
+    align-self: center;
+    padding: 20px;
+    border-radius: 4px;
 }
 
 .login-page {
-  padding: 5% 0 0;
   margin: auto;
 }
+
 .form {
-  display:flex;
-  position: relative;
-  z-index: 1;
-  max-width: 85%;
-  margin: 0 auto 100px;
-  padding: 30px;
-  text-align: center;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+  background-color: #3e3d3d;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    border-radius: 4px;
+    width: 60%;
+    margin: 0 auto 100px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
+
+/*=== Trigger  ===*/
+.animate {
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+/*=== Optional Delays, change values here  ===*/
+.one {
+-webkit-animation-delay: 0s;
+-moz-animation-delay: 0s;
+animation-delay: 0s;
+}
+
+/*=== Animations start here  ===*/
+/*==== FADE IN UP ===*/
+@-webkit-keyframes fadeInUp {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 15%, 0);
+    transform: translate3d(0, 15%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 10%, 0);
+    transform: translate3d(0, 10%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+.fadeInUp {
+  -webkit-animation-name: fadeInUp;
+  animation-name: fadeInUp;
+}
+
+
 .form input {
   font-family: "Roboto", sans-serif;
   outline: 0;
@@ -70,7 +127,7 @@
   background: #444;
   width: 100%;
   border: 0;
-  padding: 15px;
+  border-radius: 2px;
   color: #FFFFFF;
   font-size: 14px;
   -webkit-transition: all 0.3 ease;
@@ -131,8 +188,11 @@
 /* Browse login and open projects styling */
 
 .login-popup{
+
+    padding:2% 0;
     width: 12rem;
-    background-color: #f4f4f4;
+    box-sizing: border-box;
+    background-color: #f9f6f6;
     color: #333;
     border: 1px solid #aaa;
     box-shadow: 2px 2px 2px #999;
@@ -145,8 +205,8 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    width: 90%;
-    height: 90%;
+    width: 100%;
+    height: 100%;
     top: 50%;
     left: 50%;
     display: flex;
@@ -168,16 +228,26 @@
     height: 100%;
 }
 
-.float-left-div{
-  margin-top: 20px;
-  float: left;
-  overflow: auto;
-}
 .float-left-div-thumb{
     display: flex;
     flex-direction: column;
-    margin-top: 20px;
+    margin-top: 0px;
     width: 100%;
+}
+#githubButton{
+    width: 60%;
+    height: 30px;
+    margin-top: -10px;
+    margin-left: 30%;
+}
+
+.githubSign{
+    text-align: center;
+    padding: 5px;
+    margin: 0;
+    display: flex;
+    text-align: center;
+    align-items: center;
 }
 
 .github-login-display{
@@ -188,7 +258,6 @@
 }
 .topBrowse{
     margin: 10px;
-    padding: 10px;
     width: 96%;
     display: flex;
     flex-flow: row;
@@ -196,13 +265,13 @@
     box-sizing: border-box;
 }
 #project_search{
-    background: #444;
-    color: white;
-    border: none;
-    padding: 4px;
+    color: #353232;
+    border: 1px solid #444;
+    padding: 3px;
     align-self: flex-end;
     width: 40%;
-    margin-right: 30px;
+    margin-right: 10px;
+    align-self: center;
     position: relative;
     }
 
@@ -281,12 +350,12 @@
     position:relative;
     left:10px;
     width: 48%;
-    height: 150px;
+    height: 120px;
   }
 
 .newProjectdiv{
     position: relative;
-    padding: 20px;
+    padding: 5px;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
@@ -307,27 +376,27 @@
     display: none;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
-    background-color: #a9a9a957;
+    background-color: #a9a9a91a;
     padding: 5px 10px;
-    margin: 10px 0;
+    margin: 20px 0 0 0;
     height: 4%;
     box-sizing: border-box;
 }
 
  .browseButton{
-    width: 156px;
-    height: 32px;
-    border-radius: 50px;
-    font-size: 13px;
     font-family: "Roboto", sans-serif;
     text-transform: uppercase;
-    align-self: flex-end;
-    background-color: #444;
-    color: white;
-    text-align: center;
-    margin-left: 30%;
+    outline: 0;
+    background: #444;
+    width: 100%;
+    border: 0;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
  } 
 
 .browseButton:hover {
@@ -342,6 +411,7 @@
     display: inline-block;
     padding: 10px;
     font-size:13px;
+    justify-content: space-between;
 }
 
 .project:hover{

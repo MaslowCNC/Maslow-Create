@@ -41,7 +41,9 @@
                 <button class="top_buttons option" type="button" id = "projectmenu_top" title="Open projects"> <img class="thumnail-logo" src='/imgs/open-logo.png' alt="Load" style=" transform: scale(.67); border-radius: 0px;"> </button>
             </div>
         </div>  
-        <div id="popUp" style="display: none;"> Project Saved </div>
+        <div id="Progress_Status">
+            <div id="popUp" style="display: none;"> Project Saved </div>
+        </div>
         
     </div> 
     <!-- Circular menu on canvas -->
@@ -56,34 +58,32 @@
     <!-- The login popup -->
     <div class = "login-popup " id = "projects-popup">
         <div class="login-page">
-            <div id="welcome">Welcome to Maslow Create</div>
-          <div class="form">
+          <div class="form animate fadeInUp one">
 
                 <div id="gitSide" class="logindiv">
                 <img class="logo" src='/imgs/maslow-logo.png' alt="logo">
+                <div id="welcome"><img src='/imgs/maslowcreate.svg' alt="logo" style="width: 300px;padding: 10px; margin-bottom: 0;"></div>
                 <p style= "padding: 0 20px">Maslow Create projects are stored through GitHub. Login to start your own! </p>
                 <form class="login-form">
                   <!--Credit to https://codepen.io/colorlib/pen/rxddKy -->
-                  <button type="button" id = "loginButton" >Login To GitHub</button>
+                  <button type="button" id = "loginButton" style ="height: 40px;">Login With GitHub</button>
                   <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
                 </form>
                 </div>
-                <div id="nonGitSide" class="logindiv">
-                    <div class="curiousBrowse" id= "newProjectdiv">
-                    <img class="logo" src='/defaultThumbnail.svg' alt="logo" style= "height: 80%; float: left">
-                    <p style="justify-content:flex-start; display: inline; width: 60%; margin-top: 15px">Check out what others have made on Maslow Create</p>   
-                    <button type="button" class= "browseButton" id = "browseNonGit" style ="padding: 0px; margin-top: -10px;">Browse all projects</button>
-                    </div>
-                    <div class="curiousBrowse" id= "curiousLearn">
-                     <p style= "margin: 10px auto 30px auto;">Learn more about Maslow Create</p>
-                    <button type="button" class= "browseButton" style= "padding: 0; margin-top: -10px;" id = "docs" onClick="window.open('https://maslowcreate.org/documentation/');">Documentation </button>
-                    <br>
-                    <button type="button" style= "padding: 0; margin-top: -10px;" class= "browseButton" id = "repository" onClick="window.open('https://github.com/MaslowCNC/Maslow-Create');">GitHub Repository</button>
-                    </div>
+                <div id="nonGitSide" class="logindiv curiousBrowse">
+                   
+                    <p style="justify-content:flex-start; display: inline; width: 80%; ">Check out what others have designed in Maslow Create</p>   
+                    <button type="button" class= "browseButton" id = "browseNonGit" style ="padding: 0px; height: 30px; width: 70%">Browse all projects</button>
                 </div>
           </div>
         </div>
+        <div class="browse"></div>
     </div>
+    <!-- Rounded switch for changing atom size -->
+        <label class="switch">
+          <input type="checkbox" id="atomSwitch" checked >
+          <span class="sliderAtom round"></span>
+        </label>
     <!-- Draw the canvas for creating the design -->
     <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">     
@@ -93,8 +93,6 @@
             <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
             <div id="viewer_bar"></div>  
         </div>
-        
-        
         <div class="sideBar">
             Maslow Create
         </div>
