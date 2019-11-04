@@ -140,20 +140,7 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
             a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)` 
             step-=100
-        }
-        /*var name = document.createElement("div")
-                name.innerHTML= "groundcake"
-                name.style.backgroundColor = "black"
-                name.setAttribute('class','drop')
-                a.appendChild(name)
-
-            a.addEventListener('mouseover', (e) => {
-               name.style.display = "inline"
-            });
-            a.addEventListener('mouseout', (e) => {
-               name.style.display = "none"
-            });*/
-           
+        }           
     }) 
 }) 
 
