@@ -40,7 +40,9 @@
                 <button class="top_buttons option" type="button" id = "projectmenu_top" title="Open projects"> <img class="thumnail-logo" src='/imgs/open-logo.png' alt="Load" style=" transform: scale(.67); border-radius: 0px;"> </button>
             </div>
         </div>  
-        <div id="popUp" style="display: none;"> Project Saved </div>
+        <div id="Progress_Status">
+            <div id="popUp" style="display: none;"> Project Saved </div>
+        </div>
         
     </div> 
     <!-- Circular menu on canvas -->
@@ -76,6 +78,11 @@
         </div>
         <div class="browse"></div>
     </div>
+    <!-- Rounded switch for changing atom size -->
+        <label class="switch">
+          <input type="checkbox" id="atomSwitch" checked >
+          <span class="sliderAtom round"></span>
+        </label>
     <!-- Draw the canvas for creating the design -->
     <canvas id = "flow-canvas" style="background-color: #f9f9f9"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">     
@@ -85,8 +92,6 @@
             <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div>
             <div id="viewer_bar"></div>  
         </div>
-        
-        
         <div class="sideBar">
             Maslow Create
         </div>

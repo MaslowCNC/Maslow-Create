@@ -995,10 +995,7 @@ export default function GitHubModule(){
             if(typeof intervalTimer != undefined){
                 clearInterval(intervalTimer) //Turn off auto saving to prevent it from saving again during this save
             }
-            
-            let popUp = document.querySelector('#popUp')
-            popUp.textContent = "...saving"
-            popUp.setAttribute("style","display:block")
+            this.progressSave(0)
             var shape = null
             if(GlobalVariables.topLevelMolecule.value != null){
                 shape = GlobalVariables.topLevelMolecule.value
@@ -1037,6 +1034,7 @@ export default function GitHubModule(){
                 return await GlobalVariables.saveWorker({values: values, key: key})
             } 
             threadCompute([shape], "SVG Picture").then(contentSvg => {
+                this.progressSave(10)
                 
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
@@ -1078,18 +1076,41 @@ export default function GitHubModule(){
             })
         }
     }
-    
+    /** 
+     * Creates saving/saved pop up
+     */
+    this.progressSave = function (progress) { 
+        var popUp = document.getElementById("popUp")   
+        let popUpBox = document.querySelector('#Progress_Status') 
+        //var width = 1; 
+        popUp.setAttribute("style","display:block")
+        popUpBox.setAttribute("style","display:block")
+        
+        if (progress >= 100) { 
+            popUp.style.width = progress + '%' 
+            popUp.textContent = "Project Saved"
+            setTimeout(function() {
+                popUp.setAttribute("style","display:none")
+                popUpBox.setAttribute("style","display:none")
+            }, 4000)
+        } else { 
+            popUp.textContent = "Saving..."
+            popUp.style.width = progress + '%'  
+        } 
+    } 
+        
     /** 
      * Create a commit as part of the saving process.
      */
     this.createCommit = async function(octokit, { owner, repo, base, changes }) {
+        this.progressSave(30)
         let response
 
         if (!base) {
             response = await octokit.repos.get({ owner, repo })
             base = response.data.default_branch
         }
-
+        this.progressSave(40)
         response = await octokit.repos.listCommits({
             owner,
             repo,
@@ -1098,6 +1119,7 @@ export default function GitHubModule(){
         })
         let latestCommitSha = response.data[0].sha
         const treeSha = response.data[0].commit.tree.sha
+        this.progressSave(60)
       
         response = await octokit.git.createTree({
             owner,
@@ -1112,6 +1134,7 @@ export default function GitHubModule(){
             })
         })
         const newTreeSha = response.data.sha
+        this.progressSave(80)
 
         response = await octokit.git.createCommit({
             owner,
@@ -1121,6 +1144,8 @@ export default function GitHubModule(){
             parents: [latestCommitSha]
         })
         latestCommitSha = response.data.sha
+
+        this.progressSave(90)
       
         await octokit.git.updateRef({
             owner,
@@ -1129,15 +1154,9 @@ export default function GitHubModule(){
             ref: `heads/master`,
             force: true
         })
-      
+        this.progressSave(100)
         console.warn("Project saved")
-        //alert
-        let popUp = document.querySelector('#popUp')
-        popUp.textContent = "Project Saved"
-        popUp.setAttribute("style","display:block")
-        setTimeout(function() {
-            popUp.setAttribute("style","display:none")
-        }, 4000)
+       
     }
     
     /** 
