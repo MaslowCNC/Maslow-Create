@@ -76,9 +76,15 @@
 }
 
 #straight_menu{
-  background-color: black;
   z-index: 30;
   opacity:1;
+}
+.three-menu{
+      width: 12px;
+    height: 10px;
+    border-radius: 0;
+    display: inline;
+    padding: 1px;
 }
 
 .option{
