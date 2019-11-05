@@ -2,8 +2,8 @@
             background-position: 0 0;
         }
 
-  .Extrude{
-            background: url("./imgs/extrude.png");
+  .Actions{
+            background: url("./imgs/actions.png");
             width:400%;
             height:400%;
         }
@@ -58,11 +58,46 @@
             height:150%;
         }      
 
-         .Code{
+     .Code{
             background: url("./imgs/code.png");
             width:150%;
             height:150%;
-        }       
+        }   
+         .Gcode{
+            background: url("./imgs/gcode.png");
+            width:150%;
+            height:150%;
+        }   
+
+         .Scale{
+            background: url("./imgs/scale.png");
+            width:150%;
+            height:150%;
+        }   
+
+         .RegularPolygon{
+            background: url("./imgs/RegularPolygon.png");
+            width:150%;
+            height:150%;
+        }   
+
+        .Extrude{
+            background: url("./imgs/extrude.png");
+            width:150%;
+            height:150%;
+        }   
+        .Translate{
+            background: url("./imgs/translate.png");
+            width:150%;
+            height:150%;
+        }  
+        .Molecule{
+            background: url("./imgs/molecule.png");
+            width:150%;
+            height:150%;
+        }  
+
+
  
 
 

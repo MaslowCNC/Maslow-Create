@@ -23,7 +23,7 @@ var cmenu = CMenu(ele)
         menus: [
             {
                 title: '',
-                icon: 'Extrude',
+                icon: 'Actions',
                 menus: makeArray('Actions')        
             },
             {
