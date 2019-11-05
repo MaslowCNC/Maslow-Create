@@ -366,10 +366,10 @@ export default class Display {
                     if(event.target.checked){
                         //this.scene.add( this.plane )
                         this.displayGrid = true
-                        var group = new THREE.Group();
-                        var helper = new THREE.GridHelper( 160, 10 );
-                        helper.rotation.x = Math.PI / 2;
-                        group.add( helper );
+                        var group = new THREE.Group()
+                        var helper = new THREE.GridHelper( 160, 10 )
+                        helper.rotation.x = Math.PI / 2
+                        group.add( helper )
                     }
                     else{
                         this.scene.remove(this.plane)
