@@ -13,38 +13,38 @@ var cmenu = CMenu(ele)
         totalAngle: 360,//deg,
         spaceDeg: 1,//deg
         background: "#323232E8",
-        backgroundHover: "black",
-        percent: 0.30,//%
-        diameter: 130,//px
+        backgroundHover: "#FFFFFF",
+        percent: 0.20,//%
+        diameter: 120,//px
         position: 'top',
-        horizontal: false,
+        horizontal: true,
         //start: -45,//deg
         animation: "into",
         menus: [
             {
-                title: 'ACTIONS',
+                title: '',
                 icon: 'Extrude',
                 menus: makeArray('Actions')        
             },
             {
-                title: 'PROPERTY',
-                icon: '',
+                title: '',
+                icon: 'Intersection',
                 menus: makeArray('Properties')
             },
             {
-                title: 'Import/Export',
-                icon: '',
+                title: '',
+                icon: 'Import-export',
                 menus: makeArray('Import/Export')
                                 
             },
             {
-                title: 'SHAPES',
+                title: '',
                 icon: 'Shapes',
                 menus: makeArray('Shapes')
             },
             {
-                title: 'INTERACTION',
-                icon: '',
+                title: '',
+                icon: 'Interaction',
                 menus: makeArray('Interactions')
             }
         ]
@@ -60,9 +60,8 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            subMenu.title = instance.atomType.toUpperCase() 
-            console.log(`${instance.atomType}`)
-            //subMenu.icon = `${instance.atomType}`
+            //subMenu.title = instance.atomType.toUpperCase() 
+            subMenu.icon = `${instance.atomType}` + ` icon1`
             subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
                 if (title.title === 'GITHUBMOLECULE'){

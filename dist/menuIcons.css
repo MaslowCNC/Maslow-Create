@@ -1,0 +1,61 @@
+.icon1 {
+            background-position: 0 0;
+        }
+
+  .Extrude{
+            background: url("./imgs/extrude.png");
+            width:400%;
+            height:400%;
+        }
+  .Shapes{
+            background: url("./imgs/Shapes.png");
+            width:150%;
+            height:150%;
+        }
+   .Assembly{
+            background: url("./imgs/Assembly.png");
+            width:150%;
+            height:150%;
+        }
+  .Interaction{
+            background: url("./imgs/interaction.png");
+            width:150%;
+            height:150%;
+        }
+    .Intersection{
+            background: url("./imgs/intersection.png");
+            width:150%;
+            height:150%;
+        }
+
+     .Import-export{
+            background: url("./imgs/import-export.png");
+            width:150%;
+            height:150%;
+        }    
+
+    .Union{
+            background: url("./imgs/union.png");
+            width:150%;
+            height:150%;
+        }     
+
+    .Difference{
+            background: url("./imgs/difference.png");
+            width:150%;
+            height:150%;
+        }    
+
+     .Rectangle{
+            background: url("./imgs/rectangle.png");
+            width:150%;
+            height:150%;
+        }    
+     
+     .Circle{
+            background: url("./imgs/circle.png");
+            width:150%;
+            height:150%;
+        }       
+
+
