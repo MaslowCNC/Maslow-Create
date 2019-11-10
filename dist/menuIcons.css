@@ -58,12 +58,12 @@
             height:150%;
         }      
 
-     .Code{
+        .Code{
             background: url("./imgs/code.png");
             width:150%;
             height:150%;
         }   
-         .Gcode{
+        .Gcode{
             background: url("./imgs/gcode.png");
             width:150%;
             height:150%;
@@ -101,6 +101,38 @@
             width:150%;
             height:150%;
         } 
+
+        .Color{
+            background: url("./imgs/Color.png");
+            width:150%;
+            height:150%;
+        } 
+
+        .CutList{
+            background: url("./imgs/Cutlist.png");
+            width:150%;
+            height:150%;
+        } 
+
+          .Rotate{
+            background: url("./imgs/Rotate.png");
+            width:150%;
+            height:150%;
+        } 
+
+
+          .Input{
+            background: url("./imgs/Input.png");
+            width:150%;
+            height:150%;
+        } 
+
+         .Equation{
+            background: url("./imgs/Equation.png");
+            width:150%;
+            height:150%;
+        } 
+
 
 
  
