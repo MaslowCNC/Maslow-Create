@@ -1,5 +1,5 @@
-//circular-menu. -- https://github.com/yandongCoder/circular-menu
 
+//circular-menu
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
@@ -119,7 +119,6 @@
         this.skewDeg = 90 - this.centralDeg;
         this.unskewDeg = - (90 - this.centralDeg / 2);
         this.textTop = textTop(this.clickZoneRadius);
-        this.textTopSubMenu = textTop(this.clickZoneRadius*22);  //22 Here is a bit of a hack to make this represent right on the sub menu which has all the empty space outside it
     }
 
     Calculation.prototype = {
@@ -295,8 +294,10 @@
         style(p, 'margin-left', this._calc.menuSize.marginLeft);
         
         var self = this;
-        on(p, "mouseup", function(e){
-            self._cMenu.hide();
+        on(p, "click", function(e){
+            if(e.toElement === p){
+                self._cMenu.hide();
+            }
         });
         setTimeout(function(){
             style(p, 'display', 'block');
@@ -338,7 +339,6 @@
 
     var delayShow = null;// delayShow reference the last setTimeout triggered by any one of menu item(anchor)
 
-    //This seems to create the pie slices which the mouse can interact with
     function createAnchor (parent, data, index) {
         var self = this;
 
@@ -352,25 +352,20 @@
             classed(a, 'disabled', ifDisabled(data.disabled));
         };
         this._anchors.push(a);
-        
+
+
         style(a, 'width', this._calc.clickZoneSize.width);
         style(a, 'height', this._calc.clickZoneSize.height);
-        style(a, 'right', this._calc.clickZoneSize.marginRight);
-        style(a, 'bottom', this._calc.clickZoneSize.marginBottom);
+        //style(a, 'right', this._calc.clickZoneSize.marginRight);
+        //style(a, 'bottom', this._calc.clickZoneSize.marginBottom);
         style(a, 'transform', 'skew(' + -this._calc.skewDeg + 'deg) rotate(' + this._calc.unskewDeg + 'deg) scale(1)');
 
         classed(a, 'disabled', ifDisabled(data.disabled));
 
 
         var percent = this._config.percent * 100 + "%";
-        
-        if (!hasSubMenus(data.menus)) {
-            styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, #323232E8 20%, #323232E8 30%, transparent 30%, transparent)');
-            styleSheet(a, 'background', 'radial-gradient(transparent, transparent 20%, black 20%, black 30%, transparent 30%, transparent)', 'hover');
-        }else{
-            styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.background + ' ' + percent + ')');
-            styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')', 'hover');
-        }
+        styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.background + ' ' + percent + ')');
+        styleSheet(a, 'background', 'radial-gradient(transparent ' + percent + ', ' + this._config.backgroundHover + ' ' + percent + ')', 'hover');
 
 
         function clickCallBack(e, data){
@@ -383,11 +378,11 @@
             }
         }
 
-        on(a, 'mouseup', clickCallBack, data);
+        on(a, 'click', clickCallBack, data);
 
         parent.appendChild(a);
 
-        this._createHorizontal(a, data, index, hasSubMenus(data.menus));
+        this._createHorizontal(a, data, index);
         
         
         //toggle subMenu
@@ -457,8 +452,8 @@
 
         var l = this._calc.clickZoneRadius * sizeRatio - fontHeight + "px",
             m = this._calc.clickZoneRadius * marginTopRatio - fontHeight + "px";
-        style(span, 'width', l);
-        style(span, 'height', l);
+        style(span, 'width', "28px");
+        style(span, 'height', "25px");
         style(span, 'font-size', l);
         style(span, 'margin-top', m);
 
@@ -468,23 +463,19 @@
     const withIconMarginTop = "3px";
     const withIconTop = "-3px";
 
-    function createText (parent, data, index, hasSubMenus = true) {
+    function createText (parent, data, index) {
 
         var span = document.createElement('span');
         span.textContent = data.title;
 
         classed(span, 'text', true);
-        if(hasSubMenus){
-            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
-        }else{
-            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTopSubMenu);
-        }
+        style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
         style(span, 'top', hasIcon(data.icon)? withIconTop : 0);
 
         parent.appendChild(span);
     }
 
-    function createHorizontal (parent, data, index, hasSubMenus = true) {
+    function createHorizontal (parent, data, index) {
 
         var div = document.createElement('div');
         classed(div, "horizontal", true);
@@ -494,7 +485,7 @@
         parent.appendChild(div);
 
         this._createIcon(div, data, index);
-        this._createText(div, data, index, hasSubMenus);
+        this._createText(div, data, index);
     }
 
     function extend$1 () {
@@ -534,19 +525,20 @@
 
     };
 
-    const sizeRatio$1 = 12 / 3;
-    const percentRatio = 0.65;
+    const sizeRatio$1 = 5 / 3;
+    const percentRatio = 0.45;
     const centralDegRatio = 0.618;
 
 
     function createSubMenu(creator, menus, index) {
         var subMenu = document.createElement('div');
-        
-        /*Mask the default context menu on the menu so that right click up doesn't spawn the copy past stuff*/
+
+         /*Mask the default context menu on the menu so that right click up doesn't spawn the copy past stuff*/
         subMenu.addEventListener('contextmenu', (e) => {
             e.preventDefault()
         })
         
+
         classed(subMenu, 'circular-sub-menu', true);
 
         this._container.parentNode.insertBefore(subMenu, this._container);
@@ -615,7 +607,7 @@
 
     function setCoordinate(coordinate){
         if( !(coordinate instanceof Array) || !(coordinate.length === 2) ) return;
-        
+
         //TODO verify if has unit
         style(this._container, 'left', coordinate[0] + "px");
         style(this._container, 'top', coordinate[1] + "px");
@@ -680,3 +672,4 @@
 
 }));
 //# sourceMappingURL=circular-menu.js.map
+
