@@ -1,5 +1,5 @@
 import Atom from '../prototypes/atom.js'
-import GlobalVariables from '../globalvariables.js'
+//import GlobalVariables from '../globalvariables.js'
 
 /**
  * The Cut Layout atom extracts a copy of each shape on the cutlist and places them optimally on a cut sheet.
@@ -50,10 +50,9 @@ export default class CutLayout extends Atom{
     }
     
     /**
-     * Create a button to download the .svg file.
+     * Placeholder?
      */ 
     updateSidebar(){
-        const list = super.updateSidebar()
     }
 
     
