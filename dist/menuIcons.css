@@ -133,6 +133,18 @@
             height:150%;
         } 
 
+         .ShrinkWrap{
+            background: url("./imgs/shrinkwrap.png");
+            width:150%;
+            height:150%;
+        } 
+
+        .Stretch{
+            background: url("./imgs/Stretch.png");
+            width:150%;
+            height:150%;
+        } 
+
 
 
  

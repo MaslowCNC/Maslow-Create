@@ -294,10 +294,8 @@
         style(p, 'margin-left', this._calc.menuSize.marginLeft);
         
         var self = this;
-        on(p, "click", function(e){
-            if(e.toElement === p){
-                self._cMenu.hide();
-            }
+        on(p, "mouseup", function(e){
+            self._cMenu.hide();
         });
         setTimeout(function(){
             style(p, 'display', 'block');
@@ -378,7 +376,7 @@
             }
         }
 
-        on(a, 'click', clickCallBack, data);
+         on(a, 'mouseup', clickCallBack, data);
 
         parent.appendChild(a);
 
