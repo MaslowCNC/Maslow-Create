@@ -29,6 +29,10 @@ export default class CutLayout extends Atom{
         this.name = 'Cut Layout'
         
         this.addIO('input', 'geometry', this, 'geometry', null)
+
+        this.addIO('input', 'Spacing', this, 'number', 5)
+        this.addIO('input', 'Sheet Width', this, 'number', 50)
+        this.addIO('input', 'Sheet Length', this, 'number', 50)
         
         this.setValues(values)
     }
@@ -37,7 +41,6 @@ export default class CutLayout extends Atom{
      * A placeholder to keep updateValue from doing anything
      */ 
     updateValue(){
-        
     }
     
     /**
@@ -52,7 +55,7 @@ export default class CutLayout extends Atom{
      * Extracts all of the elements with the cutList tag, centers each one, generates a .svg file from each one, then lays out all the .svg files on a sheet
      */ 
     generateStl(){
-        const values = [this.findIOValue('geometry')]
+        const values = [this.findIOValue('geometry'), this.findIOValue('Spacing'), this.findIOValue('Sheet Width'), this.findIOValue('Sheet Length')]
         
         const computeValue = async (values, key) => {
             try{
@@ -63,13 +66,14 @@ export default class CutLayout extends Atom{
             }
         }
         
-        computeValue(values, "getLayoutSvgs").then(arrayOfSvgs => {
-            if (arrayOfSvgs != -1 ){
-                //console.log("Returned from worker: ")
-                //console.log(arrayOfSvgs)
+        computeValue(values, "getLayoutSvgs").then(layout => {
+            if (layout != -1 ){
+                console.log("Returned from worker: ")
+                console.log(layout)
+                this.value = layout
                 
                 //Mo, at this point arrayOfSvgs cointains an array of .svg file strings which we want to lay out in an optimal way on a single sheet. The code to do that goes in here. 
-                
+
                 //To test it connect something to a "Cut Layout" atom and then click the button.
                 
                 
