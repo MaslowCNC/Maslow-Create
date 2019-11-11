@@ -50,9 +50,10 @@ export default class CutLayout extends Atom{
     }
     
     /**
-     * Placeholder?
+     * Create a button to download the .svg file.
      */ 
     updateSidebar(){
+        const list = super.updateSidebar()
     }
 
     
