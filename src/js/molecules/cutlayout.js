@@ -33,14 +33,20 @@ export default class CutLayout extends Atom{
         this.addIO('input', 'Spacing', this, 'number', 5)
         this.addIO('input', 'Sheet Width', this, 'number', 50)
         this.addIO('input', 'Sheet Length', this, 'number', 50)
+        this.addIO('output', 'geometry', this, 'geometry', '')
         
         this.setValues(values)
     }
-    
+
     /**
-     * A placeholder to keep updateValue from doing anything
-     */ 
+* Pass the input geometry to a worker function to compute the translation.
+*/ 
     updateValue(){
+        try{
+            const values = [this.findIOValue('geometry'), this.findIOValue('Spacing'), this.findIOValue('Sheet Width'), this.findIOValue('Sheet Length')] 
+            
+            this.basicThreadValueProcessing(values, "getLayoutSvgs")
+        }catch(err){this.setAlert(err)}
     }
     
     /**
@@ -48,39 +54,7 @@ export default class CutLayout extends Atom{
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
-        this.createButton(list, this, "Download .SVG Sheet", ()=>{this.generateStl()})
     }
-    
-    /**
-     * Extracts all of the elements with the cutList tag, centers each one, generates a .svg file from each one, then lays out all the .svg files on a sheet
-     */ 
-    generateStl(){
-        const values = [this.findIOValue('geometry'), this.findIOValue('Spacing'), this.findIOValue('Sheet Width'), this.findIOValue('Sheet Length')]
-        
-        const computeValue = async (values, key) => {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
-            }
-            catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        computeValue(values, "getLayoutSvgs").then(layout => {
-            if (layout != -1 ){
-                console.log("Returned from worker: ")
-                console.log(layout)
-                this.value = layout
-                
-                //Mo, at this point arrayOfSvgs cointains an array of .svg file strings which we want to lay out in an optimal way on a single sheet. The code to do that goes in here. 
 
-                //To test it connect something to a "Cut Layout" atom and then click the button.
-                
-                
-            }else{
-                this.setAlert("Unable to compute")
-            }
-        })
-    }
     
 }
