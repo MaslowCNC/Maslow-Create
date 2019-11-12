@@ -139,7 +139,8 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
             a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)` 
             step-=100
-        }  
+        }           
+
     }) 
 }) 
 
