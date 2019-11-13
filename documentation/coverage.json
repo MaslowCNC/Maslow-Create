@@ -1,7 +1,7 @@
 {
   "coverage": "99.35%",
-  "expectCount": 464,
-  "actualCount": 461,
+  "expectCount": 463,
+  "actualCount": 460,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -79,8 +79,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/cutlayout.js": {
-      "expectCount": 8,
-      "actualCount": 8,
+      "expectCount": 7,
+      "actualCount": 7,
       "undocumentLines": []
     },
     "src/js/molecules/cutlist.js": {

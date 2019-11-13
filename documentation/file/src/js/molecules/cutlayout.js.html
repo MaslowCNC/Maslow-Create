@@ -79,7 +79,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/cutlayout.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
-import GlobalVariables from &apos;../globalvariables.js&apos;
+//import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * The Cut Layout atom extracts a copy of each shape on the cutlist and places them optimally on a cut sheet.
@@ -109,15 +109,24 @@ export default class CutLayout extends Atom{
         this.name = &apos;Cut Layout&apos;
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
+
+        this.addIO(&apos;input&apos;, &apos;Spacing&apos;, this, &apos;number&apos;, 5)
+        this.addIO(&apos;input&apos;, &apos;Sheet Width&apos;, this, &apos;number&apos;, 50)
+        this.addIO(&apos;input&apos;, &apos;Sheet Length&apos;, this, &apos;number&apos;, 50)
+        this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         this.setValues(values)
     }
-    
+
     /**
-     * A placeholder to keep updateValue from doing anything
-     */ 
+* Pass the input geometry to a worker function to compute the translation.
+*/ 
     updateValue(){
-        
+        try{
+            const values = [this.findIOValue(&apos;geometry&apos;), this.findIOValue(&apos;Spacing&apos;), this.findIOValue(&apos;Sheet Width&apos;), this.findIOValue(&apos;Sheet Length&apos;)] 
+            
+            this.basicThreadValueProcessing(values, &quot;getLayoutSvgs&quot;)
+        }catch(err){this.setAlert(err)}
     }
     
     /**
@@ -125,39 +134,8 @@ export default class CutLayout extends Atom{
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
-        this.createButton(list, this, &quot;Download .SVG Sheet&quot;, ()=&gt;{this.generateStl()})
     }
-    
-    /**
-     * Extracts all of the elements with the cutList tag, centers each one, generates a .svg file from each one, then lays out all the .svg files on a sheet
-     */ 
-    generateStl(){
-        const values = [this.findIOValue(&apos;geometry&apos;)]
-        
-        const computeValue = async (values, key) =&gt; {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
-            }
-            catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        computeValue(values, &quot;getLayoutSvgs&quot;).then(arrayOfSvgs =&gt; {
-            if (arrayOfSvgs != -1 ){
-                //console.log(&quot;Returned from worker: &quot;)
-                //console.log(arrayOfSvgs)
-                
-                //Mo, at this point arrayOfSvgs cointains an array of .svg file strings which we want to lay out in an optimal way on a single sheet. The code to do that goes in here. 
-                
-                //To test it connect something to a &quot;Cut Layout&quot; atom and then click the button.
-                
-                
-            }else{
-                this.setAlert(&quot;Unable to compute&quot;)
-            }
-        })
-    }
+
     
 }
 </code></pre>

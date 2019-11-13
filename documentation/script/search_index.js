@@ -1356,12 +1356,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/cutlayout.js~cutlayout#generatestl",
-    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-generateStl",
-    "src/js/molecules/cutlayout.js~CutLayout#generateStl",
-    "method"
-  ],
-  [
     "src/js/molecules/cutlayout.js~cutlayout#name",
     "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-member-name",
     "src/js/molecules/cutlayout.js~CutLayout#name",
