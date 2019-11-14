@@ -18,8 +18,6 @@
 </head>
 <body>
     <div id= doc-frame>
-        <div id="left_bar"></div>
-        <div id="right_bar"></div>
     </div>
      <div id= "headerBar">
         <img class="thumnail-logo" src='/imgs/maslow-logo.png' alt="logo">
@@ -28,7 +26,8 @@
         
         <!-- Top menu -->
         <div id="top_button_wrap">
-            <button class="top_buttons" type="button" id = "straight_menu" title=""> </button>
+            <button class="top_buttons" type="button" id = "straight_menu" title="" style="background-color: #a8a8a8; border: 2px solid black;"> 
+                <img class="three-menu" src='/imgs/three-menu.png' alt="three" ></button>
             <div id ="toggle_wrap">
                 <!-- 
                 <button class="top_buttons" type="button" id = "localMolecules_top" title="Available Molecules">  </button>  -->
@@ -66,13 +65,13 @@
                 <p style= "padding: 0 20px">Maslow Create projects are stored through GitHub. Login to start your own! </p>
                 <form class="login-form">
                   <!--Credit to https://codepen.io/colorlib/pen/rxddKy -->
-                  <button type="button" id = "loginButton" style ="height: 40px;">Login To GitHub</button>
+                  <button type="button" id = "loginButton" style ="height: 40px;">Login With GitHub</button>
                   <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
                 </form>
                 </div>
                 <div id="nonGitSide" class="logindiv curiousBrowse">
                    
-                    <p style="justify-content:flex-start; display: inline; width: 80%; ">Check out what others have made on Maslow Create</p>   
+                    <p style="justify-content:flex-start; display: inline; width: 80%; ">Check out what others have designed in Maslow Create</p>   
                     <button type="button" class= "browseButton" id = "browseNonGit" style ="padding: 0px; height: 30px; width: 70%">Browse all projects</button>
                 </div>
           </div>
@@ -85,7 +84,7 @@
           <span class="sliderAtom round"></span>
         </label>
     <!-- Draw the canvas for creating the design -->
-    <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
+    <canvas id = "flow-canvas" style="background-color: #f9f9f9"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">     
         <!-- setup display of the errors as required by OpenJSCAD.js -->
         <div class="jscad-container"> 
