@@ -302,7 +302,8 @@ export default class Display {
          * @type {object}
          */
         this.scene = new THREE.Scene()
-        this.scene.background = new THREE.Color(0xffffff)
+        this.scene.background = new THREE.Color(0xFFFFFF)
+
         this.scene.add(this.camera)
         //
         var ambientLight = new THREE.AmbientLight(0xc9c7c7)

@@ -92,10 +92,18 @@
 }
 
 #straight_menu{
-  background-color: black;
   z-index: 30;
   opacity:1;
 }
+
+.three-menu{
+      width: 12px;
+    height: 10px;
+    border-radius: 0;
+    display: inline;
+    padding: 1px;
+}
+
 .switch{
 
   position: fixed;
@@ -253,15 +261,15 @@ input:checked + .sliderAtom:before {
 }
 
 .closeButton{
-  padding:0;
-    position: absolute;
-    width: 23px;
-    height: 23px;
+    padding: 0px;
+    position: relative;
+    width: 20px;
+    height: 20px;
     border: 2px solid #eef5df;
     background-color: #ff5248;
     border-radius: 50%;
-    top: 10px;
-    left: 10px;
+    top: 7px;
+    left: 7px;
 }
 .closeButton::before {
   content: "\2715";

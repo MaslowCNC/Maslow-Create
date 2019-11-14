@@ -19,8 +19,6 @@
 </head>
 <body>
     <div id= doc-frame>
-        <div id="left_bar"></div>
-        <div id="right_bar"></div>
     </div>
      <div id= "headerBar">
         <img class="thumnail-logo" src='/imgs/maslow-logo.png' alt="logo">
@@ -29,7 +27,8 @@
         
         <!-- Top menu -->
         <div id="top_button_wrap">
-            <button class="top_buttons" type="button" id = "straight_menu" title=""> </button>
+            <button class="top_buttons" type="button" id = "straight_menu" title="" style="background-color: #a8a8a8; border: 2px solid black;"> 
+                <img class="three-menu" src='/imgs/three-menu.png' alt="three" ></button>
             <div id ="toggle_wrap">
                 <!-- 
                 <button class="top_buttons" type="button" id = "localMolecules_top" title="Available Molecules">  </button>  -->
@@ -86,7 +85,7 @@
           <span class="sliderAtom round"></span>
         </label>
     <!-- Draw the canvas for creating the design -->
-    <canvas id = "flow-canvas" style="background-image: linear-gradient(#E5E4E5);"></canvas>
+    <canvas id = "flow-canvas" style="background-color: #f9f9f9"></canvas>
     <div class='parent flex-parent' id = "lowerHalf">     
         <!-- setup display of the errors as required by OpenJSCAD.js -->
         <div class="jscad-container"> 
