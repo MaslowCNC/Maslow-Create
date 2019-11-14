@@ -144,7 +144,16 @@
             width:150%;
             height:150%;
         } 
-
+        .Stl{
+            background: url("./imgs/Stl.png");
+            width:150%;
+            height:150%;
+        } 
+        .Svg{
+            background: url("./imgs/Svg.png");
+            width:150%;
+            height:150%;
+        } 
 
 
  

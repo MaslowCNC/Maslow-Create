@@ -180,7 +180,7 @@ export default class Atom {
         else if(this.selected){
             GlobalVariables.c.fillStyle = this.selectedColor
             GlobalVariables.c.strokeStyle = this.defaultColor
-            this.color = this.selectedColor
+            this.color = this.defaultColor
             this.strokeColor = this.defaultColor
         }
         else{
