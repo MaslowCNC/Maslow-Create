@@ -61,10 +61,10 @@ function makeArray(group) {
         if(instance.atomCategory === group){
             var subMenu = new Object()
             //subMenu.title = instance.atomType.toUpperCase() 
-            subMenu.icon = `${instance.atomType}` + ` icon1`
+            subMenu.icon = `${instance.atomType}`
             subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
-                if (title.title === 'GITHUBMOLECULE'){
+                if (title.icon === 'GitHubMolecule'){
                     showGitHubSearch(e)
                 }
                 else{
@@ -88,8 +88,25 @@ ele.addEventListener('contextmenu', (e) => {
     e.preventDefault()
 }) 
 
-/* Right click to open circular menu */
+/* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
+    //every time the mouse button goes down
+    
+    var isRightMB
+    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = event.which == 3
+    }
+    else if ("button" in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        cmenu.show([event.clientX, event.clientY])
+        return
+    }
+})
+
+/* Double Right click to open circular menu -- double click + click to hide */
+document.getElementById('flow-canvas').addEventListener('dblclick', event => {
     //every time the mouse button goes down
     
     var isRightMB
