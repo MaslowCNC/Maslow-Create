@@ -179,8 +179,8 @@ export default class Atom {
         }
         else if(this.selected){
             GlobalVariables.c.fillStyle = this.selectedColor
-            GlobalVariables.c.strokeStyle = this.defaultColor
-            this.color = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.selectedColor
             this.strokeColor = this.defaultColor
         }
         else{
@@ -191,8 +191,10 @@ export default class Atom {
         }
 
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.textAlign = 'start'
+        GlobalVariables.c.fillStyle = '#F3EFEF'
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
         GlobalVariables.c.lineWidth = 1
