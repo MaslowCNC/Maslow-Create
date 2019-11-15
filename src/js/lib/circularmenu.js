@@ -284,6 +284,8 @@
         });
     }
 
+    let doubleClickOn;
+
     function createMenu(){
         var p = this._container;
 
@@ -294,9 +296,15 @@
         style(p, 'margin-left', this._calc.menuSize.marginLeft);
         
         var self = this;
+        console.log(doubleClickOn)
+        
         on(p, "mouseup", function(e){
-            self._cMenu.hide();
+            if(!doubleClickOn){
+                self._cMenu.hide();
+            }
         });
+    
+        
         setTimeout(function(){
             style(p, 'display', 'block');
         },100);
@@ -376,7 +384,12 @@
             }
         }
 
-         on(a, 'mouseup', clickCallBack, data);
+        if(!doubleClickOn){
+        on(a, 'mouseup', clickCallBack, data);
+        }
+        else{
+        on(a, 'click', clickCallBack, data);   
+        }
 
         parent.appendChild(a);
 
@@ -619,8 +632,9 @@
         });
     }
 
-    function show (coordinate) {
+    function show (coordinate, doubleClick) {
 
+        doubleClickOn = doubleClick;
 
         setDisabled.call(this);
 
