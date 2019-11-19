@@ -155,6 +155,31 @@
             height:150%;
         } 
 
+        .CutAway{
+            background: url("./imgs/cutaway.png");
+            width:150%;
+            height:150%;
+        } 
+        .Tag{
+            background: url("./imgs/tag.png");
+            width:150%;
+            height:150%;
+        } 
+        .AddBOMTag{
+            background: url("./imgs/Bom.png");
+            width:150%;
+            height:150%;
+        } 
+        .Readme{
+            background: url("./imgs/Readme.png");
+            width:150%;
+            height:150%;
+        } 
+        .CutLayout{
+            background: url("./imgs/Cutlayout.png");
+            width:150%;
+            height:150%;
+        } 
 
  
 
