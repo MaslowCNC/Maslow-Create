@@ -12,39 +12,39 @@ var cmenu = CMenu(ele)
     .config({
         totalAngle: 360,//deg,
         spaceDeg: 1,//deg
-        background: "#323232E8",
-        backgroundHover: "black",
-        percent: 0.35,//%
-        diameter: 130,//px
+        background: "#e1e1e1",
+        backgroundHover: "#FFFFFF",
+        percent: 0.20,//%
+        diameter: 120,//px
         position: 'top',
-        horizontal: false,
+        horizontal: true,
         //start: -45,//deg
         animation: "into",
         menus: [
             {
-                title: 'ACTIONS',
-                icon: '',
+                title: '',
+                icon: 'Actions',
                 menus: makeArray('Actions')        
             },
             {
-                title: 'PROPERTY',
-                icon: '',
+                title: '',
+                icon: 'Intersection',
                 menus: makeArray('Properties')
             },
             {
-                title: 'Import/Export',
-                icon: '',
+                title: '',
+                icon: 'Import-export',
                 menus: makeArray('Import/Export')
                                 
             },
             {
-                title: 'SHAPES',
-                icon: '',
+                title: '',
+                icon: 'Shapes',
                 menus: makeArray('Shapes')
             },
             {
-                title: 'INTERACTION',
-                icon: '',
+                title: '',
+                icon: 'Interaction',
                 menus: makeArray('Interactions')
             }
         ]
@@ -60,10 +60,11 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            subMenu.title = instance.atomType.toUpperCase() 
+            //subMenu.title = instance.atomType.toUpperCase() 
+            subMenu.icon = `${instance.atomType}`
             subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
-                if (title.title === 'GITHUBMOLECULE'){
+                if (title.icon === 'GitHubMolecule'){
                     showGitHubSearch(e)
                 }
                 else{
@@ -87,8 +88,25 @@ ele.addEventListener('contextmenu', (e) => {
     e.preventDefault()
 }) 
 
-/* Right click to open circular menu */
+/* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
+    //every time the mouse button goes down
+    
+    var isRightMB
+    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = event.which == 3
+    }
+    else if ("button" in event){  // IE, Opera 
+        isRightMB = event.button == 2
+    }
+    if(isRightMB){
+        cmenu.show([event.clientX, event.clientY])
+        return
+    }
+})
+
+/* Double Right click to open circular menu -- double click + click to hide */
+document.getElementById('flow-canvas').addEventListener('dblclick', event => {
     //every time the mouse button goes down
     
     var isRightMB

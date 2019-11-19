@@ -303,13 +303,14 @@ export default class Display {
          */
         this.scene = new THREE.Scene()
         this.scene.background = new THREE.Color(0xFFFFFF)
+
         this.scene.add(this.camera)
         //
-        var ambientLight = new THREE.AmbientLight(0x222222)
+        var ambientLight = new THREE.AmbientLight(0xc9c7c7)
         this.scene.add(ambientLight)
         // var light1 = new THREE.PointLight(0xffffff, 0, 1);
         // camera.add(light1);
-        var light2 = new THREE.DirectionalLight(0xffffff, 1)
+        var light2 = new THREE.DirectionalLight(0xd9d9d9, 1)
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
@@ -364,8 +365,12 @@ export default class Display {
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
-                        this.scene.add( this.plane )
+                        var size = 10;
+                        var divisions = 10;
+                        //this.scene.add( this.plane )
                         this.displayGrid = true
+                        var gridHelper = new THREE.GridHelper( size, divisions );
+                        this.scene.add( gridHelper );
                     }
                     else{
                         this.scene.remove(this.plane)
