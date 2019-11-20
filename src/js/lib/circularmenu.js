@@ -1,4 +1,3 @@
-
 //circular-menu
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -472,7 +471,7 @@
         style(span, 'height', "25px");
 
          if (!hasSubMenus){
-             style(span, 'margin', this._calc.clickZoneRadius * 8.55 - fontHeight + "px");
+             style(span, 'margin', this._calc.clickZoneRadius * 7.75 + "px");
         }
         else{
             style(span, 'margin', m);
@@ -497,7 +496,7 @@
         }else{
             style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTopSubMenu);
         }
-        style(span, 'top', hasIcon(data.icon)? withIconTop : 0);
+        style(span, 'top', "-200px");
 
         parent.appendChild(span);
     }
@@ -510,7 +509,7 @@
         if(this._config.horizontal) style(div, 'transform', 'rotate('+ this._calc.horizontalDeg(index) +'deg)');
 
         parent.appendChild(div);
-
+        
         this._createIcon(div, data, index, hasSubMenus);
         this._createText(div, data, index, hasSubMenus);
     }
