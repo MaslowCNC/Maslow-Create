@@ -181,6 +181,17 @@
             height:150%;
         } 
 
+        .ExtractTag{
+            background: url("./imgs/Extracttag.png");
+            width:150%;
+            height:150%;
+        } 
+        .Constant{
+            background: url("./imgs/Constant.png");
+            width:150%;
+            height:150%;
+        } 
+
  
 
 
