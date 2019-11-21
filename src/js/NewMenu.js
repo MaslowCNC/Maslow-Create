@@ -60,7 +60,6 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            //subMenu.title = instance.atomType.toUpperCase() 
             subMenu.title = `${instance.atomType}`
             subMenu.icon = `${instance.atomType}`
             subMenu.name = instance.atomType

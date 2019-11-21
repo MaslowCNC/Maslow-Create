@@ -455,10 +455,8 @@
     function createIcon (parent, data, index, hasSubMenus = true) {
         if(!hasIcon(data.icon)) return;
 
-       
 
         var span = document.createElement('span');
-
         var icon = getIcon(data.icon),
             color = getIconColor(data.icon);
 
@@ -471,7 +469,7 @@
         style(span, 'height', "25px");
 
          if (!hasSubMenus){
-             style(span, 'margin', this._calc.clickZoneRadius * 7.75 + "px");
+            style(span, 'margin', this._calc.clickZoneRadius * 8 + "px");
         }
         else{
             style(span, 'margin', m);
@@ -483,18 +481,18 @@
     }
 
     const withIconMarginTop = "0px";
-    const withIconTop = "-0px";
+    const withIconTop = "0px";
+
 
     function createText (parent, data, index, hasSubMenus = true) {
-
         var span = document.createElement('span');
         span.textContent = data.title;
-
         classed(span, 'text', true);
         if(hasSubMenus){
             style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTop);
+
         }else{
-            style(span, 'margin-top', hasIcon(data.icon)? withIconMarginTop : this._calc.textTopSubMenu);
+             style(span, 'margin-top',  "30px");
         }
         style(span, 'top', "-200px");
 
@@ -509,9 +507,9 @@
         if(this._config.horizontal) style(div, 'transform', 'rotate('+ this._calc.horizontalDeg(index) +'deg)');
 
         parent.appendChild(div);
-        
+
         this._createIcon(div, data, index, hasSubMenus);
-        this._createText(div, data, index, hasSubMenus);
+        //this._createText(div, data, index, hasSubMenus);
     }
 
     function extend$1 () {
