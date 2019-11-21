@@ -123,7 +123,7 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
             cmenu.show([event.clientX, event.clientY],doubleClick)
             return
         }
-   }
+    }
 })
 
 //Add function call to search when typing
