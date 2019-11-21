@@ -366,6 +366,7 @@ export default class Display {
                     if(event.target.checked){
                         this.scene.add( this.plane )
                         this.displayGrid = true
+
                     }
                     else{
                         this.scene.remove(this.plane)

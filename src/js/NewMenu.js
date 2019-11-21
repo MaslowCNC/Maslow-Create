@@ -60,7 +60,7 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            //subMenu.title = instance.atomType.toUpperCase() 
+            subMenu.title = `${instance.atomType}`
             subMenu.icon = `${instance.atomType}`
             subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
@@ -88,14 +88,16 @@ ele.addEventListener('contextmenu', (e) => {
     e.preventDefault()
 }) 
 
-var doubleClick;
+var doubleClick
+
 /* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
     //every time the mouse button goes down
     if (event.detail === 1) {
         doubleClick = false
-     // it was a single click
-         var isRightMB
+        // it was a single click
+        var isRightMB
+
         if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
             isRightMB = event.which == 3
         }
@@ -106,11 +108,11 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
             cmenu.show([event.clientX, event.clientY],doubleClick)
             return
         }
-   } else if (event.detail === 2) {
-         // it was a double click
-         //every time the mouse button goes down
+    } else if (event.detail === 2) {
+        // it was a double click
+        //every time the mouse button goes down
         doubleClick = true
-        var isRightMB
+
         if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
             isRightMB = event.which == 3
         }
