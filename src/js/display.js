@@ -365,12 +365,12 @@ export default class Display {
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
-                        var size = 10;
-                        var divisions = 10;
+                        var size = 10
+                        var divisions = 10
                         //this.scene.add( this.plane )
                         this.displayGrid = true
-                        var gridHelper = new THREE.GridHelper( size, divisions );
-                        this.scene.add( gridHelper );
+                        var gridHelper = new THREE.GridHelper( size, divisions )
+                        this.scene.add( gridHelper )
                     }
                     else{
                         this.scene.remove(this.plane)

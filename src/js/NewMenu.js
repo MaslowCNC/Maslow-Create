@@ -88,28 +88,13 @@ ele.addEventListener('contextmenu', (e) => {
     e.preventDefault()
 }) 
 
-var doubleClick;
+var doubleClick
 /* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
     //every time the mouse button goes down
     if (event.detail === 1) {
         doubleClick = false
-     // it was a single click
-         var isRightMB
-        if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-            isRightMB = event.which == 3
-        }
-        else if ("button" in event){  // IE, Opera 
-            isRightMB = event.button == 2
-        }
-        if(isRightMB){
-            cmenu.show([event.clientX, event.clientY],doubleClick)
-            return
-        }
-   } else if (event.detail === 2) {
-         // it was a double click
-         //every time the mouse button goes down
-        doubleClick = true
+        // it was a single click
         var isRightMB
         if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
             isRightMB = event.which == 3
@@ -121,7 +106,21 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
             cmenu.show([event.clientX, event.clientY],doubleClick)
             return
         }
-   }
+    } else if (event.detail === 2) {
+        // it was a double click
+        //every time the mouse button goes down
+        doubleClick = true
+        if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+            isRightMB = event.which == 3
+        }
+        else if ("button" in event){  // IE, Opera 
+            isRightMB = event.button == 2
+        }
+        if(isRightMB){
+            cmenu.show([event.clientX, event.clientY],doubleClick)
+            return
+        }
+    }
 })
 
 /*/ Hide the menu on a right click mouse up
