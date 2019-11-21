@@ -88,55 +88,40 @@ ele.addEventListener('contextmenu', (e) => {
     e.preventDefault()
 }) 
 
+var doubleClick;
 /* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
     //every time the mouse button goes down
-    
-    var isRightMB
-    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-        isRightMB = event.which == 3
-    }
-    else if ("button" in event){  // IE, Opera 
-        isRightMB = event.button == 2
-    }
-    if(isRightMB){
-        cmenu.show([event.clientX, event.clientY])
-        return
-    }
-})
-
-/* Double Right click to open circular menu -- double click + click to hide */
-document.getElementById('flow-canvas').addEventListener('dblclick', event => {
-    //every time the mouse button goes down
-    
-    var isRightMB
-    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-        isRightMB = event.which == 3
-    }
-    else if ("button" in event){  // IE, Opera 
-        isRightMB = event.button == 2
-    }
-    if(isRightMB){
-        cmenu.show([event.clientX, event.clientY])
-        return
-    }
-})
-
-/* Hide the menu on a right click mouse up*/
-document.getElementById('flow-canvas').addEventListener('mouseup', event => {
-    //every time the mouse button goes down
-    
-    var isRightMB
-    if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-        isRightMB = event.which == 3
-    }
-    else if ("button" in event){  // IE, Opera 
-        isRightMB = event.button == 2
-    }
-    if(isRightMB){
-        cmenu.hide()
-        return
-    }
+    if (event.detail === 1) {
+        doubleClick = false
+     // it was a single click
+         var isRightMB
+        if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+            isRightMB = event.which == 3
+        }
+        else if ("button" in event){  // IE, Opera 
+            isRightMB = event.button == 2
+        }
+        if(isRightMB){
+            cmenu.show([event.clientX, event.clientY],doubleClick)
+            return
+        }
+   } else if (event.detail === 2) {
+         // it was a double click
+         //every time the mouse button goes down
+        doubleClick = true
+        var isRightMB
+        if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+            isRightMB = event.which == 3
+        }
+        else if ("button" in event){  // IE, Opera 
+            isRightMB = event.button == 2
+        }
+        if(isRightMB){
+            cmenu.show([event.clientX, event.clientY],doubleClick)
+            return
+        }
+   }
 })
 
 //Add function call to search when typing
