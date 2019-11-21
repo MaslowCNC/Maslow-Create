@@ -124,27 +124,6 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
    }
 })
 
-/*/ Hide the menu on a right click mouse up
-document.getElementById('flow-canvas').addEventListener('mouseup', event => {
-    //every time the mouse button goes down
-    console.log(doubleClick)
-    if (!doubleClick){
-
-        var isRightMB
-        if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-            isRightMB = event.which == 3
-        }
-        else if ("button" in event){  // IE, Opera 
-            isRightMB = event.button == 2
-        }
-        if(isRightMB){
-            cmenu.hide()
-            return
-        }
-    }
-})*/
-
-
 //Add function call to search when typing
 document.getElementById('menuInput').addEventListener('keyup', (e) => {
     if(e.code == 'Enter'){
