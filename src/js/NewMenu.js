@@ -89,6 +89,7 @@ ele.addEventListener('contextmenu', (e) => {
 }) 
 
 var doubleClick
+
 /* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
     //every time the mouse button goes down
@@ -96,6 +97,7 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
         doubleClick = false
         // it was a single click
         var isRightMB
+
         if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
             isRightMB = event.which == 3
         }
@@ -110,6 +112,7 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
         // it was a double click
         //every time the mouse button goes down
         doubleClick = true
+
         if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
             isRightMB = event.which == 3
         }
@@ -120,29 +123,8 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
             cmenu.show([event.clientX, event.clientY],doubleClick)
             return
         }
-    }
+   }
 })
-
-/*/ Hide the menu on a right click mouse up
-document.getElementById('flow-canvas').addEventListener('mouseup', event => {
-    //every time the mouse button goes down
-    console.log(doubleClick)
-    if (!doubleClick){
-
-        var isRightMB
-        if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-            isRightMB = event.which == 3
-        }
-        else if ("button" in event){  // IE, Opera 
-            isRightMB = event.button == 2
-        }
-        if(isRightMB){
-            cmenu.hide()
-            return
-        }
-    }
-})*/
-
 
 //Add function call to search when typing
 document.getElementById('menuInput').addEventListener('keyup', (e) => {
