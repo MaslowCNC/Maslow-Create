@@ -77,7 +77,7 @@ class GlobalVariables{
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Interactions'},
             
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'AddBOMTag', atomCategory: 'Properties'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
             cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
@@ -101,7 +101,7 @@ class GlobalVariables{
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Import/Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Import/Export'},
-            cutLayout:          {creator: CutLayout, atomType: "Cut Layout", atomCategory: 'Import/Export'},
+            cutLayout:          {creator: CutLayout, atomType: "CutLayout", atomCategory: 'Import/Export'},
             CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Import/Export'}
         }
         /** 
