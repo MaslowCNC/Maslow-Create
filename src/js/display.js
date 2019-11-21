@@ -303,7 +303,6 @@ export default class Display {
          */
         this.scene = new THREE.Scene()
         this.scene.background = new THREE.Color(0xFFFFFF)
-
         this.scene.add(this.camera)
         //
         var ambientLight = new THREE.AmbientLight(0xc9c7c7)
@@ -365,12 +364,9 @@ export default class Display {
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
-                        var size = 10
-                        var divisions = 10
-                        //this.scene.add( this.plane )
+                        this.scene.add( this.plane )
                         this.displayGrid = true
-                        var gridHelper = new THREE.GridHelper( size, divisions )
-                        this.scene.add( gridHelper )
+
                     }
                     else{
                         this.scene.remove(this.plane)
