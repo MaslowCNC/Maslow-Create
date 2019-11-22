@@ -34,6 +34,11 @@ export default class Svg extends Atom {
         
         this.addIO('input', 'geometry', this, 'geometry', null)
         
+        //Add a download svg button to the top level atoms side bar in run mode
+        GlobalVariables.topLevelMolecule.runModeSidebarAdditions.push(list => {
+            this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
+        })
+        
         this.setValues(values)
     }
     
@@ -41,12 +46,7 @@ export default class Svg extends Atom {
      * Set the value to be the input geometry, then call super updateValue()
      */ 
     updateValue(){
-        if(this.inputs.every(x => x.ready)){
-            try{
-                this.value = this.findIOValue('geometry')
-            }catch(err){this.setAlert(err)}
-            super.updateValue()
-        }
+        this.value = this.findIOValue('geometry')
     }
     
     /**
