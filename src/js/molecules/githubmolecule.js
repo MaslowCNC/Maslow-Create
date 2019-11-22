@@ -78,6 +78,20 @@ export default class GitHubMolecule extends Molecule {
         return promsie
     }
     
+    updateSidebar(){
+        const list = super.updateSidebar()
+        
+        if(this.topLevel){
+            this.runModeSidebarAdditions.forEach(sideBarFunction => {
+                sideBarFunction(list)
+            })
+            
+            this.createButton(list, this, "Bill Of Materials", ()=>{
+                GlobalVariables.gitHub.openBillOfMaterialsPage()
+            })
+        }
+    }
+    
     /**
      * Save the project information to be loaded. This should use super.serialize() to maintain a connection with Molecule, but it doesn't...should be fixed
      */ 

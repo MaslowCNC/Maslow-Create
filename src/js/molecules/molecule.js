@@ -46,7 +46,13 @@ export default class Molecule extends Atom{
          * A flag to indicate if this molecule is the top level molecule.
          * @type {boolean}
          */
-        this.topLevel = false //a flag to signal if this node is the top level node
+        this.topLevel = false
+        /** 
+         * A list of things which should be displayed on the the top level sideBar when in toplevel mode.
+         * @type {array}
+         */
+        this.runModeSidebarAdditions = []
+        
         
         this.setValues(values)
         
