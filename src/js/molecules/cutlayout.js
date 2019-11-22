@@ -48,13 +48,4 @@ export default class CutLayout extends Atom{
             this.basicThreadValueProcessing(values, "getLayoutSvgs")
         }catch(err){this.setAlert(err)}
     }
-    
-    /**
-     * Create a button to download the .svg file.
-     */ 
-    updateSidebar(){
-        //const list = super.updateSidebar()
-    }
-
-    
 }
