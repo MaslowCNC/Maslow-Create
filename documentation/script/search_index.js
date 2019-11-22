@@ -1368,12 +1368,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/cutlayout.js~cutlayout#updatesidebar",
-    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-updateSidebar",
-    "src/js/molecules/cutlayout.js~CutLayout#updateSidebar",
-    "method"
-  ],
-  [
     "src/js/molecules/cutlayout.js~cutlayout#updatevalue",
     "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-updateValue",
     "src/js/molecules/cutlayout.js~CutLayout#updateValue",
