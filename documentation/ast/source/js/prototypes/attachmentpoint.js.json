@@ -6423,10 +6423,10 @@
                               }
                             },
                             "extra": {
-                              "rawValue": "#008080",
-                              "raw": "'#008080'"
+                              "rawValue": "#C300FF",
+                              "raw": "'#C300FF'"
                             },
-                            "value": "#008080"
+                            "value": "#C300FF"
                           }
                         }
                       ],
@@ -40113,7 +40113,7 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "#008080",
+      "value": "#C300FF",
       "start": 5043,
       "end": 5052,
       "loc": {

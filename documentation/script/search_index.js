@@ -1680,6 +1680,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/githubmolecule.js~githubmolecule#updatesidebar",
+    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-updateSidebar",
+    "src/js/molecules/githubmolecule.js~GitHubMolecule#updateSidebar",
+    "method"
+  ],
+  [
     "src/js/molecules/input.js",
     "file/src/js/molecules/input.js.html",
     "src/js/molecules/input.js",
@@ -1936,6 +1942,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-requestReadme",
     "src/js/molecules/molecule.js~Molecule#requestReadme",
     "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#runmodesidebaradditions",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-runModeSidebarAdditions",
+    "src/js/molecules/molecule.js~Molecule#runModeSidebarAdditions",
+    "member"
   ],
   [
     "src/js/molecules/molecule.js~molecule#savedconnectors",
@@ -3208,12 +3220,6 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/connector.js~Connector.html#instance-method-update",
     "src/js/prototypes/connector.js~Connector#update",
     "method"
-  ],
-  [
-    "src/straightmenu.js",
-    "file/src/straightMenu.js.html",
-    "src/straightMenu.js",
-    "file"
   ],
   [
     "src/utils.js",

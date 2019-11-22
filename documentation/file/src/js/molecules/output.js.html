@@ -145,7 +145,7 @@ export default class Output extends Atom {
             this.parent.processing = false
             
             //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
-            if(this.parent.inputs.length == 0 &amp;&amp; this.parent.atomType == &quot;GitHubMolecule&quot;){
+            if(this.parent.inputs.length == 0 &amp;&amp; this.parent.atomType == &quot;GitHubMolecule&quot; &amp;&amp; !this.parent.topLevel){
                 this.parent.dumpBuffer(true)
             }
             

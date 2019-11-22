@@ -92,39 +92,39 @@ var cmenu = CMenu(ele)
     .config({
         totalAngle: 360,//deg,
         spaceDeg: 1,//deg
-        background: &quot;#323232E8&quot;,
-        backgroundHover: &quot;black&quot;,
-        percent: 0.35,//%
-        diameter: 130,//px
+        background: &quot;#e1e1e1&quot;,
+        backgroundHover: &quot;#FFFFFF&quot;,
+        percent: 0.20,//%
+        diameter: 120,//px
         position: &apos;top&apos;,
-        horizontal: false,
+        horizontal: true,
         //start: -45,//deg
         animation: &quot;into&quot;,
         menus: [
             {
-                title: &apos;ACTIONS&apos;,
-                icon: &apos;&apos;,
+                title: &apos;&apos;,
+                icon: &apos;Actions&apos;,
                 menus: makeArray(&apos;Actions&apos;)        
             },
             {
-                title: &apos;PROPERTY&apos;,
-                icon: &apos;&apos;,
+                title: &apos;&apos;,
+                icon: &apos;Intersection&apos;,
                 menus: makeArray(&apos;Properties&apos;)
             },
             {
-                title: &apos;Import/Export&apos;,
-                icon: &apos;&apos;,
+                title: &apos;&apos;,
+                icon: &apos;Import-export&apos;,
                 menus: makeArray(&apos;Import/Export&apos;)
                                 
             },
             {
-                title: &apos;SHAPES&apos;,
-                icon: &apos;&apos;,
+                title: &apos;&apos;,
+                icon: &apos;Shapes&apos;,
                 menus: makeArray(&apos;Shapes&apos;)
             },
             {
-                title: &apos;INTERACTION&apos;,
-                icon: &apos;&apos;,
+                title: &apos;&apos;,
+                icon: &apos;Interaction&apos;,
                 menus: makeArray(&apos;Interactions&apos;)
             }
         ]
@@ -140,10 +140,11 @@ function makeArray(group) {
         var instance = GlobalVariables.availableTypes[key] 
         if(instance.atomCategory === group){
             var subMenu = new Object()
-            subMenu.title = instance.atomType.toUpperCase() 
+            subMenu.title = `${instance.atomType}`
+            subMenu.icon = `${instance.atomType}`
             subMenu.name = instance.atomType
             subMenu.click = function menuClick(e, title){ 
-                if (title.title === &apos;GITHUBMOLECULE&apos;){
+                if (title.icon === &apos;GitHubMolecule&apos;){
                     showGitHubSearch(e)
                 }
                 else{
@@ -167,37 +168,41 @@ ele.addEventListener(&apos;contextmenu&apos;, (e) =&gt; {
     e.preventDefault()
 }) 
 
-/* Right click to open circular menu */
+var doubleClick
+
+/* Right click to open circular menu -- mouse click and drag*/
 document.getElementById(&apos;flow-canvas&apos;).addEventListener(&apos;mousedown&apos;, event =&gt; {
     //every time the mouse button goes down
-    
-    var isRightMB
-    if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
-        isRightMB = event.which == 3
-    }
-    else if (&quot;button&quot; in event){  // IE, Opera 
-        isRightMB = event.button == 2
-    }
-    if(isRightMB){
-        cmenu.show([event.clientX, event.clientY])
-        return
-    }
-})
+    if (event.detail === 1) {
+        doubleClick = false
+        // it was a single click
+        var isRightMB
 
-/* Hide the menu on a right click mouse up*/
-document.getElementById(&apos;flow-canvas&apos;).addEventListener(&apos;mouseup&apos;, event =&gt; {
-    //every time the mouse button goes down
-    
-    var isRightMB
-    if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
-        isRightMB = event.which == 3
-    }
-    else if (&quot;button&quot; in event){  // IE, Opera 
-        isRightMB = event.button == 2
-    }
-    if(isRightMB){
-        cmenu.hide()
-        return
+        if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
+            isRightMB = event.which == 3
+        }
+        else if (&quot;button&quot; in event){  // IE, Opera 
+            isRightMB = event.button == 2
+        }
+        if(isRightMB){
+            cmenu.show([event.clientX, event.clientY],doubleClick)
+            return
+        }
+    } else if (event.detail === 2) {
+        // it was a double click
+        //every time the mouse button goes down
+        doubleClick = true
+
+        if (&quot;which&quot; in event){  // Gecko (Firefox), WebKit (Safari/Chrome) &amp; Opera
+            isRightMB = event.which == 3
+        }
+        else if (&quot;button&quot; in event){  // IE, Opera 
+            isRightMB = event.button == 2
+        }
+        if(isRightMB){
+            cmenu.show([event.clientX, event.clientY],doubleClick)
+            return
+        }
     }
 })
 
