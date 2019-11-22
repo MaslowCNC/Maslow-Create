@@ -391,9 +391,24 @@
         }
         else{
         on(a, 'click', clickCallBack, data);   
+      
         }
 
         parent.appendChild(a);
+
+        on(a, 'mouseenter', function () {
+            console.log(this)
+            var div = document.createElement('div');
+            div.textContent = data.icon
+            div.classList.add("tooltip");
+            div.id = data.icon
+            document.querySelector("body").appendChild(div)
+            style(div, 'top', self._container.offsetTop + self._calc.radius - 10 + 'px');
+            style(div, 'left', self._container.offsetLeft + self._calc.radius - 20 - div.innerHTML.length/2 + 'px');
+            });
+        on(a, 'mouseleave', function () {
+            document.getElementById(data.icon).remove()
+            });
 
         this._createHorizontal(a, data, index, hasSubMenus(data.menus));
         
