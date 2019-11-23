@@ -887,12 +887,13 @@ input.menu_search:focus {
 }
 
 .tooltip{
-  background-color: #44444c;
+  background-color: #C3C3CD;
+  margin:auto;
   font-size: .7em;
   color:white;
   z-index: 1041;
   position:absolute;
-  -moz-box-shadow: 1px 1px 3px 2px #44444c;
-  -webkit-box-shadow: 1px 1px 3px 2px #44444c;
-  box-shadow:         1px 1px 3px 2px #44444c;
+  -moz-box-shadow: 1px 1px 3px 2px #C3C3CD;
+  -webkit-box-shadow: 1px 1px 3px 2px #C3C3CD;
+  box-shadow:         1px 1px 3px 2px #C3C3CD;
 }
