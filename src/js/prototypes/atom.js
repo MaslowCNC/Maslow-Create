@@ -598,6 +598,8 @@ export default class Atom {
             this.processing = true
             this.clearAlert()
             
+            console.log("Ask: ")
+            console.log(GlobalVariables.ask)
             const computeValue = async (values, key) => {
                 try{
                     return await GlobalVariables.ask({values: values, key: key})
@@ -608,6 +610,7 @@ export default class Atom {
             }
             
             computeValue(values, key).then(result => {
+                console.log("Returned from ask")
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()
