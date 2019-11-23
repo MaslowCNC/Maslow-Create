@@ -20,11 +20,14 @@ const howManyInputPortsAvailable = function(target){
  * @param {object} target - The atom which should have one input deleted (if there are more than two free).
  */ 
 const deleteEmptyPort = function(target){
-    target.inputs.forEach(io => {
-        if(io.type == 'input' && io.connectors.length == 0 && howManyInputPortsAvailable(target) >= 2){
+    var i
+    for (i = 0; i < target.inputs.length - 1; i++) {
+        var io = target.inputs[i]
+        if(io.type == 'input' && io.connectors.length == 0){
             target.removeIO('input', io.name, target)
+            return
         }
-    })
+    }
 }
 
 /**
@@ -32,22 +35,12 @@ const deleteEmptyPort = function(target){
  * @param {object} target - The atom which should have it's number of inputs adjusted.
  */ 
 export const addOrDeletePorts = (target) => {
-    //Because a molecule loads with no connectors attached to the ports and we don't want them to delete before
-    //They are conencted to we use the ioValues list to keep track of them
-    target.inputs.forEach(child => {
-        target.ioValues.forEach(ioValue => {
-            if (child.name == ioValue.name && child.connectors.length > 0){
-                target.ioValues.splice(target.ioValues.indexOf(ioValue),1) //Let's remove it from the ioValues list
-            }
-        })
-    })
     
     //Add or delete ports as needed
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available
-        target.addIO('input', '3D shape ' + GlobalVariables.generateUniqueID(), target, 'geometry', '')
+        target.addIO('input', '3D shape ' + GlobalVariables.generateUniqueID(), target, 'geometry', '', true)
     }
-    if(howManyInputPortsAvailable(target) >= 2 && target.ioValues.length <= 1){  //We need to remove the empty port
+    if(howManyInputPortsAvailable(target) >= 2){  //We need to remove the empty port
         deleteEmptyPort(target)
-        target.updateValue()
     }
 }

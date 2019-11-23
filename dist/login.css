@@ -1,20 +1,114 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
+#welcome{
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.curiousBrowse{
+    display:flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #efecec;
+}
+.curiousBrowse:hover{
+  background: white;
+}
+
+.logo{
+  width:100px;
+  height:100px;
+  border-radius: 50%;
+}
+.logindiv{
+    margin: 10px 10px 0 10px;
+    position: relative;
+    width: 95%;
+    box-sizing: border-box;
+    display: flex;
+    align-content: center;
+    justify-content: space-around;
+    background-color: #f9f6f6;
+    flex-wrap: wrap;
+    align-self: center;
+    padding: 20px;
+    border-radius: 4px;
+}
+
 .login-page {
-  width: 360px;
-  padding: 8% 0 0;
   margin: auto;
 }
+
 .form {
-  position: relative;
-  z-index: 1;
-  background: #FFFFFF;
-  max-width: 360px;
-  margin: 0 auto 100px;
-  padding: 45px;
-  text-align: center;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+  background-color: #3e3d3d;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    border-radius: 4px;
+    width: 60%;
+    margin: 0 auto 100px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
+
+/*=== Trigger  ===*/
+.animate {
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+/*=== Optional Delays, change values here  ===*/
+.one {
+-webkit-animation-delay: 0s;
+-moz-animation-delay: 0s;
+animation-delay: 0s;
+}
+
+/*=== Animations start here  ===*/
+/*==== FADE IN UP ===*/
+@-webkit-keyframes fadeInUp {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 15%, 0);
+    transform: translate3d(0, 15%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 10%, 0);
+    transform: translate3d(0, 10%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+.fadeInUp {
+  -webkit-animation-name: fadeInUp;
+  animation-name: fadeInUp;
+}
+
+
 .form input {
   font-family: "Roboto", sans-serif;
   outline: 0;
@@ -26,14 +120,14 @@
   box-sizing: border-box;
   font-size: 14px;
 }
-.form button {
+.form button{
   font-family: "Roboto", sans-serif;
   text-transform: uppercase;
   outline: 0;
-  background: #4CAF50;
+  background: #444;
   width: 100%;
   border: 0;
-  padding: 15px;
+  border-radius: 2px;
   color: #FFFFFF;
   font-size: 14px;
   -webkit-transition: all 0.3 ease;
@@ -41,7 +135,9 @@
   cursor: pointer;
 }
 .form button:hover,.form button:active,.form button:focus {
-  background: #43A047;
+    background: #f1eff1;
+    border: 2px solid #444;
+    color: #444;
 }
 .form .message {
   margin: 15px 0 0;
@@ -87,4 +183,258 @@
 }
 .container .info span .fa {
   color: #EF3B3A;
+}
+
+/* Browse login and open projects styling */
+
+.login-popup{
+
+    padding:2% 0;
+    width: 12rem;
+    box-sizing: border-box;
+    background-color: #f9f6f6;
+    color: #333;
+    border: 1px solid #aaa;
+    box-shadow: 2px 2px 2px #999;
+    border-radius: 0.2rem;
+    list-style: none;
+    position: fixed;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-flow: column;
+    transform: translate(-50%, -50%);
+    z-index:10;
+}
+
+.login-popup.off{
+    top: -200%;
+    left: -200%;
+}
+
+.centered-div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+}
+
+.float-left-div-thumb{
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    width: 100%;
+}
+#githubButton{
+    width: 60%;
+    height: 30px;
+    margin-top: -10px;
+    margin-left: 30%;
+}
+
+.githubSign{
+    text-align: center;
+    padding: 5px;
+    margin: 0;
+    display: flex;
+    text-align: center;
+    align-items: center;
+}
+
+.github-login-display{
+    width: 50%;
+    height: 90%;
+    border: 1px solid black;
+    text-align: center;
+}
+.topBrowse{
+    margin: 10px;
+    width: 96%;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+#project_search{
+    color: #353232;
+    border: 1px solid #444;
+    padding: 3px;
+    align-self: flex-end;
+    width: 40%;
+    margin-right: 10px;
+    align-self: center;
+    position: relative;
+    }
+
+.middleBrowse{
+    align-self: flex-end;
+    position: relative;
+    right: 10px;
+    display: flex;
+    width: 50%;
+    flex-flow: row;
+    justify-content: flex-end;
+    margin-top: -25px;
+    margin-right: 10px;
+}
+
+.middleBrowse2{
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.custom-select{
+    position: relative;
+    display: inline-block;
+    margin: 4px 10px 0 5px;
+    width: 45%;
+}
+
+.custom-select select{
+    background: #444;
+    color:white;
+    display:inline-block;
+    width: 100%;
+    height: 30px;
+    cursor: pointer;
+    padding: 10px 15px;
+    outline: 0;
+    border: 1 px solid #444;
+    border-radius: none;
+    background: light-grey
+    color: darkgrey
+    margin: 6px;
+  }
+      
+.select__arrow{
+  position: absolute;
+  top: 16px
+  right: 15px
+  width: 0
+  height: 0
+  pointer-events: none
+  border-style: solid
+  border-width: 8px 5px 0 5px
+}
+
+.browseDisplay {
+    align-self: flex-end;
+    margin-right: 10px;
+    background-color: #ddd;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+}
+.browseColumn{
+  overflow:hidden;
+  text-align: left;
+  width: 150px; 
+  height: 30px;
+  margin-right: 10px;
+
+}
+
+.newProject{
+    position:relative;
+    left:10px;
+    width: 48%;
+    height: 120px;
+  }
+
+.newProjectdiv{
+    position: relative;
+    padding: 5px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-content: center;
+    justify-content: space-around;
+    background-color: #ddd;
+    flex-wrap: wrap;
+
+  }
+  .newProjectdiv:hover, .browseDisplay:hover{
+    background-color: white;
+  }
+
+
+  #titlesDiv{
+    font-size: 13px;
+    display: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    background-color: #a9a9a91a;
+    padding: 5px 10px;
+    margin: 20px 0 0 0;
+    height: 4%;
+    box-sizing: border-box;
+}
+
+ .browseButton{
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #444;
+    width: 100%;
+    border: 0;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
+ } 
+
+.browseButton:hover {
+    background: #f1eff1;
+    border: 2px solid #444;
+    color: #444;
+}
+
+.project{
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    padding: 10px;
+    font-size:13px;
+    justify-content: space-between;
+}
+
+.project:hover{
+    background-color: #ffffff;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 1em;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
 }

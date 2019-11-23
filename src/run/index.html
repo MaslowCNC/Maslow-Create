@@ -17,7 +17,13 @@
  	
 </head>
 <body>
-    
+    <div id="top_button_wrap" style="display:none;">
+            <button class="top_buttons" type="button" id = "straight_menu" title=""> </button>
+            <div id ="toggle_wrap">
+               
+
+            </div>
+        </div>  
     <!-- The menu for creating a new drawing node -->
     <ul class="menu off">
         <div class="tab">
@@ -30,6 +36,16 @@
         <ul id="githubList" class = "menu_list tabcontent">
         </ul>
     </ul>
+
+    <!-- Circular menu on canvas -->
+    <div>
+        <div id="circle-menu1" class="cn-menu1"></div>
+        <div id="canvas_menu">
+        <input type="text" id="menuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search_canvas">
+        <ul id="githubList" class = "menu_list tabcontent">
+        </ul>
+        </div>
+    </div>
     
     <!-- The login popup -->
     <div class = "login-popup off" id = "projects-popup">
@@ -45,6 +61,10 @@
               <!--Credit to https://codepen.io/colorlib/pen/rxddKy -->
               <button type="button" id = "loginButton" >Login To GitHub</button>
               <p class="message">Not registered? <a href="https://github.com/join">Create a free account</a></p>
+              <button type="button" class= "browseButton" id = "browseNonGit" >Browse all projects</button>
+                </div>
+                    <div class="curiousBrowse" id= "curiousLearn">
+                     <p>Learn more about Maslow Create</p>
             </form>
           </div>
           

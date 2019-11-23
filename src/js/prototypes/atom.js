@@ -1,5 +1,6 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
+
 /**
  * This class is the prototype for all atoms.
  */
@@ -36,7 +37,7 @@ export default class Atom {
          * This atom's radius as displayed on the screen
          * @type {number}
          */
-        this.radius = 16
+        this.radius = GlobalVariables.canvas.width/65 
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}
@@ -87,9 +88,15 @@ export default class Atom {
          */
         this.isMoving = false
         /** 
+         * A flag to indicate if we are hovering over this atom.
+         * @type {boolean}
+         */
+        this.showHover = false
+        /** 
          * The X cordinate of this atom now
          * @type {number}
          */
+
         this.x = 0
         /** 
          * The Y cordinate of this atom now
@@ -132,7 +139,7 @@ export default class Atom {
             this.ioValues.forEach(ioValue => { //for each saved value
                 this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
                     if(ioValue.name == io.name && io.type == 'input'){
-                        io.setValue(ioValue.ioValue)
+                        io.value = ioValue.ioValue
                     }
                 })
             })
@@ -146,10 +153,7 @@ export default class Atom {
         this.inputs.forEach(child => {
             child.draw()       
         })
-      
-        if(this.processing){
-            GlobalVariables.c.fillStyle = 'blue'
-        }
+
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
 
@@ -168,9 +172,29 @@ export default class Atom {
         else if (this.y + this.radius > canvasFlow.height/GlobalVariables.scale1){
             this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
         }
+        
+
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.selectedColor
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
+
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.textAlign = 'start'
+        GlobalVariables.c.fillStyle = '#F3EFEF'
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
         GlobalVariables.c.lineWidth = 1
@@ -178,26 +202,29 @@ export default class Atom {
         GlobalVariables.c.closePath()
       
         if (this.alertMessage.length > 0){
-            //Draw Alert block  
-            GlobalVariables.c.beginPath()
-            const padding = 10
-            GlobalVariables.c.fillStyle = 'red'
-            GlobalVariables.c.rect(
-                this.x + this.radius - padding/2, 
-                this.y - this.radius + padding/2, 
-                GlobalVariables.c.measureText(this.alertMessage).width + padding, 
-                - (parseInt(GlobalVariables.c.font) + padding))
-            GlobalVariables.c.fill()
-            GlobalVariables.c.strokeStyle = 'black'
-            GlobalVariables.c.lineWidth = 1
-            GlobalVariables.c.stroke()
-            GlobalVariables.c.closePath()
+            this.color = "red"
+            if(this.showHover){
+                //Draw Alert block  
+                GlobalVariables.c.beginPath()
+                const padding = 10
+                GlobalVariables.c.fillStyle = 'red'
+                GlobalVariables.c.rect(
+                    this.x + this.radius - padding/2, 
+                    this.y - this.radius + padding/2, 
+                    GlobalVariables.c.measureText(this.alertMessage.toUpperCase()).width + padding, 
+                    - (parseInt(GlobalVariables.c.font) + padding))
+                GlobalVariables.c.fill()
+                GlobalVariables.c.strokeStyle = 'black'
+                GlobalVariables.c.lineWidth = 1
+                GlobalVariables.c.stroke()
+                GlobalVariables.c.closePath()
 
-            GlobalVariables.c.beginPath()
-            GlobalVariables.c.fillStyle = 'black'
-            GlobalVariables.c.fillText(this.alertMessage, this.x + this.radius, this.y - this.radius) 
-            GlobalVariables.c.closePath()
-        }
+                GlobalVariables.c.beginPath()
+                GlobalVariables.c.fillStyle = 'black'
+                GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), this.x + this.radius, this.y - this.radius) 
+                GlobalVariables.c.closePath()
+            }
+        } 
     }
     
     /**
@@ -208,7 +235,7 @@ export default class Atom {
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 
-    addIO(type, name, target, valueType, defaultValue){
+    addIO(type, name, target, valueType, defaultValue, ready = false){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
@@ -230,7 +257,7 @@ export default class Atom {
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint',
-                ready: !GlobalVariables.evalLock
+                ready: ready
             })
             
             if(type == 'input'){
@@ -249,11 +276,10 @@ export default class Atom {
      */ 
     removeIO(type, name, target){
         //Remove the target IO attachment point
-        
-        target.inputs.forEach(io => {
-            if(io.name == name && io.type == type){
-                io.deleteSelf()
-                target.inputs.splice(target.inputs.indexOf(io),1)
+        target.inputs.forEach(input => {
+            if(input.name == name && input.type == type){
+                target.inputs.splice(target.inputs.indexOf(input),1)
+                input.deleteSelf()
             }
         })
     }
@@ -298,17 +324,13 @@ export default class Atom {
         
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
-            this.color = this.selectedColor
             this.isMoving = true
             this.selected = true
-            this.strokeColor = this.defaultColor
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
         }
         else{
-            this.color = this.defaultColor
-            this.strokeColor = this.selectedColor
             this.selected = false
         }
         
@@ -368,6 +390,14 @@ export default class Atom {
         if(this.output){
             this.output.clickMove(x,y)
         }
+        
+        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        
+        //If we are close to the attachment point move it to it's hover location to make it accessible
+        if (distFromClick < this.radius ){
+            this.showHover = true
+        }  
+        else { this.showHover = false}
     }
     
     /**
@@ -382,7 +412,7 @@ export default class Atom {
                 this.deleteNode()
             }
         }
-                
+        
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
@@ -460,8 +490,12 @@ export default class Atom {
     deleteNode(){
         //deletes this node and all of it's inputs
         
-        this.inputs.forEach(child => {
-            child.deleteSelf()       
+        this.inputs.forEach(input => { //disable the inputs before deleting
+            input.ready = false
+        })
+        
+        this.inputs.forEach(input => {
+            input.deleteSelf()
         })
         if(this.output){
             this.output.deleteSelf()
@@ -542,8 +576,9 @@ export default class Atom {
         
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
-            this.output.setValue(this.value)
             this.output.ready = true
+            this.output.lock() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. This prevents 
+            this.output.setValue(this.value)
         }
     }
     
@@ -551,7 +586,15 @@ export default class Atom {
      * Calls a worker thread to compute the atom's value.
      */ 
     basicThreadValueProcessing(values, key){
-        if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+        
+        //If the inputs are all ready
+        var go = true
+        this.inputs.forEach(input => {
+            if(!input.ready){
+                go = false
+            }
+        })
+        if(go){     //Then we update the value
             this.processing = true
             this.clearAlert()
             
@@ -577,22 +620,25 @@ export default class Atom {
     }
     
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before begining to process.
+     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
     unlock(){
+        
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){
                 input.ready = true
             }
         })
-    }
-    
-    /**
-     * This function will trigger the tips of the tree branches to start generating values.
-     */ 
-    beginPropogation(){
-        if(this.inputs.every(x => x.connectors.length == 0) || this.inputs.length == 0){ //If this atom has nothing upstream of it, and if it does not trigger propogation from it
+        
+        //If the inputs are all ready
+        var go = true
+        this.inputs.forEach(input => {
+            if(!input.ready){
+                go = false
+            }
+        })
+        if(go){     //Then we update the value
             this.updateValue()
         }
     }
@@ -626,6 +672,19 @@ export default class Atom {
         })
         
         return ioValue
+    }
+    
+    /**
+     * Dump the stored copies of any geometry in this atom to free up ram.
+     */ 
+    dumpBuffer(){
+        this.inputs.forEach(input => {
+            input.dumpBuffer()
+        })
+        if(this.output){
+            this.output.dumpBuffer()
+        }
+        this.value = null
     }
     
     /**
@@ -682,9 +741,6 @@ export default class Atom {
                 callBack(valueInBox)
             }
             
-            //sets the color of the molecule correctly after focus out of editable box
-            this.color = this.selectedColor
-            this.strokeColor = this.defaultColor
         })
         
         //prevent the return key from being used when editing a value

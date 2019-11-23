@@ -89,10 +89,17 @@ export default class AttachmentPoint {
          */
         this.type = 'output'
         /** 
-         * The attachment point current value. Default is 10.
+         * The attachment point current value.
          * @type {number}
          */
         this.value = 10
+        
+        /**
+         * The default value to be used by the ap when nothing is attached
+         * @type {string}
+         */
+        this.defaultValue = 10
+        
         /** 
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
@@ -149,7 +156,7 @@ export default class AttachmentPoint {
         var textWidth = GlobalVariables.c.measureText(txt).width
         GlobalVariables.c.font = '10px Work Sans'
 
-        var bubbleColor = '#008080'
+        var bubbleColor = '#C300FF'
         var scaleRadiusDown = this.radius*.7
         var halfRadius = this.radius*.5
 
@@ -353,11 +360,23 @@ export default class AttachmentPoint {
      */ 
     deleteSelf(){
         //remove any connectors which were attached to this attachment point
-        
-        this.connectors.forEach(connector => {
-            connector.deleteSelf()       
+        var connectorsList = this.connectors //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list
+        connectorsList.forEach( connector => {
+            connector.deleteSelf()
         })
-        
+    }
+    
+    /**
+     * Delete a target connector which is passed in. The default option is to delete all of the connectors.
+     */ 
+    deleteConnector(connector = "all"){
+        const connectorIndex = this.connectors.indexOf(connector)
+        if(connectorIndex != -1){
+            this.connectors.splice(connectorIndex,1) //Remove the target connector
+        }
+        else{
+            this.connectors = [] //Remove all of the connectors
+        }
     }
     
     /**
@@ -414,7 +433,19 @@ export default class AttachmentPoint {
     }
     
     /**
-     * Reads and returns the curent value of the ap.
+     * Updates the default value for the ap.
+     */ 
+    updateDefault(newDefault){
+        var oldDefault = this.defaultValue
+        this.defaultValue = newDefault
+        
+        if(this.connectors.length == 0 && this.value == oldDefault){    //Update the value to be the default if there is nothing attached
+            this.value = this.defaultValue
+        }
+    }
+    
+    /**
+     * Reads and returns the current value of the ap.
      */ 
     getValue(){
         return this.value
@@ -425,9 +456,7 @@ export default class AttachmentPoint {
      */ 
     setValue(newValue){
         this.value = newValue
-        if(!GlobalVariables.evalLock){
-            this.ready = true
-        }
+        this.ready = true
         //propagate the change to linked elements if this is an output
         if (this.type == 'output'){
             this.connectors.forEach(connector => {     //select any connectors attached to this node
@@ -438,6 +467,13 @@ export default class AttachmentPoint {
         else{   //update the code block to reflect the new values
             this.parentMolecule.updateValue()
         }
+    }
+    
+    /**
+     * Clears any references to geometry this ap is holding onto to free up ram.
+     */
+    dumpBuffer(){
+        this.value = null
     }
     
     /**

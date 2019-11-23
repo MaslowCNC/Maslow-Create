@@ -54,6 +54,17 @@ export default class Equation extends Atom {
             var re = /[a-zA-Z]/g
             const variables = this.currentEquation.match(re)
             
+            //Remove any inputs which are not needed
+            const deleteExtraInputs = () => {
+                this.inputs.forEach( input => {
+                    if( !variables.includes(input.name) ){
+                        this.removeIO('input', input.name, this)
+                        deleteExtraInputs() //This needs to be called recursively to make sure all the inputs are deleted
+                    }
+                })
+            }
+            deleteExtraInputs()
+            
             //Add any inputs which are needed
             for (var variable in variables){
                 if(!this.inputs.some(input => input.Name === variables[variable])){
@@ -61,14 +72,7 @@ export default class Equation extends Atom {
                 }
             }
             
-            //Remove any inputs which are not needed
-            for (var input in this.inputs){
-                if( !variables.includes(this.inputs[input].name) ){
-                    this.removeIO('input', this.inputs[input].name, this)
-                }
-            }
-            
-            if(!GlobalVariables.evalLock && this.inputs.every(x => x.ready)){
+            if(this.inputs.every(x => x.ready)){
                 
                 //Substitute numbers into the string
                 var substitutedEquation = this.currentEquation
@@ -76,14 +80,16 @@ export default class Equation extends Atom {
                     substitutedEquation = substitutedEquation.replace(this.inputs[key].name, this.findIOValue(this.inputs[key].name))
                 }
                 
-                
                 //Evaluate the equation
                 this.value = GlobalVariables.limitedEvaluate(substitutedEquation)
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
             }
-        }catch(err){this.setAlert(err)}
+        }catch(err){
+            console.warn(err)
+            this.setAlert(err)
+        }
     }
     
     /**
