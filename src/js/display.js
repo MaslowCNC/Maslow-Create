@@ -583,8 +583,6 @@ export default class Display {
                 }
             }
         }
-        console.log("Rgb: ")
-        console.log(rgb)
         return rgb
     }
     
