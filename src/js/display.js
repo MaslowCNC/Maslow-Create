@@ -367,6 +367,7 @@ export default class Display {
                         this.scene.add( this.plane )
                         this.displayGrid = true
 
+
                     }
                     else{
                         this.scene.remove(this.plane)
@@ -442,21 +443,8 @@ export default class Display {
             }
         })
         
-        // This event listener adjusts the gridScale when you zoom in and out
-        
-        this.targetDiv.addEventListener('wheel', () =>{ 
-            
-            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }
-            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }    
-        })
+        this.grid1= this.makeGrid();
+        this.grid2= this.makeGrid();
     }
     
     /**
@@ -533,26 +521,46 @@ export default class Display {
             zoomed out farther than initial grid tier*/ 
         this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
         // Creates initial grid plane
-        this.resizeGrid()
+        this.makeGrid();
     }
 
+    makeGrid() {
+        var size = 100;
+        var divisions = 100;
+        var grid = new THREE.GridHelper( size, divisions )
+        grid.geometry.rotateX( Math.PI / 2 )
+        this.scene.add( grid) 
+        return grid
+    }
     /**
      * Redraws the grid with gridscale update value
      */ 
-    resizeGrid () {
-        this.scene.remove(this.plane)
-        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
+    resizeGrid() {
+        this.scene.remove(grid)
+        var size = 100;
+        var divisions = 100;
+
+        var grid = new THREE.GridHelper( size, divisions );
+
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale);
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1);
+        const gridZoom = Math.pow(10, Math.floor(gridLevel));    
+
+        grid.scale.setScalar(gridZoom);
+        grid.material.opacity = Math.max((1 - gridFract) * 1);
+
+        grid.scale.setScalar(gridZoom * 10);
+        grid.material.opacity = Math.max(gridFract * 10) - 1;
+        //grid.visible = grid.material.opacity > 0;
         /** 
          * The grid which displays under the part.
          * @type {object}
          */
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
+        /*this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
         this.plane.receiveShadow = true
-        this.scene.add( this.plane )   
+        this.scene.add( this.plane )  */
+        
+        this.scene.add( grid); 
     }
     
     /**
@@ -696,5 +704,16 @@ export default class Display {
      */ 
     render() {
         this.renderer.render( this.scene, this.camera )
+
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale);
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1);
+        const gridZoom = Math.pow(10, Math.floor(gridLevel));    
+
+       this.grid1.scale.setScalar(gridZoom);
+        this.grid1.material.opacity = Math.max((1 - gridFract) * 1);
+
+        this.grid2.scale.setScalar(gridZoom * 10);
+        this.grid2.material.opacity = Math.max(gridFract * 10) - 1;
+        this.grid2.visible = this.grid2.material.opacity > 0;
     }
 }
