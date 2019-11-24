@@ -608,6 +608,7 @@ export default class Atom {
             }
             
             computeValue(values, key).then(result => {
+                
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()

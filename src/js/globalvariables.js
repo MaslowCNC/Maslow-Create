@@ -77,7 +77,7 @@ class GlobalVariables{
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Interactions'},
             
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'AddBOMTag', atomCategory: 'Properties'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
             cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
