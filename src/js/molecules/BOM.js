@@ -13,8 +13,6 @@ export default class AddBOMTag extends Atom{
     constructor(values){
         super(values)
         
-        console.log("Attempting to place bom atom");
-        
         /**
          * This atom's type
          * @type {string}
