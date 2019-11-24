@@ -22,8 +22,8 @@
       "expectCount": 30,
       "actualCount": 28,
       "undocumentLines": [
-        240,
-        282
+        255,
+        297
       ]
     },
     "src/js/githubOauth.js": {
