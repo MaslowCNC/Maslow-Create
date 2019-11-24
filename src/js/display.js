@@ -600,10 +600,6 @@ export default class Display {
         const [r, g, b] = rgb
         
         const color = new THREE.Color( r, g, b ); // create a new color for conversion
-        console.log("colors: ")
-        console.log(0xff0000)
-        console.log(color.getHex())
-        console.log((1 << 24) + (r << 16) + (g << 8) + b)
         parameters.color = color.getHex()//color.getHexString(); // "c08000"
         return parameters
     }
@@ -640,8 +636,6 @@ export default class Display {
             const parameters = {}
             this.setColor(tags, parameters, null)
             this.setMaterial(tags, parameters)
-            console.log("Paremeters: ")
-            console.log(parameters)
             if (Object.keys(parameters).length > 0) {
                 return new THREE.MeshPhysicalMaterial(parameters)
             }
