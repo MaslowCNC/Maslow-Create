@@ -391,9 +391,26 @@
         }
         else{
         on(a, 'click', clickCallBack, data);   
+      
         }
 
         parent.appendChild(a);
+
+        //Create text for icons as you hover over the different parts of the menu
+
+        on(a, 'mouseenter', function () {
+            var div = document.createElement('div');
+            div.textContent = data.icon
+            div.classList.add("tooltip");
+            div.id = data.icon + "text"
+            const length= div.textContent.length * 2.7 //Correct for text length centering 
+            document.querySelector("body").appendChild(div)
+            style(div, 'top', self._container.offsetTop + self._calc.radius - 10 + 'px');
+            style(div, 'left', self._container.offsetLeft + self._calc.radius - length + 'px');
+            });
+        on(a, 'mouseleave', function () {
+            document.getElementById(data.icon + "text").remove()
+            });
 
         this._createHorizontal(a, data, index, hasSubMenus(data.menus));
         

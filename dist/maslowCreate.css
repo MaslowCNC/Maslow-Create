@@ -863,6 +863,7 @@ input.menu_search:focus {
 /* line 85, ../../sass/circular-menu.scss */
 .circular-menu ul li a span.text {
   display: block;
+  background-color: black
   font-size: 8px;
   letter-spacing: 0.1em;
   line-height: 1;
@@ -883,4 +884,16 @@ input.menu_search:focus {
 .circular-menu ul li a:focus {
   position: fixed;
   /* fix the displacement bug in webkit browsers when using tab key */
+}
+
+.tooltip{
+  background-color: #C3C3CD;
+  margin:auto;
+  font-size: .7em;
+  color:white;
+  z-index: 1041;
+  position:absolute;
+  -moz-box-shadow: 1px 1px 3px 2px #C3C3CD;
+  -webkit-box-shadow: 1px 1px 3px 2px #C3C3CD;
+  box-shadow:         1px 1px 3px 2px #C3C3CD;
 }
