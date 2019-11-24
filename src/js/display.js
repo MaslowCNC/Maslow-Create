@@ -599,7 +599,7 @@ export default class Display {
         }
         const [r, g, b] = rgb
         
-        const color = new THREE.Color( r, g, b ); // create a new color for conversion
+        const color = new THREE.Color( r, g, b ) // create a new color for conversion
         parameters.color = color.getHex()//color.getHexString(); // "c08000"
         return parameters
     }
