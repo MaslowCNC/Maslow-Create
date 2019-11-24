@@ -133,12 +133,14 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
         if (a.classList.contains("openMenu")){
             closeMainMenu()
             a.classList.remove("openMenu")
+            document.getElementById('goup_top').style.visibility = "visible"
         }
         else{
             a.classList.add("openMenu")
             a.style.transition = `transform 0.5s`
             a.style.transform = `translateX(${step}%)` 
             step-=100
+            document.getElementById('goup_top').style.visibility = "hidden"
         }           
 
     }) 
