@@ -598,8 +598,13 @@ export default class Display {
             return
         }
         const [r, g, b] = rgb
-        const color = ((1 << 24) + (r << 16) + (g << 8) + b)
-        parameters.color = color
+        
+        const color = new THREE.Color( r, g, b ); // create a new color for conversion
+        console.log("colors: ")
+        console.log(0xff0000)
+        console.log(color.getHex())
+        console.log((1 << 24) + (r << 16) + (g << 8) + b)
+        parameters.color = color.getHex()//color.getHexString(); // "c08000"
         return parameters
     }
     
@@ -635,6 +640,8 @@ export default class Display {
             const parameters = {}
             this.setColor(tags, parameters, null)
             this.setMaterial(tags, parameters)
+            console.log("Paremeters: ")
+            console.log(parameters)
             if (Object.keys(parameters).length > 0) {
                 return new THREE.MeshPhysicalMaterial(parameters)
             }
@@ -646,7 +653,7 @@ export default class Display {
     
     /**
      * Clears the display and writes a threejs geometry to it.
-     * @param {object} threejsGeometry - A threejs geometry to write to the display.
+     * @param {object} threejsGeometry - A threejs geometry to write to the display. Generated from the worker thread.
      */ 
     updateDisplayData(threejsGeometry){
         // Delete any previous dataset in the window.
@@ -657,6 +664,7 @@ export default class Display {
         // Build new datasets from the written data, and display them.
         this.datasets = []
 
+        //This walks through the geometry building a threejs geometry out of it
         const walk = (geometry) => {
             const { tags } = geometry
             if (geometry.assembly) {
