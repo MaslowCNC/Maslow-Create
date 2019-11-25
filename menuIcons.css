@@ -97,7 +97,7 @@
             height:150%;
         }  
         .GitHubMolecule{
-            background: url("./imgs/GithubMolecule.png");
+            background: url("./imgs/githubmolecule.png");
             width:150%;
             height:150%;
         } 
@@ -145,12 +145,12 @@
             height:150%;
         } 
         .Stl{
-            background: url("./imgs/Stl.png");
+            background: url("./imgs/stl.png");
             width:150%;
             height:150%;
         } 
         .Svg{
-            background: url("./imgs/Svg.png");
+            background: url("./imgs/svg.png");
             width:150%;
             height:150%;
         } 
@@ -166,23 +166,23 @@
             height:150%;
         } 
         .AddBOMTag{
-            background: url("./imgs/Bom.png");
+            background: url("./imgs/bom.png");
             width:150%;
             height:150%;
         } 
         .Readme{
-            background: url("./imgs/Readme.png");
+            background: url("./imgs/readme.png");
             width:150%;
             height:150%;
         } 
         .CutLayout{
-            background: url("./imgs/Cutlayout.png");
+            background: url("./imgs/cutlayout.png");
             width:150%;
             height:150%;
         } 
 
         .ExtractTag{
-            background: url("./imgs/Extracttag.png");
+            background: url("./imgs/extracttag.png");
             width:150%;
             height:150%;
         } 
