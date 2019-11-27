@@ -441,8 +441,8 @@ export default class Display {
             }
         })
         
-        this.grid1= this.makeGrid();
-        this.grid2= this.makeGrid();
+        this.grid1= this.makeGrid()
+        this.grid2= this.makeGrid()
     }
     
     /**
@@ -519,28 +519,28 @@ export default class Display {
             zoomed out farther than initial grid tier*/ 
         this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
         // Creates initial grid plane
-        this.makeGrid();
+        this.makeGrid()
     }
 
     /**
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
-        var size = 100;
-        console.log("making grid")
-        var divisions = 100;
+        var size = 100
+        var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )
         grid.geometry.rotateX( Math.PI / 2 )
         this.scene.add(grid) 
         return grid
     }
 
-     /**
+    /**
      * Removes the grid with update values on checked box
-     */ 
+ 
     removeGrid() {
         this.scene.remove(grid) 
     }
+     */
 
     /**
      * Converts the tag to an RGB value.
@@ -683,16 +683,16 @@ export default class Display {
      */ 
     render() {
 
-        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale);
-        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1);
-        const gridZoom = Math.pow(10, Math.floor(gridLevel));    
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+        const gridZoom = Math.pow(10, Math.floor(gridLevel))    
 
-        this.grid1.scale.setScalar(gridZoom);
-        this.grid1.material.opacity = Math.max((1 - gridFract) * 1);
+        this.grid1.scale.setScalar(gridZoom)
+        this.grid1.material.opacity = Math.max((1 - gridFract) * 1)
 
-        this.grid2.scale.setScalar(gridZoom * 10);
-        this.grid2.material.opacity = Math.max(gridFract * 10) - 1;
-        this.grid2.visible = this.grid2.material.opacity > 0;
+        this.grid2.scale.setScalar(gridZoom * 10)
+        this.grid2.material.opacity = Math.max(gridFract * 10) - 1
+        this.grid2.visible = this.grid2.material.opacity > 0
 
         this.renderer.render( this.scene, this.camera )
     }
