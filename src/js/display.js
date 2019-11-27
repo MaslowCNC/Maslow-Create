@@ -364,12 +364,14 @@ export default class Display {
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
-                        //this.scene.add( this.plane )
-                        //this.displayGrid = true
+                        this.grid1= this.makeGrid()
+                        this.grid2= this.makeGrid()
+                        this.displayGrid = true
                     }
                     else{
-                        //this.scene.remove(this.plane)
-                        //this.displayGrid = false
+                        this.removeGrid(this.grid1)
+                        this.removeGrid(this.grid2)
+                        this.displayGrid = false
                     }
                 })
 
@@ -536,11 +538,10 @@ export default class Display {
 
     /**
      * Removes the grid with update values on checked box
- 
-    removeGrid() {
+     */ 
+    removeGrid(grid) {
         this.scene.remove(grid) 
     }
-     */
 
     /**
      * Converts the tag to an RGB value.
