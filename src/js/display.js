@@ -365,12 +365,10 @@ export default class Display {
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
                         this.grid1= this.makeGrid()
-                        this.grid2= this.makeGrid()
                         this.displayGrid = true
                     }
                     else{
                         this.removeGrid(this.grid1)
-                        this.removeGrid(this.grid2)
                         this.displayGrid = false
                     }
                 })
@@ -444,7 +442,6 @@ export default class Display {
         })
         
         this.grid1= this.makeGrid()
-        this.grid2= this.makeGrid()
     }
     
     /**
@@ -690,10 +687,6 @@ export default class Display {
 
         this.grid1.scale.setScalar(gridZoom)
         this.grid1.material.opacity = Math.max((1 - gridFract) * 1)
-
-        this.grid2.scale.setScalar(gridZoom * 10)
-        this.grid2.material.opacity = Math.max(gridFract * 10) - 1
-        this.grid2.visible = this.grid2.material.opacity > 0
 
         this.renderer.render( this.scene, this.camera )
     }
