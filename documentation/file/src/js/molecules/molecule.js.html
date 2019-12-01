@@ -133,7 +133,6 @@ export default class Molecule extends Atom{
          */
         this.runModeSidebarAdditions = []
         
-        
         this.setValues(values)
         
         //Add the molecule&apos;s output
@@ -145,7 +144,25 @@ export default class Molecule extends Atom{
             name: &apos;Output&apos;,
             atomType: &apos;Output&apos;
         }, null, GlobalVariables.secretTypes)
-        
+    }
+    
+    /**
+     * Gives this molecule inputs with the same names as all of it&apos;s parent&apos;s inputs
+     */ 
+    copyInputsFromParent(){
+        if(this.parent){
+            this.parent.nodesOnTheScreen.forEach(node =&gt; {
+                if(node.atomType == &quot;Input&quot;){
+                    this.placeAtom({
+                        parentMolecule: this,
+                        y: node.y,
+                        parent: this,
+                        name: node.name,
+                        atomType: &apos;Input&apos;
+                    }, null, GlobalVariables.availableTypes)
+                }
+            })
+        } 
     }
     
     /**
@@ -271,23 +288,6 @@ export default class Molecule extends Atom{
 
         }
         
-        // this.createButton(valueList,this,&apos;Download STL&apos;,() =&gt; {
-        // const convertSTL = require(&apos;@jsxcad/convert-stl&apos;)
-        // convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent =&gt; {
-        // const blob = new Blob([stlContent], {type: &apos;text/plain;charset=utf-8&apos;})
-        // saveAs(blob, this.name+&apos;.stl&apos;)
-        // })
-        // })
-        
-        // this.createButton(valueList,this,&apos;Download SVG&apos;,() =&gt; {
-        // const convertSVG = require(&apos;@jsxcad/convert-svg&apos;)
-        // const crossSection = this.value.crossSection().toDisjointGeometry()
-        // convertSVG.toSvg({}, crossSection).then( contentSvg =&gt; {
-        // const blob = new Blob([contentSvg], {type: &apos;text/plain;charset=utf-8&apos;})
-        // saveAs(blob, this.name+&apos;.svg&apos;)
-        // })
-        // })
-        
         //removes 3d view menu on background click
         let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
         if(viewerBar &amp;&amp; viewerBar.firstChild){
@@ -297,15 +297,13 @@ export default class Molecule extends Atom{
             }
         }
 
-        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
-            //Add options to set all of the inputs
-            this.inputs.forEach(child =&gt; {
-                if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
-                    this.createEditableValueListItem(valueList,child,&apos;value&apos;, child.name, true)
-                }
-            })
-        }
-                    
+        //Add options to set all of the inputs
+        this.inputs.forEach(child =&gt; {
+            if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
+                this.createEditableValueListItem(valueList,child,&apos;value&apos;, child.name, true)
+            }
+        })
+        
         this.displaySimpleBOM(valueList)
         
         return valueList
@@ -597,6 +595,11 @@ export default class Molecule extends Atom{
                     
                     document.getElementById(&apos;flow-canvas&apos;).dispatchEvent(downEvt)
                     document.getElementById(&apos;flow-canvas&apos;).dispatchEvent(upEvt)
+                    
+                    //Make this moleclue spawn with all of it&apos;s parent&apos;s inputs
+                    if(atom.atomType == &apos;Molecule&apos;){
+                        atom.copyInputsFromParent()
+                    }
                 }
             }
         }

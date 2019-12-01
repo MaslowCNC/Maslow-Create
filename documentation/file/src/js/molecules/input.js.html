@@ -125,7 +125,6 @@ export default class Input extends Atom {
         this.oldName = this.name
         
         this.addIO(&apos;output&apos;, &apos;number or geometry&apos;, this, &apos;number or geometry&apos;, 10)
-        this.addIO(&apos;input&apos;, &apos;default value&apos;, this, &apos;number&apos;, 10)
         
         //Add a new input to the current molecule
         if (typeof this.parent !== &apos;undefined&apos;) {
@@ -199,7 +198,9 @@ export default class Input extends Atom {
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
         GlobalVariables.c.stroke()
-
+        
+        //Snap the inputs to the far right side
+        this.x = this.radius
     }
     
     /**
@@ -234,8 +235,6 @@ export default class Input extends Atom {
         this.parent.inputs.forEach(input =&gt; { //Grab the value for this input from the parent&apos;s inputs list
             if(input.name == this.name){        //If we have found the matching input
                 this.value = input.getValue()
-                
-                input.updateDefault(this.findIOValue(&apos;default value&apos;))    //Set the default value of the input to be the default
                 
                 this.output.lock()              //Lock all of the dependents
                 this.output.setValue(this.value)

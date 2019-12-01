@@ -269,12 +269,10 @@ export default class Atom {
             this.color = this.defaultColor
             this.strokeColor = this.selectedColor
         }
-
+        
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = &apos;start&apos;
-        GlobalVariables.c.fillStyle = &apos;#F3EFEF&apos;
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
         GlobalVariables.c.lineWidth = 1

@@ -1776,6 +1776,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/input.js~input#x",
+    "class/src/js/molecules/input.js~Input.html#instance-member-x",
+    "src/js/molecules/input.js~Input#x",
+    "member"
+  ],
+  [
     "src/js/molecules/intersection.js",
     "file/src/js/molecules/intersection.js.html",
     "src/js/molecules/intersection.js",
@@ -1833,6 +1839,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/molecule.js~molecule#constructor",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-constructor-constructor",
     "src/js/molecules/molecule.js~Molecule#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#copyinputsfromparent",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-copyInputsFromParent",
+    "src/js/molecules/molecule.js~Molecule#copyInputsFromParent",
     "method"
   ],
   [

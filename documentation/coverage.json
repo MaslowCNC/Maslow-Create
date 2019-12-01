@@ -1,7 +1,7 @@
 {
-  "coverage": "99.13%",
-  "expectCount": 464,
-  "actualCount": 460,
+  "coverage": "98.92%",
+  "expectCount": 466,
+  "actualCount": 461,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -121,9 +121,11 @@
       ]
     },
     "src/js/molecules/input.js": {
-      "expectCount": 16,
+      "expectCount": 17,
       "actualCount": 16,
-      "undocumentLines": []
+      "undocumentLines": [
+        123
+      ]
     },
     "src/js/molecules/intersection.js": {
       "expectCount": 5,
@@ -131,8 +133,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 31,
-      "actualCount": 31,
+      "expectCount": 32,
+      "actualCount": 32,
       "undocumentLines": []
     },
     "src/js/molecules/output.js": {
