@@ -53,7 +53,6 @@ export default class Molecule extends Atom{
          */
         this.runModeSidebarAdditions = []
         
-        
         this.setValues(values)
         
         //Add the molecule's output
@@ -65,7 +64,25 @@ export default class Molecule extends Atom{
             name: 'Output',
             atomType: 'Output'
         }, null, GlobalVariables.secretTypes)
-        
+    }
+    
+    /**
+     * Gives this molecule inputs with the same names as all of it's parent's inputs
+     */ 
+    copyInputsFromParent(){
+        if(this.parent){
+            this.parent.nodesOnTheScreen.forEach(node => {
+                if(node.atomType == "Input"){
+                    this.placeAtom({
+                        parentMolecule: this,
+                        y: node.y,
+                        parent: this,
+                        name: node.name,
+                        atomType: 'Input'
+                    }, null, GlobalVariables.availableTypes)
+                }
+            })
+        } 
     }
     
     /**
@@ -498,6 +515,11 @@ export default class Molecule extends Atom{
                     
                     document.getElementById('flow-canvas').dispatchEvent(downEvt)
                     document.getElementById('flow-canvas').dispatchEvent(upEvt)
+                    
+                    //Make this moleclue spawn with all of it's parent's inputs
+                    if(atom.atomType == 'Molecule'){
+                        atom.copyInputsFromParent()
+                    }
                 }
             }
         }
