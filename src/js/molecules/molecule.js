@@ -191,23 +191,6 @@ export default class Molecule extends Atom{
 
         }
         
-        // this.createButton(valueList,this,'Download STL',() => {
-        // const convertSTL = require('@jsxcad/convert-stl')
-        // convertSTL.toStla({}, this.value.toDisjointGeometry()).then( stlContent => {
-        // const blob = new Blob([stlContent], {type: 'text/plain;charset=utf-8'})
-        // saveAs(blob, this.name+'.stl')
-        // })
-        // })
-        
-        // this.createButton(valueList,this,'Download SVG',() => {
-        // const convertSVG = require('@jsxcad/convert-svg')
-        // const crossSection = this.value.crossSection().toDisjointGeometry()
-        // convertSVG.toSvg({}, crossSection).then( contentSvg => {
-        // const blob = new Blob([contentSvg], {type: 'text/plain;charset=utf-8'})
-        // saveAs(blob, this.name+'.svg')
-        // })
-        // })
-        
         //removes 3d view menu on background click
         let viewerBar = document.querySelector('#viewer_bar')
         if(viewerBar && viewerBar.firstChild){
@@ -217,15 +200,13 @@ export default class Molecule extends Atom{
             }
         }
 
-        if(this.uniqueID != GlobalVariables.currentMolecule.uniqueID  || GlobalVariables.runMode){ //If you single click to select a molecule OR if we are in run mode
-            //Add options to set all of the inputs
-            this.inputs.forEach(child => {
-                if(child.type == 'input' && child.valueType != 'geometry'){
-                    this.createEditableValueListItem(valueList,child,'value', child.name, true)
-                }
-            })
-        }
-                    
+        //Add options to set all of the inputs
+        this.inputs.forEach(child => {
+            if(child.type == 'input' && child.valueType != 'geometry'){
+                this.createEditableValueListItem(valueList,child,'value', child.name, true)
+            }
+        })
+        
         this.displaySimpleBOM(valueList)
         
         return valueList
