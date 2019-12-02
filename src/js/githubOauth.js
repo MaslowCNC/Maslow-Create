@@ -749,7 +749,6 @@ export default function GitHubModule(){
         }
         else{
             document.getElementById("yoursButton").style.display = "block"
-            //document.getElementById(tabName).style.display = "block"
             document.querySelector(".topBrowse").style.display = "none"
         }
         document.getElementById(myTab).className += " active"
