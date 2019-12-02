@@ -437,14 +437,12 @@ export default function GitHubModule(){
         })
 
         searchBar.addEventListener('keyup', () => {
-            console.log("keyup")
             var opt = document.getElementById("filterDrop")
-            console.log(opt)
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
         
-       /* filterDiv.addEventListener("change", () => {
+        /* filterDiv.addEventListener("change", () => {
 
             var opt = document.getElementById("filterDrop")
             var strUser = opt.options[opt.selectedIndex].textContent
