@@ -234,12 +234,6 @@ animation-delay: 0s;
     margin-top: 0px;
     width: 100%;
 }
-#githubButton{
-    width: 60%;
-    height: 30px;
-    margin-top: -10px;
-    margin-left: 30%;
-}
 
 .githubSign{
     text-align: center;
@@ -368,6 +362,7 @@ animation-delay: 0s;
   }
   .newProjectdiv:hover, .browseDisplay:hover{
     background-color: white;
+    border: 2px solid #444;
   }
 
 

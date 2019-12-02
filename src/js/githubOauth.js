@@ -149,6 +149,8 @@ export default function GitHubModule(){
         var browseDivInner = document.createElement("div")
         browseDiv.appendChild(browseDivInner)
         browseDivInner.classList.add("newProjectdiv")
+        browseDivInner.classList.add("tablinks") 
+        browseDivInner.setAttribute("id", "githubButton")
 
         var projectPicture = document.createElement("IMG")
         projectPicture.setAttribute("src", '/defaultThumbnail.svg')
@@ -159,15 +161,7 @@ export default function GitHubModule(){
         var checkOut = document.createElement("div")
         browseDivInner.appendChild(checkOut)
         checkOut.innerHTML = "Check out what others have made on Maslow Create"
-        checkOut.setAttribute("style", "justify-content:flex-start; display: inline; width: 70%; margin-top: 20px ")
-
-        //Browse all button
-        var githubButton = document.createElement("button")
-        githubButton.appendChild(document.createTextNode("Browse Projects"))
-        githubButton.classList.add("browseButton")
-        githubButton.classList.add("tablinks")    
-        githubButton.setAttribute("id", "githubButton")
-        browseDivInner.appendChild(githubButton)
+        checkOut.setAttribute("style", "align-self:center; width:70%")
 
         topBrowseDiv.appendChild(browseDiv) 
         topBrowseDiv.setAttribute("class", "topBrowse")
@@ -247,9 +241,9 @@ export default function GitHubModule(){
         popup.appendChild(middleBrowseDiv2) */
 
         searchBar.addEventListener('keyup', (e) => {
-            var opt = document.getElementById("filterDrop")
-            var strUser = opt.options[opt.selectedIndex].textContent
-            this.loadProjectsBySearch(e, searchBar.value, strUser)
+            //var opt = document.getElementById("filterDrop")
+            //var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadProjectsBySearch(e, searchBar.value, "updated") // updated just sorts content by most recently updated
         })
         /*filterDiv.addEventListener("change", (e) => {
 
@@ -294,7 +288,7 @@ export default function GitHubModule(){
             myTab = "yoursButton"
             this.openTab(e, "yoursButton")
         })
-        githubButton.addEventListener("click", (e) => {
+        browseDivInner.addEventListener("click", (e) => {
 
             mine.innerHTML = "All Maslow Create Projects"
             myTab = "githubButton"
@@ -443,18 +437,20 @@ export default function GitHubModule(){
         })
 
         searchBar.addEventListener('keyup', () => {
+            console.log("keyup")
             var opt = document.getElementById("filterDrop")
+            console.log(opt)
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
-        /*
-        filterDiv.addEventListener("change", () => {
+        
+       /* filterDiv.addEventListener("change", () => {
 
             var opt = document.getElementById("filterDrop")
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
-        })
-        */
+        })*/
+        
 
         //header for project list style display
         var titlesDiv = document.createElement("div")
@@ -558,7 +554,7 @@ export default function GitHubModule(){
             //Load projects
             var query
             var owned
-            var sortMethod = sorting  //replace with dropdown input!
+            var sortMethod = sorting  //drop down input. temporarily inactive until we figure some better way to sort
             if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
@@ -755,7 +751,7 @@ export default function GitHubModule(){
         }
         else{
             document.getElementById("yoursButton").style.display = "block"
-            document.getElementById(tabName).style.display = "block"
+            //document.getElementById(tabName).style.display = "block"
             document.querySelector(".topBrowse").style.display = "none"
         }
         document.getElementById(myTab).className += " active"
