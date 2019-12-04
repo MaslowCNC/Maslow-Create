@@ -189,12 +189,10 @@ export default class Atom {
             this.color = this.defaultColor
             this.strokeColor = this.selectedColor
         }
-
+        
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = 'start'
-        GlobalVariables.c.fillStyle = '#F3EFEF'
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
         GlobalVariables.c.lineWidth = 1
@@ -608,6 +606,7 @@ export default class Atom {
             }
             
             computeValue(values, key).then(result => {
+                
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()
