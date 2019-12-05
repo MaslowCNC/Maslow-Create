@@ -36,7 +36,7 @@ export default class Color extends Atom {
          */
         this.selectedColorIndex = 0
         
-        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
