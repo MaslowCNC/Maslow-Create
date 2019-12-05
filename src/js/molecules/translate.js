@@ -12,7 +12,7 @@ export default class Translate extends Atom{
     constructor(values){
         super(values)
         
-        this.addIO('input', 'geometry', this, 'geometry', '')
+        this.addIO('input', 'geometry', this, 'geometry', '', false, true)
         this.addIO('input', 'xDist', this, 'number', 0)
         this.addIO('input', 'yDist', this, 'number', 0)
         this.addIO('input', 'zDist', this, 'number', 0)

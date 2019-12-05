@@ -24,7 +24,7 @@ export default class Extrude extends Atom{
          */
         this.atomType = 'Extrude'
         
-        this.addIO('input', 'geometry' , this, 'geometry', '')
+        this.addIO('input', 'geometry' , this, 'geometry', '', false, true)
         this.addIO('input', 'height'   , this, 'number', 10)
         this.addIO('output', 'geometry', this, 'geometry', '')
         

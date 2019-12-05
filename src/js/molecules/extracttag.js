@@ -27,7 +27,7 @@ export default class ExtractTag extends Atom{
          */
         this.name = 'Extract Tag'
         
-        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('input', 'tag', this, 'string', 'Tag String')
         this.addIO('output', 'geometry', this, 'geometry', null)
         

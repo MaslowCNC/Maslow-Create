@@ -40,7 +40,7 @@ export default class AddBOMTag extends Atom{
          */
         this.BOMitem = new BOMEntry()
         
-        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
