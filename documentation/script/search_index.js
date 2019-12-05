@@ -3006,6 +3006,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#primary",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-primary",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#primary",
+    "member"
+  ],
+  [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#radius",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-radius",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#radius",

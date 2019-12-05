@@ -93,7 +93,7 @@ export default class Scale extends Atom{
         
         super(values)
         
-        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
+        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;, false, true)
         this.addIO(&apos;input&apos;, &apos;multiple&apos;, this, &apos;number&apos;, 10)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         

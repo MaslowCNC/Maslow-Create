@@ -229,6 +229,8 @@ export default function GitHubModule(){
         var browseDivInner = document.createElement(&quot;div&quot;)
         browseDiv.appendChild(browseDivInner)
         browseDivInner.classList.add(&quot;newProjectdiv&quot;)
+        browseDivInner.classList.add(&quot;tablinks&quot;) 
+        browseDivInner.setAttribute(&quot;id&quot;, &quot;githubButton&quot;)
 
         var projectPicture = document.createElement(&quot;IMG&quot;)
         projectPicture.setAttribute(&quot;src&quot;, &apos;/defaultThumbnail.svg&apos;)
@@ -239,15 +241,7 @@ export default function GitHubModule(){
         var checkOut = document.createElement(&quot;div&quot;)
         browseDivInner.appendChild(checkOut)
         checkOut.innerHTML = &quot;Check out what others have made on Maslow Create&quot;
-        checkOut.setAttribute(&quot;style&quot;, &quot;justify-content:flex-start; display: inline; width: 70%; margin-top: 20px &quot;)
-
-        //Browse all button
-        var githubButton = document.createElement(&quot;button&quot;)
-        githubButton.appendChild(document.createTextNode(&quot;Browse Projects&quot;))
-        githubButton.classList.add(&quot;browseButton&quot;)
-        githubButton.classList.add(&quot;tablinks&quot;)    
-        githubButton.setAttribute(&quot;id&quot;, &quot;githubButton&quot;)
-        browseDivInner.appendChild(githubButton)
+        checkOut.setAttribute(&quot;style&quot;, &quot;align-self:center; width:70%&quot;)
 
         topBrowseDiv.appendChild(browseDiv) 
         topBrowseDiv.setAttribute(&quot;class&quot;, &quot;topBrowse&quot;)
@@ -327,9 +321,9 @@ export default function GitHubModule(){
         popup.appendChild(middleBrowseDiv2) */
 
         searchBar.addEventListener(&apos;keyup&apos;, (e) =&gt; {
-            var opt = document.getElementById(&quot;filterDrop&quot;)
-            var strUser = opt.options[opt.selectedIndex].textContent
-            this.loadProjectsBySearch(e, searchBar.value, strUser)
+            //var opt = document.getElementById(&quot;filterDrop&quot;)
+            //var strUser = opt.options[opt.selectedIndex].textContent
+            this.loadProjectsBySearch(e, searchBar.value, &quot;updated&quot;) // updated just sorts content by most recently updated
         })
         /*filterDiv.addEventListener(&quot;change&quot;, (e) =&gt; {
 
@@ -374,7 +368,7 @@ export default function GitHubModule(){
             myTab = &quot;yoursButton&quot;
             this.openTab(e, &quot;yoursButton&quot;)
         })
-        githubButton.addEventListener(&quot;click&quot;, (e) =&gt; {
+        browseDivInner.addEventListener(&quot;click&quot;, (e) =&gt; {
 
             mine.innerHTML = &quot;All Maslow Create Projects&quot;
             myTab = &quot;githubButton&quot;
@@ -527,14 +521,14 @@ export default function GitHubModule(){
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
-        /*
-        filterDiv.addEventListener(&quot;change&quot;, () =&gt; {
+        
+        /* filterDiv.addEventListener(&quot;change&quot;, () =&gt; {
 
             var opt = document.getElementById(&quot;filterDrop&quot;)
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
-        })
-        */
+        })*/
+        
 
         //header for project list style display
         var titlesDiv = document.createElement(&quot;div&quot;)
@@ -638,7 +632,7 @@ export default function GitHubModule(){
             //Load projects
             var query
             var owned
-            var sortMethod = sorting  //replace with dropdown input!
+            var sortMethod = sorting  //drop down input. temporarily inactive until we figure some better way to sort
             if(document.getElementsByClassName(&quot;tablinks active&quot;)[0].id == &quot;yoursButton&quot;){
                 owned = true
                 query = searchString + &apos; &apos; + &apos;fork:true user:&apos; + currentUser + &apos; topic:maslowcreate&apos;
@@ -835,7 +829,6 @@ export default function GitHubModule(){
         }
         else{
             document.getElementById(&quot;yoursButton&quot;).style.display = &quot;block&quot;
-            document.getElementById(tabName).style.display = &quot;block&quot;
             document.querySelector(&quot;.topBrowse&quot;).style.display = &quot;none&quot;
         }
         document.getElementById(myTab).className += &quot; active&quot;

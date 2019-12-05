@@ -93,7 +93,7 @@ export default class CutList extends Atom{
     constructor(values){
         super(values)
         
-        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
+        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;, false, true)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         /**

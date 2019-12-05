@@ -168,6 +168,15 @@ export default class AttachmentPoint {
          * @type {string}
          */
         this.type = &apos;output&apos;
+        
+        /** 
+         * This is a flag to indicate if the attachment point is of the primary type.
+         * Primary type inputs are of the form geometry.translate(input2, input3, input4) for example
+         * This value is useful for importing molecules into other formats.
+         * @type {boolean}
+         */
+        this.primary = false
+        
         /** 
          * The attachment point current value.
          * @type {number}
