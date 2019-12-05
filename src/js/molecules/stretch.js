@@ -13,7 +13,7 @@ export default class Stretch extends Atom {
         
         super(values)
         
-        this.addIO('input', 'geometry', this, 'geometry', '')
+        this.addIO('input', 'geometry', this, 'geometry', '', false, true)
         this.addIO('input', 'x', this, 'number', 1)
         this.addIO('input', 'y', this, 'number', 1)
         this.addIO('input', 'z', this, 'number', 1)

@@ -27,7 +27,7 @@ export default class CutAway extends Atom{
          */
         this.name = 'Cut Away'
         
-        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)

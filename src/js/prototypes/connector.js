@@ -156,6 +156,7 @@ export default class Connector {
             var object = {
                 ap1Name: this.attachmentPoint1.name,
                 ap2Name: this.attachmentPoint2.name,
+                ap2Primary: this.attachmentPoint2.primary,
                 ap1ID: this.attachmentPoint1.parentMolecule.uniqueID,
                 ap2ID: this.attachmentPoint2.parentMolecule.uniqueID
             }
