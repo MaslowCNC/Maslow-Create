@@ -155,7 +155,7 @@ export default class Molecule extends Atom{
             //Grab values from the inputs and push them out to the input objects
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
-                    if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
+                    if(atom.atomType == 'Input' && moleculeInput.name == atom.name && atom.output.connectors.length > 0){
                         if(atom.getOutput() != moleculeInput.getValue()){                //Don't update the input if it hasn't changed
                             atom.updateValue()
                         }
