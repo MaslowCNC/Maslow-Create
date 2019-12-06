@@ -156,8 +156,12 @@ export default class Molecule extends Atom{
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue()){                //Don't update the input if it hasn't changed
+                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){                //Don't update the input if it hasn't changed
                             atom.updateValue()
+                        }
+                        //Turn off processing if nothing needs to be done with this change
+                        else{
+                            this.processing = false
                         }
                     }
                 })
