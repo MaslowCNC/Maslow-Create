@@ -167,8 +167,8 @@ export default class Connector {
     /**
      * Passes a lock call to the connected input.
      */ 
-    lock(){
-        this.attachmentPoint2.lock()
+    waitOnComingInformation(){
+        this.attachmentPoint2.waitOnComingInformation()
     }
     
     /**
