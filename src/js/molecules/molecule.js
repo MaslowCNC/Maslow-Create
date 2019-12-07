@@ -450,7 +450,7 @@ export default class Molecule extends Atom{
             if(this.topLevel){
                 console.log("Beginning unlock")
                 this.backgroundClick()
-                //this.beginPropogation()
+                this.beginPropogation()
             }
         })
     }
@@ -513,7 +513,7 @@ export default class Molecule extends Atom{
                         })
                     }
                     else{
-                        atom.unlock()
+                        atom.beginPropogation()
                     }
                     
                     //Fake a click on the newly placed atom

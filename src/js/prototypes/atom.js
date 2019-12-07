@@ -594,6 +594,7 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.processing = true
+            console.log("processing " + this.name)
             this.clearAlert()
             
             const computeValue = async (values, key) => {
@@ -629,7 +630,6 @@ export default class Atom {
      * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
     beginPropogation(){
-        console.log("Beginning propagation")
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){
@@ -645,7 +645,6 @@ export default class Atom {
             }
         })
         if(go){     //Then we update the value
-            console.log("Beginning from: " + this.atomType)
             this.updateValue()
         }
     }
