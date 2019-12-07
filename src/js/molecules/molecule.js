@@ -144,7 +144,14 @@ export default class Molecule extends Atom{
      * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
+        
         if(this.inputs.every(x => x.ready)){
+            //console.log(this.name + " seen as ready")
+            
+            //console.trace()
+            //this.inputs.forEach(input => {
+            //    console.log(input.ready)
+            //})
             /** 
              * Flag that the current molecule is processing.
              * @type {boolean}
@@ -185,14 +192,15 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Unlock all of the atoms contained in this molecule
+     * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
      */ 
-    unlock(){
-        //Runs right after the loading process to unlock attachment points which have no connectors attached
-        super.unlock()
+    beginPropogation(){
+        //Run for this molecule
+        super.beginPropogation()
         
+        // Run for every atom in this molecule
         this.nodesOnTheScreen.forEach(node => {
-            node.unlock()
+            node.beginPropogation()
         })
     }
     
@@ -440,8 +448,9 @@ export default class Molecule extends Atom{
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
             if(this.topLevel){
-                this.unlock()
+                console.log("Beginning unlock")
                 this.backgroundClick()
+                //this.beginPropogation()
             }
         })
     }
@@ -578,7 +587,7 @@ export default class Molecule extends Atom{
         connector.attachmentPoint2.connectors.push(connector)
         
         //Update the connection
-        connector.propogate()
+        //connector.propogate()
     }
     
     /**
