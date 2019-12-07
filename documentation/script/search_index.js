@@ -1830,6 +1830,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#beginpropogation",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropogation",
+    "src/js/molecules/molecule.js~Molecule#beginPropogation",
+    "method"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#centercolor",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-centerColor",
     "src/js/molecules/molecule.js~Molecule#centerColor",
@@ -1984,12 +1990,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-topLevel",
     "src/js/molecules/molecule.js~Molecule#topLevel",
     "member"
-  ],
-  [
-    "src/js/molecules/molecule.js~molecule#unlock",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-unlock",
-    "src/js/molecules/molecule.js~Molecule#unlock",
-    "method"
   ],
   [
     "src/js/molecules/molecule.js~molecule#updatesidebar",
@@ -2580,6 +2580,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#beginpropogation",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation",
+    "src/js/prototypes/atom.js~Atom#beginPropogation",
+    "method"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#clearalert",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert",
     "src/js/prototypes/atom.js~Atom#clearAlert",
@@ -2802,12 +2808,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/prototypes/atom.js~atom#unlock",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-unlock",
-    "src/js/prototypes/atom.js~Atom#unlock",
-    "method"
-  ],
-  [
     "src/js/prototypes/atom.js~atom#update",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-update",
     "src/js/prototypes/atom.js~Atom#update",
@@ -2830,6 +2830,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-value",
     "src/js/prototypes/atom.js~Atom#value",
     "member"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#waitoncominginformation",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-waitOnComingInformation",
+    "src/js/prototypes/atom.js~Atom#waitOnComingInformation",
+    "method"
   ],
   [
     "src/js/prototypes/atom.js~atom#x",
@@ -2988,12 +2994,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/prototypes/attachmentpoint.js~attachmentpoint#lock",
-    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-lock",
-    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#lock",
-    "method"
-  ],
-  [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#offsetx",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-offsetX",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#offsetX",
@@ -3082,6 +3082,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-valueType",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#valueType",
     "member"
+  ],
+  [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#waitoncominginformation",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-waitOnComingInformation",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#waitOnComingInformation",
+    "method"
   ],
   [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#wasconnectionmade",
@@ -3192,12 +3198,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/prototypes/connector.js~connector#lock",
-    "class/src/js/prototypes/connector.js~Connector.html#instance-method-lock",
-    "src/js/prototypes/connector.js~Connector#lock",
-    "method"
-  ],
-  [
     "src/js/prototypes/connector.js~connector#propogate",
     "class/src/js/prototypes/connector.js~Connector.html#instance-method-propogate",
     "src/js/prototypes/connector.js~Connector#propogate",
@@ -3231,6 +3231,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/connector.js~connector#update",
     "class/src/js/prototypes/connector.js~Connector.html#instance-method-update",
     "src/js/prototypes/connector.js~Connector#update",
+    "method"
+  ],
+  [
+    "src/js/prototypes/connector.js~connector#waitoncominginformation",
+    "class/src/js/prototypes/connector.js~Connector.html#instance-method-waitOnComingInformation",
+    "src/js/prototypes/connector.js~Connector#waitOnComingInformation",
     "method"
   ],
   [

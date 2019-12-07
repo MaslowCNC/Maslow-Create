@@ -262,6 +262,7 @@ export default class AttachmentPoint {
                 else{
                     GlobalVariables.c.fillStyle = bubbleColor
                 }
+                
                 if(this.radius == this.defaultRadius){
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2)   
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false)
@@ -304,7 +305,11 @@ export default class AttachmentPoint {
         }
  
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillStyle = this.parentMolecule.color
+        if(this.ready){
+            GlobalVariables.c.fillStyle = this.parentMolecule.color
+        }else{
+            GlobalVariables.c.fillStyle = &apos;#6ba4ff&apos;
+        }
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
@@ -499,16 +504,16 @@ export default class AttachmentPoint {
     /**
      * Passes a lock command to the parent molecule, or to the attached connector depending on input/output.
      */ 
-    lock(){
+    waitOnComingInformation(){
         if(this.type == &apos;output&apos;){
             this.connectors.forEach(connector =&gt; {
-                connector.lock()
+                connector.waitOnComingInformation()
             })
         }
         else{
             this.ready = false
             if(this.parentMolecule.output){
-                this.parentMolecule.output.lock()
+                this.parentMolecule.output.waitOnComingInformation()
             }
         }
     }

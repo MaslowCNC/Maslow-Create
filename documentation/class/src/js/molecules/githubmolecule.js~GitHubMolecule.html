@@ -999,6 +999,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-clearAlert">clearAlert</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
@@ -1666,35 +1695,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-unlock">unlock</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-update">update</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
@@ -1760,6 +1760,35 @@
         
         
         <div data-ice="description"><p>Set&apos;s the output value and shows the atom output on the 3D view.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-waitOnComingInformation">waitOnComingInformation</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>This locks all the inputs downstream of this which will need to wait for it to update</p>
 </div>
       </div>
     </td>
@@ -1940,8 +1969,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Flag that the current molecule is processing.</p>
-</div>
+        
       </div>
     </td>
     <td>
@@ -2086,6 +2114,35 @@
         
         
         <div data-ice="description"><p>Handle a background click (a click which doesn&apos;t land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for</p>
 </div>
       </div>
     </td>
@@ -2550,35 +2607,6 @@
         
         
         <div data-ice="description"><p>Generates and returns a JSON represntation of this molecule and all of its children.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html#instance-method-unlock">unlock</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Unlock all of the atoms contained in this molecule</p>
 </div>
       </div>
     </td>

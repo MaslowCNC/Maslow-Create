@@ -236,7 +236,7 @@ export default class Input extends Atom {
             if(input.name == this.name){        //If we have found the matching input
                 this.value = input.getValue()
                 
-                this.output.lock()              //Lock all of the dependents
+                this.output.waitOnComingInformation()              //Lock all of the dependents
                 this.output.setValue(this.value)
             }
         })
