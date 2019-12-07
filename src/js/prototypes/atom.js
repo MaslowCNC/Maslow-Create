@@ -576,7 +576,7 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.ready = true
-            this.output.lock() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. This prevents 
+            this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. This prevents...what? What does this do?
             this.output.setValue(this.value)
         }
     }
@@ -595,6 +595,7 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.processing = true
+            
             this.clearAlert()
             
             const computeValue = async (values, key) => {
@@ -620,10 +621,16 @@ export default class Atom {
     }
     
     /**
+     * This locks all the inputs downstream of this which will need to wait for it to update
+     */
+    waitOnComingInformation(){
+        this.output.waitOnComingInformation()
+    }
+    
+    /**
      * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
-    unlock(){
-        
+    beginPropogation(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){

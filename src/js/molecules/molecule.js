@@ -144,24 +144,19 @@ export default class Molecule extends Atom{
      * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
+        
         if(this.inputs.every(x => x.ready)){
-            /** 
-             * Flag that the current molecule is processing.
-             * @type {boolean}
-             */
-            this.processing = true
+            
             this.clearAlert()
             
             //Grab values from the inputs and push them out to the input objects
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){                //Don't update the input if it hasn't changed
+                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){//Don't update the input if it hasn't changed
+                            
+                            this.processing = true
                             atom.updateValue()
-                        }
-                        //Turn off processing if nothing needs to be done with this change
-                        else{
-                            this.processing = false
                         }
                     }
                 })
@@ -185,14 +180,15 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Unlock all of the atoms contained in this molecule
+     * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
      */ 
-    unlock(){
-        //Runs right after the loading process to unlock attachment points which have no connectors attached
-        super.unlock()
+    beginPropogation(){
+        //Run for this molecule
+        super.beginPropogation()
         
+        // Run for every atom in this molecule
         this.nodesOnTheScreen.forEach(node => {
-            node.unlock()
+            node.beginPropogation()
         })
     }
     
@@ -440,8 +436,8 @@ export default class Molecule extends Atom{
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
             if(this.topLevel){
-                this.unlock()
                 this.backgroundClick()
+                this.beginPropogation()
             }
         })
     }
@@ -500,11 +496,11 @@ export default class Molecule extends Atom{
                     //Make it spawn ready to update right away
                     if(promise != null){
                         promise.then( ()=> {
-                            atom.unlock()
+                            atom.beginPropogation()
                         })
                     }
                     else{
-                        atom.unlock()
+                        atom.beginPropogation()
                     }
                     
                     //Fake a click on the newly placed atom
@@ -578,7 +574,7 @@ export default class Molecule extends Atom{
         connector.attachmentPoint2.connectors.push(connector)
         
         //Update the connection
-        connector.propogate()
+        //connector.propogate()
     }
     
     /**
