@@ -79,7 +79,7 @@ export default class Molecule extends Atom{
                         parent: this,
                         name: node.name,
                         atomType: 'Input'
-                    }, null, GlobalVariables.availableTypes)
+                    }, null, GlobalVariables.availableTypes, true)
                 }
             })
         } 
@@ -493,6 +493,12 @@ export default class Molecule extends Atom{
                 this.nodesOnTheScreen.push(atom)
                 
                 if(unlock){
+                    
+                    //Make this molecule spawn with all of it's parent's inputs
+                    if(atom.atomType == 'Molecule'){ //Not GitHubMolecule
+                        atom.copyInputsFromParent()
+                    }
+                    
                     //Make it spawn ready to update right away
                     if(promise != null){
                         promise.then( ()=> {
@@ -516,10 +522,6 @@ export default class Molecule extends Atom{
                     document.getElementById('flow-canvas').dispatchEvent(downEvt)
                     document.getElementById('flow-canvas').dispatchEvent(upEvt)
                     
-                    //Make this moleclue spawn with all of it's parent's inputs
-                    if(atom.atomType == 'Molecule'){
-                        atom.copyInputsFromParent()
-                    }
                 }
             }
         }
