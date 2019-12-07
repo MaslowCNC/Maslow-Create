@@ -34,7 +34,6 @@ export default class Difference extends Atom{
      * Pass the input values to the worker thread to do the actual processing.
      */ 
     updateValue(){
-        console.log("Difference update value ran")
         try{
             const values = [this.findIOValue('geometry1'), this.findIOValue('geometry2')]
             

@@ -147,7 +147,6 @@ export default class Molecule extends Atom{
         
         if(this.inputs.every(x => x.ready)){
             
-            console.log(this.name + " should be processing")
             this.clearAlert()
             
             //Grab values from the inputs and push them out to the input objects
@@ -437,7 +436,6 @@ export default class Molecule extends Atom{
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
             if(this.topLevel){
-                console.log("Beginning unlock")
                 this.backgroundClick()
                 this.beginPropogation()
             }
