@@ -146,29 +146,18 @@ export default class Molecule extends Atom{
     updateValue(){
         
         if(this.inputs.every(x => x.ready)){
-            //console.log(this.name + " seen as ready")
             
-            //console.trace()
-            //this.inputs.forEach(input => {
-            //    console.log(input.ready)
-            //})
-            /** 
-             * Flag that the current molecule is processing.
-             * @type {boolean}
-             */
-            this.processing = true
+            console.log(this.name + " should be processing")
             this.clearAlert()
             
             //Grab values from the inputs and push them out to the input objects
             this.inputs.forEach(moleculeInput => {
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){                //Don't update the input if it hasn't changed
+                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){//Don't update the input if it hasn't changed
+                            
+                            this.processing = true
                             atom.updateValue()
-                        }
-                        //Turn off processing if nothing needs to be done with this change
-                        else{
-                            this.processing = false
                         }
                     }
                 })
@@ -509,7 +498,7 @@ export default class Molecule extends Atom{
                     //Make it spawn ready to update right away
                     if(promise != null){
                         promise.then( ()=> {
-                            atom.unlock()
+                            atom.beginPropogation()
                         })
                     }
                     else{
