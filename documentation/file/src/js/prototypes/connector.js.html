@@ -133,12 +133,12 @@ export default class Connector {
          * The starting X cordinate for the connector. Should really be referenced to attachmentPoint1.
          * @type {number}
          */
-        this.startX = this.parentMolecule.outputX
+        this.startX = this.attachmentPoint1.parentMolecule.outputX
         /** 
          * The starting Y cordinate for the connector. Should really be referenced to attachmentPoint1.
          * @type {number}
          */
-        this.startY = this.parentMolecule.y
+        this.startY = this.attachmentPoint1.parentMolecule.y
     }
     
     /**
