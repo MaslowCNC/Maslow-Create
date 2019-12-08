@@ -533,50 +533,35 @@ export default class Molecule extends Atom{
      * @param {object} connectorObj - An object represntation of the connector specifying its inputs and outputs.
      */
     placeConnector(connectorObj){
-        var connector
-        var cp1NotFound = true
-        var cp2NotFound = true
-        var ap2
         
-        try{
-            this.nodesOnTheScreen.forEach(atom => {
-                //Find the output node
-                if (atom.uniqueID == connectorObj.ap1ID){
-                    connector = new Connector({
-                        atomType: 'Connector',
-                        attachmentPoint1: atom.output,
-                        parentMolecule:  atom
-                    })
-                    cp1NotFound = false
-                }
-                //Find the input node
-                if (atom.uniqueID == connectorObj.ap2ID){
-                    atom.inputs.forEach(child => {
-                        if(child.name == connectorObj.ap2Name && child.type == 'input' && child.connectors.length == 0){
-                            cp2NotFound = false
-                            ap2 = child
-                        }
-                    })
-                }
+        var outputAttachmentPoint = false
+        var inputAttachmentPoint = false
+        
+        this.nodesOnTheScreen.forEach(atom => {             //Check each atom on the screen
+            if (atom.uniqueID == connectorObj.ap1ID){           //When we have found the output atom
+                outputAttachmentPoint = atom.output
+            }
+            if (atom.uniqueID == connectorObj.ap2ID){           //When we have found the input atom
+                atom.inputs.forEach(input => {                  //Check each of its inputs
+                    if(input.name == connectorObj.ap2Name){
+                        inputAttachmentPoint = input                //Until we find the one with the right name
+                    }
+                })
+            }
+        })
+        
+        if(outputAttachmentPoint && inputAttachmentPoint){             //If we have found the output and input
+            var connector = new Connector({
+                atomType: 'Connector',
+                attachmentPoint1: outputAttachmentPoint,
+                attachmentPoint2: inputAttachmentPoint,
             })
+            connector.attachmentPoint1.connectors.push(connector)   //Give input and output references to the connector (this should probably happen in the connector constructor)
+            connector.attachmentPoint2.connectors.push(connector)
         }
-        catch(err){
-            console.warn('Unable to create connector')
+        else{
+            console.warn("Unable to place connector")
         }
-        
-        if(cp1NotFound || cp2NotFound){
-            console.warn('Unable to create connector')
-            return
-        }
-        
-        connector.attachmentPoint2 = ap2
-        
-        //Store the connector
-        connector.attachmentPoint1.connectors.push(connector)
-        connector.attachmentPoint2.connectors.push(connector)
-        
-        //Update the connection
-        //connector.propogate()
     }
     
     /**
