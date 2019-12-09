@@ -78,7 +78,8 @@ export default class Molecule extends Atom{
                         y: node.y,
                         parent: this,
                         name: node.name,
-                        atomType: 'Input'
+                        atomType: 'Input',
+                        uniqueID: GlobalVariables.generateUniqueID()
                     }, null, GlobalVariables.availableTypes, true)
                 }
             })
