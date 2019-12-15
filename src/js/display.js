@@ -311,6 +311,13 @@ export default class Display {
         this.controls.dynamicDampingFactor = 0.1
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
+        this.controls.addEventListener('change', () => { this.controls.addEventListener('change', () => { 
+            const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+            const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+            const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+            this.grid1.scale.setScalar(gridZoom)
+            this.grid1.material.opacity = Math.max((1 - gridFract) * 1) 
+        }) })
         //
         /** 
          * The threejs scene to which things should be added to show up on the display.
@@ -533,14 +540,18 @@ export default class Display {
             zoomed out farther than initial grid tier*/ 
         this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
         // Creates initial grid plane
-        this.makeGrid()
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+        const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+        this.grid1.scale.setScalar(gridZoom)
+        this.grid1.material.opacity =  Math.max((1 - gridFract) * 1) 
     }
 
     /**
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
-        var size = 100
+        var size = 1000
         var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )
         grid.geometry.rotateX( Math.PI / 2 )
@@ -696,14 +707,7 @@ export default class Display {
     /**
      * Runs regularly to update the display.
      */ 
-    render() {
-
-        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
-        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
-        const gridZoom = Math.pow(10, Math.floor(gridLevel))    
-
-        this.grid1.scale.setScalar(gridZoom)
-        this.grid1.material.opacity = Math.max((1 - gridFract) * 1)
+    render() {  
 
         this.renderer.render( this.scene, this.camera )
     }
