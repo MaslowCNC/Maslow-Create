@@ -36,7 +36,7 @@ export default class Input extends Atom {
          * This atom's radius for drawing
          * @type {string}
          */
-        this.radius = 15
+        this.radius = 20
         
         /** 
          * This atom's old name, used during name changes
@@ -110,9 +110,9 @@ export default class Input extends Atom {
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.beginPath()
         GlobalVariables.c.moveTo(this.x - this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineTo(this.x - 0, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x + 0 + 10, this.y)
+        GlobalVariables.c.lineTo(this.x + 0, this.y - this.height/2)
         GlobalVariables.c.lineTo(this.x - this.radius, this.y - this.height/2)
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
@@ -120,7 +120,7 @@ export default class Input extends Atom {
         GlobalVariables.c.stroke()
         
         //Snap the inputs to the far right side
-        this.x = this.radius
+        this.x = this.radius + 10
     }
     
     /**
