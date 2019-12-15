@@ -242,7 +242,7 @@ export default class AttachmentPoint {
                 this.offsetX = this.parentMolecule.radius
             }
             else{
-                this.offsetX = -2* this.parentMolecule.radius
+                this.offsetX = -1* this.parentMolecule.radius
             }
         }
     }
