@@ -13,7 +13,7 @@ export default class Rotate extends Atom {
         
         super(values)
         
-        this.addIO('input', 'geometry', this, 'geometry', '')
+        this.addIO('input', 'geometry', this, 'geometry', '', false, true)
         this.addIO('input', 'x-axis degrees', this, 'number', 0)
         this.addIO('input', 'y-axis degrees', this, 'number', 0)
         this.addIO('input', 'z-axis degrees', this, 'number', 0)

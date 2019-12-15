@@ -53,12 +53,12 @@ export default class Connector {
          * The starting X cordinate for the connector. Should really be referenced to attachmentPoint1.
          * @type {number}
          */
-        this.startX = this.parentMolecule.outputX
+        this.startX = this.attachmentPoint1.parentMolecule.outputX
         /** 
          * The starting Y cordinate for the connector. Should really be referenced to attachmentPoint1.
          * @type {number}
          */
-        this.startY = this.parentMolecule.y
+        this.startY = this.attachmentPoint1.parentMolecule.y
     }
     
     /**
@@ -156,6 +156,7 @@ export default class Connector {
             var object = {
                 ap1Name: this.attachmentPoint1.name,
                 ap2Name: this.attachmentPoint2.name,
+                ap2Primary: this.attachmentPoint2.primary,
                 ap1ID: this.attachmentPoint1.parentMolecule.uniqueID,
                 ap2ID: this.attachmentPoint2.parentMolecule.uniqueID
             }
@@ -166,8 +167,8 @@ export default class Connector {
     /**
      * Passes a lock call to the connected input.
      */ 
-    lock(){
-        this.attachmentPoint2.lock()
+    waitOnComingInformation(){
+        this.attachmentPoint2.waitOnComingInformation()
     }
     
     /**

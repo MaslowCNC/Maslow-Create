@@ -88,6 +88,15 @@ export default class AttachmentPoint {
          * @type {string}
          */
         this.type = 'output'
+        
+        /** 
+         * This is a flag to indicate if the attachment point is of the primary type.
+         * Primary type inputs are of the form geometry.translate(input2, input3, input4) for example
+         * This value is useful for importing molecules into other formats.
+         * @type {boolean}
+         */
+        this.primary = false
+        
         /** 
          * The attachment point current value.
          * @type {number}
@@ -120,7 +129,6 @@ export default class AttachmentPoint {
              */
             this[key] = values[key]
         }
-        
         this.clickMove(0,0) //trigger a refresh to get all the current values
     }
     
@@ -174,6 +182,7 @@ export default class AttachmentPoint {
                 else{
                     GlobalVariables.c.fillStyle = bubbleColor
                 }
+                
                 if(this.radius == this.defaultRadius){
                     GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2)   
                     GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false)
@@ -216,7 +225,11 @@ export default class AttachmentPoint {
         }
  
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillStyle = this.parentMolecule.color
+        if(this.ready){
+            GlobalVariables.c.fillStyle = this.parentMolecule.color
+        }else{
+            GlobalVariables.c.fillStyle = '#6ba4ff'
+        }
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
@@ -411,16 +424,16 @@ export default class AttachmentPoint {
     /**
      * Passes a lock command to the parent molecule, or to the attached connector depending on input/output.
      */ 
-    lock(){
+    waitOnComingInformation(){
         if(this.type == 'output'){
             this.connectors.forEach(connector => {
-                connector.lock()
+                connector.waitOnComingInformation()
             })
         }
         else{
             this.ready = false
             if(this.parentMolecule.output){
-                this.parentMolecule.output.lock()
+                this.parentMolecule.output.waitOnComingInformation()
             }
         }
     }
