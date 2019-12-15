@@ -110,9 +110,9 @@ export default class Input extends Atom {
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.beginPath()
         GlobalVariables.c.moveTo(this.x - this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x - 0, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + 0 + 10, this.y)
-        GlobalVariables.c.lineTo(this.x + 0, this.y - this.height/2)
+        GlobalVariables.c.lineTo(this.x, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x + 10, this.y)
+        GlobalVariables.c.lineTo(this.x, this.y - this.height/2)
         GlobalVariables.c.lineTo(this.x - this.radius, this.y - this.height/2)
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
