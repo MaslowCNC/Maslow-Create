@@ -202,17 +202,23 @@ input:checked + .sliderAtom:before {
     border: 1px solid #767b7b;
     border-radius: 50%;
 }
-
-#viewer_bar{
+ #viewer_bar, .arrow-up{
   color:black;
   float:right;
   position:relative;
-  height:35px;
-  
+  height:35px; 
   bottom:35px;
   left:0px;
   font-size:.7em;
-  margin-right:5%;
+}
+.arrow-up{
+  width: 0; 
+  height: 0; 
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent; 
+  border-right:10px solid #e28dde; 
+  margin-right:5px;
+  bottom:30px;
 }
 
 #viewer_bar p, #viewer_bar div{
@@ -221,10 +227,8 @@ input:checked + .sliderAtom:before {
   padding:5px;
 }
 
-.slideup, .slidedown {
-                     
-            overflow-y: hidden;
-            
+.slideup, .slidedown {           
+        overflow-y: hidden;    
         }
         .slideup {    
             transform: translateY(0%);
