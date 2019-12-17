@@ -217,7 +217,7 @@ input:checked + .sliderAtom:before {
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent; 
   border-right:10px solid #e28dde; 
-  margin-right:5px;
+  margin-right:2%;
   bottom:30px;
 }
 
