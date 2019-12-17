@@ -346,15 +346,50 @@ export default class Display {
         
         this.onWindowResize()
 
+         let viewerBar = document.querySelector('#viewer_bar')
+
+        
         this.targetDiv.addEventListener('mousedown', () => {
-            let viewerBar = document.querySelector('#viewer_bar')
 
             if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+                this.checkBoxes()   
+            }
+        })
 
-                //viewerBar.removeChild(viewerBar.firstChild)
+        viewerBar.addEventListener('mouseenter', () =>{
+                viewerBar.classList.remove("slidedown")
+                viewerBar.classList.add('slideup')   
+                })
+        viewerBar.addEventListener('mouseleave', () =>{
+                viewerBar.classList.remove("slideup")
+                viewerBar.classList.add('slidedown')   
+                })
+
+        
+        // This event listener adjusts the gridScale when you zoom in and out
+        
+        this.targetDiv.addEventListener('wheel', () =>{ 
+            
+            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
+                //this.scene.remove(this.plane)
+                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
+                this.resizeGrid()
+            }
+            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
+                //this.scene.remove(this.plane)
+                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
+                this.resizeGrid()
+            }    
+        })
+    }
+    
+    checkBoxes(){
+        let viewerBar = document.querySelector('#viewer_bar')
+         //viewerBar.removeChild(viewerBar.firstChild)
                 //Set viewer bar to only appear when other elements are created
-                viewerBar.setAttribute('style', 'background-color:white;')
+                viewerBar.classList.add('slidedown')
                 
+
                 //Grid display html element
                 var gridDiv = document.createElement('div')
                 viewerBar.appendChild(gridDiv)
@@ -454,26 +489,7 @@ export default class Display {
                         this.wireDisplay = false
                     }
                 })
-            }
-        })
-        
-        // This event listener adjusts the gridScale when you zoom in and out
-        
-        this.targetDiv.addEventListener('wheel', () =>{ 
-            
-            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }
-            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }    
-        })
     }
-    
     /**
      * This function is intended to calculate the base log of two numbers and round it to an integer
      * @param {number,number}

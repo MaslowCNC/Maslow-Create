@@ -191,7 +191,7 @@ input:checked + .sliderAtom:before {
 }
 
 .top_buttons{ 
-    background-color: whitesmoke;
+    background-color: gray;
     position: fixed;
     top: 10px;
     right: 10px;
@@ -221,39 +221,22 @@ input:checked + .sliderAtom:before {
   padding:5px;
 }
 
-#left_bar{
-  position:absolute;
-  height:100%;
-  width:5px; 
-  top:0px;
-  left:0px;
-  background: #636262
-}
+.slideup, .slidedown {
+                     
+            overflow-y: hidden;
+            
+        }
+        .slideup {    
+            transform: translateY(0%);
+            transition: .4s ease-in-out;             
+            opacity: 1      
+        }  
+        .slidedown {    
+           transform: translateY(50%);
+           opacity: 0               
+        }    
 
-#right_bar{
-  position:absolute;
-  height:100%;
-  width:5px; 
-  top:0px;
-  right:0px;
-  background: #636262
-}
 
-#bottom_bar{
-  position:absolute;
-  height:5px;
-  width:100%; 
-  bottom:0px;
-  left:0px;
-  background: #636262
-}
-
-#middle_bar{
-  position: absolute;
-  height:5px;
-  width:100%; 
-  background: #2C2C2C;
-}
 
 #flow-canvas{
   margin-top: 0;
