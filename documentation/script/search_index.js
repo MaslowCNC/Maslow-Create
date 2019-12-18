@@ -60,12 +60,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/molecules/cutaway.js~cutaway",
-    "class/src/js/molecules/cutaway.js~CutAway.html",
-    "<span>CutAway</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/cutaway.js</span>",
-    "class"
-  ],
-  [
     "canvas-template/src/js/molecules/cutlayout.js~cutlayout",
     "class/src/js/molecules/cutlayout.js~CutLayout.html",
     "<span>CutLayout</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/cutlayout.js</span>",
@@ -225,12 +219,6 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/molecules/translate.js~translate",
     "class/src/js/molecules/translate.js~Translate.html",
     "<span>Translate</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/translate.js</span>",
-    "class"
-  ],
-  [
-    "canvas-template/src/js/molecules/union.js~union",
-    "class/src/js/molecules/union.js~Union.html",
-    "<span>Union</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/union.js</span>",
     "class"
   ],
   [
@@ -672,10 +660,22 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/display.js~display#grid1",
+    "class/src/js/display.js~Display.html#instance-member-grid1",
+    "src/js/display.js~Display#grid1",
+    "member"
+  ],
+  [
     "src/js/display.js~display#gridscale",
     "class/src/js/display.js~Display.html#instance-member-gridScale",
     "src/js/display.js~Display#gridScale",
     "member"
+  ],
+  [
+    "src/js/display.js~display#makegrid",
+    "class/src/js/display.js~Display.html#instance-method-makeGrid",
+    "src/js/display.js~Display#makeGrid",
+    "method"
   ],
   [
     "src/js/display.js~display#makematerial",
@@ -702,10 +702,10 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/display.js~display#plane",
-    "class/src/js/display.js~Display.html#instance-member-plane",
-    "src/js/display.js~Display#plane",
-    "member"
+    "src/js/display.js~display#removegrid",
+    "class/src/js/display.js~Display.html#instance-method-removeGrid",
+    "src/js/display.js~Display#removeGrid",
+    "method"
   ],
   [
     "src/js/display.js~display#render",
@@ -718,12 +718,6 @@ window.esdocSearchIndex = [
     "class/src/js/display.js~Display.html#instance-member-renderer",
     "src/js/display.js~Display#renderer",
     "member"
-  ],
-  [
-    "src/js/display.js~display#resizegrid",
-    "class/src/js/display.js~Display.html#instance-method-resizeGrid",
-    "src/js/display.js~Display#resizeGrid",
-    "method"
   ],
   [
     "src/js/display.js~display#scene",
@@ -1299,42 +1293,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/constant.js~constant#updatevalue",
     "class/src/js/molecules/constant.js~Constant.html#instance-method-updateValue",
     "src/js/molecules/constant.js~Constant#updateValue",
-    "method"
-  ],
-  [
-    "src/js/molecules/cutaway.js",
-    "file/src/js/molecules/cutaway.js.html",
-    "src/js/molecules/cutaway.js",
-    "file"
-  ],
-  [
-    "src/js/molecules/cutaway.js~cutaway#atomtype",
-    "class/src/js/molecules/cutaway.js~CutAway.html#instance-member-atomType",
-    "src/js/molecules/cutaway.js~CutAway#atomType",
-    "member"
-  ],
-  [
-    "src/js/molecules/cutaway.js~cutaway#constructor",
-    "class/src/js/molecules/cutaway.js~CutAway.html#instance-constructor-constructor",
-    "src/js/molecules/cutaway.js~CutAway#constructor",
-    "method"
-  ],
-  [
-    "src/js/molecules/cutaway.js~cutaway#name",
-    "class/src/js/molecules/cutaway.js~CutAway.html#instance-member-name",
-    "src/js/molecules/cutaway.js~CutAway#name",
-    "member"
-  ],
-  [
-    "src/js/molecules/cutaway.js~cutaway#type",
-    "class/src/js/molecules/cutaway.js~CutAway.html#instance-member-type",
-    "src/js/molecules/cutaway.js~CutAway#type",
-    "member"
-  ],
-  [
-    "src/js/molecules/cutaway.js~cutaway#updatevalue",
-    "class/src/js/molecules/cutaway.js~CutAway.html#instance-method-updateValue",
-    "src/js/molecules/cutaway.js~CutAway#updateValue",
     "method"
   ],
   [
@@ -2517,36 +2475,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/translate.js~translate#updatevalue",
     "class/src/js/molecules/translate.js~Translate.html#instance-method-updateValue",
     "src/js/molecules/translate.js~Translate#updateValue",
-    "method"
-  ],
-  [
-    "src/js/molecules/union.js",
-    "file/src/js/molecules/union.js.html",
-    "src/js/molecules/union.js",
-    "file"
-  ],
-  [
-    "src/js/molecules/union.js~union#atomtype",
-    "class/src/js/molecules/union.js~Union.html#instance-member-atomType",
-    "src/js/molecules/union.js~Union#atomType",
-    "member"
-  ],
-  [
-    "src/js/molecules/union.js~union#constructor",
-    "class/src/js/molecules/union.js~Union.html#instance-constructor-constructor",
-    "src/js/molecules/union.js~Union#constructor",
-    "method"
-  ],
-  [
-    "src/js/molecules/union.js~union#name",
-    "class/src/js/molecules/union.js~Union.html#instance-member-name",
-    "src/js/molecules/union.js~Union#name",
-    "member"
-  ],
-  [
-    "src/js/molecules/union.js~union#updatevalue",
-    "class/src/js/molecules/union.js~Union.html#instance-method-updateValue",
-    "src/js/molecules/union.js~Union#updateValue",
     "method"
   ],
   [

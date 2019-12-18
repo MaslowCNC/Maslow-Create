@@ -1,7 +1,7 @@
 {
-  "coverage": "98.71%",
-  "expectCount": 468,
-  "actualCount": 462,
+  "coverage": "98.47%",
+  "expectCount": 459,
+  "actualCount": 452,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -9,8 +9,8 @@
       "undocumentLines": []
     },
     "src/js/alwaysOneFreeInput.js": {
-      "expectCount": 3,
-      "actualCount": 3,
+      "expectCount": 4,
+      "actualCount": 4,
       "undocumentLines": []
     },
     "src/js/BOM.js": {
@@ -19,11 +19,12 @@
       "undocumentLines": []
     },
     "src/js/display.js": {
-      "expectCount": 30,
+      "expectCount": 31,
       "actualCount": 28,
       "undocumentLines": [
         255,
-        297
+        297,
+        389
       ]
     },
     "src/js/githubOauth.js": {
@@ -35,7 +36,7 @@
       "expectCount": 17,
       "actualCount": 16,
       "undocumentLines": [
-        65
+        63
       ]
     },
     "src/js/localmenu.js": {
@@ -71,11 +72,6 @@
     "src/js/molecules/constant.js": {
       "expectCount": 14,
       "actualCount": 14,
-      "undocumentLines": []
-    },
-    "src/js/molecules/cutaway.js": {
-      "expectCount": 6,
-      "actualCount": 6,
       "undocumentLines": []
     },
     "src/js/molecules/cutlayout.js": {
@@ -195,11 +191,6 @@
       "undocumentLines": []
     },
     "src/js/molecules/translate.js": {
-      "expectCount": 5,
-      "actualCount": 5,
-      "undocumentLines": []
-    },
-    "src/js/molecules/union.js": {
       "expectCount": 5,
       "actualCount": 5,
       "undocumentLines": []

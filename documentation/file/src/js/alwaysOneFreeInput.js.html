@@ -45,7 +45,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -69,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -78,8 +76,7 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/alwaysOneFreeInput.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./globalvariables.js&apos;
-//This module is used to create atoms which do not have a set number of inputs, but instead always have one input free.
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">//This module is used to create atoms which do not have a set number of inputs, but instead always have one input free.
 
 /**
  * Computes the number of inputs which are curently available on a target atom.
@@ -111,6 +108,18 @@ const deleteEmptyPort = function(target){
 }
 
 /**
+ * Finds the highest number input currently used by this atom
+ * @param {object} target - The atom which should be inspected for inputs.
+ */ 
+const findHighestInput = function(target){
+    var maxInput = 0
+    target.inputs.forEach( input =&gt; {
+        maxInput = Math.max(maxInput, parseInt(input.name.match(/\d+$/)[0]))
+    })
+    return maxInput
+}
+
+/**
  * Adds or deletes inputs from a target atom until there is exactly one input available.
  * @param {object} target - The atom which should have it&apos;s number of inputs adjusted.
  */ 
@@ -118,7 +127,8 @@ export const addOrDeletePorts = (target) =&gt; {
     
     //Add or delete ports as needed
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available
-        target.addIO(&apos;input&apos;, &apos;3D shape &apos; + GlobalVariables.generateUniqueID(), target, &apos;geometry&apos;, &apos;&apos;, true)
+        findHighestInput(target)
+        target.addIO(&apos;input&apos;, &apos;3D shape &apos; + (findHighestInput(target) + 1), target, &apos;geometry&apos;, &apos;&apos;, true)
     }
     if(howManyInputPortsAvailable(target) &gt;= 2){  //We need to remove the empty port
         deleteEmptyPort(target)

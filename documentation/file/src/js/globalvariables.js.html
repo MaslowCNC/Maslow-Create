@@ -45,7 +45,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -69,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -80,7 +78,6 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/globalvariables.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { create, all }  from &apos;mathjs&apos;
 import Assembly         from &apos;./molecules/assembly.js&apos;
-import CutAway          from &apos;./molecules/cutaway.js&apos;
 import CutList          from &apos;./molecules/cutlist.js&apos;
 import Circle           from &apos;./molecules/circle.js&apos;
 import Color            from &apos;./molecules/color.js&apos;
@@ -94,7 +91,6 @@ import Extrude          from &apos;./molecules/extrude.js&apos;
 import Scale            from &apos;./molecules/scale.js&apos;
 import Stl              from &apos;./molecules/stl.js&apos;
 import Svg              from &apos;./molecules/svg.js&apos;
-import Union            from &apos;./molecules/union.js&apos;
 import Intersection     from &apos;./molecules/intersection.js&apos;
 import Difference       from &apos;./molecules/difference.js&apos;
 import Constant         from &apos;./molecules/constant.js&apos;
@@ -150,7 +146,6 @@ class GlobalVariables{
         this.availableTypes = {
 
             intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;, atomCategory: &apos;Interactions&apos;},
-            union:              {creator: Union, atomType: &apos;Union&apos;, atomCategory: &apos;Interactions&apos;},
             difference:         {creator: Difference, atomType: &apos;Difference&apos;, atomCategory: &apos;Interactions&apos;},
             assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;, atomCategory: &apos;Interactions&apos;},
             shirinkwrap:        {creator: ShrinkWrap, atomType: &apos;ShrinkWrap&apos;, atomCategory: &apos;Interactions&apos;},
@@ -160,7 +155,6 @@ class GlobalVariables{
             addBOMTag:          {creator: AddBOMTag, atomType: &apos;Add BOM Tag&apos;, atomCategory: &apos;Properties&apos;},
             color:              {creator: Color, atomType: &apos;Color&apos;, atomCategory: &apos;Properties&apos;},
             tag:                {creator: Tag, atomType: &apos;Tag&apos;, atomCategory: &apos;Properties&apos;},
-            cutAway:            {creator: CutAway, atomType: &apos;CutAway&apos;, atomCategory: &apos;Properties&apos;},
             
             regularPolygon:     {creator: RegularPolygon, atomType: &apos;RegularPolygon&apos;, atomCategory: &apos;Shapes&apos;},
             costant:            {creator: Constant, atomType: &apos;Constant&apos;, atomCategory: &apos;Shapes&apos;},

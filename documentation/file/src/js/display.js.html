@@ -45,7 +45,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -69,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -391,6 +389,13 @@ export default class Display {
         this.controls.dynamicDampingFactor = 0.1
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener(&apos;change&apos;, () =&gt; { this.render() })
+        this.controls.addEventListener(&apos;change&apos;, () =&gt; { this.controls.addEventListener(&apos;change&apos;, () =&gt; { 
+            const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+            const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+            const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+            this.grid1.scale.setScalar(gridZoom)
+            this.grid1.material.opacity = Math.max((1 - gridFract) * 1) 
+        }) })
         //
         /** 
          * The threejs scene to which things should be added to show up on the display.
@@ -459,12 +464,11 @@ export default class Display {
 
                 gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
                     if(event.target.checked){
-                        this.scene.add( this.plane )
+                        this.grid1= this.makeGrid()
                         this.displayGrid = true
-
                     }
                     else{
-                        this.scene.remove(this.plane)
+                        this.removeGrid(this.grid1)
                         this.displayGrid = false
                     }
                 })
@@ -537,21 +541,7 @@ export default class Display {
             }
         })
         
-        // This event listener adjusts the gridScale when you zoom in and out
-        
-        this.targetDiv.addEventListener(&apos;wheel&apos;, () =&gt;{ 
-            
-            if((this.dist3D(this.camera.position)/this.gridScale) &gt; 5){
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }
-            else if((this.dist3D(this.camera.position)/this.gridScale) &lt; .5){ 
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }    
-        })
+        this.grid1= this.makeGrid()
     }
     
     /**
@@ -628,28 +618,32 @@ export default class Display {
             zoomed out farther than initial grid tier*/ 
         this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
         // Creates initial grid plane
-        this.resizeGrid()
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+        const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+        this.grid1.scale.setScalar(gridZoom)
+        this.grid1.material.opacity =  Math.max((1 - gridFract) * 1) 
     }
 
     /**
-     * Redraws the grid with gridscale update value
+     * Redraws the grid with update values on render
      */ 
-    resizeGrid () {
-        this.scene.remove(this.plane)
-        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
-        /** 
-         * The grid which displays under the part.
-         * @type {object}
-         */
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        this.plane.receiveShadow = true
-        this.scene.add( this.plane )   
+    makeGrid() {
+        var size = 1000
+        var divisions = 100
+        var grid = new THREE.GridHelper( size, divisions )
+        grid.geometry.rotateX( Math.PI / 2 )
+        this.scene.add(grid) 
+        return grid
     }
-    
+
+    /**
+     * Removes the grid with update values on checked box
+     */ 
+    removeGrid(grid) {
+        this.scene.remove(grid) 
+    }
+
     /**
      * Converts the tag to an RGB value.
      */ 
@@ -791,7 +785,8 @@ export default class Display {
     /**
      * Runs regularly to update the display.
      */ 
-    render() {
+    render() {  
+
         this.renderer.render( this.scene, this.camera )
     }
 }</code></pre>

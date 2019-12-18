@@ -45,7 +45,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutaway.js~CutAway.html">CutAway</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
@@ -69,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -116,7 +114,7 @@ export default class Input extends Atom {
          * This atom&apos;s radius for drawing
          * @type {string}
          */
-        this.radius = 15
+        this.radius = 20
         
         /** 
          * This atom&apos;s old name, used during name changes
@@ -190,9 +188,9 @@ export default class Input extends Atom {
         GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
         GlobalVariables.c.beginPath()
         GlobalVariables.c.moveTo(this.x - this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y - this.height/2)
+        GlobalVariables.c.lineTo(this.x, this.y + this.height/2)
+        GlobalVariables.c.lineTo(this.x + 10, this.y)
+        GlobalVariables.c.lineTo(this.x, this.y - this.height/2)
         GlobalVariables.c.lineTo(this.x - this.radius, this.y - this.height/2)
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
@@ -200,7 +198,7 @@ export default class Input extends Atom {
         GlobalVariables.c.stroke()
         
         //Snap the inputs to the far right side
-        this.x = this.radius
+        this.x = this.radius + 10
     }
     
     /**
