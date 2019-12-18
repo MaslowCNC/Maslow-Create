@@ -1,6 +1,5 @@
 import { create, all }  from 'mathjs'
 import Assembly         from './molecules/assembly.js'
-import CutAway          from './molecules/cutaway.js'
 import CutList          from './molecules/cutlist.js'
 import Circle           from './molecules/circle.js'
 import Color            from './molecules/color.js'
@@ -14,7 +13,6 @@ import Extrude          from './molecules/extrude.js'
 import Scale            from './molecules/scale.js'
 import Stl              from './molecules/stl.js'
 import Svg              from './molecules/svg.js'
-import Union            from './molecules/union.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
@@ -70,7 +68,6 @@ class GlobalVariables{
         this.availableTypes = {
 
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
-            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
@@ -80,7 +77,6 @@ class GlobalVariables{
             addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
-            cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
             costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
