@@ -311,6 +311,13 @@ export default class Display {
         this.controls.dynamicDampingFactor = 0.1
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
+        this.controls.addEventListener('change', () => { this.controls.addEventListener('change', () => { 
+            const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+            const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+            const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+            this.grid1.scale.setScalar(gridZoom)
+            this.grid1.material.opacity = Math.max((1 - gridFract) * 1) 
+        }) })
         //
         /** 
          * The threejs scene to which things should be added to show up on the display.
@@ -379,12 +386,11 @@ export default class Display {
 
                 gridCheck.addEventListener('change', event => {
                     if(event.target.checked){
-                        this.scene.add( this.plane )
+                        this.grid1= this.makeGrid()
                         this.displayGrid = true
-
                     }
                     else{
-                        this.scene.remove(this.plane)
+                        this.removeGrid(this.grid1)
                         this.displayGrid = false
                     }
                 })
@@ -457,21 +463,7 @@ export default class Display {
             }
         })
         
-        // This event listener adjusts the gridScale when you zoom in and out
-        
-        this.targetDiv.addEventListener('wheel', () =>{ 
-            
-            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }
-            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }    
-        })
+        this.grid1= this.makeGrid()
     }
     
     /**
@@ -548,28 +540,32 @@ export default class Display {
             zoomed out farther than initial grid tier*/ 
         this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
         // Creates initial grid plane
-        this.resizeGrid()
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+        const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+        this.grid1.scale.setScalar(gridZoom)
+        this.grid1.material.opacity =  Math.max((1 - gridFract) * 1) 
     }
 
     /**
-     * Redraws the grid with gridscale update value
+     * Redraws the grid with update values on render
      */ 
-    resizeGrid () {
-        this.scene.remove(this.plane)
-        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
-        /** 
-         * The grid which displays under the part.
-         * @type {object}
-         */
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        this.plane.receiveShadow = true
-        this.scene.add( this.plane )   
+    makeGrid() {
+        var size = 1000
+        var divisions = 100
+        var grid = new THREE.GridHelper( size, divisions )
+        grid.geometry.rotateX( Math.PI / 2 )
+        this.scene.add(grid) 
+        return grid
     }
-    
+
+    /**
+     * Removes the grid with update values on checked box
+     */ 
+    removeGrid(grid) {
+        this.scene.remove(grid) 
+    }
+
     /**
      * Converts the tag to an RGB value.
      */ 
@@ -711,7 +707,8 @@ export default class Display {
     /**
      * Runs regularly to update the display.
      */ 
-    render() {
+    render() {  
+
         this.renderer.render( this.scene, this.camera )
     }
 }
