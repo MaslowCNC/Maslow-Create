@@ -887,6 +887,7 @@ input.menu_search:focus {
 }
 
 .tooltip{
+  pointer-events:none;
   background-color: #C3C3CD;
   margin:auto;
   font-size: .7em;
