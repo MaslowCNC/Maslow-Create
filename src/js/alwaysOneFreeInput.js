@@ -31,6 +31,18 @@ const deleteEmptyPort = function(target){
 }
 
 /**
+ * Finds the highest number input currently used by this atom
+ * @param {object} target - The atom which should be inspected for inputs.
+ */ 
+const findHighestInput = function(target){
+    var maxInput = 0
+    target.inputs.forEach( input => {
+        maxInput = Math.max(maxInput, parseInt(input.name.match(/\d+$/)[0]))
+    })
+    return maxInput
+}
+
+/**
  * Adds or deletes inputs from a target atom until there is exactly one input available.
  * @param {object} target - The atom which should have it's number of inputs adjusted.
  */ 
@@ -38,7 +50,8 @@ export const addOrDeletePorts = (target) => {
     
     //Add or delete ports as needed
     if(howManyInputPortsAvailable(target) == 0){ //We need to make a new port available
-        target.addIO('input', '3D shape ' + GlobalVariables.generateUniqueID(), target, 'geometry', '', true)
+        findHighestInput(target)
+        target.addIO('input', '3D shape ' + (findHighestInput(target) + 1), target, 'geometry', '', true)
     }
     if(howManyInputPortsAvailable(target) >= 2){  //We need to remove the empty port
         deleteEmptyPort(target)
