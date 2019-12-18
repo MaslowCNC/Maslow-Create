@@ -1,4 +1,3 @@
-import GlobalVariables from './globalvariables.js'
 //This module is used to create atoms which do not have a set number of inputs, but instead always have one input free.
 
 /**
