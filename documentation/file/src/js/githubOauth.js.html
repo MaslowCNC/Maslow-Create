@@ -1068,7 +1068,7 @@ export default function GitHubModule(){
             }
             this.progressSave(0)
             var shape = null
-            if(GlobalVariables.topLevelMolecule.value != null){
+            if(GlobalVariables.topLevelMolecule.value != null &amp;&amp; typeof GlobalVariables.topLevelMolecule.value != &apos;number&apos;){
                 shape = GlobalVariables.topLevelMolecule.value
             }else{
                 shape = {
