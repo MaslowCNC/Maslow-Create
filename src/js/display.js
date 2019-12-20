@@ -82,12 +82,12 @@ export default class Display {
          * @type {object}
          */
         this.colorToRgbMapping = {
-            'black': [ 0 / 255, 0 / 255, 0 / 255 ],
+            'black': [70 / 255, 70 / 255, 70 / 255], // Dark gray,
             'silver': [ 192 / 255, 192 / 255, 192 / 255 ],
             'gray': [ 128 / 255, 128 / 255, 128 / 255 ],
             'white': [ 255 / 255, 255 / 255, 255 / 255 ],
             'maroon': [ 128 / 255, 0 / 255, 0 / 255 ],
-            'red': [ 255 / 255, 0 / 255, 0 / 255 ],
+            'red': [ 255 / 255, 99 / 255, 71 / 255 ],
             'purple': [ 128 / 255, 0 / 255, 128 / 255 ],
             'fuchsia': [ 255 / 255, 0 / 255, 255 / 255 ],
             'green': [ 0 / 255, 128 / 255, 0 / 255 ],
@@ -110,7 +110,7 @@ export default class Display {
             'blanchedalmond': [ 255 / 255, 235 / 255, 205 / 255 ],
             // 'blue': [ 0 / 255, 0 / 255, 255 / 255 ],
             'blueviolet': [ 138 / 255, 43 / 255, 226 / 255 ],
-            'brown': [ 165 / 255, 42 / 255, 42 / 255 ],
+            'brown': [ 205 / 255, 133 / 255, 63 / 255 ],
             'burlywood': [ 222 / 255, 184 / 255, 135 / 255 ],
             'cadetblue': [ 95 / 255, 158 / 255, 160 / 255 ],
             'chartreuse': [ 127 / 255, 255 / 255, 0 / 255 ],
@@ -311,6 +311,13 @@ export default class Display {
         this.controls.dynamicDampingFactor = 0.1
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
+        this.controls.addEventListener('change', () => { this.controls.addEventListener('change', () => { 
+            const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+            const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+            const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+            this.grid1.scale.setScalar(gridZoom)
+            this.grid1.material.opacity = Math.max((1 - gridFract) * 1) 
+        }) })
         //
         /** 
          * The threejs scene to which things should be added to show up on the display.
@@ -353,6 +360,7 @@ export default class Display {
         this.targetDiv.addEventListener('mousedown', () => {
 
             if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+
                 this.checkBoxes()   
             }
         })
@@ -367,21 +375,7 @@ export default class Display {
         })
 
         
-        // This event listener adjusts the gridScale when you zoom in and out
-        
-        this.targetDiv.addEventListener('wheel', () =>{ 
-            
-            if((this.dist3D(this.camera.position)/this.gridScale) > 5){
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }
-            else if((this.dist3D(this.camera.position)/this.gridScale) < .5){ 
-                //this.scene.remove(this.plane)
-                this.gridScale = Math.pow(5,this.baseLog(this.dist3D(this.camera.position),5))
-                this.resizeGrid()
-            }    
-        })
+        this.grid1= this.makeGrid()
     }
     /**
      * Creates the checkbox hidden menu when viewer is active
@@ -565,28 +559,32 @@ export default class Display {
             zoomed out farther than initial grid tier*/ 
         this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
         // Creates initial grid plane
-        this.resizeGrid()
+        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
+        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
+        const gridZoom = Math.pow(10, Math.floor(gridLevel))  
+        this.grid1.scale.setScalar(gridZoom)
+        this.grid1.material.opacity =  Math.max((1 - gridFract) * 1) 
     }
 
     /**
-     * Redraws the grid with gridscale update value
+     * Redraws the grid with update values on render
      */ 
-    resizeGrid () {
-        this.scene.remove(this.plane)
-        var planeGeometry = new THREE.PlaneBufferGeometry( this.gridScale, this.gridScale, 10, 10)
-        var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} )
-        planeMaterial.wireframe = true
-        planeMaterial.transparent = true 
-        planeMaterial.opacity = 0.2
-        /** 
-         * The grid which displays under the part.
-         * @type {object}
-         */
-        this.plane = new THREE.Mesh( planeGeometry, planeMaterial )
-        this.plane.receiveShadow = true
-        this.scene.add( this.plane )   
+    makeGrid() {
+        var size = 1000
+        var divisions = 100
+        var grid = new THREE.GridHelper( size, divisions )
+        grid.geometry.rotateX( Math.PI / 2 )
+        this.scene.add(grid) 
+        return grid
     }
-    
+
+    /**
+     * Removes the grid with update values on checked box
+     */ 
+    removeGrid(grid) {
+        this.scene.remove(grid) 
+    }
+
     /**
      * Converts the tag to an RGB value.
      */ 
@@ -728,7 +726,8 @@ export default class Display {
     /**
      * Runs regularly to update the display.
      */ 
-    render() {
+    render() {  
+
         this.renderer.render( this.scene, this.camera )
     }
 }
