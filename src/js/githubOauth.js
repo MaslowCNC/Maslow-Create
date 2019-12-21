@@ -889,6 +889,20 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Send user to GitHub settings page to delete project.
+     */
+    this.deleteProject = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/settings'
+            window.open(url)
+        })
+    }
+    
+    /** 
      * Creates a new blank project.
      */
     this.createNewProject = function(){
