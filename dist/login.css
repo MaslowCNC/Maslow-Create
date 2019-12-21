@@ -59,6 +59,20 @@
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 
+.runSideBarDiv {
+  background-color: #3e3d3d;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    border-radius: 4px;
+    width: 60%;
+    margin: 0 auto 10px;
+    padding: 5px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
 /*=== Trigger  ===*/
 .animate {
   -webkit-animation-duration: 1s;

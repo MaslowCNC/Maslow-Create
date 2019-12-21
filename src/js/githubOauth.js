@@ -901,6 +901,20 @@ export default function GitHubModule(){
             window.open(url)
         })
     }
+
+    /** 
+     * Open pull request if it's a forked project.
+     */
+    this.makePullRequest = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/settings'
+            window.open(url)
+        })
+    }
     
     /** 
      * Creates a new blank project.
@@ -1348,15 +1362,19 @@ export default function GitHubModule(){
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
         // Use popup for oauth
         OAuth.popup('github').then(github => {
+
+            octokit = new Octokit({
+                auth: github.access_token
+            })
             
-            octokit.authenticate({
+            /*octokit.authenticate({
                 type: "oauth",
                 token: github.access_token,
                 headers: {
                     accept: 'application/vnd.github.mercy-preview+json'
                 }
-            })
-            
+            })*/
+
             octokit.request('GET /repositories/:id', {id}).then(result => {
                 //Find out the information of who owns the project we are trying to fork
                 var user     = result.data.owner.login
@@ -1405,6 +1423,7 @@ export default function GitHubModule(){
                             //Add a title
                             var title = document.createElement("H3")
                             title.appendChild(document.createTextNode("A copy of the project '" + repoName + "' has been copied and added to your projects. You can view it by clicking the button below."))
+                            subButtonDiv.setAttribute('style','color:white;')
                             subButtonDiv.appendChild(title)
                             subButtonDiv.appendChild(document.createElement("br"))
                             
@@ -1412,6 +1431,7 @@ export default function GitHubModule(){
                             subButtonDiv.appendChild(form)
                             var button = document.createElement("button")
                             button.setAttribute("type", "button")
+                            button.setAttribute("style", "border:2px solid white;")
                             button.appendChild(document.createTextNode("View Projects"))
                             button.addEventListener("click", () => {
                                 window.location.href = '/'
