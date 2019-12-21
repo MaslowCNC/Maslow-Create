@@ -26,7 +26,8 @@ export default class OverCutCorners extends Atom {
         this.atomType = 'OverCutCorners'
         
         this.addIO('output', 'geometry', this, 'geometry', '')
-        this.addIO('input', 'diameter', this, 'number', 10)
+        this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('input', 'diameter', this, 'number', 6.35)
         
         this.setValues(values)
     }
