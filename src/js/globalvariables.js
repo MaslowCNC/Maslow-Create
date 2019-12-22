@@ -90,10 +90,10 @@ class GlobalVariables{
             
             overCutCorners:     {creator: OverCutCorners, atomType: 'OverCutCorners', atomCategory: 'Actions'},
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
-            stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             scale:              {creator: Scale, atomType: 'Scale', atomCategory: 'Actions'},
+            stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
             
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
