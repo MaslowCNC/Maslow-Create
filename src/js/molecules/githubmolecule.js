@@ -93,7 +93,7 @@ export default class GitHubMolecule extends Molecule {
                 GlobalVariables.gitHub.forkByID(this.projectID)
             })
            this.createButton(list, this, "Like", ()=>{
-            GlobalVariables.gitHub.forkByID(this.uniqueID)
+            GlobalVariables.gitHub.likeProject(this.projectID)
             })
         }
     }
