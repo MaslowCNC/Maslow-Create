@@ -444,10 +444,10 @@
                               }
                             },
                             "extra": {
-                              "rawValue": "geometry1",
-                              "raw": "'geometry1'"
+                              "rawValue": "geometry2",
+                              "raw": "'geometry2'"
                             },
-                            "value": "geometry1"
+                            "value": "geometry2"
                           },
                           {
                             "type": "ThisExpression",
@@ -619,10 +619,10 @@
                               }
                             },
                             "extra": {
-                              "rawValue": "geometry2",
-                              "raw": "'geometry2'"
+                              "rawValue": "geometry1",
+                              "raw": "'geometry1'"
                             },
-                            "value": "geometry2"
+                            "value": "geometry1"
                           },
                           {
                             "type": "ThisExpression",
@@ -2745,7 +2745,7 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "geometry1",
+      "value": "geometry2",
       "start": 406,
       "end": 417,
       "loc": {
@@ -3115,7 +3115,7 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "geometry2",
+      "value": "geometry1",
       "start": 470,
       "end": 481,
       "loc": {

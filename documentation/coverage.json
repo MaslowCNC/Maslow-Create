@@ -1,7 +1,7 @@
 {
-  "coverage": "98.47%",
-  "expectCount": 459,
-  "actualCount": 452,
+  "coverage": "98.28%",
+  "expectCount": 466,
+  "actualCount": 458,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -19,12 +19,13 @@
       "undocumentLines": []
     },
     "src/js/display.js": {
-      "expectCount": 31,
-      "actualCount": 28,
+      "expectCount": 33,
+      "actualCount": 29,
       "undocumentLines": [
         255,
         297,
-        389
+        339,
+        378
       ]
     },
     "src/js/githubOauth.js": {
@@ -36,7 +37,7 @@
       "expectCount": 17,
       "actualCount": 16,
       "undocumentLines": [
-        63
+        64
       ]
     },
     "src/js/localmenu.js": {
@@ -138,6 +139,11 @@
     "src/js/molecules/output.js": {
       "expectCount": 14,
       "actualCount": 14,
+      "undocumentLines": []
+    },
+    "src/js/molecules/OverCutCorners.js": {
+      "expectCount": 5,
+      "actualCount": 5,
       "undocumentLines": []
     },
     "src/js/molecules/readme.js": {

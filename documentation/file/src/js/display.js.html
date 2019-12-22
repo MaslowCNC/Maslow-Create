@@ -40,6 +40,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
@@ -414,8 +415,8 @@ export default class Display {
         this.camera.add(light2)
 
         //sets axes
-        var axesHelper = new THREE.AxesHelper( 10 )
-        this.scene.add(axesHelper)
+        this.axesHelper = new THREE.AxesHelper( 10 )
+        this.scene.add(this.axesHelper)
         
         //
         /** 
@@ -431,119 +432,138 @@ export default class Display {
         
         this.onWindowResize()
 
+        
+        let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
+        let arrowUpMenu = document.querySelector(&apos;#arrow-up-menu&apos;)
+
         this.targetDiv.addEventListener(&apos;mousedown&apos;, () =&gt; {
-            let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
 
             if(!GlobalVariables.runMode &amp;&amp; viewerBar.innerHTML.trim().length == 0){
 
-                //viewerBar.removeChild(viewerBar.firstChild)
-                //Set viewer bar to only appear when other elements are created
-                viewerBar.setAttribute(&apos;style&apos;, &apos;background-color:white;&apos;)
-                
-                //Grid display html element
-                var gridDiv = document.createElement(&apos;div&apos;)
-                viewerBar.appendChild(gridDiv)
-                gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)
-                var gridCheck = document.createElement(&apos;input&apos;)
-                gridDiv.appendChild(gridCheck)
-                gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
-                gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
-                gridDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
-               
-                if (this.displayGrid){
-                    gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
-                }
-
-                var gridCheckLabel = document.createElement(&apos;label&apos;)
-                gridDiv.appendChild(gridCheckLabel)
-                gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
-                gridCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
-                gridCheckLabel.textContent= &quot;Grid&quot;
-                gridCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
-
-
-                gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
-                    if(event.target.checked){
-                        this.grid1= this.makeGrid()
-                        this.displayGrid = true
-                    }
-                    else{
-                        this.removeGrid(this.grid1)
-                        this.displayGrid = false
-                    }
-                })
-
-                //Axes Html
-
-                var axesDiv = document.createElement(&apos;div&apos;)
-                viewerBar.appendChild(axesDiv)
-                var axesCheck = document.createElement(&apos;input&apos;)
-                axesDiv.appendChild(axesCheck)
-                axesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
-                axesCheck.setAttribute(&apos;id&apos;, &apos;axesCheck&apos;)
-                
-                if (this.axesCheck){
-                    axesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
-                }
-
-                var axesCheckLabel = document.createElement(&apos;label&apos;)
-                axesDiv.appendChild(axesCheckLabel)
-                axesCheckLabel.setAttribute(&apos;for&apos;, &apos;axesCheck&apos;)
-                axesCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
-                axesDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
-                axesCheckLabel.textContent= &quot;Axes&quot;
-                axesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
-
-                axesCheck.addEventListener(&apos;change&apos;, event =&gt; {
-                    if(event.target.checked){
-                        this.scene.add( axesHelper)
-                        this.axesCheck = true
-                    }
-                    else{
-                        this.scene.remove( axesHelper )
-                        this.axesCheck = false
-                    }
-                })
-
-                //Wireframe HTML element
-
-                var wireDiv = document.createElement(&apos;div&apos;)
-                viewerBar.appendChild(wireDiv)
-                wireDiv.setAttribute(&apos;id&apos;, &apos;wireDiv&apos;)
-                var wireCheck = document.createElement(&apos;input&apos;)
-                wireDiv.appendChild(wireCheck)
-                wireCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
-                wireCheck.setAttribute(&apos;id&apos;, &apos;wireCheck&apos;)
-               
-                if (this.wireDisplay){
-                    wireCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
-                    this.threeMaterial.wireframe = true
-                }
-                //wireCheck.setAttribute(&apos;checked&apos;, false)
-                var wireCheckLabel = document.createElement(&apos;label&apos;)
-                wireDiv.appendChild(wireCheckLabel)
-                wireCheckLabel.setAttribute(&apos;for&apos;, &apos;wireCheck&apos;)
-                //wireCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:10em;&apos;)
-                wireDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
-                wireCheckLabel.textContent= &quot;Wireframe&quot;
-                wireCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
-
-                wireCheck.addEventListener(&apos;change&apos;, event =&gt; {
-                    if( event.target.checked){
-                        this.threeMaterial.wireframe = true
-                        this.wireDisplay = true
-                    }
-                    else{
-                        this.threeMaterial.wireframe = false
-                        this.wireDisplay = false
-                    }
-                })
+                this.checkBoxes()   
             }
         })
+
+        arrowUpMenu.addEventListener(&apos;mouseenter&apos;, () =&gt;{
+            viewerBar.classList.remove(&quot;slidedown&quot;)
+            viewerBar.classList.add(&apos;slideup&apos;)   
+        })
+        viewerBar.addEventListener(&apos;mouseleave&apos;, () =&gt;{
+            viewerBar.classList.remove(&quot;slideup&quot;)
+            viewerBar.classList.add(&apos;slidedown&apos;)   
+        })
+
         
         this.grid1= this.makeGrid()
     }
-    
+    /**
+     * Creates the checkbox hidden menu when viewer is active
+     */ 
+    checkBoxes(){
+        let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
+       
+        viewerBar.classList.add(&apos;slidedown&apos;)
+
+        //Grid display html element
+        var gridDiv = document.createElement(&apos;div&apos;)
+        viewerBar.appendChild(gridDiv)
+        gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)
+        var gridCheck = document.createElement(&apos;input&apos;)
+        gridDiv.appendChild(gridCheck)
+        gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+        gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+        gridDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+               
+        if (this.displayGrid){
+            gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+        }
+
+        var gridCheckLabel = document.createElement(&apos;label&apos;)
+        gridDiv.appendChild(gridCheckLabel)
+        gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
+        gridCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+        gridCheckLabel.textContent= &quot;Grid&quot;
+        gridCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+
+        gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
+            if(event.target.checked){
+                this.scene.add( this.plane )
+                this.displayGrid = true
+
+            }
+            else{
+                this.scene.remove(this.plane)
+                this.displayGrid = false
+            }
+        })
+
+        //Axes Html
+
+        var axesDiv = document.createElement(&apos;div&apos;)
+        viewerBar.appendChild(axesDiv)
+        var axesCheck = document.createElement(&apos;input&apos;)
+        axesDiv.appendChild(axesCheck)
+        axesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+        axesCheck.setAttribute(&apos;id&apos;, &apos;axesCheck&apos;)
+                
+        if (this.axesCheck){
+            axesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+        }
+
+        var axesCheckLabel = document.createElement(&apos;label&apos;)
+        axesDiv.appendChild(axesCheckLabel)
+        axesCheckLabel.setAttribute(&apos;for&apos;, &apos;axesCheck&apos;)
+        axesCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+        axesDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+        axesCheckLabel.textContent= &quot;Axes&quot;
+        axesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+        axesCheck.addEventListener(&apos;change&apos;, event =&gt; {
+            if(event.target.checked){
+                this.scene.add( this.axesHelper)
+                this.axesCheck = true
+            }
+            else{
+                this.scene.remove( this.axesHelper)
+                this.axesCheck = false
+            }
+        })
+
+        //Wireframe HTML element
+
+        var wireDiv = document.createElement(&apos;div&apos;)
+        viewerBar.appendChild(wireDiv)
+        wireDiv.setAttribute(&apos;id&apos;, &apos;wireDiv&apos;)
+        var wireCheck = document.createElement(&apos;input&apos;)
+        wireDiv.appendChild(wireCheck)
+        wireCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+        wireCheck.setAttribute(&apos;id&apos;, &apos;wireCheck&apos;)
+               
+        if (this.wireDisplay){
+            wireCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+            this.threeMaterial.wireframe = true
+        }
+        //wireCheck.setAttribute(&apos;checked&apos;, false)
+        var wireCheckLabel = document.createElement(&apos;label&apos;)
+        wireDiv.appendChild(wireCheckLabel)
+        wireCheckLabel.setAttribute(&apos;for&apos;, &apos;wireCheck&apos;)
+        //wireCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:10em;&apos;)
+        wireDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+        wireCheckLabel.textContent= &quot;Wireframe&quot;
+        wireCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+        wireCheck.addEventListener(&apos;change&apos;, event =&gt; {
+            if( event.target.checked){
+                this.threeMaterial.wireframe = true
+                this.wireDisplay = true
+            }
+            else{
+                this.threeMaterial.wireframe = false
+                this.wireDisplay = false
+            }
+        })
+    }
     /**
      * This function is intended to calculate the base log of two numbers and round it to an integer
      * @param {number,number}
