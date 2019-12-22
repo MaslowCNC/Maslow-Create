@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the OverCutCorners atom.
