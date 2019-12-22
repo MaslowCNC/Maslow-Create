@@ -19,6 +19,7 @@ import Constant         from './molecules/constant.js'
 import Equation         from './molecules/equation.js'
 import ExtractTag       from './molecules/extracttag.js'
 import Molecule         from './molecules/molecule.js'
+import OverCutCorners   from './molecules/OverCutCorners.js'
 import Input            from './molecules/input.js'
 import Readme           from './molecules/readme.js'
 import AddBOMTag        from './molecules/BOM.js'
@@ -87,6 +88,7 @@ class GlobalVariables{
             equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
             code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
             
+            overCutCorners:     {creator: OverCutCorners, atomType: 'OverCutCorners', atomCategory: 'Actions'},
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
