@@ -1323,39 +1323,11 @@ export default function GitHubModule(){
             
         })
     }
-    
-    /** 
-     * Star a project on github...I don't believe this is working.
-     */
-    this.starProject = function(id){
-        //Authenticate - Initialize with OAuth.io app public key
-        OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
-        // Use popup for oauth
-        OAuth.popup('github').then(github => {
-            
-            octokit.authenticate({
-                type: "oauth",
-                token: github.access_token,
-                headers: {
-                    accept: 'application/vnd.github.mercy-preview+json'
-                }
-            })
-            
-            octokit.request('GET /repositories/:id', {id}).then(result => {
-                //Find out the information of who owns the project we are trying to fork
-                var user     = result.data.owner.login
-                var repoName = result.data.name
-                this.octokit.activity.starRepo({
-                    owner: user,
-                    repo: repoName
-                })
-            })
-        })
-    }
+
     /** 
      * Like a project on github by unique ID.
      */
-    this.likeProject = function(id){
+    this.starProject = function(id){
         //Authenticate - Initialize with OAuth.io app public key
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
         // Use popup for oauth
@@ -1376,14 +1348,29 @@ export default function GitHubModule(){
                     headers: {
                         accept: 'application/vnd.github.mercy-preview+json'
                     }
-                }).then(result => {
-                    octokit.activity.starRepo({
-                        owner: user,
+                }).then(result => { 
+                     //Find out if the project has been starred and unstar if it is
+                    octokit.activity.checkStarringRepo({
+                        owner:user,
                         repo: repoName
-                    }).then(result => {
-                        console.log("color star")
+                        }).then(() => { 
+                            var button= document.getElementById("Like-button")
+                            button.setAttribute("class","browseButton")
+                            button.innerHTML = "Star"
+                            octokit.activity.unstarRepo({
+                            owner: user,
+                            repo: repoName
+                            })
+                        })
+                        
+                }).then(result =>{ 
+                    var button= document.getElementById("Like-button")
+                    button.setAttribute("class","liked")
+                    button.innerHTML = "Starred"
+                    octokit.activity.starRepo({
+                    owner: user,
+                    repo: repoName
                     })
-                    
                 })
             })
         })
