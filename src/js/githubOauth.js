@@ -1354,7 +1354,7 @@ export default function GitHubModule(){
                         owner:user,
                         repo: repoName
                         }).then(() => { 
-                            var button= document.getElementById("Like-button")
+                            var button= document.getElementById("Star-button")
                             button.setAttribute("class","browseButton")
                             button.innerHTML = "Star"
                             octokit.activity.unstarRepo({
@@ -1364,7 +1364,7 @@ export default function GitHubModule(){
                         })
                         
                 }).then(result =>{ 
-                    var button= document.getElementById("Like-button")
+                    var button= document.getElementById("Star-button")
                     button.setAttribute("class","liked")
                     button.innerHTML = "Starred"
                     octokit.activity.starRepo({
