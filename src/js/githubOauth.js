@@ -920,8 +920,7 @@ export default function GitHubModule(){
             let fullName= result.data.full_name
             let defaultBranch = result.data.default_branch
             let parentDefaultBranch = result.data.parent.default_branch
-            //var url = result.data.html_url + '/settings'
-            //window.open(url)
+            
             if (forked){
                 octokit.pulls.create({
                   owner: parent,
@@ -930,7 +929,11 @@ export default function GitHubModule(){
                   body:"body", //input from popup,
                   head: currentUser+ ":" + "master",
                   base: "master"
-                }).then(result => {console.log(result)})
+                }).then(result => {
+                    console.log(result)
+                    var url = result.data.html_url
+                    window.open(url)
+                    })
             }
 
 
