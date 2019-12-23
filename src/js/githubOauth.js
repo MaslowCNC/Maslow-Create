@@ -912,16 +912,12 @@ export default function GitHubModule(){
             owner: currentUser,
             repo: currentRepoName
         }).then(result => {
-            console.log(result)
-            console.log(currentRepoName)
-            var projectID = result.data.id
             let forked = result.data.fork
-            let parent= result.data.parent.owner.login
-            let fullName= result.data.full_name
-            let defaultBranch = result.data.default_branch
-            let parentDefaultBranch = result.data.parent.default_branch
-            
             if (forked){
+                let parent= result.data.parent.owner.login
+                let fullName= result.data.full_name
+                let defaultBranch = result.data.default_branch
+                let parentDefaultBranch = result.data.parent.default_branch
                 octokit.pulls.create({
                   owner: parent,
                   repo: currentRepoName,
@@ -930,10 +926,13 @@ export default function GitHubModule(){
                   head: currentUser+ ":" + "master",
                   base: "master"
                 }).then(result => {
-                    console.log(result)
                     var url = result.data.html_url
                     window.open(url)
                     })
+            }
+            else{
+                //pop-up
+                console.log("this is not a fork")
             }
 
 
