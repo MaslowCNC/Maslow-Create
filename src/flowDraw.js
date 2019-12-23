@@ -198,6 +198,10 @@ if (!GlobalVariables.runMode){
     deleteButton.addEventListener('mousedown', () => {
         GlobalVariables.gitHub.deleteProject() 
     })
+    let pullButton = document.getElementById('pull_top')
+    pullButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.makePullRequest() 
+    })
 }
 
 // Implementation

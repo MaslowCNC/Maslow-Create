@@ -906,14 +906,36 @@ export default function GitHubModule(){
      * Open pull request if it's a forked project.
      */
     this.makePullRequest = function(){
+      
         //Open the github page for the current project in a new tab
         octokit.repos.get({
             owner: currentUser,
             repo: currentRepoName
         }).then(result => {
-            var url = result.data.html_url + '/settings'
-            window.open(url)
+            console.log(result)
+            console.log(currentRepoName)
+            var projectID = result.data.id
+            let forked = result.data.fork
+            let parent= result.data.parent.owner.login
+            let fullName= result.data.full_name
+            let defaultBranch = result.data.default_branch
+            let parentDefaultBranch = result.data.parent.default_branch
+            //var url = result.data.html_url + '/settings'
+            //window.open(url)
+            if (forked){
+                octokit.pulls.create({
+                  owner: parent,
+                  repo: currentRepoName,
+                  title:"title", //input from popup,
+                  body:"body", //input from popup,
+                  head: currentUser+ ":" + "master",
+                  base: "master"
+                }).then(result => {console.log(result)})
+            }
+
+
         })
+        
     }
     
     /** 
@@ -1339,6 +1361,7 @@ export default function GitHubModule(){
             
             octokit.request('GET /repositories/:id', {id}).then(result => {
                 //Find out the information of who owns the project we are trying to like
+                
                 var user     = result.data.owner.login
                 var repoName = result.data.name
                 
