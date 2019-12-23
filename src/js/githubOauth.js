@@ -1348,28 +1348,28 @@ export default function GitHubModule(){
                     headers: {
                         accept: 'application/vnd.github.mercy-preview+json'
                     }
-                }).then(result => { 
-                     //Find out if the project has been starred and unstar if it is
+                }).then(()=> { 
+                    //Find out if the project has been starred and unstar if it is
                     octokit.activity.checkStarringRepo({
                         owner:user,
                         repo: repoName
-                        }).then(() => { 
-                            var button= document.getElementById("Star-button")
-                            button.setAttribute("class","browseButton")
-                            button.innerHTML = "Star"
-                            octokit.activity.unstarRepo({
+                    }).then(() => { 
+                        var button= document.getElementById("Star-button")
+                        button.setAttribute("class","browseButton")
+                        button.innerHTML = "Star"
+                        octokit.activity.unstarRepo({
                             owner: user,
                             repo: repoName
-                            })
                         })
+                    })
                         
-                }).then(result =>{ 
+                }).then(() =>{ 
                     var button= document.getElementById("Star-button")
                     button.setAttribute("class","liked")
                     button.innerHTML = "Starred"
                     octokit.activity.starRepo({
-                    owner: user,
-                    repo: repoName
+                        owner: user,
+                        repo: repoName
                     })
                 })
             })
