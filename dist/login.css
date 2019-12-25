@@ -57,6 +57,47 @@
     cursor: pointer;
 }
 
+.pullDiv{
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.pullDiv label {
+  margin-right: 10px;
+  margin-left: 5px;
+  width: 100px;
+  text-align: left;
+}
+.pullDiv textarea {
+  overflow: hidden;
+  width: 100%;
+  height: 150px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  resize: none;
+  font-size: 0.8em;
+}
+
+.pull-title{
+  display:inline;
+  padding:3px;
+  color:black;
+  background-color: whitesmoke;
+  border:2px solid #f1eeee;
+  margin-bottom:10px;
+}
+.pull-title p{
+  font-size: 0.6em;
+  display:inline;
+  padding:2px;
+  color:black;
+  background-color: whitesmoke;
+  border:2px solid #f1eeee;
+}
+
 .form {
   background-color: #3e3d3d;
     display: flex;

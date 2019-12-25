@@ -931,22 +931,32 @@ export default function GitHubModule(){
                     subButtonDiv.setAttribute("class", "form")
                     
                     //Add a title
+
                     var title = document.createElement("H3")
-                    title.appendChild(document.createTextNode("Open a pull request"))
+                    title.appendChild(document.createTextNode("OPEN A PULL REQUEST"))
                     subButtonDiv.setAttribute('style','color:white;')
                     subButtonDiv.appendChild(title)
                     subButtonDiv.appendChild(document.createElement("br"))
+
+                    var mergeTitles = document.createElement("div")
+                    mergeTitles.setAttribute("class","pull-title")
                     var base = document.createElement("p")
-                    base.appendChild(document.createTextNode(fullParentName))
+                    base.appendChild(document.createTextNode(fullParentName + " : " + parentDefaultBranch))
+                    var arrow = document.createElement("p")
+                    arrow.innerHTML="&#8592;"
+                    mergeTitles.appendChild(arrow)
                     var head = document.createElement("p")
-                    head.appendChild(document.createTextNode(fullName))
-                    subButtonDiv.appendChild(base)
-                    subButtonDiv.appendChild(head)
-                    
+                    head.appendChild(document.createTextNode(fullName + " : " + defaultBranch))
+                    mergeTitles.appendChild(base)
+                    mergeTitles.appendChild(arrow)
+                    mergeTitles.appendChild(head)
+
+                    subButtonDiv.appendChild(mergeTitles)
                     
                     var form = document.createElement("form")
                     subButtonDiv.appendChild(form)
                     var titleDiv = document.createElement("div")
+                    titleDiv.setAttribute("class","pullDiv")
                     var titleLabel = document.createElement("label")
                     titleLabel.appendChild(document.createTextNode("Title"))
 
@@ -959,10 +969,11 @@ export default function GitHubModule(){
                     titleDiv.appendChild(titleInput)
 
                     var bodyDiv = document.createElement("div")
+                    bodyDiv.setAttribute("class","pullDiv")
                     var bodyLabel = document.createElement("label")
                     bodyLabel.appendChild(document.createTextNode("Message"))
 
-                    var bodyInput = document.createElement("input")
+                    var bodyInput = document.createElement("textarea")
                     bodyInput.setAttribute("id","pull-message")
                     bodyInput.setAttribute("type","text")
                     bodyInput.setAttribute("placeholder","Pull Request Message")
