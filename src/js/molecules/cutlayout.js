@@ -46,6 +46,9 @@ export default class CutLayout extends Atom{
             const values = [this.findIOValue('geometry'), this.findIOValue('Spacing'), this.findIOValue('Sheet Width'), this.findIOValue('Sheet Length')] 
             
             this.basicThreadValueProcessing(values, "getLayoutSvgs")
-        }catch(err){this.setAlert(err)}
+        }catch(err){
+            console.log("Error here")
+            this.setAlert(err)
+        }
     }
 }

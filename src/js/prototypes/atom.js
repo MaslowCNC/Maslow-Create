@@ -599,12 +599,12 @@ export default class Atom {
             this.clearAlert()
             
             const computeValue = async (values, key) => {
-                try{
+                // try{
                     return await GlobalVariables.ask({values: values, key: key})
-                }
-                catch(err){
-                    this.setAlert(err)
-                }
+                // }
+                // catch(err){
+                    // this.setAlert(err)
+                // }
             }
             
             computeValue(values, key).then(result => {
