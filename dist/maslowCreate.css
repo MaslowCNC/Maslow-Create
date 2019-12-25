@@ -191,7 +191,7 @@ input:checked + .sliderAtom:before {
 }
 
 .top_buttons{ 
-    background-color: whitesmoke;
+    background-color: gray;
     position: fixed;
     top: 10px;
     right: 10px;
@@ -202,17 +202,23 @@ input:checked + .sliderAtom:before {
     border: 1px solid #767b7b;
     border-radius: 50%;
 }
-
-#viewer_bar{
+ #viewer_bar, .arrow-up{
   color:black;
   float:right;
   position:relative;
-  height:35px;
-  
+  height:35px; 
   bottom:35px;
   left:0px;
   font-size:.7em;
-  margin-right:5%;
+}
+.arrow-up{
+  width: 0; 
+  height: 0; 
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent; 
+  border-right:10px solid #e28dde; 
+  margin-right:2%;
+  bottom:30px;
 }
 
 #viewer_bar p, #viewer_bar div{
@@ -221,39 +227,20 @@ input:checked + .sliderAtom:before {
   padding:5px;
 }
 
-#left_bar{
-  position:absolute;
-  height:100%;
-  width:5px; 
-  top:0px;
-  left:0px;
-  background: #636262
-}
+.slideup, .slidedown {           
+        overflow-y: hidden;    
+        }
+        .slideup {    
+            transform: translateY(0%);
+            transition: .4s ease-in-out;             
+            opacity: 1      
+        }  
+        .slidedown {    
+           transform: translateY(50%);
+           opacity: 0               
+        }    
 
-#right_bar{
-  position:absolute;
-  height:100%;
-  width:5px; 
-  top:0px;
-  right:0px;
-  background: #636262
-}
 
-#bottom_bar{
-  position:absolute;
-  height:5px;
-  width:100%; 
-  bottom:0px;
-  left:0px;
-  background: #636262
-}
-
-#middle_bar{
-  position: absolute;
-  height:5px;
-  width:100%; 
-  background: #2C2C2C;
-}
 
 #flow-canvas{
   margin-top: 0;
@@ -866,6 +853,7 @@ input.menu_search:focus {
 }
 
 .tooltip{
+  pointer-events:none;
   background-color: #C3C3CD;
   margin:auto;
   font-size: .7em;
