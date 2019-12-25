@@ -13,8 +13,8 @@ export default class Difference extends Atom{
         
         super(values)
         
-        this.addIO('input', 'geometry1', this, 'geometry', '')
         this.addIO('input', 'geometry2', this, 'geometry', '')
+        this.addIO('input', 'geometry1', this, 'geometry', '')
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         /**

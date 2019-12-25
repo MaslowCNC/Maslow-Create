@@ -1,6 +1,5 @@
 import { create, all }  from 'mathjs'
 import Assembly         from './molecules/assembly.js'
-import CutAway          from './molecules/cutaway.js'
 import CutList          from './molecules/cutlist.js'
 import Circle           from './molecules/circle.js'
 import Color            from './molecules/color.js'
@@ -14,13 +13,13 @@ import Extrude          from './molecules/extrude.js'
 import Scale            from './molecules/scale.js'
 import Stl              from './molecules/stl.js'
 import Svg              from './molecules/svg.js'
-import Union            from './molecules/union.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
 import Equation         from './molecules/equation.js'
 import ExtractTag       from './molecules/extracttag.js'
 import Molecule         from './molecules/molecule.js'
+import OverCutCorners   from './molecules/OverCutCorners.js'
 import Input            from './molecules/input.js'
 import Readme           from './molecules/readme.js'
 import AddBOMTag        from './molecules/BOM.js'
@@ -70,7 +69,6 @@ class GlobalVariables{
         this.availableTypes = {
 
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
-            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
@@ -80,7 +78,6 @@ class GlobalVariables{
             addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
-            cutAway:            {creator: CutAway, atomType: 'CutAway', atomCategory: 'Properties'},
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
             costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
@@ -91,11 +88,12 @@ class GlobalVariables{
             equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
             code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
             
+            overCutCorners:     {creator: OverCutCorners, atomType: 'OverCutCorners', atomCategory: 'Actions'},
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
-            stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             scale:              {creator: Scale, atomType: 'Scale', atomCategory: 'Actions'},
+            stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
             
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},

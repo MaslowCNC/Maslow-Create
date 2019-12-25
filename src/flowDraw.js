@@ -194,6 +194,10 @@ if (!GlobalVariables.runMode){
             GlobalVariables.currentMolecule.goToParentMolecule()  
         }
     })
+    let deleteButton = document.getElementById('delete_top')
+    deleteButton.addEventListener('mousedown', () => {
+        GlobalVariables.gitHub.deleteProject() 
+    })
 }
 
 // Implementation
