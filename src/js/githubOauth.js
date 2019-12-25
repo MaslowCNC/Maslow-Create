@@ -929,6 +929,16 @@ export default function GitHubModule(){
 
                     var subButtonDiv = document.createElement('div')
                     subButtonDiv.setAttribute("class", "form")
+
+                    //Close button (Mac style)
+                    if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
+                        var closeButton = document.createElement("button")
+                        closeButton.setAttribute("class", "closeButton")
+                        closeButton.addEventListener("click", () => {
+                            popup.classList.add('off')
+                        })
+                        popup.appendChild(closeButton)
+                    }
                     
                     //Add a title
 
@@ -988,7 +998,6 @@ export default function GitHubModule(){
                     button.addEventListener("click", () => {
                     var pullTitle= document.getElementById("pull-title").value
                     var pullMessage= document.getElementById("pull-message").value
-                    console.log(pullTitle)
                     octokit.pulls.create({
                       owner: parent,
                       repo: currentRepoName,
@@ -999,6 +1008,8 @@ export default function GitHubModule(){
                     }).then(result => {
                         var url = result.data.html_url
                         window.open(url)
+                        }).then(result =>{
+                             popup.classList.add('off')
                         })
                     })
                     form.appendChild(titleDiv)
@@ -1008,8 +1019,24 @@ export default function GitHubModule(){
 
             }
             else{
-                //pop-up
-                console.log("this is not a fork")
+                //Remove everything in the popup now
+                    while (popup.firstChild) {
+                        popup.removeChild(popup.firstChild)
+                    }
+                    popup.classList.remove('off')
+                    var subButtonDiv = document.createElement('div')
+                    subButtonDiv.setAttribute("class", "form")
+                    
+                    //Add a title
+                    var title = document.createElement("H3")
+                    title.appendChild(document.createTextNode("You can't create a pull request because this is not a forked project"))
+                    subButtonDiv.setAttribute('style','color:white;')
+                    subButtonDiv.appendChild(title)
+                    popup.appendChild(subButtonDiv)
+
+                    var myVar = setTimeout((()=>{
+                        popup.classList.add('off')
+                    }), 3000);
             }
 
 

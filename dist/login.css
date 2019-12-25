@@ -218,6 +218,29 @@ animation-delay: 0s;
 .form .register-form {
   display: none;
 }
+
+.closeButton{
+    padding: 0px;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #eef5df;
+    background-color: #ff5248;
+    border-radius: 50%;
+    top: 7px;
+    left: 7px;
+}
+.closeButton::before {
+  content: "\2715";
+  color:black;
+  display: none;
+
+  }
+
+.closeButton:hover { cursor: pointer; }
+.closeButton:hover::before{ display: block; }
+
+
 .container {
   position: relative;
   z-index: 1;
