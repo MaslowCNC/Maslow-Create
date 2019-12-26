@@ -47,7 +47,6 @@ export default class CutLayout extends Atom{
             
             this.basicThreadValueProcessing(values, "getLayoutSvgs")
         }catch(err){
-            console.log("Error here")
             this.setAlert(err)
         }
     }
