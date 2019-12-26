@@ -7,7 +7,6 @@
     font-size: 24px;
     text-align: center;
 }
-
 .curiousBrowse{
     display:flex;
     flex-wrap: wrap;
@@ -44,6 +43,19 @@
 .login-page {
   margin: auto;
 }
+.liked{
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: whitesmoke;
+    width: 100%;
+    border: 0;
+    color: #444;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
+}
 
 .form {
   background-color: #3e3d3d;
@@ -55,6 +67,20 @@
     width: 60%;
     margin: 0 auto 100px;
     padding: 30px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.runSideBarDiv {
+  background-color: #3e3d3d;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    border-radius: 4px;
+    width: 60%;
+    margin: 0 auto 10px;
+    padding: 5px;
     text-align: center;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }

@@ -889,6 +889,34 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Send user to GitHub settings page to delete project.
+     */
+    this.deleteProject = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/settings'
+            window.open(url)
+        })
+    }
+
+    /** 
+     * Open pull request if it's a forked project.
+     */
+    this.makePullRequest = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result => {
+            var url = result.data.html_url + '/settings'
+            window.open(url)
+        })
+    }
+    
+    /** 
      * Creates a new blank project.
      */
     this.createNewProject = function(){
@@ -1295,36 +1323,58 @@ export default function GitHubModule(){
             
         })
     }
-    
+
     /** 
-     * Star a project on github...I don't believe this is working.
+     * Like a project on github by unique ID.
      */
     this.starProject = function(id){
         //Authenticate - Initialize with OAuth.io app public key
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
         // Use popup for oauth
         OAuth.popup('github').then(github => {
-            
-            octokit.authenticate({
-                type: "oauth",
-                token: github.access_token,
-                headers: {
-                    accept: 'application/vnd.github.mercy-preview+json'
-                }
+
+            octokit = new Octokit({
+                auth: github.access_token
             })
             
             octokit.request('GET /repositories/:id', {id}).then(result => {
-                //Find out the information of who owns the project we are trying to fork
+                //Find out the information of who owns the project we are trying to like
                 var user     = result.data.owner.login
                 var repoName = result.data.name
-                this.octokit.activity.starRepo({
-                    owner: user,
-                    repo: repoName
+                
+                octokit.repos.listTopics({
+                    owner: user, 
+                    repo: repoName,
+                    headers: {
+                        accept: 'application/vnd.github.mercy-preview+json'
+                    }
+                }).then(()=> { 
+                    //Find out if the project has been starred and unstar if it is
+                    octokit.activity.checkStarringRepo({
+                        owner:user,
+                        repo: repoName
+                    }).then(() => { 
+                        var button= document.getElementById("Star-button")
+                        button.setAttribute("class","browseButton")
+                        button.innerHTML = "Star"
+                        octokit.activity.unstarRepo({
+                            owner: user,
+                            repo: repoName
+                        })
+                    })
+                        
+                }).then(() =>{ 
+                    var button= document.getElementById("Star-button")
+                    button.setAttribute("class","liked")
+                    button.innerHTML = "Starred"
+                    octokit.activity.starRepo({
+                        owner: user,
+                        repo: repoName
+                    })
                 })
             })
         })
     }
-    
     /** 
      * Fork a project on github by unique ID.
      */
@@ -1334,13 +1384,9 @@ export default function GitHubModule(){
         OAuth.initialize('BYP9iFpD7aTV9SDhnalvhZ4fwD8')
         // Use popup for oauth
         OAuth.popup('github').then(github => {
-            
-            octokit.authenticate({
-                type: "oauth",
-                token: github.access_token,
-                headers: {
-                    accept: 'application/vnd.github.mercy-preview+json'
-                }
+
+            octokit = new Octokit({
+                auth: github.access_token
             })
             
             octokit.request('GET /repositories/:id', {id}).then(result => {
@@ -1391,6 +1437,7 @@ export default function GitHubModule(){
                             //Add a title
                             var title = document.createElement("H3")
                             title.appendChild(document.createTextNode("A copy of the project '" + repoName + "' has been copied and added to your projects. You can view it by clicking the button below."))
+                            subButtonDiv.setAttribute('style','color:white;')
                             subButtonDiv.appendChild(title)
                             subButtonDiv.appendChild(document.createElement("br"))
                             
@@ -1398,6 +1445,7 @@ export default function GitHubModule(){
                             subButtonDiv.appendChild(form)
                             var button = document.createElement("button")
                             button.setAttribute("type", "button")
+                            button.setAttribute("style", "border:2px solid white;")
                             button.appendChild(document.createTextNode("View Projects"))
                             button.addEventListener("click", () => {
                                 window.location.href = '/'
