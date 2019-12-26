@@ -942,7 +942,7 @@ export default class Atom {
         //Div which contains the entire element
         var div = document.createElement(&apos;div&apos;)
         listElement.appendChild(div)
-        div.setAttribute(&apos;class&apos;, &apos;sidebar-item-no-hover&apos;)
+        div.setAttribute(&apos;class&apos;, &apos;runSideBarDiv&apos;)
         
         
         //Right div which is button
@@ -950,7 +950,8 @@ export default class Atom {
         div.appendChild(valueTextDiv)
         var button = document.createElement(&apos;button&apos;)
         var buttonTextNode = document.createTextNode(buttonText)
-        button.setAttribute(&apos;class&apos;, &apos;sidebar_button&apos;)
+        button.setAttribute(&apos;class&apos;, &apos; browseButton&apos;)
+        button.setAttribute(&apos;id&apos;, buttonText + &quot;-button&quot;)
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)
         valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem&apos;)

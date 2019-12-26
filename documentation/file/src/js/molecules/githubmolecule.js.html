@@ -168,6 +168,12 @@ export default class GitHubMolecule extends Molecule {
             this.createButton(list, this, &quot;Bill Of Materials&quot;, ()=&gt;{
                 GlobalVariables.gitHub.openBillOfMaterialsPage()
             })
+            this.createButton(list, this, &quot;Fork&quot;, ()=&gt;{
+                GlobalVariables.gitHub.forkByID(this.projectID)
+            })
+            this.createButton(list, this, &quot;Star&quot;, ()=&gt;{
+                GlobalVariables.gitHub.starProject(this.projectID)
+            })
         }
     }
     

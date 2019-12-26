@@ -968,6 +968,162 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Send user to GitHub settings page to delete project.
+     */
+    this.deleteProject = function(){
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result =&gt; {
+            var url = result.data.html_url + &apos;/settings&apos;
+            window.open(url)
+        })
+    }
+
+    /** 
+     * Open pull request if it&apos;s a forked project.
+     */
+    this.makePullRequest = function(){
+      
+        //Open the github page for the current project in a new tab
+        octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+        }).then(result =&gt; {
+            let forked = result.data.fork
+            if (forked){
+                let parent= result.data.parent.owner.login
+                let fullName= result.data.full_name
+                let fullParentName= result.data.parent.full_name
+                let defaultBranch = result.data.default_branch
+                let parentDefaultBranch = result.data.parent.default_branch
+
+                //Remove everything in the popup now
+                while (popup.firstChild) {
+                    popup.removeChild(popup.firstChild)
+                }
+                    
+                popup.classList.remove(&apos;off&apos;)
+
+                var subButtonDiv = document.createElement(&apos;div&apos;)
+                subButtonDiv.setAttribute(&quot;class&quot;, &quot;form&quot;)
+
+                //Close button (Mac style)
+                if(GlobalVariables.topLevelMolecule &amp;&amp; GlobalVariables.topLevelMolecule.name != &quot;Maslow Create&quot;){ //Only offer a close button if there is a project to go back to
+                    var closeButton = document.createElement(&quot;button&quot;)
+                    closeButton.setAttribute(&quot;class&quot;, &quot;closeButton&quot;)
+                    closeButton.addEventListener(&quot;click&quot;, () =&gt; {
+                        popup.classList.add(&apos;off&apos;)
+                    })
+                    popup.appendChild(closeButton)
+                }
+                    
+                //Add a title
+
+                var title = document.createElement(&quot;H3&quot;)
+                title.appendChild(document.createTextNode(&quot;OPEN A PULL REQUEST&quot;))
+                subButtonDiv.setAttribute(&apos;style&apos;,&apos;color:white;&apos;)
+                subButtonDiv.appendChild(title)
+                subButtonDiv.appendChild(document.createElement(&quot;br&quot;))
+
+                var mergeTitles = document.createElement(&quot;div&quot;)
+                mergeTitles.setAttribute(&quot;class&quot;,&quot;pull-title&quot;)
+                var base = document.createElement(&quot;p&quot;)
+                base.appendChild(document.createTextNode(fullParentName + &quot; : &quot; + parentDefaultBranch))
+                var arrow = document.createElement(&quot;p&quot;)
+                arrow.innerHTML=&quot;&amp;#8592;&quot;
+                mergeTitles.appendChild(arrow)
+                var head = document.createElement(&quot;p&quot;)
+                head.appendChild(document.createTextNode(fullName + &quot; : &quot; + defaultBranch))
+                mergeTitles.appendChild(base)
+                mergeTitles.appendChild(arrow)
+                mergeTitles.appendChild(head)
+
+                subButtonDiv.appendChild(mergeTitles)
+                    
+                var form = document.createElement(&quot;form&quot;)
+                subButtonDiv.appendChild(form)
+                var titleDiv = document.createElement(&quot;div&quot;)
+                titleDiv.setAttribute(&quot;class&quot;,&quot;pullDiv&quot;)
+                var titleLabel = document.createElement(&quot;label&quot;)
+                titleLabel.appendChild(document.createTextNode(&quot;Title&quot;))
+
+                //Create the title field
+                var titleInput = document.createElement(&quot;input&quot;)
+                titleInput.setAttribute(&quot;id&quot;,&quot;pull-title&quot;)
+                titleInput.setAttribute(&quot;type&quot;,&quot;text&quot;)
+                titleInput.setAttribute(&quot;placeholder&quot;,&quot;Pull Request Title&quot;)
+                titleDiv.appendChild(titleLabel)
+                titleDiv.appendChild(titleInput)
+
+                var bodyDiv = document.createElement(&quot;div&quot;)
+                bodyDiv.setAttribute(&quot;class&quot;,&quot;pullDiv&quot;)
+                var bodyLabel = document.createElement(&quot;label&quot;)
+                bodyLabel.appendChild(document.createTextNode(&quot;Message&quot;))
+
+                var bodyInput = document.createElement(&quot;textarea&quot;)
+                bodyInput.setAttribute(&quot;id&quot;,&quot;pull-message&quot;)
+                bodyInput.setAttribute(&quot;type&quot;,&quot;text&quot;)
+                bodyInput.setAttribute(&quot;placeholder&quot;,&quot;Pull Request Message&quot;)
+                bodyDiv.appendChild(bodyLabel)
+                bodyDiv.appendChild(bodyInput)
+                    
+                var button = document.createElement(&quot;button&quot;)
+                button.setAttribute(&quot;type&quot;, &quot;button&quot;)
+                button.setAttribute(&quot;style&quot;, &quot;border:2px solid white;&quot;)
+                button.appendChild(document.createTextNode(&quot;Create pull request&quot;))
+                    
+                button.addEventListener(&quot;click&quot;, () =&gt; {
+                    var pullTitle= document.getElementById(&quot;pull-title&quot;).value
+                    var pullMessage= document.getElementById(&quot;pull-message&quot;).value
+                    octokit.pulls.create({
+                        owner: parent,
+                        repo: currentRepoName,
+                        title: pullTitle, //input from popup,
+                        body: pullMessage, //input from popup,
+                        head: currentUser+ &quot;:&quot; + &quot;master&quot;,
+                        base: &quot;master&quot;
+                    }).then(result =&gt; {
+                        var url = result.data.html_url
+                        window.open(url)
+                    }).then(() =&gt;{
+                        popup.classList.add(&apos;off&apos;)
+                    })
+                })
+                form.appendChild(titleDiv)
+                form.appendChild(bodyDiv)
+                form.appendChild(button)
+                popup.appendChild(subButtonDiv)
+
+            }
+            else{
+                //Remove everything in the popup now
+                while (popup.firstChild) {
+                    popup.removeChild(popup.firstChild)
+                }
+                popup.classList.remove(&apos;off&apos;)
+                var subButtonDiv1 = document.createElement(&apos;div&apos;)
+                subButtonDiv1.setAttribute(&quot;class&quot;, &quot;form&quot;)
+                    
+                //Add a title
+                var title1 = document.createElement(&quot;H3&quot;)
+                title1.appendChild(document.createTextNode(&quot;You can&apos;t create a pull request because this is not a forked project&quot;))
+                subButtonDiv1.setAttribute(&apos;style&apos;,&apos;color:white;&apos;)
+                subButtonDiv1.appendChild(title1)
+                popup.appendChild(subButtonDiv1)
+
+                setTimeout((()=&gt;{
+                    popup.classList.add(&apos;off&apos;)
+                }), 3000)
+            }
+
+
+        })
+        
+    }
+    
+    /** 
      * Creates a new blank project.
      */
     this.createNewProject = function(){
@@ -1374,36 +1530,59 @@ export default function GitHubModule(){
             
         })
     }
-    
+
     /** 
-     * Star a project on github...I don&apos;t believe this is working.
+     * Like a project on github by unique ID.
      */
     this.starProject = function(id){
         //Authenticate - Initialize with OAuth.io app public key
         OAuth.initialize(&apos;BYP9iFpD7aTV9SDhnalvhZ4fwD8&apos;)
         // Use popup for oauth
         OAuth.popup(&apos;github&apos;).then(github =&gt; {
-            
-            octokit.authenticate({
-                type: &quot;oauth&quot;,
-                token: github.access_token,
-                headers: {
-                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
-                }
+
+            octokit = new Octokit({
+                auth: github.access_token
             })
             
             octokit.request(&apos;GET /repositories/:id&apos;, {id}).then(result =&gt; {
-                //Find out the information of who owns the project we are trying to fork
+                //Find out the information of who owns the project we are trying to like
+                
                 var user     = result.data.owner.login
                 var repoName = result.data.name
-                this.octokit.activity.starRepo({
-                    owner: user,
-                    repo: repoName
+                
+                octokit.repos.listTopics({
+                    owner: user, 
+                    repo: repoName,
+                    headers: {
+                        accept: &apos;application/vnd.github.mercy-preview+json&apos;
+                    }
+                }).then(()=&gt; { 
+                    //Find out if the project has been starred and unstar if it is
+                    octokit.activity.checkStarringRepo({
+                        owner:user,
+                        repo: repoName
+                    }).then(() =&gt; { 
+                        var button= document.getElementById(&quot;Star-button&quot;)
+                        button.setAttribute(&quot;class&quot;,&quot;browseButton&quot;)
+                        button.innerHTML = &quot;Star&quot;
+                        octokit.activity.unstarRepo({
+                            owner: user,
+                            repo: repoName
+                        })
+                    })
+                        
+                }).then(() =&gt;{ 
+                    var button= document.getElementById(&quot;Star-button&quot;)
+                    button.setAttribute(&quot;class&quot;,&quot;liked&quot;)
+                    button.innerHTML = &quot;Starred&quot;
+                    octokit.activity.starRepo({
+                        owner: user,
+                        repo: repoName
+                    })
                 })
             })
         })
     }
-    
     /** 
      * Fork a project on github by unique ID.
      */
@@ -1413,13 +1592,9 @@ export default function GitHubModule(){
         OAuth.initialize(&apos;BYP9iFpD7aTV9SDhnalvhZ4fwD8&apos;)
         // Use popup for oauth
         OAuth.popup(&apos;github&apos;).then(github =&gt; {
-            
-            octokit.authenticate({
-                type: &quot;oauth&quot;,
-                token: github.access_token,
-                headers: {
-                    accept: &apos;application/vnd.github.mercy-preview+json&apos;
-                }
+
+            octokit = new Octokit({
+                auth: github.access_token
             })
             
             octokit.request(&apos;GET /repositories/:id&apos;, {id}).then(result =&gt; {
@@ -1455,7 +1630,6 @@ export default function GitHubModule(){
                             }
                         }).then(() =&gt; {
                             
-                            
                             //Remove everything in the popup now
                             while (popup.firstChild) {
                                 popup.removeChild(popup.firstChild)
@@ -1470,6 +1644,7 @@ export default function GitHubModule(){
                             //Add a title
                             var title = document.createElement(&quot;H3&quot;)
                             title.appendChild(document.createTextNode(&quot;A copy of the project &apos;&quot; + repoName + &quot;&apos; has been copied and added to your projects. You can view it by clicking the button below.&quot;))
+                            subButtonDiv.setAttribute(&apos;style&apos;,&apos;color:white;&apos;)
                             subButtonDiv.appendChild(title)
                             subButtonDiv.appendChild(document.createElement(&quot;br&quot;))
                             
@@ -1477,6 +1652,7 @@ export default function GitHubModule(){
                             subButtonDiv.appendChild(form)
                             var button = document.createElement(&quot;button&quot;)
                             button.setAttribute(&quot;type&quot;, &quot;button&quot;)
+                            button.setAttribute(&quot;style&quot;, &quot;border:2px solid white;&quot;)
                             button.appendChild(document.createTextNode(&quot;View Projects&quot;))
                             button.addEventListener(&quot;click&quot;, () =&gt; {
                                 window.location.href = &apos;/&apos;
