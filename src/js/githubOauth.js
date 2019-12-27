@@ -1315,7 +1315,7 @@ export default function GitHubModule(){
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
-        
+
         //Clear and hide the popup
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
@@ -1339,7 +1339,6 @@ export default function GitHubModule(){
             repo: projectName,
             path: 'project.maslowcreate'
         }).then(result => {
-            
             //content will be base64 encoded
             let rawFile = JSON.parse(atob(result.data.content))
             
@@ -1354,7 +1353,17 @@ export default function GitHubModule(){
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
         })
-        
+         octokit.repos.get({
+            owner: currentUser,
+            repo: currentRepoName
+            }).then(result => {
+                GlobalVariables.fork = result.data.fork
+                if(!GlobalVariables.fork){
+                    document.getElementById("pull_top").style.display = "none"
+                }
+                   
+            })      
+                
     }
     
     /** 

@@ -357,12 +357,9 @@ export default class Display {
         let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
-         if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+        if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
 
         this.targetDiv.addEventListener('mousedown', () => {
-
-           
-
                 this.checkBoxes()   
         })
 

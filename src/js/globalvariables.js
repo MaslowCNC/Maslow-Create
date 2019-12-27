@@ -122,6 +122,11 @@ class GlobalVariables{
          * @type {object}
          */
         this.gitHub = new GitHubModule()
+         /** 
+         * A flag to indicate if the project is a fork.
+         * @type {boolean}
+         */
+        this.fork = false
         /** 
          * The size (in mm) of segments to use for circles.
          * @type {number}
