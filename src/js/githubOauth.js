@@ -912,8 +912,6 @@ export default function GitHubModule(){
             owner: currentUser,
             repo: currentRepoName
         }).then(result => {
-            let forked = result.data.fork
-            if (forked){
                 let parent= result.data.parent.owner.login
                 let fullName= result.data.full_name
                 let fullParentName= result.data.parent.full_name
@@ -1016,29 +1014,6 @@ export default function GitHubModule(){
                 form.appendChild(bodyDiv)
                 form.appendChild(button)
                 popup.appendChild(subButtonDiv)
-
-            }
-            else{
-                //Remove everything in the popup now
-                while (popup.firstChild) {
-                    popup.removeChild(popup.firstChild)
-                }
-                popup.classList.remove('off')
-                var subButtonDiv1 = document.createElement('div')
-                subButtonDiv1.setAttribute("class", "form")
-                    
-                //Add a title
-                var title1 = document.createElement("H3")
-                title1.appendChild(document.createTextNode("You can't create a pull request because this is not a forked project"))
-                subButtonDiv1.setAttribute('style','color:white;')
-                subButtonDiv1.appendChild(title1)
-                popup.appendChild(subButtonDiv1)
-
-                setTimeout((()=>{
-                    popup.classList.add('off')
-                }), 3000)
-            }
-
 
         })
         
