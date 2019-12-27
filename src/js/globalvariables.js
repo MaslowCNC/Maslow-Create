@@ -122,7 +122,7 @@ class GlobalVariables{
          * @type {object}
          */
         this.gitHub = new GitHubModule()
-         /** 
+        /** 
          * A flag to indicate if the project is a fork.
          * @type {boolean}
          */

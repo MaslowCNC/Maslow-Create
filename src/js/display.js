@@ -359,19 +359,19 @@ export default class Display {
 
         if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
 
-        this.targetDiv.addEventListener('mousedown', () => {
+            this.targetDiv.addEventListener('mousedown', () => {
                 this.checkBoxes()   
-        })
+            })
 
-        arrowUpMenu.addEventListener('mouseenter', () =>{
-            viewerBar.classList.remove("slidedown")
-            viewerBar.classList.add('slideup')   
-        })
-        viewerBar.addEventListener('mouseleave', () =>{
-            viewerBar.classList.remove("slideup")
-            viewerBar.classList.add('slidedown')   
-        })
-         }
+            arrowUpMenu.addEventListener('mouseenter', () =>{
+                viewerBar.classList.remove("slidedown")
+                viewerBar.classList.add('slideup')   
+            })
+            viewerBar.addEventListener('mouseleave', () =>{
+                viewerBar.classList.remove("slideup")
+                viewerBar.classList.add('slidedown')   
+            })
+        }
         
         this.grid1= this.makeGrid()
     }
