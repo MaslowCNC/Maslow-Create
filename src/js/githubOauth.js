@@ -1360,10 +1360,8 @@ export default function GitHubModule(){
                 GlobalVariables.fork = result.data.fork
                 if(!GlobalVariables.fork){
                     document.getElementById("pull_top").style.display = "none"
-                }
-                   
-            })      
-                
+                }      
+            })                
     }
     
     /** 
