@@ -24,7 +24,7 @@ export default class Display {
          * Grid scale to keep track of zoom scale
          * @type {number}
          */
-        this.gridScale = 5
+        this.gridScale = 1
         /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
@@ -312,11 +312,7 @@ export default class Display {
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
         this.controls.addEventListener('change', () => { this.controls.addEventListener('change', () => { 
-            const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
-            const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
-            const gridZoom = Math.pow(10, Math.floor(gridLevel))  
-            this.grid1.scale.setScalar(gridZoom)
-            this.grid1.material.opacity = Math.max((1 - gridFract) * 1) 
+            this.setGrid()
         }) })
         //
         /** 
@@ -553,22 +549,24 @@ export default class Display {
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
 
+        this.setGrid()
+        
+    }
+
+    setGrid(){
         /*initializes grid at scale if object loaded is already 
             zoomed out farther than initial grid tier*/ 
-        this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
-        // Creates initial grid plane
-        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
-        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
-        const gridZoom = Math.pow(10, Math.floor(gridLevel))  
-        this.grid1.scale.setScalar(gridZoom)
-        this.grid1.material.opacity =  Math.max((1 - gridFract) * 1) 
+        this.gridScale = this.baseLog(this.dist3D(this.camera.position),.01) 
+        this.grid1.scale.setScalar(this.gridScale)
+        this.grid1.material.opacity = .01 
     }
 
     /**
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
-        var size = 10000
+        //console.log("make grid")
+        var size = 1000
         var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )
         grid.geometry.rotateX( Math.PI / 2 )
