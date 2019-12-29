@@ -568,7 +568,7 @@ export default class Display {
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
-        var size = 1000
+        var size = 10000
         var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )
         grid.geometry.rotateX( Math.PI / 2 )
