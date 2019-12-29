@@ -549,13 +549,13 @@ export default class Display {
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
 
-        this.setGrid()
-        
+        this.setGrid()  
     }
 
+    /**
+    * Scales grid if object loaded is already zoomed out farther than initial grid tier or if zoomed in or out
+    */ 
     setGrid(){
-        /*initializes grid at scale if object loaded is already 
-            zoomed out farther than initial grid tier*/ 
         this.gridScale = this.baseLog(this.dist3D(this.camera.position),.01) 
         this.grid1.scale.setScalar(this.gridScale)
         this.grid1.material.opacity = .01 
