@@ -355,20 +355,20 @@ export default class Display {
 
         
 
-            this.targetDiv.addEventListener('mousedown', () => {
-                if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
-                    this.checkBoxes()   
-                }
-            })
+        this.targetDiv.addEventListener('mousedown', () => {
+            if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+                this.checkBoxes()   
+            }
+        })
 
-            arrowUpMenu.addEventListener('mouseenter', () =>{
-                viewerBar.classList.remove("slidedown")
-                viewerBar.classList.add('slideup')   
-            })
-            viewerBar.addEventListener('mouseleave', () =>{
-                viewerBar.classList.remove("slideup")
-                viewerBar.classList.add('slidedown')   
-            })
+        arrowUpMenu.addEventListener('mouseenter', () =>{
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        viewerBar.addEventListener('mouseleave', () =>{
+            viewerBar.classList.remove("slideup")
+            viewerBar.classList.add('slidedown')   
+        })
         
         
         this.grid1= this.makeGrid()
@@ -561,7 +561,6 @@ export default class Display {
         this.gridScale = this.baseLog(this.dist3D(this.camera.position),10) 
         this.grid1.scale.setScalar(this.gridScale)
         this.grid1.material.opacity = .01 
-        console.log(this.gridScale)
     }
 
     /**
