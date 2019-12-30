@@ -405,12 +405,12 @@ export default class Display {
 
         gridCheck.addEventListener('change', event => {
             if(event.target.checked){
-                this.scene.add( this.plane )
+                this.scene.add( this.grid1 )
                 this.displayGrid = true
 
             }
             else{
-                this.scene.remove(this.plane)
+                this.scene.remove(this.grid1)
                 this.displayGrid = false
             }
         })
