@@ -353,10 +353,12 @@ export default class Display {
         let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
-        if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+        
 
             this.targetDiv.addEventListener('mousedown', () => {
-                this.checkBoxes()   
+                if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+                    this.checkBoxes()   
+                }
             })
 
             arrowUpMenu.addEventListener('mouseenter', () =>{
@@ -367,7 +369,7 @@ export default class Display {
                 viewerBar.classList.remove("slideup")
                 viewerBar.classList.add('slidedown')   
             })
-        }
+        
         
         this.grid1= this.makeGrid()
     }
@@ -556,9 +558,10 @@ export default class Display {
     * Scales grid if object loaded is already zoomed out farther than initial grid tier or if zoomed in or out
     */ 
     setGrid(){
-        this.gridScale = this.baseLog(this.dist3D(this.camera.position),.01) 
+        this.gridScale = this.baseLog(this.dist3D(this.camera.position),10) 
         this.grid1.scale.setScalar(this.gridScale)
         this.grid1.material.opacity = .01 
+        console.log(this.gridScale)
     }
 
     /**
