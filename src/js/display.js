@@ -353,10 +353,8 @@ export default class Display {
         let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
-        
-
         this.targetDiv.addEventListener('mousedown', () => {
-            if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
+            if(viewerBar.innerHTML.trim().length == 0){
                 this.checkBoxes()   
             }
         })
@@ -377,8 +375,8 @@ export default class Display {
      * Creates the checkbox hidden menu when viewer is active
      */ 
     checkBoxes(){
-        let viewerBar = document.querySelector('#viewer_bar')
-       
+
+        let viewerBar = document.querySelector('#viewer_bar')   
         viewerBar.classList.add('slidedown')
 
         //Grid display html element
