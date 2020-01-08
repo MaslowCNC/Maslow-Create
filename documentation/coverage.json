@@ -1,7 +1,7 @@
 {
-  "coverage": "98.28%",
-  "expectCount": 466,
-  "actualCount": 458,
+  "coverage": "98.29%",
+  "expectCount": 468,
+  "actualCount": 460,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -19,13 +19,13 @@
       "undocumentLines": []
     },
     "src/js/display.js": {
-      "expectCount": 33,
-      "actualCount": 29,
+      "expectCount": 34,
+      "actualCount": 30,
       "undocumentLines": [
         255,
         297,
-        339,
-        378
+        335,
+        372
       ]
     },
     "src/js/githubOauth.js": {
@@ -34,8 +34,8 @@
       "undocumentLines": []
     },
     "src/js/globalvariables.js": {
-      "expectCount": 17,
-      "actualCount": 16,
+      "expectCount": 18,
+      "actualCount": 17,
       "undocumentLines": [
         64
       ]

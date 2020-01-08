@@ -750,6 +750,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/display.js~display#setgrid",
+    "class/src/js/display.js~Display.html#instance-method-setGrid",
+    "src/js/display.js~Display#setGrid",
+    "method"
+  ],
+  [
     "src/js/display.js~display#setmaterial",
     "class/src/js/display.js~Display.html#instance-method-setMaterial",
     "src/js/display.js~Display#setMaterial",
@@ -850,6 +856,12 @@ window.esdocSearchIndex = [
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-distBetweenPoints",
     "src/js/globalvariables.js~GlobalVariables#distBetweenPoints",
     "method"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#fork",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-fork",
+    "src/js/globalvariables.js~GlobalVariables#fork",
+    "member"
   ],
   [
     "src/js/globalvariables.js~globalvariables#generateuniqueid",
