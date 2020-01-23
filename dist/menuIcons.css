@@ -22,8 +22,19 @@
             width:150%;
             height:150%;
         }
-    .Intersection{
+        .Intersection{
             background: url("./imgs/intersection.png");
+            width:150%;
+            height:150%;
+        }
+    .Properties{
+            background: url("./imgs/tag.png");
+            width:150%;
+            height:150%;
+        }
+
+    .OverCut-Corners{
+            background: url("./imgs/Overcut.png");
             width:150%;
             height:150%;
         }
@@ -165,8 +176,8 @@
             width:150%;
             height:150%;
         } 
-        .AddBOMTag{
-            background: url("./imgs/bom.png");
+        .Add-BOM-Tag{
+            background: url("./imgs/Bom.png");
             width:150%;
             height:150%;
         } 
