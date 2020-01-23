@@ -15,6 +15,10 @@ export default class Display {
          * @type {array}
          */
         this.datasets = []
+        /**
+         *The last shape that was sent to the display. Used for switching to wireframe.
+         */
+        this.displayedGeometry = []
         /** 
          * An Flag to indicate if the grid on the XY plane should be displayed.
          * @type {boolean}
@@ -24,7 +28,7 @@ export default class Display {
          * Grid scale to keep track of zoom scale
          * @type {number}
          */
-        this.gridScale = 5
+        this.gridScale = 1
         /** 
          * A flag to indicate if the axes should be displayed.
          * @type {boolean}
@@ -35,6 +39,11 @@ export default class Display {
          * @type {boolean}
          */
         this.wireDisplay = false
+        /** 
+         * A flag to indicate if the solid should be displayed.
+         * @type {boolean}
+         */
+        this.solidDisplay = true
         /** 
          * A threejs camera instance.
          * @type {object}
@@ -312,11 +321,7 @@ export default class Display {
         this.controls.keys = [65, 83, 68]
         this.controls.addEventListener('change', () => { this.render() })
         this.controls.addEventListener('change', () => { this.controls.addEventListener('change', () => { 
-            const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
-            const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
-            const gridZoom = Math.pow(10, Math.floor(gridLevel))  
-            this.grid1.scale.setScalar(gridZoom)
-            this.grid1.material.opacity = Math.max((1 - gridFract) * 1) 
+            this.setGrid()
         }) })
         //
         /** 
@@ -357,30 +362,31 @@ export default class Display {
         let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
-        if(!GlobalVariables.runMode && viewerBar.innerHTML.trim().length == 0){
-
-            this.targetDiv.addEventListener('mousedown', () => {
+        this.targetDiv.addEventListener('mousedown', () => {
+            if(viewerBar.innerHTML.trim().length == 0){
                 this.checkBoxes()   
-            })
+            }
+        })
 
-            arrowUpMenu.addEventListener('mouseenter', () =>{
-                viewerBar.classList.remove("slidedown")
-                viewerBar.classList.add('slideup')   
-            })
-            viewerBar.addEventListener('mouseleave', () =>{
-                viewerBar.classList.remove("slideup")
-                viewerBar.classList.add('slidedown')   
-            })
-        }
+        arrowUpMenu.addEventListener('mouseenter', () =>{
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        viewerBar.addEventListener('mouseleave', () =>{
+            viewerBar.classList.remove("slideup")
+            viewerBar.classList.add('slidedown')   
+        })
+        
         
         this.grid1= this.makeGrid()
     }
+    
     /**
      * Creates the checkbox hidden menu when viewer is active
      */ 
     checkBoxes(){
-        let viewerBar = document.querySelector('#viewer_bar')
-       
+
+        let viewerBar = document.querySelector('#viewer_bar')   
         viewerBar.classList.add('slidedown')
 
         //Grid display html element
@@ -407,12 +413,12 @@ export default class Display {
 
         gridCheck.addEventListener('change', event => {
             if(event.target.checked){
-                this.scene.add( this.plane )
+                this.scene.add( this.grid1 )
                 this.displayGrid = true
 
             }
             else{
-                this.scene.remove(this.plane)
+                this.scene.remove(this.grid1)
                 this.displayGrid = false
             }
         })
@@ -449,6 +455,40 @@ export default class Display {
             }
         })
 
+        //Solid HTML element
+
+        var solidDiv = document.createElement('div')
+        viewerBar.appendChild(solidDiv)
+        solidDiv.setAttribute('id', 'solidDiv')
+        var solidCheck = document.createElement('input')
+        solidDiv.appendChild(solidCheck)
+        solidCheck.setAttribute('type', 'checkbox')
+        solidCheck.setAttribute('id', 'solidCheck')
+               
+        if (this.solidDisplay){
+            solidCheck.setAttribute('checked', 'true')
+            this.threeMaterial.solid = true
+        }
+        //solidCheck.setAttribute('checked', false)
+        var solidCheckLabel = document.createElement('label')
+        solidDiv.appendChild(solidCheckLabel)
+        solidCheckLabel.setAttribute('for', 'solidCheck')
+        //solidCheckLabel.setAttribute('style', 'margin-right:10em;')
+        solidDiv.setAttribute('style', 'float:right;')
+        solidCheckLabel.textContent= "Solid"
+        solidCheckLabel.setAttribute('style', 'user-select: none;')
+
+        solidCheck.addEventListener('change', event => {
+            if( event.target.checked){
+                this.solidDisplay = true
+            }
+            else{
+                this.solidDisplay = false
+            }
+            this.writeToDisplay(this.displayedGeometry)
+        })
+
+    
         //Wireframe HTML element
 
         var wireDiv = document.createElement('div')
@@ -474,15 +514,15 @@ export default class Display {
 
         wireCheck.addEventListener('change', event => {
             if( event.target.checked){
-                this.threeMaterial.wireframe = true
                 this.wireDisplay = true
             }
             else{
-                this.threeMaterial.wireframe = false
                 this.wireDisplay = false
             }
+            this.writeToDisplay(this.displayedGeometry)
         })
     }
+    
     /**
      * This function is intended to calculate the base log of two numbers and round it to an integer
      * @param {number,number}
@@ -527,9 +567,10 @@ export default class Display {
      */ 
     writeToDisplay(shape){
         if(shape != null){
+            this.displayedGeometry = shape
             const computeValue = async () => {
                 try {
-                    return await GlobalVariables.render({values: shape, key: "render"})
+                    return await GlobalVariables.render({values: [shape, this.solidDisplay, this.wireDisplay], key: "render"})
                 } catch(err) {
                     console.warn(err)
                     return -1
@@ -553,21 +594,23 @@ export default class Display {
         this.camera.position.y = -5*Math.max(...bounds[1])
         this.camera.position.z = 5*Math.max(...bounds[1])
 
-        /*initializes grid at scale if object loaded is already 
-            zoomed out farther than initial grid tier*/ 
-        this.gridScale = Math.pow(5, this.baseLog(this.dist3D(this.camera.position),5))    
-        // Creates initial grid plane
-        const gridLevel = Math.log10(this.dist3D(this.camera.position)/this.gridScale)
-        const gridFract = THREE.Math.euclideanModulo(gridLevel, 1)
-        const gridZoom = Math.pow(10, Math.floor(gridLevel))  
-        this.grid1.scale.setScalar(gridZoom)
-        this.grid1.material.opacity =  Math.max((1 - gridFract) * 1) 
+        this.setGrid()  
+    }
+
+    /**
+    * Scales grid if object loaded is already zoomed out farther than initial grid tier or if zoomed in or out
+    */ 
+    setGrid(){
+        this.gridScale = this.baseLog(this.dist3D(this.camera.position),10) 
+        this.grid1.scale.setScalar(this.gridScale)
+        this.grid1.material.opacity = .01 
     }
 
     /**
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
+        //console.log("make grid")
         var size = 1000
         var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )
