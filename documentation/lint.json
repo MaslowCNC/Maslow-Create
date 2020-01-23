@@ -4,23 +4,23 @@
     "filePath": "src/js/display.js",
     "lines": [
       {
-        "lineNumber": 481,
+        "lineNumber": 525,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 482,
+        "lineNumber": 526,
         "line": "     * This function is intended to calculate the base log of two numbers and round it to an integer\r"
       },
       {
-        "lineNumber": 483,
+        "lineNumber": 527,
         "line": "     * @param {number,number}\r"
       },
       {
-        "lineNumber": 484,
+        "lineNumber": 528,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 485,
+        "lineNumber": 529,
         "line": "    baseLog(x,y){\r"
       }
     ],
@@ -35,23 +35,23 @@
     "filePath": "src/js/display.js",
     "lines": [
       {
-        "lineNumber": 490,
+        "lineNumber": 534,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 491,
+        "lineNumber": 535,
         "line": "     * This function is intended to calculate the 3d distance between object and camera\r"
       },
       {
-        "lineNumber": 492,
+        "lineNumber": 536,
         "line": "     * @param {number}\r"
       },
       {
-        "lineNumber": 493,
+        "lineNumber": 537,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 494,
+        "lineNumber": 538,
         "line": "    dist3D(position){\r"
       }
     ],

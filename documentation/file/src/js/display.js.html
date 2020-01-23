@@ -94,6 +94,10 @@ export default class Display {
          * @type {array}
          */
         this.datasets = []
+        /**
+         *The last shape that was sent to the display. Used for switching to wireframe.
+         */
+        this.displayedGeometry = []
         /** 
          * An Flag to indicate if the grid on the XY plane should be displayed.
          * @type {boolean}
@@ -114,6 +118,11 @@ export default class Display {
          * @type {boolean}
          */
         this.wireDisplay = false
+        /** 
+         * A flag to indicate if the solid should be displayed.
+         * @type {boolean}
+         */
+        this.solidDisplay = true
         /** 
          * A threejs camera instance.
          * @type {object}
@@ -450,6 +459,7 @@ export default class Display {
         
         this.grid1= this.makeGrid()
     }
+    
     /**
      * Creates the checkbox hidden menu when viewer is active
      */ 
@@ -524,6 +534,40 @@ export default class Display {
             }
         })
 
+        //Solid HTML element
+
+        var solidDiv = document.createElement(&apos;div&apos;)
+        viewerBar.appendChild(solidDiv)
+        solidDiv.setAttribute(&apos;id&apos;, &apos;solidDiv&apos;)
+        var solidCheck = document.createElement(&apos;input&apos;)
+        solidDiv.appendChild(solidCheck)
+        solidCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+        solidCheck.setAttribute(&apos;id&apos;, &apos;solidCheck&apos;)
+               
+        if (this.solidDisplay){
+            solidCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+            this.threeMaterial.solid = true
+        }
+        //solidCheck.setAttribute(&apos;checked&apos;, false)
+        var solidCheckLabel = document.createElement(&apos;label&apos;)
+        solidDiv.appendChild(solidCheckLabel)
+        solidCheckLabel.setAttribute(&apos;for&apos;, &apos;solidCheck&apos;)
+        //solidCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:10em;&apos;)
+        solidDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+        solidCheckLabel.textContent= &quot;Solid&quot;
+        solidCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+        solidCheck.addEventListener(&apos;change&apos;, event =&gt; {
+            if( event.target.checked){
+                this.solidDisplay = true
+            }
+            else{
+                this.solidDisplay = false
+            }
+            this.writeToDisplay(this.displayedGeometry)
+        })
+
+    
         //Wireframe HTML element
 
         var wireDiv = document.createElement(&apos;div&apos;)
@@ -549,15 +593,15 @@ export default class Display {
 
         wireCheck.addEventListener(&apos;change&apos;, event =&gt; {
             if( event.target.checked){
-                this.threeMaterial.wireframe = true
                 this.wireDisplay = true
             }
             else{
-                this.threeMaterial.wireframe = false
                 this.wireDisplay = false
             }
+            this.writeToDisplay(this.displayedGeometry)
         })
     }
+    
     /**
      * This function is intended to calculate the base log of two numbers and round it to an integer
      * @param {number,number}
@@ -602,9 +646,10 @@ export default class Display {
      */ 
     writeToDisplay(shape){
         if(shape != null){
+            this.displayedGeometry = shape
             const computeValue = async () =&gt; {
                 try {
-                    return await GlobalVariables.render({values: shape, key: &quot;render&quot;})
+                    return await GlobalVariables.render({values: [shape, this.solidDisplay, this.wireDisplay], key: &quot;render&quot;})
                 } catch(err) {
                     console.warn(err)
                     return -1

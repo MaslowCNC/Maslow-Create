@@ -1,7 +1,7 @@
 {
   "coverage": "98.29%",
-  "expectCount": 468,
-  "actualCount": 460,
+  "expectCount": 470,
+  "actualCount": 462,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -19,13 +19,13 @@
       "undocumentLines": []
     },
     "src/js/display.js": {
-      "expectCount": 34,
-      "actualCount": 30,
+      "expectCount": 36,
+      "actualCount": 32,
       "undocumentLines": [
-        255,
-        297,
-        335,
-        372
+        264,
+        306,
+        344,
+        381
       ]
     },
     "src/js/githubOauth.js": {

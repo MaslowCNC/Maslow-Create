@@ -672,6 +672,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/display.js~display#displayedgeometry",
+    "class/src/js/display.js~Display.html#instance-member-displayedGeometry",
+    "src/js/display.js~Display#displayedGeometry",
+    "member"
+  ],
+  [
     "src/js/display.js~display#dist3d",
     "class/src/js/display.js~Display.html#instance-method-dist3D",
     "src/js/display.js~Display#dist3D",
@@ -760,6 +766,12 @@ window.esdocSearchIndex = [
     "class/src/js/display.js~Display.html#instance-method-setMaterial",
     "src/js/display.js~Display#setMaterial",
     "method"
+  ],
+  [
+    "src/js/display.js~display#soliddisplay",
+    "class/src/js/display.js~Display.html#instance-member-solidDisplay",
+    "src/js/display.js~Display#solidDisplay",
+    "member"
   ],
   [
     "src/js/display.js~display#targetdiv",
