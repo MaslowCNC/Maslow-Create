@@ -187,10 +187,16 @@ export default class Molecule extends Atom{
         //Run for this molecule
         super.beginPropogation()
         
+        //Catch the corner case where this has no inputs which means it won't be marked as processing by super
+        if(this.inputs.length == 0){
+            this.processing = true
+        }
+        
         // Run for every atom in this molecule
         this.nodesOnTheScreen.forEach(node => {
             node.beginPropogation()
         })
+        
     }
     
     /**
