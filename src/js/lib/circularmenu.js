@@ -293,7 +293,6 @@
         style(p, 'margin-left', this._calc.menuSize.marginLeft);
         
         var self = this;
-        console.log(doubleClickOn)
         
         on(p, "mouseup", function(e){
             if(!doubleClickOn){
