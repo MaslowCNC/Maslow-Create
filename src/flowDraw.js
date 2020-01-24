@@ -88,6 +88,10 @@ flowCanvas.addEventListener('mousedown', event => {
     //hide the menu if it is visible
     if (!document.querySelector('#straight_menu').contains(event.target)) {
         closeTopMenu()
+        let options = document.querySelectorAll('.option')
+        Array.prototype.forEach.call(options, a => {
+            a.classList.remove("openMenu") 
+        })
     }
     
 })
@@ -125,22 +129,21 @@ window.addEventListener('keydown', event => {
 
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
-    closeTopMenu()
+    openTopMenu()
 }) 
 
 /**
- * Closes main menu on background click or on button click if open
  * Checks if menu is open and changes class to trigger hiding of individual buttons
  */ 
-function closeTopMenu(){
+function openTopMenu(){
 
     document.querySelector('#toggle_wrap').style.display = "inline"
     let options = document.querySelectorAll('.option')
     var step = -150
     Array.prototype.forEach.call(options, a => {
         if (a.classList.contains("openMenu")){
-            hideTopButton()
-            a.classList.remove("openMenu")         
+            closeTopMenu() 
+            a.classList.remove("openMenu")        
         }
         else{
             a.classList.add("openMenu")
@@ -153,18 +156,19 @@ function closeTopMenu(){
 }
 
 /**
- * Hides individual top buttons
- */ 
-function hideTopButton(){
-    let options = document.querySelectorAll('.option')
-    var step = 0
-    document.getElementById('goup_top').style.visibility = "visible"
-
-    Array.prototype.forEach.call(options, a => {
-        a.style.transition = `transform 0.5s`
-        a.style.transform = `translateX(${step}%)`              
-    })     
+ * Closes main menu on background click or on button click if open
+ */
+function closeTopMenu(){
+        document.querySelector('#toggle_wrap').style.display = "inline"
+        let options = document.querySelectorAll('.option')
+        var step = 0
+            document.getElementById('goup_top').style.visibility = "visible"
+            Array.prototype.forEach.call(options, a => {
+                a.style.transition = `transform 0.5s`
+                a.style.transform = `translateX(${step}%)`              
+            })  
 }
+
 
 /**
  * Top Button menu event listeners if not in run mode
