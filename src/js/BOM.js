@@ -17,7 +17,7 @@ export class BOMEntry {
          * The number of this item needed.
          * @type {number}
          */
-        this.numberNeeded = 0
+        this.numberNeeded = 1
         /** 
          * The cost of one of this item in USD.
          * @type {number}
@@ -48,9 +48,12 @@ export const extractBomTags = async(geometry) => {
     
     if (result != -1 ){
         //Filter for only bomItems
-        bomItems = result.filter(item => {return item.substring(5, 12) == "BOMitem"})
+        bomItems = result.filter(item => {
+            return item[0].substring(2, 13) == "BOMitemName"
+        })
+        
         bomItems = bomItems.map(JSON.parse)
-        bomItems = bomItems.map(JSON.parse)
+        //bomItems = bomItems.map(JSON.parse)
         
         //Consolidate similar items into a single item
         var compiledArray = []
