@@ -159,14 +159,14 @@ function openTopMenu(){
  * Closes main menu on background click or on button click if open
  */
 function closeTopMenu(){
-        document.querySelector('#toggle_wrap').style.display = "inline"
-        let options = document.querySelectorAll('.option')
-        var step = 0
-            document.getElementById('goup_top').style.visibility = "visible"
-            Array.prototype.forEach.call(options, a => {
-                a.style.transition = `transform 0.5s`
-                a.style.transform = `translateX(${step}%)`              
-            })  
+    document.querySelector('#toggle_wrap').style.display = "inline"
+    let options = document.querySelectorAll('.option')
+    var step = 0
+    document.getElementById('goup_top').style.visibility = "visible"
+    Array.prototype.forEach.call(options, a => {
+        a.style.transition = `transform 0.5s`
+        a.style.transform = `translateX(${step}%)`              
+    })  
 }
 
 
