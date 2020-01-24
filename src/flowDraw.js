@@ -259,20 +259,7 @@ function onWindowResize() {
     document.querySelector('#flow-canvas').setAttribute('style','height:'+innerHeight/2+'px')
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
 
-    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-
-    let switchButton = document.getElementById('atomSwitch')
-    if(switchButton != null){
-        switchButton.addEventListener('change', (event) => {
-
-            if (event.target.checked) {
-                GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-
-            } else {
-                GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
-            }
-        })
-    }
+    GlobalVariables.scale1 = GlobalVariables.canvas.width/originalWidth
 
     GlobalVariables.display.onWindowResize()
 }
