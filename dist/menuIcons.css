@@ -1,13 +1,13 @@
-.icon1 {
+    .icon1 {
             background-position: 0 0;
         }
 
-  .Actions{
+    .Actions{
             background: url("./imgs/actions.png");
             width:400%;
             height:400%;
         }
-  .Shapes{
+    .Shapes{
             background: url("./imgs/Shapes.png");
             width:150%;
             height:150%;
@@ -17,13 +17,24 @@
             width:150%;
             height:150%;
         }
-  .Interaction{
+    .Interaction{
             background: url("./imgs/interaction.png");
             width:150%;
             height:150%;
         }
     .Intersection{
             background: url("./imgs/intersection.png");
+            width:150%;
+            height:150%;
+        }
+    .Properties{
+            background: url("./imgs/tag.png");
+            width:150%;
+            height:150%;
+        }
+
+    .OverCut-Corners{
+            background: url("./imgs/Overcut.png");
             width:150%;
             height:150%;
         }
@@ -58,135 +69,142 @@
             height:150%;
         }      
 
-        .Code{
+    .Code{
             background: url("./imgs/code.png");
             width:150%;
             height:150%;
         }   
-        .Gcode{
+    .Gcode{
             background: url("./imgs/gcode.png");
             width:150%;
             height:150%;
         }   
 
-         .Scale{
+    .Scale{
             background: url("./imgs/scale.png");
             width:150%;
             height:150%;
         }   
 
-         .RegularPolygon{
+    .RegularPolygon{
             background: url("./imgs/RegularPolygon.png");
             width:150%;
             height:150%;
         }   
 
-        .Extrude{
+    .Extrude{
             background: url("./imgs/extrude.png");
             width:150%;
             height:150%;
         }   
-        .Translate{
+    .Translate{
             background: url("./imgs/translate.png");
             width:150%;
             height:150%;
         }  
-        .Molecule{
+    .Molecule{
             background: url("./imgs/molecule.png");
             width:150%;
             height:150%;
         }  
-        .GitHubMolecule{
+    .GitHubMolecule{
             background: url("./imgs/githubmolecule.png");
             width:150%;
             height:150%;
         } 
 
-        .Color{
+    .Color{
             background: url("./imgs/Color.png");
             width:150%;
             height:150%;
         } 
 
-        .CutList{
+    .CutList{
             background: url("./imgs/Cutlist.png");
             width:150%;
             height:150%;
         } 
 
-          .Rotate{
+    .Rotate{
             background: url("./imgs/Rotate.png");
             width:150%;
             height:150%;
         } 
 
 
-          .Input{
+    .Input{
             background: url("./imgs/Input.png");
             width:150%;
             height:150%;
         } 
 
-         .Equation{
+    .Equation{
             background: url("./imgs/Equation.png");
             width:150%;
             height:150%;
         } 
 
-         .ShrinkWrap{
+    .ShrinkWrap{
             background: url("./imgs/shrinkwrap.png");
             width:150%;
             height:150%;
         } 
 
-        .Stretch{
+    .Stretch{
             background: url("./imgs/Stretch.png");
             width:150%;
             height:150%;
         } 
-        .Stl{
+    
+    .Stl{
             background: url("./imgs/stl.png");
             width:150%;
             height:150%;
         } 
-        .Svg{
+    
+    .Svg{
             background: url("./imgs/svg.png");
             width:150%;
             height:150%;
         } 
 
-        .CutAway{
+    .CutAway{
             background: url("./imgs/CutAway.png");
             width:150%;
             height:150%;
         } 
-        .Tag{
+    
+    .Tag{
             background: url("./imgs/tag.png");
             width:150%;
             height:150%;
         } 
-        .AddBOMTag{
-            background: url("./imgs/bom.png");
+        
+    .Add-BOM-Tag{
+            background: url("./imgs/Bom.png");
             width:150%;
             height:150%;
         } 
-        .Readme{
+        
+    .Readme{
             background: url("./imgs/readme.png");
             width:150%;
             height:150%;
         } 
-        .CutLayout{
+        
+    .CutLayout{
             background: url("./imgs/cutlayout.png");
             width:150%;
             height:150%;
         } 
 
-        .ExtractTag{
+    .ExtractTag{
             background: url("./imgs/extracttag.png");
             width:150%;
             height:150%;
         } 
-        .Constant{
+        
+    .Constant{
             background: url("./imgs/Constant.png");
             width:150%;
             height:150%;
