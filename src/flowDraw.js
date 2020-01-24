@@ -132,7 +132,6 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
     var step = -150
     Array.prototype.forEach.call(options, a => {
         if (a.classList.contains("openMenu")){
-            console.log("containsOpen")
             closeMainMenu()
             //a.classList.remove("openMenu")
             document.getElementById('goup_top').style.visibility = "visible"
