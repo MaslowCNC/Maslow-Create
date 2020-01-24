@@ -28,7 +28,7 @@ var cmenu = CMenu(ele)
             },
             {
                 title: '',
-                icon: 'Intersection',
+                icon: 'Properties',
                 menus: makeArray('Properties')
             },
             {
