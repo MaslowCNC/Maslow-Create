@@ -88,6 +88,7 @@ flowCanvas.addEventListener('mousedown', event => {
     //hide the menu if it is visible
     if (!document.querySelector('#straight_menu').contains(event.target)) {
         closeMainMenu()
+        document.getElementById('goup_top').style.visibility = "visible"
     }
     
 })
@@ -131,8 +132,9 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
     var step = -150
     Array.prototype.forEach.call(options, a => {
         if (a.classList.contains("openMenu")){
+            console.log("containsOpen")
             closeMainMenu()
-            a.classList.remove("openMenu")
+            //a.classList.remove("openMenu")
             document.getElementById('goup_top').style.visibility = "visible"
         }
         else{
@@ -154,7 +156,8 @@ function closeMainMenu(){
     var step = 0
     Array.prototype.forEach.call(options, a => {
         a.style.transition = `transform 0.5s`
-        a.style.transform = `translateX(${step}%)`          
+        a.style.transform = `translateX(${step}%)` 
+        a.classList.remove("openMenu")         
     }) 
 }
 
