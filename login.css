@@ -188,6 +188,7 @@ animation-delay: 0s;
   font-size: 14px;
 }
 .form button{
+  height:40px;
   font-family: "Roboto", sans-serif;
   text-transform: uppercase;
   outline: 0;

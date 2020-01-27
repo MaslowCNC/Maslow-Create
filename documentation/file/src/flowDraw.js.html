@@ -166,7 +166,11 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     }
     //hide the menu if it is visible
     if (!document.querySelector(&apos;#straight_menu&apos;).contains(event.target)) {
-        closeMainMenu()
+        closeTopMenu()
+        let options = document.querySelectorAll(&apos;.option&apos;)
+        Array.prototype.forEach.call(options, a =&gt; {
+            a.classList.remove(&quot;openMenu&quot;) 
+        })
     }
     
 })
@@ -204,15 +208,21 @@ window.addEventListener(&apos;keydown&apos;, event =&gt; {
 
 /* Button to open top menu */
 document.getElementById(&apos;straight_menu&apos;).addEventListener(&apos;mousedown&apos;, () =&gt; {
+    openTopMenu()
+}) 
+
+/**
+ * Checks if menu is open and changes class to trigger hiding of individual buttons
+ */ 
+function openTopMenu(){
 
     document.querySelector(&apos;#toggle_wrap&apos;).style.display = &quot;inline&quot;
     let options = document.querySelectorAll(&apos;.option&apos;)
     var step = -150
     Array.prototype.forEach.call(options, a =&gt; {
         if (a.classList.contains(&quot;openMenu&quot;)){
-            closeMainMenu()
-            a.classList.remove(&quot;openMenu&quot;)
-            document.getElementById(&apos;goup_top&apos;).style.visibility = &quot;visible&quot;
+            closeTopMenu() 
+            a.classList.remove(&quot;openMenu&quot;)        
         }
         else{
             a.classList.add(&quot;openMenu&quot;)
@@ -221,21 +231,23 @@ document.getElementById(&apos;straight_menu&apos;).addEventListener(&apos;moused
             step-=100
             document.getElementById(&apos;goup_top&apos;).style.visibility = &quot;hidden&quot;
         }           
-
-    }) 
-}) 
+    })     
+}
 
 /**
  * Closes main menu on background click or on button click if open
- */ 
-function closeMainMenu(){
+ */
+function closeTopMenu(){
+    document.querySelector(&apos;#toggle_wrap&apos;).style.display = &quot;inline&quot;
     let options = document.querySelectorAll(&apos;.option&apos;)
     var step = 0
+    document.getElementById(&apos;goup_top&apos;).style.visibility = &quot;visible&quot;
     Array.prototype.forEach.call(options, a =&gt; {
         a.style.transition = `transform 0.5s`
-        a.style.transform = `translateX(${step}%)`          
-    }) 
+        a.style.transform = `translateX(${step}%)`              
+    })  
 }
+
 
 /**
  * Top Button menu event listeners if not in run mode
@@ -338,20 +350,7 @@ function onWindowResize() {
     document.querySelector(&apos;#flow-canvas&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
     document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
 
-    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-
-    let switchButton = document.getElementById(&apos;atomSwitch&apos;)
-    if(switchButton != null){
-        switchButton.addEventListener(&apos;change&apos;, (event) =&gt; {
-
-            if (event.target.checked) {
-                GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-
-            } else {
-                GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
-            }
-        })
-    }
+    GlobalVariables.scale1 = GlobalVariables.canvas.width/originalWidth
 
     GlobalVariables.display.onWindowResize()
 }
