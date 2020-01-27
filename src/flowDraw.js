@@ -87,7 +87,11 @@ flowCanvas.addEventListener('mousedown', event => {
     }
     //hide the menu if it is visible
     if (!document.querySelector('#straight_menu').contains(event.target)) {
-        closeMainMenu()
+        closeTopMenu()
+        let options = document.querySelectorAll('.option')
+        Array.prototype.forEach.call(options, a => {
+            a.classList.remove("openMenu") 
+        })
     }
     
 })
@@ -125,15 +129,21 @@ window.addEventListener('keydown', event => {
 
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
+    openTopMenu()
+}) 
+
+/**
+ * Checks if menu is open and changes class to trigger hiding of individual buttons
+ */ 
+function openTopMenu(){
 
     document.querySelector('#toggle_wrap').style.display = "inline"
     let options = document.querySelectorAll('.option')
     var step = -150
     Array.prototype.forEach.call(options, a => {
         if (a.classList.contains("openMenu")){
-            closeMainMenu()
-            a.classList.remove("openMenu")
-            document.getElementById('goup_top').style.visibility = "visible"
+            closeTopMenu() 
+            a.classList.remove("openMenu")        
         }
         else{
             a.classList.add("openMenu")
@@ -142,21 +152,23 @@ document.getElementById('straight_menu').addEventListener('mousedown', () => {
             step-=100
             document.getElementById('goup_top').style.visibility = "hidden"
         }           
-
-    }) 
-}) 
+    })     
+}
 
 /**
  * Closes main menu on background click or on button click if open
- */ 
-function closeMainMenu(){
+ */
+function closeTopMenu(){
+    document.querySelector('#toggle_wrap').style.display = "inline"
     let options = document.querySelectorAll('.option')
     var step = 0
+    document.getElementById('goup_top').style.visibility = "visible"
     Array.prototype.forEach.call(options, a => {
         a.style.transition = `transform 0.5s`
-        a.style.transform = `translateX(${step}%)`          
-    }) 
+        a.style.transform = `translateX(${step}%)`              
+    })  
 }
+
 
 /**
  * Top Button menu event listeners if not in run mode
@@ -259,20 +271,7 @@ function onWindowResize() {
     document.querySelector('#flow-canvas').setAttribute('style','height:'+innerHeight/2+'px')
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/2+'px')
 
-    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-
-    let switchButton = document.getElementById('atomSwitch')
-    if(switchButton != null){
-        switchButton.addEventListener('change', (event) => {
-
-            if (event.target.checked) {
-                GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
-
-            } else {
-                GlobalVariables.scale1 =  0.9 *GlobalVariables.canvas.width/originalWidth
-            }
-        })
-    }
+    GlobalVariables.scale1 = GlobalVariables.canvas.width/originalWidth
 
     GlobalVariables.display.onWindowResize()
 }
