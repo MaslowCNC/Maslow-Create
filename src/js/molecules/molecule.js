@@ -233,6 +233,8 @@ export default class Molecule extends Atom{
         
         this.displaySimpleBOM(valueList)
         
+        this.displaySidebarReadme(valueList)
+        
         return valueList
         
     }
@@ -329,7 +331,34 @@ export default class Molecule extends Atom{
         }
         
     }
-
+    
+    /**
+     * Creates markdown version of the readme content for this atom in the sidebar
+     * @param {object} list - The HTML object to append the created element to.
+     */ 
+    displaySidebarReadme(list){
+        
+        
+        var readmeContent = ""
+        this.requestReadme().forEach(item => {
+            readmeContent = readmeContent + item + "\n\n\n"
+        })
+        
+        list.appendChild(document.createElement('br'))
+        list.appendChild(document.createElement('br'))
+        
+        var div = document.createElement('h3')
+        div.setAttribute('style','text-align:center;')
+        list.appendChild(div)
+        var valueText = document.createTextNode('ReadMe')
+        div.appendChild(valueText)
+        
+        var x = document.createElement('HR')
+        list.appendChild(x)
+        
+        this.createMarkdownListItem(list,readmeContent)
+    }
+    
     /**
      * Replace the currently displayed molecule with the parent of this molecule...moves the user up one level.
      */
