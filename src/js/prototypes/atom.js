@@ -1,5 +1,6 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
+import showdown  from 'showdown'
 
 /**
  * This class is the prototype for all atoms.
@@ -798,6 +799,27 @@ export default class Atom {
         valueTextDiv.setAttribute('id', thisID)
         
 
+    }
+    
+    /**
+     * Creates a html representation of the passed text. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {string} texxt - The text used to generate the markdown html.
+     */ 
+    createMarkdownListItem(list, text){
+        
+        var converter = new showdown.Converter()
+        //var text      = '# hello, markdown!'
+        var html      = converter.makeHtml(text)
+        
+        var markdownTextDiv = document.createElement('div')
+        markdownTextDiv.innerHTML = html
+        
+        //var valueText = document.createTextNode(text)
+        //valueTextDiv.appendChild(valueText)
+        list.appendChild(markdownTextDiv)
+        
+        
     }
     
     /**
