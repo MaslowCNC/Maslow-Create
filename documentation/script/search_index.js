@@ -1902,6 +1902,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#displaysidebarreadme",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-displaySidebarReadme",
+    "src/js/molecules/molecule.js~Molecule#displaySidebarReadme",
+    "method"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#displaysimplebom",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-displaySimpleBOM",
     "src/js/molecules/molecule.js~Molecule#displaySimpleBOM",
@@ -2643,6 +2649,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#createeditablevaluelistitem",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-createEditableValueListItem",
     "src/js/prototypes/atom.js~Atom#createEditableValueListItem",
+    "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#createmarkdownlistitem",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-createMarkdownListItem",
+    "src/js/prototypes/atom.js~Atom#createMarkdownListItem",
     "method"
   ],
   [

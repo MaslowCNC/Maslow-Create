@@ -79,6 +79,7 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/prototypes/atom.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import AttachmentPoint from &apos;./attachmentpoint&apos;
 import GlobalVariables from &apos;../globalvariables&apos;
+import showdown  from &apos;showdown&apos;
 
 /**
  * This class is the prototype for all atoms.
@@ -877,6 +878,27 @@ export default class Atom {
         valueTextDiv.setAttribute(&apos;id&apos;, thisID)
         
 
+    }
+    
+    /**
+     * Creates a html representation of the passed text. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {string} texxt - The text used to generate the markdown html.
+     */ 
+    createMarkdownListItem(list, text){
+        
+        var converter = new showdown.Converter()
+        //var text      = &apos;# hello, markdown!&apos;
+        var html      = converter.makeHtml(text)
+        
+        var markdownTextDiv = document.createElement(&apos;div&apos;)
+        markdownTextDiv.innerHTML = html
+        
+        //var valueText = document.createTextNode(text)
+        //valueTextDiv.appendChild(valueText)
+        list.appendChild(markdownTextDiv)
+        
+        
     }
     
     /**
