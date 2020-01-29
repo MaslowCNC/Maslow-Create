@@ -1,5 +1,6 @@
 import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
+import showdown  from 'showdown'
 
 /**
  * This class is the prototype for all atoms.
@@ -798,6 +799,22 @@ export default class Atom {
         valueTextDiv.setAttribute('id', thisID)
         
 
+    }
+    
+    createMarkdownListItem(list, text){
+        
+        var converter = new showdown.Converter()
+        //var text      = '# hello, markdown!'
+        var html      = converter.makeHtml(text)
+        
+        var markdownTextDiv = document.createElement('div')
+        markdownTextDiv.innerHTML = html
+        
+        //var valueText = document.createTextNode(text)
+        //valueTextDiv.appendChild(valueText)
+        list.appendChild(markdownTextDiv)
+        
+        
     }
     
     /**
