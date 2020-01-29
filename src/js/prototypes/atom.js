@@ -801,6 +801,11 @@ export default class Atom {
 
     }
     
+    /**
+     * Creates a html representation of the passed text. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {string} texxt - The text used to generate the markdown html.
+     */ 
     createMarkdownListItem(list, text){
         
         var converter = new showdown.Converter()
