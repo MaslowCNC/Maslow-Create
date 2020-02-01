@@ -72,12 +72,12 @@ class GlobalVariables{
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shirinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
-            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Interactions'},
             
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
             addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Properties'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
+            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Properties'},
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
             costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
@@ -88,7 +88,7 @@ class GlobalVariables{
             equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
             code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
             
-            overCutCorners:     {creator: OverCutCorners, atomType: 'OverCutCorners', atomCategory: 'Actions'},
+            overCutCorners:     {creator: OverCutCorners, atomType: 'OverCut-Corners', atomCategory: 'Actions'},
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
