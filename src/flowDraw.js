@@ -10,8 +10,8 @@ GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 
-GlobalVariables.canvas.width = innerWidth
-GlobalVariables.canvas.height = innerHeight/2
+GlobalVariables.canvas.width = innerWidth 
+GlobalVariables.canvas.height = innerWidth/4
 /** 
  * The original width of the canvas before scaling.
  * @type {number}
@@ -27,7 +27,7 @@ document.querySelector('#flow-canvas').setAttribute('style','height:'+innerWidth
 document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.5+'px')
 
 if(!GlobalVariables.runMode){
-    document.querySelector('.flex-parent').setAttribute('style','height:'+ (innerHeight - canvasHeight*1.2)+'px')
+    document.querySelector('.flex-parent').setAttribute('style','height:'+ (innerHeight - canvasHeight)+'px')
 }else{
     document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
 }
