@@ -47,7 +47,7 @@ export default class Output extends Atom {
          * This atom's radius
          * @type {number}
          */
-        this.radius = 20
+        this.radius = GlobalVariables.canvas.width/65 
         
         this.setValues(values)
         

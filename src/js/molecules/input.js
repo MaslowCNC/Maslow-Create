@@ -36,7 +36,7 @@ export default class Input extends Atom {
          * This atom's radius for drawing
          * @type {string}
          */
-        this.radius = 20
+        this.radius = GlobalVariables.canvas.width/65 
         
         /** 
          * This atom's old name, used during name changes

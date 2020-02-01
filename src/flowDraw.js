@@ -19,15 +19,19 @@ GlobalVariables.canvas.height = innerHeight/2
 let originalWidth = GlobalVariables.canvas.width
 var canvasHeight =document.querySelector('#flow-canvas').height 
 
+GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
+
+document.querySelector('#flow-canvas').setAttribute('style','height:'+innerWidth/4+'px')
+document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.5+'px')
 
 if(!GlobalVariables.runMode){
     document.querySelector('.flex-parent').setAttribute('style','height:'+ (innerHeight - canvasHeight)+'px')
 }else{
     document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
 }
-document.querySelector('#flow-canvas').setAttribute('style','height:'+innerWidth/4+'px')
-document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.5+'px')
+
 
 // Event Listeners
 /** 
