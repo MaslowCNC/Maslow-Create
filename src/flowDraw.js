@@ -11,15 +11,9 @@ GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
     
-    //Reset screen parameters 
-    var bounds = GlobalVariables.canvas.getBoundingClientRect()
-    GlobalVariables.canvas.width = bounds.width
-    /** 
-     * The original width of the canvas before scaling.
-     * @type {number}
-     */
-    let originalWidth = GlobalVariables.canvas.width
-    setCanvas()
+    
+GlobalVariables.resetWidthOnLoad()
+setCanvas()
 
 // Event Listeners
 /** 
@@ -247,18 +241,19 @@ function init() {
 }
 
 function setCanvas(){
+ 
     var bounds = GlobalVariables.canvas.getBoundingClientRect()
     GlobalVariables.canvas.width = bounds.width
     GlobalVariables.canvas.height = bounds.height 
-    GlobalVariables.scale1 =  GlobalVariables.canvas.width/originalWidth
+    GlobalVariables.scale1 =  GlobalVariables.canvas.width/GlobalVariables.widthOnLoad
    
-    document.querySelector('#flow-canvas').setAttribute('style','height:'+GlobalVariables.canvas.width/3.5+'px')
+    document.querySelector('#flow-canvas').setAttribute('style','height:'+GlobalVariables.canvas.width/3+'px')
     
     var flowCanvasHeight =document.querySelector('#flow-canvas').height 
     document.querySelector('.jscad-container').setAttribute('style','width:'+GlobalVariables.canvas.width/1.5+'px')
 
     if(!GlobalVariables.runMode){
-        document.querySelector('.flex-parent').setAttribute('style','height:'+ (innerHeight - GlobalVariables.canvas.width/3.5)+'px')
+        document.querySelector('.flex-parent').setAttribute('style','height:'+ (innerHeight)+'px')
     }else{
         document.querySelector('.flex-parent').setAttribute('style','height:'+ innerHeight+'px')
     }
@@ -293,4 +288,5 @@ function animate() {
 }
 
 init()
+export{setCanvas}
 

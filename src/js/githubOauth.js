@@ -2,6 +2,7 @@ import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
 import { extractBomTags } from './BOM.js'
 import { OAuth } from 'oauthio-web'
+import { setCanvas } from '../flowDraw.js'
 
 /**
  * This function works like a class to sandbox interaction with GitHub.
@@ -1287,6 +1288,10 @@ export default function GitHubModule(){
      * Loads a project from github by name.
      */
     this.loadProject = async function(projectName){
+
+        GlobalVariables.resetWidthOnLoad()
+        setCanvas()
+
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }

@@ -62,6 +62,8 @@ class GlobalVariables{
          * @type {number}
          */
         this.scale1 = 1 
+
+        this.widthOnLoad
         /** 
          * An array of all of the available types of atoms which can be placed with a right click.
          * @type {array}
@@ -193,6 +195,17 @@ class GlobalVariables{
         
         return dist
     }
+
+    resetWidthOnLoad(){
+    //Reset screen parameters 
+    GlobalVariables.canvas = document.querySelector('canvas')
+    var bounds = GlobalVariables.canvas.getBoundingClientRect()
+    GlobalVariables.canvas.width = bounds.width
+    this.widthOnLoad = GlobalVariables.canvas.width
+    return this.widthOnLoad
+
+    }
+
 }
 
 /**
