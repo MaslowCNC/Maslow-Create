@@ -383,6 +383,12 @@ export default class Molecule extends Atom{
         sortableAtomsList.forEach(molecule => {
             generatedReadme = generatedReadme.concat(molecule.requestReadme())
         })
+        
+        //Check to see if any of the children added anything if not, remove the bit we added
+        if(generatedReadme[generatedReadme.length - 1] == '## ' + this.name){
+            generatedReadme.pop()
+        }
+        
         return generatedReadme
     }
     
