@@ -1026,12 +1026,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/bom.js~addbomtag#requestreadme",
-    "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-method-requestReadme",
-    "src/js/molecules/BOM.js~AddBOMTag#requestReadme",
-    "method"
-  ],
-  [
     "src/js/molecules/bom.js~addbomtag#serialize",
     "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-method-serialize",
     "src/js/molecules/BOM.js~AddBOMTag#serialize",
