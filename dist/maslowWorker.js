@@ -106933,10 +106933,10 @@ return d[d.length-1];};return ", funcName].join("");
           if (values[1] === true && values[2] === false) { // Solid, no wireframe
             fromGeo = Shape.fromGeometry(values[0]);
           } else if (values[1] === false && values[2] === true) {
-            fromGeo = Shape.fromGeometry(values[0]).wireframe();
+            fromGeo = Shape.fromGeometry(values[0]).outline();
           } else if (values[1] === true && values[2] === true) {
             const intermediate = Shape.fromGeometry(values[0]);
-            fromGeo = intermediate.with(intermediate.wireframe());
+            fromGeo = intermediate.with(intermediate.outline());
           } else {
             fromGeo = Empty(); // This should be an empty geometry
           }
