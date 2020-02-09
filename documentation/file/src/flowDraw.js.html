@@ -364,8 +364,8 @@ function animate() {
     requestAnimationFrame(animate)
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
     GlobalVariables.c.scale(GlobalVariables.scale1,GlobalVariables.scale1)
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
-        molecule.update()
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =&gt; {
+        atom.update()
 
     })
     GlobalVariables.c.setTransform(1,0,0,1,0,0)
