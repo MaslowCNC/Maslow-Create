@@ -150,7 +150,7 @@ export default class Atom {
     /**
      * Draws the atom on the screen
      */ 
-    draw() {   
+    draw() {
         this.inputs.forEach(child => {
             child.draw()       
         })
