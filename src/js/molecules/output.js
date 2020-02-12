@@ -47,7 +47,7 @@ export default class Output extends Atom {
          * This atom's radius
          * @type {number}
          */
-        this.radius = GlobalVariables.canvas.width/65 
+        this.radius = 1/72
         
         this.setValues(values)
         
@@ -89,7 +89,11 @@ export default class Output extends Atom {
      */ 
     draw() {
 
-        this.height= this.radius
+        const xInPixels = GlobalVariables.widthToPixels(this.x)
+        const yInPixels = GlobalVariables.heightToPixels(this.y)
+        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
+        this.height= radiusInPixels
         
         //Set colors
         if(this.processing){
@@ -123,12 +127,12 @@ export default class Output extends Atom {
         GlobalVariables.c.beginPath()
         GlobalVariables.c.textAlign = 'end' 
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y - this.height/2)
-        GlobalVariables.c.lineTo(this.x - this.radius + 2*this.radius, this.y - this.height/2)
-        GlobalVariables.c.lineTo(this.x + this.radius + 10, this.y)
-        GlobalVariables.c.lineTo(this.x + this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y + this.height/2)
+        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels- radiusInPixels)
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels - this.height/2)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels + 2*radiusInPixels, yInPixels - this.height/2)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels + 10, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels, yInPixels + this.height/2)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels, yInPixels + this.height/2)
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.closePath()
@@ -136,10 +140,10 @@ export default class Output extends Atom {
         //GlobalVariables.c.stroke()
        
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x + this.radius - this.radius*2, this.y - this.height)
-        GlobalVariables.c.lineTo(this.x + this.radius -5, this.y)
-        GlobalVariables.c.lineTo(this.x + this.radius - this.radius*2, this.y + this.height)
-        GlobalVariables.c.lineTo(this.x + this.radius - this.radius*2, this.y - this.height)
+        GlobalVariables.c.moveTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels - this.height)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels -5, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels + this.height)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels - this.height)
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()

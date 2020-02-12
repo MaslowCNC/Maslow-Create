@@ -10,10 +10,9 @@ GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
-    
-    
-GlobalVariables.resetWidthOnLoad()
-setCanvas()
+
+GlobalVariables.canvas.width = window.innerWidth;
+GlobalVariables.canvas.height = window.innerWidth/4;
 
 // Event Listeners
 /** 
@@ -25,7 +24,7 @@ let flowCanvas = document.getElementById('flow-canvas')
 flowCanvas.addEventListener('mousemove', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
 
-        molecule.clickMove(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1)    
+        molecule.clickMove(event.clientX,event.clientY)    
     })
 })
 
@@ -48,7 +47,7 @@ flowCanvas.addEventListener('mousedown', event => {
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         
-        if (molecule.clickDown(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1,clickHandledByMolecule) == true){
+        if (molecule.clickDown(event.clientX,event.clientY,clickHandledByMolecule) == true){
             clickHandledByMolecule = true
         }
 
@@ -87,7 +86,7 @@ flowCanvas.addEventListener('dblclick', event => {
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (molecule.doubleClick(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
+        if (molecule.doubleClick(event.clientX,event.clientY) == true){
             clickHandledByMolecule = true
         }
     })
@@ -101,7 +100,7 @@ flowCanvas.addEventListener('dblclick', event => {
 flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.clickUp(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1)      
+        molecule.clickUp(event.clientX,event.clientY)      
     })
 })
 
@@ -234,37 +233,20 @@ function init() {
         }
     }
     
-    window.addEventListener('resize', () => { onWindowResize() }, false)
+   window.addEventListener('resize', () => { onWindowResize() }, false)
 
-    onWindowResize()
     animate()
 }
 
 function setCanvas(){
- 
-    var bounds = GlobalVariables.canvas.getBoundingClientRect()
-    GlobalVariables.canvas.width = bounds.width
-    GlobalVariables.canvas.height = bounds.height 
-    GlobalVariables.scale1 =  GlobalVariables.canvas.width/GlobalVariables.widthOnLoad
-   
-    document.querySelector('#flow-canvas').setAttribute('style','height:'+GlobalVariables.canvas.width/3+'px')
-    
-    var flowCanvasHeight =document.querySelector('#flow-canvas').height 
-    document.querySelector('.jscad-container').setAttribute('style','width:'+GlobalVariables.canvas.width/1.5+'px')
 
-    if(!GlobalVariables.runMode){
-        document.querySelector('.flex-parent').setAttribute('style','height:'+ (innerHeight)+'px')
-    }else{
-        document.querySelector('.flex-parent').setAttribute('style','height:'+ innerHeight+'px')
-    }
  }
 
 /**
  * Handles the window's resize behavior when the browser size changes.
  */ 
 function onWindowResize() {
-    
-    setCanvas()
+    GlobalVariables.canvas.width = window.innerWidth;
     GlobalVariables.display.onWindowResize()
 }
 
@@ -276,12 +258,10 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate)
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
-    GlobalVariables.c.scale(GlobalVariables.scale1,GlobalVariables.scale1)
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.update()
 
     })
-    GlobalVariables.c.setTransform(1,0,0,1,0,0)
 
     GlobalVariables.display.render()
     GlobalVariables.display.controls.update()

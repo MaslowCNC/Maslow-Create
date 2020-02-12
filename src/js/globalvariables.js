@@ -57,15 +57,8 @@ class GlobalVariables{
         this.secretTypes = {
             output:        {creator: Output, atomType: 'Output'}
         }
-        /** 
-         * The current amount by which the canvas has been scaled.
-         * @type {number}
-         */
-        this.scale1 = 1 
 
-        this.widthOnLoad
-        /** 
-         * An array of all of the available types of atoms which can be placed with a right click.
+         /* An array of all of the available types of atoms which can be placed with a right click.
          * @type {array}
          */
         this.availableTypes = {
@@ -173,6 +166,23 @@ class GlobalVariables{
             'derivative': function () { throw new Error('Function derivative is disabled') }
         }, { override: true })
     }
+
+    widthToPixels(width){
+        let pixels = this.canvas.width * width
+        return pixels
+    }
+    pixelsToWidth(pixels){
+         let width = 1 /(this.canvas.width / pixels)
+        return width
+    }
+     heightToPixels(height){
+        let pixels = this.canvas.height * height
+        return pixels
+    }
+    pixelsToHeight(pixels){
+         let height = 1 /(this.canvas.height / pixels)
+        return height
+    }
     
     /** 
      * A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.
@@ -196,15 +206,6 @@ class GlobalVariables{
         return dist
     }
 
-    resetWidthOnLoad(){
-    //Reset screen parameters 
-    GlobalVariables.canvas = document.querySelector('canvas')
-    var bounds = GlobalVariables.canvas.getBoundingClientRect()
-    GlobalVariables.canvas.width = bounds.width
-    this.widthOnLoad = GlobalVariables.canvas.width
-    return this.widthOnLoad
-
-    }
 
 }
 

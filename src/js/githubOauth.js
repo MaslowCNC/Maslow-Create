@@ -1289,9 +1289,6 @@ export default function GitHubModule(){
      */
     this.loadProject = async function(projectName){
 
-        GlobalVariables.resetWidthOnLoad()
-        setCanvas()
-
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }

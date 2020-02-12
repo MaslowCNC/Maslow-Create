@@ -58,8 +58,8 @@ export default class Molecule extends Atom{
         //Add the molecule's output
         this.placeAtom({
             parentMolecule: this, 
-            x: GlobalVariables.canvas.width - 50,
-            y: GlobalVariables.canvas.height/2,
+            x: GlobalVariables.pixelsToWidth(50),
+            y: GlobalVariables.pixelsToHeight(50),
             parent: this,
             name: 'Output',
             atomType: 'Output'
@@ -85,6 +85,8 @@ export default class Molecule extends Atom{
             })
         } 
     }
+
+    
     
     /**
      * Add the center dot to the molecule

@@ -15,7 +15,7 @@ export default class AttachmentPoint {
          * This atom's default radius (non hover)
          * @type {number}
          */
-        this.defaultRadius = 8
+        this.defaultRadius = 1/60
         /** 
          * A flag to indicate if this attachmet point is currently expanded.
          * @type {boolean}
@@ -25,13 +25,8 @@ export default class AttachmentPoint {
          * This atom's current radius as displayed.
          * @type {number}
          */
-        this.radius = 8
+        this.radius = 1/60
         
-        /** 
-         * How close does the mouse need to get to expand the atom
-         * @type {number}
-         */
-        this.hoverDetectRadius = 8
         /** 
          * When the mouse is hovering where should the AP move in X
          * @type {number}
@@ -71,7 +66,7 @@ export default class AttachmentPoint {
          * A flag to determine if the hover text is shown next to the attachment point.
          * @type {boolean}
          */
-        this.showHoverText = false
+        this.showHoverText = true
         /** 
          * The attachment point type.
          * @type {string}
@@ -136,43 +131,47 @@ export default class AttachmentPoint {
      * Draws the attachment point on the screen. Called with each frame.
      */ 
     draw() {
+       
+        let xInPixels = GlobalVariables.widthToPixels(this.x);
+        let yInPixels = GlobalVariables.heightToPixels(this.y);
+        let radiusInPixels;
+        let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)
+        let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)
+        let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
 
-        this.defaultRadius = this.radius
-        this.radius = this.parentMolecule.radius/2.2
-        this.hoverDetectRadius = this.parentMolecule.radius
+        this.defaultRadius = radiusInPixels
+        radiusInPixels = parentRadiusInPixels/2.2
 
         if (this.expandedRadius){
-            this.radius = this.parentMolecule.radius/1.6
+            radiusInPixels = parentRadiusInPixels/1.6
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             /**
              * The x cordinate of the attachment point.
              */
-            this.x = this.parentMolecule.x-this.parentMolecule.radius
+            xInPixels = parentXInPixels - parentRadiusInPixels
             /**
              * The y cordinate of the attachment point.
              */
-            this.y = this.parentMolecule.y
+            yInPixels = parentYInPixels
         }    
         else if(this.parentMolecule.inputs.length < 2 && this.type == 'output'){
-            this.x= this.parentMolecule.x+this.parentMolecule.radius
-            this.y= this.parentMolecule.y
+            xInPixels = parentXInPixels + parentRadiusInPixels
+            yInPixels = parentYInPixels
         }                 
-
 
         var txt = this.name
         var textWidth = GlobalVariables.c.measureText(txt).width
         GlobalVariables.c.font = '10px Work Sans'
 
         var bubbleColor = '#C300FF'
-        var scaleRadiusDown = this.radius*.7
-        var halfRadius = this.radius*.5
+        var scaleRadiusDown = radiusInPixels*.7
+        var halfRadius = radiusInPixels *.5
 
         
         if (this.showHoverText){
             if(this.type == 'input'){
-               
-                
+ 
                 GlobalVariables.c.globalCompositeOperation='destination-over'
                 GlobalVariables.c.beginPath()
 
@@ -184,8 +183,8 @@ export default class AttachmentPoint {
                 }
                 
                 if(this.radius == this.defaultRadius){
-                    GlobalVariables.c.rect(this.x - textWidth - this.radius - halfRadius, this.y - this.radius, textWidth + this.radius + halfRadius , this.radius*2)   
-                    GlobalVariables.c.arc(this.x - textWidth - this.radius - halfRadius, this.y, this.radius, 0, Math.PI * 2, false)
+                    GlobalVariables.c.rect(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels - radiusInPixels, textWidth + radiusInPixels + halfRadius , radiusInPixels*2)   
+                    GlobalVariables.c.arc(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
                 }
             
                 GlobalVariables.c.fill()
@@ -195,7 +194,7 @@ export default class AttachmentPoint {
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor
                 GlobalVariables.c.textAlign = 'end'
-                GlobalVariables.c.fillText(this.name, this.x - (this.radius + 3), this.y+2)
+                GlobalVariables.c.fillText(this.name, xInPixels - (radiusInPixels + 3), yInPixels+2)
                 GlobalVariables.c.fill()
                 GlobalVariables.c.closePath()
             }
@@ -210,14 +209,14 @@ export default class AttachmentPoint {
                     GlobalVariables.c.fillStyle = bubbleColor
                 }
 
-                GlobalVariables.c.rect(this.x, this.y - scaleRadiusDown, textWidth + this.radius + halfRadius, scaleRadiusDown*2)
-                GlobalVariables.c.arc(this.x + textWidth + this.radius + halfRadius, this.y, scaleRadiusDown, 0, Math.PI * 2, false)
+                GlobalVariables.c.rect(xInPixels, yInPixels - scaleRadiusDown, textWidth + radiusInPixels + halfRadius, scaleRadiusDown*2)
+                GlobalVariables.c.arc(xInPixels + textWidth + radiusInPixels + halfRadius, yInPixels, scaleRadiusDown, 0, Math.PI * 2, false)
                 GlobalVariables.c.fill()
                 GlobalVariables.c.closePath()
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor
                 GlobalVariables.c.textAlign = 'start' 
-                GlobalVariables.c.fillText(this.name, (this.x + halfRadius) + (this.radius + 3), this.y+2)
+                GlobalVariables.c.fillText(this.name, (xInPixels + halfRadius) + (radiusInPixels + 3), yInPixels+2)
                 GlobalVariables.c.fill()
                 GlobalVariables.c.closePath()
             }
@@ -232,17 +231,18 @@ export default class AttachmentPoint {
         }
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.lineWidth = 1
-        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
         GlobalVariables.c.fill()
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()  
 
-        if (this.defaultRadius != this.radius){
+        if (!this.expandedRadius){ 
+            console.log("resetting")
             if (this.type == 'output'){     
-                this.offsetX = this.parentMolecule.radius
+                this.offsetX = this.parentMolecule.radius 
             }
             else{
-                this.offsetX = -1* this.parentMolecule.radius
+                //this.offsetX = -1* this.parentMolecule.radius
             }
         }
     }
@@ -300,17 +300,26 @@ export default class AttachmentPoint {
      * @param {number} y - The y cordinate of the click
      */ 
     clickMove(x,y){
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         
+        let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)
+        let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
+        let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)
         //expand if touched by mouse
-        // var distFromCursor = GlobalVariables.distBetweenPoints (this.x, x, this.y, y);
-        var distFromCursorParent = Math.abs(GlobalVariables.distBetweenPoints (this.parentMolecule.x -this.parentMolecule.radius, x, this.parentMolecule.y, y)) 
+        var distFromCursorParent = Math.abs(GlobalVariables.distBetweenPoints (parentXInPixels -parentRadiusInPixels, x, parentYInPixels, y)) 
+        
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromCursorParent < this.parentMolecule.radius*3){
+        if (distFromCursorParent < parentRadiusInPixels*3){
+
             if (this.type == 'input'){
                 this.expandOut(distFromCursorParent)
+                
             }
             this.showHoverText = true
-            if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius){
+            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels){
                 this.expandedRadius = true    
             }  
             else{
@@ -330,6 +339,7 @@ export default class AttachmentPoint {
      * I'm not sure what this does. Can it be deleted?
      */ 
     reset(){
+
         if (this.type == 'input'){
             this.offsetX = -1* this.parentMolecule.radius
             this.offsetY = this.defaultOffsetY
@@ -342,13 +352,18 @@ export default class AttachmentPoint {
      * @param {number} cursorDistance - The distance the cursor is from the attachment point.
      */ 
     expandOut(cursorDistance){
+
+        console.log(this)
+
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
         const angleCorrection = -Math.PI/2 - anglePerIO
-        this.hoverOffsetY = Math.round(1.8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))) 
-        this.hoverOffsetX = Math.round(1.5 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection)))
+        this.hoverOffsetY = 6 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
+        this.hoverOffsetX = 2 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
+        console.log(this.hoverOffsetY)
+
         this.offsetX = Math.max( this.offsetX, this.hoverOffsetX)
         cursorDistance = Math.max( cursorDistance, 30)
         this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY)
@@ -492,7 +507,7 @@ export default class AttachmentPoint {
     /**
      * Computes the curent position and then draws the ap on the screen.
      */ 
-    update() {
+    update() { 
         this.x = this.parentMolecule.x + this.offsetX
         this.y = this.parentMolecule.y + this.offsetY
         this.draw()

@@ -36,7 +36,7 @@ export default class Readme extends Atom{
          * This atom's radius...probably inherited and can be deleted
          * @type {number}
          */
-        this.radius = GlobalVariables.canvas.width/65 
+        this.radius = 15
         
         this.setValues(values)
     }

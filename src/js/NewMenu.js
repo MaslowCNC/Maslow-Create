@@ -200,10 +200,10 @@ function placeNewNode(e){
     let clr = e.target.id
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
-    const invertScale = 1 / GlobalVariables.scale1
+    console.log(containerX)
     GlobalVariables.currentMolecule.placeAtom({
-        x: containerX * invertScale, 
-        y: containerY * invertScale, 
+        x: GlobalVariables.pixelsToWidth(containerX), 
+        y: GlobalVariables.pixelsToHeight(containerY), 
         parent: GlobalVariables.currentMolecule,
         atomType: clr,
         uniqueID: GlobalVariables.generateUniqueID()
@@ -225,10 +225,9 @@ function placeGitHubMolecule(ev){
     let clr = ev.target.id
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
-    const invertScale = 1 / GlobalVariables.scale1
     GlobalVariables.currentMolecule.placeAtom({
-        x: containerX * invertScale, 
-        y: containerY * invertScale, 
+        x: containerX, 
+        y: containerY, 
         parent: GlobalVariables.currentMolecule,
         atomType: 'GitHubMolecule',
         projectID: clr,
