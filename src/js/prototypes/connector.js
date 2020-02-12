@@ -65,6 +65,11 @@ export default class Connector {
      * Draw the connector as a bezier curve on the screen
      */ 
     draw(){
+        let startXInPixels = GlobalVariables.widthToPixels(this.startX);
+        let startYInPixels = GlobalVariables.heightToPixels(this.startY);
+        let endXInPixels = GlobalVariables.widthToPixels(this.endX);
+        let endYInPixels = GlobalVariables.heightToPixels(this.endY);
+
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.strokeStyle = this.color
@@ -75,8 +80,8 @@ export default class Connector {
         else{
             GlobalVariables.c.lineWidth = 1
         }
-        GlobalVariables.c.moveTo(this.startX, this.startY)
-        GlobalVariables.c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY)
+        GlobalVariables.c.moveTo(startXInPixels, startYInPixels)
+        GlobalVariables.c.bezierCurveTo(startXInPixels + 100, startYInPixels, endXInPixels - 100, endYInPixels, endXInPixels, endYInPixels)
         GlobalVariables.c.stroke()
         GlobalVariables.c.globalCompositeOperation = 'source-over' //switch back to drawing on top
     }
@@ -116,11 +121,11 @@ export default class Connector {
             /**
              * The s cordinate of the end of the connector.
              */
-            this.endX = x
+            this.endX = GlobalVariables.pixelsToWidth(x)
             /**
              * The y cordinate of the end of the connector.
              */
-            this.endY = y
+            this.endY = GlobalVariables.pixelsToHeight(y)
         }
     }
     

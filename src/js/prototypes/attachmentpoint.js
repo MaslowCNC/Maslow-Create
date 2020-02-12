@@ -134,7 +134,7 @@ export default class AttachmentPoint {
        
         let xInPixels = GlobalVariables.widthToPixels(this.x);
         let yInPixels = GlobalVariables.heightToPixels(this.y);
-        let radiusInPixels;
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)
         let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)
         let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
@@ -237,12 +237,8 @@ export default class AttachmentPoint {
         GlobalVariables.c.closePath()  
 
         if (!this.expandedRadius){ 
-            console.log("resetting")
             if (this.type == 'output'){     
                 this.offsetX = this.parentMolecule.radius 
-            }
-            else{
-                //this.offsetX = -1* this.parentMolecule.radius
             }
         }
     }
@@ -254,7 +250,11 @@ export default class AttachmentPoint {
      * @param {boolean} clickProcessed - Has the click already been handled
      */ 
     clickDown(x,y, clickProcessed){
-        if(GlobalVariables.distBetweenPoints (this.x, x, this.y, y) < this.defaultRadius && !clickProcessed){
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x);
+        let yInPixels = GlobalVariables.heightToPixels(this.y);
+
+        if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 
@@ -352,9 +352,6 @@ export default class AttachmentPoint {
      * @param {number} cursorDistance - The distance the cursor is from the attachment point.
      */ 
     expandOut(cursorDistance){
-
-        console.log(this)
-
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
@@ -362,8 +359,6 @@ export default class AttachmentPoint {
         const angleCorrection = -Math.PI/2 - anglePerIO
         this.hoverOffsetY = 6 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
         this.hoverOffsetX = 2 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
-        console.log(this.hoverOffsetY)
-
         this.offsetX = Math.max( this.offsetX, this.hoverOffsetX)
         cursorDistance = Math.max( cursorDistance, 30)
         this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY)
@@ -413,8 +408,13 @@ export default class AttachmentPoint {
      * @param {number} y - The y cordinate of the target
      */ 
     wasConnectionMade(x,y){
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
         //this function returns itself if the coordinates passed in are within itself
-        if (GlobalVariables.distBetweenPoints(this.x, x, this.y, y) < this.radius && this.type == 'input'){  //If we have released the mouse here and this is an input...
+        if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels && this.type == 'input'){  //If we have released the mouse here and this is an input...
         
             if(this.connectors.length > 0){ //Don't accept a second connection to an input
                 return false
