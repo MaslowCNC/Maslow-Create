@@ -36,7 +36,7 @@ export default class Readme extends Atom{
          * This atom's radius...probably inherited and can be deleted
          * @type {number}
          */
-        this.radius = 15
+        this.radius = 1/72
         
         this.setValues(values)
     }
@@ -52,6 +52,10 @@ export default class Readme extends Atom{
      * Draw the two // marks on the readme atom
      */ 
     draw() {
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         
         super.draw() //Super call to draw the rest
         
@@ -61,13 +65,13 @@ export default class Readme extends Atom{
         GlobalVariables.c.lineCap = 'round'
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - 11, this.y + 10)
-        GlobalVariables.c.lineTo(this.x, this.y - 10)
+        GlobalVariables.c.moveTo(xInPixels - 11, yInPixels + 10)
+        GlobalVariables.c.lineTo(xInPixels, yInPixels - 10)
         GlobalVariables.c.stroke()
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x, this.y + 10)
-        GlobalVariables.c.lineTo(this.x + 11, this.y - 10)
+        GlobalVariables.c.moveTo(xInPixels, yInPixels + 10)
+        GlobalVariables.c.lineTo(xInPixels + 11, yInPixels - 10)
         GlobalVariables.c.stroke()
     }
     

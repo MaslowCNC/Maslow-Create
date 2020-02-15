@@ -47,7 +47,7 @@ export default class Output extends Atom {
          * This atom's radius
          * @type {number}
          */
-        this.radius = 1/72
+        this.radius = 1/75
         
         this.setValues(values)
         
