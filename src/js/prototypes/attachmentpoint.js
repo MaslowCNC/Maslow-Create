@@ -140,10 +140,10 @@ export default class AttachmentPoint {
         let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
 
         this.defaultRadius = radiusInPixels
-        radiusInPixels = parentRadiusInPixels/2.2
+        radiusInPixels = parentRadiusInPixels/2.3
 
         if (this.expandedRadius){
-            radiusInPixels = parentRadiusInPixels/1.6
+            radiusInPixels = parentRadiusInPixels/1.7
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             /**
@@ -181,15 +181,13 @@ export default class AttachmentPoint {
                 else{
                     GlobalVariables.c.fillStyle = bubbleColor
                 }
-                
-                if(this.radius == this.defaultRadius){
-                    GlobalVariables.c.rect(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels - radiusInPixels, textWidth + radiusInPixels + halfRadius , radiusInPixels*2)   
-                    GlobalVariables.c.arc(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
-                }
             
+                //Draws bubble shape
+                GlobalVariables.c.rect(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels - radiusInPixels, textWidth + radiusInPixels + halfRadius , radiusInPixels*2)   
+                GlobalVariables.c.arc(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
+
+                //Bubble text
                 GlobalVariables.c.fill()
-                
-                
                 GlobalVariables.c.globalCompositeOperation='source-over'
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor
@@ -238,7 +236,7 @@ export default class AttachmentPoint {
 
         if (!this.expandedRadius){ 
             if (this.type == 'output'){     
-                this.offsetX = this.parentMolecule.radius 
+                this.offsetX = this.parentMolecule.radius  
             }
         }
     }
@@ -319,7 +317,7 @@ export default class AttachmentPoint {
                 
             }
             this.showHoverText = true
-            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels){
+            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels ){
                 this.expandedRadius = true    
             }  
             else{

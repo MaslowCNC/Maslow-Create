@@ -94,12 +94,13 @@ export default class Output extends Atom {
         const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         this.height= radiusInPixels
-        
+
         //Set colors
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
         }
         else if(this.selected){
+            
             GlobalVariables.c.fillStyle = this.selectedColor
             GlobalVariables.c.strokeStyle = this.defaultColor
             /**
@@ -125,26 +126,11 @@ export default class Output extends Atom {
         })
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.textAlign = 'end' 
-        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
-        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels- radiusInPixels)
-        GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels - this.height/2)
-        GlobalVariables.c.lineTo(xInPixels - radiusInPixels + 2*radiusInPixels, yInPixels - this.height/2)
-        GlobalVariables.c.lineTo(xInPixels + radiusInPixels + 10, yInPixels)
-        GlobalVariables.c.lineTo(xInPixels + radiusInPixels, yInPixels + this.height/2)
-        GlobalVariables.c.lineTo(xInPixels - radiusInPixels, yInPixels + this.height/2)
-        GlobalVariables.c.fillStyle = this.color
-        GlobalVariables.c.lineWidth = 1
-        GlobalVariables.c.closePath()
-        //GlobalVariables.c.fill()
-        //GlobalVariables.c.stroke()
-       
-        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillText(this.name, xInPixels, yInPixels- radiusInPixels)
         GlobalVariables.c.moveTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels - this.height)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels -5, yInPixels)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels + this.height)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels - this.height)
-        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.fill()
         GlobalVariables.c.lineWidth = 1
