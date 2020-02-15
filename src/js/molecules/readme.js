@@ -55,7 +55,6 @@ export default class Readme extends Atom{
 
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         
         super.draw() //Super call to draw the rest
         

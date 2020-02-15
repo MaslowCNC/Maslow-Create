@@ -163,8 +163,6 @@ export default class Atom {
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
 
-        var canvasFlow = document.querySelector('#flow-canvas')
-
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
         }
@@ -341,9 +339,6 @@ export default class Atom {
         //returns true if something was done with the click
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
-       
-        
         var clickProcessed = false
         
         var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)
@@ -381,8 +376,8 @@ export default class Atom {
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         if (this.isMoving == true){
-           this.x = GlobalVariables.pixelsToWidth(x)
-           this.y = GlobalVariables.pixelsToHeight(y)
+            this.x = GlobalVariables.pixelsToWidth(x)
+            this.y = GlobalVariables.pixelsToHeight(y)
         }
         
         this.inputs.forEach(child => {

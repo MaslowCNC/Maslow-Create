@@ -2,7 +2,6 @@ import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
 import { extractBomTags } from './BOM.js'
 import { OAuth } from 'oauthio-web'
-import { setCanvas } from '../flowDraw.js'
 
 /**
  * This function works like a class to sandbox interaction with GitHub.

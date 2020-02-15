@@ -58,7 +58,7 @@ class GlobalVariables{
             output:        {creator: Output, atomType: 'Output'}
         }
 
-         /* An array of all of the available types of atoms which can be placed with a right click.
+        /* An array of all of the available types of atoms which can be placed with a right click.
          * @type {array}
          */
         this.availableTypes = {
@@ -172,15 +172,15 @@ class GlobalVariables{
         return pixels
     }
     pixelsToWidth(pixels){
-         let width = 1 /(this.canvas.width / pixels)
+        let width = 1 /(this.canvas.width / pixels)
         return width
     }
-     heightToPixels(height){
+    heightToPixels(height){
         let pixels = this.canvas.height * height
         return pixels
     }
     pixelsToHeight(pixels){
-         let height = 1 /(this.canvas.height / pixels)
+        let height = 1 /(this.canvas.height / pixels)
         return height
     }
     

@@ -200,7 +200,6 @@ function placeNewNode(e){
     let clr = e.target.id
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
-    console.log(containerX)
     GlobalVariables.currentMolecule.placeAtom({
         x: GlobalVariables.pixelsToWidth(containerX), 
         y: GlobalVariables.pixelsToHeight(containerY), 

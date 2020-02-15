@@ -249,8 +249,8 @@ export default class AttachmentPoint {
      */ 
     clickDown(x,y, clickProcessed){
 
-        let xInPixels = GlobalVariables.widthToPixels(this.x);
-        let yInPixels = GlobalVariables.heightToPixels(this.y);
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
 
         if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output

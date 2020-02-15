@@ -65,10 +65,10 @@ export default class Connector {
      * Draw the connector as a bezier curve on the screen
      */ 
     draw(){
-        let startXInPixels = GlobalVariables.widthToPixels(this.startX);
-        let startYInPixels = GlobalVariables.heightToPixels(this.startY);
-        let endXInPixels = GlobalVariables.widthToPixels(this.endX);
-        let endYInPixels = GlobalVariables.heightToPixels(this.endY);
+        let startXInPixels = GlobalVariables.widthToPixels(this.startX)
+        let startYInPixels = GlobalVariables.heightToPixels(this.startY)
+        let endXInPixels = GlobalVariables.widthToPixels(this.endX)
+        let endYInPixels = GlobalVariables.heightToPixels(this.endY)
 
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.color
