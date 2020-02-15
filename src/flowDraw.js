@@ -12,7 +12,7 @@ GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
 
 GlobalVariables.canvas.width = window.innerWidth;
-GlobalVariables.canvas.height = window.innerWidth/4;
+GlobalVariables.canvas.height = window.innerHeight/3;
 
 
 // Event Listeners
@@ -244,6 +244,8 @@ function init() {
  * Handles the window's resize behavior when the browser size changes.
  */ 
 function onWindowResize() {
+
+    GlobalVariables.canvas.height = window.innerHeight;
     GlobalVariables.canvas.width = window.innerWidth;
    //reset screen parameters 
     if(!GlobalVariables.runMode){

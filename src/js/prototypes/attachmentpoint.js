@@ -132,8 +132,8 @@ export default class AttachmentPoint {
      */ 
     draw() {
        
-        let xInPixels = GlobalVariables.widthToPixels(this.x);
-        let yInPixels = GlobalVariables.heightToPixels(this.y);
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)
         let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)
@@ -350,19 +350,24 @@ export default class AttachmentPoint {
      * @param {number} cursorDistance - The distance the cursor is from the attachment point.
      */ 
     expandOut(cursorDistance){
+
+
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
         const attachmentPointNumber = inputList.indexOf(this) 
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
         const angleCorrection = -Math.PI/2 - anglePerIO
-        this.hoverOffsetY = 6 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
+        this.hoverOffsetY = 8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
         this.hoverOffsetX = 2 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
         this.offsetX = Math.max( this.offsetX, this.hoverOffsetX)
-        cursorDistance = Math.max( cursorDistance, 30)
+        cursorDistance = Math.max( cursorDistance, radiusInPixels*2)
         this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY)
         this.offsetY = Math.max( this.offsetY, this.hoverOffsetY)
-        this.offsetX = this.hoverOffsetX * 30/cursorDistance
-        this.offsetY = this.hoverOffsetY * 30/cursorDistance
+
+        this.offsetX = this.hoverOffsetX * radiusInPixels*2/cursorDistance
+        this.offsetY = this.hoverOffsetY * radiusInPixels*2/cursorDistance
 
     }
     
