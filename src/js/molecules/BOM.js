@@ -85,14 +85,6 @@ export default class AddBOMTag extends Atom{
     }
     
     /**
-     * I'm not sure this actually does anything. Delete? 
-     */ 
-    requestReadme(){
-        //request any contributions from this atom to the readme
-        return [this.readmeText]
-    }
-   
-    /**
      * Creates an editable UI represntation of the bom list. 
      * @param {Object} list - list is an object to which the generated HTML element will be apended
      */ 

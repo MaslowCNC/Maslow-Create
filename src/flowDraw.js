@@ -267,8 +267,9 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate)
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.update()
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
+        atom.update()
+
 
     })
 

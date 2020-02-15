@@ -346,19 +346,22 @@ export default class Molecule extends Atom{
             readmeContent = readmeContent + item + "\n\n\n"
         })
         
-        list.appendChild(document.createElement('br'))
-        list.appendChild(document.createElement('br'))
+        if(readmeContent.length > 0){    //If there is anything to say
         
-        var div = document.createElement('h3')
-        div.setAttribute('style','text-align:center;')
-        list.appendChild(div)
-        var valueText = document.createTextNode('ReadMe')
-        div.appendChild(valueText)
-        
-        var x = document.createElement('HR')
-        list.appendChild(x)
-        
-        this.createMarkdownListItem(list,readmeContent)
+            list.appendChild(document.createElement('br'))
+            list.appendChild(document.createElement('br'))
+            
+            var div = document.createElement('h3')
+            div.setAttribute('style','text-align:center;')
+            list.appendChild(div)
+            var valueText = document.createTextNode('ReadMe')
+            div.appendChild(valueText)
+            
+            var x = document.createElement('HR')
+            list.appendChild(x)
+            
+            this.createMarkdownListItem(list,readmeContent)
+        }
     }
     
     /**
@@ -385,6 +388,12 @@ export default class Molecule extends Atom{
         sortableAtomsList.forEach(molecule => {
             generatedReadme = generatedReadme.concat(molecule.requestReadme())
         })
+        
+        //Check to see if any of the children added anything if not, remove the bit we added
+        if(generatedReadme[generatedReadme.length - 1] == '## ' + this.name){
+            generatedReadme.pop()
+        }
+        
         return generatedReadme
     }
     

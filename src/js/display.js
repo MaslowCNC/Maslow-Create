@@ -82,8 +82,7 @@ export default class Display {
         this.threeMaterial = new THREE.MeshStandardMaterial({
             color: 0x5f6670,
             roughness: 0.65,
-            metalness: 0.40,   
-            wireframe: this.wireDisplay
+            metalness: 0.40
         })
         
         /** 
@@ -501,7 +500,6 @@ export default class Display {
                
         if (this.wireDisplay){
             wireCheck.setAttribute('checked', 'true')
-            this.threeMaterial.wireframe = true
         }
         //wireCheck.setAttribute('checked', false)
         var wireCheckLabel = document.createElement('label')
