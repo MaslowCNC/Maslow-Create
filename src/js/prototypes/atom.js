@@ -823,6 +823,7 @@ export default class Atom {
      * @param {array} options - A list of options to display in the drop down.
      * @param {number} selectedOption - The zero referenced index of the selected option.
      * @param {string} description - A description of what the dropdown does.
+     * @param {object} Callback function
      */ 
     createDropDown(list,parent,options,selectedOption, description, callback){
         var listElement = document.createElement('LI')
@@ -903,8 +904,8 @@ export default class Atom {
     /**
      * Creates button. Used in the sidebar.
      * @param {object} list - The HTML object to attach the new item to.
-     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
      * @param {string} buttonText - The text on the button.
+     * @param {boolean} - Flag to see if checkbox is checked
      * @param {object} functionToCall - The function to call when the button is pressed.
      */ 
     createCheckbox(sideBar,text,isChecked,callback){
