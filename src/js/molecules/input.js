@@ -36,7 +36,7 @@ export default class Input extends Atom {
          * This atom's radius for drawing
          * @type {string}
          */
-        this.radius = 1/72 
+        this.radius = 1/60
         
         /** 
          * This atom's old name, used during name changes
