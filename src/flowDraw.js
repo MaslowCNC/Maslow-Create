@@ -14,6 +14,7 @@ GlobalVariables.runMode = window.location.href.includes('run') //Check if we are
 GlobalVariables.canvas.width = window.innerWidth;
 GlobalVariables.canvas.height = window.innerWidth/4;
 
+
 // Event Listeners
 /** 
  * The cansvas on which the atoms are placed.
@@ -232,22 +233,28 @@ function init() {
             })
         }
     }
-    
-   window.addEventListener('resize', () => { onWindowResize() }, false)
+    window.addEventListener('resize', () => { onWindowResize() }, false)
 
+    onWindowResize()
     animate()
+
 }
-
-function setCanvas(){
-
- }
 
 /**
  * Handles the window's resize behavior when the browser size changes.
  */ 
 function onWindowResize() {
     GlobalVariables.canvas.width = window.innerWidth;
+   //reset screen parameters 
+    if(!GlobalVariables.runMode){
+        document.querySelector('.flex-parent').setAttribute('style','height:'+ (window.innerHeight - GlobalVariables.canvas.height)+'px')
+    }else{
+        document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
+    }
+     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
+
     GlobalVariables.display.onWindowResize()
+
 }
 
 
@@ -268,5 +275,4 @@ function animate() {
 }
 
 init()
-export{setCanvas}
 
