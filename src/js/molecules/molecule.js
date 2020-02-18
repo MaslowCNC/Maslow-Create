@@ -344,19 +344,22 @@ export default class Molecule extends Atom{
             readmeContent = readmeContent + item + "\n\n\n"
         })
         
-        list.appendChild(document.createElement('br'))
-        list.appendChild(document.createElement('br'))
+        if(readmeContent.length > 0){    //If there is anything to say
         
-        var div = document.createElement('h3')
-        div.setAttribute('style','text-align:center;')
-        list.appendChild(div)
-        var valueText = document.createTextNode('ReadMe')
-        div.appendChild(valueText)
-        
-        var x = document.createElement('HR')
-        list.appendChild(x)
-        
-        this.createMarkdownListItem(list,readmeContent)
+            list.appendChild(document.createElement('br'))
+            list.appendChild(document.createElement('br'))
+            
+            var div = document.createElement('h3')
+            div.setAttribute('style','text-align:center;')
+            list.appendChild(div)
+            var valueText = document.createTextNode('ReadMe')
+            div.appendChild(valueText)
+            
+            var x = document.createElement('HR')
+            list.appendChild(x)
+            
+            this.createMarkdownListItem(list,readmeContent)
+        }
     }
     
     /**
