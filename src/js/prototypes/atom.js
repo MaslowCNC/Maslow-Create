@@ -301,19 +301,8 @@ export default class Atom {
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
-        //Returns true if something was done with the click
-        
-        this.inputs.forEach(child => {
-            if(child.clickDown(x,y, clickProcessed) == true){
-                clickProcessed = true
-            }
-        })
-        if(this.output){
-            if(this.output.clickDown(x,y, clickProcessed) == true){
-                clickProcessed = true
-            }
-        }
-        
+
+
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
             //console.log("moving")
@@ -326,6 +315,20 @@ export default class Atom {
         else{
             this.selected = false
         }
+        
+        //Returns true if something was done with the click
+        
+        this.inputs.forEach(child => {
+            if(child.clickDown(x,y, clickProcessed) == true){
+                clickProcessed = true
+            }
+        })
+        if(this.output){
+            if(this.output.clickDown(x,y, clickProcessed) == true){
+                clickProcessed = true
+            }
+        }
+       
         
         return clickProcessed 
     }
