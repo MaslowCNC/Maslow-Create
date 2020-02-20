@@ -251,8 +251,6 @@ export default class AttachmentPoint {
 
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
-        console.log(this.type)
-        console.log(clickProcessed)
 
         if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
@@ -353,7 +351,6 @@ export default class AttachmentPoint {
      */ 
     expandOut(cursorDistance){
 
-
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')
@@ -361,15 +358,17 @@ export default class AttachmentPoint {
         const anglePerIO = (Math.PI) / (inputList.length + 1)
         // angle correction so that it centers menu adjusting to however many attachment points there are 
         const angleCorrection = -Math.PI/2 - anglePerIO
-        this.hoverOffsetY = 8 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
-        this.hoverOffsetX = 2 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
+        this.hoverOffsetY = 12 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
+        this.hoverOffsetX = 4 *this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
+        this.offsetX = Math.min( this.offsetX, -this.hoverOffsetX)
         this.offsetX = Math.max( this.offsetX, this.hoverOffsetX)
-        cursorDistance = Math.max( cursorDistance, radiusInPixels*2)
+        cursorDistance = Math.max( cursorDistance, radiusInPixels*3)
         this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY)
         this.offsetY = Math.max( this.offsetY, this.hoverOffsetY)
-
-        this.offsetX = this.hoverOffsetX * radiusInPixels*2/cursorDistance
-        this.offsetY = this.hoverOffsetY * radiusInPixels*2/cursorDistance
+        // offsetX is treated differently from offsetY because flowcanvas doesn't change height
+        this.offsetX = GlobalVariables.widthToPixels(30 * this.hoverOffsetX * this.parentMolecule.radius * GlobalVariables.pixelsToWidth((radiusInPixels*3)/cursorDistance))  
+        this.offsetY = GlobalVariables.heightToPixels( this.hoverOffsetY * this.parentMolecule.radius* GlobalVariables.pixelsToHeight(cursorDistance))
+    
 
     }
     
