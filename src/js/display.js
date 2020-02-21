@@ -359,8 +359,7 @@ export default class Display {
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
-
-        
+ 
         let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
@@ -387,8 +386,6 @@ export default class Display {
      * Creates the checkbox hidden menu when viewer is active
      */ 
     checkBoxes(){
-        console.log("this runs")
-
         let viewerBar = document.querySelector('#viewer_bar')   
         viewerBar.classList.add('slidedown')
 
