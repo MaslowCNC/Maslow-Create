@@ -511,7 +511,7 @@ export default class AttachmentPoint {
         this.y = this.parentMolecule.y + this.offsetY
         this.draw()
        
-        this.connectors.forEach(connector => {
+        this.connectors.forEach(connector => {  //update any connectors attached to this node
             connector.update()       
         })
     }
