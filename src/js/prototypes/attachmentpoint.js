@@ -143,7 +143,7 @@ export default class AttachmentPoint {
         radiusInPixels = parentRadiusInPixels/2.3
 
         if (this.expandedRadius){
-            radiusInPixels = parentRadiusInPixels/1.7
+            radiusInPixels = parentRadiusInPixels/1.8
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             /**
@@ -317,7 +317,7 @@ export default class AttachmentPoint {
                 
             }
             this.showHoverText = true
-            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels ){
+            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels/1.2 ){
                 this.expandedRadius = true    
             }  
             else{
@@ -359,15 +359,10 @@ export default class AttachmentPoint {
         // angle correction so that it centers menu adjusting to however many attachment points there are 
         const angleCorrection = -Math.PI/2 - anglePerIO
         this.hoverOffsetY = 12 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
-        this.hoverOffsetX = 4 *this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
-        this.offsetX = Math.min( this.offsetX, -this.hoverOffsetX)
-        this.offsetX = Math.max( this.offsetX, this.hoverOffsetX)
-        cursorDistance = Math.max( cursorDistance, radiusInPixels*3)
-        this.offsetY = Math.min( this.offsetY, -this.hoverOffsetY)
-        this.offsetY = Math.max( this.offsetY, this.hoverOffsetY)
-        // offsetX is treated differently from offsetY because flowcanvas doesn't change height
-        this.offsetX = GlobalVariables.widthToPixels(30 * this.hoverOffsetX * this.parentMolecule.radius * GlobalVariables.pixelsToWidth((radiusInPixels*3)/cursorDistance))  
-        this.offsetY = GlobalVariables.heightToPixels( this.hoverOffsetY * this.parentMolecule.radius* GlobalVariables.pixelsToHeight(cursorDistance))
+        this.hoverOffsetX = 4 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
+        cursorDistance = Math.max( cursorDistance, radiusInPixels*2)
+        this.offsetX = GlobalVariables.widthToPixels(radiusInPixels * 1.2 * this.hoverOffsetX * this.parentMolecule.radius * GlobalVariables.pixelsToWidth((radiusInPixels*3)/cursorDistance))  
+        this.offsetY = GlobalVariables.heightToPixels( radiusInPixels* 2.1 * this.hoverOffsetY * this.parentMolecule.radius* GlobalVariables.pixelsToHeight((radiusInPixels*3)/cursorDistance))
     
 
     }
