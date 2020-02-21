@@ -38,7 +38,7 @@ export default class Atom {
          * This atom's radius as displayed on the screen is 1/72 width
          * @type {number}
          */
-        this.radius = 1/72
+        this.radius = 1/75
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}

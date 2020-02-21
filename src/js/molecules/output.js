@@ -124,9 +124,9 @@ export default class Output extends Atom {
         this.inputs.forEach(child => {
             child.draw()       
         })
-        
+
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillText(this.name, xInPixels, yInPixels- radiusInPixels)
+        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
         GlobalVariables.c.moveTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels - this.height)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels -5, yInPixels)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels + this.height)
