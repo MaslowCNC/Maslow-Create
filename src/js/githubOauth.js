@@ -75,7 +75,7 @@ export default function GitHubModule(){
         // Use popup for oauth
         OAuth.popup('github').then(github => {
         
-        /** 
+            /** 
          * Oktokit object to access github
          * @type {object}
          */   

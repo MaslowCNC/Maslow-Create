@@ -175,7 +175,7 @@ class GlobalVariables{
         let pixels = this.canvas.width * width
         return pixels
     }
-     /** 
+    /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen width
     * @param {number} width 0-1 
     */
@@ -191,7 +191,7 @@ class GlobalVariables{
         let pixels = this.canvas.height * height
         return pixels
     }
-     /** 
+    /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height
     * @param {number} width 0-1 
     */

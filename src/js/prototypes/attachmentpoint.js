@@ -360,7 +360,8 @@ export default class AttachmentPoint {
         const angleCorrection = -Math.PI/2 - anglePerIO
         this.hoverOffsetY = 12 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))
         this.hoverOffsetX = 4 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))
-        cursorDistance = Math.max( cursorDistance, radiusInPixels*2)
+        cursorDistance = Math.max( cursorDistance, radiusInPixels*2) //maxes cursor distance so we can hover over each attachment without expansion movement
+        //this.offset uses radius in pixels before translating to pixels because that's also the value that limits cursor distance
         this.offsetX = GlobalVariables.widthToPixels(radiusInPixels * 1.2 * this.hoverOffsetX * this.parentMolecule.radius * GlobalVariables.pixelsToWidth((radiusInPixels*3)/cursorDistance))  
         this.offsetY = GlobalVariables.heightToPixels( radiusInPixels* 2.1 * this.hoverOffsetY * this.parentMolecule.radius* GlobalVariables.pixelsToHeight((radiusInPixels*3)/cursorDistance))
     
