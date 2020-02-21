@@ -369,15 +369,31 @@ export default class Display {
             }
         })
 
+       var evtFired = false
+
         arrowUpMenu.addEventListener('mouseenter', () =>{
             viewerBar.classList.remove("slidedown")
             viewerBar.classList.add('slideup')   
         })
         viewerBar.addEventListener('mouseleave', () =>{
+            evtFired = false
             viewerBar.classList.remove("slideup")
             viewerBar.classList.add('slidedown')   
         })
-        
+        viewerBar.addEventListener('mouseenter', () =>{
+            evtFired = true
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        arrowUpMenu.addEventListener('mouseleave', () =>{
+            setTimeout(function() {
+            if (!evtFired) {
+                viewerBar.classList.remove("slideup")
+                viewerBar.classList.add('slidedown')  
+             }
+            }, 3000);
+        })
+
         //Creates initial grid
         this.grid1= this.makeGrid()
     }
