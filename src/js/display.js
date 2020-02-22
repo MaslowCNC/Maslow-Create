@@ -365,20 +365,42 @@ export default class Display {
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
         this.targetDiv.addEventListener('mouseenter', () => {
-        if(viewerBar.innerHTML.trim().length == 0){
+            if(viewerBar.innerHTML.trim().length == 0){
                 this.checkBoxes()   
             }
         })
 
+        var evtFired = false
+        var g_timer
+
+        function startTimer(){
+            g_timer = setTimeout(function() {
+                if (!evtFired) {
+                    viewerBar.classList.remove("slideup")
+                    viewerBar.classList.add('slidedown')  
+                }
+            }, 2000)
+        }
+
         arrowUpMenu.addEventListener('mouseenter', () =>{
+            clearTimeout(g_timer)
             viewerBar.classList.remove("slidedown")
             viewerBar.classList.add('slideup')   
         })
         viewerBar.addEventListener('mouseleave', () =>{
+            evtFired = false
             viewerBar.classList.remove("slideup")
             viewerBar.classList.add('slidedown')   
         })
-        
+        viewerBar.addEventListener('mouseenter', () =>{
+            evtFired = true
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        arrowUpMenu.addEventListener('mouseleave', () =>{
+            startTimer()
+        })
+
         //Creates initial grid
         this.grid1= this.makeGrid()
     }
