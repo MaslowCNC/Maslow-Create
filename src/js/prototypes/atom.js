@@ -35,10 +35,10 @@ export default class Atom {
          */
         this.y = 0
         /** 
-         * This atom's radius as displayed on the screen
+         * This atom's radius as displayed on the screen is 1/72 width
          * @type {number}
          */
-        this.radius = GlobalVariables.canvas.width/72 
+        this.radius = 1/75
         /** 
          * This atom's default color (ie when not selected or processing)
          * @type {string}
@@ -146,34 +146,22 @@ export default class Atom {
             })
         }
     }
-    
+
+   
     /**
      * Draws the atom on the screen
      */ 
     draw() {
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
         this.inputs.forEach(child => {
             child.draw()       
         })
 
         GlobalVariables.c.beginPath()
         GlobalVariables.c.font = '10px Work Sans'
-
-        //make it impossible to draw atoms too close to the edge
-        //not sure what x left margin should be because if it's too close it would cover expanded text
-        var canvasFlow = document.querySelector('#flow-canvas')
-        if (this.x < this.radius){
-            this.x = this.radius
-        }
-        else if (this.y<this.radius){
-            this.y = this.radius 
-        }
-        else if (this.x + this.radius > canvasFlow.width/GlobalVariables.scale1){
-            this.x = canvasFlow.width/GlobalVariables.scale1 - this.radius
-        }
-        else if (this.y + this.radius > canvasFlow.height/GlobalVariables.scale1){
-            this.y = canvasFlow.height/GlobalVariables.scale1 - this.radius
-        }
-        
 
         if(this.processing){
             GlobalVariables.c.fillStyle = 'blue'
@@ -191,9 +179,9 @@ export default class Atom {
             this.strokeColor = this.selectedColor
         }
         
-        GlobalVariables.c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = 'start'
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
         GlobalVariables.c.lineWidth = 1
@@ -208,8 +196,8 @@ export default class Atom {
                 const padding = 10
                 GlobalVariables.c.fillStyle = 'red'
                 GlobalVariables.c.rect(
-                    this.x + this.radius - padding/2, 
-                    this.y - this.radius + padding/2, 
+                    xInPixels + radiusInPixels - padding/2, 
+                    yInPixels - radiusInPixels + padding/2, 
                     GlobalVariables.c.measureText(this.alertMessage.toUpperCase()).width + padding, 
                     - (parseInt(GlobalVariables.c.font) + padding))
                 GlobalVariables.c.fill()
@@ -220,7 +208,7 @@ export default class Atom {
 
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = 'black'
-                GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), this.x + this.radius, this.y - this.radius) 
+                GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), xInPixels + radiusInPixels, yInPixels - radiusInPixels) 
                 GlobalVariables.c.closePath()
             }
         } 
@@ -309,8 +297,25 @@ export default class Atom {
      * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
      */ 
     clickDown(x,y, clickProcessed){
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
+        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
+            //console.log("moving")
+            this.isMoving = true
+            this.selected = true
+            this.updateSidebar()
+            this.sendToRender()
+            clickProcessed = true
+        }
+        else{
+            this.selected = false
+        }
+
         //Returns true if something was done with the click
-        
         this.inputs.forEach(child => {
             if(child.clickDown(x,y, clickProcessed) == true){
                 clickProcessed = true
@@ -321,18 +326,7 @@ export default class Atom {
                 clickProcessed = true
             }
         }
-        
-        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
-        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, this.x, y, this.y) < this.radius){
-            this.isMoving = true
-            this.selected = true
-            this.updateSidebar()
-            this.sendToRender()
-            clickProcessed = true
-        }
-        else{
-            this.selected = false
-        }
+       
         
         return clickProcessed 
     }
@@ -344,13 +338,13 @@ export default class Atom {
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
-        
-        
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
         var clickProcessed = false
         
-        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)
         
-        if (distFromClick < this.x){
+        if (distFromClick < xInPixels){
             clickProcessed = true
         }
         
@@ -379,9 +373,12 @@ export default class Atom {
      * @param {number} y - The Y cordinate of the click
      */ 
     clickMove(x,y){
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         if (this.isMoving == true){
-            this.x = x
-            this.y = y
+            this.x = GlobalVariables.pixelsToWidth(x)
+            this.y = GlobalVariables.pixelsToHeight(y)
         }
         
         this.inputs.forEach(child => {
@@ -391,10 +388,10 @@ export default class Atom {
             this.output.clickMove(x,y)
         }
         
-        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)
         
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromClick < this.radius ){
+        if (distFromClick < radiusInPixels ){
             this.showHover = true
         }  
         else { this.showHover = false}
@@ -817,9 +814,7 @@ export default class Atom {
         
         //var valueText = document.createTextNode(text)
         //valueTextDiv.appendChild(valueText)
-        list.appendChild(markdownTextDiv)
-        
-        
+        list.appendChild(markdownTextDiv)       
     }
     
     /**
@@ -829,6 +824,7 @@ export default class Atom {
      * @param {array} options - A list of options to display in the drop down.
      * @param {number} selectedOption - The zero referenced index of the selected option.
      * @param {string} description - A description of what the dropdown does.
+     * @param {object} Callback function
      */ 
     createDropDown(list,parent,options,selectedOption, description, callback){
         var listElement = document.createElement('LI')
@@ -909,8 +905,8 @@ export default class Atom {
     /**
      * Creates button. Used in the sidebar.
      * @param {object} list - The HTML object to attach the new item to.
-     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
      * @param {string} buttonText - The text on the button.
+     * @param {boolean} - Flag to see if checkbox is checked
      * @param {object} functionToCall - The function to call when the button is pressed.
      */ 
     createCheckbox(sideBar,text,isChecked,callback){

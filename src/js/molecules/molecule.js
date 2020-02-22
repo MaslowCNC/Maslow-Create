@@ -58,8 +58,8 @@ export default class Molecule extends Atom{
         //Add the molecule's output
         this.placeAtom({
             parentMolecule: this, 
-            x: GlobalVariables.canvas.width - 50,
-            y: GlobalVariables.canvas.height/2,
+            x: GlobalVariables.pixelsToWidth(GlobalVariables.canvas.width - 20),
+            y: GlobalVariables.pixelsToHeight(GlobalVariables.canvas.height/2),
             parent: this,
             name: 'Output',
             atomType: 'Output'
@@ -85,6 +85,8 @@ export default class Molecule extends Atom{
             })
         } 
     }
+
+    
     
     /**
      * Add the center dot to the molecule
@@ -95,7 +97,7 @@ export default class Molecule extends Atom{
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.centerColor
-        GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
     }
@@ -108,12 +110,14 @@ export default class Molecule extends Atom{
     doubleClick(x,y){
         //returns true if something was done with the click
         
+        x = GlobalVariables.pixelsToWidth(x)
+        y = GlobalVariables.pixelsToHeight(y)
         
         var clickProcessed = false
         
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
         
-        if (distFromClick < this.radius){
+        if (distFromClick < this.radius*2){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
             clickProcessed = true
