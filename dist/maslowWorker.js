@@ -928,208 +928,438 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const rotateZ$1 = (radians, path) => transform$1(fromZRotation(radians), path);
   const scale$2 = (vector, path) => transform$1(fromScaling(vector), path);
 
-  const update = (geometry, updates) => {
-    const updated = {};
-    for (const key of Object.keys(geometry)) {
-      if (typeof key !== 'symbol') {
-        updated[key] = geometry[key];
-      }
-    }
-    for (const key of Object.keys(updates)) {
-      updated[key] = updates[key];
-    }
-    return updated;
-  };
+  const X$1 = 0;
+  const Y$1 = 1;
 
-  const rewrite = (geometry, op) => {
-    const walk = (geometry) => {
-      if (geometry.assembly) {
-        return op(geometry, _ => update(geometry, { assembly: geometry.assembly.map(walk) }), walk);
-      } else if (geometry.disjointAssembly) {
-        return op(geometry, _ => update(geometry, { disjointAssembly: geometry.disjointAssembly.map(walk) }), walk);
-      } else if (geometry.layers) {
-        return op(geometry, _ => update(geometry, { layers: geometry.layers.map(walk) }), walk);
-      } else if (geometry.connection) {
-        return op(geometry,
-                  _ => update(geometry, { geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk) }),
-                  walk);
-      } else if (geometry.item) {
-        return op(geometry, _ => update(geometry, { item: walk(geometry.item) }), walk);
-      } else if (geometry.paths) {
-        return op(geometry, _ => geometry, walk);
-      } else if (geometry.plan) {
-        return op(geometry, _ => update(geometry, { content: walk(geometry.content) }), walk);
-      } else if (geometry.points) {
-        return op(geometry, _ => geometry, walk);
-      } else if (geometry.solid) {
-        return op(geometry, _ => geometry, walk);
-      } else if (geometry.surface) {
-        return op(geometry, _ => geometry, walk);
-      } else if (geometry.untransformed) {
-        return op(geometry, _ => update(geometry, { untransformed: walk(geometry.untransformed) }), walk);
-      } else if (geometry.z0Surface) {
-        return op(geometry, _ => geometry, walk);
-      } else {
-        throw Error('die: Unknown geometry');
+  // The resolution is 1 / multiplier.
+  const createNormalize2 = (multiplier = 1e5) => {
+    const map = new Map();
+    const update = (key, value) => {
+      if (!map.has(key)) {
+        map.set(key, value);
       }
     };
-    return walk(geometry);
+    const normalize2 = (coordinate) => {
+      // Apply a spatial quantization to the 2 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nx1 = nx + 1;
+      const ny1 = ny + 1;
+      // Populate the space of the quantized coordinate and its adjacencies.
+      const normalized = [nx1 / multiplier, ny1 / multiplier, 0];
+      update(`${nx0}/${ny0}`, normalized);
+      update(`${nx0}/${ny1}`, normalized);
+      update(`${nx1}/${ny0}`, normalized);
+      update(`${nx1}/${ny1}`, normalized);
+      // This is now the normalized coordinate for this region.
+      return normalized;
+    };
+    return normalize2;
   };
 
-  const visit = (geometry, op) => {
-    const walk = (geometry) => {
-      if (geometry.assembly) {
-        op(geometry, _ => geometry.assembly.forEach(walk));
-      } else if (geometry.disjointAssembly) {
-        op(geometry, _ => geometry.disjointAssembly.forEach(walk));
-      } else if (geometry.layers) {
-        op(geometry, _ => geometry.layers.forEach(walk));
-      } else if (geometry.connection) {
-        op(geometry, _ => { geometry.geometries.forEach(walk); geometry.connectors.forEach(walk); });
-      } else if (geometry.item) {
-        op(geometry, _ => walk(geometry.item));
-      } else if (geometry.paths) {
-        op(geometry, _ => undefined);
-      } else if (geometry.plan) {
-        op(geometry, _ => { walk(geometry.content); });
-      } else if (geometry.points) {
-        op(geometry, _ => undefined);
-      } else if (geometry.solid) {
-        op(geometry, _ => undefined);
-      } else if (geometry.surface) {
-        op(geometry, _ => undefined);
-      } else if (geometry.untransformed) {
-        op(geometry, _ => undefined, _ => walk(geometry.untransformed));
-      } else if (geometry.z0Surface) {
-        op(geometry, _ => undefined);
-      } else {
-        throw Error('die: Unknown geometry');
+  const X$2 = 0;
+  const Y$2 = 1;
+  const Z = 2;
+
+  // The resolution is 1 / multiplier.
+  const createNormalize3 = (multiplier = 1e5) => {
+    const map = new Map();
+    const update = (key, value) => {
+      if (!map.has(key)) {
+        map.set(key, value);
       }
     };
-    walk(geometry);
+    const normalize3 = (coordinate) => {
+      // Apply a spatial quantization to the 2 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
+      const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}/${nz}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nz0 = nz;
+      const nx1 = nx + 1;
+      const ny1 = ny + 1;
+      const nz1 = nz + 1;
+      // Populate the space of the quantized coordinate and its adjacencies.
+      const normalized = coordinate;
+      update(`${nx0}/${ny0}/${nz0}`, normalized);
+      update(`${nx0}/${ny0}/${nz1}`, normalized);
+      update(`${nx0}/${ny1}/${nz0}`, normalized);
+      update(`${nx0}/${ny1}/${nz1}`, normalized);
+      update(`${nx1}/${ny0}/${nz0}`, normalized);
+      update(`${nx1}/${ny0}/${nz1}`, normalized);
+      update(`${nx1}/${ny1}/${nz0}`, normalized);
+      update(`${nx1}/${ny1}/${nz1}`, normalized);
+      // This is now the normalized coordinate for this region.
+      return normalized;
+    };
+    return normalize3;
   };
 
-  // Remove any symbols (which refer to cached values).
-  const fresh = (geometry) => {
-    const fresh = {};
-    for (const key of Object.keys(geometry)) {
-      if (typeof key !== 'symbol') {
-        fresh[key] = geometry[key];
+  const THRESHOLD = 1e-5;
+
+  // We expect a solid of reconciled triangles.
+
+  const watertight = Symbol('watertight');
+
+  const makeWatertight = (solid, normalize = createNormalize3(), onFixed = (_ => _)) => {
+    if (!solid[watertight]) {
+      let fixed = false;
+      const vertices = new Set();
+
+      const reconciledSolid = [];
+      for (const surface of solid) {
+        const reconciledSurface = [];
+        for (const path of surface) {
+          const reconciledPath = [];
+          for (const point of path) {
+            const reconciledPoint = normalize(point);
+            reconciledPath.push(reconciledPoint);
+            vertices.add(reconciledPoint);
+          }
+          reconciledSurface.push(reconciledPath);
+        }
+        reconciledSolid.push(reconciledSurface);
+      }
+
+      const watertightSolid = [];
+      for (const surface of reconciledSolid) {
+        const watertightPaths = [];
+        for (const path of surface) {
+          const watertightPath = [];
+          for (const [start, end] of getEdges(path)) {
+            watertightPath.push(start);
+            const span = distance(start, end);
+            const colinear = [];
+            for (const vertex of vertices) {
+              // FIX: Threshold
+              if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+                if (vertex !== start && vertex !== end) {
+                  // FIX: Clip an ear instead.
+                  // Vertex is on the open edge.
+                  colinear.push(vertex);
+                  fixed = true;
+                }
+              }
+            }
+            // Arrange by distance from start.
+            colinear.sort((a, b) => distance(start, a) - distance(start, b));
+            // Insert into the path.
+            watertightPath.push(...colinear);
+          }
+          watertightPaths.push(watertightPath);
+        }
+        watertightSolid.push(watertightPaths);
+      }
+      // At this point we should have the correct structure for assembly into a solid.
+      // We just need to ensure triangulation to support deformation.
+
+      onFixed(fixed);
+
+      solid[watertight] = watertightSolid;
+    }
+
+    return solid[watertight];
+  };
+
+  const isWatertight = (solid) => {
+    const edges = new Set();
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const [start, end] of getEdges(path)) {
+          edges.add(`${JSON.stringify([start, end])}`);
+        }
       }
     }
-    return fresh;
-  };
-
-  const shallowEq = (a, b) => {
-    if (a === undefined) throw Error('die');
-    if (b === undefined) throw Error('die');
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) {
-        return false;
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const [start, end] of getEdges(path)) {
+          if (!edges.has(`${JSON.stringify([end, start])}`)) {
+            return false;
+          }
+        }
       }
     }
     return true;
   };
 
-  // Rewrite on the way back up the call-path.
-  const rewriteUp = (geometry, op) => {
-    // FIX: Minimize identity churn.
-    const walk = (geometry) => {
-      const q = (postopGeometry) => {
-        if (postopGeometry === undefined) {
-          return geometry;
-        } else if (postopGeometry === geometry) {
-          return geometry;
-        } else {
-          return fresh(postopGeometry);
-        }
-      };
-
-      if (geometry.assembly) {
-        const assembly = geometry.assembly.map(walk);
-        if (shallowEq(assembly, geometry.assembly)) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, assembly }));
-        }
-      } else if (geometry.disjointAssembly) {
-        const disjointAssembly = geometry.disjointAssembly.map(walk);
-        if (shallowEq(disjointAssembly, geometry.disjointAssembly)) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, disjointAssembly }));
-        }
-      } else if (geometry.layers) {
-        const layers = geometry.layers.map(walk);
-        if (shallowEq(layers, geometry.layers)) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, layers }));
-        }
-      } else if (geometry.connection) {
-        const geometries = geometry.geometries.map(walk);
-        const connectors = geometry.connectors.map(walk);
-        if (shallowEq(geometries, geometry.geometries) &&
-            shallowEq(connectors, geometry.connectors)) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, geometries, connectors }));
-        }
-      } else if (geometry.item) {
-        const item = walk(geometry.item);
-        if (item === geometry.item) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, item }));
-        }    } else if (geometry.paths) {
-        return q(op(geometry));
-      } else if (geometry.plan) {
-        const content = walk(geometry.content);
-        if (content === geometry.content) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, content }));
-        }
-      } else if (geometry.points) {
-        return q(op(geometry));
-      } else if (geometry.solid) {
-        return q(op(geometry));
-      } else if (geometry.surface) {
-        return q(op(geometry));
-      } else if (geometry.untransformed) {
-        const untransformed = walk(geometry.untransformed);
-        if (untransformed === geometry.untransformed) {
-          return q(op(geometry));
-        } else {
-          return q(op({ ...geometry, untransformed }));
-        }
-      } else if (geometry.z0Surface) {
-        return q(op(geometry));
-      } else {
-        throw Error('die: Unknown geometry');
-      }
-    };
-
-    return walk(geometry);
+  /**
+   * Transforms the vertices of a polygon, producing a new poly3.
+   *
+   * The polygon does not need to be a poly3, but may be any array of
+   * points. The points being represented as arrays of values.
+   *
+   * If the original has a 'plane' property, the result will have a clone
+   * of the plane.
+   *
+   * @param {Function} [transform=vec3.clone] - function used to transform the vertices.
+   * @returns {Array} a copy with transformed vertices and copied properties.
+   *
+   * @example
+   * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
+   * let observed = poly3.map(vertices)
+   */
+  const map = (original, transform) => {
+    if (original === undefined) {
+      original = [];
+    }
+    if (transform === undefined) {
+      transform = _ => _;
+    }
+    return original.map(vertex => transform(vertex));
   };
 
-  // FIX: Refactor the geometry walkers.
+  const canonicalize$2 = polygon => map(polygon, canonicalize);
 
-  const allTags = (geometry) => {
-    const collectedTags = new Set();
-    const op = ({ tags }) => {
-      if (tags !== undefined) {
-        for (const tag of tags) {
-          collectedTags.add(tag);
-        }
-      }
-    };
-    rewriteUp(geometry, op);
-    return collectedTags;
+  /**
+   * Flip the give polygon to face the opposite direction.
+   *
+   * @param {poly3} polygon - the polygon to flip
+   * @returns {poly3} a new poly3
+   */
+  const flip$1 = (polygon) => [...polygon].reverse();
+
+  /**
+   * Create a poly3 from the given points.
+   *
+   * @param {Array[]} points - list of points
+   * @param {plane} [planeof] - plane of the polygon
+   *
+   * @example
+   * const points = [
+   *   [0,  0, 0],
+   *   [0, 10, 0],
+   *   [0, 10, 10]
+   * ]
+   * const polygon = createFromPoints(points)
+   */
+  const fromPoints = (points, planeof) => [...points];
+
+  const canonicalize$3 = ([x = 0, y = 0, z = 0, w = 0]) => [reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(z), reallyQuantizeForSpace(w)];
+
+  /**
+   * Compare the given planes for equality
+   * @return {boolean} true if planes are equal
+   */
+  const equals$2 = (a, b) =>
+    (a[0] === b[0]) &&
+    (a[1] === b[1]) &&
+    (a[2] === b[2]) &&
+    (a[3] === b[3]);
+
+  /**
+   * Flip the given plane (vec4)
+   *
+   * @param {vec4} vec - plane to flip
+   * @return {vec4} flipped plane
+   */
+  const flip$2 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
+
+  /**
+   * Create a new plane from the given points
+   *
+   * @param {Vec3} a - 3D point
+   * @param {Vec3} b - 3D point
+   * @param {Vec3} c - 3D point
+   * @returns {Vec4} a new plane with properly typed values
+   */
+  const fromPoints$1 = (a, b, c) => {
+    // let n = b.minus(a).cross(c.minus(a)).unit()
+    // FIXME optimize later
+    const ba = subtract(b, a);
+    const ca = subtract(c, a);
+    const cr = cross(ba, ca);
+    const normal = unit(cr); // normal part
+    //
+    const w = dot(normal, a);
+    return [normal[0], normal[1], normal[2], w];
   };
+
+  const X$3 = 0;
+  const Y$3 = 1;
+  const Z$1 = 2;
+  const W = 3;
+
+  // Newell's method for computing the plane of a polygon.
+  const fromPolygon = (polygon) => {
+    const normal = [0, 0, 0];
+    const reference = [0, 0, 0];
+    let lastPoint = polygon[polygon.length - 1];
+    for (const thisPoint of polygon) {
+      normal[X$3] += (lastPoint[Y$3] - thisPoint[Y$3]) * (lastPoint[Z$1] + thisPoint[Z$1]);
+      normal[Y$3] += (lastPoint[Z$1] - thisPoint[Z$1]) * (lastPoint[X$3] + thisPoint[X$3]);
+      normal[Z$1] += (lastPoint[X$3] - thisPoint[X$3]) * (lastPoint[Y$3] + thisPoint[Y$3]);
+      reference[X$3] += lastPoint[X$3];
+      reference[Y$3] += lastPoint[Y$3];
+      reference[Z$1] += lastPoint[Z$1];
+      lastPoint = thisPoint;
+    }
+    const factor = 1 / length(normal);
+    const plane = scale(factor, normal);
+    plane[W] = dot(reference, normal) * factor / polygon.length;
+    if (isNaN(plane[0])) {
+      return undefined;
+    } else {
+      return plane;
+    }
+  };
+
+  const W$1 = 3;
+
+  /**
+   * Calculate the distance to the given point
+   * @return {Number} signed distance to point
+   */
+  const signedDistanceToPoint = (plane, point) => dot(plane, point) - plane[W$1];
+
+  /**
+   * Split the given line by the given plane.
+   * Robust splitting, even if the line is parallel to the plane
+   * @return {vec3} a new point
+   */
+  const splitLineSegmentByPlane = (plane, p1, p2) => {
+    const direction = subtract(p2, p1);
+    let lambda = (plane[3] - dot(plane, p1)) / dot(plane, direction);
+    if (Number.isNaN(lambda)) lambda = 0;
+    if (lambda > 1) lambda = 1;
+    if (lambda < 0) lambda = 0;
+    return add(p1, scale(lambda, direction));
+  };
+
+  const X$4 = 0;
+  const Y$4 = 1;
+  const Z$2 = 2;
+  const W$2 = 3;
+
+  const toXYPlaneTransforms = (plane, rightVector) => {
+    if (plane === undefined) {
+      throw Error('die');
+    }
+    if (rightVector === undefined) {
+      rightVector = random(plane);
+    }
+
+    const v = unit(cross(plane, rightVector));
+    const u = cross(v, plane);
+    const p = multiply(plane, fromScalar(plane[W$2]));
+
+    const to = fromValues(u[X$4], v[X$4], plane[X$4], 0,
+                          u[Y$4], v[Y$4], plane[Y$4], 0,
+                          u[Z$2], v[Z$2], plane[Z$2], 0,
+                          0, 0, -plane[W$2], 1);
+
+    const from = fromValues(u[X$4], u[Y$4], u[Z$2], 0,
+                            v[X$4], v[Y$4], v[Z$2], 0,
+                            plane[X$4], plane[Y$4], plane[Z$2], 0,
+                            p[X$4], p[Y$4], p[Z$2], 1);
+
+    return [to, from];
+  };
+
+  /**
+   * Transform the given plane using the given matrix
+   * @return {Array} a new plane with properly typed values
+   */
+  const transform$2 = (matrix, plane) => {
+    const ismirror = isMirroring(matrix);
+    // get two vectors in the plane:
+    const r = random(plane);
+    const u = cross(plane, r);
+    const v = cross(plane, u);
+    // get 3 points in the plane:
+    let point1 = multiply(plane, [plane[3], plane[3], plane[3]]);
+    let point2 = add(point1, u);
+    let point3 = add(point1, v);
+    // transform the points:
+    point1 = transform(matrix, point1);
+    point2 = transform(matrix, point2);
+    point3 = transform(matrix, point3);
+    // and create a new plane from the transformed points:
+    let newplane = fromPoints$1(point1, point2, point3);
+    if (ismirror) {
+      // the transform is mirroring so mirror the plane
+      newplane = flip$2(newplane);
+    }
+    return newplane;
+  };
+
+  const toPlane = (polygon) => {
+    if (polygon.plane === undefined) {
+      polygon.plane = fromPolygon(polygon);
+    }
+    return polygon.plane;
+  };
+
+  /**
+   * Check whether the polygon is convex.
+   * @returns {boolean}
+   */
+  const areVerticesConvex = (vertices, plane) => {
+    if (plane === undefined) {
+      return false;
+    }
+    const numvertices = vertices.length;
+    if (numvertices > 3) {
+      let prevprevpos = vertices[numvertices - 2];
+      let prevpos = vertices[numvertices - 1];
+      for (let i = 0; i < numvertices; i++) {
+        const pos = vertices[i];
+        if (!isConvexPoint(prevprevpos, prevpos, pos, plane)) {
+          return false;
+        }
+        prevprevpos = prevpos;
+        prevpos = pos;
+      }
+    }
+    return true;
+  };
+
+  // calculate whether three points form a convex corner
+  //  prevpoint, point, nextpoint: the 3 coordinates (Vector3D instances)
+  //  normal: the normal vector of the plane
+  const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
+    const crossproduct = cross(subtract(point, prevpoint),
+                               subtract(nextpoint, point));
+    // The plane of a polygon is structurally equivalent to its normal.
+    const crossdotnormal = dot(crossproduct, plane);
+    // CHECK: 0 or EPS?
+    return crossdotnormal >= 0;
+  };
+
+  const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
+
+  // Affine transformation of polygon. Returns a new polygon.
+  const transform$3 = (matrix, polygon) => {
+    const transformed = map(polygon, vertex => transform(matrix, vertex));
+    if (isMirroring(matrix)) {
+      // Reverse the order to preserve the orientation.
+      transformed.reverse();
+    }
+    return transformed;
+  };
+
+  // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
+  const canonicalize$4 = (surface) => surface.map(canonicalize$2);
+
+  // Transforms
+  const transform$4 = (matrix, surface) => surface.map(polygon => transform$3(matrix, polygon));
+  const translate$1 = (vector, surface) => transform$4(fromTranslation(vector), surface);
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2032,317 +2262,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const cachePoints = (op) => memoize(op, { isMatchingKey: isMatchingPointsKey, maxSize });
 
-  const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
-
-  const assemble = cache(assembleImpl);
-
-  const canonicalize$2 = (paths) => {
-    let canonicalized = paths.map(canonicalize$1);
-    if (paths.properties !== undefined) {
-      // Transfer properties.
-      canonicalized.properties = paths.properties;
-    }
-    return canonicalized;
-  };
-
-  // FIX: Determine the correct behaviour here.
-
-  const difference = (pathset, ...pathsets) => pathset;
-
-  const eachPoint = (thunk, paths) => {
-    for (const path of paths) {
-      for (const point of path) {
-        if (point !== null) {
-          thunk(point);
-        }
-      }
-    }
-  };
-
-  const flip$1 = (paths) => paths.map(flip);
-
-  const intersection = (...pathsets) => { throw Error('Not implemented'); };
-
-  const transform$2 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
-
-  // FIX: Deduplication.
-
-  const union = (...pathsets) => [].concat(...pathsets);
-
-  const translate$1 = ([x = 0, y = 0, z = 0], paths) => transform$2(fromTranslation([x, y, z]), paths);
-
-  const canonicalize$3 = ([x = 0, y = 0, z = 0, w = 0]) => [reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(z), reallyQuantizeForSpace(w)];
-
-  /**
-   * Compare the given planes for equality
-   * @return {boolean} true if planes are equal
-   */
-  const equals$2 = (a, b) => (a[0] === b[0]) && (a[1] === b[1]) && (a[2] === b[2]) && (a[3] === b[3]);
-
-  /**
-   * Flip the given plane (vec4)
-   *
-   * @param {vec4} vec - plane to flip
-   * @return {vec4} flipped plane
-   */
-  const flip$2 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
-
-  /**
-   * Create a new plane from the given points
-   *
-   * @param {Vec3} a - 3D point
-   * @param {Vec3} b - 3D point
-   * @param {Vec3} c - 3D point
-   * @returns {Vec4} a new plane with properly typed values
-   */
-  const fromPoints = (a, b, c) => {
-    // let n = b.minus(a).cross(c.minus(a)).unit()
-    // FIXME optimize later
-    const ba = subtract(b, a);
-    const ca = subtract(c, a);
-    const cr = cross(ba, ca);
-    const normal = unit(cr); // normal part
-    //
-    const w = dot(normal, a);
-    return [normal[0], normal[1], normal[2], w];
-  };
-
-  const X$1 = 0;
-  const Y$1 = 1;
-  const Z = 2;
-  const W = 3;
-
-  // Newell's method for computing the plane of a polygon.
-  const fromPolygon = (polygon) => {
-    const normal = [0, 0, 0];
-    const reference = [0, 0, 0];
-    let lastPoint = polygon[polygon.length - 1];
-    for (const thisPoint of polygon) {
-      normal[X$1] += (lastPoint[Y$1] - thisPoint[Y$1]) * (lastPoint[Z] + thisPoint[Z]);
-      normal[Y$1] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X$1] + thisPoint[X$1]);
-      normal[Z] += (lastPoint[X$1] - thisPoint[X$1]) * (lastPoint[Y$1] + thisPoint[Y$1]);
-      reference[X$1] += lastPoint[X$1];
-      reference[Y$1] += lastPoint[Y$1];
-      reference[Z] += lastPoint[Z];
-      lastPoint = thisPoint;
-    }
-    const factor = 1 / length(normal);
-    const plane = scale(factor, normal);
-    plane[W] = dot(reference, normal) * factor / polygon.length;
-    if (isNaN(plane[0])) {
-      return undefined;
-    } else {
-      return plane;
-    }
-  };
-
-  const W$1 = 3;
-
-  /**
-   * Calculate the distance to the given point
-   * @return {Number} signed distance to point
-   */
-  const signedDistanceToPoint = (plane, point) => dot(plane, point) - plane[W$1];
-
-  /**
-   * Split the given line by the given plane.
-   * Robust splitting, even if the line is parallel to the plane
-   * @return {vec3} a new point
-   */
-  const splitLineSegmentByPlane = (plane, p1, p2) => {
-    const direction = subtract(p2, p1);
-    let lambda = (plane[3] - dot(plane, p1)) / dot(plane, direction);
-    if (Number.isNaN(lambda)) lambda = 0;
-    if (lambda > 1) lambda = 1;
-    if (lambda < 0) lambda = 0;
-    return add(p1, scale(lambda, direction));
-  };
-
-  const X$2 = 0;
-  const Y$2 = 1;
-  const Z$1 = 2;
-  const W$2 = 3;
-
-  const toXYPlaneTransforms = (plane, rightVector) => {
-    if (plane === undefined) {
-      throw Error('die');
-    }
-    if (rightVector === undefined) {
-      rightVector = random(plane);
-    }
-
-    const v = unit(cross(plane, rightVector));
-    const u = cross(v, plane);
-    const p = multiply(plane, fromScalar(plane[W$2]));
-
-    const to = fromValues(u[X$2], v[X$2], plane[X$2], 0,
-                          u[Y$2], v[Y$2], plane[Y$2], 0,
-                          u[Z$1], v[Z$1], plane[Z$1], 0,
-                          0, 0, -plane[W$2], 1);
-
-    const from = fromValues(u[X$2], u[Y$2], u[Z$1], 0,
-                            v[X$2], v[Y$2], v[Z$1], 0,
-                            plane[X$2], plane[Y$2], plane[Z$1], 0,
-                            p[X$2], p[Y$2], p[Z$1], 1);
-
-    return [to, from];
-  };
-
-  /**
-   * Transform the given plane using the given matrix
-   * @return {Array} a new plane with properly typed values
-   */
-  const transform$3 = (matrix, plane) => {
-    const ismirror = isMirroring(matrix);
-    // get two vectors in the plane:
-    const r = random(plane);
-    const u = cross(plane, r);
-    const v = cross(plane, u);
-    // get 3 points in the plane:
-    let point1 = multiply(plane, [plane[3], plane[3], plane[3]]);
-    let point2 = add(point1, u);
-    let point3 = add(point1, v);
-    // transform the points:
-    point1 = transform(matrix, point1);
-    point2 = transform(matrix, point2);
-    point3 = transform(matrix, point3);
-    // and create a new plane from the transformed points:
-    let newplane = fromPoints(point1, point2, point3);
-    if (ismirror) {
-      // the transform is mirroring so mirror the plane
-      newplane = flip$2(newplane);
-    }
-    return newplane;
-  };
-
-  const transform$4 = (matrix, points) => points.map(point => transform(matrix, point));
-  const translate$2 = ([x = 0, y = 0, z = 0], points) => transform$4(fromTranslation([x, y, z]), points);
-
-  const canonicalize$4 = (points) => points.map(canonicalize);
-
-  const eachPoint$1 = (thunk, points) => {
-    for (const point of points) {
-      thunk(point);
-    }
-  };
-
-  const flip$3 = (points) => points;
-
-  /**
-   * Transforms the vertices of a polygon, producing a new poly3.
-   *
-   * The polygon does not need to be a poly3, but may be any array of
-   * points. The points being represented as arrays of values.
-   *
-   * If the original has a 'plane' property, the result will have a clone
-   * of the plane.
-   *
-   * @param {Function} [transform=vec3.clone] - function used to transform the vertices.
-   * @returns {Array} a copy with transformed vertices and copied properties.
-   *
-   * @example
-   * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
-   * let observed = poly3.map(vertices)
-   */
-  const map = (original, transform) => {
-    if (original === undefined) {
-      original = [];
-    }
-    if (transform === undefined) {
-      transform = _ => _;
-    }
-    return original.map(vertex => transform(vertex));
-  };
-
-  const canonicalize$5 = polygon => map(polygon, canonicalize);
-
-  /**
-   * Flip the give polygon to face the opposite direction.
-   *
-   * @param {poly3} polygon - the polygon to flip
-   * @returns {poly3} a new poly3
-   */
-  const flip$4 = (polygon) => [...polygon].reverse();
-
-  /**
-   * Create a poly3 from the given points.
-   *
-   * @param {Array[]} points - list of points
-   * @param {plane} [planeof] - plane of the polygon
-   *
-   * @example
-   * const points = [
-   *   [0,  0, 0],
-   *   [0, 10, 0],
-   *   [0, 10, 10]
-   * ]
-   * const polygon = createFromPoints(points)
-   */
-  const fromPoints$1 = (points, planeof) => [...points];
-
-  const toPlane = (polygon) => {
-    if (polygon.plane === undefined) {
-      polygon.plane = fromPolygon(polygon);
-    }
-    return polygon.plane;
-  };
-
-  /**
-   * Check whether the polygon is convex.
-   * @returns {boolean}
-   */
-  const areVerticesConvex = (vertices, plane) => {
-    if (plane === undefined) {
-      return false;
-    }
-    const numvertices = vertices.length;
-    if (numvertices > 3) {
-      let prevprevpos = vertices[numvertices - 2];
-      let prevpos = vertices[numvertices - 1];
-      for (let i = 0; i < numvertices; i++) {
-        const pos = vertices[i];
-        if (!isConvexPoint(prevprevpos, prevpos, pos, plane)) {
-          return false;
-        }
-        prevprevpos = prevpos;
-        prevpos = pos;
-      }
-    }
-    return true;
-  };
-
-  // calculate whether three points form a convex corner
-  //  prevpoint, point, nextpoint: the 3 coordinates (Vector3D instances)
-  //  normal: the normal vector of the plane
-  const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
-    const crossproduct = cross(subtract(point, prevpoint),
-                               subtract(nextpoint, point));
-    // The plane of a polygon is structurally equivalent to its normal.
-    const crossdotnormal = dot(crossproduct, plane);
-    // CHECK: 0 or EPS?
-    return crossdotnormal >= 0;
-  };
-
-  const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
-
-  // Affine transformation of polygon. Returns a new polygon.
-  const transform$5 = (matrix, polygon) => {
-    const transformed = map(polygon, vertex => transform(matrix, vertex));
-    if (isMirroring(matrix)) {
-      // Reverse the order to preserve the orientation.
-      transformed.reverse();
-    }
-    return transformed;
-  };
-
-  // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
-  const canonicalize$6 = (surface) => surface.map(canonicalize$5);
-
-  // Transforms
-  const transform$6 = (matrix, surface) => surface.map(polygon => transform$5(matrix, polygon));
-  const translate$3 = (vector, surface) => transform$6(fromTranslation(vector), surface);
-
-  // FIX
+  // FIX: This is incorrect, since it assumes the first non-degenerate polygon is representative.
 
   const toPlane$1 = (surface) => {
     if (surface.plane !== undefined) {
@@ -2548,7 +2468,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const cut = cacheCut(cutImpl);
 
-  const eachPoint$2 = (thunk, surface) => {
+  const eachPoint = (thunk, surface) => {
     for (const polygon of surface) {
       for (const [x = 0, y = 0, z = 0] of polygon) {
         thunk([x, y, z]);
@@ -2573,91 +2493,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return original.map(polygon => transform(polygon));
   };
 
-  const flip$5 = (surface) => map$1(surface, flip$4);
-
-  const X$3 = 0;
-  const Y$3 = 1;
-
-  // The resolution is 1 / multiplier.
-  const createNormalize2 = (multiplier = 1e5) => {
-    const map = new Map();
-    const update = (key, value) => {
-      if (!map.has(key)) {
-        map.set(key, value);
-      }
-    };
-    const normalize2 = (coordinate) => {
-      // Apply a spatial quantization to the 2 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$3] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$3] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nx1 = nx + 1;
-      const ny1 = ny + 1;
-      // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = [nx1 / multiplier, ny1 / multiplier, 0];
-      update(`${nx0}/${ny0}`, normalized);
-      update(`${nx0}/${ny1}`, normalized);
-      update(`${nx1}/${ny0}`, normalized);
-      update(`${nx1}/${ny1}`, normalized);
-      // This is now the normalized coordinate for this region.
-      return normalized;
-    };
-    return normalize2;
-  };
-
-  const X$4 = 0;
-  const Y$4 = 1;
-  const Z$2 = 2;
-
-  // The resolution is 1 / multiplier.
-  const createNormalize3 = (multiplier = 1e5) => {
-    const map = new Map();
-    const update = (key, value) => {
-      if (!map.has(key)) {
-        map.set(key, value);
-      }
-    };
-    const normalize3 = (coordinate) => {
-      // Apply a spatial quantization to the 2 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$4] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$4] * multiplier - 0.5);
-      const nz = Math.floor(coordinate[Z$2] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}/${nz}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nz0 = nz;
-      const nx1 = nx + 1;
-      const ny1 = ny + 1;
-      const nz1 = nz + 1;
-      // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = coordinate;
-      update(`${nx0}/${ny0}/${nz0}`, normalized);
-      update(`${nx0}/${ny0}/${nz1}`, normalized);
-      update(`${nx0}/${ny1}/${nz0}`, normalized);
-      update(`${nx0}/${ny1}/${nz1}`, normalized);
-      update(`${nx1}/${ny0}/${nz0}`, normalized);
-      update(`${nx1}/${ny0}/${nz1}`, normalized);
-      update(`${nx1}/${ny1}/${nz0}`, normalized);
-      update(`${nx1}/${ny1}/${nz1}`, normalized);
-      // This is now the normalized coordinate for this region.
-      return normalized;
-    };
-    return normalize3;
-  };
+  const flip$3 = (surface) => map$1(surface, flip$1);
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
   const measureBoundingBox = (surface) => {
@@ -13742,6 +13578,14 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const RESOLUTION = 1e6;
 
+  const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+
+  // Reorder in-place such that counterclockwise paths preceed clockwise paths.
+  const clockSort = (surface) => {
+    surface.sort((a, b) => clockOrder(a) - clockOrder(b));
+    return surface;
+  };
+
   const toInt = (integer) => Math.round(integer * RESOLUTION);
   const toFloat = (integer) => integer / RESOLUTION;
 
@@ -13803,7 +13647,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const toSurface = (clipperPaths, normalize) =>
-    clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));
+    clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
 
   const toPaths = (clipper, polytree, normalize) => {
     const paths = [];
@@ -13856,7 +13700,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return false;
   };
 
-  const difference$1 = (a, ...z0Surfaces) => {
+  const difference = (a, ...z0Surfaces) => {
     if (a === undefined || a.length === 0) {
       return [];
     }
@@ -13896,7 +13740,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
    * @returns {Z0Surface} the resulting z0 surface.
    */
-  const intersection$1 = (a, ...z0Surfaces) => {
+  const intersection = (a, ...z0Surfaces) => {
     if (a === undefined || a.length === 0) {
       return [];
     }
@@ -14706,12 +14550,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       walkContour(child);
     }
 
-    return convexSurface.map(path => path.map(normalize));
+    const normalized = convexSurface.map(path => path.map(normalize));
+    return normalized;
   };
+
+  const THRESHOLD$1 = 1e-5;
 
   // We expect a surface of reconciled triangles.
 
-  const makeWatertight = (surface) => {
+  const makeWatertight$1 = (surface) => {
     const vertices = new Set();
 
     for (const path of surface) {
@@ -14729,7 +14576,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         const colinear = [];
         for (const vertex of vertices) {
           // FIX: Threshold
-          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
+          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD$1) {
             // FIX: Clip an ear instead.
             // Vertex is on the open edge.
             colinear.push(vertex);
@@ -14747,28 +14594,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return watertightPaths;
   };
 
-  const outline = (surface, normalize = p => p) => {
-    const watertightSurface = makeWatertight(surface.map(path => path.map(normalize)));
-    const polygons = fromSurface(watertightSurface, normalize);
-    if (polygons.length === 0) {
-      return [];
-    }
-    const subjectInputs = polygons.map(polygon => ({ data: polygon, closed: true }));
-    const result = clipper$1.clipToPaths(
-      {
-        clipType: jsAngusjClipperjsWeb_2.Union,
-        subjectInputs,
-        subjectFillType: jsAngusjClipperjsWeb_8.Positive
-      });
-    const surfaceResult = toSurface(result, normalize);
-    return surfaceResult;
-  };
-
   // Here we have a surface with a confused orientation.
   // This reorients the most exterior paths to be ccw.
 
   const reorient = (surface, normalize = p => p) => {
-    const polygons = fromSurface(surface, normalize);
+    const watertightSurface = makeWatertight$1(surface.map(path => path.map(normalize)));
+    const polygons = fromSurface(watertightSurface, normalize);
     if (polygons.length === 0) {
       return [];
     }
@@ -14790,7 +14621,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
    * @returns {Z0Surface} the resulting z0 surface.
    */
-  const union$1 = (...z0Surfaces) => {
+  const union = (...z0Surfaces) => {
     if (z0Surfaces.length === 0) {
       return [];
     }
@@ -14821,6 +14652,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     return z0Surfaces[0];
   };
+
+  const outline = reorient;
 
   // Cut the corners to produce triangles.
   const triangulateConvexPolygon = (polygon) => {
@@ -14856,8 +14689,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       }
     }
     const [to, from] = toXYPlaneTransforms(plane);
-    const convexZ0Surface = makeConvex(transform$6(to, surface.map(path => path.map(normalize3))));
-    const convexSurface = transform$6(from, convexZ0Surface).map(path => path.map(normalize3));
+    const convexZ0Surface = makeConvex(transform$4(to, surface.map(path => path.map(normalize3))));
+    const convexSurface = transform$4(from, convexZ0Surface).map(path => path.map(normalize3));
     return convexSurface;
   };
 
@@ -14891,9 +14724,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return surface.measureBoundingSphere;
   };
 
-  const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$5(matrix, polygon));
+  const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$3(matrix, polygon));
 
-  const transform$7 = cacheTransform(transformImpl);
+  const transform$5 = cacheTransform(transformImpl);
 
   const outline$1 = (surface, normalize = createNormalize3(), plane = toPlane$1(surface)) => {
     if (plane === undefined) {
@@ -14901,14 +14734,14 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     // FIX: Detect when the surfaces aren't in the same plane.
     const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-    const z0Surface = transform$7(toZ0, surface.map(path => path.map(normalize)));
+    const z0Surface = transform$5(toZ0, surface.map(path => path.map(normalize)));
     const outlinedZ0Surface = outline(z0Surface, normalize);
-    return transform$7(fromZ0, outlinedZ0Surface).map(path => path.map(normalize));
+    return transform$5(fromZ0, outlinedZ0Surface).map(path => path.map(normalize));
   };
 
   const toPolygons = (options = {}, surface) => surface;
 
-  const transform$8 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
+  const transform$6 = (matrix, solid) => solid.map(surface => transform$4(matrix, surface));
 
   const alignVertices = (solid, normalize3 = createNormalize3()) => {
     const aligned = solid.map(surface =>
@@ -14918,7 +14751,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return aligned;
   };
 
-  const canonicalize$7 = (solid) => solid.map(canonicalize$6);
+  const canonicalize$5 = (solid) => solid.map(canonicalize$4);
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
   const measureBoundingBox$3 = (solid) => {
@@ -14939,9 +14772,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return solid.measureBoundingBox;
   };
 
-  const eachPoint$3 = (thunk, solid) => {
+  const eachPoint$1 = (thunk, solid) => {
     for (const surface of solid) {
-      eachPoint$2(thunk, surface);
+      eachPoint(thunk, surface);
     }
   };
 
@@ -14971,7 +14804,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return openEdges;
   };
 
-  const flip$6 = (solid) => solid.map(surface => flip$5(surface));
+  const flip$4 = (solid) => solid.map(surface => flip$3(surface));
 
   // The resolution is 1 / multiplier.
   const multiplier = 1e5;
@@ -15069,57 +14902,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return defragmented;
   };
 
-  // We expect a solid of reconciled triangles.
-
-  const watertight = Symbol('watertight');
-
-  const makeWatertight$1 = (solid, normalize = createNormalize3()) => {
-    if (!solid[watertight]) {
-      const vertices = new Set();
-      for (const surface of solid) {
-        for (const path of surface) {
-          for (const point of path) {
-            const reconciledPoint = normalize(point);
-            vertices.add(reconciledPoint);
-          }
-        }
-      }
-
-      const watertightSolid = [];
-      for (const surface of solid) {
-        const watertightPaths = [];
-        for (const path of surface) {
-          const watertightPath = [];
-          for (const [start, end] of getEdges(path)) {
-            watertightPath.push(start);
-            const span = distance(start, end);
-            const colinear = [];
-            for (const vertex of vertices) {
-              // FIX: Threshold
-              if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
-                // FIX: Clip an ear instead.
-                // Vertex is on the open edge.
-                colinear.push(vertex);
-              }
-            }
-            // Arrange by distance from start.
-            colinear.sort((a, b) => distance(start, a) - distance(start, b));
-            // Insert into the path.
-            watertightPath.push(...colinear);
-          }
-          watertightPaths.push(watertightPath);
-        }
-        watertightSolid.push(watertightPaths);
-      }
-      // At this point we should have the correct structure for assembly into a solid.
-      // We just need to ensure triangulation to support deformation.
-
-      solid[watertight] = watertightSolid;
-    }
-
-    return solid[watertight];
-  };
-
   const outline$2 = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
 
   // Relax the coplanar arrangement into polygon soup.
@@ -15130,6 +14912,286 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     return polygons;
   };
+
+  const update = (geometry, updates) => {
+    const updated = {};
+    for (const key of Object.keys(geometry)) {
+      if (typeof key !== 'symbol') {
+        updated[key] = geometry[key];
+      }
+    }
+    for (const key of Object.keys(updates)) {
+      updated[key] = updates[key];
+    }
+    return updated;
+  };
+
+  const rewrite = (geometry, op) => {
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        return op(geometry, _ => update(geometry, { assembly: geometry.assembly.map(walk) }), walk);
+      } else if (geometry.disjointAssembly) {
+        return op(geometry, _ => update(geometry, { disjointAssembly: geometry.disjointAssembly.map(walk) }), walk);
+      } else if (geometry.layers) {
+        return op(geometry, _ => update(geometry, { layers: geometry.layers.map(walk) }), walk);
+      } else if (geometry.connection) {
+        return op(geometry,
+                  _ => update(geometry, { geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk) }),
+                  walk);
+      } else if (geometry.item) {
+        return op(geometry, _ => update(geometry, { item: walk(geometry.item) }), walk);
+      } else if (geometry.paths) {
+        return op(geometry, _ => geometry, walk);
+      } else if (geometry.plan) {
+        return op(geometry, _ => update(geometry, { content: walk(geometry.content) }), walk);
+      } else if (geometry.points) {
+        return op(geometry, _ => geometry, walk);
+      } else if (geometry.solid) {
+        return op(geometry, _ => geometry, walk);
+      } else if (geometry.surface) {
+        return op(geometry, _ => geometry, walk);
+      } else if (geometry.untransformed) {
+        return op(geometry, _ => update(geometry, { untransformed: walk(geometry.untransformed) }), walk);
+      } else if (geometry.z0Surface) {
+        return op(geometry, _ => geometry, walk);
+      } else {
+        throw Error('die: Unknown geometry');
+      }
+    };
+    return walk(geometry);
+  };
+
+  const visit = (geometry, op) => {
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        op(geometry, _ => geometry.assembly.forEach(walk));
+      } else if (geometry.disjointAssembly) {
+        op(geometry, _ => geometry.disjointAssembly.forEach(walk));
+      } else if (geometry.layers) {
+        op(geometry, _ => geometry.layers.forEach(walk));
+      } else if (geometry.connection) {
+        op(geometry, _ => { geometry.geometries.forEach(walk); geometry.connectors.forEach(walk); });
+      } else if (geometry.item) {
+        op(geometry, _ => walk(geometry.item));
+      } else if (geometry.paths) {
+        op(geometry, _ => undefined);
+      } else if (geometry.plan) {
+        op(geometry, _ => { walk(geometry.content); });
+      } else if (geometry.points) {
+        op(geometry, _ => undefined);
+      } else if (geometry.solid) {
+        op(geometry, _ => undefined);
+      } else if (geometry.surface) {
+        op(geometry, _ => undefined);
+      } else if (geometry.untransformed) {
+        op(geometry, _ => undefined, _ => walk(geometry.untransformed));
+      } else if (geometry.z0Surface) {
+        op(geometry, _ => undefined);
+      } else {
+        throw Error('die: Unknown geometry');
+      }
+    };
+    walk(geometry);
+  };
+
+  const makeWatertight$2 = (geometry, normalize = createNormalize3(), onFixed) =>
+    rewrite(geometry,
+            (geometry, descend) => {
+              if (geometry.solid) {
+                return {
+                  solid: makeWatertight(geometry.solid, normalize, onFixed),
+                  tags: geometry.tags
+                };
+              } else {
+                return descend();
+              }
+            });
+
+  const isWatertight$1 = (geometry) => {
+    let watertight = true;
+    visit(geometry,
+          (geometry, descend) => {
+            if (geometry.solid && !isWatertight(geometry.solid)) {
+              watertight = false;
+            }
+            return descend();
+          });
+    return watertight;
+  };
+
+  // Remove any symbols (which refer to cached values).
+  const fresh = (geometry) => {
+    const fresh = {};
+    for (const key of Object.keys(geometry)) {
+      if (typeof key !== 'symbol') {
+        fresh[key] = geometry[key];
+      }
+    }
+    return fresh;
+  };
+
+  const shallowEq = (a, b) => {
+    if (a === undefined) throw Error('die');
+    if (b === undefined) throw Error('die');
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Rewrite on the way back up the call-path.
+  const rewriteUp = (geometry, op) => {
+    // FIX: Minimize identity churn.
+    const walk = (geometry) => {
+      const q = (postopGeometry) => {
+        if (postopGeometry === undefined) {
+          return geometry;
+        } else if (postopGeometry === geometry) {
+          return geometry;
+        } else {
+          return fresh(postopGeometry);
+        }
+      };
+
+      if (geometry.assembly) {
+        const assembly = geometry.assembly.map(walk);
+        if (shallowEq(assembly, geometry.assembly)) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, assembly }));
+        }
+      } else if (geometry.disjointAssembly) {
+        const disjointAssembly = geometry.disjointAssembly.map(walk);
+        if (shallowEq(disjointAssembly, geometry.disjointAssembly)) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, disjointAssembly }));
+        }
+      } else if (geometry.layers) {
+        const layers = geometry.layers.map(walk);
+        if (shallowEq(layers, geometry.layers)) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, layers }));
+        }
+      } else if (geometry.connection) {
+        const geometries = geometry.geometries.map(walk);
+        const connectors = geometry.connectors.map(walk);
+        if (shallowEq(geometries, geometry.geometries) &&
+            shallowEq(connectors, geometry.connectors)) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, geometries, connectors }));
+        }
+      } else if (geometry.item) {
+        const item = walk(geometry.item);
+        if (item === geometry.item) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, item }));
+        }    } else if (geometry.paths) {
+        return q(op(geometry));
+      } else if (geometry.plan) {
+        const content = walk(geometry.content);
+        if (content === geometry.content) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, content }));
+        }
+      } else if (geometry.points) {
+        return q(op(geometry));
+      } else if (geometry.solid) {
+        return q(op(geometry));
+      } else if (geometry.surface) {
+        return q(op(geometry));
+      } else if (geometry.untransformed) {
+        const untransformed = walk(geometry.untransformed);
+        if (untransformed === geometry.untransformed) {
+          return q(op(geometry));
+        } else {
+          return q(op({ ...geometry, untransformed }));
+        }
+      } else if (geometry.z0Surface) {
+        return q(op(geometry));
+      } else {
+        throw Error('die: Unknown geometry');
+      }
+    };
+
+    return walk(geometry);
+  };
+
+  // FIX: Refactor the geometry walkers.
+
+  const allTags = (geometry) => {
+    const collectedTags = new Set();
+    const op = ({ tags }) => {
+      if (tags !== undefined) {
+        for (const tag of tags) {
+          collectedTags.add(tag);
+        }
+      }
+    };
+    rewriteUp(geometry, op);
+    return collectedTags;
+  };
+
+  const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
+
+  const assemble = cache(assembleImpl);
+
+  const canonicalize$6 = (paths) => {
+    let canonicalized = paths.map(canonicalize$1);
+    if (paths.properties !== undefined) {
+      // Transfer properties.
+      canonicalized.properties = paths.properties;
+    }
+    return canonicalized;
+  };
+
+  // FIX: Determine the correct behaviour here.
+
+  const difference$1 = (pathset, ...pathsets) => pathset;
+
+  const eachPoint$2 = (thunk, paths) => {
+    for (const path of paths) {
+      for (const point of path) {
+        if (point !== null) {
+          thunk(point);
+        }
+      }
+    }
+  };
+
+  const flip$5 = (paths) => paths.map(flip);
+
+  const intersection$1 = (pathset, ...pathsets) => pathset;
+
+  const transform$7 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
+
+  // FIX: Deduplication.
+
+  const union$1 = (...pathsets) => [].concat(...pathsets);
+
+  const translate$2 = ([x = 0, y = 0, z = 0], paths) => transform$7(fromTranslation([x, y, z]), paths);
+
+  const transform$8 = (matrix, points) => points.map(point => transform(matrix, point));
+  const translate$3 = ([x = 0, y = 0, z = 0], points) => transform$8(fromTranslation([x, y, z]), points);
+
+  const canonicalize$7 = (points) => points.map(canonicalize);
+
+  const eachPoint$3 = (thunk, points) => {
+    for (const point of points) {
+      thunk(point);
+    }
+  };
+
+  const flip$6 = (points) => points;
 
   const transformedGeometry = Symbol('transformedGeometry');
 
@@ -15173,37 +15235,37 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           };
         } else if (geometry.paths) {
           return {
-            paths: transform$2(matrix, geometry.paths),
+            paths: transform$7(matrix, geometry.paths),
             tags
           };
         } else if (geometry.plan) {
           return {
             plan: geometry.plan,
-            marks: transform$4(matrix, geometry.marks),
-            planes: geometry.planes.map(plane => transform$3(matrix, plane)),
+            marks: transform$8(matrix, geometry.marks),
+            planes: geometry.planes.map(plane => transform$2(matrix, plane)),
             content: walk(matrix, geometry.content),
             visualization: walk(matrix, geometry.visualization),
             tags
           };
         } else if (geometry.points) {
           return {
-            points: transform$4(matrix, geometry.points),
+            points: transform$8(matrix, geometry.points),
             tags
           };
         } else if (geometry.solid) {
           return {
-            solid: transform$8(matrix, geometry.solid),
+            solid: transform$6(matrix, geometry.solid),
             tags
           };
         } else if (geometry.surface) {
           return {
-            surface: transform$6(matrix, geometry.surface),
+            surface: transform$4(matrix, geometry.surface),
             tags
           };
         } else if (geometry.z0Surface) {
           // FIX: Consider transforms that preserve z0.
           return {
-            surface: transform$6(matrix, geometry.z0Surface),
+            surface: transform$4(matrix, geometry.z0Surface),
             tags
           };
         } else {
@@ -15219,23 +15281,23 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const geometry = toTransformedGeometry(rawGeometry);
     const canonicalized = {};
     if (geometry.points !== undefined) {
-      canonicalized.points = canonicalize$4(geometry.points);
+      canonicalized.points = canonicalize$7(geometry.points);
     } else if (geometry.paths !== undefined) {
-      canonicalized.paths = canonicalize$2(geometry.paths);
+      canonicalized.paths = canonicalize$6(geometry.paths);
     } else if (geometry.plan !== undefined) {
       canonicalized.plan = geometry.plan;
-      canonicalized.marks = canonicalize$4(geometry.marks);
+      canonicalized.marks = canonicalize$7(geometry.marks);
       canonicalized.planes = geometry.planes.map(canonicalize$3);
       canonicalized.visualization = canonicalize$8(geometry.visualization);
       canonicalized.content = canonicalize$8(geometry.content);
     } else if (geometry.connection) {
       canonicalized.connection = geometry.connection;
       canonicalized.geometries = geometry.geometries.map(canonicalize$8);    canonicalized.connectors = geometry.connectors.map(canonicalize$8);  } else if (geometry.surface !== undefined) {
-      canonicalized.surface = canonicalize$6(geometry.surface);
+      canonicalized.surface = canonicalize$4(geometry.surface);
     } else if (geometry.z0Surface !== undefined) {
-      canonicalized.z0Surface = canonicalize$6(geometry.z0Surface);
+      canonicalized.z0Surface = canonicalize$4(geometry.z0Surface);
     } else if (geometry.solid !== undefined) {
-      canonicalized.solid = canonicalize$7(geometry.solid);
+      canonicalized.solid = canonicalize$5(geometry.solid);
     } else if (geometry.assembly !== undefined) {
       canonicalized.assembly = geometry.assembly.map(canonicalize$8);
     } else if (geometry.layers !== undefined) {
@@ -15437,10 +15499,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const pointType$1 = [];
 
-  const splitPolygon$1 = (normalize, plane, polygon, back, coplanarBack, coplanarFront, front) => {
-    if (normalize === undefined) {
-      throw Error('die: no normalize');
-    }
+  const splitPolygon$1 = (normalize, plane, polygon, back, abutting, overlapping, front) => {
     /*
       // This slows things down on average, probably due to not having the bounding sphere computed.
       // Check for non-intersection due to distance from the plane.
@@ -15483,9 +15542,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     switch (polygonType) {
       case COPLANAR$1:
         if (dot$2(plane, polygonPlane) > 0) {
-          coplanarFront.push(polygon);
+          // The plane and the polygon face the same way, so the spaces overlap.
+          overlapping.push(polygon);
         } else {
-          coplanarBack.push(polygon);
+          // The plane and the polygon face the opposite directions, so the spaces abut.
+          abutting.push(polygon);
         }
         return;
       case FRONT$1:
@@ -15496,7 +15557,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         return;
       case SPANNING$1: {
         const frontPoints = [];
+        let lastFront;
         const backPoints = [];
+        let lastBack;
         const last = polygon.length - 1;
         let startPoint = polygon[last];
         let startType = pointType$1[last];
@@ -15505,21 +15568,29 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           const endType = pointType$1[nth];
           if (startType !== BACK$1) {
             // The inequality is important as it includes COPLANAR points.
-            frontPoints.push(startPoint);
+            if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
+              lastFront = startPoint;
+              frontPoints.push(startPoint);
+            }
           }
           if (startType !== FRONT$1) {
             // The inequality is important as it includes COPLANAR points.
-            backPoints.push(startPoint);
+            if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
+              lastBack = startPoint;
+              backPoints.push(startPoint);
+            }
           }
           if ((startType | endType) === SPANNING$1) {
             // This should exclude COPLANAR points.
             // Compute the point that touches the splitting plane.
             // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
             const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-            if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
+            if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
+              lastFront = spanPoint;
               frontPoints.push(spanPoint);
             }
-            if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
+            if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
+              lastBack = spanPoint;
               backPoints.push(spanPoint);
             }
           }
@@ -15527,7 +15598,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           startType = endType;
         }
         if (frontPoints.length >= 3) {
-          frontPoints.plane = polygon.plane;
+          frontPoints.plane = polygonPlane;
           if (backPoints.length >= 3) {
             frontPoints.parent = polygon;
             frontPoints.sibling = backPoints;
@@ -15535,7 +15606,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           front.push(frontPoints);
         }
         if (backPoints.length >= 3) {
-          backPoints.plane = polygon.plane;
+          backPoints.plane = polygonPlane;
           if (frontPoints.length >= 3) {
             backPoints.parent = polygon;
             backPoints.sibling = frontPoints;
@@ -15577,7 +15648,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return {
       // Bottom
       kind: BRANCH,
-      plane: [0, 0, -1, -(cMin[Z$4] - EPSILON$2 * 10)],
+      plane: [0, 0, -1, -cMin[Z$4] + EPSILON$2 * 10],
       front,
       back: {
         // Top
@@ -15587,7 +15658,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         back: {
           // Left
           kind: BRANCH,
-          plane: [-1, 0, 0, -(cMin[X$7] - EPSILON$2 * 10)],
+          plane: [-1, 0, 0, -cMin[X$7] + EPSILON$2 * 10],
           front,
           back: {
             // Right
@@ -15597,7 +15668,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             back: {
               // Back
               kind: BRANCH,
-              plane: [0, -1, 0, -(cMin[Y$7] - EPSILON$2 * 10)],
+              plane: [0, -1, 0, -cMin[Y$7] + EPSILON$2 * 10],
               front,
               back: {
                 // Front
@@ -15624,12 +15695,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     let plane = toPlane(polygons[polygons.length >> 1]);
 
     for (const polygon of polygons) {
+      if (toPlane([...polygon]) === undefined) {
+        continue;
+      }
       splitPolygon$1(normalize,
                    plane,
                    polygon,
                    /* back= */back,
-                   /* coplanarBack= */same,
-                   /* coplanarFront= */same,
+                   /* abutting= */back,
+                   /* overlapping= */same,
                    /* front= */front);
     }
 
@@ -15688,7 +15762,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return merged;
   };
 
-  const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
+  const clean = (polygons) => {
+    for (const polygon of polygons) {
+      delete polygon.parent;
+      delete polygon.sibling;
+    }
+    return polygons;
+  };
+
+  const removeInteriorPolygonsForUnionKeepingOverlap = (bsp, polygons, normalize) => {
     if (bsp === inLeaf) {
       return [];
     } else if (bsp === outLeaf) {
@@ -15701,12 +15783,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back,
-                     /* coplanarBack= */back,
-                     /* coplanarFront= */front,
+                     /* abutting= */back,
+                     /* overlapping= */front,
                      /* front= */front);
       }
-      const trimmedFront = removeInteriorPolygonsKeepingSkin(bsp.front, front, normalize);
-      const trimmedBack = removeInteriorPolygonsKeepingSkin(bsp.back, back, normalize);
+      const trimmedFront = removeInteriorPolygonsForUnionKeepingOverlap(bsp.front, front, normalize);
+      const trimmedBack = removeInteriorPolygonsForUnionKeepingOverlap(bsp.back, back, normalize);
 
       if (trimmedFront.length === 0) {
         return trimmedBack;
@@ -15718,7 +15800,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
+  const removeInteriorPolygonsForUnionDroppingOverlap = (bsp, polygons, normalize) => {
     if (bsp === inLeaf) {
       return [];
     } else if (bsp === outLeaf) {
@@ -15731,12 +15813,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back,
-                     /* coplanarBack= */front,
-                     /* coplanarFront= */back,
+                     /* abutting= */back,
+                     /* overlapping= */back,
                      /* front= */front);
       }
-      const trimmedFront = removeInteriorPolygonsKeepingSkin2(bsp.front, front, normalize);
-      const trimmedBack = removeInteriorPolygonsKeepingSkin2(bsp.back, back, normalize);
+      const trimmedFront = removeInteriorPolygonsForUnionDroppingOverlap(bsp.front, front, normalize);
+      const trimmedBack = removeInteriorPolygonsForUnionDroppingOverlap(bsp.back, back, normalize);
 
       if (trimmedFront.length === 0) {
         return trimmedBack;
@@ -15748,7 +15830,37 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const removeExteriorPolygons = (bsp, polygons, normalize) => {
+  const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+    if (bsp === inLeaf) {
+      return [];
+    } else if (bsp === outLeaf) {
+      return keepOut(polygons);
+    } else {
+      const outward = [];
+      const inward = [];
+      for (let i = 0; i < polygons.length; i++) {
+        splitPolygon$1(normalize,
+                     bsp.plane,
+                     polygons[i],
+                     /* back= */inward,
+                     /* abutting= */outward,
+                     /* overlapping= */inward,
+                     /* front= */outward);
+      }
+      const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
+      const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, inward, normalize);
+
+      if (trimmedFront.length === 0) {
+        return trimmedBack;
+      } else if (trimmedBack.length === 0) {
+        return trimmedFront;
+      } else {
+        return merge(trimmedFront, trimmedBack);
+      }
+    }
+  };
+
+  const removeExteriorPolygonsForSection = (bsp, polygons, normalize) => {
     if (bsp === inLeaf) {
       return keepIn(polygons);
     } else if (bsp === outLeaf) {
@@ -15761,12 +15873,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back,
-                     /* coplanarBack= */back,
-                     /* coplanarFront= */front,
+                     /* abutting= */front,
+                     /* overlapping= */back,
                      /* front= */front);
       }
-      const trimmedFront = removeExteriorPolygons(bsp.front, front, normalize);
-      const trimmedBack = removeExteriorPolygons(bsp.back, back, normalize);
+      const trimmedFront = removeExteriorPolygonsForSection(bsp.front, front, normalize);
+      const trimmedBack = removeExteriorPolygonsForSection(bsp.back, back, normalize);
 
       if (trimmedFront.length === 0) {
         return trimmedBack;
@@ -15778,7 +15890,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
+  const removeExteriorPolygonsForCutDroppingOverlap = (bsp, polygons, normalize) => {
     if (bsp === inLeaf) {
       return keepIn(polygons);
     } else if (bsp === outLeaf) {
@@ -15791,12 +15903,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back,
-                     /* coplanarBack= */front,
-                     /* coplanarFront= */back,
+                     /* abutting= */front,
+                     /* overlapping= */front,
                      /* front= */front);
       }
-      const trimmedFront = removeExteriorPolygons2(bsp.front, front, normalize);
-      const trimmedBack = removeExteriorPolygons2(bsp.back, back, normalize);
+      const trimmedFront = removeExteriorPolygonsForCutDroppingOverlap(bsp.front, front, normalize);
+      const trimmedBack = removeExteriorPolygonsForCutDroppingOverlap(bsp.back, back, normalize);
 
       if (trimmedFront.length === 0) {
         return trimmedBack;
@@ -15808,7 +15920,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
+  const removeExteriorPolygonsForCutKeepingOverlap = (bsp, polygons, normalize) => {
     if (bsp === inLeaf) {
       return keepIn(polygons);
     } else if (bsp === outLeaf) {
@@ -15821,12 +15933,102 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back,
-                     /* coplanarBack= */back,
-                     /* coplanarFront= */back,
+                     /* abutting= */front,
+                     /* overlapping= */back,
                      /* front= */front);
       }
-      const trimmedFront = removeExteriorPolygonsKeepingSkin(bsp.front, front, normalize);
-      const trimmedBack = removeExteriorPolygonsKeepingSkin(bsp.back, back, normalize);
+      const trimmedFront = removeExteriorPolygonsForCutKeepingOverlap(bsp.front, front, normalize);
+      const trimmedBack = removeExteriorPolygonsForCutKeepingOverlap(bsp.back, back, normalize);
+
+      if (trimmedFront.length === 0) {
+        return trimmedBack;
+      } else if (trimmedBack.length === 0) {
+        return trimmedFront;
+      } else {
+        return merge(trimmedFront, trimmedBack);
+      }
+    }
+  };
+
+  const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+    if (bsp === inLeaf) {
+      return keepIn(polygons);
+    } else if (bsp === outLeaf) {
+      return [];
+    } else {
+      const outward = [];
+      const inward = [];
+      for (let i = 0; i < polygons.length; i++) {
+        splitPolygon$1(normalize,
+                     bsp.plane,
+                     polygons[i],
+                     /* back= */inward,
+                     /* abutting= */inward, // difference facing are kept
+                     /* overlapping= */outward, // same facing are removed
+                     /* front= */outward);
+      }
+      const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, outward, normalize);
+      const trimmedBack = removeExteriorPolygonsForDifference(bsp.back, inward, normalize);
+
+      if (trimmedFront.length === 0) {
+        return trimmedBack;
+      } else if (trimmedBack.length === 0) {
+        return trimmedFront;
+      } else {
+        return merge(trimmedFront, trimmedBack);
+      }
+    }
+  };
+
+  const removeExteriorPolygonsForIntersectionKeepingOverlap = (bsp, polygons, normalize) => {
+    if (bsp === inLeaf) {
+      return keepIn(polygons);
+    } else if (bsp === outLeaf) {
+      return [];
+    } else {
+      const front = [];
+      const back = [];
+      for (let i = 0; i < polygons.length; i++) {
+        splitPolygon$1(normalize,
+                     bsp.plane,
+                     polygons[i],
+                     /* back= */back,
+                     /* abutting= */front,
+                     /* overlapping= */back,
+                     /* front= */front);
+      }
+      const trimmedFront = removeExteriorPolygonsForIntersectionKeepingOverlap(bsp.front, front, normalize);
+      const trimmedBack = removeExteriorPolygonsForIntersectionKeepingOverlap(bsp.back, back, normalize);
+
+      if (trimmedFront.length === 0) {
+        return trimmedBack;
+      } else if (trimmedBack.length === 0) {
+        return trimmedFront;
+      } else {
+        return merge(trimmedFront, trimmedBack);
+      }
+    }
+  };
+
+  const removeExteriorPolygonsForIntersectionDroppingOverlap = (bsp, polygons, normalize) => {
+    if (bsp === inLeaf) {
+      return keepIn(polygons);
+    } else if (bsp === outLeaf) {
+      return [];
+    } else {
+      const front = [];
+      const back = [];
+      for (let i = 0; i < polygons.length; i++) {
+        splitPolygon$1(normalize,
+                     bsp.plane,
+                     polygons[i],
+                     /* back= */back,
+                     /* abutting= */front,
+                     /* overlapping= */front,
+                     /* front= */front);
+      }
+      const trimmedFront = removeExteriorPolygonsForIntersectionDroppingOverlap(bsp.front, front, normalize);
+      const trimmedBack = removeExteriorPolygonsForIntersectionDroppingOverlap(bsp.back, back, normalize);
 
       if (trimmedFront.length === 0) {
         return trimmedBack;
@@ -15852,8 +16054,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back,
-                     /* coplanarBack= */front,
-                     /* coplanarFront= */back,
+                     /* abutting= */front,
+                     /* overlapping= */back,
                      /* front= */front);
       }
       const trimmedFront = dividePolygons(bsp.front, front, normalize);
@@ -15870,7 +16072,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   // Merge the fragments for this one.
-  const separatePolygons = (bsp, polygons, normalize) => {
+  const separatePolygonsSkinIn = (bsp, polygons, normalize) => {
     if (polygons.length === 0) {
       return [];
     } else if (bsp === inLeaf) {
@@ -15884,13 +16086,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         splitPolygon$1(normalize,
                      bsp.plane,
                      polygons[i],
-                     /* back= */back,
-                     /* coplanarBack= */back,
-                     /* coplanarFront= */front,
-                     /* front= */front);
+                     /* back= */back, // toward keepIn
+                     /* abutting= */back, // toward keepIn
+                     /* overlapping= */back, // toward keepIn
+                     /* front= */front); // toward keepOut
       }
-      const trimmedFront = separatePolygons(bsp.front, front, normalize);
-      const trimmedBack = separatePolygons(bsp.back, back, normalize);
+      const trimmedFront = separatePolygonsSkinIn(bsp.front, front, normalize);
+      const trimmedBack = separatePolygonsSkinIn(bsp.back, back, normalize);
 
       return [...trimmedFront, ...trimmedBack];
     }
@@ -15899,14 +16101,14 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const boundPolygons = (bsp, polygons, normalize) => {
     const inPolygons = [];
     const outPolygons = [];
-    for (const polygon of separatePolygons(bsp, polygons, normalize)) {
+    for (const polygon of separatePolygonsSkinIn(bsp, polygons, normalize)) {
       if (polygon.leaf === inLeaf) {
         inPolygons.push(polygon);
       } else if (polygon.leaf === outLeaf) {
         outPolygons.push(polygon);
       }
     }
-    return [inPolygons, outPolygons];
+    return [clean(inPolygons), clean(outPolygons)];
   };
 
   const cut$1 = (solid, surface, normalize = createNormalize3()) => {
@@ -15915,12 +16117,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const solidPolygons = toPolygons$1({}, solid);
 
     // Classify the solid with it.
-    const trimmedSolid = removeExteriorPolygons(cutBsp, solidPolygons, normalize);
+    const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
 
     // The solid will have holes that need to be patched with the parts of the
     // planar polygon that are on the solid boundary.
     const solidBsp = fromPolygons$1(solidPolygons, normalize);
-    const trimmedPolygons = removeExteriorPolygons(solidBsp, surface, normalize);
+    const trimmedPolygons = removeExteriorPolygonsForCutKeepingOverlap(solidBsp, surface, normalize);
 
     return fromPolygons({}, [...trimmedSolid, ...trimmedPolygons]);
   };
@@ -15931,7 +16133,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const solidPolygons = toPolygons$1({}, solid);
 
     // Classify the solid with it.
-    const trimmedSolid = removeExteriorPolygons(cutBsp, solidPolygons, normalize);
+    const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
 
     return fromPolygons({}, trimmedSolid);
   };
@@ -16053,7 +16255,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const canonicalize$9 = (polygons) => {
     const canonicalized = [];
     for (let polygon of polygons) {
-      polygon = canonicalize$5(polygon);
+      polygon = canonicalize$2(polygon);
       if (!isDegenerate(polygon)) {
         canonicalized.push(polygon);
       }
@@ -16085,19 +16287,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const Y$9 = 1;
   const Z$6 = 2;
 
-  // Tolerates overlap up to one iota.
+  // Requires a conservative gap.
   const doesNotOverlap = (a, b) => {
     if (a.length === 0 || b.length === 0) {
       return true;
     }
     const [minA, maxA] = measureBoundingBox$4(a);
     const [minB, maxB] = measureBoundingBox$4(b);
-    if (maxA[X$9] <= minB[X$9] + iota$1) { return true; }
-    if (maxA[Y$9] <= minB[Y$9] + iota$1) { return true; }
-    if (maxA[Z$6] <= minB[Z$6] + iota$1) { return true; }
-    if (maxB[X$9] <= minA[X$9] + iota$1) { return true; }
-    if (maxB[Y$9] <= minA[Y$9] + iota$1) { return true; }
-    if (maxB[Z$6] <= minA[Z$6] + iota$1) { return true; }
+    if (maxA[X$9] <= minB[X$9] - iota$1 * 10) { return true; }
+    if (maxA[Y$9] <= minB[Y$9] - iota$1 * 10) { return true; }
+    if (maxA[Z$6] <= minB[Z$6] - iota$1 * 10) { return true; }
+    if (maxB[X$9] <= minA[X$9] - iota$1 * 10) { return true; }
+    if (maxB[Y$9] <= minA[Y$9] - iota$1 * 10) { return true; }
+    if (maxB[Z$6] <= minA[Z$6] - iota$1 * 10) { return true; }
     return false;
   };
 
@@ -16118,7 +16320,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return original.map(polygon => transform(polygon));
   };
 
-  const flip$7 = (polygons) => map$4(polygons, flip$4);
+  const flip$7 = (polygons) => map$4(polygons, flip$1);
 
   const toTriangles = (options = {}, paths) => {
     const triangles = [];
@@ -16154,7 +16356,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
       const bPolygons = b;
       const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-      const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(bIn, normalize));
+      // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
+      // const bBsp = toBspFromPolygons(bIn, normalize);
+      const bBsp = fromPolygons$1(bPolygons, normalize);
 
       if (aIn.length === 0) {
         // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
@@ -16177,11 +16381,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           continue;
         }
       } else {
-        const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aIn, normalize);
-        const bTrimmed = removeExteriorPolygons2(aBsp, flip$7(bIn), normalize);
+        const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
+        const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
 
-        // aSolid = toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
-        a = [...aOut, ...aTrimmed, ...bTrimmed];
+        a = clean([...aOut, ...aTrimmed, ...flip$7(bTrimmed)]);
       }
     }
     return fromPolygons({}, a, normalize);
@@ -16239,10 +16442,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           return [];
         }
       } else {
-        const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
-        const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
+        const aTrimmed = removeExteriorPolygonsForIntersectionKeepingOverlap(bBsp, aIn, normalize);
+        const bTrimmed = removeExteriorPolygonsForIntersectionDroppingOverlap(aBsp, bIn, normalize);
 
-        s.push([...aTrimmed, ...bTrimmed]);
+        s.push(clean([...aTrimmed, ...bTrimmed]));
       }
     }
     return fromPolygons({}, s[0], normalize);
@@ -16250,7 +16453,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const section = (solid, surfaces, normalize) => {
     const bsp = fromSolid(alignVertices(solid, normalize), normalize);
-    return surfaces.map(surface => removeExteriorPolygons(bsp, surface, normalize));
+    return surfaces.map(surface => removeExteriorPolygonsForSection(bsp, surface, normalize));
   };
 
   // An asymmetric binary merge.
@@ -16306,10 +16509,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           s.push([...a, ...b]);
         }
       } else {
-        const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
-        const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
+        const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
+        const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
 
-        s.push([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]);
+        s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
       }
     }
     return fromPolygons({}, s[0], normalize);
@@ -16394,7 +16597,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const transform$9 = (matrix, polygons) => polygons.map(polygon => transform$5(matrix, polygon));
+  const transform$9 = (matrix, polygons) => polygons.map(polygon => transform$3(matrix, polygon));
 
   const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
 
@@ -16415,7 +16618,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(baseSurface));
     const z0Surface = transform$9(toZ0, baseSurface);
     const z0Surfaces = surfaces.map(surface => transform$9(toZ0, surface));
-    const z0Difference = difference$1(z0Surface, ...z0Surfaces);
+    const z0Difference = difference(z0Surface, ...z0Surfaces);
     return transform$9(fromZ0, z0Difference);
   };
 
@@ -16430,7 +16633,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     // FIX: Detect when the surfaces aren't in the same plane.
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(surfaces[0]));
-    const z0Surface = intersection$1(...surfaces.map(surface => transform$9(toZ0, surface)));
+    const z0Surface = intersection(...surfaces.map(surface => transform$9(toZ0, surface)));
     return transform$9(fromZ0, z0Surface);
   };
 
@@ -16451,7 +16654,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return baseSurface;
     }
     const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
-    const z0Surface = union$1(transform$9(toZ0, baseSurface),
+    const z0Surface = union(transform$9(toZ0, baseSurface),
                                       ...surfaces.map(surface => transform$9(toZ0, surface)));
     return transform$9(fromZ0, z0Surface);
   };
@@ -16474,7 +16677,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).filter(isNegative).map(item => item.surface));
     for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
       if (surfaces.length === 0) {
-        result.disjointAssembly.push({ z0Surface: difference$1(z0Surface, ...z0Surfaces), tags });
+        result.disjointAssembly.push({ z0Surface: difference(z0Surface, ...z0Surfaces), tags });
       } else {
         result.disjointAssembly.push({ surface: difference$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
       }
@@ -16485,7 +16688,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     // Paths.
     const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
     for (const { paths, tags } of getPaths(baseGeometry)) {
-      result.disjointAssembly.push({ paths: difference(paths, ...pathsets), tags });
+      result.disjointAssembly.push({ paths: difference$1(paths, ...pathsets), tags });
     }
     // Plans are preserved over difference.
     for (const plan of getPlans(baseGeometry)) {
@@ -16531,15 +16734,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       } else if (geometry.item) {
         walk(geometry.item);
       } else if (geometry.points) {
-        eachPoint$1(operation, geometry.points);
+        eachPoint$3(operation, geometry.points);
       } else if (geometry.paths) {
-        eachPoint(operation, geometry.paths);
+        eachPoint$2(operation, geometry.paths);
       } else if (geometry.solid) {
-        eachPoint$3(operation, geometry.solid);
+        eachPoint$1(operation, geometry.solid);
       } else if (geometry.surface) {
-        eachPoint$2(operation, geometry.surface);
+        eachPoint(operation, geometry.surface);
       } else if (geometry.z0Surface) {
-        eachPoint$2(operation, geometry.z0Surface);
+        eachPoint(operation, geometry.z0Surface);
       }
     };
 
@@ -16549,15 +16752,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const flip$8 = (geometry) => {
     const op = (geometry) => {
       if (geometry.points) {
-        return { ...geometry, points: flip$3(geometry.points) };
+        return { ...geometry, points: flip$6(geometry.points) };
       } else if (geometry.paths) {
-        return { ...geometry, paths: flip$1(geometry.paths) };
+        return { ...geometry, paths: flip$5(geometry.paths) };
       } else if (geometry.surface) {
-        return { ...geometry, surface: flip$5(geometry.surface) };
+        return { ...geometry, surface: flip$3(geometry.surface) };
       } else if (geometry.z0Surface) {
-        return { ...geometry, surface: flip$5(geometry.z0Surface) };
+        return { ...geometry, surface: flip$3(geometry.z0Surface) };
       } else if (geometry.solid) {
-        return { ...geometry, solid: flip$6(geometry.solid) };
+        return { ...geometry, solid: flip$4(geometry.solid) };
       } else if (geometry.assembly) {
         return geometry;
       } else if (geometry.layers) {
@@ -16600,7 +16803,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const fromPathToZ0Surface = cache(fromPathToZ0SurfaceImpl);
 
   const fromPathsToSurfaceImpl = (paths) => {
-    return { surface: paths };
+    return { surface: makeConvex$1(paths) };
   };
 
   const fromPathsToSurface = cache(fromPathsToSurfaceImpl);
@@ -16662,7 +16865,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
     for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
       if (surfaces.length === 0) {
-        result.disjointAssembly.push({ z0Surface: intersection$1(z0Surface, ...z0Surfaces), tags });
+        result.disjointAssembly.push({ z0Surface: intersection(z0Surface, ...z0Surfaces), tags });
       } else {
         result.disjointAssembly.push({ surface: intersection$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
       }
@@ -16673,7 +16876,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     // Paths.
     const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
     for (const { paths, tags } of getPaths(baseGeometry)) {
-      result.disjointAssembly.push({ paths: intersection(paths, ...pathsets), tags });
+      result.disjointAssembly.push({ paths: intersection$1(paths, ...pathsets), tags });
     }
     // Plans are preserved across intersection.
     for (const plan of getPlans(baseGeometry)) {
@@ -16971,7 +17174,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
     for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
       if (surfaces.length === 0) {
-        result.disjointAssembly.push({ z0Surface: union$1(z0Surface, ...z0Surfaces), tags });
+        result.disjointAssembly.push({ z0Surface: union(z0Surface, ...z0Surfaces), tags });
       } else {
         result.disjointAssembly.push({ surface: union$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
       }
@@ -16982,7 +17185,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     // Paths.
     const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
     for (const { paths, tags } of getPaths(baseGeometry)) {
-      result.disjointAssembly.push({ paths: union(paths, ...pathsets), tags });
+      result.disjointAssembly.push({ paths: union$1(paths, ...pathsets), tags });
     }
     // Plans are preserved across union.
     for (const plan of getPlans(baseGeometry)) {
@@ -17053,10 +17256,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return fromGeometry(flip$8(toKeptGeometry$1(this)), this.context);
     }
 
-    op (op, ...args) {
-      return op(this, ...args);
-    }
-
     setTags (tags) {
       return fromGeometry({ ...toGeometry(this), tags }, this.context);
     }
@@ -17091,7 +17290,23 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       }
       return fromGeometry(transform$a(matrix, this.toGeometry()), this.context);
     }
+
+    assertWatertight () {
+      if (!this.isWatertight()) {
+        throw Error('not watertight');
+      }
+      return this;
+    }
+
+    isWatertight () {
+      return isWatertight$1(this.toKeptGeometry());
+    }
+
+    makeWatertight (onFixed = (_ => _)) {
+      return fromGeometry(makeWatertight$2(this.toKeptGeometry(), undefined));
+    }
   }
+
   const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
   Shape.fromClosedPath = (path, context) => fromGeometry({ paths: [close(path)] }, context);
@@ -17446,8 +17661,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const faces = [];
     for (const { solid } of getSolids(shape.toKeptGeometry())) {
       for (const surface of solid) {
-        const face = Shape.fromGeometry({ surface });
-        faces.push(op(face));
+        faces.push(op(Shape.fromGeometry({ paths: outline$1(surface) }), faces.length));
       }
     }
     return assemble$1(...faces);
@@ -17513,11 +17727,17 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
   measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
+  const opMethod = function (op, ...args) { return op(this, ...args); };
+  const withOpMethod = function (op, ...args) { return assemble$1(this, op(this, ...args)); };
+
+  Shape.prototype.op = opMethod;
+  Shape.prototype.withOp = withOpMethod;
+
   const openEdges = (shape, { isOpen = true } = {}) => {
-    const r = (v) => v + (Math.random() - 0.5) * 0.2;
+    const r = (v) => v;
     const paths = [];
     for (const { solid } of getSolids(shape.toKeptGeometry())) {
-      paths.push(...findOpenEdges(alignVertices(solid), isOpen));
+      paths.push(...findOpenEdges(solid, isOpen));
     }
     return Shape.fromGeometry({ paths: paths.map(path => path.map(([x, y, z]) => [r(x), r(y), r(z)])) });
   };
@@ -17704,3231 +17924,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   center.signature = 'center(shape:Shape) -> Shape';
   centerMethod.signature = 'Shape -> center() -> Shape';
-
-  var chroma = createCommonjsModule(function (module, exports) {
-  /**
-   * chroma.js - JavaScript library for color conversions
-   *
-   * Copyright (c) 2011-2019, Gregor Aisch
-   * All rights reserved.
-   *
-   * Redistribution and use in source and binary forms, with or without
-   * modification, are permitted provided that the following conditions are met:
-   *
-   * 1. Redistributions of source code must retain the above copyright notice, this
-   * list of conditions and the following disclaimer.
-   *
-   * 2. Redistributions in binary form must reproduce the above copyright notice,
-   * this list of conditions and the following disclaimer in the documentation
-   * and/or other materials provided with the distribution.
-   *
-   * 3. The name Gregor Aisch may not be used to endorse or promote products
-   * derived from this software without specific prior written permission.
-   *
-   * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   * DISCLAIMED. IN NO EVENT SHALL GREGOR AISCH OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-   * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-   * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-   * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-   * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-   * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-   *
-   * -------------------------------------------------------
-   *
-   * chroma.js includes colors from colorbrewer2.org, which are released under
-   * the following license:
-   *
-   * Copyright (c) 2002 Cynthia Brewer, Mark Harrower,
-   * and The Pennsylvania State University.
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   * http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing,
-   * software distributed under the License is distributed on an
-   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-   * either express or implied. See the License for the specific
-   * language governing permissions and limitations under the License.
-   *
-   * ------------------------------------------------------
-   *
-   * Named colors are taken from X11 Color Names.
-   * http://www.w3.org/TR/css3-color/#svg-color
-   *
-   * @preserve
-   */
-
-  (function (global, factory) {
-       module.exports = factory() ;
-  }(commonjsGlobal, (function () {
-      var limit = function (x, min, max) {
-          if ( min === void 0 ) min=0;
-          if ( max === void 0 ) max=1;
-
-          return x < min ? min : x > max ? max : x;
-      };
-
-      var clip_rgb = function (rgb) {
-          rgb._clipped = false;
-          rgb._unclipped = rgb.slice(0);
-          for (var i=0; i<=3; i++) {
-              if (i < 3) {
-                  if (rgb[i] < 0 || rgb[i] > 255) { rgb._clipped = true; }
-                  rgb[i] = limit(rgb[i], 0, 255);
-              } else if (i === 3) {
-                  rgb[i] = limit(rgb[i], 0, 1);
-              }
-          }
-          return rgb;
-      };
-
-      // ported from jQuery's $.type
-      var classToType = {};
-      for (var i = 0, list = ['Boolean', 'Number', 'String', 'Function', 'Array', 'Date', 'RegExp', 'Undefined', 'Null']; i < list.length; i += 1) {
-          var name = list[i];
-
-          classToType[("[object " + name + "]")] = name.toLowerCase();
-      }
-      var type = function(obj) {
-          return classToType[Object.prototype.toString.call(obj)] || "object";
-      };
-
-      var unpack = function (args, keyOrder) {
-          if ( keyOrder === void 0 ) keyOrder=null;
-
-      	// if called with more than 3 arguments, we return the arguments
-          if (args.length >= 3) { return Array.prototype.slice.call(args); }
-          // with less than 3 args we check if first arg is object
-          // and use the keyOrder string to extract and sort properties
-      	if (type(args[0]) == 'object' && keyOrder) {
-      		return keyOrder.split('')
-      			.filter(function (k) { return args[0][k] !== undefined; })
-      			.map(function (k) { return args[0][k]; });
-      	}
-      	// otherwise we just return the first argument
-      	// (which we suppose is an array of args)
-          return args[0];
-      };
-
-      var last = function (args) {
-          if (args.length < 2) { return null; }
-          var l = args.length-1;
-          if (type(args[l]) == 'string') { return args[l].toLowerCase(); }
-          return null;
-      };
-
-      var PI = Math.PI;
-
-      var utils = {
-      	clip_rgb: clip_rgb,
-      	limit: limit,
-      	type: type,
-      	unpack: unpack,
-      	last: last,
-      	PI: PI,
-      	TWOPI: PI*2,
-      	PITHIRD: PI/3,
-      	DEG2RAD: PI / 180,
-      	RAD2DEG: 180 / PI
-      };
-
-      var input = {
-      	format: {},
-      	autodetect: []
-      };
-
-      var last$1 = utils.last;
-      var clip_rgb$1 = utils.clip_rgb;
-      var type$1 = utils.type;
-
-
-      var Color = function Color() {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var me = this;
-          if (type$1(args[0]) === 'object' &&
-              args[0].constructor &&
-              args[0].constructor === this.constructor) {
-              // the argument is already a Color instance
-              return args[0];
-          }
-
-          // last argument could be the mode
-          var mode = last$1(args);
-          var autodetect = false;
-
-          if (!mode) {
-              autodetect = true;
-              if (!input.sorted) {
-                  input.autodetect = input.autodetect.sort(function (a,b) { return b.p - a.p; });
-                  input.sorted = true;
-              }
-              // auto-detect format
-              for (var i = 0, list = input.autodetect; i < list.length; i += 1) {
-                  var chk = list[i];
-
-                  mode = chk.test.apply(chk, args);
-                  if (mode) { break; }
-              }
-          }
-
-          if (input.format[mode]) {
-              var rgb = input.format[mode].apply(null, autodetect ? args : args.slice(0,-1));
-              me._rgb = clip_rgb$1(rgb);
-          } else {
-              throw new Error('unknown format: '+args);
-          }
-
-          // add alpha channel
-          if (me._rgb.length === 3) { me._rgb.push(1); }
-      };
-
-      Color.prototype.toString = function toString () {
-          if (type$1(this.hex) == 'function') { return this.hex(); }
-          return ("[" + (this._rgb.join(',')) + "]");
-      };
-
-      var Color_1 = Color;
-
-      var chroma = function () {
-      	var args = [], len = arguments.length;
-      	while ( len-- ) args[ len ] = arguments[ len ];
-
-      	return new (Function.prototype.bind.apply( chroma.Color, [ null ].concat( args) ));
-      };
-
-      chroma.Color = Color_1;
-      chroma.version = '2.1.0';
-
-      var chroma_1 = chroma;
-
-      var unpack$1 = utils.unpack;
-      var max = Math.max;
-
-      var rgb2cmyk = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$1(args, 'rgb');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          r = r / 255;
-          g = g / 255;
-          b = b / 255;
-          var k = 1 - max(r,max(g,b));
-          var f = k < 1 ? 1 / (1-k) : 0;
-          var c = (1-r-k) * f;
-          var m = (1-g-k) * f;
-          var y = (1-b-k) * f;
-          return [c,m,y,k];
-      };
-
-      var rgb2cmyk_1 = rgb2cmyk;
-
-      var unpack$2 = utils.unpack;
-
-      var cmyk2rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          args = unpack$2(args, 'cmyk');
-          var c = args[0];
-          var m = args[1];
-          var y = args[2];
-          var k = args[3];
-          var alpha = args.length > 4 ? args[4] : 1;
-          if (k === 1) { return [0,0,0,alpha]; }
-          return [
-              c >= 1 ? 0 : 255 * (1-c) * (1-k), // r
-              m >= 1 ? 0 : 255 * (1-m) * (1-k), // g
-              y >= 1 ? 0 : 255 * (1-y) * (1-k), // b
-              alpha
-          ];
-      };
-
-      var cmyk2rgb_1 = cmyk2rgb;
-
-      var unpack$3 = utils.unpack;
-      var type$2 = utils.type;
-
-
-
-      Color_1.prototype.cmyk = function() {
-          return rgb2cmyk_1(this._rgb);
-      };
-
-      chroma_1.cmyk = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['cmyk']) ));
-      };
-
-      input.format.cmyk = cmyk2rgb_1;
-
-      input.autodetect.push({
-          p: 2,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$3(args, 'cmyk');
-              if (type$2(args) === 'array' && args.length === 4) {
-                  return 'cmyk';
-              }
-          }
-      });
-
-      var unpack$4 = utils.unpack;
-      var last$2 = utils.last;
-      var rnd = function (a) { return Math.round(a*100)/100; };
-
-      /*
-       * supported arguments:
-       * - hsl2css(h,s,l)
-       * - hsl2css(h,s,l,a)
-       * - hsl2css([h,s,l], mode)
-       * - hsl2css([h,s,l,a], mode)
-       * - hsl2css({h,s,l,a}, mode)
-       */
-      var hsl2css = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var hsla = unpack$4(args, 'hsla');
-          var mode = last$2(args) || 'lsa';
-          hsla[0] = rnd(hsla[0] || 0);
-          hsla[1] = rnd(hsla[1]*100) + '%';
-          hsla[2] = rnd(hsla[2]*100) + '%';
-          if (mode === 'hsla' || (hsla.length > 3 && hsla[3]<1)) {
-              hsla[3] = hsla.length > 3 ? hsla[3] : 1;
-              mode = 'hsla';
-          } else {
-              hsla.length = 3;
-          }
-          return (mode + "(" + (hsla.join(',')) + ")");
-      };
-
-      var hsl2css_1 = hsl2css;
-
-      var unpack$5 = utils.unpack;
-
-      /*
-       * supported arguments:
-       * - rgb2hsl(r,g,b)
-       * - rgb2hsl(r,g,b,a)
-       * - rgb2hsl([r,g,b])
-       * - rgb2hsl([r,g,b,a])
-       * - rgb2hsl({r,g,b,a})
-       */
-      var rgb2hsl = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          args = unpack$5(args, 'rgba');
-          var r = args[0];
-          var g = args[1];
-          var b = args[2];
-
-          r /= 255;
-          g /= 255;
-          b /= 255;
-
-          var min = Math.min(r, g, b);
-          var max = Math.max(r, g, b);
-
-          var l = (max + min) / 2;
-          var s, h;
-
-          if (max === min){
-              s = 0;
-              h = Number.NaN;
-          } else {
-              s = l < 0.5 ? (max - min) / (max + min) : (max - min) / (2 - max - min);
-          }
-
-          if (r == max) { h = (g - b) / (max - min); }
-          else if (g == max) { h = 2 + (b - r) / (max - min); }
-          else if (b == max) { h = 4 + (r - g) / (max - min); }
-
-          h *= 60;
-          if (h < 0) { h += 360; }
-          if (args.length>3 && args[3]!==undefined) { return [h,s,l,args[3]]; }
-          return [h,s,l];
-      };
-
-      var rgb2hsl_1 = rgb2hsl;
-
-      var unpack$6 = utils.unpack;
-      var last$3 = utils.last;
-
-
-      var round = Math.round;
-
-      /*
-       * supported arguments:
-       * - rgb2css(r,g,b)
-       * - rgb2css(r,g,b,a)
-       * - rgb2css([r,g,b], mode)
-       * - rgb2css([r,g,b,a], mode)
-       * - rgb2css({r,g,b,a}, mode)
-       */
-      var rgb2css = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var rgba = unpack$6(args, 'rgba');
-          var mode = last$3(args) || 'rgb';
-          if (mode.substr(0,3) == 'hsl') {
-              return hsl2css_1(rgb2hsl_1(rgba), mode);
-          }
-          rgba[0] = round(rgba[0]);
-          rgba[1] = round(rgba[1]);
-          rgba[2] = round(rgba[2]);
-          if (mode === 'rgba' || (rgba.length > 3 && rgba[3]<1)) {
-              rgba[3] = rgba.length > 3 ? rgba[3] : 1;
-              mode = 'rgba';
-          }
-          return (mode + "(" + (rgba.slice(0,mode==='rgb'?3:4).join(',')) + ")");
-      };
-
-      var rgb2css_1 = rgb2css;
-
-      var unpack$7 = utils.unpack;
-      var round$1 = Math.round;
-
-      var hsl2rgb = function () {
-          var assign;
-
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-          args = unpack$7(args, 'hsl');
-          var h = args[0];
-          var s = args[1];
-          var l = args[2];
-          var r,g,b;
-          if (s === 0) {
-              r = g = b = l*255;
-          } else {
-              var t3 = [0,0,0];
-              var c = [0,0,0];
-              var t2 = l < 0.5 ? l * (1+s) : l+s-l*s;
-              var t1 = 2 * l - t2;
-              var h_ = h / 360;
-              t3[0] = h_ + 1/3;
-              t3[1] = h_;
-              t3[2] = h_ - 1/3;
-              for (var i=0; i<3; i++) {
-                  if (t3[i] < 0) { t3[i] += 1; }
-                  if (t3[i] > 1) { t3[i] -= 1; }
-                  if (6 * t3[i] < 1)
-                      { c[i] = t1 + (t2 - t1) * 6 * t3[i]; }
-                  else if (2 * t3[i] < 1)
-                      { c[i] = t2; }
-                  else if (3 * t3[i] < 2)
-                      { c[i] = t1 + (t2 - t1) * ((2 / 3) - t3[i]) * 6; }
-                  else
-                      { c[i] = t1; }
-              }
-              (assign = [round$1(c[0]*255),round$1(c[1]*255),round$1(c[2]*255)], r = assign[0], g = assign[1], b = assign[2]);
-          }
-          if (args.length > 3) {
-              // keep alpha channel
-              return [r,g,b,args[3]];
-          }
-          return [r,g,b,1];
-      };
-
-      var hsl2rgb_1 = hsl2rgb;
-
-      var RE_RGB = /^rgb\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/;
-      var RE_RGBA = /^rgba\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*([01]|[01]?\.\d+)\)$/;
-      var RE_RGB_PCT = /^rgb\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/;
-      var RE_RGBA_PCT = /^rgba\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/;
-      var RE_HSL = /^hsl\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/;
-      var RE_HSLA = /^hsla\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/;
-
-      var round$2 = Math.round;
-
-      var css2rgb = function (css) {
-          css = css.toLowerCase().trim();
-          var m;
-
-          if (input.format.named) {
-              try {
-                  return input.format.named(css);
-              } catch (e) {
-                  // eslint-disable-next-line
-              }
-          }
-
-          // rgb(250,20,0)
-          if ((m = css.match(RE_RGB))) {
-              var rgb = m.slice(1,4);
-              for (var i=0; i<3; i++) {
-                  rgb[i] = +rgb[i];
-              }
-              rgb[3] = 1;  // default alpha
-              return rgb;
-          }
-
-          // rgba(250,20,0,0.4)
-          if ((m = css.match(RE_RGBA))) {
-              var rgb$1 = m.slice(1,5);
-              for (var i$1=0; i$1<4; i$1++) {
-                  rgb$1[i$1] = +rgb$1[i$1];
-              }
-              return rgb$1;
-          }
-
-          // rgb(100%,0%,0%)
-          if ((m = css.match(RE_RGB_PCT))) {
-              var rgb$2 = m.slice(1,4);
-              for (var i$2=0; i$2<3; i$2++) {
-                  rgb$2[i$2] = round$2(rgb$2[i$2] * 2.55);
-              }
-              rgb$2[3] = 1;  // default alpha
-              return rgb$2;
-          }
-
-          // rgba(100%,0%,0%,0.4)
-          if ((m = css.match(RE_RGBA_PCT))) {
-              var rgb$3 = m.slice(1,5);
-              for (var i$3=0; i$3<3; i$3++) {
-                  rgb$3[i$3] = round$2(rgb$3[i$3] * 2.55);
-              }
-              rgb$3[3] = +rgb$3[3];
-              return rgb$3;
-          }
-
-          // hsl(0,100%,50%)
-          if ((m = css.match(RE_HSL))) {
-              var hsl = m.slice(1,4);
-              hsl[1] *= 0.01;
-              hsl[2] *= 0.01;
-              var rgb$4 = hsl2rgb_1(hsl);
-              rgb$4[3] = 1;
-              return rgb$4;
-          }
-
-          // hsla(0,100%,50%,0.5)
-          if ((m = css.match(RE_HSLA))) {
-              var hsl$1 = m.slice(1,4);
-              hsl$1[1] *= 0.01;
-              hsl$1[2] *= 0.01;
-              var rgb$5 = hsl2rgb_1(hsl$1);
-              rgb$5[3] = +m[4];  // default alpha = 1
-              return rgb$5;
-          }
-      };
-
-      css2rgb.test = function (s) {
-          return RE_RGB.test(s) ||
-              RE_RGBA.test(s) ||
-              RE_RGB_PCT.test(s) ||
-              RE_RGBA_PCT.test(s) ||
-              RE_HSL.test(s) ||
-              RE_HSLA.test(s);
-      };
-
-      var css2rgb_1 = css2rgb;
-
-      var type$3 = utils.type;
-
-
-
-
-      Color_1.prototype.css = function(mode) {
-          return rgb2css_1(this._rgb, mode);
-      };
-
-      chroma_1.css = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['css']) ));
-      };
-
-      input.format.css = css2rgb_1;
-
-      input.autodetect.push({
-          p: 5,
-          test: function (h) {
-              var rest = [], len = arguments.length - 1;
-              while ( len-- > 0 ) rest[ len ] = arguments[ len + 1 ];
-
-              if (!rest.length && type$3(h) === 'string' && css2rgb_1.test(h)) {
-                  return 'css';
-              }
-          }
-      });
-
-      var unpack$8 = utils.unpack;
-
-      input.format.gl = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var rgb = unpack$8(args, 'rgba');
-          rgb[0] *= 255;
-          rgb[1] *= 255;
-          rgb[2] *= 255;
-          return rgb;
-      };
-
-      chroma_1.gl = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['gl']) ));
-      };
-
-      Color_1.prototype.gl = function() {
-          var rgb = this._rgb;
-          return [rgb[0]/255, rgb[1]/255, rgb[2]/255, rgb[3]];
-      };
-
-      var unpack$9 = utils.unpack;
-
-      var rgb2hcg = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$9(args, 'rgb');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          var min = Math.min(r, g, b);
-          var max = Math.max(r, g, b);
-          var delta = max - min;
-          var c = delta * 100 / 255;
-          var _g = min / (255 - delta) * 100;
-          var h;
-          if (delta === 0) {
-              h = Number.NaN;
-          } else {
-              if (r === max) { h = (g - b) / delta; }
-              if (g === max) { h = 2+(b - r) / delta; }
-              if (b === max) { h = 4+(r - g) / delta; }
-              h *= 60;
-              if (h < 0) { h += 360; }
-          }
-          return [h, c, _g];
-      };
-
-      var rgb2hcg_1 = rgb2hcg;
-
-      var unpack$a = utils.unpack;
-      var floor = Math.floor;
-
-      /*
-       * this is basically just HSV with some minor tweaks
-       *
-       * hue.. [0..360]
-       * chroma .. [0..1]
-       * grayness .. [0..1]
-       */
-
-      var hcg2rgb = function () {
-          var assign, assign$1, assign$2, assign$3, assign$4, assign$5;
-
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-          args = unpack$a(args, 'hcg');
-          var h = args[0];
-          var c = args[1];
-          var _g = args[2];
-          var r,g,b;
-          _g = _g * 255;
-          var _c = c * 255;
-          if (c === 0) {
-              r = g = b = _g;
-          } else {
-              if (h === 360) { h = 0; }
-              if (h > 360) { h -= 360; }
-              if (h < 0) { h += 360; }
-              h /= 60;
-              var i = floor(h);
-              var f = h - i;
-              var p = _g * (1 - c);
-              var q = p + _c * (1 - f);
-              var t = p + _c * f;
-              var v = p + _c;
-              switch (i) {
-                  case 0: (assign = [v, t, p], r = assign[0], g = assign[1], b = assign[2]); break
-                  case 1: (assign$1 = [q, v, p], r = assign$1[0], g = assign$1[1], b = assign$1[2]); break
-                  case 2: (assign$2 = [p, v, t], r = assign$2[0], g = assign$2[1], b = assign$2[2]); break
-                  case 3: (assign$3 = [p, q, v], r = assign$3[0], g = assign$3[1], b = assign$3[2]); break
-                  case 4: (assign$4 = [t, p, v], r = assign$4[0], g = assign$4[1], b = assign$4[2]); break
-                  case 5: (assign$5 = [v, p, q], r = assign$5[0], g = assign$5[1], b = assign$5[2]); break
-              }
-          }
-          return [r, g, b, args.length > 3 ? args[3] : 1];
-      };
-
-      var hcg2rgb_1 = hcg2rgb;
-
-      var unpack$b = utils.unpack;
-      var type$4 = utils.type;
-
-
-
-
-
-
-      Color_1.prototype.hcg = function() {
-          return rgb2hcg_1(this._rgb);
-      };
-
-      chroma_1.hcg = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hcg']) ));
-      };
-
-      input.format.hcg = hcg2rgb_1;
-
-      input.autodetect.push({
-          p: 1,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$b(args, 'hcg');
-              if (type$4(args) === 'array' && args.length === 3) {
-                  return 'hcg';
-              }
-          }
-      });
-
-      var unpack$c = utils.unpack;
-      var last$4 = utils.last;
-      var round$3 = Math.round;
-
-      var rgb2hex = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$c(args, 'rgba');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          var a = ref[3];
-          var mode = last$4(args) || 'auto';
-          if (a === undefined) { a = 1; }
-          if (mode === 'auto') {
-              mode = a < 1 ? 'rgba' : 'rgb';
-          }
-          r = round$3(r);
-          g = round$3(g);
-          b = round$3(b);
-          var u = r << 16 | g << 8 | b;
-          var str = "000000" + u.toString(16); //#.toUpperCase();
-          str = str.substr(str.length - 6);
-          var hxa = '0' + round$3(a * 255).toString(16);
-          hxa = hxa.substr(hxa.length - 2);
-          switch (mode.toLowerCase()) {
-              case 'rgba': return ("#" + str + hxa);
-              case 'argb': return ("#" + hxa + str);
-              default: return ("#" + str);
-          }
-      };
-
-      var rgb2hex_1 = rgb2hex;
-
-      var RE_HEX = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-      var RE_HEXA = /^#?([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$/;
-
-      var hex2rgb = function (hex) {
-          if (hex.match(RE_HEX)) {
-              // remove optional leading #
-              if (hex.length === 4 || hex.length === 7) {
-                  hex = hex.substr(1);
-              }
-              // expand short-notation to full six-digit
-              if (hex.length === 3) {
-                  hex = hex.split('');
-                  hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-              }
-              var u = parseInt(hex, 16);
-              var r = u >> 16;
-              var g = u >> 8 & 0xFF;
-              var b = u & 0xFF;
-              return [r,g,b,1];
-          }
-
-          // match rgba hex format, eg #FF000077
-          if (hex.match(RE_HEXA)) {
-              if (hex.length === 5 || hex.length === 9) {
-                  // remove optional leading #
-                  hex = hex.substr(1);
-              }
-              // expand short-notation to full eight-digit
-              if (hex.length === 4) {
-                  hex = hex.split('');
-                  hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
-              }
-              var u$1 = parseInt(hex, 16);
-              var r$1 = u$1 >> 24 & 0xFF;
-              var g$1 = u$1 >> 16 & 0xFF;
-              var b$1 = u$1 >> 8 & 0xFF;
-              var a = Math.round((u$1 & 0xFF) / 0xFF * 100) / 100;
-              return [r$1,g$1,b$1,a];
-          }
-
-          // we used to check for css colors here
-          // if _input.css? and rgb = _input.css hex
-          //     return rgb
-
-          throw new Error(("unknown hex color: " + hex));
-      };
-
-      var hex2rgb_1 = hex2rgb;
-
-      var type$5 = utils.type;
-
-
-
-
-      Color_1.prototype.hex = function(mode) {
-          return rgb2hex_1(this._rgb, mode);
-      };
-
-      chroma_1.hex = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hex']) ));
-      };
-
-      input.format.hex = hex2rgb_1;
-      input.autodetect.push({
-          p: 4,
-          test: function (h) {
-              var rest = [], len = arguments.length - 1;
-              while ( len-- > 0 ) rest[ len ] = arguments[ len + 1 ];
-
-              if (!rest.length && type$5(h) === 'string' && [3,4,5,6,7,8,9].indexOf(h.length) >= 0) {
-                  return 'hex';
-              }
-          }
-      });
-
-      var unpack$d = utils.unpack;
-      var TWOPI = utils.TWOPI;
-      var min = Math.min;
-      var sqrt = Math.sqrt;
-      var acos = Math.acos;
-
-      var rgb2hsi = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          /*
-          borrowed from here:
-          http://hummer.stanford.edu/museinfo/doc/examples/humdrum/keyscape2/rgb2hsi.cpp
-          */
-          var ref = unpack$d(args, 'rgb');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          r /= 255;
-          g /= 255;
-          b /= 255;
-          var h;
-          var min_ = min(r,g,b);
-          var i = (r+g+b) / 3;
-          var s = i > 0 ? 1 - min_/i : 0;
-          if (s === 0) {
-              h = NaN;
-          } else {
-              h = ((r-g)+(r-b)) / 2;
-              h /= sqrt((r-g)*(r-g) + (r-b)*(g-b));
-              h = acos(h);
-              if (b > g) {
-                  h = TWOPI - h;
-              }
-              h /= TWOPI;
-          }
-          return [h*360,s,i];
-      };
-
-      var rgb2hsi_1 = rgb2hsi;
-
-      var unpack$e = utils.unpack;
-      var limit$1 = utils.limit;
-      var TWOPI$1 = utils.TWOPI;
-      var PITHIRD = utils.PITHIRD;
-      var cos = Math.cos;
-
-      /*
-       * hue [0..360]
-       * saturation [0..1]
-       * intensity [0..1]
-       */
-      var hsi2rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          /*
-          borrowed from here:
-          http://hummer.stanford.edu/museinfo/doc/examples/humdrum/keyscape2/hsi2rgb.cpp
-          */
-          args = unpack$e(args, 'hsi');
-          var h = args[0];
-          var s = args[1];
-          var i = args[2];
-          var r,g,b;
-
-          if (isNaN(h)) { h = 0; }
-          if (isNaN(s)) { s = 0; }
-          // normalize hue
-          if (h > 360) { h -= 360; }
-          if (h < 0) { h += 360; }
-          h /= 360;
-          if (h < 1/3) {
-              b = (1-s)/3;
-              r = (1+s*cos(TWOPI$1*h)/cos(PITHIRD-TWOPI$1*h))/3;
-              g = 1 - (b+r);
-          } else if (h < 2/3) {
-              h -= 1/3;
-              r = (1-s)/3;
-              g = (1+s*cos(TWOPI$1*h)/cos(PITHIRD-TWOPI$1*h))/3;
-              b = 1 - (r+g);
-          } else {
-              h -= 2/3;
-              g = (1-s)/3;
-              b = (1+s*cos(TWOPI$1*h)/cos(PITHIRD-TWOPI$1*h))/3;
-              r = 1 - (g+b);
-          }
-          r = limit$1(i*r*3);
-          g = limit$1(i*g*3);
-          b = limit$1(i*b*3);
-          return [r*255, g*255, b*255, args.length > 3 ? args[3] : 1];
-      };
-
-      var hsi2rgb_1 = hsi2rgb;
-
-      var unpack$f = utils.unpack;
-      var type$6 = utils.type;
-
-
-
-
-
-
-      Color_1.prototype.hsi = function() {
-          return rgb2hsi_1(this._rgb);
-      };
-
-      chroma_1.hsi = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hsi']) ));
-      };
-
-      input.format.hsi = hsi2rgb_1;
-
-      input.autodetect.push({
-          p: 2,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$f(args, 'hsi');
-              if (type$6(args) === 'array' && args.length === 3) {
-                  return 'hsi';
-              }
-          }
-      });
-
-      var unpack$g = utils.unpack;
-      var type$7 = utils.type;
-
-
-
-
-
-
-      Color_1.prototype.hsl = function() {
-          return rgb2hsl_1(this._rgb);
-      };
-
-      chroma_1.hsl = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hsl']) ));
-      };
-
-      input.format.hsl = hsl2rgb_1;
-
-      input.autodetect.push({
-          p: 2,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$g(args, 'hsl');
-              if (type$7(args) === 'array' && args.length === 3) {
-                  return 'hsl';
-              }
-          }
-      });
-
-      var unpack$h = utils.unpack;
-      var min$1 = Math.min;
-      var max$1 = Math.max;
-
-      /*
-       * supported arguments:
-       * - rgb2hsv(r,g,b)
-       * - rgb2hsv([r,g,b])
-       * - rgb2hsv({r,g,b})
-       */
-      var rgb2hsl$1 = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          args = unpack$h(args, 'rgb');
-          var r = args[0];
-          var g = args[1];
-          var b = args[2];
-          var min_ = min$1(r, g, b);
-          var max_ = max$1(r, g, b);
-          var delta = max_ - min_;
-          var h,s,v;
-          v = max_ / 255.0;
-          if (max_ === 0) {
-              h = Number.NaN;
-              s = 0;
-          } else {
-              s = delta / max_;
-              if (r === max_) { h = (g - b) / delta; }
-              if (g === max_) { h = 2+(b - r) / delta; }
-              if (b === max_) { h = 4+(r - g) / delta; }
-              h *= 60;
-              if (h < 0) { h += 360; }
-          }
-          return [h, s, v]
-      };
-
-      var rgb2hsv = rgb2hsl$1;
-
-      var unpack$i = utils.unpack;
-      var floor$1 = Math.floor;
-
-      var hsv2rgb = function () {
-          var assign, assign$1, assign$2, assign$3, assign$4, assign$5;
-
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-          args = unpack$i(args, 'hsv');
-          var h = args[0];
-          var s = args[1];
-          var v = args[2];
-          var r,g,b;
-          v *= 255;
-          if (s === 0) {
-              r = g = b = v;
-          } else {
-              if (h === 360) { h = 0; }
-              if (h > 360) { h -= 360; }
-              if (h < 0) { h += 360; }
-              h /= 60;
-
-              var i = floor$1(h);
-              var f = h - i;
-              var p = v * (1 - s);
-              var q = v * (1 - s * f);
-              var t = v * (1 - s * (1 - f));
-
-              switch (i) {
-                  case 0: (assign = [v, t, p], r = assign[0], g = assign[1], b = assign[2]); break
-                  case 1: (assign$1 = [q, v, p], r = assign$1[0], g = assign$1[1], b = assign$1[2]); break
-                  case 2: (assign$2 = [p, v, t], r = assign$2[0], g = assign$2[1], b = assign$2[2]); break
-                  case 3: (assign$3 = [p, q, v], r = assign$3[0], g = assign$3[1], b = assign$3[2]); break
-                  case 4: (assign$4 = [t, p, v], r = assign$4[0], g = assign$4[1], b = assign$4[2]); break
-                  case 5: (assign$5 = [v, p, q], r = assign$5[0], g = assign$5[1], b = assign$5[2]); break
-              }
-          }
-          return [r,g,b,args.length > 3?args[3]:1];
-      };
-
-      var hsv2rgb_1 = hsv2rgb;
-
-      var unpack$j = utils.unpack;
-      var type$8 = utils.type;
-
-
-
-
-
-
-      Color_1.prototype.hsv = function() {
-          return rgb2hsv(this._rgb);
-      };
-
-      chroma_1.hsv = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hsv']) ));
-      };
-
-      input.format.hsv = hsv2rgb_1;
-
-      input.autodetect.push({
-          p: 2,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$j(args, 'hsv');
-              if (type$8(args) === 'array' && args.length === 3) {
-                  return 'hsv';
-              }
-          }
-      });
-
-      var labConstants = {
-          // Corresponds roughly to RGB brighter/darker
-          Kn: 18,
-
-          // D65 standard referent
-          Xn: 0.950470,
-          Yn: 1,
-          Zn: 1.088830,
-
-          t0: 0.137931034,  // 4 / 29
-          t1: 0.206896552,  // 6 / 29
-          t2: 0.12841855,   // 3 * t1 * t1
-          t3: 0.008856452,  // t1 * t1 * t1
-      };
-
-      var unpack$k = utils.unpack;
-      var pow = Math.pow;
-
-      var rgb2lab = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$k(args, 'rgb');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          var ref$1 = rgb2xyz(r,g,b);
-          var x = ref$1[0];
-          var y = ref$1[1];
-          var z = ref$1[2];
-          var l = 116 * y - 16;
-          return [l < 0 ? 0 : l, 500 * (x - y), 200 * (y - z)];
-      };
-
-      var rgb_xyz = function (r) {
-          if ((r /= 255) <= 0.04045) { return r / 12.92; }
-          return pow((r + 0.055) / 1.055, 2.4);
-      };
-
-      var xyz_lab = function (t) {
-          if (t > labConstants.t3) { return pow(t, 1 / 3); }
-          return t / labConstants.t2 + labConstants.t0;
-      };
-
-      var rgb2xyz = function (r,g,b) {
-          r = rgb_xyz(r);
-          g = rgb_xyz(g);
-          b = rgb_xyz(b);
-          var x = xyz_lab((0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / labConstants.Xn);
-          var y = xyz_lab((0.2126729 * r + 0.7151522 * g + 0.0721750 * b) / labConstants.Yn);
-          var z = xyz_lab((0.0193339 * r + 0.1191920 * g + 0.9503041 * b) / labConstants.Zn);
-          return [x,y,z];
-      };
-
-      var rgb2lab_1 = rgb2lab;
-
-      var unpack$l = utils.unpack;
-      var pow$1 = Math.pow;
-
-      /*
-       * L* [0..100]
-       * a [-100..100]
-       * b [-100..100]
-       */
-      var lab2rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          args = unpack$l(args, 'lab');
-          var l = args[0];
-          var a = args[1];
-          var b = args[2];
-          var x,y,z, r,g,b_;
-
-          y = (l + 16) / 116;
-          x = isNaN(a) ? y : y + a / 500;
-          z = isNaN(b) ? y : y - b / 200;
-
-          y = labConstants.Yn * lab_xyz(y);
-          x = labConstants.Xn * lab_xyz(x);
-          z = labConstants.Zn * lab_xyz(z);
-
-          r = xyz_rgb(3.2404542 * x - 1.5371385 * y - 0.4985314 * z);  // D65 -> sRGB
-          g = xyz_rgb(-0.9692660 * x + 1.8760108 * y + 0.0415560 * z);
-          b_ = xyz_rgb(0.0556434 * x - 0.2040259 * y + 1.0572252 * z);
-
-          return [r,g,b_,args.length > 3 ? args[3] : 1];
-      };
-
-      var xyz_rgb = function (r) {
-          return 255 * (r <= 0.00304 ? 12.92 * r : 1.055 * pow$1(r, 1 / 2.4) - 0.055)
-      };
-
-      var lab_xyz = function (t) {
-          return t > labConstants.t1 ? t * t * t : labConstants.t2 * (t - labConstants.t0)
-      };
-
-      var lab2rgb_1 = lab2rgb;
-
-      var unpack$m = utils.unpack;
-      var type$9 = utils.type;
-
-
-
-
-
-
-      Color_1.prototype.lab = function() {
-          return rgb2lab_1(this._rgb);
-      };
-
-      chroma_1.lab = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['lab']) ));
-      };
-
-      input.format.lab = lab2rgb_1;
-
-      input.autodetect.push({
-          p: 2,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$m(args, 'lab');
-              if (type$9(args) === 'array' && args.length === 3) {
-                  return 'lab';
-              }
-          }
-      });
-
-      var unpack$n = utils.unpack;
-      var RAD2DEG = utils.RAD2DEG;
-      var sqrt$1 = Math.sqrt;
-      var atan2 = Math.atan2;
-      var round$4 = Math.round;
-
-      var lab2lch = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$n(args, 'lab');
-          var l = ref[0];
-          var a = ref[1];
-          var b = ref[2];
-          var c = sqrt$1(a * a + b * b);
-          var h = (atan2(b, a) * RAD2DEG + 360) % 360;
-          if (round$4(c*10000) === 0) { h = Number.NaN; }
-          return [l, c, h];
-      };
-
-      var lab2lch_1 = lab2lch;
-
-      var unpack$o = utils.unpack;
-
-
-
-      var rgb2lch = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$o(args, 'rgb');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          var ref$1 = rgb2lab_1(r,g,b);
-          var l = ref$1[0];
-          var a = ref$1[1];
-          var b_ = ref$1[2];
-          return lab2lch_1(l,a,b_);
-      };
-
-      var rgb2lch_1 = rgb2lch;
-
-      var unpack$p = utils.unpack;
-      var DEG2RAD = utils.DEG2RAD;
-      var sin = Math.sin;
-      var cos$1 = Math.cos;
-
-      var lch2lab = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          /*
-          Convert from a qualitative parameter h and a quantitative parameter l to a 24-bit pixel.
-          These formulas were invented by David Dalrymple to obtain maximum contrast without going
-          out of gamut if the parameters are in the range 0-1.
-
-          A saturation multiplier was added by Gregor Aisch
-          */
-          var ref = unpack$p(args, 'lch');
-          var l = ref[0];
-          var c = ref[1];
-          var h = ref[2];
-          if (isNaN(h)) { h = 0; }
-          h = h * DEG2RAD;
-          return [l, cos$1(h) * c, sin(h) * c]
-      };
-
-      var lch2lab_1 = lch2lab;
-
-      var unpack$q = utils.unpack;
-
-
-
-      var lch2rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          args = unpack$q(args, 'lch');
-          var l = args[0];
-          var c = args[1];
-          var h = args[2];
-          var ref = lch2lab_1 (l,c,h);
-          var L = ref[0];
-          var a = ref[1];
-          var b_ = ref[2];
-          var ref$1 = lab2rgb_1 (L,a,b_);
-          var r = ref$1[0];
-          var g = ref$1[1];
-          var b = ref$1[2];
-          return [r, g, b, args.length > 3 ? args[3] : 1];
-      };
-
-      var lch2rgb_1 = lch2rgb;
-
-      var unpack$r = utils.unpack;
-
-
-      var hcl2rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var hcl = unpack$r(args, 'hcl').reverse();
-          return lch2rgb_1.apply(void 0, hcl);
-      };
-
-      var hcl2rgb_1 = hcl2rgb;
-
-      var unpack$s = utils.unpack;
-      var type$a = utils.type;
-
-
-
-
-
-
-      Color_1.prototype.lch = function() { return rgb2lch_1(this._rgb); };
-      Color_1.prototype.hcl = function() { return rgb2lch_1(this._rgb).reverse(); };
-
-      chroma_1.lch = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['lch']) ));
-      };
-      chroma_1.hcl = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hcl']) ));
-      };
-
-      input.format.lch = lch2rgb_1;
-      input.format.hcl = hcl2rgb_1;
-
-      ['lch','hcl'].forEach(function (m) { return input.autodetect.push({
-          p: 2,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$s(args, m);
-              if (type$a(args) === 'array' && args.length === 3) {
-                  return m;
-              }
-          }
-      }); });
-
-      /**
-      	X11 color names
-
-      	http://www.w3.org/TR/css3-color/#svg-color
-      */
-
-      var w3cx11 = {
-          aliceblue: '#f0f8ff',
-          antiquewhite: '#faebd7',
-          aqua: '#00ffff',
-          aquamarine: '#7fffd4',
-          azure: '#f0ffff',
-          beige: '#f5f5dc',
-          bisque: '#ffe4c4',
-          black: '#000000',
-          blanchedalmond: '#ffebcd',
-          blue: '#0000ff',
-          blueviolet: '#8a2be2',
-          brown: '#a52a2a',
-          burlywood: '#deb887',
-          cadetblue: '#5f9ea0',
-          chartreuse: '#7fff00',
-          chocolate: '#d2691e',
-          coral: '#ff7f50',
-          cornflower: '#6495ed',
-          cornflowerblue: '#6495ed',
-          cornsilk: '#fff8dc',
-          crimson: '#dc143c',
-          cyan: '#00ffff',
-          darkblue: '#00008b',
-          darkcyan: '#008b8b',
-          darkgoldenrod: '#b8860b',
-          darkgray: '#a9a9a9',
-          darkgreen: '#006400',
-          darkgrey: '#a9a9a9',
-          darkkhaki: '#bdb76b',
-          darkmagenta: '#8b008b',
-          darkolivegreen: '#556b2f',
-          darkorange: '#ff8c00',
-          darkorchid: '#9932cc',
-          darkred: '#8b0000',
-          darksalmon: '#e9967a',
-          darkseagreen: '#8fbc8f',
-          darkslateblue: '#483d8b',
-          darkslategray: '#2f4f4f',
-          darkslategrey: '#2f4f4f',
-          darkturquoise: '#00ced1',
-          darkviolet: '#9400d3',
-          deeppink: '#ff1493',
-          deepskyblue: '#00bfff',
-          dimgray: '#696969',
-          dimgrey: '#696969',
-          dodgerblue: '#1e90ff',
-          firebrick: '#b22222',
-          floralwhite: '#fffaf0',
-          forestgreen: '#228b22',
-          fuchsia: '#ff00ff',
-          gainsboro: '#dcdcdc',
-          ghostwhite: '#f8f8ff',
-          gold: '#ffd700',
-          goldenrod: '#daa520',
-          gray: '#808080',
-          green: '#008000',
-          greenyellow: '#adff2f',
-          grey: '#808080',
-          honeydew: '#f0fff0',
-          hotpink: '#ff69b4',
-          indianred: '#cd5c5c',
-          indigo: '#4b0082',
-          ivory: '#fffff0',
-          khaki: '#f0e68c',
-          laserlemon: '#ffff54',
-          lavender: '#e6e6fa',
-          lavenderblush: '#fff0f5',
-          lawngreen: '#7cfc00',
-          lemonchiffon: '#fffacd',
-          lightblue: '#add8e6',
-          lightcoral: '#f08080',
-          lightcyan: '#e0ffff',
-          lightgoldenrod: '#fafad2',
-          lightgoldenrodyellow: '#fafad2',
-          lightgray: '#d3d3d3',
-          lightgreen: '#90ee90',
-          lightgrey: '#d3d3d3',
-          lightpink: '#ffb6c1',
-          lightsalmon: '#ffa07a',
-          lightseagreen: '#20b2aa',
-          lightskyblue: '#87cefa',
-          lightslategray: '#778899',
-          lightslategrey: '#778899',
-          lightsteelblue: '#b0c4de',
-          lightyellow: '#ffffe0',
-          lime: '#00ff00',
-          limegreen: '#32cd32',
-          linen: '#faf0e6',
-          magenta: '#ff00ff',
-          maroon: '#800000',
-          maroon2: '#7f0000',
-          maroon3: '#b03060',
-          mediumaquamarine: '#66cdaa',
-          mediumblue: '#0000cd',
-          mediumorchid: '#ba55d3',
-          mediumpurple: '#9370db',
-          mediumseagreen: '#3cb371',
-          mediumslateblue: '#7b68ee',
-          mediumspringgreen: '#00fa9a',
-          mediumturquoise: '#48d1cc',
-          mediumvioletred: '#c71585',
-          midnightblue: '#191970',
-          mintcream: '#f5fffa',
-          mistyrose: '#ffe4e1',
-          moccasin: '#ffe4b5',
-          navajowhite: '#ffdead',
-          navy: '#000080',
-          oldlace: '#fdf5e6',
-          olive: '#808000',
-          olivedrab: '#6b8e23',
-          orange: '#ffa500',
-          orangered: '#ff4500',
-          orchid: '#da70d6',
-          palegoldenrod: '#eee8aa',
-          palegreen: '#98fb98',
-          paleturquoise: '#afeeee',
-          palevioletred: '#db7093',
-          papayawhip: '#ffefd5',
-          peachpuff: '#ffdab9',
-          peru: '#cd853f',
-          pink: '#ffc0cb',
-          plum: '#dda0dd',
-          powderblue: '#b0e0e6',
-          purple: '#800080',
-          purple2: '#7f007f',
-          purple3: '#a020f0',
-          rebeccapurple: '#663399',
-          red: '#ff0000',
-          rosybrown: '#bc8f8f',
-          royalblue: '#4169e1',
-          saddlebrown: '#8b4513',
-          salmon: '#fa8072',
-          sandybrown: '#f4a460',
-          seagreen: '#2e8b57',
-          seashell: '#fff5ee',
-          sienna: '#a0522d',
-          silver: '#c0c0c0',
-          skyblue: '#87ceeb',
-          slateblue: '#6a5acd',
-          slategray: '#708090',
-          slategrey: '#708090',
-          snow: '#fffafa',
-          springgreen: '#00ff7f',
-          steelblue: '#4682b4',
-          tan: '#d2b48c',
-          teal: '#008080',
-          thistle: '#d8bfd8',
-          tomato: '#ff6347',
-          turquoise: '#40e0d0',
-          violet: '#ee82ee',
-          wheat: '#f5deb3',
-          white: '#ffffff',
-          whitesmoke: '#f5f5f5',
-          yellow: '#ffff00',
-          yellowgreen: '#9acd32'
-      };
-
-      var w3cx11_1 = w3cx11;
-
-      var type$b = utils.type;
-
-
-
-
-
-      Color_1.prototype.name = function() {
-          var hex = rgb2hex_1(this._rgb, 'rgb');
-          for (var i = 0, list = Object.keys(w3cx11_1); i < list.length; i += 1) {
-              var n = list[i];
-
-              if (w3cx11_1[n] === hex) { return n.toLowerCase(); }
-          }
-          return hex;
-      };
-
-      input.format.named = function (name) {
-          name = name.toLowerCase();
-          if (w3cx11_1[name]) { return hex2rgb_1(w3cx11_1[name]); }
-          throw new Error('unknown color name: '+name);
-      };
-
-      input.autodetect.push({
-          p: 5,
-          test: function (h) {
-              var rest = [], len = arguments.length - 1;
-              while ( len-- > 0 ) rest[ len ] = arguments[ len + 1 ];
-
-              if (!rest.length && type$b(h) === 'string' && w3cx11_1[h.toLowerCase()]) {
-                  return 'named';
-              }
-          }
-      });
-
-      var unpack$t = utils.unpack;
-
-      var rgb2num = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var ref = unpack$t(args, 'rgb');
-          var r = ref[0];
-          var g = ref[1];
-          var b = ref[2];
-          return (r << 16) + (g << 8) + b;
-      };
-
-      var rgb2num_1 = rgb2num;
-
-      var type$c = utils.type;
-
-      var num2rgb = function (num) {
-          if (type$c(num) == "number" && num >= 0 && num <= 0xFFFFFF) {
-              var r = num >> 16;
-              var g = (num >> 8) & 0xFF;
-              var b = num & 0xFF;
-              return [r,g,b,1];
-          }
-          throw new Error("unknown num color: "+num);
-      };
-
-      var num2rgb_1 = num2rgb;
-
-      var type$d = utils.type;
-
-
-
-      Color_1.prototype.num = function() {
-          return rgb2num_1(this._rgb);
-      };
-
-      chroma_1.num = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['num']) ));
-      };
-
-      input.format.num = num2rgb_1;
-
-      input.autodetect.push({
-          p: 5,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              if (args.length === 1 && type$d(args[0]) === 'number' && args[0] >= 0 && args[0] <= 0xFFFFFF) {
-                  return 'num';
-              }
-          }
-      });
-
-      var unpack$u = utils.unpack;
-      var type$e = utils.type;
-      var round$5 = Math.round;
-
-      Color_1.prototype.rgb = function(rnd) {
-          if ( rnd === void 0 ) rnd=true;
-
-          if (rnd === false) { return this._rgb.slice(0,3); }
-          return this._rgb.slice(0,3).map(round$5);
-      };
-
-      Color_1.prototype.rgba = function(rnd) {
-          if ( rnd === void 0 ) rnd=true;
-
-          return this._rgb.slice(0,4).map(function (v,i) {
-              return i<3 ? (rnd === false ? v : round$5(v)) : v;
-          });
-      };
-
-      chroma_1.rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['rgb']) ));
-      };
-
-      input.format.rgb = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var rgba = unpack$u(args, 'rgba');
-          if (rgba[3] === undefined) { rgba[3] = 1; }
-          return rgba;
-      };
-
-      input.autodetect.push({
-          p: 3,
-          test: function () {
-              var args = [], len = arguments.length;
-              while ( len-- ) args[ len ] = arguments[ len ];
-
-              args = unpack$u(args, 'rgba');
-              if (type$e(args) === 'array' && (args.length === 3 ||
-                  args.length === 4 && type$e(args[3]) == 'number' && args[3] >= 0 && args[3] <= 1)) {
-                  return 'rgb';
-              }
-          }
-      });
-
-      /*
-       * Based on implementation by Neil Bartlett
-       * https://github.com/neilbartlett/color-temperature
-       */
-
-      var log = Math.log;
-
-      var temperature2rgb = function (kelvin) {
-          var temp = kelvin / 100;
-          var r,g,b;
-          if (temp < 66) {
-              r = 255;
-              g = -155.25485562709179 - 0.44596950469579133 * (g = temp-2) + 104.49216199393888 * log(g);
-              b = temp < 20 ? 0 : -254.76935184120902 + 0.8274096064007395 * (b = temp-10) + 115.67994401066147 * log(b);
-          } else {
-              r = 351.97690566805693 + 0.114206453784165 * (r = temp-55) - 40.25366309332127 * log(r);
-              g = 325.4494125711974 + 0.07943456536662342 * (g = temp-50) - 28.0852963507957 * log(g);
-              b = 255;
-          }
-          return [r,g,b,1];
-      };
-
-      var temperature2rgb_1 = temperature2rgb;
-
-      /*
-       * Based on implementation by Neil Bartlett
-       * https://github.com/neilbartlett/color-temperature
-       **/
-
-
-      var unpack$v = utils.unpack;
-      var round$6 = Math.round;
-
-      var rgb2temperature = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          var rgb = unpack$v(args, 'rgb');
-          var r = rgb[0], b = rgb[2];
-          var minTemp = 1000;
-          var maxTemp = 40000;
-          var eps = 0.4;
-          var temp;
-          while (maxTemp - minTemp > eps) {
-              temp = (maxTemp + minTemp) * 0.5;
-              var rgb$1 = temperature2rgb_1(temp);
-              if ((rgb$1[2] / rgb$1[0]) >= (b / r)) {
-                  maxTemp = temp;
-              } else {
-                  minTemp = temp;
-              }
-          }
-          return round$6(temp);
-      };
-
-      var rgb2temperature_1 = rgb2temperature;
-
-      Color_1.prototype.temp =
-      Color_1.prototype.kelvin =
-      Color_1.prototype.temperature = function() {
-          return rgb2temperature_1(this._rgb);
-      };
-
-      chroma_1.temp =
-      chroma_1.kelvin =
-      chroma_1.temperature = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['temp']) ));
-      };
-
-      input.format.temp =
-      input.format.kelvin =
-      input.format.temperature = temperature2rgb_1;
-
-      var type$f = utils.type;
-
-      Color_1.prototype.alpha = function(a, mutate) {
-          if ( mutate === void 0 ) mutate=false;
-
-          if (a !== undefined && type$f(a) === 'number') {
-              if (mutate) {
-                  this._rgb[3] = a;
-                  return this;
-              }
-              return new Color_1([this._rgb[0], this._rgb[1], this._rgb[2], a], 'rgb');
-          }
-          return this._rgb[3];
-      };
-
-      Color_1.prototype.clipped = function() {
-          return this._rgb._clipped || false;
-      };
-
-      Color_1.prototype.darken = function(amount) {
-      	if ( amount === void 0 ) amount=1;
-
-      	var me = this;
-      	var lab = me.lab();
-      	lab[0] -= labConstants.Kn * amount;
-      	return new Color_1(lab, 'lab').alpha(me.alpha(), true);
-      };
-
-      Color_1.prototype.brighten = function(amount) {
-      	if ( amount === void 0 ) amount=1;
-
-      	return this.darken(-amount);
-      };
-
-      Color_1.prototype.darker = Color_1.prototype.darken;
-      Color_1.prototype.brighter = Color_1.prototype.brighten;
-
-      Color_1.prototype.get = function(mc) {
-          var ref = mc.split('.');
-          var mode = ref[0];
-          var channel = ref[1];
-          var src = this[mode]();
-          if (channel) {
-              var i = mode.indexOf(channel);
-              if (i > -1) { return src[i]; }
-              throw new Error(("unknown channel " + channel + " in mode " + mode));
-          } else {
-              return src;
-          }
-      };
-
-      var type$g = utils.type;
-      var pow$2 = Math.pow;
-
-      var EPS = 1e-7;
-      var MAX_ITER = 20;
-
-      Color_1.prototype.luminance = function(lum) {
-          if (lum !== undefined && type$g(lum) === 'number') {
-              if (lum === 0) {
-                  // return pure black
-                  return new Color_1([0,0,0,this._rgb[3]], 'rgb');
-              }
-              if (lum === 1) {
-                  // return pure white
-                  return new Color_1([255,255,255,this._rgb[3]], 'rgb');
-              }
-              // compute new color using...
-              var cur_lum = this.luminance();
-              var mode = 'rgb';
-              var max_iter = MAX_ITER;
-
-              var test = function (low, high) {
-                  var mid = low.interpolate(high, 0.5, mode);
-                  var lm = mid.luminance();
-                  if (Math.abs(lum - lm) < EPS || !max_iter--) {
-                      // close enough
-                      return mid;
-                  }
-                  return lm > lum ? test(low, mid) : test(mid, high);
-              };
-
-              var rgb = (cur_lum > lum ? test(new Color_1([0,0,0]), this) : test(this, new Color_1([255,255,255]))).rgb();
-              return new Color_1(rgb.concat( [this._rgb[3]]));
-          }
-          return rgb2luminance.apply(void 0, (this._rgb).slice(0,3));
-      };
-
-
-      var rgb2luminance = function (r,g,b) {
-          // relative luminance
-          // see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-          r = luminance_x(r);
-          g = luminance_x(g);
-          b = luminance_x(b);
-          return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      };
-
-      var luminance_x = function (x) {
-          x /= 255;
-          return x <= 0.03928 ? x/12.92 : pow$2((x+0.055)/1.055, 2.4);
-      };
-
-      var interpolator = {};
-
-      var type$h = utils.type;
-
-
-      var mix = function (col1, col2, f) {
-          if ( f === void 0 ) f=0.5;
-          var rest = [], len = arguments.length - 3;
-          while ( len-- > 0 ) rest[ len ] = arguments[ len + 3 ];
-
-          var mode = rest[0] || 'lrgb';
-          if (!interpolator[mode] && !rest.length) {
-              // fall back to the first supported mode
-              mode = Object.keys(interpolator)[0];
-          }
-          if (!interpolator[mode]) {
-              throw new Error(("interpolation mode " + mode + " is not defined"));
-          }
-          if (type$h(col1) !== 'object') { col1 = new Color_1(col1); }
-          if (type$h(col2) !== 'object') { col2 = new Color_1(col2); }
-          return interpolator[mode](col1, col2, f)
-              .alpha(col1.alpha() + f * (col2.alpha() - col1.alpha()));
-      };
-
-      Color_1.prototype.mix =
-      Color_1.prototype.interpolate = function(col2, f) {
-      	if ( f === void 0 ) f=0.5;
-      	var rest = [], len = arguments.length - 2;
-      	while ( len-- > 0 ) rest[ len ] = arguments[ len + 2 ];
-
-      	return mix.apply(void 0, [ this, col2, f ].concat( rest ));
-      };
-
-      Color_1.prototype.premultiply = function(mutate) {
-      	if ( mutate === void 0 ) mutate=false;
-
-      	var rgb = this._rgb;
-      	var a = rgb[3];
-      	if (mutate) {
-      		this._rgb = [rgb[0]*a, rgb[1]*a, rgb[2]*a, a];
-      		return this;
-      	} else {
-      		return new Color_1([rgb[0]*a, rgb[1]*a, rgb[2]*a, a], 'rgb');
-      	}
-      };
-
-      Color_1.prototype.saturate = function(amount) {
-      	if ( amount === void 0 ) amount=1;
-
-      	var me = this;
-      	var lch = me.lch();
-      	lch[1] += labConstants.Kn * amount;
-      	if (lch[1] < 0) { lch[1] = 0; }
-      	return new Color_1(lch, 'lch').alpha(me.alpha(), true);
-      };
-
-      Color_1.prototype.desaturate = function(amount) {
-      	if ( amount === void 0 ) amount=1;
-
-      	return this.saturate(-amount);
-      };
-
-      var type$i = utils.type;
-
-      Color_1.prototype.set = function(mc, value, mutate) {
-          if ( mutate === void 0 ) mutate=false;
-
-          var ref = mc.split('.');
-          var mode = ref[0];
-          var channel = ref[1];
-          var src = this[mode]();
-          if (channel) {
-              var i = mode.indexOf(channel);
-              if (i > -1) {
-                  if (type$i(value) == 'string') {
-                      switch(value.charAt(0)) {
-                          case '+': src[i] += +value; break;
-                          case '-': src[i] += +value; break;
-                          case '*': src[i] *= +(value.substr(1)); break;
-                          case '/': src[i] /= +(value.substr(1)); break;
-                          default: src[i] = +value;
-                      }
-                  } else if (type$i(value) === 'number') {
-                      src[i] = value;
-                  } else {
-                      throw new Error("unsupported value for Color.set");
-                  }
-                  var out = new Color_1(src, mode);
-                  if (mutate) {
-                      this._rgb = out._rgb;
-                      return this;
-                  }
-                  return out;
-              }
-              throw new Error(("unknown channel " + channel + " in mode " + mode));
-          } else {
-              return src;
-          }
-      };
-
-      var rgb$1 = function (col1, col2, f) {
-          var xyz0 = col1._rgb;
-          var xyz1 = col2._rgb;
-          return new Color_1(
-              xyz0[0] + f * (xyz1[0]-xyz0[0]),
-              xyz0[1] + f * (xyz1[1]-xyz0[1]),
-              xyz0[2] + f * (xyz1[2]-xyz0[2]),
-              'rgb'
-          )
-      };
-
-      // register interpolator
-      interpolator.rgb = rgb$1;
-
-      var sqrt$2 = Math.sqrt;
-      var pow$3 = Math.pow;
-
-      var lrgb = function (col1, col2, f) {
-          var ref = col1._rgb;
-          var x1 = ref[0];
-          var y1 = ref[1];
-          var z1 = ref[2];
-          var ref$1 = col2._rgb;
-          var x2 = ref$1[0];
-          var y2 = ref$1[1];
-          var z2 = ref$1[2];
-          return new Color_1(
-              sqrt$2(pow$3(x1,2) * (1-f) + pow$3(x2,2) * f),
-              sqrt$2(pow$3(y1,2) * (1-f) + pow$3(y2,2) * f),
-              sqrt$2(pow$3(z1,2) * (1-f) + pow$3(z2,2) * f),
-              'rgb'
-          )
-      };
-
-      // register interpolator
-      interpolator.lrgb = lrgb;
-
-      var lab$1 = function (col1, col2, f) {
-          var xyz0 = col1.lab();
-          var xyz1 = col2.lab();
-          return new Color_1(
-              xyz0[0] + f * (xyz1[0]-xyz0[0]),
-              xyz0[1] + f * (xyz1[1]-xyz0[1]),
-              xyz0[2] + f * (xyz1[2]-xyz0[2]),
-              'lab'
-          )
-      };
-
-      // register interpolator
-      interpolator.lab = lab$1;
-
-      var _hsx = function (col1, col2, f, m) {
-          var assign, assign$1;
-
-          var xyz0, xyz1;
-          if (m === 'hsl') {
-              xyz0 = col1.hsl();
-              xyz1 = col2.hsl();
-          } else if (m === 'hsv') {
-              xyz0 = col1.hsv();
-              xyz1 = col2.hsv();
-          } else if (m === 'hcg') {
-              xyz0 = col1.hcg();
-              xyz1 = col2.hcg();
-          } else if (m === 'hsi') {
-              xyz0 = col1.hsi();
-              xyz1 = col2.hsi();
-          } else if (m === 'lch' || m === 'hcl') {
-              m = 'hcl';
-              xyz0 = col1.hcl();
-              xyz1 = col2.hcl();
-          }
-
-          var hue0, hue1, sat0, sat1, lbv0, lbv1;
-          if (m.substr(0, 1) === 'h') {
-              (assign = xyz0, hue0 = assign[0], sat0 = assign[1], lbv0 = assign[2]);
-              (assign$1 = xyz1, hue1 = assign$1[0], sat1 = assign$1[1], lbv1 = assign$1[2]);
-          }
-
-          var sat, hue, lbv, dh;
-
-          if (!isNaN(hue0) && !isNaN(hue1)) {
-              // both colors have hue
-              if (hue1 > hue0 && hue1 - hue0 > 180) {
-                  dh = hue1-(hue0+360);
-              } else if (hue1 < hue0 && hue0 - hue1 > 180) {
-                  dh = hue1+360-hue0;
-              } else{
-                  dh = hue1 - hue0;
-              }
-              hue = hue0 + f * dh;
-          } else if (!isNaN(hue0)) {
-              hue = hue0;
-              if ((lbv1 == 1 || lbv1 == 0) && m != 'hsv') { sat = sat0; }
-          } else if (!isNaN(hue1)) {
-              hue = hue1;
-              if ((lbv0 == 1 || lbv0 == 0) && m != 'hsv') { sat = sat1; }
-          } else {
-              hue = Number.NaN;
-          }
-
-          if (sat === undefined) { sat = sat0 + f * (sat1 - sat0); }
-          lbv = lbv0 + f * (lbv1-lbv0);
-          return new Color_1([hue, sat, lbv], m);
-      };
-
-      var lch$1 = function (col1, col2, f) {
-      	return _hsx(col1, col2, f, 'lch');
-      };
-
-      // register interpolator
-      interpolator.lch = lch$1;
-      interpolator.hcl = lch$1;
-
-      var num$1 = function (col1, col2, f) {
-          var c1 = col1.num();
-          var c2 = col2.num();
-          return new Color_1(c1 + f * (c2-c1), 'num')
-      };
-
-      // register interpolator
-      interpolator.num = num$1;
-
-      var hcg$1 = function (col1, col2, f) {
-      	return _hsx(col1, col2, f, 'hcg');
-      };
-
-      // register interpolator
-      interpolator.hcg = hcg$1;
-
-      var hsi$1 = function (col1, col2, f) {
-      	return _hsx(col1, col2, f, 'hsi');
-      };
-
-      // register interpolator
-      interpolator.hsi = hsi$1;
-
-      var hsl$1 = function (col1, col2, f) {
-      	return _hsx(col1, col2, f, 'hsl');
-      };
-
-      // register interpolator
-      interpolator.hsl = hsl$1;
-
-      var hsv$1 = function (col1, col2, f) {
-      	return _hsx(col1, col2, f, 'hsv');
-      };
-
-      // register interpolator
-      interpolator.hsv = hsv$1;
-
-      var clip_rgb$2 = utils.clip_rgb;
-      var pow$4 = Math.pow;
-      var sqrt$3 = Math.sqrt;
-      var PI$1 = Math.PI;
-      var cos$2 = Math.cos;
-      var sin$1 = Math.sin;
-      var atan2$1 = Math.atan2;
-
-      var average = function (colors, mode, weights) {
-          if ( mode === void 0 ) mode='lrgb';
-          if ( weights === void 0 ) weights=null;
-
-          var l = colors.length;
-          if (!weights) { weights = Array.from(new Array(l)).map(function () { return 1; }); }
-          // normalize weights
-          var k = l / weights.reduce(function(a, b) { return a + b; });
-          weights.forEach(function (w,i) { weights[i] *= k; });
-          // convert colors to Color objects
-          colors = colors.map(function (c) { return new Color_1(c); });
-          if (mode === 'lrgb') {
-              return _average_lrgb(colors, weights)
-          }
-          var first = colors.shift();
-          var xyz = first.get(mode);
-          var cnt = [];
-          var dx = 0;
-          var dy = 0;
-          // initial color
-          for (var i=0; i<xyz.length; i++) {
-              xyz[i] = (xyz[i] || 0) * weights[0];
-              cnt.push(isNaN(xyz[i]) ? 0 : weights[0]);
-              if (mode.charAt(i) === 'h' && !isNaN(xyz[i])) {
-                  var A = xyz[i] / 180 * PI$1;
-                  dx += cos$2(A) * weights[0];
-                  dy += sin$1(A) * weights[0];
-              }
-          }
-
-          var alpha = first.alpha() * weights[0];
-          colors.forEach(function (c,ci) {
-              var xyz2 = c.get(mode);
-              alpha += c.alpha() * weights[ci+1];
-              for (var i=0; i<xyz.length; i++) {
-                  if (!isNaN(xyz2[i])) {
-                      cnt[i] += weights[ci+1];
-                      if (mode.charAt(i) === 'h') {
-                          var A = xyz2[i] / 180 * PI$1;
-                          dx += cos$2(A) * weights[ci+1];
-                          dy += sin$1(A) * weights[ci+1];
-                      } else {
-                          xyz[i] += xyz2[i] * weights[ci+1];
-                      }
-                  }
-              }
-          });
-
-          for (var i$1=0; i$1<xyz.length; i$1++) {
-              if (mode.charAt(i$1) === 'h') {
-                  var A$1 = atan2$1(dy / cnt[i$1], dx / cnt[i$1]) / PI$1 * 180;
-                  while (A$1 < 0) { A$1 += 360; }
-                  while (A$1 >= 360) { A$1 -= 360; }
-                  xyz[i$1] = A$1;
-              } else {
-                  xyz[i$1] = xyz[i$1]/cnt[i$1];
-              }
-          }
-          alpha /= l;
-          return (new Color_1(xyz, mode)).alpha(alpha > 0.99999 ? 1 : alpha, true);
-      };
-
-
-      var _average_lrgb = function (colors, weights) {
-          var l = colors.length;
-          var xyz = [0,0,0,0];
-          for (var i=0; i < colors.length; i++) {
-              var col = colors[i];
-              var f = weights[i] / l;
-              var rgb = col._rgb;
-              xyz[0] += pow$4(rgb[0],2) * f;
-              xyz[1] += pow$4(rgb[1],2) * f;
-              xyz[2] += pow$4(rgb[2],2) * f;
-              xyz[3] += rgb[3] * f;
-          }
-          xyz[0] = sqrt$3(xyz[0]);
-          xyz[1] = sqrt$3(xyz[1]);
-          xyz[2] = sqrt$3(xyz[2]);
-          if (xyz[3] > 0.9999999) { xyz[3] = 1; }
-          return new Color_1(clip_rgb$2(xyz));
-      };
-
-      // minimal multi-purpose interface
-
-      // @requires utils color analyze
-
-
-      var type$j = utils.type;
-
-      var pow$5 = Math.pow;
-
-      var scale = function(colors) {
-
-          // constructor
-          var _mode = 'rgb';
-          var _nacol = chroma_1('#ccc');
-          var _spread = 0;
-          // const _fixed = false;
-          var _domain = [0, 1];
-          var _pos = [];
-          var _padding = [0,0];
-          var _classes = false;
-          var _colors = [];
-          var _out = false;
-          var _min = 0;
-          var _max = 1;
-          var _correctLightness = false;
-          var _colorCache = {};
-          var _useCache = true;
-          var _gamma = 1;
-
-          // private methods
-
-          var setColors = function(colors) {
-              colors = colors || ['#fff', '#000'];
-              if (colors && type$j(colors) === 'string' && chroma_1.brewer &&
-                  chroma_1.brewer[colors.toLowerCase()]) {
-                  colors = chroma_1.brewer[colors.toLowerCase()];
-              }
-              if (type$j(colors) === 'array') {
-                  // handle single color
-                  if (colors.length === 1) {
-                      colors = [colors[0], colors[0]];
-                  }
-                  // make a copy of the colors
-                  colors = colors.slice(0);
-                  // convert to chroma classes
-                  for (var c=0; c<colors.length; c++) {
-                      colors[c] = chroma_1(colors[c]);
-                  }
-                  // auto-fill color position
-                  _pos.length = 0;
-                  for (var c$1=0; c$1<colors.length; c$1++) {
-                      _pos.push(c$1/(colors.length-1));
-                  }
-              }
-              resetCache();
-              return _colors = colors;
-          };
-
-          var getClass = function(value) {
-              if (_classes != null) {
-                  var n = _classes.length-1;
-                  var i = 0;
-                  while (i < n && value >= _classes[i]) {
-                      i++;
-                  }
-                  return i-1;
-              }
-              return 0;
-          };
-
-          var tMapLightness = function (t) { return t; };
-          var tMapDomain = function (t) { return t; };
-
-          // const classifyValue = function(value) {
-          //     let val = value;
-          //     if (_classes.length > 2) {
-          //         const n = _classes.length-1;
-          //         const i = getClass(value);
-          //         const minc = _classes[0] + ((_classes[1]-_classes[0]) * (0 + (_spread * 0.5)));  // center of 1st class
-          //         const maxc = _classes[n-1] + ((_classes[n]-_classes[n-1]) * (1 - (_spread * 0.5)));  // center of last class
-          //         val = _min + ((((_classes[i] + ((_classes[i+1] - _classes[i]) * 0.5)) - minc) / (maxc-minc)) * (_max - _min));
-          //     }
-          //     return val;
-          // };
-
-          var getColor = function(val, bypassMap) {
-              var col, t;
-              if (bypassMap == null) { bypassMap = false; }
-              if (isNaN(val) || (val === null)) { return _nacol; }
-              if (!bypassMap) {
-                  if (_classes && (_classes.length > 2)) {
-                      // find the class
-                      var c = getClass(val);
-                      t = c / (_classes.length-2);
-                  } else if (_max !== _min) {
-                      // just interpolate between min/max
-                      t = (val - _min) / (_max - _min);
-                  } else {
-                      t = 1;
-                  }
-              } else {
-                  t = val;
-              }
-
-              // domain map
-              t = tMapDomain(t);
-
-              if (!bypassMap) {
-                  t = tMapLightness(t);  // lightness correction
-              }
-
-              if (_gamma !== 1) { t = pow$5(t, _gamma); }
-
-              t = _padding[0] + (t * (1 - _padding[0] - _padding[1]));
-
-              t = Math.min(1, Math.max(0, t));
-
-              var k = Math.floor(t * 10000);
-
-              if (_useCache && _colorCache[k]) {
-                  col = _colorCache[k];
-              } else {
-                  if (type$j(_colors) === 'array') {
-                      //for i in [0.._pos.length-1]
-                      for (var i=0; i<_pos.length; i++) {
-                          var p = _pos[i];
-                          if (t <= p) {
-                              col = _colors[i];
-                              break;
-                          }
-                          if ((t >= p) && (i === (_pos.length-1))) {
-                              col = _colors[i];
-                              break;
-                          }
-                          if (t > p && t < _pos[i+1]) {
-                              t = (t-p)/(_pos[i+1]-p);
-                              col = chroma_1.interpolate(_colors[i], _colors[i+1], t, _mode);
-                              break;
-                          }
-                      }
-                  } else if (type$j(_colors) === 'function') {
-                      col = _colors(t);
-                  }
-                  if (_useCache) { _colorCache[k] = col; }
-              }
-              return col;
-          };
-
-          var resetCache = function () { return _colorCache = {}; };
-
-          setColors(colors);
-
-          // public interface
-
-          var f = function(v) {
-              var c = chroma_1(getColor(v));
-              if (_out && c[_out]) { return c[_out](); } else { return c; }
-          };
-
-          f.classes = function(classes) {
-              if (classes != null) {
-                  if (type$j(classes) === 'array') {
-                      _classes = classes;
-                      _domain = [classes[0], classes[classes.length-1]];
-                  } else {
-                      var d = chroma_1.analyze(_domain);
-                      if (classes === 0) {
-                          _classes = [d.min, d.max];
-                      } else {
-                          _classes = chroma_1.limits(d, 'e', classes);
-                      }
-                  }
-                  return f;
-              }
-              return _classes;
-          };
-
-
-          f.domain = function(domain) {
-              if (!arguments.length) {
-                  return _domain;
-              }
-              _min = domain[0];
-              _max = domain[domain.length-1];
-              _pos = [];
-              var k = _colors.length;
-              if ((domain.length === k) && (_min !== _max)) {
-                  // update positions
-                  for (var i = 0, list = Array.from(domain); i < list.length; i += 1) {
-                      var d = list[i];
-
-                    _pos.push((d-_min) / (_max-_min));
-                  }
-              } else {
-                  for (var c=0; c<k; c++) {
-                      _pos.push(c/(k-1));
-                  }
-                  if (domain.length > 2) {
-                      // set domain map
-                      var tOut = domain.map(function (d,i) { return i/(domain.length-1); });
-                      var tBreaks = domain.map(function (d) { return (d - _min) / (_max - _min); });
-                      if (!tBreaks.every(function (val, i) { return tOut[i] === val; })) {
-                          tMapDomain = function (t) {
-                              if (t <= 0 || t >= 1) { return t; }
-                              var i = 0;
-                              while (t >= tBreaks[i+1]) { i++; }
-                              var f = (t - tBreaks[i]) / (tBreaks[i+1] - tBreaks[i]);
-                              var out = tOut[i] + f * (tOut[i+1] - tOut[i]);
-                              return out;
-                          };
-                      }
-
-                  }
-              }
-              _domain = [_min, _max];
-              return f;
-          };
-
-          f.mode = function(_m) {
-              if (!arguments.length) {
-                  return _mode;
-              }
-              _mode = _m;
-              resetCache();
-              return f;
-          };
-
-          f.range = function(colors, _pos) {
-              setColors(colors);
-              return f;
-          };
-
-          f.out = function(_o) {
-              _out = _o;
-              return f;
-          };
-
-          f.spread = function(val) {
-              if (!arguments.length) {
-                  return _spread;
-              }
-              _spread = val;
-              return f;
-          };
-
-          f.correctLightness = function(v) {
-              if (v == null) { v = true; }
-              _correctLightness = v;
-              resetCache();
-              if (_correctLightness) {
-                  tMapLightness = function(t) {
-                      var L0 = getColor(0, true).lab()[0];
-                      var L1 = getColor(1, true).lab()[0];
-                      var pol = L0 > L1;
-                      var L_actual = getColor(t, true).lab()[0];
-                      var L_ideal = L0 + ((L1 - L0) * t);
-                      var L_diff = L_actual - L_ideal;
-                      var t0 = 0;
-                      var t1 = 1;
-                      var max_iter = 20;
-                      while ((Math.abs(L_diff) > 1e-2) && (max_iter-- > 0)) {
-                          (function() {
-                              if (pol) { L_diff *= -1; }
-                              if (L_diff < 0) {
-                                  t0 = t;
-                                  t += (t1 - t) * 0.5;
-                              } else {
-                                  t1 = t;
-                                  t += (t0 - t) * 0.5;
-                              }
-                              L_actual = getColor(t, true).lab()[0];
-                              return L_diff = L_actual - L_ideal;
-                          })();
-                      }
-                      return t;
-                  };
-              } else {
-                  tMapLightness = function (t) { return t; };
-              }
-              return f;
-          };
-
-          f.padding = function(p) {
-              if (p != null) {
-                  if (type$j(p) === 'number') {
-                      p = [p,p];
-                  }
-                  _padding = p;
-                  return f;
-              } else {
-                  return _padding;
-              }
-          };
-
-          f.colors = function(numColors, out) {
-              // If no arguments are given, return the original colors that were provided
-              if (arguments.length < 2) { out = 'hex'; }
-              var result = [];
-
-              if (arguments.length === 0) {
-                  result = _colors.slice(0);
-
-              } else if (numColors === 1) {
-                  result = [f(0.5)];
-
-              } else if (numColors > 1) {
-                  var dm = _domain[0];
-                  var dd = _domain[1] - dm;
-                  result = __range__(0, numColors, false).map(function (i) { return f( dm + ((i/(numColors-1)) * dd) ); });
-
-              } else { // returns all colors based on the defined classes
-                  colors = [];
-                  var samples = [];
-                  if (_classes && (_classes.length > 2)) {
-                      for (var i = 1, end = _classes.length, asc = 1 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
-                          samples.push((_classes[i-1]+_classes[i])*0.5);
-                      }
-                  } else {
-                      samples = _domain;
-                  }
-                  result = samples.map(function (v) { return f(v); });
-              }
-
-              if (chroma_1[out]) {
-                  result = result.map(function (c) { return c[out](); });
-              }
-              return result;
-          };
-
-          f.cache = function(c) {
-              if (c != null) {
-                  _useCache = c;
-                  return f;
-              } else {
-                  return _useCache;
-              }
-          };
-
-          f.gamma = function(g) {
-              if (g != null) {
-                  _gamma = g;
-                  return f;
-              } else {
-                  return _gamma;
-              }
-          };
-
-          f.nodata = function(d) {
-              if (d != null) {
-                  _nacol = chroma_1(d);
-                  return f;
-              } else {
-                  return _nacol;
-              }
-          };
-
-          return f;
-      };
-
-      function __range__(left, right, inclusive) {
-        var range = [];
-        var ascending = left < right;
-        var end = !inclusive ? right : ascending ? right + 1 : right - 1;
-        for (var i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-          range.push(i);
-        }
-        return range;
-      }
-
-      //
-      // interpolates between a set of colors uzing a bezier spline
-      //
-
-      // @requires utils lab
-
-
-
-
-      var bezier = function(colors) {
-          var assign, assign$1, assign$2;
-
-          var I, lab0, lab1, lab2;
-          colors = colors.map(function (c) { return new Color_1(c); });
-          if (colors.length === 2) {
-              // linear interpolation
-              (assign = colors.map(function (c) { return c.lab(); }), lab0 = assign[0], lab1 = assign[1]);
-              I = function(t) {
-                  var lab = ([0, 1, 2].map(function (i) { return lab0[i] + (t * (lab1[i] - lab0[i])); }));
-                  return new Color_1(lab, 'lab');
-              };
-          } else if (colors.length === 3) {
-              // quadratic bezier interpolation
-              (assign$1 = colors.map(function (c) { return c.lab(); }), lab0 = assign$1[0], lab1 = assign$1[1], lab2 = assign$1[2]);
-              I = function(t) {
-                  var lab = ([0, 1, 2].map(function (i) { return ((1-t)*(1-t) * lab0[i]) + (2 * (1-t) * t * lab1[i]) + (t * t * lab2[i]); }));
-                  return new Color_1(lab, 'lab');
-              };
-          } else if (colors.length === 4) {
-              // cubic bezier interpolation
-              var lab3;
-              (assign$2 = colors.map(function (c) { return c.lab(); }), lab0 = assign$2[0], lab1 = assign$2[1], lab2 = assign$2[2], lab3 = assign$2[3]);
-              I = function(t) {
-                  var lab = ([0, 1, 2].map(function (i) { return ((1-t)*(1-t)*(1-t) * lab0[i]) + (3 * (1-t) * (1-t) * t * lab1[i]) + (3 * (1-t) * t * t * lab2[i]) + (t*t*t * lab3[i]); }));
-                  return new Color_1(lab, 'lab');
-              };
-          } else if (colors.length === 5) {
-              var I0 = bezier(colors.slice(0, 3));
-              var I1 = bezier(colors.slice(2, 5));
-              I = function(t) {
-                  if (t < 0.5) {
-                      return I0(t*2);
-                  } else {
-                      return I1((t-0.5)*2);
-                  }
-              };
-          }
-          return I;
-      };
-
-      var bezier_1 = function (colors) {
-          var f = bezier(colors);
-          f.scale = function () { return scale(f); };
-          return f;
-      };
-
-      /*
-       * interpolates between a set of colors uzing a bezier spline
-       * blend mode formulas taken from http://www.venture-ware.com/kevin/coding/lets-learn-math-photoshop-blend-modes/
-       */
-
-
-
-
-      var blend = function (bottom, top, mode) {
-          if (!blend[mode]) {
-              throw new Error('unknown blend mode ' + mode);
-          }
-          return blend[mode](bottom, top);
-      };
-
-      var blend_f = function (f) { return function (bottom,top) {
-              var c0 = chroma_1(top).rgb();
-              var c1 = chroma_1(bottom).rgb();
-              return chroma_1.rgb(f(c0, c1));
-          }; };
-
-      var each = function (f) { return function (c0, c1) {
-              var out = [];
-              out[0] = f(c0[0], c1[0]);
-              out[1] = f(c0[1], c1[1]);
-              out[2] = f(c0[2], c1[2]);
-              return out;
-          }; };
-
-      var normal = function (a) { return a; };
-      var multiply = function (a,b) { return a * b / 255; };
-      var darken$1 = function (a,b) { return a > b ? b : a; };
-      var lighten = function (a,b) { return a > b ? a : b; };
-      var screen = function (a,b) { return 255 * (1 - (1-a/255) * (1-b/255)); };
-      var overlay = function (a,b) { return b < 128 ? 2 * a * b / 255 : 255 * (1 - 2 * (1 - a / 255 ) * ( 1 - b / 255 )); };
-      var burn = function (a,b) { return 255 * (1 - (1 - b / 255) / (a/255)); };
-      var dodge = function (a,b) {
-          if (a === 255) { return 255; }
-          a = 255 * (b / 255) / (1 - a / 255);
-          return a > 255 ? 255 : a
-      };
-
-      // # add = (a,b) ->
-      // #     if (a + b > 255) then 255 else a + b
-
-      blend.normal = blend_f(each(normal));
-      blend.multiply = blend_f(each(multiply));
-      blend.screen = blend_f(each(screen));
-      blend.overlay = blend_f(each(overlay));
-      blend.darken = blend_f(each(darken$1));
-      blend.lighten = blend_f(each(lighten));
-      blend.dodge = blend_f(each(dodge));
-      blend.burn = blend_f(each(burn));
-      // blend.add = blend_f(each(add));
-
-      var blend_1 = blend;
-
-      // cubehelix interpolation
-      // based on D.A. Green "A colour scheme for the display of astronomical intensity images"
-      // http://astron-soc.in/bulletin/11June/289392011.pdf
-
-      var type$k = utils.type;
-      var clip_rgb$3 = utils.clip_rgb;
-      var TWOPI$2 = utils.TWOPI;
-      var pow$6 = Math.pow;
-      var sin$2 = Math.sin;
-      var cos$3 = Math.cos;
-
-
-      var cubehelix = function(start, rotations, hue, gamma, lightness) {
-          if ( start === void 0 ) start=300;
-          if ( rotations === void 0 ) rotations=-1.5;
-          if ( hue === void 0 ) hue=1;
-          if ( gamma === void 0 ) gamma=1;
-          if ( lightness === void 0 ) lightness=[0,1];
-
-          var dh = 0, dl;
-          if (type$k(lightness) === 'array') {
-              dl = lightness[1] - lightness[0];
-          } else {
-              dl = 0;
-              lightness = [lightness, lightness];
-          }
-
-          var f = function(fract) {
-              var a = TWOPI$2 * (((start+120)/360) + (rotations * fract));
-              var l = pow$6(lightness[0] + (dl * fract), gamma);
-              var h = dh !== 0 ? hue[0] + (fract * dh) : hue;
-              var amp = (h * l * (1-l)) / 2;
-              var cos_a = cos$3(a);
-              var sin_a = sin$2(a);
-              var r = l + (amp * ((-0.14861 * cos_a) + (1.78277* sin_a)));
-              var g = l + (amp * ((-0.29227 * cos_a) - (0.90649* sin_a)));
-              var b = l + (amp * (+1.97294 * cos_a));
-              return chroma_1(clip_rgb$3([r*255,g*255,b*255,1]));
-          };
-
-          f.start = function(s) {
-              if ((s == null)) { return start; }
-              start = s;
-              return f;
-          };
-
-          f.rotations = function(r) {
-              if ((r == null)) { return rotations; }
-              rotations = r;
-              return f;
-          };
-
-          f.gamma = function(g) {
-              if ((g == null)) { return gamma; }
-              gamma = g;
-              return f;
-          };
-
-          f.hue = function(h) {
-              if ((h == null)) { return hue; }
-              hue = h;
-              if (type$k(hue) === 'array') {
-                  dh = hue[1] - hue[0];
-                  if (dh === 0) { hue = hue[1]; }
-              } else {
-                  dh = 0;
-              }
-              return f;
-          };
-
-          f.lightness = function(h) {
-              if ((h == null)) { return lightness; }
-              if (type$k(h) === 'array') {
-                  lightness = h;
-                  dl = h[1] - h[0];
-              } else {
-                  lightness = [h,h];
-                  dl = 0;
-              }
-              return f;
-          };
-
-          f.scale = function () { return chroma_1.scale(f); };
-
-          f.hue(hue);
-
-          return f;
-      };
-
-      var digits = '0123456789abcdef';
-
-      var floor$2 = Math.floor;
-      var random = Math.random;
-
-      var random_1 = function () {
-          var code = '#';
-          for (var i=0; i<6; i++) {
-              code += digits.charAt(floor$2(random() * 16));
-          }
-          return new Color_1(code, 'hex');
-      };
-
-      var log$1 = Math.log;
-      var pow$7 = Math.pow;
-      var floor$3 = Math.floor;
-      var abs = Math.abs;
-
-
-      var analyze = function (data, key) {
-          if ( key === void 0 ) key=null;
-
-          var r = {
-              min: Number.MAX_VALUE,
-              max: Number.MAX_VALUE*-1,
-              sum: 0,
-              values: [],
-              count: 0
-          };
-          if (type(data) === 'object') {
-              data = Object.values(data);
-          }
-          data.forEach(function (val) {
-              if (key && type(val) === 'object') { val = val[key]; }
-              if (val !== undefined && val !== null && !isNaN(val)) {
-                  r.values.push(val);
-                  r.sum += val;
-                  if (val < r.min) { r.min = val; }
-                  if (val > r.max) { r.max = val; }
-                  r.count += 1;
-              }
-          });
-
-          r.domain = [r.min, r.max];
-
-          r.limits = function (mode, num) { return limits(r, mode, num); };
-
-          return r;
-      };
-
-
-      var limits = function (data, mode, num) {
-          if ( mode === void 0 ) mode='equal';
-          if ( num === void 0 ) num=7;
-
-          if (type(data) == 'array') {
-              data = analyze(data);
-          }
-          var min = data.min;
-          var max = data.max;
-          var values = data.values.sort(function (a,b) { return a-b; });
-
-          if (num === 1) { return [min,max]; }
-
-          var limits = [];
-
-          if (mode.substr(0,1) === 'c') { // continuous
-              limits.push(min);
-              limits.push(max);
-          }
-
-          if (mode.substr(0,1) === 'e') { // equal interval
-              limits.push(min);
-              for (var i=1; i<num; i++) {
-                  limits.push(min+((i/num)*(max-min)));
-              }
-              limits.push(max);
-          }
-
-          else if (mode.substr(0,1) === 'l') { // log scale
-              if (min <= 0) {
-                  throw new Error('Logarithmic scales are only possible for values > 0');
-              }
-              var min_log = Math.LOG10E * log$1(min);
-              var max_log = Math.LOG10E * log$1(max);
-              limits.push(min);
-              for (var i$1=1; i$1<num; i$1++) {
-                  limits.push(pow$7(10, min_log + ((i$1/num) * (max_log - min_log))));
-              }
-              limits.push(max);
-          }
-
-          else if (mode.substr(0,1) === 'q') { // quantile scale
-              limits.push(min);
-              for (var i$2=1; i$2<num; i$2++) {
-                  var p = ((values.length-1) * i$2)/num;
-                  var pb = floor$3(p);
-                  if (pb === p) {
-                      limits.push(values[pb]);
-                  } else { // p > pb
-                      var pr = p - pb;
-                      limits.push((values[pb]*(1-pr)) + (values[pb+1]*pr));
-                  }
-              }
-              limits.push(max);
-
-          }
-
-          else if (mode.substr(0,1) === 'k') { // k-means clustering
-              /*
-              implementation based on
-              http://code.google.com/p/figue/source/browse/trunk/figue.js#336
-              simplified for 1-d input values
-              */
-              var cluster;
-              var n = values.length;
-              var assignments = new Array(n);
-              var clusterSizes = new Array(num);
-              var repeat = true;
-              var nb_iters = 0;
-              var centroids = null;
-
-              // get seed values
-              centroids = [];
-              centroids.push(min);
-              for (var i$3=1; i$3<num; i$3++) {
-                  centroids.push(min + ((i$3/num) * (max-min)));
-              }
-              centroids.push(max);
-
-              while (repeat) {
-                  // assignment step
-                  for (var j=0; j<num; j++) {
-                      clusterSizes[j] = 0;
-                  }
-                  for (var i$4=0; i$4<n; i$4++) {
-                      var value = values[i$4];
-                      var mindist = Number.MAX_VALUE;
-                      var best = (void 0);
-                      for (var j$1=0; j$1<num; j$1++) {
-                          var dist = abs(centroids[j$1]-value);
-                          if (dist < mindist) {
-                              mindist = dist;
-                              best = j$1;
-                          }
-                          clusterSizes[best]++;
-                          assignments[i$4] = best;
-                      }
-                  }
-
-                  // update centroids step
-                  var newCentroids = new Array(num);
-                  for (var j$2=0; j$2<num; j$2++) {
-                      newCentroids[j$2] = null;
-                  }
-                  for (var i$5=0; i$5<n; i$5++) {
-                      cluster = assignments[i$5];
-                      if (newCentroids[cluster] === null) {
-                          newCentroids[cluster] = values[i$5];
-                      } else {
-                          newCentroids[cluster] += values[i$5];
-                      }
-                  }
-                  for (var j$3=0; j$3<num; j$3++) {
-                      newCentroids[j$3] *= 1/clusterSizes[j$3];
-                  }
-
-                  // check convergence
-                  repeat = false;
-                  for (var j$4=0; j$4<num; j$4++) {
-                      if (newCentroids[j$4] !== centroids[j$4]) {
-                          repeat = true;
-                          break;
-                      }
-                  }
-
-                  centroids = newCentroids;
-                  nb_iters++;
-
-                  if (nb_iters > 200) {
-                      repeat = false;
-                  }
-              }
-
-              // finished k-means clustering
-              // the next part is borrowed from gabrielflor.it
-              var kClusters = {};
-              for (var j$5=0; j$5<num; j$5++) {
-                  kClusters[j$5] = [];
-              }
-              for (var i$6=0; i$6<n; i$6++) {
-                  cluster = assignments[i$6];
-                  kClusters[cluster].push(values[i$6]);
-              }
-              var tmpKMeansBreaks = [];
-              for (var j$6=0; j$6<num; j$6++) {
-                  tmpKMeansBreaks.push(kClusters[j$6][0]);
-                  tmpKMeansBreaks.push(kClusters[j$6][kClusters[j$6].length-1]);
-              }
-              tmpKMeansBreaks = tmpKMeansBreaks.sort(function (a,b){ return a-b; });
-              limits.push(tmpKMeansBreaks[0]);
-              for (var i$7=1; i$7 < tmpKMeansBreaks.length; i$7+= 2) {
-                  var v = tmpKMeansBreaks[i$7];
-                  if (!isNaN(v) && (limits.indexOf(v) === -1)) {
-                      limits.push(v);
-                  }
-              }
-          }
-          return limits;
-      };
-
-      var analyze_1 = {analyze: analyze, limits: limits};
-
-      var contrast = function (a, b) {
-          // WCAG contrast ratio
-          // see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
-          a = new Color_1(a);
-          b = new Color_1(b);
-          var l1 = a.luminance();
-          var l2 = b.luminance();
-          return l1 > l2 ? (l1 + 0.05) / (l2 + 0.05) : (l2 + 0.05) / (l1 + 0.05);
-      };
-
-      var sqrt$4 = Math.sqrt;
-      var atan2$2 = Math.atan2;
-      var abs$1 = Math.abs;
-      var cos$4 = Math.cos;
-      var PI$2 = Math.PI;
-
-      var deltaE = function(a, b, L, C) {
-          if ( L === void 0 ) L=1;
-          if ( C === void 0 ) C=1;
-
-          // Delta E (CMC)
-          // see http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CMC.html
-          a = new Color_1(a);
-          b = new Color_1(b);
-          var ref = Array.from(a.lab());
-          var L1 = ref[0];
-          var a1 = ref[1];
-          var b1 = ref[2];
-          var ref$1 = Array.from(b.lab());
-          var L2 = ref$1[0];
-          var a2 = ref$1[1];
-          var b2 = ref$1[2];
-          var c1 = sqrt$4((a1 * a1) + (b1 * b1));
-          var c2 = sqrt$4((a2 * a2) + (b2 * b2));
-          var sl = L1 < 16.0 ? 0.511 : (0.040975 * L1) / (1.0 + (0.01765 * L1));
-          var sc = ((0.0638 * c1) / (1.0 + (0.0131 * c1))) + 0.638;
-          var h1 = c1 < 0.000001 ? 0.0 : (atan2$2(b1, a1) * 180.0) / PI$2;
-          while (h1 < 0) { h1 += 360; }
-          while (h1 >= 360) { h1 -= 360; }
-          var t = (h1 >= 164.0) && (h1 <= 345.0) ? (0.56 + abs$1(0.2 * cos$4((PI$2 * (h1 + 168.0)) / 180.0))) : (0.36 + abs$1(0.4 * cos$4((PI$2 * (h1 + 35.0)) / 180.0)));
-          var c4 = c1 * c1 * c1 * c1;
-          var f = sqrt$4(c4 / (c4 + 1900.0));
-          var sh = sc * (((f * t) + 1.0) - f);
-          var delL = L1 - L2;
-          var delC = c1 - c2;
-          var delA = a1 - a2;
-          var delB = b1 - b2;
-          var dH2 = ((delA * delA) + (delB * delB)) - (delC * delC);
-          var v1 = delL / (L * sl);
-          var v2 = delC / (C * sc);
-          var v3 = sh;
-          return sqrt$4((v1 * v1) + (v2 * v2) + (dH2 / (v3 * v3)));
-      };
-
-      // simple Euclidean distance
-      var distance = function(a, b, mode) {
-          if ( mode === void 0 ) mode='lab';
-
-          // Delta E (CIE 1976)
-          // see http://www.brucelindbloom.com/index.html?Equations.html
-          a = new Color_1(a);
-          b = new Color_1(b);
-          var l1 = a.get(mode);
-          var l2 = b.get(mode);
-          var sum_sq = 0;
-          for (var i in l1) {
-              var d = (l1[i] || 0) - (l2[i] || 0);
-              sum_sq += d*d;
-          }
-          return Math.sqrt(sum_sq);
-      };
-
-      var valid = function () {
-          var args = [], len = arguments.length;
-          while ( len-- ) args[ len ] = arguments[ len ];
-
-          try {
-              new (Function.prototype.bind.apply( Color_1, [ null ].concat( args) ));
-              return true;
-          } catch (e) {
-              return false;
-          }
-      };
-
-      // some pre-defined color scales:
-
-
-
-
-      var scales = {
-      	cool: function cool() { return scale([chroma_1.hsl(180,1,.9), chroma_1.hsl(250,.7,.4)]) },
-      	hot: function hot() { return scale(['#000','#f00','#ff0','#fff']).mode('rgb') }
-      };
-
-      /**
-          ColorBrewer colors for chroma.js
-
-          Copyright (c) 2002 Cynthia Brewer, Mark Harrower, and The
-          Pennsylvania State University.
-
-          Licensed under the Apache License, Version 2.0 (the "License");
-          you may not use this file except in compliance with the License.
-          You may obtain a copy of the License at
-          http://www.apache.org/licenses/LICENSE-2.0
-
-          Unless required by applicable law or agreed to in writing, software distributed
-          under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-          CONDITIONS OF ANY KIND, either express or implied. See the License for the
-          specific language governing permissions and limitations under the License.
-      */
-
-      var colorbrewer = {
-          // sequential
-          OrRd: ['#fff7ec', '#fee8c8', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#b30000', '#7f0000'],
-          PuBu: ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', '#0570b0', '#045a8d', '#023858'],
-          BuPu: ['#f7fcfd', '#e0ecf4', '#bfd3e6', '#9ebcda', '#8c96c6', '#8c6bb1', '#88419d', '#810f7c', '#4d004b'],
-          Oranges: ['#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704'],
-          BuGn: ['#f7fcfd', '#e5f5f9', '#ccece6', '#99d8c9', '#66c2a4', '#41ae76', '#238b45', '#006d2c', '#00441b'],
-          YlOrBr: ['#ffffe5', '#fff7bc', '#fee391', '#fec44f', '#fe9929', '#ec7014', '#cc4c02', '#993404', '#662506'],
-          YlGn: ['#ffffe5', '#f7fcb9', '#d9f0a3', '#addd8e', '#78c679', '#41ab5d', '#238443', '#006837', '#004529'],
-          Reds: ['#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d'],
-          RdPu: ['#fff7f3', '#fde0dd', '#fcc5c0', '#fa9fb5', '#f768a1', '#dd3497', '#ae017e', '#7a0177', '#49006a'],
-          Greens: ['#f7fcf5', '#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#41ab5d', '#238b45', '#006d2c', '#00441b'],
-          YlGnBu: ['#ffffd9', '#edf8b1', '#c7e9b4', '#7fcdbb', '#41b6c4', '#1d91c0', '#225ea8', '#253494', '#081d58'],
-          Purples: ['#fcfbfd', '#efedf5', '#dadaeb', '#bcbddc', '#9e9ac8', '#807dba', '#6a51a3', '#54278f', '#3f007d'],
-          GnBu: ['#f7fcf0', '#e0f3db', '#ccebc5', '#a8ddb5', '#7bccc4', '#4eb3d3', '#2b8cbe', '#0868ac', '#084081'],
-          Greys: ['#ffffff', '#f0f0f0', '#d9d9d9', '#bdbdbd', '#969696', '#737373', '#525252', '#252525', '#000000'],
-          YlOrRd: ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026'],
-          PuRd: ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#980043', '#67001f'],
-          Blues: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b'],
-          PuBuGn: ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016c59', '#014636'],
-          Viridis: ['#440154', '#482777', '#3f4a8a', '#31678e', '#26838f', '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825'],
-
-          // diverging
-
-          Spectral: ['#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b', '#ffffbf', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'],
-          RdYlGn: ['#a50026', '#d73027', '#f46d43', '#fdae61', '#fee08b', '#ffffbf', '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850', '#006837'],
-          RdBu: ['#67001f', '#b2182b', '#d6604d', '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de', '#4393c3', '#2166ac', '#053061'],
-          PiYG: ['#8e0152', '#c51b7d', '#de77ae', '#f1b6da', '#fde0ef', '#f7f7f7', '#e6f5d0', '#b8e186', '#7fbc41', '#4d9221', '#276419'],
-          PRGn: ['#40004b', '#762a83', '#9970ab', '#c2a5cf', '#e7d4e8', '#f7f7f7', '#d9f0d3', '#a6dba0', '#5aae61', '#1b7837', '#00441b'],
-          RdYlBu: ['#a50026', '#d73027', '#f46d43', '#fdae61', '#fee090', '#ffffbf', '#e0f3f8', '#abd9e9', '#74add1', '#4575b4', '#313695'],
-          BrBG: ['#543005', '#8c510a', '#bf812d', '#dfc27d', '#f6e8c3', '#f5f5f5', '#c7eae5', '#80cdc1', '#35978f', '#01665e', '#003c30'],
-          RdGy: ['#67001f', '#b2182b', '#d6604d', '#f4a582', '#fddbc7', '#ffffff', '#e0e0e0', '#bababa', '#878787', '#4d4d4d', '#1a1a1a'],
-          PuOr: ['#7f3b08', '#b35806', '#e08214', '#fdb863', '#fee0b6', '#f7f7f7', '#d8daeb', '#b2abd2', '#8073ac', '#542788', '#2d004b'],
-
-          // qualitative
-
-          Set2: ['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', '#ffd92f', '#e5c494', '#b3b3b3'],
-          Accent: ['#7fc97f', '#beaed4', '#fdc086', '#ffff99', '#386cb0', '#f0027f', '#bf5b17', '#666666'],
-          Set1: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#999999'],
-          Set3: ['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f'],
-          Dark2: ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666'],
-          Paired: ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928'],
-          Pastel2: ['#b3e2cd', '#fdcdac', '#cbd5e8', '#f4cae4', '#e6f5c9', '#fff2ae', '#f1e2cc', '#cccccc'],
-          Pastel1: ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6', '#ffffcc', '#e5d8bd', '#fddaec', '#f2f2f2'],
-      };
-
-      // add lowercase aliases for case-insensitive matches
-      for (var i$1 = 0, list$1 = Object.keys(colorbrewer); i$1 < list$1.length; i$1 += 1) {
-          var key = list$1[i$1];
-
-          colorbrewer[key.toLowerCase()] = colorbrewer[key];
-      }
-
-      var colorbrewer_1 = colorbrewer;
-
-      // feel free to comment out anything to rollup
-      // a smaller chroma.js built
-
-      // io --> convert colors
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      // operators --> modify existing Colors
-
-
-
-
-
-
-
-
-
-
-      // interpolators
-
-
-
-
-
-
-
-
-
-
-      // generators -- > create new colors
-      chroma_1.average = average;
-      chroma_1.bezier = bezier_1;
-      chroma_1.blend = blend_1;
-      chroma_1.cubehelix = cubehelix;
-      chroma_1.mix = chroma_1.interpolate = mix;
-      chroma_1.random = random_1;
-      chroma_1.scale = scale;
-
-      // other utility methods
-      chroma_1.analyze = analyze_1.analyze;
-      chroma_1.contrast = contrast;
-      chroma_1.deltaE = deltaE;
-      chroma_1.distance = distance;
-      chroma_1.limits = analyze_1.limits;
-      chroma_1.valid = valid;
-
-      // scale
-      chroma_1.scales = scales;
-
-      // colors
-      chroma_1.colors = w3cx11_1;
-      chroma_1.brewer = colorbrewer_1;
-
-      var chroma_js = chroma_1;
-
-      return chroma_js;
-
-  })));
-  });
 
   // Derived from npm color-namer due to issue with rollup and weak maps.
 
@@ -22943,17 +19938,65 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     { name: 'oldlace', rgb: 0xfdf5e6, origin: './x11' }
   ];
 
-  const toChromaNameFromRgb = (rgb) => {
-    const suffix = rgb.toString(16);
-    const prefix = '#000000';
-    return prefix.substring(0, 7 - suffix.length) + suffix;
+  // From 'colour-proximity' and 'chroma-js' npm.
+
+  const proximity = (s1, s2) => {
+    const c1 = rgb2lab(...s1);
+    const c2 = rgb2lab(...s2);
+    return Math.sqrt(Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2));
   };
 
-  const toEntryFromChromaName = (chromaName) => {
+  const labConstants = {
+    // Corresponds roughly to RGB brighter/darker
+    Kn: 18,
+
+    // D65 standard referent
+    Xn: 0.950470,
+    Yn: 1,
+    Zn: 1.088830,
+
+    t0: 0.137931034, // 4 / 29
+    t1: 0.206896552, // 6 / 29
+    t2: 0.12841855, // 3 * t1 * t1
+    t3: 0.008856452 // t1 * t1 * t1
+  };
+
+  const rgbXyz = (r) => {
+    if ((r /= 255) <= 0.04045) {
+      return r / 12.92;
+    }
+    return Math.pow((r + 0.055) / 1.055, 2.4);
+  };
+
+  const xyzLab = function (t) {
+    if (t > labConstants.t3) {
+      return Math.pow(t, 1 / 3);
+    }
+    return t / labConstants.t2 + labConstants.t0;
+  };
+
+  const rgb2xyz = (r, g, b) => {
+    r = rgbXyz(r);
+    g = rgbXyz(g);
+    b = rgbXyz(b);
+    var x = xyzLab((0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / labConstants.Xn);
+    var y = xyzLab((0.2126729 * r + 0.7151522 * g + 0.0721750 * b) / labConstants.Yn);
+    var z = xyzLab((0.0193339 * r + 0.1191920 * g + 0.9503041 * b) / labConstants.Zn);
+    return [x, y, z];
+  };
+
+  const rgb2lab = (r, g, b) => {
+    const [x, y, z] = rgb2xyz(r, g, b);
+    const l = 116 * y - 16;
+    return [l < 0 ? 0 : l, 500 * (x - y), 200 * (y - z)];
+  };
+
+  const toEntryFromRgbInt = (rgbInt) => {
+    const rgb = toArrayFromRgbInt(rgbInt);
     let bestDistance = Infinity;
     let best;
     for (const entry of colors) {
-      const distance = chroma.distance(chromaName, toChromaNameFromRgb(entry.rgb));
+      const distance = proximity(rgb, toArrayFromRgbInt(entry.rgb));
       if (distance < bestDistance) {
         best = entry;
         bestDistance = distance;
@@ -22962,45 +20005,39 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return best;
   };
 
-  const toTagFromChromaName = (name) => {
-    const entry = toEntryFromChromaName(name);
+  const toRgbIntFromName = (name, defaultRgbInt = 0) => {
+    let rgbInt;
+    // Handle '#00ffbb'.
+    if (rgbInt === undefined) {
+      if (name.startsWith('#')) {
+        rgbInt = parseInt(name.substring(1), 16);
+      }
+    }
+    // Handle 'blue'.
+    if (rgbInt === undefined) {
+      const normalizedName = name.toLowerCase();
+      for (const { name, rgb } of colors) {
+        if (normalizedName === name) {
+          rgbInt = rgb;
+        }
+      }
+    }
+    // Handle defaulting.
+    if (rgbInt === undefined) {
+      rgbInt = defaultRgbInt;
+    }
+    return rgbInt;
+  };
+
+  const toArrayFromRgbInt = (rgbInt) =>
+    [(rgbInt >> 16) & 0xFF, (rgbInt >> 8) & 0xFF, (rgbInt >> 0) & 0xFF];
+
+  const toTagFromName = (name) => {
+    const entry = toEntryFromRgbInt(toRgbIntFromName(name));
     if (entry !== undefined) {
       return `color/${entry.name.toLowerCase()}`;
     }
     return `color/unknown`;
-  };
-
-  const toRgbFromChromaName = (name, defaultRgb = [0, 0, 0]) => {
-    const entry = toEntryFromChromaName(name);
-    if (entry !== undefined) {
-      const { rgb } = entry;
-      const result = [(rgb >> 16) & 0xFF,
-                      (rgb >> 8) & 0xFF,
-                      (rgb >> 0) & 0xFF];
-      return result;
-    }
-    return defaultRgb;
-  };
-
-  const toRgbFromName = (name, defaultRgb = [0, 0, 0]) => {
-    const normalizedName = name.toLowerCase();
-    for (const { name, rgb } of colors) {
-      if (normalizedName === name) {
-        const result = [(rgb >> 16) & 0xFF,
-                        (rgb >> 8) & 0xFF,
-                        (rgb >> 0) & 0xFF];
-        return result;
-      }
-    }
-    return toRgbFromChromaName(name, defaultRgb);
-  };
-
-  const toTagFromRgb = ([r = 0, g = 0, b = 0], defaultTag = 'color/black') =>
-    toTagFromChromaName(`rgb(${r},${g},${b})`);
-
-  const toTagFromName = (name) => {
-    const tag = toTagFromRgb(toRgbFromName(name));
-    return tag;
   };
 
   /**
@@ -23836,19 +20873,22 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const Z$d = 2;
 
-  const flat = (shape) => {
+  const findFlatTransforms = (shape) => {
     let bestDepth = Infinity;
+    let bestTo;
+    let bestFrom;
     let bestSurface;
 
     const assay = (surface) => {
       const plane = toPlane$1(surface);
       if (plane !== undefined) {
-        const [to] = toXYPlaneTransforms(plane);
+        const [to, from] = toXYPlaneTransforms(plane);
         const flatShape = shape.transform(to);
         const [min, max] = flatShape.measureBoundingBox();
         const depth = max[Z$d] - min[Z$d];
         if (depth < bestDepth) {
-          bestDepth = depth;
+          bestTo = to;
+          bestFrom = from;
           bestSurface = surface;
         }
       }
@@ -23867,6 +20907,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       assay(z0Surface);
     }
 
+    return [bestTo, bestFrom, bestSurface];
+  };
+
+  const flat = (shape) => {
+    const [, , bestSurface] = findFlatTransforms(shape);
     return withConnector(shape, bestSurface, 'flat');
   };
 
@@ -23875,6 +20920,17 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   flat.signature = 'flat(shape:Shape) -> Connector';
   flatMethod.signature = 'Shape -> flat() -> Connector';
+
+  // Perform an operation on the shape in its best flat orientation,
+  // returning the result in the original orientation.
+
+  const inFlat = (shape, op) => {
+    const [to, from] = findFlatTransforms(shape);
+    return op(shape.transform(to)).transform(from);
+  };
+
+  const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
+  Shape.prototype.inFlat = inFlatMethod;
 
   const Y$f = 1;
 
@@ -24033,8 +21089,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const toShape = (connector) => connector.getContext(shapeToConnect);
 
-  const dropConnector = (shape, ...connectors) =>
-    Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+  const dropConnector = (shape, ...connectors) => {
+    if (shape !== undefined) {
+      return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+    }
+  };
 
   const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
   Shape.prototype.dropConnector = dropConnectorMethod;
@@ -24090,9 +21149,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     if (doConnect) {
       if (doAssemble) {
-        return aMovedShape.Item().with(bShape).Item();
+        return dropConnector(aMovedShape, aConnector.plan.connector)
+            .Item()
+            .with(dropConnector(bShape, bConnector.plan.connector))
+            .Item();
       } else {
-        return aMovedShape.Item().layer(bShape).Item();
+        return dropConnector(aMovedShape, aConnector.plan.connector)
+            .Item()
+            .layer(dropConnector(bShape, bConnector.plan.connector))
+            .Item();
       }
       /*
       return Shape.fromGeometry(
@@ -24525,7 +21590,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
       const [min, max] = measureBoundingBox$3(solid);
-      assembly.push({ solid: deform(makeWatertight$1(solid), perturb, min, max, resolution), tags });
+      assembly.push({ solid: deform(makeWatertight(solid), perturb, min, max, resolution), tags });
     }
 
     return Shape.fromGeometry({ assembly });
@@ -24547,7 +21612,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const height = maxZ - minZ;
       const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
       const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
-      assembly.push({ solid: deform(makeWatertight$1(solid), squeeze, min, max, resolution), tags });
+      assembly.push({ solid: deform(makeWatertight(solid), squeeze, min, max, resolution), tags });
     }
 
     return Shape.fromGeometry({ assembly });
@@ -24565,7 +21630,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const height = max[Z$g] - min[Z$g];
       const radians = (angle / height) * (Math.PI / 180);
       const rotate = point => rotateZ(point, radians * (point[Z$g] - min[Z$g]));
-      assembly.push({ solid: deform(makeWatertight$1(solid), rotate, min, max, resolution), tags });
+      assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
     }
 
     return Shape.fromGeometry({ assembly });
@@ -24573,6 +21638,382 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const twistMethod = function (...args) { return twist(this, ...args); };
   Shape.prototype.twist = twistMethod;
+
+  var binPacking = createCommonjsModule(function (module, exports) {
+  (function (global, factory) {
+     factory(exports) ;
+  }(commonjsGlobal, (function (exports) {
+  /******************************************************************************
+
+  This is a binary tree based bin packing algorithm that is more complex than
+  the simple Packer (packer.js). Instead of starting off with a fixed width and
+  height, it starts with the width and height of the first block passed and then
+  grows as necessary to accomodate each subsequent block. As it grows it attempts
+  to maintain a roughly square ratio by making 'smart' choices about whether to
+  grow right or down.
+
+  When growing, the algorithm can only grow to the right OR down. Therefore, if
+  the new block is BOTH wider and taller than the current target then it will be
+  rejected. This makes it very important to initialize with a sensible starting
+  width and height. If you are providing sorted input (largest first) then this
+  will not be an issue.
+
+  A potential way to solve this limitation would be to allow growth in BOTH
+  directions at once, but this requires maintaining a more complex tree
+  with 3 children (down, right and center) and that complexity can be avoided
+  by simply chosing a sensible starting block.
+
+  Best results occur when the input blocks are sorted by height, or even better
+  when sorted by max(width,height).
+
+  Inputs:
+  ------
+
+    blocks: array of any objects that have .w and .h attributes
+
+  Outputs:
+  -------
+
+    marks each block that fits with a .fit attribute pointing to a
+    node with .x and .y coordinates
+
+  Example:
+  -------
+
+    var blocks = [
+      { w: 100, h: 100 },
+      { w: 100, h: 100 },
+      { w:  80, h:  80 },
+      { w:  80, h:  80 },
+      etc
+      etc
+    ];
+
+    var packer = new GrowingPacker();
+    packer.fit(blocks);
+
+    for(var n = 0 ; n < blocks.length ; n++) {
+      var block = blocks[n];
+      if (block.fit) {
+        Draw(block.fit.x, block.fit.y, block.w, block.h);
+      }
+    }
+
+
+  ******************************************************************************/
+
+  function GrowingPacker() {}
+
+  GrowingPacker.prototype = {
+
+    fit: function fit(blocks) {
+      var n,
+          node,
+          block,
+          len = blocks.length;
+      var w = len > 0 ? blocks[0].w : 0;
+      var h = len > 0 ? blocks[0].h : 0;
+      this.root = { x: 0, y: 0, w: w, h: h };
+      for (n = 0; n < len; n++) {
+        block = blocks[n];
+        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);else block.fit = this.growNode(block.w, block.h);
+      }
+    },
+
+    findNode: function findNode(root, w, h) {
+      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
+    },
+
+    splitNode: function splitNode(node, w, h) {
+      node.used = true;
+      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
+      return node;
+    },
+
+    growNode: function growNode(w, h) {
+      var canGrowDown = w <= this.root.w;
+      var canGrowRight = h <= this.root.h;
+
+      var shouldGrowRight = canGrowRight && this.root.h >= this.root.w + w; // attempt to keep square-ish by growing right when height is much greater than width
+      var shouldGrowDown = canGrowDown && this.root.w >= this.root.h + h; // attempt to keep square-ish by growing down  when width  is much greater than height
+
+      if (shouldGrowRight) return this.growRight(w, h);else if (shouldGrowDown) return this.growDown(w, h);else if (canGrowRight) return this.growRight(w, h);else if (canGrowDown) return this.growDown(w, h);else return null; // need to ensure sensible root starting size to avoid this happening
+    },
+
+    growRight: function growRight(w, h) {
+      var node;
+      this.root = {
+        used: true,
+        x: 0,
+        y: 0,
+        w: this.root.w + w,
+        h: this.root.h,
+        down: this.root,
+        right: { x: this.root.w, y: 0, w: w, h: this.root.h }
+      };
+      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
+    },
+
+    growDown: function growDown(w, h) {
+      var node;
+      this.root = {
+        used: true,
+        x: 0,
+        y: 0,
+        w: this.root.w,
+        h: this.root.h + h,
+        down: { x: 0, y: this.root.h, w: this.root.w, h: h },
+        right: this.root
+      };
+      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
+    }
+
+  };
+
+  /******************************************************************************
+
+  This is a very simple binary tree based bin packing algorithm that is initialized
+  with a fixed width and height and will fit each block into the first node where
+  it fits and then split that node into 2 parts (down and right) to track the
+  remaining whitespace.
+
+  Best results occur when the input blocks are sorted by height, or even better
+  when sorted by max(width,height).
+
+  Inputs:
+  ------
+
+    w:       width of target rectangle
+    h:      height of target rectangle
+    blocks: array of any objects that have .w and .h attributes
+
+  Outputs:
+  -------
+
+    marks each block that fits with a .fit attribute pointing to a
+    node with .x and .y coordinates
+
+  Example:
+  -------
+
+    var blocks = [
+      { w: 100, h: 100 },
+      { w: 100, h: 100 },
+      { w:  80, h:  80 },
+      { w:  80, h:  80 },
+      etc
+      etc
+    ];
+
+    var packer = new Packer(500, 500);
+    packer.fit(blocks);
+
+    for(var n = 0 ; n < blocks.length ; n++) {
+      var block = blocks[n];
+      if (block.fit) {
+        Draw(block.fit.x, block.fit.y, block.w, block.h);
+      }
+    }
+
+
+  ******************************************************************************/
+
+  function Packer(w, h) {
+    this.init(w, h);
+  }
+
+  Packer.prototype = {
+
+    init: function init(w, h) {
+      this.root = { x: 0, y: 0, w: w, h: h };
+    },
+
+    fit: function fit(blocks) {
+      var n, node, block;
+      for (n = 0; n < blocks.length; n++) {
+        block = blocks[n];
+        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);
+      }
+    },
+
+    findNode: function findNode(root, w, h) {
+      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
+    },
+
+    splitNode: function splitNode(node, w, h) {
+      node.used = true;
+      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
+      return node;
+    }
+
+  };
+
+  exports.GrowingPacker = GrowingPacker;
+  exports.Packer = Packer;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+  })));
+
+  });
+
+  unwrapExports(binPacking);
+  var binPacking_1 = binPacking.GrowingPacker;
+  var binPacking_2 = binPacking.Packer;
+
+  const X$h = 0;
+  const Y$h = 1;
+
+  const measureSize = (geometry) => {
+    const [min, max] = measureBoundingBox$5(geometry);
+    const width = max[X$h] - min[X$h];
+    const height = max[Y$h] - min[Y$h];
+    return [width, height];
+  };
+
+  const measureOrigin = (geometry) => {
+    const [min] = measureBoundingBox$5(geometry);
+    const [x, y] = min;
+    return [x, y];
+  };
+
+  const measureOffsets = (size, pageMargin) => {
+    if (size) {
+      const [width, height] = size;
+
+      // Center the output to match pages.
+      const xOffset = width / -2;
+      const yOffset = height / -2;
+      const packer = new binPacking_2(width - pageMargin * 2, height - pageMargin * 2);
+
+      return [xOffset, yOffset, packer];
+    } else {
+      const packer = new binPacking_1();
+      return [0, 0, packer];
+    }
+  };
+
+  const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
+    const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
+
+    const packedGeometries = [];
+    const unpackedGeometries = [];
+
+    const blocks = [];
+
+    for (const geometry of geometries) {
+      const [width, height] = measureSize(geometry);
+      const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
+      blocks.push({ w, h, geometry });
+    }
+
+    // Place largest cells first
+    blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
+
+    packer.fit(blocks);
+
+    let minPoint = [Infinity, Infinity, 0];
+    let maxPoint = [-Infinity, -Infinity, 0];
+
+    for (const { geometry, fit } of blocks) {
+      if (fit && fit.used) {
+        const [x, y] = measureOrigin(geometry);
+        const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
+        const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
+        minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
+        maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
+        const transformed = toTransformedGeometry(translate$4([xo, yo, 0], geometry));
+        packedGeometries.push(transformed);
+      } else {
+        unpackedGeometries.push(geometry);
+      }
+    }
+
+    return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
+  };
+
+  const pack$1 = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }) => {
+    if (perLayout === 0) {
+      // Packing was disabled -- do nothing.
+      return shape;
+    }
+
+    let todo = [];
+    for (const leaf of getLeafs(shape.toKeptGeometry())) {
+      todo.push(leaf);
+    }
+    const packedLayers = [];
+    while (todo.length > 0) {
+      const input = [];
+      while (todo.length > 0 && input.length < perLayout) {
+        input.push(todo.shift());
+      }
+      const [packed, unpacked, minPoint, maxPoint] = pack({ size, pageMargin, itemMargin }, ...input);
+      packSize[0] = minPoint;
+      packSize[1] = maxPoint;
+      if (packed.length === 0) {
+        break;
+      } else {
+        packedLayers.push({ item: { disjointAssembly: packed } });
+      }
+      todo.unshift(...unpacked);
+    }
+    let packedShape = Shape.fromGeometry({ layers: packedLayers });
+    if (size === undefined) {
+      packedShape = packedShape.center();
+    }
+    return packedShape;
+  };
+
+  const packMethod = function (...args) { return pack$1(this, ...args); };
+  Shape.prototype.pack = packMethod;
+
+  pack$1.signature = 'pack({ size, margin = 5 }, ...shapes:Shape) -> [packed:Shapes, unpacked:Shapes]';
+
+  /**
+   *
+   * # Spiral
+   *
+   * These take a function mapping angle to radius.
+   *
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * Spiral(angle => [angle],
+   *        { to: 360 * 5 });
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * Spiral({ to: 360 },
+   *        (angle) => [[2 + sin(angle * 20)]])
+   *   .close()
+   *   .interior()
+   * ```
+   * :::
+   **/
+
+  const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by, resolution } = {}) => {
+    if (by === undefined && resolution === undefined) {
+      by = 1;
+    }
+    let path = [null];
+    for (const angle of numbers(angle => angle, { from, to, by, resolution })) {
+      const radians = angle * Math.PI / 180;
+      const subpath = toPathFromAngle(angle);
+      path = concatenate(path, rotateZ$1(radians, subpath));
+    }
+    return Shape.fromPath(path);
+  };
+
+  const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
+    Spiral(a => [[radius]], { from: start, to: start + angle, resolution: sides });
+
+  const Arc = (...args) => ofRadius(...args);
+  Arc.ofRadius = ofRadius;
+
+  const Assembly = (...shapes) => Shape.fromGeometry({ assembly: shapes.map(shape => shape.toGeometry()) });
 
   function clone(point) { //TODO: use gl-vec2 for this
       return [point[0], point[1]]
@@ -27519,7 +24960,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const buildConvexMinkowskiSumImpl = (aPoints, bPoints) => {
     const summedPoints = [];
     for (const aPoint of aPoints) {
-      for (const summedPoint of translate$2(aPoint, bPoints)) {
+      for (const summedPoint of translate$3(aPoint, bPoints)) {
         summedPoints.push(summedPoint);
       }
     }
@@ -28320,17 +25761,17 @@ return d[d.length-1];};return ", funcName].join("");
     if (cap) {
       const deduplicatedPath = deduplicate(lastPath);
       if (deduplicatedPath.length > 0) {
-        polygons.push(...flip$5(makeConvex$1([deduplicatedPath])));
+        polygons.push(...flip$3(makeConvex$1([deduplicatedPath])));
       }
     }
 
-    return { solid: fromPolygons({}, flip$5(polygons)) };
+    return { solid: fromPolygons({}, flip$3(polygons)) };
   };
 
   const fromPointsAndPaths = ({ points = [], paths = [] }) => {
     const polygons = [];
     for (const path of paths) {
-      polygons.push(fromPoints$1(path.map(nth => points[nth])));
+      polygons.push(fromPoints(path.map(nth => points[nth])));
     }
     return polygons;
   };
@@ -28423,11 +25864,11 @@ return d[d.length-1];};return ", funcName].join("");
       const surface = makeConvex$1(z0Surface);
 
       // Roof goes up.
-      const roof = translate$3([0, 0, height], surface);
+      const roof = translate$1([0, 0, height], surface);
       polygons.push(...roof);
 
       // floor faces down.
-      const floor = translate$3([0, 0, depth], flip$5(surface));
+      const floor = translate$1([0, 0, depth], flip$3(surface));
       polygons.push(...floor);
     }
 
@@ -28586,32 +26027,35 @@ return d[d.length-1];};return ", funcName].join("");
         continue;
       }
       // Remember that we are walking CCW.
-      polygons.push([floor[start], floor[end], roof[end], roof[start]].reverse());
+      polygons.push([roof[start], roof[end], floor[start]]);
+      polygons.push([roof[end], floor[end], floor[start]]);
     }
   };
 
   // Rotate a path around the X axis to produce the polygons of a solid.
-  const latheImpl = (path, endRadians = Math.PI * 2, resolution = 1) => {
-    const stepRadians = endRadians / resolution;
+  const loopImpl = (path, endRadians = Math.PI * 2, resolution = 16, pitch = 0) => {
+    const stepRadians = (Math.PI * 2) / resolution;
+    const pitchPerRadian = pitch / (Math.PI * 2);
     let lastPath;
     const polygons = [];
-    if (endRadians !== Math.PI * 2) {
-      polygons.push(flip(path), rotateX$1(endRadians, path));
+    if (endRadians !== Math.PI * 2 || pitch !== 0) {
+      // Cap the loop.
+      polygons.push(flip(path), translate([pitchPerRadian * endRadians, 0, 0], rotateX$1(endRadians, path)));
     }
     for (let radians = 0; radians < endRadians; radians += stepRadians) {
-      const rotatedPath = rotateX$1(radians, path);
+      const rotatedPath = translate([pitchPerRadian * radians, 0, 0], rotateX$1(radians, path));
       if (lastPath !== undefined) {
         buildWalls$3(polygons, rotatedPath, lastPath);
       }
       lastPath = rotatedPath;
     }
     if (lastPath !== undefined) {
-      buildWalls$3(polygons, rotateX$1(endRadians, path), lastPath);
+      buildWalls$3(polygons, translate([pitchPerRadian * endRadians, 0, 0], rotateX$1(endRadians, path)), lastPath);
     }
     return { solid: fromPolygons({}, polygons) };
   };
 
-  const lathe = cache(latheImpl);
+  const loop = cache(loopImpl);
 
   const sin$1 = (a) => Math.sin(a / 360 * Math.PI * 2);
 
@@ -28725,1036 +26169,6 @@ return d[d.length-1];};return ", funcName].join("");
   simplifyPath.douglasPeucker = douglasPeucker$1;
 
   const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-
-  /**
-   *
-   * # Chain Hull
-   *
-   * Builds a convex hull between adjacent pairs in a sequence of shapes.
-   *
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * chainHull(Cube(3).move(-5, 5),
-   *           Sphere(3).move(5, -5),
-   *           Cylinder(3, 10).move(-10, -10))
-   *   .move(10, 10)
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [80, 80, 0] } }
-   * ```
-   * chainHull(Circle(20).moveZ(-10),
-   *           Circle(10),
-   *           Circle(20).moveZ(10))
-   * ```
-   * :::
-   *
-   **/
-
-  const Z$h = 2;
-
-  const chainHull = (...shapes) => {
-    const pointsets = shapes.map(shape => shape.toPoints());
-    const chain = [];
-    for (let nth = 1; nth < pointsets.length; nth++) {
-      const points = [...pointsets[nth - 1], ...pointsets[nth]];
-      if (points.every(point => point[Z$h] === 0)) {
-        chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
-      } else {
-        chain.push(Shape.fromGeometry(buildConvexHull(points)));
-      }
-    }
-    return union$5(...chain);
-  };
-
-  const chainHullMethod = function (...args) { return chainHull(this, ...args); };
-  Shape.prototype.chainHull = chainHullMethod;
-
-  chainHull.signature = 'chainHull(...shapes:Shape) -> Shape';
-
-  /**
-   *
-   * # Extrude
-   *
-   * Generates a solid from a surface by linear extrusion.
-   *
-   * ```
-   * shape.extrude(height, depth, { twist = 0, steps = 1 })
-   * ```
-   *
-   * ::: illustration
-   * ```
-   * Circle(10).cut(Circle(8))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * Circle(10).cut(Circle(8)).extrude(10)
-   * ```
-   * :::
-   *
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * Triangle(10).extrude(5, -2)
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
-   * ```
-   * :::
-   *
-   **/
-
-  const extrude$1 = (shape, height = 1, depth = 0) => {
-    if (height < depth) {
-      [height, depth] = [depth, height];
-    }
-    // FIX: Handle extrusion along a vector properly.
-    const solids = [];
-    const keptGeometry = shape.toKeptGeometry();
-    for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
-      if (z0Surface.length > 0) {
-        const solid = alignVertices(extrude(z0Surface, height, depth));
-        solids.push(Shape.fromGeometry({ solid, tags }));
-      }
-    }
-    for (const { surface, tags } of getSurfaces(keptGeometry)) {
-      if (surface.length > 0) {
-        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-        const z0SolidGeometry = extrude(transform$6(toZ0, surface), height, depth);
-        const solid = alignVertices(transform$8(fromZ0, z0SolidGeometry));
-        solids.push(Shape.fromGeometry({ solid, tags }));
-      }
-    }
-    // Keep plans.
-    for (const entry of getPlans(keptGeometry)) {
-      solids.push(entry);
-    }
-    return assemble$1(...solids);
-  };
-
-  const extrudeMethod = function (...args) { return extrude$1(this, ...args); };
-  Shape.prototype.extrude = extrudeMethod;
-
-  extrude$1.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
-  extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
-
-  const fill = (shape, pathsShape) => {
-    const fills = [];
-    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
-      const anySurface = surface || z0Surface;
-      const plane = toPlane$1(anySurface);
-      const [to, from] = toXYPlaneTransforms(plane);
-      const flatSurface = transform$6(to, anySurface);
-      for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
-        const flatPaths = transform$2(to, paths);
-        const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
-        const fill = transform$2(from, flatFill);
-        fills.push(...fill);
-      }
-    }
-    return Shape.fromGeometry({ paths: fills });
-  };
-
-  const fillMethod = function (...args) { return fill(this, ...args); };
-  Shape.prototype.fill = fillMethod;
-
-  const withFillMethod = function (...args) { return assemble$1(this, fill(this, ...args)); };
-  Shape.prototype.withFill = withFillMethod;
-
-  fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
-  fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
-  withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
-
-  /**
-   *
-   * # Hull
-   *
-   * Builds the convex hull of a set of shapes.
-   *
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * hull(Point([0, 0, 10]),
-   *      Circle(10))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * assemble(Point([0, 0, 10]),
-   *          Circle(10))
-   *   .hull()
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * Point([0, 0, 10]).hull(Circle(10))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * hull(Circle(4),
-   *      Circle(2).move(8));
-   * ```
-   * :::
-   *
-   **/
-
-  const Z$i = 2;
-
-  const hull = (...shapes) => {
-    const points = [];
-    shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
-    // FIX: Detect planar hulls properly.
-    if (points.every(point => point[Z$i] === 0)) {
-      return Shape.fromGeometry(buildConvexSurfaceHull(points));
-    } else {
-      return Shape.fromGeometry(buildConvexHull(points));
-    }
-  };
-
-  const hullMethod = function (...shapes) { return hull(this, ...shapes); };
-  Shape.prototype.hull = hullMethod;
-
-  hull.signature = 'hull(shape:Shape, ...shapes:Shape) -> Shape';
-  hullMethod.signature = 'Shape -> hull(...shapes:Shape) -> Shape';
-
-  /**
-   *
-   * # Interior
-   *
-   * Generates a surface from the interior of a simple closed path.
-   *
-   * ::: illustration
-   * ```
-   * Circle(10)
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * Circle(10)
-   *   .outline()
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * Circle(10)
-   *   .outline()
-   *   .interior()
-   * ```
-   * :::
-   *
-   **/
-
-  const interior = (shape) => {
-    const surfaces = [];
-    for (const { paths } of getPaths(shape.toKeptGeometry())) {
-      // FIX: Check paths for coplanarity.
-      surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
-    }
-    return assemble$1(...surfaces);
-  };
-
-  const interiorMethod = function (...args) { return interior(this); };
-  Shape.prototype.interior = interiorMethod;
-
-  interior.signature = 'interior(shape:Shape) -> Shape';
-  interiorMethod.signature = 'Shape -> interior() -> Shape';
-
-  /**
-   *
-   * # Lathe
-   *
-   * ::: illustration { "view": { "position": [-80, -80, 80] } }
-   * ```
-   * ```
-   * :::
-   *
-   **/
-
-  const lathe$1 = (shape, endDegrees = 360, { sides = 32 } = {}) => {
-    const profile = shape.chop(Y$g(0));
-    const outline = profile.outline();
-    const solids = [];
-    for (const geometry of getPaths(outline.toKeptGeometry())) {
-      for (const path of geometry.paths) {
-        solids.push(Shape.fromGeometry(lathe(path, endDegrees * Math.PI / 180, sides)));
-      }
-    }
-    return assemble$1(...solids);
-  };
-
-  const latheMethod = function (...args) { return lathe$1(this, ...args); };
-  Shape.prototype.lathe = latheMethod;
-
-  lathe$1.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
-  latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';
-
-  /**
-   *
-   * # Minkowski (convex)
-   *
-   * Generates the minkowski sum of a two convex shapes.
-   *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
-   * ```
-   * minkowski(Cube(10),
-   *           Sphere(3));
-   * ```
-   * :::
-   *
-   **/
-
-  // TODO: Generalize for more operands?
-  const minkowski = (a, b) => {
-    const aPoints = [];
-    const bPoints = [];
-    a.eachPoint(point => aPoints.push(point));
-    b.eachPoint(point => bPoints.push(point));
-    return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
-  };
-
-  const minkowskiMethod = function (shape) { return minkowski(this, shape); };
-  Shape.prototype.minkowski = minkowskiMethod;
-
-  minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
-
-  /**
-   *
-   * # Outline
-   *
-   * Generates the outline of a surface.
-   *
-   * ::: illustration
-   * ```
-   * difference(Circle(10),
-   *            Circle(2).move([-4]),
-   *            Circle(2).move([4]))
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * difference(Circle(10),
-   *            Circle(2).move([-4]),
-   *            Circle(2).move([4]))
-   *   .outline()
-   * ```
-   * :::
-   *
-   **/
-
-  const outline$4 = (shape) =>
-    assemble$1(...outline$3(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
-
-  const outlineMethod = function (options) { return outline$4(this); };
-  const withOutlineMethod = function (options) { return assemble$1(this, outline$4(this)); };
-
-  Shape.prototype.outline = outlineMethod;
-  Shape.prototype.withOutline = withOutlineMethod;
-
-  outline$4.signature = 'outline(shape:Surface) -> Shape';
-  outlineMethod.signature = 'Shape -> outline() -> Shape';
-  withOutlineMethod.signature = 'Shape -> outline() -> Shape';
-
-  /**
-   *
-   * # Section
-   *
-   * Produces a cross-section of a solid as a surface.
-   *
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * difference(Cylinder(10, 10),
-   *            Cylinder(8, 10))
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * difference(Sphere(10),
-   *            Sphere(8))
-   *   .section()
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * difference(Sphere(10),
-   *            Sphere(8))
-   *   .section()
-   *   .outline()
-   * ```
-   * :::
-   *
-   **/
-
-  const toPlane$4 = (connector) => {
-    for (const entry of getPlans(connector.toKeptGeometry())) {
-      if (entry.plan && entry.plan.connector) {
-        return entry.planes[0];
-      }
-    }
-  };
-
-  const toSurface$2 = (plane) => {
-    const max = +1e5;
-    const min = -1e5;
-    const [, from] = toXYPlaneTransforms(plane);
-    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
-    const polygon = transform$1(from, path);
-    return [polygon];
-  };
-
-  const section$1 = (solidShape, ...connectors) => {
-    if (connectors.length === 0) {
-      connectors.push(Z$c(0));
-    }
-    const planes = connectors.map(toPlane$4);
-    const planeSurfaces = planes.map(toSurface$2);
-    const shapes = [];
-    const normalize = createNormalize3();
-    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const sections = section(solid, planeSurfaces, normalize);
-      const surfaces = sections.map(section => makeConvex$1(section, normalize));
-      // const surfaces = sections.map(section => outlineSurface(section, normalize));
-      // const surfaces = sections.map(section => section);
-      // const surfaces = sections;
-      for (let i = 0; i < surfaces.length; i++) {
-        surfaces[i].plane = planes[i];
-        shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
-      }
-    }
-    return layer(...shapes);
-  };
-
-  const sectionMethod = function (...args) { return section$1(this, ...args); };
-  Shape.prototype.section = sectionMethod;
-
-  const squash = (shape) => {
-    const geometry = shape.toKeptGeometry();
-    const result = { layers: [] };
-    for (const { solid } of getSolids(geometry)) {
-      const polygons = [];
-      for (const surface of solid) {
-        for (const path of surface) {
-          const flat = path.map(([x, y]) => [x, y, 0]);
-          if (toPlane(flat) === undefined) continue;
-          polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
-        }
-      }
-      result.layers.push({ z0Surface: outline(polygons) });
-    }
-    for (const { surface } of getSurfaces(geometry)) {
-      const polygons = [];
-      for (const path of surface) {
-        const flat = path.map(([x, y]) => [x, y, 0]);
-        if (toPlane(flat) === undefined) continue;
-        polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
-      }
-      result.layers.push({ z0Surface: polygons });
-    }
-    for (const { z0Surface } of getZ0Surfaces(geometry)) {
-      const polygons = [];
-      for (const path of z0Surface) {
-        polygons.push(path);
-      }
-      result.layers.push({ z0Surface: polygons });
-    }
-    for (const { paths } of getPaths(geometry)) {
-      const flatPaths = [];
-      for (const path of paths) {
-        flatPaths.push(path.map(([x, y]) => [x, y, 0]));
-      }
-      result.layers.push({ paths: flatPaths });
-    }
-    return Shape.fromGeometry(result);
-  };
-
-  const squashMethod = function () { return squash(this); };
-  Shape.prototype.squash = squashMethod;
-
-  /**
-   *
-   * # Stretch
-   *
-   **/
-
-  const toPlaneFromConnector = (connector) => {
-    for (const entry of getPlans(connector.toKeptGeometry())) {
-      if (entry.plan && entry.plan.connector) {
-        return entry.planes[0];
-      }
-    }
-  };
-
-  const toSurface$3 = (plane) => {
-    const max = +1e5;
-    const min = -1e5;
-    const [, from] = toXYPlaneTransforms(plane);
-    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
-    const polygon = transform$1(from, path);
-    return [polygon];
-  };
-
-  const stretch = (shape, length, connector = Z$c()) => {
-    const normalize = createNormalize3();
-    const stretches = [];
-    const planeSurface = toSurface$3(toPlaneFromConnector(connector));
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      if (solid.length === 0) {
-        continue;
-      }
-      const bottom = cutOpen(solid, planeSurface, normalize);
-      const [profile] = section(solid, [planeSurface], normalize);
-      const top = cutOpen(solid, flip$5(planeSurface), normalize);
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-      const z0SolidGeometry = extrude(transform$6(toZ0, profile), length, 0, false);
-      const middle = transform$8(fromZ0, z0SolidGeometry);
-      const topMoved = transform$8(fromTranslation(scale(length, toPlane$1(profile))), top);
-      stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
-    }
-
-    return assemble$1(...stretches);
-  };
-
-  const method$3 = function (...args) { return stretch(this, ...args); };
-  Shape.prototype.stretch = method$3;
-
-  /**
-   *
-   * # Sweep
-   *
-   * Sweep a tool profile along a path, to produce a surface.
-   *
-   **/
-
-  // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
-  const sweep = (toolpath, tool) => {
-    const chains = [];
-    for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
-      for (const path of paths) {
-        chains.push(chainHull(...path.map(point => tool.move(...point))));
-      }
-    }
-    return union$5(...chains);
-  };
-
-  const sweepMethod = function (tool) { return sweep(this, tool); };
-
-  Shape.prototype.sweep = sweepMethod;
-  Shape.prototype.withSweep = function (tool) { return assemble$1(this, sweep(this, tool)); };
-
-  /**
-   * Creates a new unbounded 2D line initialized with the given values.
-   *
-   * This is a 2d plane, similar to the [x, y, z, w] form of the 3d plane.
-   *
-   * @param {Number} x X coordinate of the unit normal
-   * @param {Number} y Y coordinate of the unit normal
-   * @param {Number} w length (positive) of the normal segment
-   * @returns {line2} a new unbounded 2D line
-   */
-  const fromValues$2 = (x = 0, y = 1, w = 0) => [x, y, w];
-
-  /**
-   * Create a new 2D line that passes through the given points
-   *
-   * @param {vec2} p1 start point of the 2D line
-   * @param {vec2} p2 end point of the 2D line
-   * @returns {line2} a new unbounded 2D line
-   */
-  const fromPoints$2 = (p1, p2) => {
-    const direction = subtract$1(p2, p1);
-    const normalizedNormal = normalize$1(normal(direction));
-    const distance = dot$1(p1, normalizedNormal);
-    return fromValues$2(normalizedNormal[0], normalizedNormal[1], distance);
-  };
-
-  /**
-   * Return the point of intersection between the given lines.
-   *
-   * The point will have Infinity values if the lines are paralell.
-   * The point will have NaN values if the lines are the same.
-   *
-   * @param {line2} line1 a 2D line for reference
-   * @param {line2} line2 a 2D line for reference
-   * @return {vec2} the point of intersection
-   */
-  const intersectPointOfLines = (line1, line2) =>
-    solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
-
-  const intersectionPoints = (cuts, overcut = 0) => {
-    cuts.push(cuts[0]);
-    var intersectionPointsList = [];
-    var i = 0;
-    while (i < cuts.length - 1) {
-      const point = intersectPointOfLines(fromPoints$2(...cuts[i]), fromPoints$2(...cuts[i + 1]));
-      point.push(cuts[i][0][2]);
-      if (overcut) {
-        intersectionPointsList.push(cuts[i][1]);
-      }
-      intersectionPointsList.push(point);
-      i++;
-    }
-    return intersectionPointsList;
-  };
-
-  const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
-    var cuts = [];
-    for (const [start, end] of getEdges(path)) {
-      const direction = normalize(subtract(start, end));
-      const angleRadians = Math.PI / 2;
-      const offsetDirection = rotateZ(direction, angleRadians);
-      const offset = scale(radius, offsetDirection);
-      const frontcut = scale(-overcut, direction);
-      const backcut = scale(overcut, direction);
-      const startCut = add(start, add(backcut, offset));
-      const endCut = add(end, add(frontcut, offset));
-      cuts.push([startCut, endCut]);
-    }
-    if (joinPaths) {
-      cuts = [intersectionPoints(cuts, overcut)];
-    }
-    return cuts;
-  };
-
-  const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
-    const cuts = [];
-    for (const { paths } of getPaths(geometry)) {
-      for (const path of paths) {
-        cuts.push(...overcutPathEdges(path, radius, overcut, joinPaths));
-      }
-    }
-    return cuts;
-  };
-
-  // Return an assembly of paths so that each toolpath can have its own tag.
-  const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
-    Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
-
-  const method$4 = function (...options) { return toolpath(this, ...options); };
-
-  Shape.prototype.toolpath = method$4;
-  Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
-
-  const X$h = 0;
-  const Y$h = 1;
-  const Z$j = 2;
-
-  const voxels = (shape, resolution = 1) => {
-    const offset = resolution / 2;
-    const voxels = [];
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$3(solid);
-      const bsp = fromSolid(solid, createNormalize3());
-      const polygons = [];
-      for (let x = min[X$h] - offset; x <= max[X$h] + offset; x += resolution) {
-        for (let y = min[Y$h] - offset; y <= max[Y$h] + offset; y += resolution) {
-          for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
-            const state = containsPoint(bsp, [x, y, z]);
-            if (state !== containsPoint(bsp, [x + resolution, y, z])) {
-              const face = [[x + offset, y - offset, z - offset],
-                            [x + offset, y + offset, z - offset],
-                            [x + offset, y + offset, z + offset],
-                            [x + offset, y - offset, z + offset]];
-              polygons.push(state ? face : face.reverse());
-            }
-            if (state !== containsPoint(bsp, [x, y + resolution, z])) {
-              const face = [[x - offset, y + offset, z - offset],
-                            [x + offset, y + offset, z - offset],
-                            [x + offset, y + offset, z + offset],
-                            [x - offset, y + offset, z + offset]];
-              polygons.push(state ? face.reverse() : face);
-            }
-            if (state !== containsPoint(bsp, [x, y, z + resolution])) {
-              const face = [[x - offset, y - offset, z + offset],
-                            [x + offset, y - offset, z + offset],
-                            [x + offset, y + offset, z + offset],
-                            [x - offset, y + offset, z + offset]];
-              polygons.push(state ? face : face.reverse());
-            }
-          }
-        }
-      }
-      voxels.push(Shape.fromGeometry({ solid: fromPolygons({}, polygons), tags }));
-    }
-    return assemble$1(...voxels);
-  };
-
-  const vowelsMethod = function (...args) { return voxels(this, ...args); };
-  Shape.prototype.voxels = vowelsMethod;
-
-  var binPacking = createCommonjsModule(function (module, exports) {
-  (function (global, factory) {
-     factory(exports) ;
-  }(commonjsGlobal, (function (exports) {
-  /******************************************************************************
-
-  This is a binary tree based bin packing algorithm that is more complex than
-  the simple Packer (packer.js). Instead of starting off with a fixed width and
-  height, it starts with the width and height of the first block passed and then
-  grows as necessary to accomodate each subsequent block. As it grows it attempts
-  to maintain a roughly square ratio by making 'smart' choices about whether to
-  grow right or down.
-
-  When growing, the algorithm can only grow to the right OR down. Therefore, if
-  the new block is BOTH wider and taller than the current target then it will be
-  rejected. This makes it very important to initialize with a sensible starting
-  width and height. If you are providing sorted input (largest first) then this
-  will not be an issue.
-
-  A potential way to solve this limitation would be to allow growth in BOTH
-  directions at once, but this requires maintaining a more complex tree
-  with 3 children (down, right and center) and that complexity can be avoided
-  by simply chosing a sensible starting block.
-
-  Best results occur when the input blocks are sorted by height, or even better
-  when sorted by max(width,height).
-
-  Inputs:
-  ------
-
-    blocks: array of any objects that have .w and .h attributes
-
-  Outputs:
-  -------
-
-    marks each block that fits with a .fit attribute pointing to a
-    node with .x and .y coordinates
-
-  Example:
-  -------
-
-    var blocks = [
-      { w: 100, h: 100 },
-      { w: 100, h: 100 },
-      { w:  80, h:  80 },
-      { w:  80, h:  80 },
-      etc
-      etc
-    ];
-
-    var packer = new GrowingPacker();
-    packer.fit(blocks);
-
-    for(var n = 0 ; n < blocks.length ; n++) {
-      var block = blocks[n];
-      if (block.fit) {
-        Draw(block.fit.x, block.fit.y, block.w, block.h);
-      }
-    }
-
-
-  ******************************************************************************/
-
-  function GrowingPacker() {}
-
-  GrowingPacker.prototype = {
-
-    fit: function fit(blocks) {
-      var n,
-          node,
-          block,
-          len = blocks.length;
-      var w = len > 0 ? blocks[0].w : 0;
-      var h = len > 0 ? blocks[0].h : 0;
-      this.root = { x: 0, y: 0, w: w, h: h };
-      for (n = 0; n < len; n++) {
-        block = blocks[n];
-        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);else block.fit = this.growNode(block.w, block.h);
-      }
-    },
-
-    findNode: function findNode(root, w, h) {
-      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
-    },
-
-    splitNode: function splitNode(node, w, h) {
-      node.used = true;
-      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
-      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
-      return node;
-    },
-
-    growNode: function growNode(w, h) {
-      var canGrowDown = w <= this.root.w;
-      var canGrowRight = h <= this.root.h;
-
-      var shouldGrowRight = canGrowRight && this.root.h >= this.root.w + w; // attempt to keep square-ish by growing right when height is much greater than width
-      var shouldGrowDown = canGrowDown && this.root.w >= this.root.h + h; // attempt to keep square-ish by growing down  when width  is much greater than height
-
-      if (shouldGrowRight) return this.growRight(w, h);else if (shouldGrowDown) return this.growDown(w, h);else if (canGrowRight) return this.growRight(w, h);else if (canGrowDown) return this.growDown(w, h);else return null; // need to ensure sensible root starting size to avoid this happening
-    },
-
-    growRight: function growRight(w, h) {
-      var node;
-      this.root = {
-        used: true,
-        x: 0,
-        y: 0,
-        w: this.root.w + w,
-        h: this.root.h,
-        down: this.root,
-        right: { x: this.root.w, y: 0, w: w, h: this.root.h }
-      };
-      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
-    },
-
-    growDown: function growDown(w, h) {
-      var node;
-      this.root = {
-        used: true,
-        x: 0,
-        y: 0,
-        w: this.root.w,
-        h: this.root.h + h,
-        down: { x: 0, y: this.root.h, w: this.root.w, h: h },
-        right: this.root
-      };
-      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
-    }
-
-  };
-
-  /******************************************************************************
-
-  This is a very simple binary tree based bin packing algorithm that is initialized
-  with a fixed width and height and will fit each block into the first node where
-  it fits and then split that node into 2 parts (down and right) to track the
-  remaining whitespace.
-
-  Best results occur when the input blocks are sorted by height, or even better
-  when sorted by max(width,height).
-
-  Inputs:
-  ------
-
-    w:       width of target rectangle
-    h:      height of target rectangle
-    blocks: array of any objects that have .w and .h attributes
-
-  Outputs:
-  -------
-
-    marks each block that fits with a .fit attribute pointing to a
-    node with .x and .y coordinates
-
-  Example:
-  -------
-
-    var blocks = [
-      { w: 100, h: 100 },
-      { w: 100, h: 100 },
-      { w:  80, h:  80 },
-      { w:  80, h:  80 },
-      etc
-      etc
-    ];
-
-    var packer = new Packer(500, 500);
-    packer.fit(blocks);
-
-    for(var n = 0 ; n < blocks.length ; n++) {
-      var block = blocks[n];
-      if (block.fit) {
-        Draw(block.fit.x, block.fit.y, block.w, block.h);
-      }
-    }
-
-
-  ******************************************************************************/
-
-  function Packer(w, h) {
-    this.init(w, h);
-  }
-
-  Packer.prototype = {
-
-    init: function init(w, h) {
-      this.root = { x: 0, y: 0, w: w, h: h };
-    },
-
-    fit: function fit(blocks) {
-      var n, node, block;
-      for (n = 0; n < blocks.length; n++) {
-        block = blocks[n];
-        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);
-      }
-    },
-
-    findNode: function findNode(root, w, h) {
-      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
-    },
-
-    splitNode: function splitNode(node, w, h) {
-      node.used = true;
-      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
-      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
-      return node;
-    }
-
-  };
-
-  exports.GrowingPacker = GrowingPacker;
-  exports.Packer = Packer;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
-
-  })));
-
-  });
-
-  unwrapExports(binPacking);
-  var binPacking_1 = binPacking.GrowingPacker;
-  var binPacking_2 = binPacking.Packer;
-
-  const X$i = 0;
-  const Y$i = 1;
-
-  const measureSize = (geometry) => {
-    const [min, max] = measureBoundingBox$5(geometry);
-    const width = max[X$i] - min[X$i];
-    const height = max[Y$i] - min[Y$i];
-    return [width, height];
-  };
-
-  const measureOrigin = (geometry) => {
-    const [min] = measureBoundingBox$5(geometry);
-    const [x, y] = min;
-    return [x, y];
-  };
-
-  const measureOffsets = (size, pageMargin) => {
-    if (size) {
-      const [width, height] = size;
-
-      // Center the output to match pages.
-      const xOffset = width / -2;
-      const yOffset = height / -2;
-      const packer = new binPacking_2(width - pageMargin * 2, height - pageMargin * 2);
-
-      return [xOffset, yOffset, packer];
-    } else {
-      const packer = new binPacking_1();
-      return [0, 0, packer];
-    }
-  };
-
-  const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
-    const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
-
-    const packedGeometries = [];
-    const unpackedGeometries = [];
-
-    const blocks = [];
-
-    for (const geometry of geometries) {
-      const [width, height] = measureSize(geometry);
-      const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
-      blocks.push({ w, h, geometry });
-    }
-
-    // Place largest cells first
-    blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
-
-    packer.fit(blocks);
-
-    let minPoint = [Infinity, Infinity, 0];
-    let maxPoint = [-Infinity, -Infinity, 0];
-
-    for (const { geometry, fit } of blocks) {
-      if (fit && fit.used) {
-        const [x, y] = measureOrigin(geometry);
-        const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
-        const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
-        minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
-        maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
-        const transformed = toTransformedGeometry(translate$4([xo, yo, 0], geometry));
-        packedGeometries.push(transformed);
-      } else {
-        unpackedGeometries.push(geometry);
-      }
-    }
-
-    return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
-  };
-
-  const pack$1 = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }) => {
-    if (perLayout === 0) {
-      // Packing was disabled -- do nothing.
-      return shape;
-    }
-
-    let todo = [];
-    for (const leaf of getLeafs(shape.toKeptGeometry())) {
-      todo.push(leaf);
-    }
-    const packedLayers = [];
-    while (true) {
-      const [packed, unpacked, minPoint, maxPoint] = pack({ size, pageMargin, itemMargin }, ...todo.slice(0, perLayout));
-      packSize[0] = minPoint;
-      packSize[1] = maxPoint;
-      if (packed.length === 0) {
-        break;
-      } else {
-        packedLayers.push({ item: { disjointAssembly: packed } });
-      }
-      if (unpacked.length === 0) {
-        break;
-      }
-      todo = unpacked;
-    }
-    let packedShape = Shape.fromGeometry({ layers: packedLayers });
-    if (size === undefined) {
-      packedShape = packedShape.center();
-    }
-    return packedShape;
-  };
-
-  const packMethod = function (...args) { return pack$1(this, ...args); };
-  Shape.prototype.pack = packMethod;
-
-  pack$1.signature = 'pack({ size, margin = 5 }, ...shapes:Shape) -> [packed:Shapes, unpacked:Shapes]';
-
-  /**
-   *
-   * # Spiral
-   *
-   * These take a function mapping angle to radius.
-   *
-   * ::: illustration { "view": { "position": [0, 0, 10] } }
-   * ```
-   * Spiral(angle => [angle],
-   *        { to: 360 * 5 });
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [0, 0, 10] } }
-   * ```
-   * Spiral({ to: 360 },
-   *        (angle) => [[2 + sin(angle * 20)]])
-   *   .close()
-   *   .interior()
-   * ```
-   * :::
-   **/
-
-  const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by, resolution } = {}) => {
-    if (by === undefined && resolution === undefined) {
-      by = 1;
-    }
-    let path = [null];
-    for (const angle of numbers(angle => angle, { from, to, by, resolution })) {
-      const radians = angle * Math.PI / 180;
-      const subpath = toPathFromAngle(angle);
-      path = concatenate(path, rotateZ$1(radians, subpath));
-    }
-    return Shape.fromPath(path);
-  };
-
-  const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
-    Spiral(a => [[radius]], { from: start, to: start + angle, resolution: sides });
-
-  const Arc = (...args) => ofRadius(...args);
-  Arc.ofRadius = ofRadius;
-
-  const Assembly = (...shapes) => Shape.fromGeometry({ assembly: shapes.map(shape => shape.toGeometry()) });
 
   const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
@@ -30191,7 +26605,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
 
-  const fromPoints$3 = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+  const fromPoints$2 = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
   /**
    *
@@ -30208,8 +26622,8 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Path = (...points) => fromPoints$3(...points);
-  Path.fromPoints = fromPoints$3;
+  const Path = (...points) => fromPoints$2(...points);
+  Path.fromPoints = fromPoints$2;
 
   Path.signature = 'Path(...points:Point) -> Shape';
   Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';
@@ -30224,7 +26638,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   Point.signature = 'Point(point:Point) -> Shape';
 
-  const fromPoints$4 = (points) => Shape.fromPoints(points);
+  const fromPoints$3 = (points) => Shape.fromPoints(points);
 
   /**
    *
@@ -30261,8 +26675,8 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Points = (...args) => fromPoints$4(...args);
-  Points.fromPoints = fromPoints$4;
+  const Points = (...args) => fromPoints$3(...args);
+  Points.fromPoints = fromPoints$3;
 
   /**
    *
@@ -30486,7 +26900,7 @@ return d[d.length-1];};return ", funcName].join("");
     Circle(height / 2, { sides })
         .rotateZ(rotation)
         .moveY(radius)
-        .lathe(360, { sides: segments })
+        .Loop(360, { sides: segments })
         .rotateY(90);
 
   /**
@@ -30576,6 +26990,680 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # Chained Hull
+   *
+   * Builds a convex hull between adjacent pairs in a sequence of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * chainHull(Cube(3).move(-5, 5),
+   *           Sphere(3).move(5, -5),
+   *           Cylinder(3, 10).move(-10, -10))
+   *   .move(10, 10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [80, 80, 0] } }
+   * ```
+   * chainHull(Circle(20).moveZ(-10),
+   *           Circle(10),
+   *           Circle(20).moveZ(10))
+   * ```
+   * :::
+   *
+   **/
+
+  const Z$h = 2;
+
+  const ChainedHull = (...shapes) => {
+    const pointsets = shapes.map(shape => shape.toPoints());
+    const chain = [];
+    for (let nth = 1; nth < pointsets.length; nth++) {
+      const points = [...pointsets[nth - 1], ...pointsets[nth]];
+      if (points.every(point => point[Z$h] === 0)) {
+        chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
+      } else {
+        chain.push(Shape.fromGeometry(buildConvexHull(points)));
+      }
+    }
+    return union$5(...chain);
+  };
+
+  const ChainedHullMethod = function (...args) { return ChainedHull(this, ...args); };
+  Shape.prototype.ChainedHull = ChainedHullMethod;
+
+  ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
+
+  /**
+   *
+   * # Hull
+   *
+   * Builds the convex hull of a set of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(Point([0, 0, 10]),
+   *      Circle(10))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * assemble(Point([0, 0, 10]),
+   *          Circle(10))
+   *   .hull()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * Point([0, 0, 10]).hull(Circle(10))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(Circle(4),
+   *      Circle(2).move(8));
+   * ```
+   * :::
+   *
+   **/
+
+  const Z$i = 2;
+
+  const Hull = (...shapes) => {
+    const points = [];
+    shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
+    // FIX: Detect planar hulls properly.
+    if (points.every(point => point[Z$i] === 0)) {
+      return Shape.fromGeometry(buildConvexSurfaceHull(points));
+    } else {
+      return Shape.fromGeometry(buildConvexHull(points));
+    }
+  };
+
+  const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
+  Shape.prototype.Hull = HullMethod;
+
+  Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
+  HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
+
+  /**
+   *
+   * # Lathe
+   *
+   * ::: illustration { "view": { "position": [-80, -80, 80] } }
+   * ```
+   * ```
+   * :::
+   *
+   **/
+
+  const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
+    const profile = shape.chop(Y$g(0));
+    const outline = profile.outline();
+    const solids = [];
+    for (const geometry of getPaths(outline.toKeptGeometry())) {
+      for (const path of geometry.paths) {
+        solids.push(Shape.fromGeometry(loop(path, endDegrees * Math.PI / 180, sides, pitch)));
+      }
+    }
+    return assemble$1(...solids);
+  };
+
+  const LoopMethod = function (...args) { return Loop(this, ...args); };
+  Shape.prototype.Loop = LoopMethod;
+
+  /**
+   *
+   * # Extrude
+   *
+   * Generates a solid from a surface by linear extrusion.
+   *
+   * ```
+   * shape.extrude(height, depth, { twist = 0, steps = 1 })
+   * ```
+   *
+   * ::: illustration
+   * ```
+   * Circle(10).cut(Circle(8))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * Circle(10).cut(Circle(8)).extrude(10)
+   * ```
+   * :::
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * Triangle(10).extrude(5, -2)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
+   * ```
+   * :::
+   *
+   **/
+
+  const extrude$1 = (shape, height = 1, depth = 0) => {
+    if (height < depth) {
+      [height, depth] = [depth, height];
+    }
+    // FIX: Handle extrusion along a vector properly.
+    const solids = [];
+    const keptGeometry = shape.toKeptGeometry();
+    for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
+      if (z0Surface.length > 0) {
+        const solid = alignVertices(extrude(z0Surface, height, depth));
+        solids.push(Shape.fromGeometry({ solid, tags }));
+      }
+    }
+    for (const { surface, tags } of getSurfaces(keptGeometry)) {
+      if (surface.length > 0) {
+        const plane = toPlane$1(surface);
+        if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
+          // Detect Z0.
+          // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
+          const solid = extrude(surface, height, depth);
+          solids.push(Shape.fromGeometry({ solid, tags }));
+        } else {
+          const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
+          const z0SolidGeometry = extrude(transform$4(toZ0, surface), height, depth);
+          const solid = alignVertices(transform$6(fromZ0, z0SolidGeometry));
+          solids.push(Shape.fromGeometry({ solid, tags }));
+        }
+      }
+    }
+    // Keep plans.
+    for (const entry of getPlans(keptGeometry)) {
+      solids.push(entry);
+    }
+    return assemble$1(...solids);
+  };
+
+  const extrudeMethod = function (...args) { return extrude$1(this, ...args); };
+  Shape.prototype.extrude = extrudeMethod;
+
+  extrude$1.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
+  extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
+
+  const fill = (shape, pathsShape) => {
+    const fills = [];
+    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+      const anySurface = surface || z0Surface;
+      const plane = toPlane$1(anySurface);
+      const [to, from] = toXYPlaneTransforms(plane);
+      const flatSurface = transform$4(to, anySurface);
+      for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
+        const flatPaths = transform$7(to, paths);
+        const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
+        const fill = transform$7(from, flatFill);
+        fills.push(...fill);
+      }
+    }
+    return Shape.fromGeometry({ paths: fills });
+  };
+
+  const fillMethod = function (...args) { return fill(this, ...args); };
+  Shape.prototype.fill = fillMethod;
+
+  const withFillMethod = function (...args) { return assemble$1(this, fill(this, ...args)); };
+  Shape.prototype.withFill = withFillMethod;
+
+  fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
+  fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
+  withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
+
+  /**
+   *
+   * # Interior
+   *
+   * Generates a surface from the interior of a simple closed path.
+   *
+   * ::: illustration
+   * ```
+   * Circle(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * Circle(10)
+   *   .outline()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * Circle(10)
+   *   .outline()
+   *   .interior()
+   * ```
+   * :::
+   *
+   **/
+
+  const interior = (shape) => {
+    const surfaces = [];
+    for (const { paths } of getPaths(shape.toKeptGeometry())) {
+      // FIX: Check paths for coplanarity.
+      surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
+    }
+    return assemble$1(...surfaces);
+  };
+
+  const interiorMethod = function (...args) { return interior(this); };
+  Shape.prototype.interior = interiorMethod;
+
+  interior.signature = 'interior(shape:Shape) -> Shape';
+  interiorMethod.signature = 'Shape -> interior() -> Shape';
+
+  /**
+   *
+   * # Minkowski (convex)
+   *
+   * Generates the minkowski sum of a two convex shapes.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * minkowski(Cube(10),
+   *           Sphere(3));
+   * ```
+   * :::
+   *
+   **/
+
+  // TODO: Generalize for more operands?
+  const minkowski = (a, b) => {
+    const aPoints = [];
+    const bPoints = [];
+    a.eachPoint(point => aPoints.push(point));
+    b.eachPoint(point => bPoints.push(point));
+    return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
+  };
+
+  const minkowskiMethod = function (shape) { return minkowski(this, shape); };
+  Shape.prototype.minkowski = minkowskiMethod;
+
+  minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
+
+  /**
+   *
+   * # Outline
+   *
+   * Generates the outline of a surface.
+   *
+   * ::: illustration
+   * ```
+   * difference(Circle(10),
+   *            Circle(2).move([-4]),
+   *            Circle(2).move([4]))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(Circle(10),
+   *            Circle(2).move([-4]),
+   *            Circle(2).move([4]))
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const outline$4 = (shape) =>
+    assemble$1(...outline$3(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
+
+  const outlineMethod = function (options) { return outline$4(this); };
+  const withOutlineMethod = function (options) { return assemble$1(this, outline$4(this)); };
+
+  Shape.prototype.outline = outlineMethod;
+  Shape.prototype.withOutline = withOutlineMethod;
+
+  outline$4.signature = 'outline(shape:Surface) -> Shape';
+  outlineMethod.signature = 'Shape -> outline() -> Shape';
+  withOutlineMethod.signature = 'Shape -> outline() -> Shape';
+
+  /**
+   *
+   * # Section
+   *
+   * Produces a cross-section of a solid as a surface.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * difference(Cylinder(10, 10),
+   *            Cylinder(8, 10))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(Sphere(10),
+   *            Sphere(8))
+   *   .section()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(Sphere(10),
+   *            Sphere(8))
+   *   .section()
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const toPlane$4 = (connector) => {
+    for (const entry of getPlans(connector.toKeptGeometry())) {
+      if (entry.plan && entry.plan.connector) {
+        return entry.planes[0];
+      }
+    }
+  };
+
+  const toSurface$2 = (plane) => {
+    const max = +1e5;
+    const min = -1e5;
+    const [, from] = toXYPlaneTransforms(plane);
+    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+    const polygon = transform$1(from, path);
+    return [polygon];
+  };
+
+  const section$1 = (solidShape, ...connectors) => {
+    if (connectors.length === 0) {
+      connectors.push(Z$c(0));
+    }
+    const planes = connectors.map(toPlane$4);
+    const planeSurfaces = planes.map(toSurface$2);
+    const shapes = [];
+    const normalize = createNormalize3();
+    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+      const sections = section(solid, planeSurfaces, normalize);
+      const surfaces = sections.map(section => makeConvex$1(section, normalize));
+      // const surfaces = sections.map(section => outlineSurface(section, normalize));
+      // const surfaces = sections.map(section => section);
+      // const surfaces = sections;
+      for (let i = 0; i < surfaces.length; i++) {
+        surfaces[i].plane = planes[i];
+        shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+      }
+    }
+    return layer(...shapes);
+  };
+
+  const sectionMethod = function (...args) { return section$1(this, ...args); };
+  Shape.prototype.section = sectionMethod;
+
+  const squash = (shape) => {
+    const geometry = shape.toKeptGeometry();
+    const result = { layers: [] };
+    for (const { solid } of getSolids(geometry)) {
+      const polygons = [];
+      for (const surface of solid) {
+        for (const path of surface) {
+          const flat = path.map(([x, y]) => [x, y, 0]);
+          if (toPlane(flat) === undefined) continue;
+          polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
+        }
+      }
+      result.layers.push({ z0Surface: outline(polygons) });
+    }
+    for (const { surface } of getSurfaces(geometry)) {
+      const polygons = [];
+      for (const path of surface) {
+        const flat = path.map(([x, y]) => [x, y, 0]);
+        if (toPlane(flat) === undefined) continue;
+        polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
+      }
+      result.layers.push({ z0Surface: polygons });
+    }
+    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+      const polygons = [];
+      for (const path of z0Surface) {
+        polygons.push(path);
+      }
+      result.layers.push({ z0Surface: polygons });
+    }
+    for (const { paths } of getPaths(geometry)) {
+      const flatPaths = [];
+      for (const path of paths) {
+        flatPaths.push(path.map(([x, y]) => [x, y, 0]));
+      }
+      result.layers.push({ paths: flatPaths });
+    }
+    return Shape.fromGeometry(result);
+  };
+
+  const squashMethod = function () { return squash(this); };
+  Shape.prototype.squash = squashMethod;
+
+  /**
+   *
+   * # Stretch
+   *
+   **/
+
+  const toPlaneFromConnector = (connector) => {
+    for (const entry of getPlans(connector.toKeptGeometry())) {
+      if (entry.plan && entry.plan.connector) {
+        return entry.planes[0];
+      }
+    }
+  };
+
+  const toSurface$3 = (plane) => {
+    const max = +1e5;
+    const min = -1e5;
+    const [, from] = toXYPlaneTransforms(plane);
+    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+    const polygon = transform$1(from, path);
+    return [polygon];
+  };
+
+  const stretch = (shape, length, connector = Z$c()) => {
+    const normalize = createNormalize3();
+    const stretches = [];
+    const planeSurface = toSurface$3(toPlaneFromConnector(connector));
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      if (solid.length === 0) {
+        continue;
+      }
+      const bottom = cutOpen(solid, planeSurface, normalize);
+      const [profile] = section(solid, [planeSurface], normalize);
+      const top = cutOpen(solid, flip$3(planeSurface), normalize);
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
+      const z0SolidGeometry = extrude(transform$4(toZ0, profile), length, 0, false);
+      const middle = transform$6(fromZ0, z0SolidGeometry);
+      const topMoved = transform$6(fromTranslation(scale(length, toPlane$1(profile))), top);
+      stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
+    }
+
+    return assemble$1(...stretches);
+  };
+
+  const method$3 = function (...args) { return stretch(this, ...args); };
+  Shape.prototype.stretch = method$3;
+
+  /**
+   *
+   * # Sweep
+   *
+   * Sweep a tool profile along a path, to produce a surface.
+   *
+   **/
+
+  // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
+  const sweep = (toolpath, tool) => {
+    const chains = [];
+    for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
+      for (const path of paths) {
+        chains.push(ChainedHull(...path.map(point => tool.move(...point))));
+      }
+    }
+    return union$5(...chains);
+  };
+
+  const sweepMethod = function (tool) { return sweep(this, tool); };
+
+  Shape.prototype.sweep = sweepMethod;
+  Shape.prototype.withSweep = function (tool) { return assemble$1(this, sweep(this, tool)); };
+
+  /**
+   * Creates a new unbounded 2D line initialized with the given values.
+   *
+   * This is a 2d plane, similar to the [x, y, z, w] form of the 3d plane.
+   *
+   * @param {Number} x X coordinate of the unit normal
+   * @param {Number} y Y coordinate of the unit normal
+   * @param {Number} w length (positive) of the normal segment
+   * @returns {line2} a new unbounded 2D line
+   */
+  const fromValues$2 = (x = 0, y = 1, w = 0) => [x, y, w];
+
+  /**
+   * Create a new 2D line that passes through the given points
+   *
+   * @param {vec2} p1 start point of the 2D line
+   * @param {vec2} p2 end point of the 2D line
+   * @returns {line2} a new unbounded 2D line
+   */
+  const fromPoints$4 = (p1, p2) => {
+    const direction = subtract$1(p2, p1);
+    const normalizedNormal = normalize$1(normal(direction));
+    const distance = dot$1(p1, normalizedNormal);
+    return fromValues$2(normalizedNormal[0], normalizedNormal[1], distance);
+  };
+
+  /**
+   * Return the point of intersection between the given lines.
+   *
+   * The point will have Infinity values if the lines are paralell.
+   * The point will have NaN values if the lines are the same.
+   *
+   * @param {line2} line1 a 2D line for reference
+   * @param {line2} line2 a 2D line for reference
+   * @return {vec2} the point of intersection
+   */
+  const intersectPointOfLines = (line1, line2) =>
+    solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
+
+  const intersectionPoints = (cuts, overcut = 0) => {
+    cuts.push(cuts[0]);
+    var intersectionPointsList = [];
+    var i = 0;
+    while (i < cuts.length - 1) {
+      const point = intersectPointOfLines(fromPoints$4(...cuts[i]), fromPoints$4(...cuts[i + 1]));
+      point.push(cuts[i][0][2]);
+      if (overcut) {
+        intersectionPointsList.push(cuts[i][1]);
+      }
+      intersectionPointsList.push(point);
+      i++;
+    }
+    return intersectionPointsList;
+  };
+
+  const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
+    var cuts = [];
+    for (const [start, end] of getEdges(path)) {
+      const direction = normalize(subtract(start, end));
+      const angleRadians = Math.PI / 2;
+      const offsetDirection = rotateZ(direction, angleRadians);
+      const offset = scale(radius, offsetDirection);
+      const frontcut = scale(-overcut, direction);
+      const backcut = scale(overcut, direction);
+      const startCut = add(start, add(backcut, offset));
+      const endCut = add(end, add(frontcut, offset));
+      cuts.push([startCut, endCut]);
+    }
+    if (joinPaths) {
+      cuts = [intersectionPoints(cuts, overcut)];
+    }
+    return cuts;
+  };
+
+  const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
+    const cuts = [];
+    for (const { paths } of getPaths(geometry)) {
+      for (const path of paths) {
+        cuts.push(...overcutPathEdges(path, radius, overcut, joinPaths));
+      }
+    }
+    return cuts;
+  };
+
+  // Return an assembly of paths so that each toolpath can have its own tag.
+  const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
+    Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
+
+  const method$4 = function (...options) { return toolpath(this, ...options); };
+
+  Shape.prototype.toolpath = method$4;
+  Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
+
+  const X$i = 0;
+  const Y$i = 1;
+  const Z$j = 2;
+
+  const voxels = (shape, resolution = 1) => {
+    const offset = resolution / 2;
+    const voxels = [];
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const [min, max] = measureBoundingBox$3(solid);
+      const bsp = fromSolid(solid, createNormalize3());
+      const polygons = [];
+      for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
+        for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+          for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+            const state = containsPoint(bsp, [x, y, z]);
+            if (state !== containsPoint(bsp, [x + resolution, y, z])) {
+              const face = [[x + offset, y - offset, z - offset],
+                            [x + offset, y + offset, z - offset],
+                            [x + offset, y + offset, z + offset],
+                            [x + offset, y - offset, z + offset]];
+              polygons.push(state ? face : face.reverse());
+            }
+            if (state !== containsPoint(bsp, [x, y + resolution, z])) {
+              const face = [[x - offset, y + offset, z - offset],
+                            [x + offset, y + offset, z - offset],
+                            [x + offset, y + offset, z + offset],
+                            [x - offset, y + offset, z + offset]];
+              polygons.push(state ? face.reverse() : face);
+            }
+            if (state !== containsPoint(bsp, [x, y, z + resolution])) {
+              const face = [[x - offset, y - offset, z + offset],
+                            [x + offset, y - offset, z + offset],
+                            [x + offset, y + offset, z + offset],
+                            [x - offset, y + offset, z + offset]];
+              polygons.push(state ? face : face.reverse());
+            }
+          }
+        }
+      }
+      voxels.push(Shape.fromGeometry({ solid: fromPolygons({}, polygons), tags }));
+    }
+    return assemble$1(...voxels);
+  };
+
+  const voxelsMethod = function (...args) { return voxels(this, ...args); };
+  Shape.prototype.voxels = voxelsMethod;
+
+  // FIX: move this
+  const containsPoint$1 = (shape, point) => {
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      const bsp = fromSolid(solid, createNormalize3());
+      if (containsPoint(bsp, point)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const containsPointMethod = function (point) { return containsPoint$1(this, point); };
+  Shape.prototype.containsPoint = containsPointMethod;
+
+  /**
+   *
    * # Shell
    *
    * Converts a solid into a hollow shell of a given thickness.
@@ -30599,7 +27687,7 @@ return d[d.length-1];};return ", funcName].join("");
       const pieces = [];
       for (const surface of solid) {
         for (const polygon of surface) {
-          pieces.push(hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
+          pieces.push(Hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
         }
       }
       shells.push(union$5(...pieces).as(...tags));
@@ -30619,7 +27707,7 @@ return d[d.length-1];};return ", funcName].join("");
         for (const path of paths) {
           for (const edge of getEdges(path)) {
             // FIX: Handle non-z0-surfaces properly.
-            pieces.push(hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+            pieces.push(Hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y))));
           }
         }
       }
@@ -30702,7 +27790,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (const letter of letters) {
       const code = letter.charCodeAt(0);
       const paths = hersheyPaths[code] || [];
-      mergedPaths.push(...translate$1([xOffset, 0, 0], paths));
+      mergedPaths.push(...translate$2([xOffset, 0, 0], paths));
       xOffset += hersheyWidth[code] || 0;
     }
     return Shape.fromGeometry({ paths: mergedPaths }).scale(1 / 28);
@@ -33266,7 +30354,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     if (normalizeCoordinateSystem) {
       // Turn it upside down.
-      return transform$2(fromScaling([1, -1, 0]), simplifiedPaths);
+      return transform$7(fromScaling([1, -1, 0]), simplifiedPaths);
     } else {
       return simplifiedPaths;
     }
@@ -48194,7 +45282,7 @@ return d[d.length-1];};return ", funcName].join("");
       const pageWidth = packSize[MAX][X$k] - packSize[MIN][X$k];
       const pageLength = packSize[MAX][Y$k] - packSize[MIN][Y$k];
       const plans = [];
-      for (const layer of content.toGeometry().layers) {
+      for (const layer of content.toKeptGeometry().layers) {
         plans.push(Plan({
           plan: { page: { size, margin: pageMargin } },
           marks: packSize,
@@ -48210,23 +45298,26 @@ return d[d.length-1];};return ", funcName].join("");
     } else {
       const packSize = [];
       // Page fits to content size.
-      const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize })
-          .center();
+      const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
       // FIX: Using content.size() loses the margin, which is a problem for repacking.
       // Probably page plans should be generated by pack and count toward the size.
       const pageWidth = packSize[MAX][X$k] - packSize[MIN][X$k];
       const pageLength = packSize[MAX][Y$k] - packSize[MIN][Y$k];
       if (isFinite(pageWidth) && isFinite(pageLength)) {
-        return Plan({
-          plan: { page: { size, margin: pageMargin } },
-          content: content,
-          marks: packSize,
-          visualization:
-                        Square(pageWidth, pageLength)
-                            .outline()
-                            .with(Hershey(max$1(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
-                            .color('red')
-        }).Item();
+        const plans = [];
+        for (const layer of content.toKeptGeometry().layers) {
+          plans.push(Plan({
+            plan: { page: { size, margin: pageMargin } },
+            content: Shape.fromGeometry(layer).center(),
+            marks: packSize,
+            visualization:
+                          Square(pageWidth, pageLength)
+                              .outline()
+                              .with(Hershey(max$1(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
+                              .color('red')
+          }).Item());
+        }
+        return Layers(...plans);
       } else {
         return Empty();
       }
@@ -48287,6 +45378,14 @@ return d[d.length-1];};return ", funcName].join("");
   Shape.prototype.view = viewMethod;
 
   const source = (path, source) => addSource(`cache/${path}`, source);
+
+  const ofPoints$1 = (a, b) => fromPoints$4(a, b);
+  const meet = (a, b) => intersectPointOfLines(a, b);
+
+  const Line2 = (...args) => ofPoints$1(...args);
+
+  Line2.ofPoints = ofPoints$1;
+  Line2.meet = meet;
 
   const foot = 304.8;
   const inch = 25.4;
@@ -49788,9 +46887,13 @@ return d[d.length-1];};return ", funcName].join("");
     X: X$g,
     Y: Y$g,
     Z: Z$c,
+    ChainedHull: ChainedHull,
+    Hull: Hull,
+    Loop: Loop,
     Shape: Shape,
     log: log$2,
     pack: pack$1,
+    Line2: Line2,
     Plan: Plan,
     Page: Page,
     Arc: Arc,
@@ -56137,9 +53240,13 @@ return d[d.length-1];};return ", funcName].join("");
     X: X$g,
     Y: Y$g,
     Z: Z$c,
+    ChainedHull: ChainedHull,
+    Hull: Hull,
+    Loop: Loop,
     Shape: Shape,
     log: log$2,
     pack: pack$1,
+    Line2: Line2,
     Plan: Plan,
     Page: Page,
     Arc: Arc,
@@ -106825,7 +103932,7 @@ return d[d.length-1];};return ", funcName].join("");
     const keptGeometry = toKeptGeometry(geometry);
     let solids = getSolids(keptGeometry);
     if (doFixTJunctions) {
-      solids = solids.map(solid => ({ ...solid, solid: makeWatertight$1(solid.solid) }));
+      solids = solids.map(solid => ({ ...solid, solid: makeWatertight(solid.solid) }));
     }
     const triangles = geometryToTriangles(solids);
     return `solid JSxCAD\n${convertToFacets(options, canonicalize$9(triangles))}\nendsolid JSxCAD\n`;
@@ -106915,7 +104022,7 @@ return d[d.length-1];};return ", funcName].join("");
           return Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
         case 'hull':
           values = values.map(Shape.fromGeometry);
-          return hull(...values).toDisjointGeometry();
+          return Hull(...values).toDisjointGeometry();
         case 'intersection':
           return intersection$5(Shape.fromGeometry(values[0]), Shape.fromGeometry(values[1])).toDisjointGeometry();
         case 'rectangle':
