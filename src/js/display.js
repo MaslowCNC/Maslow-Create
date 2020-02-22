@@ -345,7 +345,7 @@ export default class Display {
          */
         this.axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(this.axesHelper)
-        this.gridLevel;
+        this.gridLevel
         
         //
         /** 
@@ -624,8 +624,8 @@ export default class Display {
     */ 
     setGrid(){
 
-        this.gridLevel = Math.log10(.01 * this.dist3D(this.camera.position));
-        this.gridScale = Math.pow(10, Math.floor(this.gridLevel));
+        this.gridLevel = Math.log10(.01 * this.dist3D(this.camera.position))
+        this.gridScale = Math.pow(10, Math.floor(this.gridLevel))
         this.grid1.scale.setScalar(this.gridScale)
         this.grid1.material.opacity = .01 
     }
