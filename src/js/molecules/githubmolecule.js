@@ -77,6 +77,10 @@ export default class GitHubMolecule extends Molecule {
         
         return promsie
     }
+
+    /**
+     * Updates sidebar with buttons for user in runMode
+     */
     
     updateSidebar(){
         const list = super.updateSidebar()

@@ -258,7 +258,7 @@ export default class Display {
         
         /** 
          * A description.
-         * @type {object}
+         * @type {array}
          */
         this.materialProperties = {
             paper: {
@@ -339,7 +339,10 @@ export default class Display {
         light2.position.set(1, 1, 1)
         this.camera.add(light2)
 
-        //sets axes
+        /** 
+         * The three js Axes that appears on the grid
+         * @type {object}
+         */
         this.axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(this.axesHelper)
         
@@ -376,7 +379,7 @@ export default class Display {
             viewerBar.classList.add('slidedown')   
         })
         
-        
+        //Creates initial grid
         this.grid1= this.makeGrid()
     }
     

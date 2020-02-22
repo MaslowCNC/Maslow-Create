@@ -31,12 +31,12 @@ export default class Input extends Atom {
          * This atom's height for drawing
          * @type {number}
          */
-        this.height = 20
+        this.height = 1/60
         /** 
          * This atom's radius for drawing
          * @type {string}
          */
-        this.radius = 20
+        this.radius = 1/60
         
         /** 
          * This atom's old name, used during name changes
@@ -70,7 +70,11 @@ export default class Input extends Atom {
      * Draws the atom on the screen.
      */ 
     draw() {
-        
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+        let heightInPixels = GlobalVariables.widthToPixels(this.height)
         //Check if the name has been updated
         if(this.name != this.oldName){this.updateParentName()}
         
@@ -107,20 +111,20 @@ export default class Input extends Atom {
         }
         
         GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(this.x - this.radius, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x, this.y + this.height/2)
-        GlobalVariables.c.lineTo(this.x + 10, this.y)
-        GlobalVariables.c.lineTo(this.x, this.y - this.height/2)
-        GlobalVariables.c.lineTo(this.x - this.radius, this.y - this.height/2)
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels + heightInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels, yInPixels + heightInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels + 10, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels, yInPixels - heightInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels, yInPixels - heightInPixels/2)
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
         GlobalVariables.c.stroke()
         
         //Snap the inputs to the far right side
-        this.x = this.radius + 10
+        xInPixels = radiusInPixels + 10
     }
     
     /**

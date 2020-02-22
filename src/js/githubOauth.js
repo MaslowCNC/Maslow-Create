@@ -74,7 +74,11 @@ export default function GitHubModule(){
         }
         // Use popup for oauth
         OAuth.popup('github').then(github => {
-            
+        
+            /** 
+         * Oktokit object to access github
+         * @type {object}
+         */   
             octokit = new Octokit({
                 auth: github.access_token
             })
@@ -1287,6 +1291,7 @@ export default function GitHubModule(){
      * Loads a project from github by name.
      */
     this.loadProject = async function(projectName){
+
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }

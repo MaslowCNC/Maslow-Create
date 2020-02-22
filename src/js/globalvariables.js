@@ -58,14 +58,9 @@ class GlobalVariables{
             output:        {creator: Output, atomType: 'Output'}
         }
         /** 
-         * The current amount by which the canvas has been scaled.
-         * @type {number}
-         */
-        this.scale1 = 1 
-        /** 
-         * An array of all of the available types of atoms which can be placed with a right click.
-         * @type {array}
-         */
+        * An array of all of the available types of atoms which can be placed with a right click.
+        * @type {array}
+        */
         this.availableTypes = {
 
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
@@ -171,6 +166,39 @@ class GlobalVariables{
             'derivative': function () { throw new Error('Function derivative is disabled') }
         }, { override: true })
     }
+
+    /** 
+    * A function to generate a pixel value for 0-1 location on screen depending on screen width
+    * @param {number} width 0-1 
+    */
+    widthToPixels(width){
+        let pixels = this.canvas.width * width
+        return pixels
+    }
+    /** 
+    * A function to generate a 0-1 value from pixels for location on screen depending on screen width
+    * @param {number} width 0-1 
+    */
+    pixelsToWidth(pixels){
+        let width = 1 /(this.canvas.width / pixels)
+        return width
+    }
+    /** 
+    * A function to generate a pixel value for 0-1 location on screen depending on screen height
+    * @param {number} width 0-1 
+    */
+    heightToPixels(height){
+        let pixels = this.canvas.height * height
+        return pixels
+    }
+    /** 
+    * A function to generate a 0-1 value from pixels for location on screen depending on screen height
+    * @param {number} width 0-1 
+    */
+    pixelsToHeight(pixels){
+        let height = 1 /(this.canvas.height / pixels)
+        return height
+    }
     
     /** 
      * A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.
@@ -193,6 +221,8 @@ class GlobalVariables{
         
         return dist
     }
+
+
 }
 
 /**
