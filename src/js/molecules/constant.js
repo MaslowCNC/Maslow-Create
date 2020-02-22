@@ -37,7 +37,7 @@ export default class Constant extends Atom{
          * This atom's radius as drawn on the screen...probably doesn't need to be in this scope
          * @type {string}
          */
-        this.radius = 15
+        this.radius = GlobalVariables.canvas.width/65 
         
         this.setValues(values)
         
