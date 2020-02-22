@@ -126,7 +126,8 @@ export default class Output extends Atom {
         })
 
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
+        GlobalVariables.c.textAlign = 'start'
+        GlobalVariables.c.fillText(this.name, xInPixels - radiusInPixels, yInPixels - radiusInPixels*1.5)
         GlobalVariables.c.moveTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels - this.height)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels -5, yInPixels)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels - radiusInPixels*2, yInPixels + this.height)
