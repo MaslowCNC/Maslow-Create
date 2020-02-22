@@ -32,13 +32,11 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -137,8 +135,8 @@ export default class Molecule extends Atom{
         //Add the molecule&apos;s output
         this.placeAtom({
             parentMolecule: this, 
-            x: GlobalVariables.canvas.width - 50,
-            y: GlobalVariables.canvas.height/2,
+            x: GlobalVariables.pixelsToWidth(GlobalVariables.canvas.width - 20),
+            y: GlobalVariables.pixelsToHeight(GlobalVariables.canvas.height/2),
             parent: this,
             name: &apos;Output&apos;,
             atomType: &apos;Output&apos;
@@ -164,6 +162,8 @@ export default class Molecule extends Atom{
             })
         } 
     }
+
+    
     
     /**
      * Add the center dot to the molecule
@@ -174,7 +174,7 @@ export default class Molecule extends Atom{
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.centerColor
-        GlobalVariables.c.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
     }
@@ -187,12 +187,14 @@ export default class Molecule extends Atom{
     doubleClick(x,y){
         //returns true if something was done with the click
         
+        x = GlobalVariables.pixelsToWidth(x)
+        y = GlobalVariables.pixelsToHeight(y)
         
         var clickProcessed = false
         
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
         
-        if (distFromClick &lt; this.radius){
+        if (distFromClick &lt; this.radius*2){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
             clickProcessed = true

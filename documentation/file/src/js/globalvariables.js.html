@@ -32,13 +32,11 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -137,14 +135,9 @@ class GlobalVariables{
             output:        {creator: Output, atomType: &apos;Output&apos;}
         }
         /** 
-         * The current amount by which the canvas has been scaled.
-         * @type {number}
-         */
-        this.scale1 = 1 
-        /** 
-         * An array of all of the available types of atoms which can be placed with a right click.
-         * @type {array}
-         */
+        * An array of all of the available types of atoms which can be placed with a right click.
+        * @type {array}
+        */
         this.availableTypes = {
 
             intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;, atomCategory: &apos;Interactions&apos;},
@@ -250,6 +243,41 @@ class GlobalVariables{
             &apos;derivative&apos;: function () { throw new Error(&apos;Function derivative is disabled&apos;) }
         }, { override: true })
     }
+
+    /** 
+    * A function to generate a pixel value for 0-1 location on screen depending on screen width
+    * @param {number} width 0-1 
+    */
+    widthToPixels(width){
+        width = Math.min(width, 1) //Constrain the position to be a max of 1
+        let pixels = this.canvas.width * width
+        return pixels
+    }
+    /** 
+    * A function to generate a 0-1 value from pixels for location on screen depending on screen width
+    * @param {number} width 0-1 
+    */
+    pixelsToWidth(pixels){
+        let width = 1 /(this.canvas.width / pixels)
+        return width
+    }
+    /** 
+    * A function to generate a pixel value for 0-1 location on screen depending on screen height
+    * @param {number} width 0-1 
+    */
+    heightToPixels(height){
+        height = Math.min(height, 1) //Constrain the position of the max value to be 1
+        let pixels = this.canvas.height * height
+        return pixels
+    }
+    /** 
+    * A function to generate a 0-1 value from pixels for location on screen depending on screen height
+    * @param {number} width 0-1 
+    */
+    pixelsToHeight(pixels){
+        let height = 1 /(this.canvas.height / pixels)
+        return height
+    }
     
     /** 
      * A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.
@@ -272,6 +300,8 @@ class GlobalVariables{
         
         return dist
     }
+
+
 }
 
 /**

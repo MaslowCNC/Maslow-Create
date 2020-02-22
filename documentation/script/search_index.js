@@ -138,12 +138,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/localmenu.js~localmenu",
-    "class/src/js/localmenu.js~Localmenu.html",
-    "<span>Localmenu</span> <span class=\"search-result-import-path\">canvas-template/src/js/localmenu.js</span>",
-    "class"
-  ],
-  [
     "canvas-template/src/js/molecules/molecule.js~molecule",
     "class/src/js/molecules/molecule.js~Molecule.html",
     "<span>Molecule</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/molecule.js</span>",
@@ -249,12 +243,6 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/globalvariables.js~globalvariables",
     "variable/index.html#static-variable-globalVariables",
     "<span>globalVariables</span> <span class=\"search-result-import-path\">canvas-template/src/js/globalvariables.js</span>",
-    "variable"
-  ],
-  [
-    "canvas-template/src/js/localmenu.js~localmenu",
-    "variable/index.html#static-variable-localmenu",
-    "<span>localmenu</span> <span class=\"search-result-import-path\">canvas-template/src/js/localmenu.js</span>",
     "variable"
   ],
   [
@@ -888,10 +876,28 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#heighttopixels",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-heightToPixels",
+    "src/js/globalvariables.js~GlobalVariables#heightToPixels",
+    "method"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#limitedevaluate",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-limitedEvaluate",
     "src/js/globalvariables.js~GlobalVariables#limitedEvaluate",
     "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#pixelstoheight",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-pixelsToHeight",
+    "src/js/globalvariables.js~GlobalVariables#pixelsToHeight",
+    "method"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#pixelstowidth",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-pixelsToWidth",
+    "src/js/globalvariables.js~GlobalVariables#pixelsToWidth",
+    "method"
   ],
   [
     "src/js/globalvariables.js~globalvariables#render",
@@ -912,70 +918,22 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/globalvariables.js~globalvariables#scale1",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-scale1",
-    "src/js/globalvariables.js~GlobalVariables#scale1",
-    "member"
-  ],
-  [
     "src/js/globalvariables.js~globalvariables#secrettypes",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-secretTypes",
     "src/js/globalvariables.js~GlobalVariables#secretTypes",
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#widthtopixels",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-widthToPixels",
+    "src/js/globalvariables.js~GlobalVariables#widthToPixels",
+    "method"
+  ],
+  [
     "src/js/initialpopup.js",
     "file/src/js/initialPopup.js.html",
     "src/js/initialPopup.js",
     "file"
-  ],
-  [
-    "src/js/localmenu.js",
-    "file/src/js/localmenu.js.html",
-    "src/js/localmenu.js",
-    "file"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#availablemolecules",
-    "class/src/js/localmenu.js~Localmenu.html#instance-member-availableMolecules",
-    "src/js/localmenu.js~Localmenu#availableMolecules",
-    "member"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#availablemoleculesdiv",
-    "class/src/js/localmenu.js~Localmenu.html#instance-member-availableMoleculesDiv",
-    "src/js/localmenu.js~Localmenu#availableMoleculesDiv",
-    "member"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#availablemoleculesselect",
-    "class/src/js/localmenu.js~Localmenu.html#instance-member-availableMoleculesSelect",
-    "src/js/localmenu.js~Localmenu#availableMoleculesSelect",
-    "member"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#constructor",
-    "class/src/js/localmenu.js~Localmenu.html#instance-constructor-constructor",
-    "src/js/localmenu.js~Localmenu#constructor",
-    "method"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#hidemenu",
-    "class/src/js/localmenu.js~Localmenu.html#instance-method-hideMenu",
-    "src/js/localmenu.js~Localmenu#hideMenu",
-    "method"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#placeatom",
-    "class/src/js/localmenu.js~Localmenu.html#instance-method-placeAtom",
-    "src/js/localmenu.js~Localmenu#placeAtom",
-    "method"
-  ],
-  [
-    "src/js/localmenu.js~localmenu#showmenu",
-    "class/src/js/localmenu.js~Localmenu.html#instance-method-showMenu",
-    "src/js/localmenu.js~Localmenu#showMenu",
-    "method"
   ],
   [
     "src/js/molecules/bom.js",
@@ -1797,12 +1755,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/input.js~input#value",
     "class/src/js/molecules/input.js~Input.html#instance-member-value",
     "src/js/molecules/input.js~Input#value",
-    "member"
-  ],
-  [
-    "src/js/molecules/input.js~input#x",
-    "class/src/js/molecules/input.js~Input.html#instance-member-x",
-    "src/js/molecules/input.js~Input#x",
     "member"
   ],
   [
@@ -2974,12 +2926,6 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-getValue",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#getValue",
     "method"
-  ],
-  [
-    "src/js/prototypes/attachmentpoint.js~attachmentpoint#hoverdetectradius",
-    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-member-hoverDetectRadius",
-    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#hoverDetectRadius",
-    "member"
   ],
   [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#hoveroffsetx",

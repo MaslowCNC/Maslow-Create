@@ -1,11 +1,11 @@
 {
-  "coverage": "98.3%",
-  "expectCount": 472,
-  "actualCount": 464,
+  "coverage": "98.48%",
+  "expectCount": 463,
+  "actualCount": 456,
   "files": {
     "src/flowDraw.js": {
-      "expectCount": 7,
-      "actualCount": 7,
+      "expectCount": 6,
+      "actualCount": 6,
       "undocumentLines": []
     },
     "src/js/alwaysOneFreeInput.js": {
@@ -20,12 +20,11 @@
     },
     "src/js/display.js": {
       "expectCount": 36,
-      "actualCount": 32,
+      "actualCount": 33,
       "undocumentLines": [
         263,
         305,
-        343,
-        380
+        383
       ]
     },
     "src/js/githubOauth.js": {
@@ -34,16 +33,11 @@
       "undocumentLines": []
     },
     "src/js/globalvariables.js": {
-      "expectCount": 18,
-      "actualCount": 17,
+      "expectCount": 21,
+      "actualCount": 20,
       "undocumentLines": [
         64
       ]
-    },
-    "src/js/localmenu.js": {
-      "expectCount": 9,
-      "actualCount": 9,
-      "undocumentLines": []
     },
     "src/js/molecules/assembly.js": {
       "expectCount": 9,
@@ -112,17 +106,13 @@
     },
     "src/js/molecules/githubmolecule.js": {
       "expectCount": 10,
-      "actualCount": 9,
-      "undocumentLines": [
-        81
-      ]
+      "actualCount": 10,
+      "undocumentLines": []
     },
     "src/js/molecules/input.js": {
-      "expectCount": 17,
+      "expectCount": 16,
       "actualCount": 16,
-      "undocumentLines": [
-        123
-      ]
+      "undocumentLines": []
     },
     "src/js/molecules/intersection.js": {
       "expectCount": 5,
@@ -133,7 +123,7 @@
       "expectCount": 33,
       "actualCount": 32,
       "undocumentLines": [
-        159
+        163
       ]
     },
     "src/js/molecules/output.js": {
@@ -212,9 +202,12 @@
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
-      "expectCount": 43,
-      "actualCount": 43,
-      "undocumentLines": []
+      "expectCount": 42,
+      "actualCount": 40,
+      "undocumentLines": [
+        511,
+        512
+      ]
     },
     "src/js/prototypes/connector.js": {
       "expectCount": 22,

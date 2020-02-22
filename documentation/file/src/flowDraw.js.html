@@ -32,13 +32,11 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -88,24 +86,10 @@ import {cmenu} from &apos;./js/NewMenu.js&apos;
 GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector(&apos;canvas&apos;)
 GlobalVariables.c = GlobalVariables.canvas.getContext(&apos;2d&apos;)
-
-GlobalVariables.canvas.width = innerWidth
-GlobalVariables.canvas.height = innerHeight/2
-/** 
- * The original width of the canvas before scaling.
- * @type {number}
- */
-let originalWidth = GlobalVariables.canvas.width
-
 GlobalVariables.runMode = window.location.href.includes(&apos;run&apos;) //Check if we are using the run mode based on url
 
-if(!GlobalVariables.runMode){
-    document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
-}else{
-    document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
-}
-document.querySelector(&apos;#flow-canvas&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
-document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/1.5+&apos;px&apos;)
+GlobalVariables.canvas.width = window.innerWidth
+GlobalVariables.canvas.height = window.innerHeight/2.5
 
 
 // Event Listeners
@@ -118,7 +102,7 @@ let flowCanvas = document.getElementById(&apos;flow-canvas&apos;)
 flowCanvas.addEventListener(&apos;mousemove&apos;, event =&gt; {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
 
-        molecule.clickMove(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1)    
+        molecule.clickMove(event.clientX,event.clientY)    
     })
 })
 
@@ -141,7 +125,7 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
         
-        if (molecule.clickDown(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1,clickHandledByMolecule) == true){
+        if (molecule.clickDown(event.clientX,event.clientY,clickHandledByMolecule) == true){
             clickHandledByMolecule = true
         }
 
@@ -180,7 +164,7 @@ flowCanvas.addEventListener(&apos;dblclick&apos;, event =&gt; {
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
-        if (molecule.doubleClick(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1) == true){
+        if (molecule.doubleClick(event.clientX,event.clientY) == true){
             clickHandledByMolecule = true
         }
     })
@@ -194,7 +178,7 @@ flowCanvas.addEventListener(&apos;dblclick&apos;, event =&gt; {
 flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
-        molecule.clickUp(event.clientX/GlobalVariables.scale1,event.clientY/GlobalVariables.scale1)      
+        molecule.clickUp(event.clientX,event.clientY)      
     })
 })
 
@@ -326,33 +310,29 @@ function init() {
             })
         }
     }
-    
     window.addEventListener(&apos;resize&apos;, () =&gt; { onWindowResize() }, false)
 
     onWindowResize()
     animate()
+
 }
 
 /**
  * Handles the window&apos;s resize behavior when the browser size changes.
  */ 
 function onWindowResize() {
-    
-    var bounds = GlobalVariables.canvas.getBoundingClientRect()
-    GlobalVariables.canvas.width = bounds.width
-    GlobalVariables.canvas.height = bounds.height 
+
+    GlobalVariables.canvas.width = window.innerWidth
     //reset screen parameters 
     if(!GlobalVariables.runMode){
-        document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
+        document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+ (window.innerHeight - GlobalVariables.canvas.height)+&apos;px&apos;)
     }else{
         document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
     }
-    document.querySelector(&apos;#flow-canvas&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight/2+&apos;px&apos;)
-    document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/2+&apos;px&apos;)
-
-    GlobalVariables.scale1 = GlobalVariables.canvas.width/originalWidth
+    document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/1.7+&apos;px&apos;)
 
     GlobalVariables.display.onWindowResize()
+
 }
 
 
@@ -363,12 +343,11 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate)
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
-    GlobalVariables.c.scale(GlobalVariables.scale1,GlobalVariables.scale1)
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =&gt; {
         atom.update()
 
+
     })
-    GlobalVariables.c.setTransform(1,0,0,1,0,0)
 
     GlobalVariables.display.render()
     GlobalVariables.display.controls.update()

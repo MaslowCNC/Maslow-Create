@@ -32,13 +32,11 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -144,6 +142,11 @@ export default class Connector {
      * Draw the connector as a bezier curve on the screen
      */ 
     draw(){
+        let startXInPixels = GlobalVariables.widthToPixels(this.startX)
+        let startYInPixels = GlobalVariables.heightToPixels(this.startY)
+        let endXInPixels = GlobalVariables.widthToPixels(this.endX)
+        let endYInPixels = GlobalVariables.heightToPixels(this.endY)
+
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.color
         GlobalVariables.c.strokeStyle = this.color
@@ -154,8 +157,8 @@ export default class Connector {
         else{
             GlobalVariables.c.lineWidth = 1
         }
-        GlobalVariables.c.moveTo(this.startX, this.startY)
-        GlobalVariables.c.bezierCurveTo(this.startX + 100, this.startY, this.endX - 100, this.endY, this.endX, this.endY)
+        GlobalVariables.c.moveTo(startXInPixels, startYInPixels)
+        GlobalVariables.c.bezierCurveTo(startXInPixels + 100, startYInPixels, endXInPixels - 100, endYInPixels, endXInPixels, endYInPixels)
         GlobalVariables.c.stroke()
         GlobalVariables.c.globalCompositeOperation = &apos;source-over&apos; //switch back to drawing on top
     }
@@ -195,11 +198,11 @@ export default class Connector {
             /**
              * The s cordinate of the end of the connector.
              */
-            this.endX = x
+            this.endX = GlobalVariables.pixelsToWidth(x)
             /**
              * The y cordinate of the end of the connector.
              */
-            this.endY = y
+            this.endY = GlobalVariables.pixelsToHeight(y)
         }
     }
     

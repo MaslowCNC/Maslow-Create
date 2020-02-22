@@ -32,13 +32,11 @@
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/localmenu.js~Localmenu.html">Localmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-localmenu">localmenu</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
@@ -383,34 +381,6 @@
         
         <div data-ice="description"><p>The value the input is set to, defaults to 10.</p>
 </div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-member-x">x</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
       </div>
     </td>
     <td>
@@ -917,7 +887,7 @@
       <div>
         
         
-        <div data-ice="description"><p>This atom&apos;s radius as displayed on the screen</p>
+        <div data-ice="description"><p>This atom&apos;s radius as displayed on the screen is 1/72 width</p>
 </div>
       </div>
     </td>
@@ -1375,7 +1345,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-createCheckbox">createCheckbox</a></span></span><span class="code" data-ice="signature">(list: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, parent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, buttonText: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, functionToCall: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-createCheckbox">createCheckbox</a></span></span><span class="code" data-ice="signature">(list: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, buttonText: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, -: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, functionToCall: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
@@ -1404,7 +1374,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-createDropDown">createDropDown</a></span></span><span class="code" data-ice="signature">(list: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, parent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, options: <span>array</span>, selectedOption: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, description: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-createDropDown">createDropDown</a></span></span><span class="code" data-ice="signature">(list: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, parent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, options: <span>array</span>, selectedOption: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, description: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, Callback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
@@ -2156,7 +2126,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber88">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber92">source</a></span></span>
     </span>
   </h3>
 
@@ -2376,7 +2346,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber93">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber97">source</a></span></span>
     </span>
   </h3>
 
@@ -2452,50 +2422,6 @@
   
   
 </div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-x">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">x</span><span class="code" data-ice="signature">: <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber123">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>The X cordinate of this atom</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-member-x">Atom#x</a></span></div>
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
 </div>
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
@@ -2511,7 +2437,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber129">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber133">source</a></span></span>
     </span>
   </h3>
 
@@ -2599,7 +2525,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber168">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber172">source</a></span></span>
     </span>
   </h3>
 
@@ -2655,7 +2581,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber141">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber145">source</a></span></span>
     </span>
   </h3>
 
@@ -2743,7 +2669,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber154">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber158">source</a></span></span>
     </span>
   </h3>
 
