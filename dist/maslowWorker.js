@@ -104336,7 +104336,7 @@ return d[d.length-1];};return ", funcName].join("");
         case 'stretch':
           return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
         case 'svg':
-          const svgString = await toSvg({}, Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
+          const svgString = await toSvg(Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
           return svgString;
         case 'SVG Picture':
           const shape = Shape.fromGeometry(values[0]).center();
