@@ -345,6 +345,7 @@ export default class Display {
          */
         this.axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(this.axesHelper)
+        this.gridLevel
         
         //
         /** 
@@ -622,7 +623,9 @@ export default class Display {
     * Scales grid if object loaded is already zoomed out farther than initial grid tier or if zoomed in or out
     */ 
     setGrid(){
-        this.gridScale = this.baseLog(this.dist3D(this.camera.position),10) 
+
+        this.gridLevel = Math.log10(.01 * this.dist3D(this.camera.position))
+        this.gridScale = Math.pow(10, Math.floor(this.gridLevel))
         this.grid1.scale.setScalar(this.gridScale)
         this.grid1.material.opacity = .01 
     }
@@ -631,7 +634,7 @@ export default class Display {
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
-        //console.log("make grid")
+       
         var size = 1000
         var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )
