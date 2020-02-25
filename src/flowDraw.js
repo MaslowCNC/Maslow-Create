@@ -105,18 +105,43 @@ flowCanvas.addEventListener('mouseup', event => {
     })
 })
 
-window.addEventListener('keydown', event => {
-    //every time the mouse button goes up
-    
+let ctrlDown = false
+const ctrlKey = 17
+const cmdKey = 91
+const vKey = 86
+const cKey = 67
+
+window.addEventListener('keydown', e => {
+
+    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+    ctrlDown = true
+        }
+    if (ctrlDown && e.keyCode == cKey) {
+        GlobalVariables.copyMolecule()
+        }
+    if (ctrlDown && e.keyCode == vKey) {
+        GlobalVariables.pasteMolecule()
+        }
+
+
+    //every time the mouse button goes up 
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyPress(event.key)      
     })
 })
 
+window.addEventListener('keyup', e => {
+    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+        ctrlDown = false
+    }
+})
+
+
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
     openTopMenu()
 }) 
+
 
 /**
  * Checks if menu is open and changes class to trigger hiding of individual buttons

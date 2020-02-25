@@ -167,6 +167,23 @@ class GlobalVariables{
         }, { override: true })
     }
 
+
+    /** 
+    * A function to grab selected molecule and save its string form with cmmd+c
+    * @param {number} width 0-1 
+    */
+    copyMolecule(){
+        
+    }
+
+    /** 
+    * A function to grab selected molecule's string and reproduce it with cmmd+P
+    * @param {number} width 0-1 
+    */
+    pasteMolecule(){
+        
+    }
+
     /** 
     * A function to generate a pixel value for 0-1 location on screen depending on screen width
     * @param {number} width 0-1 
