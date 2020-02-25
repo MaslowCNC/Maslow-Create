@@ -517,7 +517,14 @@ export default class Atom {
         
         this.draw()
     }
-    
+    /**
+     * Save JSON string with information about this atom that we want to save and copy. 
+     */ 
+    copySelected(){
+        if (this.selected){
+        GlobalVariables.atomToCopy = (JSON.stringify(this.serialize()))
+        }
+    }
     /**
      * Create an object containing the information about this atom that we want to save. 
      */ 

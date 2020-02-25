@@ -117,10 +117,12 @@ window.addEventListener('keydown', e => {
     ctrlDown = true
         }
     if (ctrlDown && e.keyCode == cKey) {
-        GlobalVariables.copyMolecule()
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.copySelected()     
+    })
         }
     if (ctrlDown && e.keyCode == vKey) {
-        GlobalVariables.pasteMolecule()
+        console.log(GlobalVariables.atomToCopy)
         }
 
 

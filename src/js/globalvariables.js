@@ -123,6 +123,11 @@ class GlobalVariables{
          */
         this.fork = false
         /** 
+         * A variable to save string object to be copied
+         * @type {string}
+         */
+        this.atomToCopy
+        /** 
          * The size (in mm) of segments to use for circles.
          * @type {number}
          */
@@ -165,23 +170,6 @@ class GlobalVariables{
             'simplify':   function () { throw new Error('Function simplify is disabled') },
             'derivative': function () { throw new Error('Function derivative is disabled') }
         }, { override: true })
-    }
-
-
-    /** 
-    * A function to grab selected molecule and save its string form with cmmd+c
-    * @param {number} width 0-1 
-    */
-    copyMolecule(){
-        
-    }
-
-    /** 
-    * A function to grab selected molecule's string and reproduce it with cmmd+P
-    * @param {number} width 0-1 
-    */
-    pasteMolecule(){
-        
     }
 
     /** 
