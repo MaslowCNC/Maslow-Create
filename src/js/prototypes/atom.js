@@ -522,7 +522,7 @@ export default class Atom {
      */ 
     copySelected(){
         if (this.selected){
-        GlobalVariables.atomToCopy = (JSON.stringify(this.serialize()))
+            GlobalVariables.atomToCopy = (JSON.stringify(this.serialize()))
         }
     }
 

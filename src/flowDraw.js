@@ -114,16 +114,16 @@ const cKey = 67
 window.addEventListener('keydown', e => {
 
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
-    ctrlDown = true
-        }
+        ctrlDown = true
+    }
     if (ctrlDown && e.keyCode == cKey) {
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.copySelected()     
-    })
-        }
+            molecule.copySelected()     
+        })
+    }
     if (ctrlDown && e.keyCode == vKey) {
         GlobalVariables.currentMolecule.pasteSelected()  
-        }
+    }
 
 
     //every time the mouse button goes up 

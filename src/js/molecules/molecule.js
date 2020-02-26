@@ -460,8 +460,6 @@ export default class Molecule extends Atom{
         //Find the target molecule in the list
         let promiseArray = []
         let moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
-        console.log("moleculeObject")
-        console.log(moleculeObject)
         this.setValues(moleculeObject) //Grab the values of everything from the passed object
         //Place the atoms
         moleculeObject.allAtoms.forEach(atom => {
