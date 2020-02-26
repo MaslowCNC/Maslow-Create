@@ -527,7 +527,7 @@ export default class Atom {
     }
 
     /**
-     * paste JSON string with information about this atom that we want to save and copy. 
+     * Paste new copied atom into screen. 
      */ 
     pasteSelected(){    
         let newAtom = JSON.parse(GlobalVariables.atomToCopy)
