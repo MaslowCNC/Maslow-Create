@@ -122,7 +122,7 @@ window.addEventListener('keydown', e => {
     })
         }
     if (ctrlDown && e.keyCode == vKey) {
-        console.log(GlobalVariables.atomToCopy)
+        GlobalVariables.currentMolecule.pasteSelected()  
         }
 
 
