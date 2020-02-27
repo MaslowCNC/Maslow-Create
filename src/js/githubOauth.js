@@ -1056,7 +1056,7 @@ export default function GitHubModule(){
             //Once we have created the new repo we need to create a file within it to store the project in
             currentRepoName = result.data.name
             var path = "project.maslowcreate"
-            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)) // create a file with the new molecule in it and base64 encode it
+            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)) // create a file with the new molecule in it and base64 encode it
             octokit.repos.createFile({
                 owner: currentUser,
                 repo: currentRepoName,
@@ -1184,7 +1184,7 @@ export default function GitHubModule(){
                         readmeContent = readmeContent + item + "\n\n\n"
                     })
                     
-                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize(null), null, 4)
+                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)
                     
                     this.createCommit(octokit,{
                         owner: saveUser,
@@ -1400,7 +1400,7 @@ export default function GitHubModule(){
                 var path = "project.maslowcreate"
                 
                 molecule.topLevel = true //force the molecule to export in the long form as if it were the top level molecule
-                var content = window.btoa(JSON.stringify(molecule.serialize(null), null, 4)) //Convert the passed molecule object to a JSON string and then convert it to base64 encoding
+                var content = window.btoa(JSON.stringify(molecule.serialize({molecules: []}), null, 4)) //Convert the passed molecule object to a JSON string and then convert it to base64 encoding
                 
                 //Get the SHA for the file
                 octokit.repos.getContents({

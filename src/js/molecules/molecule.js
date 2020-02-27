@@ -407,13 +407,7 @@ export default class Molecule extends Atom{
         //Save this molecule.
         
         //This one is a little confusing. Basically each molecule saves like an atom, but also creates a second object 
-        //record of itself in the object "savedObject" object. If this is the topLevel molecule we need to create the 
-        //savedObject object here to pass to lower levels.
-        
-        if(this.topLevel == true){
-            //If this is the top level create a new blank project to save to FIXME: It would be cleaner if this function were just called with the object when called from the top level
-            savedObject = {molecules: []}
-        }
+        //record of itself in the object "savedObject" object.
             
         var allAtoms = [] //An array of all the atoms containted in this molecule
         var allConnectors = [] //An array of all the connectors contained in this molelcule
