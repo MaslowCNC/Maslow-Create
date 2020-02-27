@@ -105,18 +105,65 @@ flowCanvas.addEventListener('mouseup', event => {
     })
 })
 
-window.addEventListener('keydown', event => {
-    //every time the mouse button goes up
-    
+/** 
+* A flag to indicate if ctrl or commd pressed
+* @type {boolean}
+*/
+let ctrlDown = false
+/** 
+* Ctrl event key
+* @type {number}
+*/
+const ctrlKey = 17
+/** 
+* Cmmd event key
+* @type {number}
+*/
+const cmdKey = 91
+/** 
+* V event key
+* @type {number}
+*/
+const vKey = 86
+/** 
+* C event key
+* @type {number}
+*/
+const cKey = 67
+
+window.addEventListener('keydown', e => {
+
+    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+        ctrlDown = true
+    }
+    if (ctrlDown && e.keyCode == cKey) {
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+            molecule.copySelected()     
+        })
+    }
+    if (ctrlDown && e.keyCode == vKey) {
+        GlobalVariables.currentMolecule.pasteSelected()  
+    }
+
+
+    //every time the mouse button goes up 
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyPress(event.key)      
     })
 })
 
+window.addEventListener('keyup', e => {
+    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+        ctrlDown = false
+    }
+})
+
+
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
     openTopMenu()
 }) 
+
 
 /**
  * Checks if menu is open and changes class to trigger hiding of individual buttons
