@@ -128,6 +128,11 @@ class GlobalVariables{
          */
         this.atomToCopy
         /** 
+         * A variable to save string object to be copied
+         * @type {string}
+         */
+        this.atomsToCopy = []
+        /** 
          * The size (in mm) of segments to use for circles.
          * @type {number}
          */

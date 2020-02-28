@@ -114,6 +114,11 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
+        /** 
+         * A flag to indicate //
+         * @type {boolean}
+         */
+        this.ctrlDown = false
         
 
         for(var key in values) {
@@ -304,15 +309,21 @@ export default class Atom {
 
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
-            //console.log("moving")
             this.isMoving = true
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
+            GlobalVariables.atomsToCopy.push(JSON.stringify(this.serialize()))
         }
         else{
-            this.selected = false
+            if (this.ctrlDown && this.selected){
+            GlobalVariables.atomsToCopy.push(JSON.stringify(this.serialize()))
+            }
+            else{
+              this.selected = false
+              GlobalVariables.atomsToCopy.length = 0
+            }
         }
 
         //Returns true if something was done with the click
@@ -409,10 +420,21 @@ export default class Atom {
                 this.deleteNode()
             }
         }
+        else if (['Control', 'Meta'].includes(key)){
+            this.ctrlDown = true
+        }
+        
         
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
+    }
+
+    /**
+     * Set the atom's response to a key Up. Is used to know if command has been lifted and delete selection
+     */ 
+    keyUp(key){
+        this.ctrlDown = false
     }
     
     /**

@@ -14,6 +14,32 @@ GlobalVariables.runMode = window.location.href.includes('run') //Check if we are
 GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
 
+/** 
+* A flag to indicate if ctrl or commd pressed
+* @type {boolean}
+*/
+let ctrlDown = false
+/** 
+* Ctrl event key
+* @type {number}
+*/
+const ctrlKey = 17
+/** 
+* Cmmd event key
+* @type {number}
+*/
+const cmdKey = 91
+/** 
+* V event key
+* @type {number}
+*/
+const vKey = 86
+/** 
+* C event key
+* @type {number}
+*/
+const cKey = 67
+
 
 // Event Listeners
 /** 
@@ -42,8 +68,7 @@ flowCanvas.addEventListener('mousedown', event => {
     if(isRightMB){
         return
     }
- 
-    
+
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
@@ -54,11 +79,15 @@ flowCanvas.addEventListener('mousedown', event => {
 
     })
     
-    if(!clickHandledByMolecule){
+    if(!clickHandledByMolecule && ctrlDown){
+
         GlobalVariables.currentMolecule.backgroundClick()
     }
+    else if(!clickHandledByMolecule){
+       GlobalVariables.currentMolecule.backgroundClick() 
+    }
     else{
-        GlobalVariables.currentMolecule.deselect()
+        //GlobalVariables.currentMolecule.deselect()
     }
     //hide the menu if it is visible
     if (!document.querySelector('#circle-menu1').contains(event.target)) {
@@ -105,36 +134,15 @@ flowCanvas.addEventListener('mouseup', event => {
     })
 })
 
-/** 
-* A flag to indicate if ctrl or commd pressed
-* @type {boolean}
-*/
-let ctrlDown = false
-/** 
-* Ctrl event key
-* @type {number}
-*/
-const ctrlKey = 17
-/** 
-* Cmmd event key
-* @type {number}
-*/
-const cmdKey = 91
-/** 
-* V event key
-* @type {number}
-*/
-const vKey = 86
-/** 
-* C event key
-* @type {number}
-*/
-const cKey = 67
-
 window.addEventListener('keydown', e => {
 
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         ctrlDown = true
+    }
+    if(ctrlDown){
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+            molecule.copySelected()     
+        })     
     }
     if (ctrlDown && e.keyCode == cKey) {
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
@@ -156,6 +164,11 @@ window.addEventListener('keyup', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         ctrlDown = false
     }
+
+    //every time the mouse button goes up 
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.keyUp(event.key)      
+    })
 })
 
 
