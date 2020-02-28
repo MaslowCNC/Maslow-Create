@@ -13647,7 +13647,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const toSurface = (clipperPaths, normalize) =>
-    clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
+    clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
 
   const toPaths = (clipper, polytree, normalize) => {
     const paths = [];
@@ -14899,7 +14899,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       defragmented.push(surface);
     }
 
-    return defragmented;
+    return makeWatertight(defragmented);
   };
 
   const outline$2 = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
@@ -17781,6 +17781,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     for (const { solid } of getSolids(shape.toKeptGeometry())) {
       paths.push(...findOpenEdges(solid, isOpen));
     }
+    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+      paths.push(...findOpenEdges([surface || z0Surface], isOpen));
+    }
     return Shape.fromGeometry({ paths: paths.map(path => path.map(([x, y, z]) => [r(x), r(y), r(z)])) });
   };
 
@@ -17905,6 +17908,21 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.wireframe = method;
   Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
+
+  const wireframeFaces = (shape, op = (x => x)) => {
+    const faces = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      for (const surface of solid) {
+        for (const path of surface) {
+          faces.push(op(Shape.fromGeometry({ paths: [path] }), faces.length));
+        }
+      }
+    }
+    return assemble$1(...faces);
+  };
+
+  const wireframeFacesMethod = function (...args) { return wireframeFaces(this, ...args); };
+  Shape.prototype.wireframeFaces = wireframeFacesMethod;
 
   /**
    *
@@ -26727,7 +26745,7 @@ return d[d.length-1];};return ", funcName].join("");
   Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
   Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-  const Empty = (...shapes) => Shape.fromGeometry({ layers: [] });
+  const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
   /**
    *
