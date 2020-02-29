@@ -955,7 +955,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const nx1 = nx + 1;
       const ny1 = ny + 1;
       // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = [nx1 / multiplier, ny1 / multiplier, 0];
+      const normalized = coordinate;
       update(`${nx0}/${ny0}`, normalized);
       update(`${nx0}/${ny1}`, normalized);
       update(`${nx1}/${ny0}`, normalized);
@@ -971,7 +971,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const Z = 2;
 
   // The resolution is 1 / multiplier.
-  const createNormalize3 = (multiplier = 1e5) => {
+  // export const createNormalize3 = (multiplier = 1e5) => {
+  const createNormalize3 = (multiplier = 1e5 * 2) => {
     const map = new Map();
     const update = (key, value) => {
       if (!map.has(key)) {
@@ -1010,93 +1011,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return normalized;
     };
     return normalize3;
-  };
-
-  const THRESHOLD = 1e-5;
-
-  // We expect a solid of reconciled triangles.
-
-  const watertight = Symbol('watertight');
-
-  const makeWatertight = (solid, normalize = createNormalize3(), onFixed = (_ => _)) => {
-    if (!solid[watertight]) {
-      let fixed = false;
-      const vertices = new Set();
-
-      const reconciledSolid = [];
-      for (const surface of solid) {
-        const reconciledSurface = [];
-        for (const path of surface) {
-          const reconciledPath = [];
-          for (const point of path) {
-            const reconciledPoint = normalize(point);
-            reconciledPath.push(reconciledPoint);
-            vertices.add(reconciledPoint);
-          }
-          reconciledSurface.push(reconciledPath);
-        }
-        reconciledSolid.push(reconciledSurface);
-      }
-
-      const watertightSolid = [];
-      for (const surface of reconciledSolid) {
-        const watertightPaths = [];
-        for (const path of surface) {
-          const watertightPath = [];
-          for (const [start, end] of getEdges(path)) {
-            watertightPath.push(start);
-            const span = distance(start, end);
-            const colinear = [];
-            for (const vertex of vertices) {
-              // FIX: Threshold
-              if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
-                if (vertex !== start && vertex !== end) {
-                  // FIX: Clip an ear instead.
-                  // Vertex is on the open edge.
-                  colinear.push(vertex);
-                  fixed = true;
-                }
-              }
-            }
-            // Arrange by distance from start.
-            colinear.sort((a, b) => distance(start, a) - distance(start, b));
-            // Insert into the path.
-            watertightPath.push(...colinear);
-          }
-          watertightPaths.push(watertightPath);
-        }
-        watertightSolid.push(watertightPaths);
-      }
-      // At this point we should have the correct structure for assembly into a solid.
-      // We just need to ensure triangulation to support deformation.
-
-      onFixed(fixed);
-
-      solid[watertight] = watertightSolid;
-    }
-
-    return solid[watertight];
-  };
-
-  const isWatertight = (solid) => {
-    const edges = new Set();
-    for (const surface of solid) {
-      for (const path of surface) {
-        for (const [start, end] of getEdges(path)) {
-          edges.add(`${JSON.stringify([start, end])}`);
-        }
-      }
-    }
-    for (const surface of solid) {
-      for (const path of surface) {
-        for (const [start, end] of getEdges(path)) {
-          if (!edges.has(`${JSON.stringify([end, start])}`)) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
   };
 
   /**
@@ -1213,7 +1127,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const factor = 1 / length(normal);
     const plane = scale(factor, normal);
     plane[W] = dot(reference, normal) * factor / polygon.length;
-    if (isNaN(plane[0])) {
+    if (isNaN(plane[X$3])) {
       return undefined;
     } else {
       return plane;
@@ -1352,6 +1266,110 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       transformed.reverse();
     }
     return transformed;
+  };
+
+  const THRESHOLD = 1e-5 * 1.2;
+
+  // We expect a solid of reconciled triangles.
+
+  const watertight = Symbol('watertight');
+
+  const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
+    if (normalize === undefined) {
+      normalize = createNormalize3(1 / threshold);
+    }
+    if (!solid[watertight]) {
+      if (isWatertight(solid)) {
+        solid[watertight] = solid;
+      }
+    }
+
+    if (!solid[watertight]) {
+      let fixed = false;
+      const vertices = new Set();
+
+      const reconciledSolid = [];
+      for (const surface of solid) {
+        const reconciledSurface = [];
+        for (const path of surface) {
+          const reconciledPath = [];
+          for (const point of path) {
+            const reconciledPoint = normalize(point);
+            reconciledPath.push(reconciledPoint);
+            vertices.add(reconciledPoint);
+          }
+          if (toPlane(reconciledPath) !== undefined) {
+            // Filter degenerates.
+            reconciledSurface.push(reconciledPath);
+          }
+        }
+        reconciledSolid.push(reconciledSurface);
+      }
+
+      const watertightSolid = [];
+      for (const surface of reconciledSolid) {
+        const watertightPaths = [];
+        for (const path of surface) {
+          const watertightPath = [];
+          for (const [start, end] of getEdges(path)) {
+            watertightPath.push(start);
+            const span = distance(start, end);
+            const colinear = [];
+            for (const vertex of vertices) {
+              // FIX: Threshold
+              if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+                if (vertex !== start && vertex !== end) {
+                  // FIX: Clip an ear instead.
+                  // Vertex is on the open edge.
+                  colinear.push(vertex);
+                  fixed = true;
+                }
+              }
+            }
+            // Arrange by distance from start.
+            colinear.sort((a, b) => distance(start, a) - distance(start, b));
+            // Insert into the path.
+            watertightPath.push(...colinear);
+          }
+          const deduplicated = deduplicate(watertightPath);
+          assertGood(deduplicated);
+          if (toPlane(deduplicated) !== undefined) {
+            // Filter degenerates.
+            watertightPaths.push(deduplicated);
+          }
+        }
+        watertightSolid.push(watertightPaths);
+      }
+      // At this point we should have the correct structure for assembly into a solid.
+      // We just need to ensure triangulation to support deformation.
+
+      onFixed(fixed);
+
+      solid[watertight] = watertightSolid;
+    }
+
+    return solid[watertight];
+  };
+
+  const isWatertight = (solid) => {
+    const edges = new Set();
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const [start, end] of getEdges(path)) {
+          edges.add(`${JSON.stringify([start, end])}`);
+        }
+      }
+    }
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const [start, end] of getEdges(path)) {
+          if (!edges.has(`${JSON.stringify([end, start])}`)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   };
 
   // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
@@ -13647,7 +13665,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const toSurface = (clipperPaths, normalize) =>
-    clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
+    clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
 
   const toPaths = (clipper, polytree, normalize) => {
     const paths = [];
@@ -14806,68 +14824,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const flip$4 = (solid) => solid.map(surface => flip$3(surface));
 
-  // The resolution is 1 / multiplier.
-  const multiplier = 1e5;
-
-  const X$6 = 0;
-  const Y$6 = 1;
-  const Z$3 = 2;
-  const W$3 = 3;
-
-  const createNormalize4 = () => {
-    const map = new Map();
-    const normalize4 = (coordinate) => {
-      // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$6] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$6] * multiplier - 0.5);
-      const nz = Math.floor(coordinate[Z$3] * multiplier - 0.5);
-      const nw = Math.floor(coordinate[W$3] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nz0 = nz;
-      const nw0 = nw;
-      const nx1 = nx0 + 1;
-      const ny1 = ny0 + 1;
-      const nz1 = nz0 + 1;
-      const nw1 = nw0 + 1;
-      // Populate the space of the quantized value and its adjacencies.
-      // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier, nw1 / multiplier];
-      // FIX: Rename the function to reflect that it seems that we cannot quantize planes,
-      // but we can form a consensus among nearby planes.
-      const normalized = coordinate;
-      map.set(`${nx0}/${ny0}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz1}/${nw1}`, normalized);
-      // This is now the normalized value for this region.
-      return normalized;
-    };
-    return normalize4;
-  };
+  // const s = (x) => (x === 0 && 1 / x < 0) ? '0' : x.toString();
+  // const s = (x) => (x === 0 && 1 / x < 0) ? '-0' : x.toString();
+  // const fromPlaneToKey = ([x, y, z, w]) => `${s(x)}/${s(y)}/${s(z)}/${s(w)}`;
 
   const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
-    const normalize4 = createNormalize4();
+    // const normalize4 = createNormalize4();
     const coplanarGroups = new Map();
 
+    // let i = 0;
     for (const polygon of polygons) {
       if (polygon.length < 3) {
         // Polygon became degenerate.
@@ -14876,10 +14841,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const plane = toPlane(polygon);
       if (plane === undefined) {
         // Polygon is degenerate -- probably on a line.
-        // console.log(`QQ/fromPolygons/degenerate`);
         continue;
       }
-      const key = normalize4(toPlane(polygon));
+      // const key = i++;
+      const key = JSON.stringify(toPlane(polygon));
+      // const key = normalize4(toPlane(polygon));
+      // const key = fromPlaneToKey(toPlane(polygon));
       const groups = coplanarGroups.get(key);
       if (groups === undefined) {
         const group = [polygon];
@@ -14894,15 +14861,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const defragmented = [];
 
     // Erase substructure and make convex.
-    for (const [plane, polygons] of coplanarGroups) {
-      const surface = makeConvex$1(polygons, normalize3, plane);
+    for (const polygons of coplanarGroups.values()) {
+      // const surface = polygons;
+      const surface = makeConvex$1(polygons, normalize3, toPlane(polygons[0]));
       defragmented.push(surface);
     }
 
-    return defragmented;
+    return makeWatertight(defragmented, normalize3);
   };
 
   const outline$2 = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
+
+  const reconcile = (solid, normalize = createNormalize3()) =>
+    alignVertices(solid, normalize);
 
   // Relax the coplanar arrangement into polygon soup.
   const toPolygons$1 = (options = {}, solid) => {
@@ -14993,6 +14964,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     };
     walk(geometry);
   };
+
+  const reconcile$1 = (geometry, normalize = createNormalize3()) =>
+    rewrite(geometry,
+            (geometry, descend) => {
+              if (geometry.solid) {
+                return {
+                  solid: reconcile(geometry.solid, normalize),
+                  tags: geometry.tags
+                };
+              } else {
+                return descend();
+              }
+            });
 
   const makeWatertight$2 = (geometry, normalize = createNormalize3(), onFixed) =>
     rewrite(geometry,
@@ -15254,7 +15238,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           };
         } else if (geometry.solid) {
           return {
-            solid: transform$6(matrix, geometry.solid),
+            solid: transform$6(matrix, reconcile(geometry.solid)),
             tags
           };
         } else if (geometry.surface) {
@@ -15305,7 +15289,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     } else if (geometry.disjointAssembly !== undefined) {
       canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize$8);
     } else if (geometry.item !== undefined) {
-      canonicalized.item = geometry.item(canonicalize$8);
+      canonicalized.item = canonicalize$8(geometry.item);
     } else {
       throw Error('die');
     }
@@ -15598,12 +15582,24 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           startType = endType;
         }
         if (frontPoints.length >= 3) {
+          while (squaredDistance(frontPoints[0], lastFront) <= EPSILON2) {
+            frontPoints.pop();
+            lastFront = frontPoints[frontPoints.length - 1];
+          }
+        }
+        if (frontPoints.length >= 3) {
           frontPoints.plane = polygonPlane;
           if (backPoints.length >= 3) {
             frontPoints.parent = polygon;
             frontPoints.sibling = backPoints;
           }
           front.push(frontPoints);
+        }
+        if (backPoints.length >= 3) {
+          while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
+            backPoints.pop();
+            lastBack = backPoints[backPoints.length - 1];
+          }
         }
         if (backPoints.length >= 3) {
           backPoints.plane = polygonPlane;
@@ -15622,9 +15618,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const IN_LEAF = 1;
   const OUT_LEAF = 2;
 
-  const X$7 = 0;
-  const Y$7 = 1;
-  const Z$4 = 2;
+  const X$6 = 0;
+  const Y$6 = 1;
+  const Z$3 = 2;
 
   const inLeaf = {
     plane: null,
@@ -15645,35 +15641,35 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = inLeaf) => {
     const cMin = max(aMin, bMin);
     const cMax = min(aMax, bMax);
-    return {
+    const bsp = {
       // Bottom
       kind: BRANCH,
-      plane: [0, 0, -1, -cMin[Z$4] + EPSILON$2 * 10],
+      plane: [0, 0, -1, -cMin[Z$3] + EPSILON$2 * 10],
       front,
       back: {
         // Top
         kind: BRANCH,
-        plane: [0, 0, 1, cMax[Z$4] + EPSILON$2 * 10],
+        plane: [0, 0, 1, cMax[Z$3] + EPSILON$2 * 10],
         front,
         back: {
           // Left
           kind: BRANCH,
-          plane: [-1, 0, 0, -cMin[X$7] + EPSILON$2 * 10],
+          plane: [-1, 0, 0, -cMin[X$6] + EPSILON$2 * 10],
           front,
           back: {
             // Right
             kind: BRANCH,
-            plane: [1, 0, 0, cMax[X$7] + EPSILON$2 * 10],
+            plane: [1, 0, 0, cMax[X$6] + EPSILON$2 * 10],
             front,
             back: {
               // Back
               kind: BRANCH,
-              plane: [0, -1, 0, -cMin[Y$7] + EPSILON$2 * 10],
+              plane: [0, -1, 0, -cMin[Y$6] + EPSILON$2 * 10],
               front,
               back: {
                 // Front
                 kind: BRANCH,
-                plane: [0, 1, 0, cMax[Y$7] + EPSILON$2 * 10],
+                plane: [0, 1, 0, cMax[Y$6] + EPSILON$2 * 10],
                 front: outLeaf,
                 back
               }
@@ -15682,9 +15678,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         }
       }
     };
+    return bsp;
   };
 
-  const fromPolygons$1 = (polygons, normalize) => {
+  const fromPolygonsToBspTree = (polygons, normalize) => {
     if (polygons.length === 0) {
       // Everything is outside of an empty geometry.
       return outLeaf;
@@ -15695,9 +15692,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     let plane = toPlane(polygons[polygons.length >> 1]);
 
     for (const polygon of polygons) {
-      if (toPlane([...polygon]) === undefined) {
-        continue;
-      }
       splitPolygon$1(normalize,
                    plane,
                    polygon,
@@ -15708,8 +15702,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
 
     const bsp = {
-      back: back.length === 0 ? inLeaf : fromPolygons$1(back, normalize),
-      front: front.length === 0 ? outLeaf : fromPolygons$1(front, normalize),
+      back: back.length === 0 ? inLeaf : fromPolygonsToBspTree(back, normalize),
+      front: front.length === 0 ? outLeaf : fromPolygonsToBspTree(front, normalize),
       kind: BRANCH,
       plane,
       same
@@ -15717,6 +15711,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     return bsp;
   };
+
+  const fromPolygons$1 = (polygons, normalize) =>
+    // fromPolygonsToBspTree(polygons.filter(polygon => toPlane(polygon) !== undefined), normalize);
+    fromPolygonsToBspTree(polygons, normalize);
 
   const fromSolid = (solid, normalize) => {
     const polygons = [];
@@ -15830,36 +15828,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
-    if (bsp === inLeaf) {
-      return [];
-    } else if (bsp === outLeaf) {
-      return keepOut(polygons);
-    } else {
-      const outward = [];
-      const inward = [];
-      for (let i = 0; i < polygons.length; i++) {
-        splitPolygon$1(normalize,
-                     bsp.plane,
-                     polygons[i],
-                     /* back= */inward,
-                     /* abutting= */outward,
-                     /* overlapping= */inward,
-                     /* front= */outward);
-      }
-      const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
-      const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, inward, normalize);
-
-      if (trimmedFront.length === 0) {
-        return trimmedBack;
-      } else if (trimmedBack.length === 0) {
-        return trimmedFront;
-      } else {
-        return merge(trimmedFront, trimmedBack);
-      }
-    }
-  };
-
   const removeExteriorPolygonsForSection = (bsp, polygons, normalize) => {
     if (bsp === inLeaf) {
       return keepIn(polygons);
@@ -15902,10 +15870,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         splitPolygon$1(normalize,
                      bsp.plane,
                      polygons[i],
-                     /* back= */back,
-                     /* abutting= */front,
-                     /* overlapping= */front,
-                     /* front= */front);
+                     /* back= */back, // keepward
+                     /* abutting= */front, // dropward
+                     /* overlapping= */front, // dropward
+                     /* front= */front); // dropward
       }
       const trimmedFront = removeExteriorPolygonsForCutDroppingOverlap(bsp.front, front, normalize);
       const trimmedBack = removeExteriorPolygonsForCutDroppingOverlap(bsp.back, back, normalize);
@@ -15932,13 +15900,43 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         splitPolygon$1(normalize,
                      bsp.plane,
                      polygons[i],
-                     /* back= */back,
-                     /* abutting= */front,
-                     /* overlapping= */back,
-                     /* front= */front);
+                     /* back= */back, // keepward
+                     /* abutting= */front, // dropward
+                     /* overlapping= */back, // keepward
+                     /* front= */front); // dropward
       }
       const trimmedFront = removeExteriorPolygonsForCutKeepingOverlap(bsp.front, front, normalize);
       const trimmedBack = removeExteriorPolygonsForCutKeepingOverlap(bsp.back, back, normalize);
+
+      if (trimmedFront.length === 0) {
+        return trimmedBack;
+      } else if (trimmedBack.length === 0) {
+        return trimmedFront;
+      } else {
+        return merge(trimmedFront, trimmedBack);
+      }
+    }
+  };
+
+  const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+    if (bsp === inLeaf) {
+      return [];
+    } else if (bsp === outLeaf) {
+      return keepOut(polygons);
+    } else {
+      const outward = [];
+      const inward = [];
+      for (let i = 0; i < polygons.length; i++) {
+        splitPolygon$1(normalize,
+                     bsp.plane,
+                     polygons[i],
+                     /* back= */inward,
+                     /* abutting= */outward, // keepward
+                     /* overlapping= */inward, // dropward
+                     /* front= */outward);
+      }
+      const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
+      const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, inward, normalize);
 
       if (trimmedFront.length === 0) {
         return trimmedBack;
@@ -15963,8 +15961,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */inward,
-                     /* abutting= */inward, // difference facing are kept
-                     /* overlapping= */outward, // same facing are removed
+                     /* abutting= */inward, // keepward
+                     /* overlapping= */outward, // dropward
                      /* front= */outward);
       }
       const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, outward, normalize);
@@ -16071,8 +16069,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  // Merge the fragments for this one.
-  const separatePolygonsSkinIn = (bsp, polygons, normalize) => {
+  const separatePolygonsForBoundPolygons = (bsp, polygons, normalize) => {
     if (polygons.length === 0) {
       return [];
     } else if (bsp === inLeaf) {
@@ -16087,12 +16084,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */back, // toward keepIn
-                     /* abutting= */back, // toward keepIn
+                     /* abutting= */front, // toward keepOut
                      /* overlapping= */back, // toward keepIn
                      /* front= */front); // toward keepOut
       }
-      const trimmedFront = separatePolygonsSkinIn(bsp.front, front, normalize);
-      const trimmedBack = separatePolygonsSkinIn(bsp.back, back, normalize);
+      const trimmedFront = separatePolygonsForBoundPolygons(bsp.front, front, normalize);
+      const trimmedBack = separatePolygonsForBoundPolygons(bsp.back, back, normalize);
 
       return [...trimmedFront, ...trimmedBack];
     }
@@ -16101,7 +16098,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const boundPolygons = (bsp, polygons, normalize) => {
     const inPolygons = [];
     const outPolygons = [];
-    for (const polygon of separatePolygonsSkinIn(bsp, polygons, normalize)) {
+    for (const polygon of separatePolygonsForBoundPolygons(bsp, polygons, normalize)) {
       if (polygon.leaf === inLeaf) {
         inPolygons.push(polygon);
       } else if (polygon.leaf === outLeaf) {
@@ -16114,7 +16111,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const cut$1 = (solid, surface, normalize = createNormalize3()) => {
     // Build a classifier from the planar polygon.
     const cutBsp = fromPolygons$1(surface, normalize);
-    const solidPolygons = toPolygons$1({}, solid);
+    const solidPolygons = toPolygons$1({}, alignVertices(solid, normalize));
 
     // Classify the solid with it.
     const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -16124,22 +16121,23 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const solidBsp = fromPolygons$1(solidPolygons, normalize);
     const trimmedPolygons = removeExteriorPolygonsForCutKeepingOverlap(solidBsp, surface, normalize);
 
-    return fromPolygons({}, [...trimmedSolid, ...trimmedPolygons]);
+    return fromPolygons({}, [...trimmedSolid, ...trimmedPolygons], normalize);
   };
 
   const cutOpen = (solid, surface, normalize = createNormalize3()) => {
     // Build a classifier from the planar polygon.
     const cutBsp = fromPolygons$1(surface, normalize);
-    const solidPolygons = toPolygons$1({}, solid);
+    const solidPolygons = toPolygons$1({}, alignVertices(solid, normalize));
 
     // Classify the solid with it.
     const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
 
-    return fromPolygons({}, trimmedSolid);
+    return fromPolygons({}, trimmedSolid, normalize);
   };
 
-  const containsPoint = (bsp, point) => {
+  const containsPoint = (bsp, point, history = []) => {
     while (true) {
+      history.push(bsp);
       if (bsp === inLeaf) {
         return true;
       } else if (bsp === outLeaf) {
@@ -16158,18 +16156,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const X$8 = 0;
-  const Y$8 = 1;
-  const Z$5 = 2;
+  const X$7 = 0;
+  const Y$7 = 1;
+  const Z$4 = 2;
 
   const walkX = (min, max, resolution) => {
-    if (min[X$8] + resolution > max[X$8]) {
+    if (min[X$7] + resolution > max[X$7]) {
       return inLeaf;
     }
-    const midX = (min[X$8] + max[X$8]) / 2;
+    const midX = (min[X$7] + max[X$7]) / 2;
     return {
-      back: walkY(min, [midX, max[Y$8], max[Z$5]], resolution),
-      front: walkY([midX, min[Y$8], min[Z$5]], max, resolution),
+      back: walkY(min, [midX, max[Y$7], max[Z$4]], resolution),
+      front: walkY([midX, min[Y$7], min[Z$4]], max, resolution),
       kind: BRANCH,
       plane: [1, 0, 0, midX],
       same: []
@@ -16177,13 +16175,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const walkY = (min, max, resolution) => {
-    if (min[Y$8] + resolution > max[Y$8]) {
+    if (min[Y$7] + resolution > max[Y$7]) {
       return inLeaf;
     }
-    const midY = (min[Y$8] + max[Y$8]) / 2;
+    const midY = (min[Y$7] + max[Y$7]) / 2;
     return {
-      back: walkZ(min, [max[X$8], midY, max[Z$5]], resolution),
-      front: walkZ([min[X$8], midY, min[Z$5]], max, resolution),
+      back: walkZ(min, [max[X$7], midY, max[Z$4]], resolution),
+      front: walkZ([min[X$7], midY, min[Z$4]], max, resolution),
       kind: BRANCH,
       plane: [0, 1, 0, midY],
       same: []
@@ -16191,13 +16189,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const walkZ = (min, max, resolution) => {
-    if (min[Z$5] + resolution > max[Z$5]) {
+    if (min[Z$4] + resolution > max[Z$4]) {
       return inLeaf;
     }
-    const midZ = (min[Z$5] + max[Z$5]) / 2;
+    const midZ = (min[Z$4] + max[Z$4]) / 2;
     return {
-      back: walkX(min, [max[X$8], max[Y$8], midZ], resolution),
-      front: walkX([min[X$8], min[Y$8], midZ], max, resolution),
+      back: walkX(min, [max[X$7], max[Y$7], midZ], resolution),
+      front: walkX([min[X$7], min[Y$7], midZ], max, resolution),
       kind: BRANCH,
       plane: [0, 0, 1, midZ],
       same: []
@@ -16283,9 +16281,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const iota$1 = 1e-5;
-  const X$9 = 0;
-  const Y$9 = 1;
-  const Z$6 = 2;
+  const X$8 = 0;
+  const Y$8 = 1;
+  const Z$5 = 2;
 
   // Requires a conservative gap.
   const doesNotOverlap = (a, b) => {
@@ -16294,12 +16292,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     const [minA, maxA] = measureBoundingBox$4(a);
     const [minB, maxB] = measureBoundingBox$4(b);
-    if (maxA[X$9] <= minB[X$9] - iota$1 * 10) { return true; }
-    if (maxA[Y$9] <= minB[Y$9] - iota$1 * 10) { return true; }
-    if (maxA[Z$6] <= minB[Z$6] - iota$1 * 10) { return true; }
-    if (maxB[X$9] <= minA[X$9] - iota$1 * 10) { return true; }
-    if (maxB[Y$9] <= minA[Y$9] - iota$1 * 10) { return true; }
-    if (maxB[Z$6] <= minA[Z$6] - iota$1 * 10) { return true; }
+    if (maxA[X$8] <= minB[X$8] - iota$1 * 10) { return true; }
+    if (maxA[Y$8] <= minB[Y$8] - iota$1 * 10) { return true; }
+    if (maxA[Z$5] <= minB[Z$5] - iota$1 * 10) { return true; }
+    if (maxB[X$8] <= minA[X$8] - iota$1 * 10) { return true; }
+    if (maxB[Y$8] <= minA[Y$8] - iota$1 * 10) { return true; }
+    if (maxB[Z$5] <= minA[Z$5] - iota$1 * 10) { return true; }
     return false;
   };
 
@@ -16332,6 +16330,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return triangles;
   };
 
+  const MIN = 0;
+
   const difference$2 = (aSolid, ...bSolids) => {
     if (bSolids.length === 0) {
       return aSolid;
@@ -16356,14 +16356,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
       const bPolygons = b;
       const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-      // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
-      // const bBsp = toBspFromPolygons(bIn, normalize);
-      const bBsp = fromPolygons$1(bPolygons, normalize);
+      const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(bIn, normalize));
 
       if (aIn.length === 0) {
+        const bbMin = max(aBB[MIN], bBB[MIN]);
         // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
         const aBsp = fromPolygons$1(a, normalize);
-        if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+        if (containsPoint(aBsp, bbMin)) {
           // The space is fully enclosed; invert b.
           a = [...aOut, ...flip$7(bIn)];
         } else {
@@ -16371,9 +16370,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           continue;
         }
       } else if (bIn.length === 0) {
+        const bbMin = max(aBB[MIN], bBB[MIN]);
         // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
         const bBsp = fromPolygons$1(b, normalize);
-        if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+        if (containsPoint(bBsp, bbMin)) {
           // The space is fully enclosed; only the out region remains.
           a = aOut;
         } else {
@@ -16389,6 +16389,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     return fromPolygons({}, a, normalize);
   };
+
+  const MIN$1 = 0;
 
   // An asymmetric binary merge.
   const intersection$2 = (...solids) => {
@@ -16414,7 +16416,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
       const aPolygons = a;
       const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
-
       const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons$1(aIn, normalize));
 
       const bPolygons = b;
@@ -16422,9 +16423,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons$1(bIn, normalize));
 
       if (aIn.length === 0) {
+        const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
         // There are two ways for aIn to be empty: the space is fully exclosed or fully vacated.
         const aBsp = fromPolygons$1(a, normalize);
-        if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+        if (containsPoint(aBsp, bbMin)) {
           // The space is fully enclosed.
           s.push(bIn);
         } else {
@@ -16432,9 +16434,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           return [];
         }
       } else if (bIn.length === 0) {
+        const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
         // There are two ways for bIn to be empty: the space is fully exclosed or fully vacated.
         const bBsp = fromPolygons$1(b, normalize);
-        if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+        if (containsPoint(bBsp, bbMin)) {
           // The space is fully enclosed.
           s.push(aIn);
         } else {
@@ -16455,6 +16458,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const bsp = fromSolid(alignVertices(solid, normalize), normalize);
     return surfaces.map(surface => removeExteriorPolygonsForSection(bsp, surface, normalize));
   };
+
+  const MIN$2 = 0;
 
   // An asymmetric binary merge.
   const union$2 = (...solids) => {
@@ -16488,9 +16493,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(bIn, normalize));
 
       if (aIn.length === 0) {
+        const bbMin = max(aBB[MIN$2], bBB[MIN$2]);
         // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
         const aBsp = fromPolygons$1(a, normalize);
-        if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+        if (containsPoint(aBsp, bbMin)) {
           // The space is fully enclosed; bIn is redundant.
           s.push([...aOut, ...aIn, ...bOut]);
         } else {
@@ -16499,9 +16505,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           s.push([...a, ...b]);
         }
       } else if (bIn.length === 0) {
+        const bbMin = max(aBB[MIN$2], bBB[MIN$2]);
         // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
         const bBsp = fromPolygons$1(b, normalize);
-        if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+        if (containsPoint(bBsp, bbMin)) {
           // The space is fully enclosed; aIn is redundant.
           s.push([...aOut, ...bIn, ...bOut]);
         } else {
@@ -16519,12 +16526,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   // The resolution is 1 / multiplier.
-  const multiplier$1 = 1e5;
+  const multiplier = 1e5;
 
-  const X$a = 0;
-  const Y$a = 1;
-  const Z$7 = 2;
-  const W$4 = 3;
+  const X$9 = 0;
+  const Y$9 = 1;
+  const Z$6 = 2;
+  const W$3 = 3;
 
   // FIX: Make this efficient.
   // FIX: Move to math-plane.
@@ -16532,10 +16539,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const map = new Map();
     const normalize4 = (coordinate) => {
       // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$a] * multiplier$1 - 0.5);
-      const ny = Math.floor(coordinate[Y$a] * multiplier$1 - 0.5);
-      const nz = Math.floor(coordinate[Z$7] * multiplier$1 - 0.5);
-      const nw = Math.floor(coordinate[W$4] * multiplier$1 - 0.5);
+      const nx = Math.floor(coordinate[X$9] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$9] * multiplier - 0.5);
+      const nz = Math.floor(coordinate[Z$6] * multiplier - 0.5);
+      const nw = Math.floor(coordinate[W$3] * multiplier - 0.5);
       // Look for an existing inhabitant.
       const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
       if (value !== undefined) {
@@ -17099,19 +17106,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const outline$3 = cache(outlineImpl);
 
   // The resolution is 1 / multiplier.
-  const multiplier$2 = 1e5;
+  const multiplier$1 = 1e5;
 
-  const X$b = 0;
-  const Y$b = 1;
-  const Z$8 = 2;
+  const X$a = 0;
+  const Y$a = 1;
+  const Z$7 = 2;
 
   const createPointNormalizer = () => {
     const map = new Map();
     const normalize = (coordinate) => {
       // Apply a spatial quantization to the 3 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$b] * multiplier$2 - 0.5);
-      const ny = Math.floor(coordinate[Y$b] * multiplier$2 - 0.5);
-      const nz = Math.floor(coordinate[Z$8] * multiplier$2 - 0.5);
+      const nx = Math.floor(coordinate[X$a] * multiplier$1 - 0.5);
+      const ny = Math.floor(coordinate[Y$a] * multiplier$1 - 0.5);
+      const nz = Math.floor(coordinate[Z$7] * multiplier$1 - 0.5);
       // Look for an existing inhabitant.
       const value = map.get(`${nx}/${ny}/${nz}`);
       if (value !== undefined) {
@@ -17242,7 +17249,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     constructor (geometry = { assembly: [] },
                  context) {
       if (geometry.geometry) {
-        throw Error('die');
+        throw Error('die: { geometry: ... } is not valid geometry.');
       }
       this.geometry = geometry;
       this.context = context;
@@ -17286,9 +17293,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     transform (matrix) {
       if (matrix.some(item => typeof item !== 'number' || isNaN(item))) {
-        throw Error('die');
+        throw Error('die: matrix is malformed');
       }
       return fromGeometry(transform$a(matrix, this.toGeometry()), this.context);
+    }
+
+    reconcile () {
+      return fromGeometry(reconcile$1(this.toKeptGeometry()));
     }
 
     assertWatertight () {
@@ -17302,8 +17313,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return isWatertight$1(this.toKeptGeometry());
     }
 
-    makeWatertight (onFixed = (_ => _)) {
-      return fromGeometry(makeWatertight$2(this.toKeptGeometry(), undefined));
+    makeWatertight (threshold) {
+      return fromGeometry(makeWatertight$2(this.toKeptGeometry(), undefined, undefined));
     }
   }
 
@@ -17670,6 +17681,28 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const facesMethod = function (...args) { return faces(this, ...args); };
   Shape.prototype.faces = facesMethod;
 
+  const inSolids = (shape, op = (_ => _)) => {
+    let nth = 0;
+    const rewritten = rewrite(shape.toKeptGeometry(),
+                              (geometry, descend) => {
+                                if (geometry.solid) {
+                                  // Operate on the solid.
+                                  const solid = op(Shape.fromGeometry(geometry), nth++);
+                                  // Replace the solid with the result (which might not be a solid).
+                                  return solid.toGeometry();
+                                } else {
+                                  return descend();
+                                }
+                              });
+    return Shape.fromGeometry(rewritten);
+  };
+
+  const inSolidsMethod = function (...args) { return inSolids(this, ...args); };
+  Shape.prototype.inSolids = inSolidsMethod;
+
+  inSolids.signature = 'inSolids(shape:Shape, op:function) -> Shapes';
+  inSolidsMethod.signature = 'Shape -> inSolids(op:function) -> Shapes';
+
   /**
    *
    * # Measure Bounding Box
@@ -17744,6 +17777,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const openEdgesMethod = function (...args) { return openEdges(this, ...args); };
   Shape.prototype.openEdges = openEdgesMethod;
+
+  const withOpenEdgesMethod = function (...args) { return assemble$1(this, openEdges(this, ...args)); };
+  Shape.prototype.withOpenEdges = withOpenEdgesMethod;
 
   /**
    *
@@ -17864,6 +17900,21 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   Shape.prototype.wireframe = method;
   Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
 
+  const wireframeFaces = (shape, op = (x => x)) => {
+    const faces = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      for (const surface of solid) {
+        for (const path of surface) {
+          faces.push(op(Shape.fromGeometry({ paths: [path] }), faces.length));
+        }
+      }
+    }
+    return assemble$1(...faces);
+  };
+
+  const wireframeFacesMethod = function (...args) { return wireframeFaces(this, ...args); };
+  Shape.prototype.wireframeFaces = wireframeFacesMethod;
+
   /**
    *
    * # With
@@ -17904,15 +17955,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * :::
    **/
 
-  const X$c = 0;
-  const Y$c = 1;
-  const Z$9 = 2;
+  const X$b = 0;
+  const Y$b = 1;
+  const Z$8 = 2;
 
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$6(shape);
     let center = scale(0.5, add(minPoint, maxPoint));
     // FIX: Find a more principled way to handle centering empty shapes.
-    if (isNaN(center[X$c]) || isNaN(center[Y$c]) || isNaN(center[Z$9])) {
+    if (isNaN(center[X$b]) || isNaN(center[Y$b]) || isNaN(center[Z$8])) {
       return shape;
     }
     const moved = shape.move(...negate(center));
@@ -20032,12 +20083,33 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const toArrayFromRgbInt = (rgbInt) =>
     [(rgbInt >> 16) & 0xFF, (rgbInt >> 8) & 0xFF, (rgbInt >> 0) & 0xFF];
 
+  const toRgbIntFromTags = (tags = [], defaultRgb = [0, 0, 0]) => {
+    let rgb = defaultRgb;
+    for (const tag of tags) {
+      if (tag.startsWith('color/')) {
+        let entry = toRgbIntFromName(tag.substring(6));
+        if (entry !== undefined) {
+          return entry;
+        }
+      }
+    }
+    return rgb;
+  };
+
   const toTagFromName = (name) => {
     const entry = toEntryFromRgbInt(toRgbIntFromName(name));
     if (entry !== undefined) {
       return `color/${entry.name.toLowerCase()}`;
     }
     return `color/unknown`;
+  };
+
+  const toRgbFromTags = (tags, defaultRgb) => {
+    const rgbInt = toRgbIntFromTags(tags, null);
+    if (rgbInt === null) {
+      return defaultRgb;
+    }
+    return toArrayFromRgbInt(rgbInt);
   };
 
   /**
@@ -20495,15 +20567,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const scaleMethod = function (factor) { return scale$4(factor, this); };
   Shape.prototype.scale = scaleMethod;
 
-  const X$d = 0;
-  const Y$d = 1;
-  const Z$a = 2;
+  const X$c = 0;
+  const Y$c = 1;
+  const Z$9 = 2;
 
   const size = (shape) => {
     const [min, max] = measureBoundingBox$6(shape);
-    const width = max[X$d] - min[X$d];
-    const length = max[Y$d] - min[Y$d];
-    const height = max[Z$a] - min[Z$a];
+    const width = max[X$c] - min[X$c];
+    const length = max[Y$c] - min[Y$c];
+    const height = max[Z$9] - min[Z$9];
     const center = scale(0.5, add(min, max));
     const radius = distance(center, max);
     return { length, width, height, max, min, center, radius };
@@ -20778,10 +20850,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return shape.toConnector(toConnector(shape, surface, id));
   };
 
-  const Y$e = 1;
+  const Y$d = 1;
 
   const back = (shape) =>
-    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$e]);
+    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$d]);
 
   const backMethod = function () { return back(this); };
   Shape.prototype.back = backMethod;
@@ -20789,10 +20861,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   back.signature = 'back(shape:Shape) -> Shape';
   backMethod.signature = 'Shape -> back() -> Shape';
 
-  const Z$b = 2;
+  const Z$a = 2;
 
   const bottom = (shape) =>
-    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$b]);
+    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$a]);
 
   const bottomMethod = function () { return bottom(this); };
   Shape.prototype.bottom = bottomMethod;
@@ -20804,7 +20876,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const Z$c = (z = 0) => {
+  const Z$b = (z = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -20849,7 +20921,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return [polygon];
   };
 
-  const chop = (shape, connector = Z$c()) => {
+  const chop = (shape, connector = Z$b()) => {
     const cuts = [];
     const planeSurface = toSurface$1(toPlane$3(connector));
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
@@ -20871,7 +20943,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
   chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
 
-  const Z$d = 2;
+  const Z$c = 2;
 
   const findFlatTransforms = (shape) => {
     let bestDepth = Infinity;
@@ -20885,7 +20957,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         const [to, from] = toXYPlaneTransforms(plane);
         const flatShape = shape.transform(to);
         const [min, max] = flatShape.measureBoundingBox();
-        const depth = max[Z$d] - min[Z$d];
+        const depth = max[Z$c] - min[Z$c];
         if (depth < bestDepth) {
           bestTo = to;
           bestFrom = from;
@@ -20932,10 +21004,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
   Shape.prototype.inFlat = inFlatMethod;
 
-  const Y$f = 1;
+  const Y$e = 1;
 
   const front = (shape) =>
-    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$f]);
+    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$e]);
 
   const frontMethod = function () { return front(this); };
   Shape.prototype.front = frontMethod;
@@ -20943,10 +21015,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   front.signature = 'front(shape:Shape) -> Shape';
   frontMethod.signature = 'Shape -> front() -> Shape';
 
-  const X$e = 0;
+  const X$d = 0;
 
   const left = (shape) =>
-    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$e]);
+    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$d]);
 
   const leftMethod = function () { return left(this); };
   Shape.prototype.left = leftMethod;
@@ -20959,10 +21031,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.on = onMethod;
 
-  const X$f = 0;
+  const X$e = 0;
 
   const right = (shape) =>
-    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$f]);
+    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$e]);
 
   const rightMethod = function () { return right(this); };
   Shape.prototype.right = rightMethod;
@@ -20970,10 +21042,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   right.signature = 'right(shape:Shape) -> Shape';
   rightMethod.signature = 'Shape -> right() -> Shape';
 
-  const Z$e = 2;
+  const Z$d = 2;
 
   const top = (shape) =>
-    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$e]);
+    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$d]);
 
   const topMethod = function () { return top(this); };
   Shape.prototype.top = topMethod;
@@ -21053,7 +21125,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const X$g = (x = 0) => {
+  const X$f = (x = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -21065,7 +21137,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const Y$g = (y = 0) => {
+  const Y$f = (y = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -21429,9 +21501,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   module.exports.default = module.exports; // Terrible injection just so it works regardless of how it's required
   });
 
+  const to = (g) => (to) => g() * to;
+  const vary = (g) => (degree) => (g() - 0.5) * degree * 2;
+
   const Random = (seed = 0) => {
     const rng = new Prando_umd(seed);
-    return () => rng.next();
+    const g = () => rng.next();
+    g.to = to(g);
+    g.vary = vary(g);
+    return g;
   };
 
   /**
@@ -21599,7 +21677,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const crumpleMethod = function (...args) { return crumple(this, ...args); };
   Shape.prototype.crumple = crumpleMethod;
 
-  const Z$f = 2;
+  const Z$e = 2;
 
   const scaleXY = (factor, [x, y, z]) => [...scale$1(factor, [x, y]), z];
 
@@ -21607,8 +21685,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
       const [min, max] = measureBoundingBox$3(solid);
-      const maxZ = max[Z$f];
-      const minZ = min[Z$f];
+      const maxZ = max[Z$e];
+      const minZ = min[Z$e];
       const height = maxZ - minZ;
       const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
       const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
@@ -21621,15 +21699,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const thinMethod = function (...args) { return thin(this, ...args); };
   Shape.prototype.thin = thinMethod;
 
-  const Z$g = 2;
+  const Z$f = 2;
 
   const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
       const [min, max] = measureBoundingBox$3(solid);
-      const height = max[Z$g] - min[Z$g];
+      const height = max[Z$f] - min[Z$f];
       const radians = (angle / height) * (Math.PI / 180);
-      const rotate = point => rotateZ(point, radians * (point[Z$g] - min[Z$g]));
+      const rotate = point => rotateZ(point, radians * (point[Z$f] - min[Z$f]));
       assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
     }
 
@@ -21863,13 +21941,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   var binPacking_1 = binPacking.GrowingPacker;
   var binPacking_2 = binPacking.Packer;
 
-  const X$h = 0;
-  const Y$h = 1;
+  const X$g = 0;
+  const Y$g = 1;
 
   const measureSize = (geometry) => {
     const [min, max] = measureBoundingBox$5(geometry);
-    const width = max[X$h] - min[X$h];
-    const height = max[Y$h] - min[Y$h];
+    const width = max[X$g] - min[X$g];
+    const height = max[Y$g] - min[Y$g];
     return [width, height];
   };
 
@@ -21971,6 +22049,141 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   Shape.prototype.pack = packMethod;
 
   pack$1.signature = 'pack({ size, margin = 5 }, ...shapes:Shape) -> [packed:Shapes, unpacked:Shapes]';
+
+  const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
+  const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
+
+  const black = [0, 0, 0];
+
+  // Not entirely sure how conformant this is, but it seems to work for simple
+  // cases.
+
+  // Width and height are in post-script points.
+  const header = ({ scale = 1, width = 210, height = 297, trim = 5, lineWidth = 0.096 }) => {
+    const mediaX1 = 0 * scale;
+    const mediaY1 = 0 * scale;
+    const mediaX2 = width * scale;
+    const mediaY2 = height * scale;
+    const trimX1 = trim * scale;
+    const trimY1 = trim * scale;
+    const trimX2 = (width - trim) * scale;
+    const trimY2 = (height - trim) * scale;
+    return [
+      `%PDF-1.5`,
+      `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
+      `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,
+      `3 0 obj <<`,
+      `  /Contents 4 0 R`,
+      `  /MediaBox [ ${mediaX1.toFixed(9)} ${mediaY1.toFixed(9)} ${mediaX2.toFixed(9)} ${mediaY2.toFixed(9)} ]`,
+      `  /TrimBox [ ${trimX1.toFixed(9)} ${trimY1.toFixed(9)} ${trimX2.toFixed(9)} ${trimY2.toFixed(9)} ]`,
+      `  /Parent 2 0 R`,
+      `  /Type /Page`,
+      `>>`,
+      `endobj`,
+      `4 0 obj << >>`,
+      `stream`,
+      `${lineWidth.toFixed(9)} w`
+    ];
+  };
+
+  const footer =
+     [`endstream`,
+      `endobj`,
+      `trailer << /Root 1 0 R /Size 4 >>`,
+      `%%EOF`];
+
+  const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) => {
+    geometry = await geometry;
+
+    // This is the size of a post-script point in mm.
+    const pointSize = 0.352777778;
+    const scale = 1 / pointSize;
+    const [width, height] = size;
+    const lines = [];
+    const matrix = multiply$1(fromTranslation([width * scale / 2, height * scale / 2, 0]),
+                            fromScaling([scale, scale, scale]));
+    const keptGeometry = toKeptGeometry(transform$a(matrix, geometry));
+    for (const { tags, surface } of getSurfaces(keptGeometry)) {
+      lines.push(toFillColor(toRgbFromTags(tags, black)));
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      for (const path of outline$1(surface)) {
+        let nth = (path[0] === null) ? 1 : 0;
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+        }
+        lines.push(`h`); // Surface paths are always closed.
+      }
+      lines.push(`f`); // Surface paths are always filled.
+    }
+    for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
+      lines.push(toFillColor(toRgbFromTags(tags, black)));
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      // FIX: Avoid making the surface convex.
+      for (const path of outline$1(z0Surface)) {
+        let nth = (path[0] === null) ? 1 : 0;
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+        }
+        lines.push(`h`); // Surface paths are always closed.
+      }
+      lines.push(`f`); // Surface paths are always filled.
+    }
+    for (const { tags, paths } of getPaths(keptGeometry)) {
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      for (const path of paths) {
+        let nth = (path[0] === null) ? 1 : 0;
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+        }
+        if (path[0] !== null) {
+          // A leading null indicates an open path.
+          lines.push(`h`); // close path.
+        }
+        lines.push(`S`); // stroke.
+      }
+    }
+
+    return [].concat(header({ scale, width, height, lineWidth }),
+                     lines,
+                     footer).join('\n');
+  };
+
+  // FIX: Support multi-page pdf, and multi-page preview.
+
+  const toPdf$1 = async (shape, { lineWidth = 0.096 } = {}) => {
+    const pages = [];
+    // CHECK: Should this be limited to Page plans?
+    const geometry = shape.toKeptGeometry();
+    for (const entry of getPlans(geometry)) {
+      if (entry.plan.page) {
+        const { size } = entry.plan.page;
+        for (let leaf of getLeafs(entry.content)) {
+          const pdf = await toPdf(leaf, { lineWidth, size });
+          pages.push({ pdf, leaf: { ...entry, content: leaf }, index: pages.length });
+        }
+      }
+    }
+    return pages;
+  };
+
+  const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
+    for (const { pdf, leaf, index } of await toPdf$1(shape, { lineWidth })) {
+      await writeFile({}, `output/${name}_${index}.pdf`, pdf);
+      await writeFile({}, `geometry/${name}_${index}.pdf`, JSON.stringify(toKeptGeometry(leaf)));
+    }
+  };
+
+  const writePdfMethod = function (...args) { return writePdf(this, ...args); };
+  Shape.prototype.writePdf = writePdfMethod;
 
   /**
    *
@@ -25836,15 +26049,14 @@ return d[d.length-1];};return ", funcName].join("");
 
   const buildRegularPolygon = cache(buildRegularPolygonImpl);
 
-  // FIX: Rewrite via buildFromFunction.
-  // FIX: This only works on z0surface.
   const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
-    const surface = z0Surface;
+    const normalize = createNormalize2();
+    const surfaceOutline = outline(z0Surface, normalize);
     const polygons = [];
     const stepHeight = height - depth;
 
     // Build the walls.
-    for (const polygon of surface) {
+    for (const polygon of surfaceOutline) {
       const wall = flip(polygon);
       const floor = translate([0, 0, depth + stepHeight * 0], wall);
       const roof = translate([0, 0, depth + stepHeight * 1], wall);
@@ -25861,7 +26073,7 @@ return d[d.length-1];};return ", funcName].join("");
     if (cap) {
       // FIX: This is already Z0.
       // FIX: This is bringing the vertices out of alignment?
-      const surface = makeConvex$1(z0Surface);
+      const surface = makeConvex(surfaceOutline, normalize);
 
       // Roof goes up.
       const roof = translate$1([0, 0, height], surface);
@@ -26524,7 +26736,7 @@ return d[d.length-1];};return ", funcName].join("");
   Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
   Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-  const Empty = (...shapes) => Shape.fromGeometry({ layers: [] });
+  const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
   /**
    *
@@ -27012,14 +27224,14 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Z$h = 2;
+  const Z$g = 2;
 
   const ChainedHull = (...shapes) => {
     const pointsets = shapes.map(shape => shape.toPoints());
     const chain = [];
     for (let nth = 1; nth < pointsets.length; nth++) {
       const points = [...pointsets[nth - 1], ...pointsets[nth]];
-      if (points.every(point => point[Z$h] === 0)) {
+      if (points.every(point => point[Z$g] === 0)) {
         chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
       } else {
         chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -27066,13 +27278,13 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Z$i = 2;
+  const Z$h = 2;
 
   const Hull = (...shapes) => {
     const points = [];
     shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
     // FIX: Detect planar hulls properly.
-    if (points.every(point => point[Z$i] === 0)) {
+    if (points.every(point => point[Z$h] === 0)) {
       return Shape.fromGeometry(buildConvexSurfaceHull(points));
     } else {
       return Shape.fromGeometry(buildConvexHull(points));
@@ -27097,12 +27309,14 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
-    const profile = shape.chop(Y$g(0));
+    const profile = shape.chop(Y$f(0));
     const outline = profile.outline();
     const solids = [];
     for (const geometry of getPaths(outline.toKeptGeometry())) {
       for (const path of geometry.paths) {
-        solids.push(Shape.fromGeometry(loop(path, endDegrees * Math.PI / 180, sides, pitch)));
+        for (let startDegrees = 0; startDegrees < endDegrees; startDegrees += 360) {
+          solids.push(Shape.fromGeometry(loop(path, Math.min(360, endDegrees - startDegrees) * Math.PI / 180, sides, pitch)).moveX(pitch * startDegrees / 360));
+        }
       }
     }
     return assemble$1(...solids);
@@ -27371,7 +27585,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const section$1 = (solidShape, ...connectors) => {
     if (connectors.length === 0) {
-      connectors.push(Z$c(0));
+      connectors.push(Z$b(0));
     }
     const planes = connectors.map(toPlane$4);
     const planeSurfaces = planes.map(toSurface$2);
@@ -27397,7 +27611,7 @@ return d[d.length-1];};return ", funcName].join("");
   const squash = (shape) => {
     const geometry = shape.toKeptGeometry();
     const result = { layers: [] };
-    for (const { solid } of getSolids(geometry)) {
+    for (const { solid, tags } of getSolids(geometry)) {
       const polygons = [];
       for (const surface of solid) {
         for (const path of surface) {
@@ -27406,30 +27620,30 @@ return d[d.length-1];};return ", funcName].join("");
           polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
         }
       }
-      result.layers.push({ z0Surface: outline(polygons) });
+      result.layers.push({ z0Surface: outline(polygons), tags });
     }
-    for (const { surface } of getSurfaces(geometry)) {
+    for (const { surface, tags } of getSurfaces(geometry)) {
       const polygons = [];
       for (const path of surface) {
         const flat = path.map(([x, y]) => [x, y, 0]);
         if (toPlane(flat) === undefined) continue;
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
-      result.layers.push({ z0Surface: polygons });
+      result.layers.push({ z0Surface: polygons, tags });
     }
-    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+    for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
       const polygons = [];
       for (const path of z0Surface) {
         polygons.push(path);
       }
-      result.layers.push({ z0Surface: polygons });
+      result.layers.push({ z0Surface: polygons, tags });
     }
-    for (const { paths } of getPaths(geometry)) {
+    for (const { paths, tags } of getPaths(geometry)) {
       const flatPaths = [];
       for (const path of paths) {
         flatPaths.push(path.map(([x, y]) => [x, y, 0]));
       }
-      result.layers.push({ paths: flatPaths });
+      result.layers.push({ paths: flatPaths, tags });
     }
     return Shape.fromGeometry(result);
   };
@@ -27460,7 +27674,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [polygon];
   };
 
-  const stretch = (shape, length, connector = Z$c()) => {
+  const stretch = (shape, length, connector = Z$b()) => {
     const normalize = createNormalize3();
     const stretches = [];
     const planeSurface = toSurface$3(toPlaneFromConnector(connector));
@@ -27601,9 +27815,9 @@ return d[d.length-1];};return ", funcName].join("");
   Shape.prototype.toolpath = method$4;
   Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
 
-  const X$i = 0;
-  const Y$i = 1;
-  const Z$j = 2;
+  const X$h = 0;
+  const Y$h = 1;
+  const Z$i = 2;
 
   const voxels = (shape, resolution = 1) => {
     const offset = resolution / 2;
@@ -27612,9 +27826,9 @@ return d[d.length-1];};return ", funcName].join("");
       const [min, max] = measureBoundingBox$3(solid);
       const bsp = fromSolid(solid, createNormalize3());
       const polygons = [];
-      for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
-        for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
-          for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+      for (let x = min[X$h] - offset; x <= max[X$h] + offset; x += resolution) {
+        for (let y = min[Y$h] - offset; y <= max[Y$h] + offset; y += resolution) {
+          for (let z = min[Z$i] - offset; z <= max[Z$i] + offset; z += resolution) {
             const state = containsPoint(bsp, [x, y, z]);
             if (state !== containsPoint(bsp, [x + resolution, y, z])) {
               const face = [[x + offset, y - offset, z - offset],
@@ -27776,31 +27990,6 @@ return d[d.length-1];};return ", funcName].join("");
 
   shrink.signature = 'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
   shrinkMethod.signature = 'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';
-
-  // Hershey simplex one line font.
-  // See: http://paulbourke.net/dataformats/hershey/
-
-  const hersheyPaths = { '32': [[null]], '33': [[null, [5, 21, 0], [5, 7, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '34': [[null, [4, 21, 0], [4, 14, 0]], [null, [12, 21, 0], [12, 14, 0]], [null]], '35': [[null, [11, 25, 0], [4, -7, 0]], [null, [17, 25, 0], [10, -7, 0]], [null, [4, 12, 0], [18, 12, 0]], [null, [3, 6, 0], [17, 6, 0]], [null]], '36': [[null, [8, 25, 0], [8, -4, 0]], [null, [12, 25, 0], [12, -4, 0]], [null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '37': [[null, [21, 21, 0], [3, 0, 0]], [null, [8, 21, 0], [10, 19, 0], [10, 17, 0], [9, 15, 0], [7, 14, 0], [5, 14, 0], [3, 16, 0], [3, 18, 0], [4, 20, 0], [6, 21, 0], [8, 21, 0], [10, 20, 0], [13, 19, 0], [16, 19, 0], [19, 20, 0], [21, 21, 0]], [null, [17, 7, 0], [15, 6, 0], [14, 4, 0], [14, 2, 0], [16, 0, 0], [18, 0, 0], [20, 1, 0], [21, 3, 0], [21, 5, 0], [19, 7, 0], [17, 7, 0]], [null]], '38': [[null, [23, 12, 0], [23, 13, 0], [22, 14, 0], [21, 14, 0], [20, 13, 0], [19, 11, 0], [17, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [7, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 6, 0], [4, 8, 0], [5, 9, 0], [12, 13, 0], [13, 14, 0], [14, 16, 0], [14, 18, 0], [13, 20, 0], [11, 21, 0], [9, 20, 0], [8, 18, 0], [8, 16, 0], [9, 13, 0], [11, 10, 0], [16, 3, 0], [18, 1, 0], [20, 0, 0], [22, 0, 0], [23, 1, 0], [23, 2, 0]], [null]], '39': [[null, [5, 19, 0], [4, 20, 0], [5, 21, 0], [6, 20, 0], [6, 18, 0], [5, 16, 0], [4, 15, 0]], [null]], '40': [[null, [11, 25, 0], [9, 23, 0], [7, 20, 0], [5, 16, 0], [4, 11, 0], [4, 7, 0], [5, 2, 0], [7, -2, 0], [9, -5, 0], [11, -7, 0]], [null]], '41': [[null, [3, 25, 0], [5, 23, 0], [7, 20, 0], [9, 16, 0], [10, 11, 0], [10, 7, 0], [9, 2, 0], [7, -2, 0], [5, -5, 0], [3, -7, 0]], [null]], '42': [[null, [8, 21, 0], [8, 9, 0]], [null, [3, 18, 0], [13, 12, 0]], [null, [13, 18, 0], [3, 12, 0]], [null]], '43': [[null, [13, 18, 0], [13, 0, 0]], [null, [4, 9, 0], [22, 9, 0]], [null]], '44': [[null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '45': [[null, [4, 9, 0], [22, 9, 0]], [null]], '46': [[null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '47': [[null, [20, 25, 0], [2, -7, 0]], [null]], '48': [[null, [9, 21, 0], [6, 20, 0], [4, 17, 0], [3, 12, 0], [3, 9, 0], [4, 4, 0], [6, 1, 0], [9, 0, 0], [11, 0, 0], [14, 1, 0], [16, 4, 0], [17, 9, 0], [17, 12, 0], [16, 17, 0], [14, 20, 0], [11, 21, 0], [9, 21, 0]], [null]], '49': [[null, [6, 17, 0], [8, 18, 0], [11, 21, 0], [11, 0, 0]], [null]], '50': [[null, [4, 16, 0], [4, 17, 0], [5, 19, 0], [6, 20, 0], [8, 21, 0], [12, 21, 0], [14, 20, 0], [15, 19, 0], [16, 17, 0], [16, 15, 0], [15, 13, 0], [13, 10, 0], [3, 0, 0], [17, 0, 0]], [null]], '51': [[null, [5, 21, 0], [16, 21, 0], [10, 13, 0], [13, 13, 0], [15, 12, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '52': [[null, [13, 21, 0], [3, 7, 0], [18, 7, 0]], [null, [13, 21, 0], [13, 0, 0]], [null]], '53': [[null, [15, 21, 0], [5, 21, 0], [4, 12, 0], [5, 13, 0], [8, 14, 0], [11, 14, 0], [14, 13, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '54': [[null, [16, 18, 0], [15, 20, 0], [12, 21, 0], [10, 21, 0], [7, 20, 0], [5, 17, 0], [4, 12, 0], [4, 7, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [11, 0, 0], [14, 1, 0], [16, 3, 0], [17, 6, 0], [17, 7, 0], [16, 10, 0], [14, 12, 0], [11, 13, 0], [10, 13, 0], [7, 12, 0], [5, 10, 0], [4, 7, 0]], [null]], '55': [[null, [17, 21, 0], [7, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null]], '56': [[null, [8, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 14, 0], [7, 13, 0], [11, 12, 0], [14, 11, 0], [16, 9, 0], [17, 7, 0], [17, 4, 0], [16, 2, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 7, 0], [4, 9, 0], [6, 11, 0], [9, 12, 0], [13, 13, 0], [15, 14, 0], [16, 16, 0], [16, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0]], [null]], '57': [[null, [16, 14, 0], [15, 11, 0], [13, 9, 0], [10, 8, 0], [9, 8, 0], [6, 9, 0], [4, 11, 0], [3, 14, 0], [3, 15, 0], [4, 18, 0], [6, 20, 0], [9, 21, 0], [10, 21, 0], [13, 20, 0], [15, 18, 0], [16, 14, 0], [16, 9, 0], [15, 4, 0], [13, 1, 0], [10, 0, 0], [8, 0, 0], [5, 1, 0], [4, 3, 0]], [null]], '58': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '59': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '60': [[null, [20, 18, 0], [4, 9, 0], [20, 0, 0]], [null]], '61': [[null, [4, 12, 0], [22, 12, 0]], [null, [4, 6, 0], [22, 6, 0]], [null]], '62': [[null, [4, 18, 0], [20, 9, 0], [4, 0, 0]], [null]], '63': [[null, [3, 16, 0], [3, 17, 0], [4, 19, 0], [5, 20, 0], [7, 21, 0], [11, 21, 0], [13, 20, 0], [14, 19, 0], [15, 17, 0], [15, 15, 0], [14, 13, 0], [13, 12, 0], [9, 10, 0], [9, 7, 0]], [null, [9, 2, 0], [8, 1, 0], [9, 0, 0], [10, 1, 0], [9, 2, 0]], [null]], '64': [[null, [18, 13, 0], [17, 15, 0], [15, 16, 0], [12, 16, 0], [10, 15, 0], [9, 14, 0], [8, 11, 0], [8, 8, 0], [9, 6, 0], [11, 5, 0], [14, 5, 0], [16, 6, 0], [17, 8, 0]], [null, [12, 16, 0], [10, 14, 0], [9, 11, 0], [9, 8, 0], [10, 6, 0], [11, 5, 0]], [null, [18, 16, 0], [17, 8, 0], [17, 6, 0], [19, 5, 0], [21, 5, 0], [23, 7, 0], [24, 10, 0], [24, 12, 0], [23, 15, 0], [22, 17, 0], [20, 19, 0], [18, 20, 0], [15, 21, 0], [12, 21, 0], [9, 20, 0], [7, 19, 0], [5, 17, 0], [4, 15, 0], [3, 12, 0], [3, 9, 0], [4, 6, 0], [5, 4, 0], [7, 2, 0], [9, 1, 0], [12, 0, 0], [15, 0, 0], [18, 1, 0], [20, 2, 0], [21, 3, 0]], [null, [19, 16, 0], [18, 8, 0], [18, 6, 0], [19, 5, 0]]], '65': [[null, [9, 21, 0], [1, 0, 0]], [null, [9, 21, 0], [17, 0, 0]], [null, [4, 7, 0], [14, 7, 0]], [null]], '66': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0]], [null, [4, 11, 0], [13, 11, 0], [16, 10, 0], [17, 9, 0], [18, 7, 0], [18, 4, 0], [17, 2, 0], [16, 1, 0], [13, 0, 0], [4, 0, 0]], [null]], '67': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0]], [null]], '68': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [11, 21, 0], [14, 20, 0], [16, 18, 0], [17, 16, 0], [18, 13, 0], [18, 8, 0], [17, 5, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [4, 0, 0]], [null]], '69': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null, [4, 0, 0], [17, 0, 0]], [null]], '70': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null]], '71': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [18, 8, 0]], [null, [13, 8, 0], [18, 8, 0]], [null]], '72': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null, [4, 11, 0], [18, 11, 0]], [null]], '73': [[null, [4, 21, 0], [4, 0, 0]], [null]], '74': [[null, [12, 21, 0], [12, 5, 0], [11, 2, 0], [10, 1, 0], [8, 0, 0], [6, 0, 0], [4, 1, 0], [3, 2, 0], [2, 5, 0], [2, 7, 0]], [null]], '75': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [4, 7, 0]], [null, [9, 12, 0], [18, 0, 0]], [null]], '76': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 0, 0], [16, 0, 0]], [null]], '77': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [20, 0, 0]], [null]], '78': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [18, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null]], '79': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null]], '80': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 14, 0], [17, 12, 0], [16, 11, 0], [13, 10, 0], [4, 10, 0]], [null]], '81': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null, [12, 4, 0], [18, -2, 0]], [null]], '82': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0], [4, 11, 0]], [null, [11, 11, 0], [18, 0, 0]], [null]], '83': [[null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '84': [[null, [8, 21, 0], [8, 0, 0]], [null, [1, 21, 0], [15, 21, 0]], [null]], '85': [[null, [4, 21, 0], [4, 6, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [12, 0, 0], [15, 1, 0], [17, 3, 0], [18, 6, 0], [18, 21, 0]], [null]], '86': [[null, [1, 21, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 0, 0]], [null]], '87': [[null, [2, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [17, 0, 0]], [null, [22, 21, 0], [17, 0, 0]], [null]], '88': [[null, [3, 21, 0], [17, 0, 0]], [null, [17, 21, 0], [3, 0, 0]], [null]], '89': [[null, [1, 21, 0], [9, 11, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 11, 0]], [null]], '90': [[null, [17, 21, 0], [3, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null, [3, 0, 0], [17, 0, 0]], [null]], '91': [[null, [4, 25, 0], [4, -7, 0]], [null, [5, 25, 0], [5, -7, 0]], [null, [4, 25, 0], [11, 25, 0]], [null, [4, -7, 0], [11, -7, 0]], [null]], '92': [[null, [0, 21, 0], [14, -3, 0]], [null]], '93': [[null, [9, 25, 0], [9, -7, 0]], [null, [10, 25, 0], [10, -7, 0]], [null, [3, 25, 0], [10, 25, 0]], [null, [3, -7, 0], [10, -7, 0]], [null]], '94': [[null, [6, 15, 0], [8, 18, 0], [10, 15, 0]], [null, [3, 12, 0], [8, 17, 0], [13, 12, 0]], [null, [8, 17, 0], [8, 0, 0]], [null]], '95': [[null, [0, -2, 0], [16, -2, 0]], [null]], '96': [[null, [6, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 15, 0], [6, 16, 0], [5, 17, 0]], [null]], '97': [[null, [15, 14, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '98': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '99': [[null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '100': [[null, [15, 21, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '101': [[null, [3, 8, 0], [15, 8, 0], [15, 10, 0], [14, 12, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '102': [[null, [10, 21, 0], [8, 21, 0], [6, 20, 0], [5, 17, 0], [5, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '103': [[null, [15, 14, 0], [15, -2, 0], [14, -5, 0], [13, -6, 0], [11, -7, 0], [8, -7, 0], [6, -6, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '104': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '105': [[null, [3, 21, 0], [4, 20, 0], [5, 21, 0], [4, 22, 0], [3, 21, 0]], [null, [4, 14, 0], [4, 0, 0]], [null]], '106': [[null, [5, 21, 0], [6, 20, 0], [7, 21, 0], [6, 22, 0], [5, 21, 0]], [null, [6, 14, 0], [6, -3, 0], [5, -6, 0], [3, -7, 0], [1, -7, 0]], [null]], '107': [[null, [4, 21, 0], [4, 0, 0]], [null, [14, 14, 0], [4, 4, 0]], [null, [8, 8, 0], [15, 0, 0]], [null]], '108': [[null, [4, 21, 0], [4, 0, 0]], [null]], '109': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null, [15, 10, 0], [18, 13, 0], [20, 14, 0], [23, 14, 0], [25, 13, 0], [26, 10, 0], [26, 0, 0]], [null]], '110': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '111': [[null, [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0], [16, 6, 0], [16, 8, 0], [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0]], [null]], '112': [[null, [4, 14, 0], [4, -7, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '113': [[null, [15, 14, 0], [15, -7, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '114': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 8, 0], [5, 11, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0]], [null]], '115': [[null, [14, 11, 0], [13, 13, 0], [10, 14, 0], [7, 14, 0], [4, 13, 0], [3, 11, 0], [4, 9, 0], [6, 8, 0], [11, 7, 0], [13, 6, 0], [14, 4, 0], [14, 3, 0], [13, 1, 0], [10, 0, 0], [7, 0, 0], [4, 1, 0], [3, 3, 0]], [null]], '116': [[null, [5, 21, 0], [5, 4, 0], [6, 1, 0], [8, 0, 0], [10, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '117': [[null, [4, 14, 0], [4, 4, 0], [5, 1, 0], [7, 0, 0], [10, 0, 0], [12, 1, 0], [15, 4, 0]], [null, [15, 14, 0], [15, 0, 0]], [null]], '118': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0]], [null]], '119': [[null, [3, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [15, 0, 0]], [null, [19, 14, 0], [15, 0, 0]], [null]], '120': [[null, [3, 14, 0], [14, 0, 0]], [null, [14, 14, 0], [3, 0, 0]], [null]], '121': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0], [6, -4, 0], [4, -6, 0], [2, -7, 0], [1, -7, 0]], [null]], '122': [[null, [14, 14, 0], [3, 0, 0]], [null, [3, 14, 0], [14, 14, 0]], [null, [3, 0, 0], [14, 0, 0]], [null]], '123': [[null, [9, 25, 0], [7, 24, 0], [6, 23, 0], [5, 21, 0], [5, 19, 0], [6, 17, 0], [7, 16, 0], [8, 14, 0], [8, 12, 0], [6, 10, 0]], [null, [7, 24, 0], [6, 22, 0], [6, 20, 0], [7, 18, 0], [8, 17, 0], [9, 15, 0], [9, 13, 0], [8, 11, 0], [4, 9, 0], [8, 7, 0], [9, 5, 0], [9, 3, 0], [8, 1, 0], [7, 0, 0], [6, -2, 0], [6, -4, 0], [7, -6, 0]], [null, [6, 8, 0], [8, 6, 0], [8, 4, 0], [7, 2, 0], [6, 1, 0], [5, -1, 0], [5, -3, 0], [6, -5, 0], [7, -6, 0], [9, -7, 0]], [null]], '124': [[null, [4, 25, 0], [4, -7, 0]], [null]], '125': [[null, [5, 25, 0], [7, 24, 0], [8, 23, 0], [9, 21, 0], [9, 19, 0], [8, 17, 0], [7, 16, 0], [6, 14, 0], [6, 12, 0], [8, 10, 0]], [null, [7, 24, 0], [8, 22, 0], [8, 20, 0], [7, 18, 0], [6, 17, 0], [5, 15, 0], [5, 13, 0], [6, 11, 0], [10, 9, 0], [6, 7, 0], [5, 5, 0], [5, 3, 0], [6, 1, 0], [7, 0, 0], [8, -2, 0], [8, -4, 0], [7, -6, 0]], [null, [8, 8, 0], [6, 6, 0], [6, 4, 0], [7, 2, 0], [8, 1, 0], [9, -1, 0], [9, -3, 0], [8, -5, 0], [7, -6, 0], [5, -7, 0]], [null]], '126': [[null, [3, 6, 0], [3, 8, 0], [4, 11, 0], [6, 12, 0], [8, 12, 0], [10, 11, 0], [14, 8, 0], [16, 7, 0], [18, 7, 0], [20, 8, 0], [21, 10, 0]], [null, [3, 8, 0], [4, 10, 0], [6, 11, 0], [8, 11, 0], [10, 10, 0], [14, 7, 0], [16, 6, 0], [18, 6, 0], [20, 7, 0], [21, 10, 0], [21, 12, 0]], [null]] };
-
-  const hersheyWidth = { '32': 16, '33': 10, '34': 16, '35': 21, '36': 20, '37': 24, '38': 26, '39': 10, '40': 14, '41': 14, '42': 16, '43': 26, '44': 10, '45': 26, '46': 10, '47': 22, '48': 20, '49': 20, '50': 20, '51': 20, '52': 20, '53': 20, '54': 20, '55': 20, '56': 20, '57': 20, '58': 10, '59': 10, '60': 24, '61': 26, '62': 24, '63': 18, '64': 27, '65': 18, '66': 21, '67': 21, '68': 21, '69': 19, '70': 18, '71': 21, '72': 22, '73': 8, '74': 16, '75': 21, '76': 17, '77': 24, '78': 22, '79': 22, '80': 21, '81': 22, '82': 21, '83': 20, '84': 16, '85': 22, '86': 18, '87': 24, '88': 20, '89': 18, '90': 20, '91': 14, '92': 14, '93': 14, '94': 16, '95': 16, '96': 10, '97': 19, '98': 19, '99': 18, '100': 19, '101': 18, '102': 12, '103': 19, '104': 19, '105': 8, '106': 10, '107': 17, '108': 8, '109': 30, '110': 19, '111': 19, '112': 19, '113': 19, '114': 13, '115': 17, '116': 12, '117': 19, '118': 16, '119': 22, '120': 17, '121': 16, '122': 17, '123': 14, '124': 8, '125': 14, '126': 24 };
-
-  const toPaths$1 = (letters) => {
-    let xOffset = 0;
-    const mergedPaths = [];
-    for (const letter of letters) {
-      const code = letter.charCodeAt(0);
-      const paths = hersheyPaths[code] || [];
-      mergedPaths.push(...translate$2([xOffset, 0, 0], paths));
-      xOffset += hersheyWidth[code] || 0;
-    }
-    return Shape.fromGeometry({ paths: mergedPaths }).scale(1 / 28);
-  };
-
-  const ofSize$2 = (size) => (text) => toPaths$1(text).scale(size);
-
-  const Hershey = (size) => ofSize$2(size);
-  Hershey.ofSize = ofSize$2;
-  Hershey.toPaths = toPaths$1;
 
   //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
   //[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
@@ -30297,7 +30486,7 @@ return d[d.length-1];};return ", funcName].join("");
     return unrepeated;
   };
 
-  const toPaths$2 = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
+  const toPaths$1 = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
     const paths = [];
     let path = [null];
 
@@ -30360,8 +30549,8 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const fromSvgPath = (options = {}, svgPath) => {
-    const paths = toPaths$2(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath))));
+  const fromSvgPath = (svgPath, options = {}) => {
+    const paths = toPaths$1(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath))));
     for (const path of paths) {
       assertGood(path);
     }
@@ -31048,8 +31237,8 @@ return d[d.length-1];};return ", funcName].join("");
   var cjs_2 = cjs.toPoints;
   var cjs_3 = cjs.toPath;
 
-  const X$j = 0;
-  const Y$j = 1;
+  const X$i = 0;
+  const Y$i = 1;
 
   const toColorFromTags = (tags, otherwise = 'black') => {
     if (tags !== undefined) {
@@ -31062,10 +31251,10 @@ return d[d.length-1];};return ", funcName].join("");
     return otherwise;
   };
 
-  const toSvg = async ({ padding = 0 }, baseGeometry) => {
+  const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const [min, max] = measureBoundingBox$5(baseGeometry);
-    const width = max[X$j] - min[X$j];
-    const height = max[Y$j] - min[Y$j];
+    const width = max[X$i] - min[X$i];
+    const height = max[Y$i] - min[Y$i];
     const translated = translate$4([width / 2, height / 2, 0], baseGeometry);
     const geometry = canonicalize$8(toKeptGeometry(translated));
 
@@ -31076,31 +31265,171 @@ return d[d.length-1];};return ", funcName].join("");
       `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`
     ];
 
-    for (const { surface, tags } of getSurfaces(geometry)) {
+    for (const { surface, z0Surface, tags } of getAnySurfaces(geometry)) {
+      const anySurface = surface || z0Surface;
+      if (anySurface === undefined) throw Error('die');
       const color = toColorFromTags(tags);
-      for (const polygon of makeConvex$1(surface)) {
-        svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+      const paths = [];
+      for (const polygon of outline$1(anySurface)) {
+        paths.push(`${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z`);
       }
-    }
-    for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
-      const color = toColorFromTags(tags);
-      for (const polygon of makeConvex(z0Surface)) {
-        svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
-      }
+      svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
     }
     for (const { paths, tags } of getPaths(geometry)) {
       const color = toColorFromTags(tags);
       for (const path of paths) {
         if (path[0] === null) {
-          svg.push(`<path stroke="${color}" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
+          svg.push(`<path stroke="${color}" fill="none" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
         } else {
-          svg.push(`<path stroke="${color}" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+          svg.push(`<path stroke="${color}" fill="none" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
         }
       }
     }
     svg.push('</svg>');
     return svg.join('\n');
   };
+
+  const toSvg$1 = async (shape, options = {}) => {
+    const pages = [];
+    // CHECK: Should this be limited to Page plans?
+    const geometry = shape.toKeptGeometry();
+    for (const entry of getPlans(geometry)) {
+      if (entry.plan.page) {
+        for (let leaf of getLeafs(entry.content)) {
+          const svg = await toSvg(leaf);
+          pages.push({ svg, leaf: { ...entry, content: leaf }, index: pages.length });
+        }
+      }
+    }
+    return pages;
+  };
+
+  const writeSvg = async (shape, name, options = {}) => {
+    for (const { svg, leaf, index } of await toSvg$1(shape, options)) {
+      await writeFile({}, `output/${name}_${index}.svg`, svg);
+      await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
+    }
+  };
+
+  const method$6 = function (...args) { return writeSvg(this, ...args); };
+  Shape.prototype.writeSvg = method$6;
+
+  /**
+   * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
+   * The exterior side of a polygon is determined by a CCW point ordering.
+   *
+   * @param {Object} options.
+   * @param {Polygon Array} polygons - An array of arrays of points.
+   * @returns {String} - the ascii STL output.
+   */
+
+  const geometryToTriangles = (solids) => {
+    const triangles = [];
+    for (const { solid } of solids) {
+      for (const surface of solid) {
+        for (const triangle of toTriangles({}, surface)) {
+          triangles.push(triangle);
+        }
+      }
+    }
+    return triangles;
+  };
+
+  const toStl = async (geometry, options = {}) => {
+    const { doFixTJunctions = true } = options;
+    const keptGeometry = toKeptGeometry(geometry);
+    let solids = getSolids(keptGeometry);
+    if (doFixTJunctions) {
+      solids = solids.map(solid => ({ ...solid, solid: makeWatertight(solid.solid) }));
+    }
+    const triangles = geometryToTriangles(solids);
+    return `solid JSxCAD\n${convertToFacets(options, canonicalize$9(triangles))}\nendsolid JSxCAD\n`;
+  };
+
+  const convertToFacets = (options, polygons) =>
+    polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
+
+  const toStlVector = vector =>
+    `${vector[0]} ${vector[1]} ${vector[2]}`;
+
+  const toStlVertex = vertex =>
+    `vertex ${toStlVector(vertex)}`;
+
+  const convertToFacet = (polygon) => {
+    const plane = toPlane(polygon);
+    if (plane !== undefined) {
+      return `facet normal ${toStlVector(toPlane(polygon))}\n` +
+             `outer loop\n` +
+             `${toStlVertex(polygon[0])}\n` +
+             `${toStlVertex(polygon[1])}\n` +
+             `${toStlVertex(polygon[2])}\n` +
+             `endloop\n` +
+             `endfacet`;
+    }
+  };
+
+  /**
+   *
+   * # Write STL
+   *
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * await Cube().writeStl('cube.stl');
+   * await readStl({ path: 'cube.stl' });
+   * ```
+   * :::
+   *
+   **/
+
+  const toStl$1 = async (shape, options = {}) => {
+    const pages = [];
+    // CHECK: Should this be limited to Page plans?
+    const geometry = shape.toKeptGeometry();
+    for (const entry of getPlans(geometry)) {
+      if (entry.plan.page) {
+        for (let leaf of getLeafs(entry.content)) {
+          const stl = await toStl(leaf, {});
+          pages.push({ stl, leaf: { ...entry, content: leaf }, index: pages.length });
+        }
+      }
+    }
+    return pages;
+  };
+
+  const writeStl = async (shape, name, options = {}) => {
+    for (const { stl, leaf, index } of await toStl$1(shape, {})) {
+      await writeFile({}, `output/${name}_${index}.stl`, stl);
+      await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
+    }
+  };
+
+  const method$7 = function (...args) { return writeStl(this, ...args); };
+  Shape.prototype.writeStl = method$7;
+
+  // Hershey simplex one line font.
+  // See: http://paulbourke.net/dataformats/hershey/
+
+  const hersheyPaths = { '32': [[null]], '33': [[null, [5, 21, 0], [5, 7, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '34': [[null, [4, 21, 0], [4, 14, 0]], [null, [12, 21, 0], [12, 14, 0]], [null]], '35': [[null, [11, 25, 0], [4, -7, 0]], [null, [17, 25, 0], [10, -7, 0]], [null, [4, 12, 0], [18, 12, 0]], [null, [3, 6, 0], [17, 6, 0]], [null]], '36': [[null, [8, 25, 0], [8, -4, 0]], [null, [12, 25, 0], [12, -4, 0]], [null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '37': [[null, [21, 21, 0], [3, 0, 0]], [null, [8, 21, 0], [10, 19, 0], [10, 17, 0], [9, 15, 0], [7, 14, 0], [5, 14, 0], [3, 16, 0], [3, 18, 0], [4, 20, 0], [6, 21, 0], [8, 21, 0], [10, 20, 0], [13, 19, 0], [16, 19, 0], [19, 20, 0], [21, 21, 0]], [null, [17, 7, 0], [15, 6, 0], [14, 4, 0], [14, 2, 0], [16, 0, 0], [18, 0, 0], [20, 1, 0], [21, 3, 0], [21, 5, 0], [19, 7, 0], [17, 7, 0]], [null]], '38': [[null, [23, 12, 0], [23, 13, 0], [22, 14, 0], [21, 14, 0], [20, 13, 0], [19, 11, 0], [17, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [7, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 6, 0], [4, 8, 0], [5, 9, 0], [12, 13, 0], [13, 14, 0], [14, 16, 0], [14, 18, 0], [13, 20, 0], [11, 21, 0], [9, 20, 0], [8, 18, 0], [8, 16, 0], [9, 13, 0], [11, 10, 0], [16, 3, 0], [18, 1, 0], [20, 0, 0], [22, 0, 0], [23, 1, 0], [23, 2, 0]], [null]], '39': [[null, [5, 19, 0], [4, 20, 0], [5, 21, 0], [6, 20, 0], [6, 18, 0], [5, 16, 0], [4, 15, 0]], [null]], '40': [[null, [11, 25, 0], [9, 23, 0], [7, 20, 0], [5, 16, 0], [4, 11, 0], [4, 7, 0], [5, 2, 0], [7, -2, 0], [9, -5, 0], [11, -7, 0]], [null]], '41': [[null, [3, 25, 0], [5, 23, 0], [7, 20, 0], [9, 16, 0], [10, 11, 0], [10, 7, 0], [9, 2, 0], [7, -2, 0], [5, -5, 0], [3, -7, 0]], [null]], '42': [[null, [8, 21, 0], [8, 9, 0]], [null, [3, 18, 0], [13, 12, 0]], [null, [13, 18, 0], [3, 12, 0]], [null]], '43': [[null, [13, 18, 0], [13, 0, 0]], [null, [4, 9, 0], [22, 9, 0]], [null]], '44': [[null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '45': [[null, [4, 9, 0], [22, 9, 0]], [null]], '46': [[null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '47': [[null, [20, 25, 0], [2, -7, 0]], [null]], '48': [[null, [9, 21, 0], [6, 20, 0], [4, 17, 0], [3, 12, 0], [3, 9, 0], [4, 4, 0], [6, 1, 0], [9, 0, 0], [11, 0, 0], [14, 1, 0], [16, 4, 0], [17, 9, 0], [17, 12, 0], [16, 17, 0], [14, 20, 0], [11, 21, 0], [9, 21, 0]], [null]], '49': [[null, [6, 17, 0], [8, 18, 0], [11, 21, 0], [11, 0, 0]], [null]], '50': [[null, [4, 16, 0], [4, 17, 0], [5, 19, 0], [6, 20, 0], [8, 21, 0], [12, 21, 0], [14, 20, 0], [15, 19, 0], [16, 17, 0], [16, 15, 0], [15, 13, 0], [13, 10, 0], [3, 0, 0], [17, 0, 0]], [null]], '51': [[null, [5, 21, 0], [16, 21, 0], [10, 13, 0], [13, 13, 0], [15, 12, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '52': [[null, [13, 21, 0], [3, 7, 0], [18, 7, 0]], [null, [13, 21, 0], [13, 0, 0]], [null]], '53': [[null, [15, 21, 0], [5, 21, 0], [4, 12, 0], [5, 13, 0], [8, 14, 0], [11, 14, 0], [14, 13, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '54': [[null, [16, 18, 0], [15, 20, 0], [12, 21, 0], [10, 21, 0], [7, 20, 0], [5, 17, 0], [4, 12, 0], [4, 7, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [11, 0, 0], [14, 1, 0], [16, 3, 0], [17, 6, 0], [17, 7, 0], [16, 10, 0], [14, 12, 0], [11, 13, 0], [10, 13, 0], [7, 12, 0], [5, 10, 0], [4, 7, 0]], [null]], '55': [[null, [17, 21, 0], [7, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null]], '56': [[null, [8, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 14, 0], [7, 13, 0], [11, 12, 0], [14, 11, 0], [16, 9, 0], [17, 7, 0], [17, 4, 0], [16, 2, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 7, 0], [4, 9, 0], [6, 11, 0], [9, 12, 0], [13, 13, 0], [15, 14, 0], [16, 16, 0], [16, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0]], [null]], '57': [[null, [16, 14, 0], [15, 11, 0], [13, 9, 0], [10, 8, 0], [9, 8, 0], [6, 9, 0], [4, 11, 0], [3, 14, 0], [3, 15, 0], [4, 18, 0], [6, 20, 0], [9, 21, 0], [10, 21, 0], [13, 20, 0], [15, 18, 0], [16, 14, 0], [16, 9, 0], [15, 4, 0], [13, 1, 0], [10, 0, 0], [8, 0, 0], [5, 1, 0], [4, 3, 0]], [null]], '58': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '59': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '60': [[null, [20, 18, 0], [4, 9, 0], [20, 0, 0]], [null]], '61': [[null, [4, 12, 0], [22, 12, 0]], [null, [4, 6, 0], [22, 6, 0]], [null]], '62': [[null, [4, 18, 0], [20, 9, 0], [4, 0, 0]], [null]], '63': [[null, [3, 16, 0], [3, 17, 0], [4, 19, 0], [5, 20, 0], [7, 21, 0], [11, 21, 0], [13, 20, 0], [14, 19, 0], [15, 17, 0], [15, 15, 0], [14, 13, 0], [13, 12, 0], [9, 10, 0], [9, 7, 0]], [null, [9, 2, 0], [8, 1, 0], [9, 0, 0], [10, 1, 0], [9, 2, 0]], [null]], '64': [[null, [18, 13, 0], [17, 15, 0], [15, 16, 0], [12, 16, 0], [10, 15, 0], [9, 14, 0], [8, 11, 0], [8, 8, 0], [9, 6, 0], [11, 5, 0], [14, 5, 0], [16, 6, 0], [17, 8, 0]], [null, [12, 16, 0], [10, 14, 0], [9, 11, 0], [9, 8, 0], [10, 6, 0], [11, 5, 0]], [null, [18, 16, 0], [17, 8, 0], [17, 6, 0], [19, 5, 0], [21, 5, 0], [23, 7, 0], [24, 10, 0], [24, 12, 0], [23, 15, 0], [22, 17, 0], [20, 19, 0], [18, 20, 0], [15, 21, 0], [12, 21, 0], [9, 20, 0], [7, 19, 0], [5, 17, 0], [4, 15, 0], [3, 12, 0], [3, 9, 0], [4, 6, 0], [5, 4, 0], [7, 2, 0], [9, 1, 0], [12, 0, 0], [15, 0, 0], [18, 1, 0], [20, 2, 0], [21, 3, 0]], [null, [19, 16, 0], [18, 8, 0], [18, 6, 0], [19, 5, 0]]], '65': [[null, [9, 21, 0], [1, 0, 0]], [null, [9, 21, 0], [17, 0, 0]], [null, [4, 7, 0], [14, 7, 0]], [null]], '66': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0]], [null, [4, 11, 0], [13, 11, 0], [16, 10, 0], [17, 9, 0], [18, 7, 0], [18, 4, 0], [17, 2, 0], [16, 1, 0], [13, 0, 0], [4, 0, 0]], [null]], '67': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0]], [null]], '68': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [11, 21, 0], [14, 20, 0], [16, 18, 0], [17, 16, 0], [18, 13, 0], [18, 8, 0], [17, 5, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [4, 0, 0]], [null]], '69': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null, [4, 0, 0], [17, 0, 0]], [null]], '70': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null]], '71': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [18, 8, 0]], [null, [13, 8, 0], [18, 8, 0]], [null]], '72': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null, [4, 11, 0], [18, 11, 0]], [null]], '73': [[null, [4, 21, 0], [4, 0, 0]], [null]], '74': [[null, [12, 21, 0], [12, 5, 0], [11, 2, 0], [10, 1, 0], [8, 0, 0], [6, 0, 0], [4, 1, 0], [3, 2, 0], [2, 5, 0], [2, 7, 0]], [null]], '75': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [4, 7, 0]], [null, [9, 12, 0], [18, 0, 0]], [null]], '76': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 0, 0], [16, 0, 0]], [null]], '77': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [20, 0, 0]], [null]], '78': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [18, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null]], '79': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null]], '80': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 14, 0], [17, 12, 0], [16, 11, 0], [13, 10, 0], [4, 10, 0]], [null]], '81': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null, [12, 4, 0], [18, -2, 0]], [null]], '82': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0], [4, 11, 0]], [null, [11, 11, 0], [18, 0, 0]], [null]], '83': [[null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '84': [[null, [8, 21, 0], [8, 0, 0]], [null, [1, 21, 0], [15, 21, 0]], [null]], '85': [[null, [4, 21, 0], [4, 6, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [12, 0, 0], [15, 1, 0], [17, 3, 0], [18, 6, 0], [18, 21, 0]], [null]], '86': [[null, [1, 21, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 0, 0]], [null]], '87': [[null, [2, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [17, 0, 0]], [null, [22, 21, 0], [17, 0, 0]], [null]], '88': [[null, [3, 21, 0], [17, 0, 0]], [null, [17, 21, 0], [3, 0, 0]], [null]], '89': [[null, [1, 21, 0], [9, 11, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 11, 0]], [null]], '90': [[null, [17, 21, 0], [3, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null, [3, 0, 0], [17, 0, 0]], [null]], '91': [[null, [4, 25, 0], [4, -7, 0]], [null, [5, 25, 0], [5, -7, 0]], [null, [4, 25, 0], [11, 25, 0]], [null, [4, -7, 0], [11, -7, 0]], [null]], '92': [[null, [0, 21, 0], [14, -3, 0]], [null]], '93': [[null, [9, 25, 0], [9, -7, 0]], [null, [10, 25, 0], [10, -7, 0]], [null, [3, 25, 0], [10, 25, 0]], [null, [3, -7, 0], [10, -7, 0]], [null]], '94': [[null, [6, 15, 0], [8, 18, 0], [10, 15, 0]], [null, [3, 12, 0], [8, 17, 0], [13, 12, 0]], [null, [8, 17, 0], [8, 0, 0]], [null]], '95': [[null, [0, -2, 0], [16, -2, 0]], [null]], '96': [[null, [6, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 15, 0], [6, 16, 0], [5, 17, 0]], [null]], '97': [[null, [15, 14, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '98': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '99': [[null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '100': [[null, [15, 21, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '101': [[null, [3, 8, 0], [15, 8, 0], [15, 10, 0], [14, 12, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '102': [[null, [10, 21, 0], [8, 21, 0], [6, 20, 0], [5, 17, 0], [5, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '103': [[null, [15, 14, 0], [15, -2, 0], [14, -5, 0], [13, -6, 0], [11, -7, 0], [8, -7, 0], [6, -6, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '104': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '105': [[null, [3, 21, 0], [4, 20, 0], [5, 21, 0], [4, 22, 0], [3, 21, 0]], [null, [4, 14, 0], [4, 0, 0]], [null]], '106': [[null, [5, 21, 0], [6, 20, 0], [7, 21, 0], [6, 22, 0], [5, 21, 0]], [null, [6, 14, 0], [6, -3, 0], [5, -6, 0], [3, -7, 0], [1, -7, 0]], [null]], '107': [[null, [4, 21, 0], [4, 0, 0]], [null, [14, 14, 0], [4, 4, 0]], [null, [8, 8, 0], [15, 0, 0]], [null]], '108': [[null, [4, 21, 0], [4, 0, 0]], [null]], '109': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null, [15, 10, 0], [18, 13, 0], [20, 14, 0], [23, 14, 0], [25, 13, 0], [26, 10, 0], [26, 0, 0]], [null]], '110': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '111': [[null, [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0], [16, 6, 0], [16, 8, 0], [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0]], [null]], '112': [[null, [4, 14, 0], [4, -7, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '113': [[null, [15, 14, 0], [15, -7, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '114': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 8, 0], [5, 11, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0]], [null]], '115': [[null, [14, 11, 0], [13, 13, 0], [10, 14, 0], [7, 14, 0], [4, 13, 0], [3, 11, 0], [4, 9, 0], [6, 8, 0], [11, 7, 0], [13, 6, 0], [14, 4, 0], [14, 3, 0], [13, 1, 0], [10, 0, 0], [7, 0, 0], [4, 1, 0], [3, 3, 0]], [null]], '116': [[null, [5, 21, 0], [5, 4, 0], [6, 1, 0], [8, 0, 0], [10, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '117': [[null, [4, 14, 0], [4, 4, 0], [5, 1, 0], [7, 0, 0], [10, 0, 0], [12, 1, 0], [15, 4, 0]], [null, [15, 14, 0], [15, 0, 0]], [null]], '118': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0]], [null]], '119': [[null, [3, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [15, 0, 0]], [null, [19, 14, 0], [15, 0, 0]], [null]], '120': [[null, [3, 14, 0], [14, 0, 0]], [null, [14, 14, 0], [3, 0, 0]], [null]], '121': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0], [6, -4, 0], [4, -6, 0], [2, -7, 0], [1, -7, 0]], [null]], '122': [[null, [14, 14, 0], [3, 0, 0]], [null, [3, 14, 0], [14, 14, 0]], [null, [3, 0, 0], [14, 0, 0]], [null]], '123': [[null, [9, 25, 0], [7, 24, 0], [6, 23, 0], [5, 21, 0], [5, 19, 0], [6, 17, 0], [7, 16, 0], [8, 14, 0], [8, 12, 0], [6, 10, 0]], [null, [7, 24, 0], [6, 22, 0], [6, 20, 0], [7, 18, 0], [8, 17, 0], [9, 15, 0], [9, 13, 0], [8, 11, 0], [4, 9, 0], [8, 7, 0], [9, 5, 0], [9, 3, 0], [8, 1, 0], [7, 0, 0], [6, -2, 0], [6, -4, 0], [7, -6, 0]], [null, [6, 8, 0], [8, 6, 0], [8, 4, 0], [7, 2, 0], [6, 1, 0], [5, -1, 0], [5, -3, 0], [6, -5, 0], [7, -6, 0], [9, -7, 0]], [null]], '124': [[null, [4, 25, 0], [4, -7, 0]], [null]], '125': [[null, [5, 25, 0], [7, 24, 0], [8, 23, 0], [9, 21, 0], [9, 19, 0], [8, 17, 0], [7, 16, 0], [6, 14, 0], [6, 12, 0], [8, 10, 0]], [null, [7, 24, 0], [8, 22, 0], [8, 20, 0], [7, 18, 0], [6, 17, 0], [5, 15, 0], [5, 13, 0], [6, 11, 0], [10, 9, 0], [6, 7, 0], [5, 5, 0], [5, 3, 0], [6, 1, 0], [7, 0, 0], [8, -2, 0], [8, -4, 0], [7, -6, 0]], [null, [8, 8, 0], [6, 6, 0], [6, 4, 0], [7, 2, 0], [8, 1, 0], [9, -1, 0], [9, -3, 0], [8, -5, 0], [7, -6, 0], [5, -7, 0]], [null]], '126': [[null, [3, 6, 0], [3, 8, 0], [4, 11, 0], [6, 12, 0], [8, 12, 0], [10, 11, 0], [14, 8, 0], [16, 7, 0], [18, 7, 0], [20, 8, 0], [21, 10, 0]], [null, [3, 8, 0], [4, 10, 0], [6, 11, 0], [8, 11, 0], [10, 10, 0], [14, 7, 0], [16, 6, 0], [18, 6, 0], [20, 7, 0], [21, 10, 0], [21, 12, 0]], [null]] };
+
+  const hersheyWidth = { '32': 16, '33': 10, '34': 16, '35': 21, '36': 20, '37': 24, '38': 26, '39': 10, '40': 14, '41': 14, '42': 16, '43': 26, '44': 10, '45': 26, '46': 10, '47': 22, '48': 20, '49': 20, '50': 20, '51': 20, '52': 20, '53': 20, '54': 20, '55': 20, '56': 20, '57': 20, '58': 10, '59': 10, '60': 24, '61': 26, '62': 24, '63': 18, '64': 27, '65': 18, '66': 21, '67': 21, '68': 21, '69': 19, '70': 18, '71': 21, '72': 22, '73': 8, '74': 16, '75': 21, '76': 17, '77': 24, '78': 22, '79': 22, '80': 21, '81': 22, '82': 21, '83': 20, '84': 16, '85': 22, '86': 18, '87': 24, '88': 20, '89': 18, '90': 20, '91': 14, '92': 14, '93': 14, '94': 16, '95': 16, '96': 10, '97': 19, '98': 19, '99': 18, '100': 19, '101': 18, '102': 12, '103': 19, '104': 19, '105': 8, '106': 10, '107': 17, '108': 8, '109': 30, '110': 19, '111': 19, '112': 19, '113': 19, '114': 13, '115': 17, '116': 12, '117': 19, '118': 16, '119': 22, '120': 17, '121': 16, '122': 17, '123': 14, '124': 8, '125': 14, '126': 24 };
+
+  const toPaths$2 = (letters) => {
+    let xOffset = 0;
+    const mergedPaths = [];
+    for (const letter of letters) {
+      const code = letter.charCodeAt(0);
+      const paths = hersheyPaths[code] || [];
+      mergedPaths.push(...translate$2([xOffset, 0, 0], paths));
+      xOffset += hersheyWidth[code] || 0;
+    }
+    return Shape.fromGeometry({ paths: mergedPaths }).scale(1 / 28);
+  };
+
+  const ofSize$2 = (size) => (text) => toPaths$2(text).scale(size);
+
+  const Hershey = (size) => ofSize$2(size);
+  Hershey.ofSize = ofSize$2;
+  Hershey.toPaths = toPaths$2;
 
   var opentype = createCommonjsModule(function (module, exports) {
   /**
@@ -44986,7 +45315,7 @@ return d[d.length-1];};return ", funcName].join("");
                               svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
                             });
       const pathsets = [];
-      for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
+      for (let { paths } of svgPaths.map(svgPath => fromSvgPath(svgPath, { curveSegments: curveSegments }))) {
         // Outlining forces re-orientation.
         pathsets.push(reorient(paths));
       }
@@ -45262,10 +45591,10 @@ return d[d.length-1];};return ", funcName].join("");
 
   Shape.prototype.toBillOfMaterial = toBillOfMaterialMethod;
 
-  const MIN = 0;
+  const MIN$3 = 0;
   const MAX = 1;
-  const X$k = 0;
-  const Y$k = 1;
+  const X$j = 0;
+  const Y$j = 1;
 
   const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...shapes) => {
     const layers = [];
@@ -45279,8 +45608,8 @@ return d[d.length-1];};return ", funcName].join("");
       // Content fits to page size.
       const packSize = [];
       const content = pack$1(Shape.fromGeometry({ layers }), { size, pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
-      const pageWidth = packSize[MAX][X$k] - packSize[MIN][X$k];
-      const pageLength = packSize[MAX][Y$k] - packSize[MIN][Y$k];
+      const pageWidth = packSize[MAX][X$j] - packSize[MIN$3][X$j];
+      const pageLength = packSize[MAX][Y$j] - packSize[MIN$3][Y$j];
       const plans = [];
       for (const layer of content.toKeptGeometry().layers) {
         plans.push(Plan({
@@ -45301,8 +45630,8 @@ return d[d.length-1];};return ", funcName].join("");
       const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
       // FIX: Using content.size() loses the margin, which is a problem for repacking.
       // Probably page plans should be generated by pack and count toward the size.
-      const pageWidth = packSize[MAX][X$k] - packSize[MIN][X$k];
-      const pageLength = packSize[MAX][Y$k] - packSize[MIN][Y$k];
+      const pageWidth = packSize[MAX][X$j] - packSize[MIN$3][X$j];
+      const pageLength = packSize[MAX][Y$j] - packSize[MIN$3][Y$j];
       if (isFinite(pageWidth) && isFinite(pageLength)) {
         const plans = [];
         for (const layer of content.toKeptGeometry().layers) {
@@ -46884,9 +47213,9 @@ return d[d.length-1];};return ", funcName].join("");
   var api = /*#__PURE__*/Object.freeze({
     __proto__: null,
     source: source,
-    X: X$g,
-    Y: Y$g,
-    Z: Z$c,
+    X: X$f,
+    Y: Y$f,
+    Z: Z$b,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
@@ -46923,6 +47252,7 @@ return d[d.length-1];};return ", funcName].join("");
     Wave: Wave,
     Item: Item$1,
     WoodScrew: WoodScrew,
+    Random: Random,
     acos: acos,
     cos: cos,
     ease: ease,
@@ -53237,9 +53567,9 @@ return d[d.length-1];};return ", funcName].join("");
     __proto__: null,
     importModule: importModule,
     source: source,
-    X: X$g,
-    Y: Y$g,
-    Z: Z$c,
+    X: X$f,
+    Y: Y$f,
+    Z: Z$b,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
@@ -53276,6 +53606,7 @@ return d[d.length-1];};return ", funcName].join("");
     Wave: Wave,
     Item: Item$1,
     WoodScrew: WoodScrew,
+    Random: Random,
     acos: acos,
     cos: cos,
     ease: ease,
@@ -103880,9 +104211,9 @@ return d[d.length-1];};return ", funcName].join("");
     return [scene, camera];
   };
 
-  const toSvg$1 = async (options = {}, geometry) => toSvgSync(options, geometry);
+  const toSvg$2 = async (options = {}, geometry) => toSvgSync(options, geometry);
 
-  const header =
+  const header$1 =
 `<?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated by jsxcad -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
@@ -103901,63 +104232,9 @@ return d[d.length-1];};return ", funcName].join("");
     const serializer = new domParser_2();
     let svg = serializer.serializeToString(renderer.domElement) + '\n';
     if (includeXmlHeader) {
-      svg = header + svg;
+      svg = header$1 + svg;
     }
     return svg;
-  };
-
-  /**
-   * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
-   * The exterior side of a polygon is determined by a CCW point ordering.
-   *
-   * @param {Object} options.
-   * @param {Polygon Array} polygons - An array of arrays of points.
-   * @returns {String} - the ascii STL output.
-   */
-
-  const geometryToTriangles = (solids) => {
-    const triangles = [];
-    for (const { solid } of solids) {
-      for (const surface of solid) {
-        for (const triangle of toTriangles({}, surface)) {
-          triangles.push(triangle);
-        }
-      }
-    }
-    return triangles;
-  };
-
-  const toStl = async (geometry, options = {}) => {
-    const { doFixTJunctions = true } = options;
-    const keptGeometry = toKeptGeometry(geometry);
-    let solids = getSolids(keptGeometry);
-    if (doFixTJunctions) {
-      solids = solids.map(solid => ({ ...solid, solid: makeWatertight(solid.solid) }));
-    }
-    const triangles = geometryToTriangles(solids);
-    return `solid JSxCAD\n${convertToFacets(options, canonicalize$9(triangles))}\nendsolid JSxCAD\n`;
-  };
-
-  const convertToFacets = (options, polygons) =>
-    polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
-
-  const toStlVector = vector =>
-    `${vector[0]} ${vector[1]} ${vector[2]}`;
-
-  const toStlVertex = vertex =>
-    `vertex ${toStlVector(vertex)}`;
-
-  const convertToFacet = (polygon) => {
-    const plane = toPlane(polygon);
-    if (plane !== undefined) {
-      return `facet normal ${toStlVector(toPlane(polygon))}\n` +
-             `outer loop\n` +
-             `${toStlVertex(polygon[0])}\n` +
-             `${toStlVertex(polygon[1])}\n` +
-             `${toStlVertex(polygon[2])}\n` +
-             `endloop\n` +
-             `endfacet`;
-    }
   };
 
   /* global postMessage, onmessage:writable, self */
@@ -104004,16 +104281,25 @@ return d[d.length-1];};return ", funcName].join("");
           } else {
             return returnVal;
           }
-        case 'getLayoutSvgs':
+        case 'layout':
+          const solidToSplit = Shape.fromGeometry(values[0]);
           // Extract shapes
-          let items = Shape.fromGeometry(values[0]).toItems();
+          let items = solidToSplit.bom();
+          
+          console.log("Here:");
+          console.log(items);
+          
+          var shapes = [];
+          items.forEach(item => {
+              shapes.push(solidToSplit.keep(item));
+          });
+          
+          console.log(shapes);
+          
           const sheetX = values[2];
           const sheetY = values[3];
-          const [packed, unpacked] = pack$1({ size: [sheetX, sheetY], margin: values[1] }, ...items.map(
-            x => x.flat().to(Z$c()))
-          );
-          console.log(unpacked);
-          return Assembly(...packed).toDisjointGeometry();
+          const sheet = Layers(...shapes).squash().Page({ size: [2438, 1219] });
+          return sheet.toDisjointGeometry();
         case 'difference':
           return Shape.fromGeometry(values[0]).cut(Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
         case 'extractTag':
@@ -104030,7 +104316,7 @@ return d[d.length-1];};return ", funcName].join("");
         case 'Over Cut Inside Corners':
           console.log('Overcutting corners');
           const overcutShape = Shape.fromGeometry(values[0]);
-          const overcutSection = overcutShape.section(Z$c());
+          const overcutSection = overcutShape.section(Z$b());
           const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
           const height = overcutShape.size().height;
           const sweep = toolpath.sweep(Circle(values[1])).extrude(height);
@@ -104059,13 +104345,13 @@ return d[d.length-1];};return ", funcName].join("");
         case 'stretch':
           return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
         case 'svg':
-          const svgString = await toSvg({}, Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
+          const svgString = await toSvg(Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
           return svgString;
         case 'SVG Picture':
           const shape = Shape.fromGeometry(values[0]).center();
           const bounds = shape.measureBoundingBox();
           const cameraDistance = 6 * Math.max(...bounds[1]);
-          return toSvg$1({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+          return toSvg$2({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
         case 'tag':
           return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
         case 'specify':

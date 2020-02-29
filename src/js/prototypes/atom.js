@@ -517,7 +517,24 @@ export default class Atom {
         
         this.draw()
     }
-    
+    /**
+     * Save JSON string with information about this atom that we want to save and copy. 
+     */ 
+    copySelected(){
+        if (this.selected){
+            GlobalVariables.atomToCopy = (JSON.stringify(this.serialize()))
+        }
+    }
+
+    /**
+     * Paste new copied atom into screen. 
+     */ 
+    pasteSelected(){    
+        let newAtom = JSON.parse(GlobalVariables.atomToCopy)
+        let newAtomID = GlobalVariables.generateUniqueID()
+        newAtom.uniqueID = newAtomID
+        this.placeAtom(newAtom, null, GlobalVariables.availableTypes, false)
+    }    
     /**
      * Create an object containing the information about this atom that we want to save. 
      */ 
