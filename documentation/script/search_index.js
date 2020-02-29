@@ -1284,12 +1284,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/constant.js~constant#radius",
-    "class/src/js/molecules/constant.js~Constant.html#instance-member-radius",
-    "src/js/molecules/constant.js~Constant#radius",
-    "member"
-  ],
-  [
     "src/js/molecules/constant.js~constant#serialize",
     "class/src/js/molecules/constant.js~Constant.html#instance-method-serialize",
     "src/js/molecules/constant.js~Constant#serialize",
