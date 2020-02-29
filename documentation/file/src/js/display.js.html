@@ -422,6 +422,7 @@ export default class Display {
          */
         this.axesHelper = new THREE.AxesHelper( 10 )
         this.scene.add(this.axesHelper)
+        this.gridLevel
         
         //
         /** 
@@ -436,26 +437,47 @@ export default class Display {
         this.targetDiv.appendChild(this.renderer.domElement)
         
         this.onWindowResize()
-
-        
+ 
         let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
         let arrowUpMenu = document.querySelector(&apos;#arrow-up-menu&apos;)
 
-        this.targetDiv.addEventListener(&apos;mousedown&apos;, () =&gt; {
+        this.targetDiv.addEventListener(&apos;mouseenter&apos;, () =&gt; {
             if(viewerBar.innerHTML.trim().length == 0){
                 this.checkBoxes()   
             }
         })
 
+        var evtFired = false
+        var g_timer
+
+        function startTimer(){
+            g_timer = setTimeout(function() {
+                if (!evtFired) {
+                    viewerBar.classList.remove(&quot;slideup&quot;)
+                    viewerBar.classList.add(&apos;slidedown&apos;)  
+                }
+            }, 2000)
+        }
+
         arrowUpMenu.addEventListener(&apos;mouseenter&apos;, () =&gt;{
+            clearTimeout(g_timer)
             viewerBar.classList.remove(&quot;slidedown&quot;)
             viewerBar.classList.add(&apos;slideup&apos;)   
         })
         viewerBar.addEventListener(&apos;mouseleave&apos;, () =&gt;{
+            evtFired = false
             viewerBar.classList.remove(&quot;slideup&quot;)
             viewerBar.classList.add(&apos;slidedown&apos;)   
         })
-        
+        viewerBar.addEventListener(&apos;mouseenter&apos;, () =&gt;{
+            evtFired = true
+            viewerBar.classList.remove(&quot;slidedown&quot;)
+            viewerBar.classList.add(&apos;slideup&apos;)   
+        })
+        arrowUpMenu.addEventListener(&apos;mouseleave&apos;, () =&gt;{
+            startTimer()
+        })
+
         //Creates initial grid
         this.grid1= this.makeGrid()
     }
@@ -464,7 +486,6 @@ export default class Display {
      * Creates the checkbox hidden menu when viewer is active
      */ 
     checkBoxes(){
-
         let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)   
         viewerBar.classList.add(&apos;slidedown&apos;)
 
@@ -679,7 +700,9 @@ export default class Display {
     * Scales grid if object loaded is already zoomed out farther than initial grid tier or if zoomed in or out
     */ 
     setGrid(){
-        this.gridScale = this.baseLog(this.dist3D(this.camera.position),10) 
+
+        this.gridLevel = Math.log10(.01 * this.dist3D(this.camera.position))
+        this.gridScale = Math.pow(10, Math.floor(this.gridLevel))
         this.grid1.scale.setScalar(this.gridScale)
         this.grid1.material.opacity = .01 
     }
@@ -688,7 +711,7 @@ export default class Display {
      * Redraws the grid with update values on render
      */ 
     makeGrid() {
-        //console.log(&quot;make grid&quot;)
+       
         var size = 1000
         var divisions = 100
         var grid = new THREE.GridHelper( size, divisions )

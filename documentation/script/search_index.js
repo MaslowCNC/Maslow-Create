@@ -678,6 +678,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/display.js~display#gridlevel",
+    "class/src/js/display.js~Display.html#instance-member-gridLevel",
+    "src/js/display.js~Display#gridLevel",
+    "member"
+  ],
+  [
     "src/js/display.js~display#gridscale",
     "class/src/js/display.js~Display.html#instance-member-gridScale",
     "src/js/display.js~Display#gridScale",
@@ -975,12 +981,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/bom.js~addbomtag#name",
     "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-member-name",
     "src/js/molecules/BOM.js~AddBOMTag#name",
-    "member"
-  ],
-  [
-    "src/js/molecules/bom.js~addbomtag#radius",
-    "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-member-radius",
-    "src/js/molecules/BOM.js~AddBOMTag#radius",
     "member"
   ],
   [
@@ -2574,6 +2574,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#copyselected",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-copySelected",
+    "src/js/prototypes/atom.js~Atom#copySelected",
+    "method"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#createbutton",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-createButton",
     "src/js/prototypes/atom.js~Atom#createButton",
@@ -2692,6 +2698,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-parentMolecule",
     "src/js/prototypes/atom.js~Atom#parentMolecule",
     "member"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#pasteselected",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-pasteSelected",
+    "src/js/prototypes/atom.js~Atom#pasteSelected",
+    "method"
   ],
   [
     "src/js/prototypes/atom.js~atom#processing",

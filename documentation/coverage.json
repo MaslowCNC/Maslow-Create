@@ -1,11 +1,11 @@
 {
-  "coverage": "98.48%",
-  "expectCount": 463,
-  "actualCount": 456,
+  "coverage": "98.29%",
+  "expectCount": 470,
+  "actualCount": 462,
   "files": {
     "src/flowDraw.js": {
-      "expectCount": 6,
-      "actualCount": 6,
+      "expectCount": 11,
+      "actualCount": 11,
       "undocumentLines": []
     },
     "src/js/alwaysOneFreeInput.js": {
@@ -19,12 +19,13 @@
       "undocumentLines": []
     },
     "src/js/display.js": {
-      "expectCount": 36,
+      "expectCount": 37,
       "actualCount": 33,
       "undocumentLines": [
         263,
         305,
-        383
+        405,
+        627
       ]
     },
     "src/js/githubOauth.js": {
@@ -45,8 +46,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/BOM.js": {
-      "expectCount": 12,
-      "actualCount": 12,
+      "expectCount": 11,
+      "actualCount": 11,
       "undocumentLines": []
     },
     "src/js/molecules/circle.js": {
@@ -197,8 +198,8 @@
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 51,
-      "actualCount": 51,
+      "expectCount": 53,
+      "actualCount": 53,
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
