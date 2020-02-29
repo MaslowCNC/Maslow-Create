@@ -136,12 +136,12 @@ window.addEventListener('keydown', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         ctrlDown = true
     }
-    if (ctrlDown && e.keyCode == cKey) {
+    if (ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") { //ctrl+c while working in the main body
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
             molecule.copySelected()     
         })
     }
-    if (ctrlDown && e.keyCode == vKey) {
+    if (ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody") {
         GlobalVariables.currentMolecule.pasteSelected()  
     }
 
