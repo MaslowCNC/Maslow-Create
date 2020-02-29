@@ -33,11 +33,6 @@ export default class Constant extends Atom{
          * @type {string}
          */
         this.height = 16
-        /**
-         * This atom's radius as drawn on the screen...probably doesn't need to be in this scope
-         * @type {string}
-         */
-        this.radius = GlobalVariables.canvas.width/65 
         
         this.setValues(values)
         
@@ -119,10 +114,14 @@ export default class Constant extends Atom{
             this.output.draw()
         }
         
+        let pixelsX = GlobalVariables.widthToPixels(this.x)
+        let pixelsY = GlobalVariables.heightToPixels(this.y)
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.rect(this.x - this.radius, this.y - this.height/2, 2*this.radius, this.height)
+        GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)
         GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, this.x + this.radius, this.y-this.radius)
+        GlobalVariables.c.fillText(this.name, pixelsX + pixelsRadius, pixelsY-pixelsRadius)
         GlobalVariables.c.fill()
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
