@@ -504,7 +504,7 @@ export default class Molecule extends Atom{
     /**
      * Places a new atom inside the molecule
      * @param {object} newAtomObj - An object defining the new atom to be placed
-     * @param {array} moleculeList - Only pased if we are placing an instance of Molecule.
+     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.
      * @param {object} typesList - A dictionary of all of the available types with references to their constructors
      * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.
      */

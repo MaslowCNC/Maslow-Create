@@ -123,13 +123,8 @@ class GlobalVariables{
          */
         this.fork = false
         /** 
-         * A variable to save string object to be copied
-         * @type {string}
-         */
-        this.atomToCopy
-        /** 
-         * A variable to save string object to be copied
-         * @type {string}
+         * A variable to save array to be copied
+         * @type {array}
          */
         this.atomsToCopy = []
         /** 

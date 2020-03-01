@@ -147,9 +147,9 @@ window.addEventListener('keydown', e => {
         ctrlDown = true
     }
     if (e.keyCode == 46 || e.keyCode == deleteKey) {     
-            GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-                molecule.keyPress('Delete')      
-            })        
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+            molecule.keyPress('Delete')      
+        })        
     }
     if (ctrlDown && e.keyCode == cKey) {
         newAtom = GlobalVariables.atomsToCopy
