@@ -414,14 +414,14 @@ export default class Atom {
      */ 
     keyPress(key){
         //runs whenever a key is pressed
-       /* if (['Delete', 'Backspace'].includes(key)){
+        if (['Delete', 'Backspace'].includes(key)){
 
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
                 this.deleteNode()
             }
         }
-        else */if (['Control', 'Meta'].includes(key)){
+        else if (['Control', 'Meta'].includes(key)){
             this.ctrlDown = true
         }
         
@@ -508,6 +508,7 @@ export default class Atom {
      * Delete this atom.
      */ 
     deleteNode(){
+
         //deletes this node and all of it's inputs
         
         this.inputs.forEach(input => { //disable the inputs before deleting

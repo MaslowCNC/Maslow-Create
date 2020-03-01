@@ -137,13 +137,13 @@ window.addEventListener('keydown', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         ctrlDown = true
     }
-    console.log(e.keyCode)
     if (e.keyCode == 46 || e.keyCode == 8) {
         newAtom = GlobalVariables.atomsToCopy
         newAtom.forEach(item => {
-            console.log(item)
-            GlobalVariables.currentMolecule.deleteNode()
-            })   
+            GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.keyPress('Delete')      
+    })
+        })   
     }
     if (ctrlDown && e.keyCode == cKey) {
         newAtom = GlobalVariables.atomsToCopy
