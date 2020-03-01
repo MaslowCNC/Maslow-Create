@@ -79,11 +79,7 @@ flowCanvas.addEventListener('mousedown', event => {
 
     })
     
-    if(!clickHandledByMolecule && ctrlDown){
-
-        GlobalVariables.currentMolecule.backgroundClick()
-    }
-    else if(!clickHandledByMolecule){
+    if(!clickHandledByMolecule){
        GlobalVariables.currentMolecule.backgroundClick() 
     }
     else{
@@ -134,23 +130,30 @@ flowCanvas.addEventListener('mouseup', event => {
     })
 })
 
+let newAtom
+
 window.addEventListener('keydown', e => {
 
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         ctrlDown = true
     }
-    if(ctrlDown){
-        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-            molecule.copySelected()     
-        })     
+    console.log(e.keyCode)
+    if (e.keyCode == 46 || e.keyCode == 8) {
+        newAtom = GlobalVariables.atomsToCopy
+        newAtom.forEach(item => {
+            console.log(item)
+            GlobalVariables.currentMolecule.deleteNode()
+            })   
     }
     if (ctrlDown && e.keyCode == cKey) {
-        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-            molecule.copySelected()     
-        })
+        newAtom = GlobalVariables.atomsToCopy
     }
     if (ctrlDown && e.keyCode == vKey) {
-        GlobalVariables.currentMolecule.pasteSelected()  
+        newAtom.forEach(item => {
+            let newAtomID = GlobalVariables.generateUniqueID()
+            item.uniqueID = newAtomID
+            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, false)
+            })     
     }
 
 

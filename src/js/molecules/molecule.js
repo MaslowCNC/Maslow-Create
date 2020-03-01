@@ -130,6 +130,7 @@ export default class Molecule extends Atom{
      * Handle a background click (a click which doesn't land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
+        GlobalVariables.atomsToCopy.length = 0
         /**
          * Flag that the attom is now selected.
          */

@@ -314,15 +314,15 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            GlobalVariables.atomsToCopy.push(JSON.stringify(this.serialize()))
+            GlobalVariables.atomsToCopy.push(this.serialize())
         }
         else{
             if (this.ctrlDown && this.selected){
-            GlobalVariables.atomsToCopy.push(JSON.stringify(this.serialize()))
+            GlobalVariables.atomsToCopy.length = 0
+            GlobalVariables.atomsToCopy.push(this.serialize())
             }
             else{
               this.selected = false
-              GlobalVariables.atomsToCopy.length = 0
             }
         }
 
@@ -414,13 +414,14 @@ export default class Atom {
      */ 
     keyPress(key){
         //runs whenever a key is pressed
-        if (['Delete', 'Backspace'].includes(key)){
+       /* if (['Delete', 'Backspace'].includes(key)){
+
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
                 this.deleteNode()
             }
         }
-        else if (['Control', 'Meta'].includes(key)){
+        else */if (['Control', 'Meta'].includes(key)){
             this.ctrlDown = true
         }
         
@@ -543,16 +544,18 @@ export default class Atom {
      * Save JSON string with information about this atom that we want to save and copy. 
      */ 
     copySelected(){
-        if (this.selected){
-            GlobalVariables.atomToCopy = (JSON.stringify(this.serialize()))
-        }
+        console.log(GlobalVariables.atomsToCopy)
+        let newAtom = JSON.stringify(GlobalVariables.atomsToCopy)
+
+        console.log(newAtom)
     }
 
     /**
      * Paste new copied atom into screen. 
      */ 
     pasteSelected(){    
-        let newAtom = JSON.parse(GlobalVariables.atomToCopy)
+        //let newAtom = JSON.parse(GlobalVariables.atomsToCopy)
+
         let newAtomID = GlobalVariables.generateUniqueID()
         newAtom.uniqueID = newAtomID
         this.placeAtom(newAtom, null, GlobalVariables.availableTypes, false)
