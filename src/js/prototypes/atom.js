@@ -318,11 +318,11 @@ export default class Atom {
         }
         else{
             if (this.ctrlDown && this.selected){
-            GlobalVariables.atomsToCopy.length = 0
-            GlobalVariables.atomsToCopy.push(this.serialize())
+                GlobalVariables.atomsToCopy.length = 0
+                GlobalVariables.atomsToCopy.push(this.serialize())
             }
             else{
-              this.selected = false
+                this.selected = false
             }
         }
 
@@ -432,9 +432,9 @@ export default class Atom {
     }
 
     /**
-     * Set the atom's response to a key Up. Is used to know if command has been lifted and delete selection
+     * Set the atom's response to a keyup. Is used to know if command has been lifted and delete selection
      */ 
-    keyUp(key){
+    keyUp(){
         this.ctrlDown = false
     }
     
@@ -541,26 +541,7 @@ export default class Atom {
         
         this.draw()
     }
-    /**
-     * Save JSON string with information about this atom that we want to save and copy. 
-     */ 
-    copySelected(){
-        console.log(GlobalVariables.atomsToCopy)
-        let newAtom = JSON.stringify(GlobalVariables.atomsToCopy)
-
-        console.log(newAtom)
-    }
-
-    /**
-     * Paste new copied atom into screen. 
-     */ 
-    pasteSelected(){    
-        //let newAtom = JSON.parse(GlobalVariables.atomsToCopy)
-
-        let newAtomID = GlobalVariables.generateUniqueID()
-        newAtom.uniqueID = newAtomID
-        this.placeAtom(newAtom, null, GlobalVariables.availableTypes, false)
-    }    
+     
     /**
      * Create an object containing the information about this atom that we want to save. 
      */ 

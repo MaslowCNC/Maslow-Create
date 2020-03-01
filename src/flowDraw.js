@@ -25,6 +25,11 @@ let ctrlDown = false
 */
 const ctrlKey = 17
 /** 
+* Delete event key
+* @type {number}
+*/
+const deleteKey = 8
+/** 
 * Cmmd event key
 * @type {number}
 */
@@ -80,7 +85,7 @@ flowCanvas.addEventListener('mousedown', event => {
     })
     
     if(!clickHandledByMolecule){
-       GlobalVariables.currentMolecule.backgroundClick() 
+        GlobalVariables.currentMolecule.backgroundClick() 
     }
     else{
         //GlobalVariables.currentMolecule.deselect()
@@ -130,6 +135,10 @@ flowCanvas.addEventListener('mouseup', event => {
     })
 })
 
+/** 
+* Array containing selected atoms to copy or delete
+* @type {array}
+*/
 let newAtom
 
 window.addEventListener('keydown', e => {
@@ -137,13 +146,10 @@ window.addEventListener('keydown', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         ctrlDown = true
     }
-    if (e.keyCode == 46 || e.keyCode == 8) {
-        newAtom = GlobalVariables.atomsToCopy
-        newAtom.forEach(item => {
+    if (e.keyCode == 46 || e.keyCode == deleteKey) {     
             GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.keyPress('Delete')      
-    })
-        })   
+                molecule.keyPress('Delete')      
+            })        
     }
     if (ctrlDown && e.keyCode == cKey) {
         newAtom = GlobalVariables.atomsToCopy
@@ -152,10 +158,9 @@ window.addEventListener('keydown', e => {
         newAtom.forEach(item => {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, false)
-            })     
+            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)
+        })     
     }
-
 
     //every time the mouse button goes up 
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
