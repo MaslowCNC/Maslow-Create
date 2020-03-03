@@ -14,11 +14,7 @@ GlobalVariables.runMode = window.location.href.includes('run') //Check if we are
 GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
 
-/** 
-* A flag to indicate if ctrl or commd pressed
-* @type {boolean}
-*/
-let ctrlDown = false
+
 /** 
 * Ctrl event key
 * @type {number}
@@ -144,22 +140,25 @@ let newAtom
 window.addEventListener('keydown', e => {
 
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
-        ctrlDown = true
+        GlobalVariables.ctrlDown = true
     }
     if (e.keyCode == 46 || e.keyCode == deleteKey) {     
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
             molecule.keyPress('Delete')      
         })        
     }
-    if (ctrlDown && e.keyCode == cKey) {
+    if (GlobalVariables.ctrlDown && e.keyCode == cKey) {
         newAtom = GlobalVariables.atomsToCopy
+
     }
-    if (ctrlDown && e.keyCode == vKey) {
+    if (GlobalVariables.ctrlDown && e.keyCode == vKey) {
+        console.log(newAtom)
         newAtom.forEach(item => {
+            console.log(item)
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)
-        })     
+            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+        })   
     }
 
     //every time the mouse button goes up 
@@ -170,7 +169,7 @@ window.addEventListener('keydown', e => {
 
 window.addEventListener('keyup', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
-        ctrlDown = false
+        GlobalVariables.ctrlDown = false
     }
 
     //every time the mouse button goes up 

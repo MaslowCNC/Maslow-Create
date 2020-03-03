@@ -122,6 +122,11 @@ class GlobalVariables{
          * @type {boolean}
          */
         this.fork = false
+         /** 
+         * A flag to indicate if command is pressed
+         * @type {boolean}
+         */
+        this.ctrlDown = false
         /** 
          * A variable to save array to be copied
          * @type {array}

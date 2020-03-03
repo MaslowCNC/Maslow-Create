@@ -114,12 +114,6 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
-        /** 
-         * A flag to indicate //
-         * @type {boolean}
-         */
-        this.ctrlDown = false
-        
 
         for(var key in values) {
             /** 
@@ -309,23 +303,22 @@ export default class Atom {
 
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
+            if (!GlobalVariables.ctrlDown){
+               // GlobalVariables.atomsToCopy.length = 0
+            }           
             this.isMoving = true
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
             GlobalVariables.atomsToCopy.push(this.serialize())
+            console.log("if one click")
+            console.log(GlobalVariables.atomsToCopy)
         }
-        else{
-            if (this.ctrlDown && this.selected){
-                GlobalVariables.atomsToCopy.length = 0
-                GlobalVariables.atomsToCopy.push(this.serialize())
-            }
-            else{
+        else if (!GlobalVariables.ctrlDown){
                 this.selected = false
             }
-        }
-
+            
         //Returns true if something was done with the click
         this.inputs.forEach(child => {
             if(child.clickDown(x,y, clickProcessed) == true){
@@ -413,6 +406,7 @@ export default class Atom {
      * @param {string} key - The key which has been pressed.
      */ 
     keyPress(key){
+
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){
 
@@ -422,7 +416,7 @@ export default class Atom {
             }
         }
         else if (['Control', 'Meta'].includes(key)){
-            this.ctrlDown = true
+            GlobalVariables.ctrlDown = true
         }
         
         
@@ -434,8 +428,11 @@ export default class Atom {
     /**
      * Set the atom's response to a keyup. Is used to know if command has been lifted and delete selection
      */ 
-    keyUp(){
-        this.ctrlDown = false
+    keyUp(key){
+        console.log(key)
+        if(key == "Meta"){
+        GlobalVariables.ctrlDown = false
+        }
     }
     
     /**
@@ -541,7 +538,7 @@ export default class Atom {
         
         this.draw()
     }
-     
+
     /**
      * Create an object containing the information about this atom that we want to save. 
      */ 
