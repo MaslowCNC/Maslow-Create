@@ -144,7 +144,7 @@ window.addEventListener('keydown', e => {
     }
     if (e.keyCode == 46 || e.keyCode == deleteKey) {     
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-           molecule.keyPress('Delete')      
+            molecule.keyPress('Delete')      
         })        
     }
     if (GlobalVariables.ctrlDown && e.keyCode == cKey) {
@@ -161,7 +161,7 @@ window.addEventListener('keydown', e => {
 
     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-       molecule.keyPress(event.key)      
+        molecule.keyPress(event.key)      
     })
 })
 
