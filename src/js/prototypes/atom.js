@@ -401,23 +401,18 @@ export default class Atom {
      * @param {string} key - The key which has been pressed.
      */ 
     keyPress(key){
-        console.log(this.selected)
-
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){
 
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                
-                console.log(this)
                 this.deleteNode()
             }
         }
         else if (['Control', 'Meta'].includes(key)){
             GlobalVariables.ctrlDown = true
         }
-        
-        
+
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
