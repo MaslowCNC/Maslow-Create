@@ -142,16 +142,16 @@ window.addEventListener('keydown', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = true
     }
-    if (e.keyCode == 46 || e.keyCode == deleteKey) {     
+    if (e.keyCode == 46 || e.keyCode == deleteKey ) {     
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
             molecule.keyPress('Delete')      
         })        
     }
-    if (GlobalVariables.ctrlDown && e.keyCode == cKey) {
+    if (GlobalVariables.ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") {
         newAtom = GlobalVariables.atomsToCopy
 
     }
-    if (GlobalVariables.ctrlDown && e.keyCode == vKey) {
+    if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody") {
         newAtom.forEach(item => {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
