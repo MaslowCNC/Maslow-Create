@@ -122,7 +122,7 @@ class GlobalVariables{
          * @type {boolean}
          */
         this.fork = false
-         /** 
+        /** 
          * A flag to indicate if command is pressed
          * @type {boolean}
          */

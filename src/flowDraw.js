@@ -144,7 +144,7 @@ window.addEventListener('keydown', e => {
     }
     if (e.keyCode == 46 || e.keyCode == deleteKey) {     
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-            molecule.keyPress('Delete')      
+           molecule.keyPress('Delete')      
         })        
     }
     if (GlobalVariables.ctrlDown && e.keyCode == cKey) {
@@ -152,18 +152,16 @@ window.addEventListener('keydown', e => {
 
     }
     if (GlobalVariables.ctrlDown && e.keyCode == vKey) {
-        console.log(newAtom)
         newAtom.forEach(item => {
-            console.log(item)
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
             GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
         })   
     }
 
-    //every time the mouse button goes up 
+    //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.keyPress(event.key)      
+       molecule.keyPress(event.key)      
     })
 })
 
@@ -172,7 +170,7 @@ window.addEventListener('keyup', e => {
         GlobalVariables.ctrlDown = false
     }
 
-    //every time the mouse button goes up 
+    //every time a key is lifted
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyUp(event.key)      
     })

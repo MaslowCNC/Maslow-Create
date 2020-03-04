@@ -302,22 +302,17 @@ export default class Atom {
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
-        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
-            if (!GlobalVariables.ctrlDown){
-               // GlobalVariables.atomsToCopy.length = 0
-            }           
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){        
             this.isMoving = true
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
             GlobalVariables.atomsToCopy.push(this.serialize())
-            console.log("if one click")
-            console.log(GlobalVariables.atomsToCopy)
         }
         else if (!GlobalVariables.ctrlDown){
-                this.selected = false
-            }
+            this.selected = false
+        }
             
         //Returns true if something was done with the click
         this.inputs.forEach(child => {
@@ -406,12 +401,15 @@ export default class Atom {
      * @param {string} key - The key which has been pressed.
      */ 
     keyPress(key){
+        console.log(this.selected)
 
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){
 
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
+                
+                console.log(this)
                 this.deleteNode()
             }
         }
@@ -426,12 +424,12 @@ export default class Atom {
     }
 
     /**
-     * Set the atom's response to a keyup. Is used to know if command has been lifted and delete selection
+     * Set the atom's response to a keyup. 
      */ 
     keyUp(key){
-        console.log(key)
+        // Is used to know if command has been lifted 
         if(key == "Meta"){
-        GlobalVariables.ctrlDown = false
+            GlobalVariables.ctrlDown = false
         }
     }
     
