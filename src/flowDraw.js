@@ -21,11 +21,6 @@ GlobalVariables.canvas.height = window.innerHeight/2.5
 */
 const ctrlKey = 17
 /** 
-* Delete event key
-* @type {number}
-*/
-const deleteKey = 8
-/** 
 * Cmmd event key
 * @type {number}
 */
@@ -152,7 +147,7 @@ window.addEventListener('keydown', e => {
             GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
         })   
     }
-     //every time a key is pressed
+    //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyPress(event.key)      
     })
