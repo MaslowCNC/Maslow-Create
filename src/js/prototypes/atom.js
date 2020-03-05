@@ -403,31 +403,15 @@ export default class Atom {
     keyPress(key){
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){
-
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.deleteNode()
+                this.deleteNode()     
             }
         }
-        else if (['Control', 'Meta'].includes(key)){
-            GlobalVariables.ctrlDown = true
-        }
-
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
     }
-
-    /**
-     * Set the atom's response to a keyup. 
-     */ 
-    keyUp(key){
-        // Is used to know if command has been lifted 
-        if(key == "Meta"){
-            GlobalVariables.ctrlDown = false
-        }
-    }
-    
     /**
      * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.
      */ 
@@ -498,7 +482,6 @@ export default class Atom {
      * Delete this atom.
      */ 
     deleteNode(){
-
         //deletes this node and all of it's inputs
         
         this.inputs.forEach(input => { //disable the inputs before deleting

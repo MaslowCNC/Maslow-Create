@@ -141,39 +141,28 @@ window.addEventListener('keydown', e => {
 
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = true
-    }
-    if (e.keyCode == 46 || e.keyCode == deleteKey ) {     
-        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-            molecule.keyPress('Delete')      
-        })        
-    }
+    } 
     if (GlobalVariables.ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") {
         newAtom = GlobalVariables.atomsToCopy
-
     }
-    if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody") {
+    if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody" ) {
         newAtom.forEach(item => {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
             GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
         })   
     }
-
-    //every time a key is pressed
+     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyPress(event.key)      
     })
+
 })
 
 window.addEventListener('keyup', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = false
     }
-
-    //every time a key is lifted
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.keyUp(event.key)      
-    })
 })
 
 
