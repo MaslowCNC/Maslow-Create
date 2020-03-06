@@ -123,10 +123,15 @@ class GlobalVariables{
          */
         this.fork = false
         /** 
-         * A variable to save string object to be copied
-         * @type {string}
+         * A flag to indicate if command is pressed
+         * @type {boolean}
          */
-        this.atomToCopy
+        this.ctrlDown = false
+        /** 
+         * A variable to save array to be copied
+         * @type {array}
+         */
+        this.atomsToCopy = []
         /** 
          * The size (in mm) of segments to use for circles.
          * @type {number}
