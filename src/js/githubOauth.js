@@ -1326,7 +1326,7 @@ export default function GitHubModule(){
             let rawFile = JSON.parse(atob(result.data.content))
             
             if(rawFile.filetypeVersion == 1){
-                console.log("Would load using new technique")
+                console.log("Loading using new technique")
                 
                 if(rawFile.circleSegmentSize){
                     GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize

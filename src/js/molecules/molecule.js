@@ -446,8 +446,7 @@ export default class Molecule extends Atom{
      */
     deserialize(json, unlock = false){
         
-        
-        if(json.atomType == "Molecule"){
+        if(json.atomType == "Molecule" && json.topLevel == true){
             //Find the target molecule in the list
             let promiseArray = []
             this.setValues(json) //Grab the values of everything from the passed object
@@ -458,6 +457,11 @@ export default class Molecule extends Atom{
                     const promise = this.internalPlaceAtom(atom, GlobalVariables.availableTypes, unlock)
                     promiseArray.push(promise)
                 })
+            }
+            
+            //If the passed json is topLevel == true then we are loading a project. If not then this is a sub molecule and should be placed.
+            if(json.topLevel != true){
+                this.internalPlaceAtom(json, GlobalVariables.availableTypes, unlock)
             }
             
             return Promise.all(promiseArray).then( ()=> {
@@ -471,16 +475,15 @@ export default class Molecule extends Atom{
                 
                 if(json.allConnectors){
                     this.savedConnectors = json.allConnectors //Save a copy of the connectors so we can use them later if we want
-                }else{
-                    this.savedConnectors = [];
-                }
-                this.savedConnectors.forEach(connector => {
+                    
+                    this.savedConnectors.forEach(connector => {
                     this.placeConnector(connector)
                 })
+                }
                 
                 this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
 
-                if(this.topLevel){
+                if(json.topLevel){
                     this.backgroundClick()
                     this.beginPropogation()
                 }
@@ -522,6 +525,9 @@ export default class Molecule extends Atom{
                 json.parent = this
                 var atom = new typesList[key].creator(json)
                 
+                console.log("Placing atom")
+                console.log(json)
+                
                 //reassign the name of the Inputs to preserve linking
                 if(atom.atomType == 'Input' && typeof json.name !== 'undefined'){
                     atom.name = json.name
@@ -529,9 +535,9 @@ export default class Molecule extends Atom{
                 }
 
                 //If this is a molecule, de-serialize it
-                // if(atom.atomType == 'Molecule' && moleculeList != null){
-                    // promise = atom.deserialize(moleculeList, atom.uniqueID)
-                // }
+                if(atom.atomType == 'Molecule'){
+                    promise = atom.deserialize(json, atom.uniqueID)
+                }
                 
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
@@ -570,7 +576,6 @@ export default class Molecule extends Atom{
                     
                     document.getElementById('flow-canvas').dispatchEvent(downEvt)
                     document.getElementById('flow-canvas').dispatchEvent(upEvt)
-                    
                 }
             }
         }
