@@ -1184,7 +1184,7 @@ export default function GitHubModule(){
                         readmeContent = readmeContent + item + "\n\n\n"
                     })
                     
-                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize({molecules: []})
+                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
                     jsonRepOfProject.filetypeVersion = 1
                     jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
                     const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
@@ -1325,19 +1325,29 @@ export default function GitHubModule(){
             //content will be base64 encoded
             let rawFile = JSON.parse(atob(result.data.content))
             
-            console.log("Raw file: ")
-            console.log(rawFile)
-            console.log(rawFile.filetypeVersion == 1)
-            
-            var moleculesList = rawFile.molecules
-            
-            if(rawFile.circleSegmentSize){
-                GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
+            if(rawFile.filetypeVersion == 1){
+                console.log("Would load using new technique")
+                
+                if(rawFile.circleSegmentSize){
+                    GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
+                }
+                
+                //Load the top level molecule from the file
+                GlobalVariables.topLevelMolecule.deserialize(rawFile)
+                intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
             }
-            
-            //Load the top level molecule from the file
-            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
-            intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
+            else{
+                
+                var moleculesList = rawFile.molecules
+                
+                if(rawFile.circleSegmentSize){
+                    GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
+                }
+                
+                //Load the top level molecule from the file
+                GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
+                intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
+            }
         })
         octokit.repos.get({
             owner: currentUser,

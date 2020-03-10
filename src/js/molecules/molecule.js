@@ -408,19 +408,22 @@ export default class Molecule extends Atom{
      * Generates and returns a JSON represntation of this molecule and all of its children.
      * @param {object} savedObject - A JSON object to append the represntation of this atom to.
      */
-    serialize(savedObject){
+    serialize(){
         //Save this molecule.
         
         //This one is a little confusing. Basically each molecule saves like an atom, but also creates a second object 
         //record of itself in the object "savedObject" object.
-            
+        
+        
+        
         var allAtoms = [] //An array of all the atoms containted in this molecule
         var allConnectors = [] //An array of all the connectors contained in this molelcule
         
         
+        //Store all the atoms and all the connectors currently on the screen into an array
         this.nodesOnTheScreen.forEach(atom => {
             //Store a representation of the atom
-            allAtoms.push(atom.serialize(savedObject))
+            allAtoms.push(atom.serialize())
             //Store a representation of the atom's connectors
             if(atom.output){
                 atom.output.connectors.forEach(connector => {
@@ -429,23 +432,13 @@ export default class Molecule extends Atom{
             }
         })
         
-        var thisAsObject = super.serialize(savedObject)
+        var thisAsObject = super.serialize()
         thisAsObject.topLevel = this.topLevel
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
         thisAsObject.fileTypeVersion = 1
         
-        //Add a JSON representation of this object to the file being saved
-        savedObject.molecules.push(thisAsObject)
-            
-        if(this.topLevel == true){
-            //If this is the top level, return the complete file to be saved
-            return savedObject
-        }
-        else{
-            //If not, return a placeholder for this molecule
-            return super.serialize(savedObject)
-        }
+        return thisAsObject
     }
     
     /**
@@ -453,15 +446,20 @@ export default class Molecule extends Atom{
      * @param {object} moleculeList - A list of all the atoms to be placed
      * @param {number} moleculeID - The uniqueID of the molecule from the list to be loaded
      */
-    deserialize(moleculeList, moleculeID){
+    deserialize(json){
+        
+        console.log("Molecule is decerializing: ")
+        console.log(json)
+        console.trace()
         
         //Find the target molecule in the list
         let promiseArray = []
-        let moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
-        this.setValues(moleculeObject) //Grab the values of everything from the passed object
+        let moleculeObject = json
+        this.setValues(json) //Grab the values of everything from the passed object
         //Place the atoms
-        moleculeObject.allAtoms.forEach(atom => {
-            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes, false)
+        
+        json.allAtoms.forEach(atom => {
+            const promise = this.placeAtom(atom, GlobalVariables.availableTypes, false)
             promiseArray.push(promise)
         })
         
@@ -511,7 +509,7 @@ export default class Molecule extends Atom{
      * @param {object} typesList - A dictionary of all of the available types with references to their constructors
      * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.
      */
-    async placeAtom(newAtomObj, moleculeList, typesList, unlock){
+    async placeAtom(newAtomObj, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
         var promise = null
         
@@ -527,9 +525,9 @@ export default class Molecule extends Atom{
                 }
 
                 //If this is a molecule, de-serialize it
-                if(atom.atomType == 'Molecule' && moleculeList != null){
-                    promise = atom.deserialize(moleculeList, atom.uniqueID)
-                }
+                // if(atom.atomType == 'Molecule' && moleculeList != null){
+                    // promise = atom.deserialize(moleculeList, atom.uniqueID)
+                // }
                 
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
