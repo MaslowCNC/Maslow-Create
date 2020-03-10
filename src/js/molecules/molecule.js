@@ -56,7 +56,7 @@ export default class Molecule extends Atom{
         this.setValues(values)
         
         //Add the molecule's output
-        this.placeAtom({
+        this.internalPlaceAtom({
             parentMolecule: this, 
             x: GlobalVariables.pixelsToWidth(GlobalVariables.canvas.width - 20),
             y: GlobalVariables.pixelsToHeight(GlobalVariables.canvas.height/2),
@@ -73,7 +73,7 @@ export default class Molecule extends Atom{
         if(this.parent){
             this.parent.nodesOnTheScreen.forEach(node => {
                 if(node.atomType == "Input"){
-                    this.placeAtom({
+                    this.internalPlaceAtom({
                         parentMolecule: this,
                         y: node.y,
                         parent: this,
@@ -85,8 +85,6 @@ export default class Molecule extends Atom{
             })
         } 
     }
-
-    
     
     /**
      * Add the center dot to the molecule
@@ -446,43 +444,51 @@ export default class Molecule extends Atom{
      * @param {object} moleculeList - A list of all the atoms to be placed
      * @param {number} moleculeID - The uniqueID of the molecule from the list to be loaded
      */
-    deserialize(json){
+    deserialize(json, unlock = false){
         
-        console.log("Molecule is decerializing: ")
-        console.log(json)
-        console.trace()
         
-        //Find the target molecule in the list
-        let promiseArray = []
-        let moleculeObject = json
-        this.setValues(json) //Grab the values of everything from the passed object
-        //Place the atoms
-        
-        json.allAtoms.forEach(atom => {
-            const promise = this.placeAtom(atom, GlobalVariables.availableTypes, false)
-            promiseArray.push(promise)
-        })
-        
-        return Promise.all(promiseArray).then( ()=> {
-            //Once all the atoms are placed we can finish
+        if(json.atomType == "Molecule"){
+            //Find the target molecule in the list
+            let promiseArray = []
+            this.setValues(json) //Grab the values of everything from the passed object
+            //Place the atoms
             
-            //Place the connectors
-            /**
-             * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
-             * @param {array}
-             */
-            this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
-            this.savedConnectors.forEach(connector => {
-                this.placeConnector(connector)
-            })
-            
-            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
-
-            if(this.topLevel){
-                this.backgroundClick()
-                this.beginPropogation()
+            if(json.allAtoms){
+                json.allAtoms.forEach(atom => {
+                    const promise = this.internalPlaceAtom(atom, GlobalVariables.availableTypes, unlock)
+                    promiseArray.push(promise)
+                })
             }
-        })
+            
+            return Promise.all(promiseArray).then( ()=> {
+                //Once all the atoms are placed we can finish
+                
+                //Place the connectors
+                /**
+                 * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
+                 * @param {array}
+                 */
+                
+                if(json.allConnectors){
+                    this.savedConnectors = json.allConnectors //Save a copy of the connectors so we can use them later if we want
+                }else{
+                    this.savedConnectors = [];
+                }
+                this.savedConnectors.forEach(connector => {
+                    this.placeConnector(connector)
+                })
+                
+                this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
+
+                if(this.topLevel){
+                    this.backgroundClick()
+                    this.beginPropogation()
+                }
+            })
+        }
+        else{
+            this.internalPlaceAtom(json, GlobalVariables.availableTypes, unlock)
+        }
     }
     
     /**
@@ -502,28 +508,23 @@ export default class Molecule extends Atom{
     
     /**
      * Places a new atom inside the molecule
-     * @param {object} newAtomObj - An object defining the new atom to be placed
+     * @param {object} json - An object defining the new atom to be placed
      * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.
      * @param {object} typesList - A dictionary of all of the available types with references to their constructors
      * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.
      */
-    async placeAtom(newAtomObj, typesList, unlock){
+    async internalPlaceAtom(json, typesList, unlock){
         //Place the atom - note that types not listed in typesList will not be placed with no warning
         var promise = null
         
-        console.log("Placing a new atom ran")
-        console.log(newAtomObj)
-        console.log(typesList)
-        console.trace()
-        
         for(var key in typesList) {
-            if (typesList[key].atomType == newAtomObj.atomType){
-                newAtomObj.parent = this
-                var atom = new typesList[key].creator(newAtomObj)
+            if (typesList[key].atomType == json.atomType){
+                json.parent = this
+                var atom = new typesList[key].creator(json)
                 
                 //reassign the name of the Inputs to preserve linking
-                if(atom.atomType == 'Input' && typeof newAtomObj.name !== 'undefined'){
-                    atom.name = newAtomObj.name
+                if(atom.atomType == 'Input' && typeof json.name !== 'undefined'){
+                    atom.name = json.name
                     atom.draw() //The poling happens in draw :roll_eyes:
                 }
 

@@ -200,14 +200,14 @@ function placeNewNode(e){
     let clr = e.target.id
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
-    GlobalVariables.currentMolecule.placeAtom({
+    GlobalVariables.currentMolecule.deserialize({
         x: GlobalVariables.pixelsToWidth(containerX), 
         y: GlobalVariables.pixelsToHeight(containerY), 
         parent: GlobalVariables.currentMolecule,
         atomType: clr,
         uniqueID: GlobalVariables.generateUniqueID()
             
-    }, GlobalVariables.availableTypes, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
+    }, true) //null indicates that there is nothing to load from the molecule list for this one, true indicates the atom should spawn unlocked
 }
 
 /**
@@ -224,7 +224,7 @@ function placeGitHubMolecule(ev){
     let clr = ev.target.id
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
-    GlobalVariables.currentMolecule.placeAtom({
+    GlobalVariables.currentMolecule.deserialize({
         x: containerX, 
         y: containerY, 
         parent: GlobalVariables.currentMolecule,
