@@ -1184,7 +1184,10 @@ export default function GitHubModule(){
                         readmeContent = readmeContent + item + "\n\n\n"
                     })
                     
-                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)
+                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize({molecules: []})
+                    jsonRepOfProject.filetypeVersion = 1
+                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
                     
                     this.createCommit(octokit,{
                         owner: saveUser,
@@ -1322,6 +1325,9 @@ export default function GitHubModule(){
             //content will be base64 encoded
             let rawFile = JSON.parse(atob(result.data.content))
             
+            console.log("Raw file: ")
+            console.log(rawFile)
+            console.log(rawFile.filetypeVersion == 1)
             
             var moleculesList = rawFile.molecules
             
