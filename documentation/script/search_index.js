@@ -828,6 +828,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#atomstocopy",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-atomsToCopy",
+    "src/js/globalvariables.js~GlobalVariables#atomsToCopy",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#availabletypes",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-availableTypes",
     "src/js/globalvariables.js~GlobalVariables#availableTypes",
@@ -856,6 +862,12 @@ window.esdocSearchIndex = [
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-constructor-constructor",
     "src/js/globalvariables.js~GlobalVariables#constructor",
     "method"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#ctrldown",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-ctrlDown",
+    "src/js/globalvariables.js~GlobalVariables#ctrlDown",
+    "member"
   ],
   [
     "src/js/globalvariables.js~globalvariables#distbetweenpoints",
@@ -2568,12 +2580,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/prototypes/atom.js~atom#copyselected",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-copySelected",
-    "src/js/prototypes/atom.js~Atom#copySelected",
-    "method"
-  ],
-  [
     "src/js/prototypes/atom.js~atom#createbutton",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-createButton",
     "src/js/prototypes/atom.js~Atom#createButton",
@@ -2692,12 +2698,6 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-parentMolecule",
     "src/js/prototypes/atom.js~Atom#parentMolecule",
     "member"
-  ],
-  [
-    "src/js/prototypes/atom.js~atom#pasteselected",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-pasteSelected",
-    "src/js/prototypes/atom.js~Atom#pasteSelected",
-    "method"
   ],
   [
     "src/js/prototypes/atom.js~atom#processing",

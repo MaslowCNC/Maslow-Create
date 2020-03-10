@@ -1354,15 +1354,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const validated = [];
     const l = points.length;
     for (let i = 0; i < l; i++) {
-      let good = true;
-      for (let j = i + 1; j < l; j++) {
-        const sd = squaredDistance(points[i], points[j]);
-        if (sd <= EPSILON2) {
-          good = false;
-          break;
-        }
-      }
-      if (good) {
+      if (squaredDistance(points[i], points[(i + 1) % l]) > EPSILON2) {
         validated.push(points[i]);
       }
     }
@@ -1372,6 +1364,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const plane = fromPolygon(validated);
     if (plane === undefined) {
       return;
+    }
+    if (expectedPlane !== undefined) {
+      validated.plane = expectedPlane;
     }
     out.push(validated);
   };
@@ -16005,8 +16000,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           startPoint = endPoint;
           startType = endType;
         }
-        pushWhenValid(front, frontPoints);
-        pushWhenValid(back, backPoints);
+        pushWhenValid(front, frontPoints, polygonPlane);
+        pushWhenValid(back, backPoints, polygonPlane);
         break;
       }
     }
@@ -16616,8 +16611,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     for (const polygon of dividePolygons(bsp, solidPolygons, normalize)) {
       if (polygon.length > 3) {
-        for (const triangle of makeConvex$1([polygon])) {
-          dividedPolygons.push(triangle);
+        for (let nth = 2; nth < polygon.length; nth++) {
+          dividedPolygons.push([polygon[0], polygon[nth - 1], polygon[nth]]);
         }
       } else if (polygon.length === 3) {
         dividedPolygons.push(polygon);
@@ -16628,6 +16623,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     const vertices = new Map();
 
+    // We only need this for non-deterministic transforms.
+    // Let's require transforms be deterministic functions.
     for (const path of realignedPolygons) {
       for (const point of path) {
         const tag = JSON.stringify(point);
@@ -20687,6 +20684,53 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   /**
    *
+   * # Write Shape Geometry
+   *
+   * This writes a shape as a tagged geometry in json format.
+   *
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * await Cube().writeShape('cube.shape');
+   * await readShape({ path: 'cube.shape' })
+   * ```
+   * :::
+   *
+   **/
+
+  const cacheShape = async (shape, path) => {
+    const geometry = shape.toGeometry();
+    await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+  };
+
+  const writeShape = async (shape, path) => {
+    const geometry = shape.toGeometry();
+    await writeFile({}, `output/${path}`, JSON.stringify(geometry));
+    await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  };
+
+  const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
+  Shape.prototype.writeShape = writeShapeMethod;
+
+  const readShape = async (path, build, { ephemeral = false, src } = {}) => {
+    let data = await readFile({ as: 'utf8', ephemeral }, `source/${path}`);
+    if (data === undefined && src) {
+      data = await readFile({ as: 'utf8', sources: [src], ephemeral }, `cache/${path}`);
+    }
+    if (data === undefined && build !== undefined) {
+      const shape = await build();
+      if (!ephemeral) {
+        await cacheShape(shape, `cache/${path}`);
+      }
+      return shape;
+    }
+    const geometry = JSON.parse(data);
+    return Shape.fromGeometry(geometry);
+  };
+
+  const make = (path, builder) => readShape(path, builder);
+
+  /**
+   *
    * # Material
    *
    * Produces a version of a shape with a given material.
@@ -20865,19 +20909,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
   orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-
-  const writeShape = async (options, shape) => {
-    if (typeof options === 'string') {
-      options = { path: options };
-    }
-    const { path } = options;
-    const geometry = shape.toGeometry();
-    await writeFile({}, `output/${path}`, JSON.stringify(geometry));
-    await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-  };
-
-  const writeShapeMethod = function (options = {}) { return writeShape(options, this); };
-  Shape.prototype.writeShape = writeShapeMethod;
 
   /**
    *
@@ -27994,6 +28025,19 @@ return d[d.length-1];};return ", funcName].join("");
   const withSurfaceCloudMethod = function (...args) { return assemble$1(this, surfaceCloud(this, ...args)); };
   Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
 
+  const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
+    const dX = aX - bX;
+    if (dX !== 0) {
+      return dX;
+    }
+    const dY = aY - bY;
+    if (dY !== 0) {
+      return dY;
+    }
+    const dZ = aZ - bZ;
+    return dZ;
+  };
+
   const cloud = (shape, resolution = 1) => {
     const offset = resolution / 2;
     const geometry = shape.toKeptGeometry();
@@ -28023,6 +28067,7 @@ return d[d.length-1];};return ", funcName].join("");
         }
       }
     }
+    points.sort(orderPoints);
     return Shape.fromGeometry({ points });
   };
 
@@ -47382,10 +47427,8 @@ return d[d.length-1];};return ", funcName].join("");
     Hull: Hull,
     Loop: Loop,
     Shape: Shape,
-    difference: difference$5,
-    intersection: intersection$5,
     log: log$2,
-    union: union$5,
+    make: make,
     pack: pack$1,
     Line2: Line2,
     Plan: Plan,
@@ -53740,10 +53783,8 @@ return d[d.length-1];};return ", funcName].join("");
     Hull: Hull,
     Loop: Loop,
     Shape: Shape,
-    difference: difference$5,
-    intersection: intersection$5,
     log: log$2,
-    union: union$5,
+    make: make,
     pack: pack$1,
     Line2: Line2,
     Plan: Plan,

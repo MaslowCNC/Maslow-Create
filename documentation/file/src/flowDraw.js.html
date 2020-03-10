@@ -92,6 +92,28 @@ GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
 
 
+/** 
+* Ctrl event key
+* @type {number}
+*/
+const ctrlKey = 17
+/** 
+* Cmmd event key
+* @type {number}
+*/
+const cmdKey = 91
+/** 
+* V event key
+* @type {number}
+*/
+const vKey = 86
+/** 
+* C event key
+* @type {number}
+*/
+const cKey = 67
+
+
 // Event Listeners
 /** 
  * The cansvas on which the atoms are placed.
@@ -119,8 +141,7 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     if(isRightMB){
         return
     }
- 
-    
+
     var clickHandledByMolecule = false
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
@@ -132,10 +153,10 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     })
     
     if(!clickHandledByMolecule){
-        GlobalVariables.currentMolecule.backgroundClick()
+        GlobalVariables.currentMolecule.backgroundClick() 
     }
     else{
-        GlobalVariables.currentMolecule.deselect()
+        //GlobalVariables.currentMolecule.deselect()
     }
     //hide the menu if it is visible
     if (!document.querySelector(&apos;#circle-menu1&apos;).contains(event.target)) {
@@ -183,55 +204,36 @@ flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
 })
 
 /** 
-* A flag to indicate if ctrl or commd pressed
-* @type {boolean}
+* Array containing selected atoms to copy or delete
+* @type {array}
 */
-let ctrlDown = false
-/** 
-* Ctrl event key
-* @type {number}
-*/
-const ctrlKey = 17
-/** 
-* Cmmd event key
-* @type {number}
-*/
-const cmdKey = 91
-/** 
-* V event key
-* @type {number}
-*/
-const vKey = 86
-/** 
-* C event key
-* @type {number}
-*/
-const cKey = 67
+let newAtom
 
 window.addEventListener(&apos;keydown&apos;, e =&gt; {
 
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
-        ctrlDown = true
+        GlobalVariables.ctrlDown = true
+    } 
+    if (GlobalVariables.ctrlDown &amp;&amp; e.keyCode == cKey &amp;&amp; document.activeElement.id == &quot;mainBody&quot;) {
+        newAtom = GlobalVariables.atomsToCopy
     }
-    if (ctrlDown &amp;&amp; e.keyCode == cKey &amp;&amp; document.activeElement.id == &quot;mainBody&quot;) { //ctrl+c while working in the main body
-        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
-            molecule.copySelected()     
-        })
+    if (GlobalVariables.ctrlDown &amp;&amp; e.keyCode == vKey &amp;&amp; document.activeElement.id == &quot;mainBody&quot; ) {
+        newAtom.forEach(item =&gt; {
+            let newAtomID = GlobalVariables.generateUniqueID()
+            item.uniqueID = newAtomID
+            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+        })   
     }
-    if (ctrlDown &amp;&amp; e.keyCode == vKey &amp;&amp; document.activeElement.id == &quot;mainBody&quot;) {
-        GlobalVariables.currentMolecule.pasteSelected()  
-    }
-
-
-    //every time the mouse button goes up 
+    //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
         molecule.keyPress(event.key)      
     })
+
 })
 
 window.addEventListener(&apos;keyup&apos;, e =&gt; {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
-        ctrlDown = false
+        GlobalVariables.ctrlDown = false
     }
 })
 

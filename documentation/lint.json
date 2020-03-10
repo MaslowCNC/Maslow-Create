@@ -65,23 +65,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 183,
+        "lineNumber": 188,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 184,
+        "lineNumber": 189,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 185,
+        "lineNumber": 190,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 186,
+        "lineNumber": 191,
         "line": "    */\r"
       },
       {
-        "lineNumber": 187,
+        "lineNumber": 192,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -97,23 +97,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 191,
+        "lineNumber": 196,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 192,
+        "lineNumber": 197,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 193,
+        "lineNumber": 198,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 194,
+        "lineNumber": 199,
         "line": "    */\r"
       },
       {
-        "lineNumber": 195,
+        "lineNumber": 200,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -129,23 +129,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 200,
+        "lineNumber": 205,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 201,
+        "lineNumber": 206,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 202,
+        "lineNumber": 207,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 203,
+        "lineNumber": 208,
         "line": "    */\r"
       },
       {
-        "lineNumber": 204,
+        "lineNumber": 209,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
@@ -193,39 +193,39 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 216,
+        "lineNumber": 215,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 217,
+        "lineNumber": 216,
         "line": "     * Adds a new attachment point to this atom\r"
       },
       {
-        "lineNumber": 218,
+        "lineNumber": 217,
         "line": "     * @param {boolean} type - The type of the IO (input or output)\r"
       },
       {
-        "lineNumber": 219,
+        "lineNumber": 218,
         "line": "     * @param {string} name - The name of the new attachment point\r"
       },
       {
-        "lineNumber": 220,
+        "lineNumber": 219,
         "line": "     * @param {object} target - The attom to attach the new attachment point to. Should we force this to always be this one?\r"
       },
       {
-        "lineNumber": 221,
+        "lineNumber": 220,
         "line": "     * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array\r"
       },
       {
-        "lineNumber": 222,
+        "lineNumber": 221,
         "line": "     * @param {object} defaultValue - The default value to be used when the value is not yet set\r"
       },
       {
-        "lineNumber": 223,
+        "lineNumber": 222,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 224,
+        "lineNumber": 223,
         "line": "    addIO(type, name, target, valueType, defaultValue, ready = false, primary = false){\r"
       }
     ],
@@ -251,27 +251,27 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 817,
+        "lineNumber": 797,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 818,
+        "lineNumber": 798,
         "line": "     * Creates a html representation of the passed text. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 819,
+        "lineNumber": 799,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 820,
+        "lineNumber": 800,
         "line": "     * @param {string} texxt - The text used to generate the markdown html.\r"
       },
       {
-        "lineNumber": 821,
+        "lineNumber": 801,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 822,
+        "lineNumber": 802,
         "line": "    createMarkdownListItem(list, text){\r"
       }
     ],
@@ -289,43 +289,43 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 836,
+        "lineNumber": 816,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 837,
+        "lineNumber": 817,
         "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 838,
+        "lineNumber": 818,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 839,
+        "lineNumber": 819,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 840,
+        "lineNumber": 820,
         "line": "     * @param {array} options - A list of options to display in the drop down.\r"
       },
       {
-        "lineNumber": 841,
+        "lineNumber": 821,
         "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
       },
       {
-        "lineNumber": 842,
+        "lineNumber": 822,
         "line": "     * @param {string} description - A description of what the dropdown does.\r"
       },
       {
-        "lineNumber": 843,
+        "lineNumber": 823,
         "line": "     * @param {object} Callback function\r"
       },
       {
-        "lineNumber": 844,
+        "lineNumber": 824,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 845,
+        "lineNumber": 825,
         "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
       }
     ],
@@ -351,35 +351,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 921,
+        "lineNumber": 901,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 922,
+        "lineNumber": 902,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 923,
+        "lineNumber": 903,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 924,
+        "lineNumber": 904,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 925,
+        "lineNumber": 905,
         "line": "     * @param {boolean} - Flag to see if checkbox is checked\r"
       },
       {
-        "lineNumber": 926,
+        "lineNumber": 906,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 927,
+        "lineNumber": 907,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 928,
+        "lineNumber": 908,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],
