@@ -114,7 +114,6 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
-        
 
         for(var key in values) {
             /** 
@@ -303,18 +302,18 @@ export default class Atom {
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
-        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
-            //console.log("moving")
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){        
             this.isMoving = true
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
+            GlobalVariables.atomsToCopy.push(this.serialize())
         }
-        else{
+        else if (!GlobalVariables.ctrlDown){
             this.selected = false
         }
-
+            
         //Returns true if something was done with the click
         this.inputs.forEach(child => {
             if(child.clickDown(x,y, clickProcessed) == true){
@@ -406,15 +405,13 @@ export default class Atom {
         if (['Delete', 'Backspace'].includes(key)){
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.deleteNode()
+                this.deleteNode()     
             }
         }
-        
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
     }
-    
     /**
      * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.
      */ 
@@ -517,24 +514,7 @@ export default class Atom {
         
         this.draw()
     }
-    /**
-     * Save JSON string with information about this atom that we want to save and copy. 
-     */ 
-    copySelected(){
-        if (this.selected){
-            GlobalVariables.atomToCopy = (JSON.stringify(this.serialize()))
-        }
-    }
 
-    /**
-     * Paste new copied atom into screen. 
-     */ 
-    pasteSelected(){    
-        let newAtom = JSON.parse(GlobalVariables.atomToCopy)
-        let newAtomID = GlobalVariables.generateUniqueID()
-        newAtom.uniqueID = newAtomID
-        this.placeAtom(newAtom, null, GlobalVariables.availableTypes, false)
-    }    
     /**
      * Create an object containing the information about this atom that we want to save. 
      */ 
