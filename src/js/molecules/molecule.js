@@ -513,6 +513,11 @@ export default class Molecule extends Atom{
         //Place the atom - note that types not listed in typesList will not be placed with no warning
         var promise = null
         
+        console.log("Placing a new atom ran")
+        console.log(newAtomObj)
+        console.log(typesList)
+        console.trace()
+        
         for(var key in typesList) {
             if (typesList[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
