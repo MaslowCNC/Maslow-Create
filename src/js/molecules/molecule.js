@@ -466,8 +466,6 @@ export default class Molecule extends Atom{
         return Promise.all(promiseArray).then( ()=> {
             //Once all the atoms are placed we can finish
             
-            //reload the molecule object to prevent persistence issues
-            moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             //Place the connectors
             /**
              * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
