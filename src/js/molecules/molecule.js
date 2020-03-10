@@ -63,7 +63,7 @@ export default class Molecule extends Atom{
             parent: this,
             name: 'Output',
             atomType: 'Output'
-        }, null, GlobalVariables.secretTypes)
+        }, GlobalVariables.secretTypes)
     }
     
     /**
