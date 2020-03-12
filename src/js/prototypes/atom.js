@@ -145,8 +145,7 @@ export default class Atom {
             })
         }
     }
-
-   
+    
     /**
      * Draws the atom on the screen
      */ 
@@ -412,6 +411,7 @@ export default class Atom {
             child.keyPress(key)
         })
     }
+    
     /**
      * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.
      */ 
