@@ -104,8 +104,6 @@ export default class Atom {
          * @type {number}
          */
         this.y = 0
-
-        this.box = false
         /** 
          * A warning message displayed next to the atom. Put text in here to have a warning automatically show up. Cleared each time the output is regenerated.
          * @type {string}
@@ -300,7 +298,11 @@ export default class Atom {
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         if(xInPixels >= xIn && xInPixels <= xOut){
             if(yInPixels >= yIn && yInPixels <= yOut){
+                this.isMoving = true
                 this.selected = true
+                this.updateSidebar()
+                this.sendToRender()
+                GlobalVariables.atomsToCopy.push(this.serialize())
             }
         }
     }
