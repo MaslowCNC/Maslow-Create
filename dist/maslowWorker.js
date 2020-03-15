@@ -104,161 +104,89 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   }
 
-  /**
-   * Set a mat4 to the identity matrix
-   *
-   * @returns {mat4} out
-   */
-  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const X = 0;
+  const Y = 1;
 
-  const EPSILON = 1e-5;
-
-  /**
-   * Creates a matrix from a given angle around a given axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotate(dest, dest, rad, axis);
-   *
-   * @param {mat4} out mat4 receiving operation result
-   * @param {Number} rad the angle to rotate the matrix by
-   * @param {vec3} axis the axis to rotate around
-   * @returns {mat4} out
-   */
-  const fromRotation = (rad, [x, y, z]) => {
-    let len = Math.sqrt(x * x + y * y + z * z);
-
-    if (Math.abs(len) < EPSILON) {
-      return identity();
-    }
-
-    len = 1 / len;
-    x *= len;
-    y *= len;
-    z *= len;
-
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    const t = 1 - c;
-
-    // Perform rotation-specific matrix multiplication
-    return [x * x * t + c,
-            y * x * t + z * s,
-            z * x * t - y * s,
-            0,
-            x * y * t - z * s,
-            y * y * t + c,
-            z * y * t + x * s,
-            0,
-            x * z * t + y * s,
-            y * z * t - x * s,
-            z * z * t + c,
-            0,
-            0,
-            0,
-            0,
-            1];
+  // The resolution is 1 / multiplier.
+  const createNormalize2 = (multiplier = 1e5) => {
+    const map = new Map();
+    const update = (key, value) => {
+      if (!map.has(key)) {
+        map.set(key, value);
+      }
+    };
+    const normalize2 = (coordinate) => {
+      // Apply a spatial quantization to the 2 dimensional coordinate.
+      const nx = Math.floor(coordinate[X] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nx1 = nx + 1;
+      const ny1 = ny + 1;
+      // Populate the space of the quantized coordinate and its adjacencies.
+      const normalized = coordinate;
+      update(`${nx0}/${ny0}`, normalized);
+      update(`${nx0}/${ny1}`, normalized);
+      update(`${nx1}/${ny0}`, normalized);
+      update(`${nx1}/${ny1}`, normalized);
+      // This is now the normalized coordinate for this region.
+      return normalized;
+    };
+    return normalize2;
   };
 
-  /**
-   * Creates a matrix from a vector scaling
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.scale(dest, dest, vec);
-   *
-   * @param {vec3} v Scaling vector
-   * @returns {mat4} out
-   */
-  const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
+  const X$1 = 0;
+  const Y$1 = 1;
+  const Z = 2;
 
-  /**
-   * Creates a matrix from a vector translation
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.translate(dest, dest, vec);
-   *
-   * @param {mat4} out mat4 receiving operation result
-   * @param {vec3} v Translation vector
-   * @returns {mat4} out
-   */
-  const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
-
-  /**
-   * Create a new mat4 with the given values
-   *
-   * @param {Number} m00 Component in column 0, row 0 position (index 0)
-   * @param {Number} m01 Component in column 0, row 1 position (index 1)
-   * @param {Number} m02 Component in column 0, row 2 position (index 2)
-   * @param {Number} m03 Component in column 0, row 3 position (index 3)
-   * @param {Number} m10 Component in column 1, row 0 position (index 4)
-   * @param {Number} m11 Component in column 1, row 1 position (index 5)
-   * @param {Number} m12 Component in column 1, row 2 position (index 6)
-   * @param {Number} m13 Component in column 1, row 3 position (index 7)
-   * @param {Number} m20 Component in column 2, row 0 position (index 8)
-   * @param {Number} m21 Component in column 2, row 1 position (index 9)
-   * @param {Number} m22 Component in column 2, row 2 position (index 10)
-   * @param {Number} m23 Component in column 2, row 3 position (index 11)
-   * @param {Number} m30 Component in column 3, row 0 position (index 12)
-   * @param {Number} m31 Component in column 3, row 1 position (index 13)
-   * @param {Number} m32 Component in column 3, row 2 position (index 14)
-   * @param {Number} m33 Component in column 3, row 3 position (index 15)
-   * @returns {mat4} A new mat4
-   */
-  const fromValues = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
-    [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
-
-  /**
-   * Creates a matrix from the given angle around the X axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateX(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromXRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-
-    // Perform axis-specific matrix multiplication
-    return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Creates a matrix from the given angle around the Y axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateY(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromYRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    // Perform axis-specific matrix multiplication
-    return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Creates a matrix from the given angle around the Z axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateZ(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromZRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    // Perform axis-specific matrix multiplication
-    return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  // The resolution is 1 / multiplier.
+  // export const createNormalize3 = (multiplier = 1e5) => {
+  const createNormalize3 = (multiplier = 1e5 * 2) => {
+    const map = new Map();
+    const update = (key, value) => {
+      if (!map.has(key)) {
+        map.set(key, value);
+      }
+    };
+    const normalize3 = (coordinate) => {
+      // Apply a spatial quantization to the 2 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
+      const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}/${nz}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nz0 = nz;
+      const nx1 = nx + 1;
+      const ny1 = ny + 1;
+      const nz1 = nz + 1;
+      // Populate the space of the quantized coordinate and its adjacencies.
+      const normalized = coordinate;
+      update(`${nx0}/${ny0}/${nz0}`, normalized);
+      update(`${nx0}/${ny0}/${nz1}`, normalized);
+      update(`${nx0}/${ny1}/${nz0}`, normalized);
+      update(`${nx0}/${ny1}/${nz1}`, normalized);
+      update(`${nx1}/${ny0}/${nz0}`, normalized);
+      update(`${nx1}/${ny0}/${nz1}`, normalized);
+      update(`${nx1}/${ny1}/${nz0}`, normalized);
+      update(`${nx1}/${ny1}/${nz1}`, normalized);
+      // This is now the normalized coordinate for this region.
+      return normalized;
+    };
+    return normalize3;
   };
 
   /**
@@ -408,7 +336,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * @param {Number} z Z component
    * @returns {vec3} a new 3D vector
    */
-  const fromValues$1 = (x = 0, y = 0, z = 0) => [x, y, z];
+  const fromValues = (x = 0, y = 0, z = 0) => [x, y, z];
 
   // extend to a 3D vector by adding a z coordinate:
   const fromVec2 = ([x = 0, y = 0], z = 0) => [x, y, z];
@@ -626,7 +554,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     equals: equals,
     fromPoint: fromPoint,
     fromScalar: fromScalar,
-    fromValues: fromValues$1,
+    fromValues: fromValues,
     fromVec2: fromVec2,
     length: length,
     lerp: lerp,
@@ -649,6 +577,163 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     turnZ: turnZ,
     unit: unit
   });
+
+  /**
+   * Set a mat4 to the identity matrix
+   *
+   * @returns {mat4} out
+   */
+  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+  const EPSILON = 1e-5;
+
+  /**
+   * Creates a matrix from a given angle around a given axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotate(dest, dest, rad, axis);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {Number} rad the angle to rotate the matrix by
+   * @param {vec3} axis the axis to rotate around
+   * @returns {mat4} out
+   */
+  const fromRotation = (rad, [x, y, z]) => {
+    let len = Math.sqrt(x * x + y * y + z * z);
+
+    if (Math.abs(len) < EPSILON) {
+      return identity();
+    }
+
+    len = 1 / len;
+    x *= len;
+    y *= len;
+    z *= len;
+
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    const t = 1 - c;
+
+    // Perform rotation-specific matrix multiplication
+    return [x * x * t + c,
+            y * x * t + z * s,
+            z * x * t - y * s,
+            0,
+            x * y * t - z * s,
+            y * y * t + c,
+            z * y * t + x * s,
+            0,
+            x * z * t + y * s,
+            y * z * t - x * s,
+            z * z * t + c,
+            0,
+            0,
+            0,
+            0,
+            1];
+  };
+
+  /**
+   * Creates a matrix from a vector scaling
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.scale(dest, dest, vec);
+   *
+   * @param {vec3} v Scaling vector
+   * @returns {mat4} out
+   */
+  const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
+
+  /**
+   * Creates a matrix from a vector translation
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.translate(dest, dest, vec);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {vec3} v Translation vector
+   * @returns {mat4} out
+   */
+  const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+
+  /**
+   * Create a new mat4 with the given values
+   *
+   * @param {Number} m00 Component in column 0, row 0 position (index 0)
+   * @param {Number} m01 Component in column 0, row 1 position (index 1)
+   * @param {Number} m02 Component in column 0, row 2 position (index 2)
+   * @param {Number} m03 Component in column 0, row 3 position (index 3)
+   * @param {Number} m10 Component in column 1, row 0 position (index 4)
+   * @param {Number} m11 Component in column 1, row 1 position (index 5)
+   * @param {Number} m12 Component in column 1, row 2 position (index 6)
+   * @param {Number} m13 Component in column 1, row 3 position (index 7)
+   * @param {Number} m20 Component in column 2, row 0 position (index 8)
+   * @param {Number} m21 Component in column 2, row 1 position (index 9)
+   * @param {Number} m22 Component in column 2, row 2 position (index 10)
+   * @param {Number} m23 Component in column 2, row 3 position (index 11)
+   * @param {Number} m30 Component in column 3, row 0 position (index 12)
+   * @param {Number} m31 Component in column 3, row 1 position (index 13)
+   * @param {Number} m32 Component in column 3, row 2 position (index 14)
+   * @param {Number} m33 Component in column 3, row 3 position (index 15)
+   * @returns {mat4} A new mat4
+   */
+  const fromValues$1 = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
+    [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
+
+  /**
+   * Creates a matrix from the given angle around the X axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateX(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromXRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+
+    // Perform axis-specific matrix multiplication
+    return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Creates a matrix from the given angle around the Y axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateY(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromYRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    // Perform axis-specific matrix multiplication
+    return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Creates a matrix from the given angle around the Z axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateZ(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromZRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    // Perform axis-specific matrix multiplication
+    return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  };
 
   /**
    * determine whether the input matrix is a mirroring transformation
@@ -878,8 +963,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return edges;
   };
 
-  const X = 0;
-  const Y = 1;
+  const X$2 = 0;
+  const Y$2 = 1;
 
   /**
    * Measure the area of a path as though it were a polygon.
@@ -892,7 +977,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     let current = (path[0] === null) ? 1 : 0;
     let twiceArea = 0;
     for (; current < path.length; last = current++) {
-      twiceArea += path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
+      twiceArea += path[last][X$2] * path[current][Y$2] - path[last][Y$2] * path[current][X$2];
     }
     return twiceArea / 2;
   };
@@ -927,177 +1012,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const rotateX$1 = (radians, path) => transform$1(fromXRotation(radians), path);
   const rotateZ$1 = (radians, path) => transform$1(fromZRotation(radians), path);
   const scale$2 = (vector, path) => transform$1(fromScaling(vector), path);
-
-  const X$1 = 0;
-  const Y$1 = 1;
-
-  // The resolution is 1 / multiplier.
-  const createNormalize2 = (multiplier = 1e5) => {
-    const map = new Map();
-    const update = (key, value) => {
-      if (!map.has(key)) {
-        map.set(key, value);
-      }
-    };
-    const normalize2 = (coordinate) => {
-      // Apply a spatial quantization to the 2 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nx1 = nx + 1;
-      const ny1 = ny + 1;
-      // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = coordinate;
-      update(`${nx0}/${ny0}`, normalized);
-      update(`${nx0}/${ny1}`, normalized);
-      update(`${nx1}/${ny0}`, normalized);
-      update(`${nx1}/${ny1}`, normalized);
-      // This is now the normalized coordinate for this region.
-      return normalized;
-    };
-    return normalize2;
-  };
-
-  const X$2 = 0;
-  const Y$2 = 1;
-  const Z = 2;
-
-  // The resolution is 1 / multiplier.
-  const createNormalize3 = (multiplier = 1e5) => {
-    const map = new Map();
-    const update = (key, value) => {
-      if (!map.has(key)) {
-        map.set(key, value);
-      }
-    };
-    const normalize3 = (coordinate) => {
-      // Apply a spatial quantization to the 2 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
-      const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}/${nz}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nz0 = nz;
-      const nx1 = nx + 1;
-      const ny1 = ny + 1;
-      const nz1 = nz + 1;
-      // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = coordinate;
-      update(`${nx0}/${ny0}/${nz0}`, normalized);
-      update(`${nx0}/${ny0}/${nz1}`, normalized);
-      update(`${nx0}/${ny1}/${nz0}`, normalized);
-      update(`${nx0}/${ny1}/${nz1}`, normalized);
-      update(`${nx1}/${ny0}/${nz0}`, normalized);
-      update(`${nx1}/${ny0}/${nz1}`, normalized);
-      update(`${nx1}/${ny1}/${nz0}`, normalized);
-      update(`${nx1}/${ny1}/${nz1}`, normalized);
-      // This is now the normalized coordinate for this region.
-      return normalized;
-    };
-    return normalize3;
-  };
-
-  const THRESHOLD = 1e-5;
-
-  // We expect a solid of reconciled triangles.
-
-  const watertight = Symbol('watertight');
-
-  const makeWatertight = (solid, normalize = createNormalize3(), onFixed = (_ => _)) => {
-    if (!solid[watertight]) {
-      let fixed = false;
-      const vertices = new Set();
-
-      const reconciledSolid = [];
-      for (const surface of solid) {
-        const reconciledSurface = [];
-        for (const path of surface) {
-          const reconciledPath = [];
-          for (const point of path) {
-            const reconciledPoint = normalize(point);
-            reconciledPath.push(reconciledPoint);
-            vertices.add(reconciledPoint);
-          }
-          reconciledSurface.push(reconciledPath);
-        }
-        reconciledSolid.push(reconciledSurface);
-      }
-
-      const watertightSolid = [];
-      for (const surface of reconciledSolid) {
-        const watertightPaths = [];
-        for (const path of surface) {
-          const watertightPath = [];
-          for (const [start, end] of getEdges(path)) {
-            watertightPath.push(start);
-            const span = distance(start, end);
-            const colinear = [];
-            for (const vertex of vertices) {
-              // FIX: Threshold
-              if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
-                if (vertex !== start && vertex !== end) {
-                  // FIX: Clip an ear instead.
-                  // Vertex is on the open edge.
-                  colinear.push(vertex);
-                  fixed = true;
-                }
-              }
-            }
-            // Arrange by distance from start.
-            colinear.sort((a, b) => distance(start, a) - distance(start, b));
-            // Insert into the path.
-            watertightPath.push(...colinear);
-          }
-          watertightPaths.push(watertightPath);
-        }
-        watertightSolid.push(watertightPaths);
-      }
-      // At this point we should have the correct structure for assembly into a solid.
-      // We just need to ensure triangulation to support deformation.
-
-      onFixed(fixed);
-
-      solid[watertight] = watertightSolid;
-    }
-
-    return solid[watertight];
-  };
-
-  const isWatertight = (solid) => {
-    const edges = new Set();
-    for (const surface of solid) {
-      for (const path of surface) {
-        for (const [start, end] of getEdges(path)) {
-          edges.add(`${JSON.stringify([start, end])}`);
-        }
-      }
-    }
-    for (const surface of solid) {
-      for (const path of surface) {
-        for (const [start, end] of getEdges(path)) {
-          if (!edges.has(`${JSON.stringify([end, start])}`)) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  };
 
   /**
    * Transforms the vertices of a polygon, producing a new poly3.
@@ -1213,7 +1127,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const factor = 1 / length(normal);
     const plane = scale(factor, normal);
     plane[W] = dot(reference, normal) * factor / polygon.length;
-    if (isNaN(plane[0])) {
+    if (isNaN(plane[X$3])) {
       return undefined;
     } else {
       return plane;
@@ -1259,12 +1173,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const u = cross(v, plane);
     const p = multiply(plane, fromScalar(plane[W$2]));
 
-    const to = fromValues(u[X$4], v[X$4], plane[X$4], 0,
+    const to = fromValues$1(u[X$4], v[X$4], plane[X$4], 0,
                           u[Y$4], v[Y$4], plane[Y$4], 0,
                           u[Z$2], v[Z$2], plane[Z$2], 0,
                           0, 0, -plane[W$2], 1);
 
-    const from = fromValues(u[X$4], u[Y$4], u[Z$2], 0,
+    const from = fromValues$1(u[X$4], u[Y$4], u[Z$2], 0,
                             v[X$4], v[Y$4], v[Z$2], 0,
                             plane[X$4], plane[Y$4], plane[Z$2], 0,
                             p[X$4], p[Y$4], p[Z$2], 1);
@@ -1354,8 +1268,221 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return transformed;
   };
 
+  const isDegenerate = (polygon) => {
+    for (let nth = 0; nth < polygon.length; nth++) {
+      if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const canonicalize$4 = (polygons) => {
+    const canonicalized = [];
+    for (let polygon of polygons) {
+      polygon = canonicalize$2(polygon);
+      if (!isDegenerate(polygon)) {
+        canonicalized.push(polygon);
+      }
+    }
+    return canonicalized;
+  };
+
+  const measureBoundingBox = (polygons) => {
+    if (polygons.measureBoundingBox === undefined) {
+      const min = [Infinity, Infinity, Infinity];
+      const max = [-Infinity, -Infinity, -Infinity];
+      for (const path of polygons) {
+        for (const point of path) {
+          if (point[0] < min[0]) min[0] = point[0];
+          if (point[1] < min[1]) min[1] = point[1];
+          if (point[2] < min[2]) min[2] = point[2];
+          if (point[0] > max[0]) max[0] = point[0];
+          if (point[1] > max[1]) max[1] = point[1];
+          if (point[2] > max[2]) max[2] = point[2];
+        }
+      }
+      polygons.measureBoundingBox = [min, max];
+    }
+    return polygons.measureBoundingBox;
+  };
+
+  const iota = 1e-5;
+  const X$5 = 0;
+  const Y$5 = 1;
+  const Z$3 = 2;
+
+  // Requires a conservative gap.
+  const doesNotOverlap = (a, b) => {
+    if (a.length === 0 || b.length === 0) {
+      return true;
+    }
+    const [minA, maxA] = measureBoundingBox(a);
+    const [minB, maxB] = measureBoundingBox(b);
+    if (maxA[X$5] <= minB[X$5] - iota * 10) { return true; }
+    if (maxA[Y$5] <= minB[Y$5] - iota * 10) { return true; }
+    if (maxA[Z$3] <= minB[Z$3] - iota * 10) { return true; }
+    if (maxB[X$5] <= minA[X$5] - iota * 10) { return true; }
+    if (maxB[Y$5] <= minA[Y$5] - iota * 10) { return true; }
+    if (maxB[Z$3] <= minA[Z$3] - iota * 10) { return true; }
+    return false;
+  };
+
+  /**
+   * Transforms each polygon of Polygons.
+   *
+   * @param {Polygons} original - the Polygons to transform.
+   * @param {Function} [transform=identity] - function used to transform the polygons.
+   * @returns {Polygons} a copy with transformed polygons.
+   */
+  const map$1 = (original, transform) => {
+    if (original === undefined) {
+      original = [];
+    }
+    if (transform === undefined) {
+      transform = _ => _;
+    }
+    return original.map(polygon => transform(polygon));
+  };
+
+  const flip$3 = (polygons) => map$1(polygons, flip$1);
+
+  // const EPSILON = 1e-5;
+  const EPSILON2 = 1e-10;
+
+  const pushWhenValid = (out, points, expectedPlane) => {
+    const validated = [];
+    const l = points.length;
+    for (let i = 0; i < l; i++) {
+      if (squaredDistance(points[i], points[(i + 1) % l]) > EPSILON2) {
+        validated.push(points[i]);
+      }
+    }
+    if (validated.length < 3) {
+      return;
+    }
+    const plane = fromPolygon(validated);
+    if (plane === undefined) {
+      return;
+    }
+    if (expectedPlane !== undefined) {
+      validated.plane = expectedPlane;
+    }
+    out.push(validated);
+  };
+
+  const toTriangles = (options = {}, paths) => {
+    const triangles = [];
+    for (const path of paths) {
+      for (let nth = 2; nth < path.length; nth++) {
+        triangles.push([path[0], path[nth - 1], path[nth]]);
+      }
+    }
+    return triangles;
+  };
+
+  const THRESHOLD = 1e-5;
+
+  // We expect a solid of reconciled triangles.
+
+  const watertight = Symbol('watertight');
+
+  const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
+    if (normalize === undefined) {
+      normalize = createNormalize3(1 / threshold);
+    }
+    if (!solid[watertight]) {
+      if (isWatertight(solid)) {
+        solid[watertight] = solid;
+      }
+    }
+
+    if (!solid[watertight]) {
+      let fixed = false;
+      const vertices = new Set();
+
+      const reconciledSolid = [];
+      for (const surface of solid) {
+        const reconciledSurface = [];
+        for (const path of surface) {
+          const reconciledPath = [];
+          for (const point of path) {
+            const reconciledPoint = normalize(point);
+            reconciledPath.push(reconciledPoint);
+            vertices.add(reconciledPoint);
+          }
+          if (toPlane(reconciledPath) !== undefined) {
+            // Filter degenerates.
+            reconciledSurface.push(reconciledPath);
+          }
+        }
+        reconciledSolid.push(reconciledSurface);
+      }
+
+      const watertightSolid = [];
+      for (const surface of reconciledSolid) {
+        const watertightPaths = [];
+        for (const path of surface) {
+          const watertightPath = [];
+          for (const [start, end] of getEdges(path)) {
+            watertightPath.push(start);
+            const span = distance(start, end);
+            const colinear = [];
+            for (const vertex of vertices) {
+              // FIX: Threshold
+              if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+                // Avoid trying to resolve t-junctions via self-intersection.
+                if (!path.includes(vertex)) {
+                  // FIX: Clip an ear instead.
+                  // Vertex is on the open edge.
+                  colinear.push(vertex);
+                  fixed = true;
+                }
+              }
+            }
+            // Arrange by distance from start.
+            colinear.sort((a, b) => distance(start, a) - distance(start, b));
+            // Insert into the path.
+            watertightPath.push(...colinear);
+          }
+          pushWhenValid(watertightPaths, watertightPath);
+        }
+        watertightSolid.push(watertightPaths);
+      }
+      // At this point we should have the correct structure for assembly into a solid.
+      // We just need to ensure triangulation to support deformation.
+
+      onFixed(fixed);
+
+      solid[watertight] = watertightSolid;
+    }
+
+    return solid[watertight];
+  };
+
+  const isWatertight = (solid) => {
+    const edges = new Set();
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const [start, end] of getEdges(path)) {
+          edges.add(`${JSON.stringify([start, end])}`);
+        }
+      }
+    }
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const [start, end] of getEdges(path)) {
+          if (!edges.has(`${JSON.stringify([end, start])}`)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
   // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
-  const canonicalize$4 = (surface) => surface.map(canonicalize$2);
+  const canonicalize$5 = (surface) => surface.map(canonicalize$2);
 
   // Transforms
   const transform$4 = (matrix, surface) => surface.map(polygon => transform$3(matrix, polygon));
@@ -2483,7 +2610,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * @param {Function} [transform=identity] - function used to transform the polygons.
    * @returns {Polygons} a copy with transformed polygons.
    */
-  const map$1 = (original, transform) => {
+  const map$2 = (original, transform) => {
     if (original === undefined) {
       original = [];
     }
@@ -2493,10 +2620,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return original.map(polygon => transform(polygon));
   };
 
-  const flip$3 = (surface) => map$1(surface, flip$1);
+  const flip$4 = (surface) => map$2(surface, flip$1);
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox = (surface) => {
+  const measureBoundingBox$1 = (surface) => {
     if (surface.measureBoundingBox === undefined) {
       let max = [-Infinity, -Infinity, 0];
       let min = [Infinity, Infinity, 0];
@@ -7995,7 +8122,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * item.
    * @returns {Array} A new array of values returned by the callback function.
    */
-  function map$2(array, fn) {
+  function map$3(array, fn) {
     var length = array.length;
     var result = [];
     while (length--) {
@@ -8026,7 +8153,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     // Avoid `split(regex)` for IE8 compatibility. See #17.
     string = string.replace(regexSeparators, '\x2E');
     var labels = string.split('.');
-    var encoded = map$2(labels, fn).join('.');
+    var encoded = map$3(labels, fn).join('.');
     return result + encoded;
   }
 
@@ -10822,10 +10949,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
 
     if (typeof obj === 'object') {
-      return map$3(objectKeys(obj), function(k) {
+      return map$4(objectKeys(obj), function(k) {
         var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
         if (isArray$2(obj[k])) {
-          return map$3(obj[k], function(v) {
+          return map$4(obj[k], function(v) {
             return ks + encodeURIComponent(stringifyPrimitive(v));
           }).join(sep);
         } else {
@@ -10839,7 +10966,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return encodeURIComponent(stringifyPrimitive(name)) + eq +
            encodeURIComponent(stringifyPrimitive(obj));
   }
-  function map$3 (xs, f) {
+  function map$4 (xs, f) {
     if (xs.map) return xs.map(f);
     var res = [];
     for (var i = 0; i < xs.length; i++) {
@@ -13647,7 +13774,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const toSurface = (clipperPaths, normalize) =>
-    clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
+    clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
 
   const toPaths = (clipper, polytree, normalize) => {
     const paths = [];
@@ -13661,7 +13788,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$1 = (surface) => {
+  const measureBoundingBox$2 = (surface) => {
     if (surface.measureBoundingBox === undefined) {
       const max = [-Infinity, -Infinity, 0];
       const min = [Infinity, Infinity, 0];
@@ -13682,21 +13809,21 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return surface.measureBoundingBox;
   };
 
-  const iota = 1e-5;
-  const X$5 = 0;
-  const Y$5 = 1;
+  const iota$1 = 1e-5;
+  const X$6 = 0;
+  const Y$6 = 1;
 
   // No overlap tolerance.
   const doesNotOverlapOrAbut = (a, b) => {
     if (a.length === 0 || b.length === 0) {
       return true;
     }
-    const [minA, maxA] = measureBoundingBox$1(a);
-    const [minB, maxB] = measureBoundingBox$1(b);
-    if (maxA[X$5] < minB[X$5] - iota) { return true; }
-    if (maxA[Y$5] < minB[Y$5] - iota) { return true; }
-    if (maxB[X$5] < minA[X$5] - iota) { return true; }
-    if (maxB[Y$5] < minA[Y$5] - iota) { return true; }
+    const [minA, maxA] = measureBoundingBox$2(a);
+    const [minB, maxB] = measureBoundingBox$2(b);
+    if (maxA[X$6] < minB[X$6] - iota$1) { return true; }
+    if (maxA[Y$6] < minB[Y$6] - iota$1) { return true; }
+    if (maxB[X$6] < minA[X$6] - iota$1) { return true; }
+    if (maxB[Y$6] < minA[Y$6] - iota$1) { return true; }
     return false;
   };
 
@@ -14488,7 +14615,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
   earcut_1.default = default_1;
 
-  const makeConvex = (surface, normalize = p => p) => {
+  const makeConvex = (surface, normalize = createNormalize2()) => {
     if (surface.length === 0) {
       return [];
     }
@@ -14521,12 +14648,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         const a = triangles[i + 0];
         const b = triangles[i + 1];
         const c = triangles[i + 2];
-        const triangle = [[earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0],
-                          [earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0],
-                          [earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0]];
-        if (isClockwise(triangle)) {
-          triangle.reverse();
-        }
+        const triangle = [normalize([earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0]),
+                          normalize([earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0]),
+                          normalize([earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0])];
         convexSurface.push(triangle);
       }
     };
@@ -14550,7 +14674,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       walkContour(child);
     }
 
-    const normalized = convexSurface.map(path => path.map(normalize));
+    const normalized = convexSurface.map(path => path.map(normalize)).filter(path => toPlane(path) !== undefined);
+    const rectified = [];
+    for (const polygon of normalized) {
+      if (isClockwise(polygon)) {
+        rectified.push(flip(polygon));
+      } else {
+        rectified.push(polygon);
+      }
+    }
     return normalized;
   };
 
@@ -14558,7 +14690,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   // We expect a surface of reconciled triangles.
 
-  const makeWatertight$1 = (surface) => {
+  const fixTJunctions = (surface) => {
     const vertices = new Set();
 
     for (const path of surface) {
@@ -14598,8 +14730,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // This reorients the most exterior paths to be ccw.
 
   const reorient = (surface, normalize = p => p) => {
-    const watertightSurface = makeWatertight$1(surface.map(path => path.map(normalize)));
-    const polygons = fromSurface(watertightSurface, normalize);
+    const polygons = fromSurface(fixTJunctions(surface), normalize);
     if (polygons.length === 0) {
       return [];
     }
@@ -14689,13 +14820,14 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       }
     }
     const [to, from] = toXYPlaneTransforms(plane);
-    const convexZ0Surface = makeConvex(transform$4(to, surface.map(path => path.map(normalize3))));
+    const z0Surface = transform$4(to, surface.map(path => path.map(normalize3)));
+    const convexZ0Surface = makeConvex(z0Surface);
     const convexSurface = transform$4(from, convexZ0Surface).map(path => path.map(normalize3));
     return convexSurface;
   };
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$2 = (surface) => {
+  const measureBoundingBox$3 = (surface) => {
     if (surface.measureBoundingBox === undefined) {
       const min = [Infinity, Infinity, Infinity];
       const max = [-Infinity, -Infinity, -Infinity];
@@ -14716,7 +14848,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const measureBoundingSphere = (surface) => {
     if (surface.measureBoundingSphere === undefined) {
-      const box = measureBoundingBox$2(surface);
+      const box = measureBoundingBox$3(surface);
       const center = scale(0.5, add(box[0], box[1]));
       const radius = distance(center, box[1]);
       surface.measureBoundingSphere = [center, radius];
@@ -14751,15 +14883,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return aligned;
   };
 
-  const canonicalize$5 = (solid) => solid.map(canonicalize$4);
+  const canonicalize$6 = (solid) => solid.map(canonicalize$5);
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$3 = (solid) => {
+  const measureBoundingBox$4 = (solid) => {
     if (solid.measureBoundingBox === undefined) {
       const min = [Infinity, Infinity, Infinity];
       const max = [-Infinity, -Infinity, -Infinity];
       for (const surface of solid) {
-        const [minSurface, maxSurface] = measureBoundingBox$2(surface);
+        const [minSurface, maxSurface] = measureBoundingBox$3(surface);
         if (minSurface[0] < min[0]) min[0] = minSurface[0];
         if (minSurface[1] < min[1]) min[1] = minSurface[1];
         if (minSurface[2] < min[2]) min[2] = minSurface[2];
@@ -14804,23 +14936,23 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return openEdges;
   };
 
-  const flip$4 = (solid) => solid.map(surface => flip$3(surface));
+  const flip$5 = (solid) => solid.map(surface => flip$4(surface));
 
   // The resolution is 1 / multiplier.
   const multiplier = 1e5;
 
-  const X$6 = 0;
-  const Y$6 = 1;
-  const Z$3 = 2;
+  const X$7 = 0;
+  const Y$7 = 1;
+  const Z$4 = 2;
   const W$3 = 3;
 
   const createNormalize4 = () => {
     const map = new Map();
     const normalize4 = (coordinate) => {
       // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$6] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$6] * multiplier - 0.5);
-      const nz = Math.floor(coordinate[Z$3] * multiplier - 0.5);
+      const nx = Math.floor(coordinate[X$7] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$7] * multiplier - 0.5);
+      const nz = Math.floor(coordinate[Z$4] * multiplier - 0.5);
       const nw = Math.floor(coordinate[W$3] * multiplier - 0.5);
       // Look for an existing inhabitant.
       const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
@@ -14876,9 +15008,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       const plane = toPlane(polygon);
       if (plane === undefined) {
         // Polygon is degenerate -- probably on a line.
-        // console.log(`QQ/fromPolygons/degenerate`);
         continue;
       }
+      // Here we use a strict plane identity to merge.
+      // This may result in fragmentation.
+      // const key = JSON.stringify(toPlane(polygon));
       const key = normalize4(toPlane(polygon));
       const groups = coplanarGroups.get(key);
       if (groups === undefined) {
@@ -14894,12 +15028,16 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const defragmented = [];
 
     // Erase substructure and make convex.
-    for (const [plane, polygons] of coplanarGroups) {
-      const surface = makeConvex$1(polygons, normalize3, plane);
+    for (const polygons of coplanarGroups.values()) {
+      // const surface = polygons;
+      const surface = makeConvex$1(polygons, normalize3, toPlane(polygons[0]));
       defragmented.push(surface);
     }
 
-    return defragmented;
+    // return defragmented;
+
+    const w = makeWatertight(defragmented, normalize3);
+    return w;
   };
 
   const outline$2 = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
@@ -14915,6 +15053,380 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     return polygons;
   };
+
+  /**
+   *
+   * # Ease
+   *
+   * Produces a function for composing easing functions.
+   * ```
+   * ease(0.00, 0.25, t => sin(t * 25))(ease(0.25, 1.00, t => 5)())
+   * ```
+   *
+   **/
+
+  const ease = (start = 0.00, end = 1.00, op = t => 1) => {
+    const compose = (next = t => 1) => {
+      const fn = t => {
+        if (t >= start && t <= end) {
+          return op((t - start) / (end - start));
+        } else {
+          return next(t);
+        }
+      };
+      return fn;
+    };
+    return compose;
+  };
+
+  const linear = (start, end) => t => start + t * (end - start);
+  ease.linear = linear;
+
+  ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
+  linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
+
+  var Prando_umd = createCommonjsModule(function (module, exports) {
+  (function (global, factory) {
+  	 module.exports = factory() ;
+  }(commonjsGlobal, (function () {
+  	var Prando = /** @class */ (function () {
+  	    // ================================================================================================================
+  	    // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
+  	    /**
+  	     * Generate a new Prando pseudo-random number generator.
+  	     *
+  	     * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
+  	     */
+  	    function Prando(seed) {
+  	        this._value = NaN;
+  	        if (typeof (seed) === "string") {
+  	            // String seed
+  	            this._seed = this.hashCode(seed);
+  	        }
+  	        else if (typeof (seed) === "number") {
+  	            // Numeric seed
+  	            this._seed = this.getSafeSeed(seed);
+  	        }
+  	        else {
+  	            // Pseudo-random seed
+  	            this._seed = this.getSafeSeed(Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random()));
+  	        }
+  	        this.reset();
+  	    }
+  	    // ================================================================================================================
+  	    // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
+  	    /**
+  	     * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
+  	     *
+  	     * @param min - The minimum number that can be randomly generated.
+  	     * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
+  	     * @return The generated pseudo-random number.
+  	     */
+  	    Prando.prototype.next = function (min, pseudoMax) {
+  	        if (min === void 0) { min = 0; }
+  	        if (pseudoMax === void 0) { pseudoMax = 1; }
+  	        this.recalculate();
+  	        return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
+  	    };
+  	    /**
+  	     * Generates a pseudo-random integer number in a range (inclusive).
+  	     *
+  	     * @param min - The minimum number that can be randomly generated.
+  	     * @param max - The maximum number that can be randomly generated.
+  	     * @return The generated pseudo-random number.
+  	     */
+  	    Prando.prototype.nextInt = function (min, max) {
+  	        if (min === void 0) { min = 10; }
+  	        if (max === void 0) { max = 100; }
+  	        this.recalculate();
+  	        return Math.floor(this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1));
+  	    };
+  	    /**
+  	     * Generates a pseudo-random string sequence of a particular length from a specific character range.
+  	     *
+  	     * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
+  	     * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
+  	     * pre-existing ids, or employ a robust GUID/UUID generator.
+  	     *
+  	     * @param length - Length of the strting to be generated.
+  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+  	     * @return The generated string sequence.
+  	     */
+  	    Prando.prototype.nextString = function (length, chars) {
+  	        if (length === void 0) { length = 16; }
+  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
+  	        var str = "";
+  	        while (str.length < length) {
+  	            str += this.nextChar(chars);
+  	        }
+  	        return str;
+  	    };
+  	    /**
+  	     * Generates a pseudo-random string of 1 character specific character range.
+  	     *
+  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+  	     * @return The generated character.
+  	     */
+  	    Prando.prototype.nextChar = function (chars) {
+  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
+  	        this.recalculate();
+  	        return chars.substr(this.nextInt(0, chars.length - 1), 1);
+  	    };
+  	    /**
+  	     * Picks a pseudo-random item from an array. The array is left unmodified.
+  	     *
+  	     * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
+  	     * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
+  	     * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
+  	     * apply a *shuffle* transformation to the array instead, then read it linearly.
+  	     *
+  	     * @param array - Array of any type containing one or more candidates for random picking.
+  	     * @return An item from the array.
+  	     */
+  	    Prando.prototype.nextArrayItem = function (array) {
+  	        this.recalculate();
+  	        return array[this.nextInt(0, array.length - 1)];
+  	    };
+  	    /**
+  	     * Generates a pseudo-random boolean.
+  	     *
+  	     * @return A value of true or false.
+  	     */
+  	    Prando.prototype.nextBoolean = function () {
+  	        this.recalculate();
+  	        return this._value > 0.5;
+  	    };
+  	    /**
+  	     * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
+  	     * calling next() a specified number of times, but faster since it doesn't need to map the
+  	     * new random numbers to a range and return it.
+  	     *
+  	     * @param iterations - The number of items to skip ahead.
+  	     */
+  	    Prando.prototype.skip = function (iterations) {
+  	        if (iterations === void 0) { iterations = 1; }
+  	        while (iterations-- > 0) {
+  	            this.recalculate();
+  	        }
+  	    };
+  	    /**
+  	     * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
+  	     * will then produce the same sequence of numbers it had produced before. This is equivalent to
+  	     * creating a new Prando instance with the same seed as another Prando instance.
+  	     *
+  	     * Example:
+  	     * let rng = new Prando(12345678);
+  	     * console.log(rng.next()); // 0.6177754114889017
+  	     * console.log(rng.next()); // 0.5784605181725837
+  	     * rng.reset();
+  	     * console.log(rng.next()); // 0.6177754114889017 again
+  	     * console.log(rng.next()); // 0.5784605181725837 again
+  	     */
+  	    Prando.prototype.reset = function () {
+  	        this._value = this._seed;
+  	    };
+  	    // ================================================================================================================
+  	    // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
+  	    Prando.prototype.recalculate = function () {
+  	        this._value = this.xorshift(this._value);
+  	    };
+  	    Prando.prototype.xorshift = function (value) {
+  	        // Xorshift*32
+  	        // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
+  	        value ^= value << 13;
+  	        value ^= value >> 17;
+  	        value ^= value << 5;
+  	        return value;
+  	    };
+  	    Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
+  	        return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
+  	    };
+  	    Prando.prototype.hashCode = function (str) {
+  	        var hash = 0;
+  	        if (str) {
+  	            var l = str.length;
+  	            for (var i = 0; i < l; i++) {
+  	                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+  	                hash |= 0;
+  	                hash = this.xorshift(hash);
+  	            }
+  	        }
+  	        return this.getSafeSeed(hash);
+  	    };
+  	    Prando.prototype.getSafeSeed = function (seed) {
+  	        if (seed === 0)
+  	            return 1;
+  	        return seed;
+  	    };
+  	    Prando.MIN = -2147483648; // Int32 min
+  	    Prando.MAX = 2147483647; // Int32 max
+  	    return Prando;
+  	}());
+
+  	return Prando;
+
+  })));
+  module.exports.default = module.exports; // Terrible injection just so it works regardless of how it's required
+  });
+
+  const to = (g) => (to) => g() * to;
+  const vary = (g) => (degree) => (g() - 0.5) * degree * 2;
+
+  const Random = (seed = 0) => {
+    const rng = new Prando_umd(seed);
+    const g = () => rng.next();
+    g.to = to(g);
+    g.vary = vary(g);
+    return g;
+  };
+
+  /**
+   *
+   * # Arc Cosine
+   *
+   * Gives the arc cosine converted to degrees.
+   * ```
+   * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
+   *
+   * acos(0) = 90
+   * acos(0.5) = 60
+   * acos(1) = 0
+   * ```
+   *
+   **/
+
+  const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+  acos.signature = 'acos(angle:number) -> number';
+
+  /**
+   *
+   * # Cosine
+   *
+   * Gives the cosine in degrees.
+   * ```
+   * cos(a) => Math.cos(a / 360 * Math.PI * 2);
+   *
+   * cos(0) = 1
+   * cos(45) = 0.707
+   * cos(90) = 0
+   * ```
+   *
+   **/
+
+  const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
+
+  cos.signature = 'cos(angle:number) -> number';
+
+  /**
+   *
+   * # Max
+   *
+   * Produces the maximum of a series of numbers.
+   *
+   * ```
+   * max(1, 2, 3, 4) == 4
+   * ```
+   *
+   **/
+
+  const max$1 = Math.max;
+
+  max$1.signature = 'max(...values:number) -> number';
+
+  /**
+   *
+   * # Min
+   *
+   * Produces the minimum of a series of numbers.
+   *
+   * ```
+   * min(1, 2, 3, 4) == 1
+   * ```
+   *
+   **/
+
+  const min$1 = Math.min;
+
+  min$1.signature = 'min(...values:number) -> number';
+
+  /**
+   *
+   * # Numbers
+   *
+   * ```
+   * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
+   * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
+   * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
+   * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
+   * ```
+   *
+   **/
+
+  const EPSILON$2 = 1e-5;
+
+  const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
+    const numbers = [];
+    if (by === undefined) {
+      if (resolution !== undefined) {
+        by = to / resolution;
+      } else {
+        by = 1;
+      }
+    }
+
+    if (to === undefined && upto === undefined) {
+      upto = 1;
+    }
+
+    if (upto !== undefined) {
+      // Exclusive
+      for (let number = from, nth = 0; number < to - EPSILON$2; number += by, nth++) {
+        numbers.push(thunk(number, nth));
+      }
+    } else if (to !== undefined) {
+      // Inclusive
+      for (let number = from, nth = 0; number <= to + EPSILON$2; number += by, nth++) {
+        numbers.push(thunk(number, nth));
+      }
+    }
+    return numbers;
+  };
+
+  numbers.signature = 'numbers(spec) -> numbers';
+
+  /**
+   *
+   * # Sine
+   *
+   * Gives the sine in degrees.
+   * ```
+   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
+   *
+   * sin(0) = 0
+   * sin(45) = 0.707
+   * sin(90) = 1
+   * ```
+   *
+   **/
+
+  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+
+  /**
+   *
+   * # Square Root
+   *
+   * Gives the the square root of a number.
+   * ```
+   * sqrt(a) => Math.sqrt(a);
+   *
+   * sqrt(0) = 0
+   * sqrt(4) = 2
+   * sqrt(16) = 4
+   * ```
+   *
+   **/
+
+  const sqrt = Math.sqrt;
 
   const update = (geometry, updates) => {
     const updated = {};
@@ -14987,7 +15499,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       } else if (geometry.surface) {
         op(geometry, _ => undefined);
       } else if (geometry.untransformed) {
-        op(geometry, _ => undefined, _ => walk(geometry.untransformed));
+        op(geometry, _ => walk(geometry.untransformed));
       } else if (geometry.z0Surface) {
         op(geometry, _ => undefined);
       } else {
@@ -15010,7 +15522,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
               }
             });
 
-  const makeWatertight$2 = (geometry, normalize = createNormalize3(), onFixed) =>
+  const makeWatertight$1 = (geometry, normalize = createNormalize3(), onFixed) =>
     rewrite(geometry,
             (geometry, descend) => {
               if (geometry.solid) {
@@ -15161,7 +15673,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const assemble = cache(assembleImpl);
 
-  const canonicalize$6 = (paths) => {
+  const canonicalize$7 = (paths) => {
     let canonicalized = paths.map(canonicalize$1);
     if (paths.properties !== undefined) {
       // Transfer properties.
@@ -15184,7 +15696,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const flip$5 = (paths) => paths.map(flip);
+  const flip$6 = (paths) => paths.map(flip);
 
   const intersection$1 = (pathset, ...pathsets) => pathset;
 
@@ -15199,7 +15711,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const transform$8 = (matrix, points) => points.map(point => transform(matrix, point));
   const translate$3 = ([x = 0, y = 0, z = 0], points) => transform$8(fromTranslation([x, y, z]), points);
 
-  const canonicalize$7 = (points) => points.map(canonicalize);
+  const canonicalize$8 = (points) => points.map(canonicalize);
 
   const eachPoint$3 = (thunk, points) => {
     for (const point of points) {
@@ -15207,7 +15719,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const flip$6 = (points) => points;
+  const flip$7 = (points) => points;
 
   const transformedGeometry = Symbol('transformedGeometry');
 
@@ -15293,35 +15805,35 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return geometry[transformedGeometry];
   };
 
-  const canonicalize$8 = (rawGeometry) => {
+  const canonicalize$9 = (rawGeometry) => {
     const geometry = toTransformedGeometry(rawGeometry);
     const canonicalized = {};
     if (geometry.points !== undefined) {
-      canonicalized.points = canonicalize$7(geometry.points);
+      canonicalized.points = canonicalize$8(geometry.points);
     } else if (geometry.paths !== undefined) {
-      canonicalized.paths = canonicalize$6(geometry.paths);
+      canonicalized.paths = canonicalize$7(geometry.paths);
     } else if (geometry.plan !== undefined) {
       canonicalized.plan = geometry.plan;
-      canonicalized.marks = canonicalize$7(geometry.marks);
+      canonicalized.marks = canonicalize$8(geometry.marks);
       canonicalized.planes = geometry.planes.map(canonicalize$3);
-      canonicalized.visualization = canonicalize$8(geometry.visualization);
-      canonicalized.content = canonicalize$8(geometry.content);
+      canonicalized.visualization = canonicalize$9(geometry.visualization);
+      canonicalized.content = canonicalize$9(geometry.content);
     } else if (geometry.connection) {
       canonicalized.connection = geometry.connection;
-      canonicalized.geometries = geometry.geometries.map(canonicalize$8);    canonicalized.connectors = geometry.connectors.map(canonicalize$8);  } else if (geometry.surface !== undefined) {
-      canonicalized.surface = canonicalize$4(geometry.surface);
+      canonicalized.geometries = geometry.geometries.map(canonicalize$9);    canonicalized.connectors = geometry.connectors.map(canonicalize$9);  } else if (geometry.surface !== undefined) {
+      canonicalized.surface = canonicalize$5(geometry.surface);
     } else if (geometry.z0Surface !== undefined) {
-      canonicalized.z0Surface = canonicalize$4(geometry.z0Surface);
+      canonicalized.z0Surface = canonicalize$5(geometry.z0Surface);
     } else if (geometry.solid !== undefined) {
-      canonicalized.solid = canonicalize$5(geometry.solid);
+      canonicalized.solid = canonicalize$6(geometry.solid);
     } else if (geometry.assembly !== undefined) {
-      canonicalized.assembly = geometry.assembly.map(canonicalize$8);
+      canonicalized.assembly = geometry.assembly.map(canonicalize$9);
     } else if (geometry.layers !== undefined) {
-      canonicalized.layers = geometry.layers.map(canonicalize$8);
+      canonicalized.layers = geometry.layers.map(canonicalize$9);
     } else if (geometry.disjointAssembly !== undefined) {
-      canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize$8);
+      canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize$9);
     } else if (geometry.item !== undefined) {
-      canonicalized.item = canonicalize$8(geometry.item);
+      canonicalized.item = canonicalize$9(geometry.item);
     } else {
       throw Error('die');
     }
@@ -15336,30 +15848,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     visit(geometry, walk);
   };
 
-  const getConnections = (geometry) => {
-    const connections = [];
-    eachItem(geometry,
-             item => {
-               if (item.connection) {
-                 connections.push(item);
-               }
-             });
-    return connections;
-  };
-
-  const getItems = (geometry) => {
-    const items = [];
-    const op = (geometry, descend) => {
-      if (geometry.item) {
-        items.push(geometry);
-      } else {
-        descend();
-      }
-    };
-    visit(geometry, op);
-    return items;
-  };
-
   const getPaths = (geometry) => {
     const pathsets = [];
     eachItem(geometry,
@@ -15369,28 +15857,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                }
              });
     return pathsets;
-  };
-
-  const getPlans = (geometry) => {
-    const plans = [];
-    eachItem(geometry,
-             item => {
-               if (item.plan) {
-                 plans.push(item);
-               }
-             });
-    return plans;
-  };
-
-  const getPoints = (geometry) => {
-    const pointsets = [];
-    eachItem(geometry,
-             item => {
-               if (item.points) {
-                 pointsets.push(item);
-               }
-             });
-    return pointsets;
   };
 
   const getSolids = (geometry) => {
@@ -15426,73 +15892,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return z0Surfaces;
   };
 
-  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-    if (set === undefined) {
-      return whenSetUndefined;
-    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const buildCondition = (conditionTags, conditionSpec) => {
-    switch (conditionSpec) {
-      case 'has':
-        return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-      case 'has not':
-        return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-      default:
-        return undefined;
-    }
-  };
-
-  const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
-    const condition = buildCondition(conditionTags, conditionSpec);
-    const composeTags = (geometryTags) => {
-      if (condition === undefined || condition(geometryTags)) {
-        if (geometryTags === undefined) {
-          return add.filter(tag => !remove.includes(tag));
-        } else {
-          return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
-        }
-      } else {
-        return geometryTags;
-      }
-    };
-
-    const op = (geometry) => {
-      if (geometry.assembly || geometry.disjointAssembly) {
-        // These structural geometries don't take tags.
-        return geometry;
-      }
-      const composedTags = composeTags(geometry.tags);
-      if (composedTags === undefined) {
-        const copy = { ...geometry };
-        delete copy.tags;
-        return copy;
-      } if (composedTags === geometry.tags) {
-        return geometry;
-      } else {
-        return { ...geometry, tags: composedTags };
-      }
-    };
-
-    return rewriteUp(geometry, op);
-  };
-
-  const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
-
-  // Dropped elements displace as usual, but are not included in positive output.
-
-  const isNonNegative = (geometry) => hasMatchingTag(geometry.tags, ['compose/non-negative']);
-
-  const isNegative = (geometry) => !isNonNegative(geometry);
-
-  const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
-
-  const EPSILON$2 = 1e-5;
-  const EPSILON2 = 1e-10;
+  const EPSILON$3 = 1e-5;
+  // const EPSILON2 = 1e-10;
 
   const COPLANAR$1 = 0; // Neither front nor back.
   const FRONT$1 = 1;
@@ -15541,10 +15942,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         // const t = planeDistance(plane, point);
         const point = polygon[nth];
         const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
-        if (t < -EPSILON$2) {
+        if (t < -EPSILON$3) {
           polygonType |= BACK$1;
           pointType$1[nth] = BACK$1;
-        } else if (t > EPSILON$2) {
+        } else if (t > EPSILON$3) {
           polygonType |= FRONT$1;
           pointType$1[nth] = FRONT$1;
         } else {
@@ -15573,9 +15974,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         return;
       case SPANNING$1: {
         const frontPoints = [];
-        let lastFront;
         const backPoints = [];
-        let lastBack;
         const last = polygon.length - 1;
         let startPoint = polygon[last];
         let startType = pointType$1[last];
@@ -15584,63 +15983,25 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           const endType = pointType$1[nth];
           if (startType !== BACK$1) {
             // The inequality is important as it includes COPLANAR points.
-            if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
-              lastFront = startPoint;
-              frontPoints.push(startPoint);
-            }
+            frontPoints.push(startPoint);
           }
           if (startType !== FRONT$1) {
             // The inequality is important as it includes COPLANAR points.
-            if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
-              lastBack = startPoint;
-              backPoints.push(startPoint);
-            }
+            backPoints.push(startPoint);
           }
           if ((startType | endType) === SPANNING$1) {
             // This should exclude COPLANAR points.
             // Compute the point that touches the splitting plane.
             // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
             const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-            if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
-              lastFront = spanPoint;
-              frontPoints.push(spanPoint);
-            }
-            if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
-              lastBack = spanPoint;
-              backPoints.push(spanPoint);
-            }
+            frontPoints.push(spanPoint);
+            backPoints.push(spanPoint);
           }
           startPoint = endPoint;
           startType = endType;
         }
-        if (frontPoints.length >= 3) {
-          while (squaredDistance(frontPoints[0], lastFront) <= EPSILON2) {
-            frontPoints.pop();
-            lastFront = frontPoints[frontPoints.length - 1];
-          }
-        }
-        if (frontPoints.length >= 3) {
-          frontPoints.plane = polygonPlane;
-          if (backPoints.length >= 3) {
-            frontPoints.parent = polygon;
-            frontPoints.sibling = backPoints;
-          }
-          front.push(frontPoints);
-        }
-        if (backPoints.length >= 3) {
-          while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
-            backPoints.pop();
-            lastBack = backPoints[backPoints.length - 1];
-          }
-        }
-        if (backPoints.length >= 3) {
-          backPoints.plane = polygonPlane;
-          if (frontPoints.length >= 3) {
-            backPoints.parent = polygon;
-            backPoints.sibling = frontPoints;
-          }
-          back.push(backPoints);
-        }
+        pushWhenValid(front, frontPoints, polygonPlane);
+        pushWhenValid(back, backPoints, polygonPlane);
         break;
       }
     }
@@ -15650,9 +16011,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const IN_LEAF = 1;
   const OUT_LEAF = 2;
 
-  const X$7 = 0;
-  const Y$7 = 1;
-  const Z$4 = 2;
+  const X$8 = 0;
+  const Y$8 = 1;
+  const Z$5 = 2;
 
   const inLeaf = {
     plane: null,
@@ -15676,32 +16037,32 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const bsp = {
       // Bottom
       kind: BRANCH,
-      plane: [0, 0, -1, -cMin[Z$4] + EPSILON$2 * 10],
+      plane: [0, 0, -1, -cMin[Z$5] + EPSILON$3 * 1000],
       front,
       back: {
         // Top
         kind: BRANCH,
-        plane: [0, 0, 1, cMax[Z$4] + EPSILON$2 * 10],
+        plane: [0, 0, 1, cMax[Z$5] + EPSILON$3 * 1000],
         front,
         back: {
           // Left
           kind: BRANCH,
-          plane: [-1, 0, 0, -cMin[X$7] + EPSILON$2 * 10],
+          plane: [-1, 0, 0, -cMin[X$8] + EPSILON$3 * 1000],
           front,
           back: {
             // Right
             kind: BRANCH,
-            plane: [1, 0, 0, cMax[X$7] + EPSILON$2 * 10],
+            plane: [1, 0, 0, cMax[X$8] + EPSILON$3 * 1000],
             front,
             back: {
               // Back
               kind: BRANCH,
-              plane: [0, -1, 0, -cMin[Y$7] + EPSILON$2 * 10],
+              plane: [0, -1, 0, -cMin[Y$8] + EPSILON$3 * 1000],
               front,
               back: {
                 // Front
                 kind: BRANCH,
-                plane: [0, 1, 0, cMax[Y$7] + EPSILON$2 * 10],
+                plane: [0, 1, 0, cMax[Y$8] + EPSILON$3 * 1000],
                 front: outLeaf,
                 back
               }
@@ -15713,7 +16074,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return bsp;
   };
 
-  const fromPolygons$1 = (polygons, normalize) => {
+  const fromPolygonsToBspTree = (polygons, normalize) => {
     if (polygons.length === 0) {
       // Everything is outside of an empty geometry.
       return outLeaf;
@@ -15723,10 +16084,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     let back = [];
     let plane = toPlane(polygons[polygons.length >> 1]);
 
+    if (plane === undefined) {
+      throw Error('die');
+    }
+
     for (const polygon of polygons) {
-      if (toPlane([...polygon]) === undefined) {
-        continue;
-      }
       splitPolygon$1(normalize,
                    plane,
                    polygon,
@@ -15737,8 +16099,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
 
     const bsp = {
-      back: back.length === 0 ? inLeaf : fromPolygons$1(back, normalize),
-      front: front.length === 0 ? outLeaf : fromPolygons$1(front, normalize),
+      back: back.length === 0 ? inLeaf : fromPolygonsToBspTree(back, normalize),
+      front: front.length === 0 ? outLeaf : fromPolygonsToBspTree(front, normalize),
       kind: BRANCH,
       plane,
       same
@@ -15746,6 +16108,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     return bsp;
   };
+
+  const fromPolygons$1 = (polygons, normalize) =>
+    // fromPolygonsToBspTree(polygons.filter(polygon => toPlane(polygon) !== undefined), normalize);
+    fromPolygonsToBspTree(polygons, normalize);
 
   const fromSolid = (solid, normalize) => {
     const polygons = [];
@@ -16187,18 +16553,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const X$8 = 0;
-  const Y$8 = 1;
-  const Z$5 = 2;
+  const X$9 = 0;
+  const Y$9 = 1;
+  const Z$6 = 2;
 
   const walkX = (min, max, resolution) => {
-    if (min[X$8] + resolution > max[X$8]) {
+    if (min[X$9] + resolution > max[X$9]) {
       return inLeaf;
     }
-    const midX = (min[X$8] + max[X$8]) / 2;
+    const midX = (min[X$9] + max[X$9]) / 2;
     return {
-      back: walkY(min, [midX, max[Y$8], max[Z$5]], resolution),
-      front: walkY([midX, min[Y$8], min[Z$5]], max, resolution),
+      back: walkY(min, [midX, max[Y$9], max[Z$6]], resolution),
+      front: walkY([midX, min[Y$9], min[Z$6]], max, resolution),
       kind: BRANCH,
       plane: [1, 0, 0, midX],
       same: []
@@ -16206,13 +16572,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const walkY = (min, max, resolution) => {
-    if (min[Y$8] + resolution > max[Y$8]) {
+    if (min[Y$9] + resolution > max[Y$9]) {
       return inLeaf;
     }
-    const midY = (min[Y$8] + max[Y$8]) / 2;
+    const midY = (min[Y$9] + max[Y$9]) / 2;
     return {
-      back: walkZ(min, [max[X$8], midY, max[Z$5]], resolution),
-      front: walkZ([min[X$8], midY, min[Z$5]], max, resolution),
+      back: walkZ(min, [max[X$9], midY, max[Z$6]], resolution),
+      front: walkZ([min[X$9], midY, min[Z$6]], max, resolution),
       kind: BRANCH,
       plane: [0, 1, 0, midY],
       same: []
@@ -16220,13 +16586,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const walkZ = (min, max, resolution) => {
-    if (min[Z$5] + resolution > max[Z$5]) {
+    if (min[Z$6] + resolution > max[Z$6]) {
       return inLeaf;
     }
-    const midZ = (min[Z$5] + max[Z$5]) / 2;
+    const midZ = (min[Z$6] + max[Z$6]) / 2;
     return {
-      back: walkX(min, [max[X$8], max[Y$8], midZ], resolution),
-      front: walkX([min[X$8], min[Y$8], midZ], max, resolution),
+      back: walkX(min, [max[X$9], max[Y$9], midZ], resolution),
+      front: walkX([min[X$9], min[Y$9], midZ], max, resolution),
       kind: BRANCH,
       plane: [0, 0, 1, midZ],
       same: []
@@ -16245,8 +16611,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     for (const polygon of dividePolygons(bsp, solidPolygons, normalize)) {
       if (polygon.length > 3) {
-        for (const triangle of makeConvex$1([polygon])) {
-          dividedPolygons.push(triangle);
+        for (let nth = 2; nth < polygon.length; nth++) {
+          dividedPolygons.push([polygon[0], polygon[nth - 1], polygon[nth]]);
         }
       } else if (polygon.length === 3) {
         dividedPolygons.push(polygon);
@@ -16257,6 +16623,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     const vertices = new Map();
 
+    // We only need this for non-deterministic transforms.
+    // Let's require transforms be deterministic functions.
     for (const path of realignedPolygons) {
       for (const point of path) {
         const tag = JSON.stringify(point);
@@ -16272,94 +16640,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return fromPolygons({}, transformedPolygons);
   };
 
-  const isDegenerate = (polygon) => {
-    for (let nth = 0; nth < polygon.length; nth++) {
-      if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
-        return true;
-      }
-    }
-    return false;
+  const boxPartition = (bbBsp, aBB, bBB, bbOutLeaf, aPolygons, normalize) => {
+    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
+    const aBsp = fromBoundingBoxes(aBB, bBB, bbOutLeaf, fromPolygons$1(aIn, normalize));
+    return [aIn, aOut, aBsp];
   };
-
-  const canonicalize$9 = (polygons) => {
-    const canonicalized = [];
-    for (let polygon of polygons) {
-      polygon = canonicalize$2(polygon);
-      if (!isDegenerate(polygon)) {
-        canonicalized.push(polygon);
-      }
-    }
-    return canonicalized;
-  };
-
-  const measureBoundingBox$4 = (polygons) => {
-    if (polygons.measureBoundingBox === undefined) {
-      const min = [Infinity, Infinity, Infinity];
-      const max = [-Infinity, -Infinity, -Infinity];
-      for (const path of polygons) {
-        for (const point of path) {
-          if (point[0] < min[0]) min[0] = point[0];
-          if (point[1] < min[1]) min[1] = point[1];
-          if (point[2] < min[2]) min[2] = point[2];
-          if (point[0] > max[0]) max[0] = point[0];
-          if (point[1] > max[1]) max[1] = point[1];
-          if (point[2] > max[2]) max[2] = point[2];
-        }
-      }
-      polygons.measureBoundingBox = [min, max];
-    }
-    return polygons.measureBoundingBox;
-  };
-
-  const iota$1 = 1e-5;
-  const X$9 = 0;
-  const Y$9 = 1;
-  const Z$6 = 2;
-
-  // Requires a conservative gap.
-  const doesNotOverlap = (a, b) => {
-    if (a.length === 0 || b.length === 0) {
-      return true;
-    }
-    const [minA, maxA] = measureBoundingBox$4(a);
-    const [minB, maxB] = measureBoundingBox$4(b);
-    if (maxA[X$9] <= minB[X$9] - iota$1 * 10) { return true; }
-    if (maxA[Y$9] <= minB[Y$9] - iota$1 * 10) { return true; }
-    if (maxA[Z$6] <= minB[Z$6] - iota$1 * 10) { return true; }
-    if (maxB[X$9] <= minA[X$9] - iota$1 * 10) { return true; }
-    if (maxB[Y$9] <= minA[Y$9] - iota$1 * 10) { return true; }
-    if (maxB[Z$6] <= minA[Z$6] - iota$1 * 10) { return true; }
-    return false;
-  };
-
-  /**
-   * Transforms each polygon of Polygons.
-   *
-   * @param {Polygons} original - the Polygons to transform.
-   * @param {Function} [transform=identity] - function used to transform the polygons.
-   * @returns {Polygons} a copy with transformed polygons.
-   */
-  const map$4 = (original, transform) => {
-    if (original === undefined) {
-      original = [];
-    }
-    if (transform === undefined) {
-      transform = _ => _;
-    }
-    return original.map(polygon => transform(polygon));
-  };
-
-  const flip$7 = (polygons) => map$4(polygons, flip$1);
-
-  const toTriangles = (options = {}, paths) => {
-    const triangles = [];
-    for (const path of paths) {
-      for (let nth = 2; nth < path.length; nth++) {
-        triangles.push([path[0], path[nth - 1], path[nth]]);
-      }
-    }
-    return triangles;
-  };
+  // export default nullPartition;
 
   const MIN = 0;
 
@@ -16377,17 +16663,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     while (bs.length > 0) {
       const b = bs.shift();
 
-      const aBB = measureBoundingBox$4(a);
-      const bBB = measureBoundingBox$4(b);
+      const aBB = measureBoundingBox(a);
+      const bBB = measureBoundingBox(b);
       const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-      const aPolygons = a;
-      const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-      const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(aIn, normalize));
-
-      const bPolygons = b;
-      const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-      const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(bIn, normalize));
+      const [aIn, aOut, aBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+      const [bIn, , bBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
       if (aIn.length === 0) {
         const bbMin = max(aBB[MIN], bBB[MIN]);
@@ -16395,7 +16676,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         const aBsp = fromPolygons$1(a, normalize);
         if (containsPoint(aBsp, bbMin)) {
           // The space is fully enclosed; invert b.
-          a = [...aOut, ...flip$7(bIn)];
+          a = [...aOut, ...flip$3(bIn)];
         } else {
           // The space is fully vacated; nothing to be cut.
           continue;
@@ -16415,7 +16696,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
         const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
 
-        a = clean([...aOut, ...aTrimmed, ...flip$7(bTrimmed)]);
+        a = clean([...aOut, ...aTrimmed, ...flip$3(bTrimmed)]);
       }
     }
     return fromPolygons({}, a, normalize);
@@ -16441,17 +16722,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         return [];
       }
 
-      const aBB = measureBoundingBox$4(a);
-      const bBB = measureBoundingBox$4(b);
+      const aBB = measureBoundingBox(a);
+      const bBB = measureBoundingBox(b);
       const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-      const aPolygons = a;
-      const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
-      const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons$1(aIn, normalize));
-
-      const bPolygons = b;
-      const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-      const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons$1(bIn, normalize));
+      const [aIn, , aBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, a, normalize);
+      const [bIn, , bBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
       if (aIn.length === 0) {
         const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
@@ -16511,17 +16787,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         continue;
       }
 
-      const aBB = measureBoundingBox$4(a);
-      const bBB = measureBoundingBox$4(b);
+      const aBB = measureBoundingBox(a);
+      const bBB = measureBoundingBox(b);
       const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-      const aPolygons = a;
-      const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-      const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(aIn, normalize));
-
-      const bPolygons = b;
-      const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
-      const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons$1(bIn, normalize));
+      const [aIn, aOut, aBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+      const [bIn, bOut, bBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, b, normalize);
 
       if (aIn.length === 0) {
         const bbMin = max(aBB[MIN$2], bBB[MIN$2]);
@@ -16697,63 +16968,117 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return transform$9(fromZ0, z0Surface);
   };
 
-  // PROVE: Is the non-negative behavior here correct for difference in general, or only difference when makeing disjoint?
-
-  const differenceImpl = (baseGeometry, ...geometries) => {
-    if (baseGeometry.item) {
-      return { ...baseGeometry, item: difference$4(baseGeometry.item, ...geometries) };
-    }
-
-    const result = { disjointAssembly: [] };
-    // Solids.
-    const solids = geometries.flatMap(geometry => getSolids(geometry)).filter(isNegative).map(item => item.solid);
-    for (const { solid, tags } of getSolids(baseGeometry)) {
-      result.disjointAssembly.push({ solid: difference$2(solid, ...solids), tags });
-    }
-    // Surfaces -- generalize to surface unless specializable upon z0surface.
-    const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).filter(isNegative).map(item => item.z0Surface));
-    const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).filter(isNegative).map(item => item.surface));
-    for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-      if (surfaces.length === 0) {
-        result.disjointAssembly.push({ z0Surface: difference(z0Surface, ...z0Surfaces), tags });
+  const differenceImpl = (geometry, ...geometries) => {
+    const op = (geometry, descend) => {
+      if (geometry.solid) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { solid } of getSolids(geometry)) {
+            todo.push(solid);
+          }
+        }
+        return { solid: difference$2(geometry.solid, ...todo), tags: geometry.tags };
+      } else if (geometry.surface) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todo.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todo.push(z0Surface);
+          }
+        }
+        return { surface: difference$3(geometry.surface, ...todo), tags: geometry.tags };
+      } else if (geometry.z0Surface) {
+        const todoSurfaces = [];
+        const todoZ0Surfaces = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todoSurfaces.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todoZ0Surfaces.push(z0Surface);
+          }
+        }
+        if (todoSurfaces.length > 0) {
+          return { surface: difference$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        } else {
+          return { surface: difference(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        }
+      } else if (geometry.paths) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { paths } of getPaths(geometry)) {
+            todo.push(paths);
+          }
+        }
+        return { paths: difference$1(geometry.paths, ...todo), tags: geometry.tags };
       } else {
-        result.disjointAssembly.push({ surface: difference$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+        return descend();
       }
-    }
-    for (const { surface, tags } of getSurfaces(baseGeometry)) {
-      result.disjointAssembly.push({ surface: difference$3(surface, ...surfaces, ...z0Surfaces), tags });
-    }
-    // Paths.
-    const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
-    for (const { paths, tags } of getPaths(baseGeometry)) {
-      result.disjointAssembly.push({ paths: difference$1(paths, ...pathsets), tags });
-    }
-    // Plans are preserved over difference.
-    for (const plan of getPlans(baseGeometry)) {
-      result.disjointAssembly.push(plan);
-    }
-    for (const geometry of geometries) {
-      for (const plan of getPlans(geometry)) {
-        result.disjointAssembly.push(plan);
-      }
-    }
-    // Connections
-    for (const connection of getConnections(baseGeometry)) {
-      result.disjointAssembly.push(connection);
-    }
-    // Items
-    for (const item of getItems(baseGeometry)) {
-      result.disjointAssembly.push(item);
-    }
-    // Points
-    for (const points of getPoints(baseGeometry)) {
-      // FIX: Actually subtract points.
-      result.disjointAssembly.push(points);
-    }
-    return result;
+    };
+
+    return rewrite(geometry, op);
   };
 
   const difference$4 = cache(differenceImpl);
+
+  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+    if (set === undefined) {
+      return whenSetUndefined;
+    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const buildCondition = (conditionTags, conditionSpec) => {
+    switch (conditionSpec) {
+      case 'has':
+        return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+      case 'has not':
+        return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+      default:
+        return undefined;
+    }
+  };
+
+  const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
+    const condition = buildCondition(conditionTags, conditionSpec);
+    const composeTags = (geometryTags) => {
+      if (condition === undefined || condition(geometryTags)) {
+        if (geometryTags === undefined) {
+          return add.filter(tag => !remove.includes(tag));
+        } else {
+          return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
+        }
+      } else {
+        return geometryTags;
+      }
+    };
+
+    const op = (geometry) => {
+      if (geometry.assembly || geometry.disjointAssembly) {
+        // These structural geometries don't take tags.
+        return geometry;
+      }
+      const composedTags = composeTags(geometry.tags);
+      if (composedTags === undefined) {
+        const copy = { ...geometry };
+        delete copy.tags;
+        return copy;
+      } if (composedTags === geometry.tags) {
+        return geometry;
+      } else {
+        return { ...geometry, tags: composedTags };
+      }
+    };
+
+    return rewriteUp(geometry, op);
+  };
+
+  const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
 
   // Dropped elements displace as usual, but are not included in positive output.
 
@@ -16790,15 +17115,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const flip$8 = (geometry) => {
     const op = (geometry) => {
       if (geometry.points) {
-        return { ...geometry, points: flip$6(geometry.points) };
+        return { ...geometry, points: flip$7(geometry.points) };
       } else if (geometry.paths) {
-        return { ...geometry, paths: flip$5(geometry.paths) };
+        return { ...geometry, paths: flip$6(geometry.paths) };
       } else if (geometry.surface) {
-        return { ...geometry, surface: flip$3(geometry.surface) };
+        return { ...geometry, surface: flip$4(geometry.surface) };
       } else if (geometry.z0Surface) {
-        return { ...geometry, surface: flip$3(geometry.z0Surface) };
+        return { ...geometry, surface: flip$4(geometry.z0Surface) };
       } else if (geometry.solid) {
-        return { ...geometry, solid: flip$4(geometry.solid) };
+        return { ...geometry, solid: flip$5(geometry.solid) };
       } else if (geometry.assembly) {
         return geometry;
       } else if (geometry.layers) {
@@ -16872,6 +17197,30 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return surfaces;
   };
 
+  const getConnections = (geometry) => {
+    const connections = [];
+    eachItem(geometry,
+             item => {
+               if (item.connection) {
+                 connections.push(item);
+               }
+             });
+    return connections;
+  };
+
+  const getItems = (geometry) => {
+    const items = [];
+    const op = (geometry, descend) => {
+      if (geometry.item) {
+        items.push(geometry);
+      } else {
+        descend();
+      }
+    };
+    visit(geometry, op);
+    return items;
+  };
+
   // Retrieve leaf geometry.
 
   const getLeafs = (geometry) => {
@@ -16887,59 +17236,68 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return leafs;
   };
 
-  const intersectionImpl = (baseGeometry, ...geometries) => {
-    if (baseGeometry.item) {
-      return { ...baseGeometry, item: intersection$4(baseGeometry.item, ...geometries) };
-    }
+  const getPlans = (geometry) => {
+    const plans = [];
+    eachItem(geometry,
+             item => {
+               if (item.plan) {
+                 plans.push(item);
+               }
+             });
+    return plans;
+  };
 
-    const result = { disjointAssembly: [] };
-    // Solids.
-    const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
-    for (const { solid, tags } of getSolids(baseGeometry)) {
-      result.disjointAssembly.push({ solid: intersection$2(solid, ...solids), tags });
-    }
-    // Surfaces -- generalize to surface unless specializable upon z0surface.
-    const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
-    const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
-    for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-      if (surfaces.length === 0) {
-        result.disjointAssembly.push({ z0Surface: intersection(z0Surface, ...z0Surfaces), tags });
+  const intersectionImpl = (geometry, ...geometries) => {
+    const op = (geometry, descend) => {
+      if (geometry.solid) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { solid } of getSolids(geometry)) {
+            todo.push(solid);
+          }
+        }
+        return { solid: intersection$2(geometry.solid, ...todo), tags: geometry.tags };
+      } else if (geometry.surface) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todo.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todo.push(z0Surface);
+          }
+        }
+        return { surface: intersection$3(geometry.surface, ...todo), tags: geometry.tags };
+      } else if (geometry.z0Surface) {
+        const todoSurfaces = [];
+        const todoZ0Surfaces = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todoSurfaces.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todoZ0Surfaces.push(z0Surface);
+          }
+        }
+        if (todoSurfaces.length > 0) {
+          return { surface: intersection$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        } else {
+          return { surface: intersection(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        }
+      } else if (geometry.paths) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { paths } of getPaths(geometry)) {
+            todo.push(paths);
+          }
+        }
+        return { paths: intersection$1(geometry.paths, ...todo), tags: geometry.tags };
       } else {
-        result.disjointAssembly.push({ surface: intersection$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+        return descend();
       }
-    }
-    for (const { surface, tags } of getSurfaces(baseGeometry)) {
-      result.disjointAssembly.push({ surface: intersection$3(surface, ...surfaces, ...z0Surfaces), tags });
-    }
-    // Paths.
-    const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
-    for (const { paths, tags } of getPaths(baseGeometry)) {
-      result.disjointAssembly.push({ paths: intersection$1(paths, ...pathsets), tags });
-    }
-    // Plans are preserved across intersection.
-    for (const plan of getPlans(baseGeometry)) {
-      result.disjointAssembly.push(plan);
-    }
-    for (const geometry of geometries) {
-      for (const plan of getPlans(geometry)) {
-        result.disjointAssembly.push(plan);
-      }
-    }
-    // Connections
-    for (const connection of getConnections(baseGeometry)) {
-      result.disjointAssembly.push(connection);
-    }
-    // Items
-    for (const item of getItems(baseGeometry)) {
-      result.disjointAssembly.push(item);
-    }
-    // Points
-    for (const points of getPoints(baseGeometry)) {
-      // FIX: Actually subtract points.
-      result.disjointAssembly.push(points);
-    }
-    // FIX: Surfaces, Paths, etc.
-    return result;
+    };
+
+    return rewrite(geometry, op);
   };
 
   const intersection$4 = cache(intersectionImpl);
@@ -17092,11 +17450,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       } else if (item.item) {
         walk(item.item);
       } else if (item.solid) {
-        update(measureBoundingBox$3(item.solid));
+        update(measureBoundingBox$4(item.solid));
       } else if (item.surface) {
-        update(measureBoundingBox$2(item.surface));
+        update(measureBoundingBox$3(item.surface));
       } else if (item.z0Surface) {
-        update(measureBoundingBox(item.z0Surface));
+        update(measureBoundingBox$1(item.z0Surface));
       } else if (item.plan) {
         if (item.plan.page) {
           update(item.marks);
@@ -17115,6 +17473,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return [minPoint, maxPoint];
     }
   };
+
+  const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
   const outlineImpl = (geometry) => {
     const normalize = createNormalize3();
@@ -17196,59 +17556,70 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const transform$a = cacheTransform(transformImpl$1);
 
-  const unionImpl = (baseGeometry, ...geometries) => {
-    if (baseGeometry.item) {
-      return { ...baseGeometry, item: union$4(baseGeometry.item, ...geometries) };
-    }
+  // Union is a little more complex, since it can make violate disjointAssembly invariants.
 
-    const result = { disjointAssembly: [] };
-    // Solids.
-    const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
-    for (const { solid, tags } of getSolids(baseGeometry)) {
-      result.disjointAssembly.push({ solid: union$2(solid, ...solids), tags });
-    }
-    // Surfaces -- generalize to surface unless specializable upon z0surface.
-    const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
-    const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
-    for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-      if (surfaces.length === 0) {
-        result.disjointAssembly.push({ z0Surface: union(z0Surface, ...z0Surfaces), tags });
+  const unionImpl = (geometry, ...geometries) => {
+    const op = (geometry, descend) => {
+      if (geometry.solid) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { solid } of getSolids(geometry)) {
+            todo.push(solid);
+          }
+        }
+        return { solid: union$2(geometry.solid, ...todo), tags: geometry.tags };
+      } else if (geometry.surface) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todo.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todo.push(z0Surface);
+          }
+        }
+        return { surface: union$3(geometry.surface, ...todo), tags: geometry.tags };
+      } else if (geometry.z0Surface) {
+        const todoSurfaces = [];
+        const todoZ0Surfaces = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todoSurfaces.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todoZ0Surfaces.push(z0Surface);
+          }
+        }
+        if (todoSurfaces.length > 0) {
+          return { surface: union$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        } else {
+          return { surface: union(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        }
+      } else if (geometry.paths) {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { paths } of getPaths(geometry)) {
+            todo.push(paths);
+          }
+        }
+        return { paths: union$1(geometry.paths, ...todo), tags: geometry.tags };
+      } else if (geometry.assembly) {
+        // Let's consider an assembly to have an implicit Empty() geometry at the end.
+        // Then we can implement union over assembly by assemble.
+        return { assembly: [...geometry.assembly, ...geometries], tags: geometry.tags };
+      } else if (geometry.disjointAssembly) {
+        // Likewise for disjointAssembly, but it needs to revert to an assembly, since it is no-longer disjoint.
+        return { assembly: [...geometry.disjointAssembly, ...geometries], tags: geometry.tags };
+      } else if (geometry.layers) {
+        // We union with layers by appending a new layer.
+        // It is not entirely that this is ideal, but will preserve semantics for layer to assembly conversion.
+        return { layers: [...geometry.layers, ...geometries], tags: geometry.tags };
       } else {
-        result.disjointAssembly.push({ surface: union$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+        return descend();
       }
-    }
-    for (const { surface, tags } of getSurfaces(baseGeometry)) {
-      result.disjointAssembly.push({ surface: union$3(surface, ...surfaces, ...z0Surfaces), tags });
-    }
-    // Paths.
-    const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
-    for (const { paths, tags } of getPaths(baseGeometry)) {
-      result.disjointAssembly.push({ paths: union$1(paths, ...pathsets), tags });
-    }
-    // Plans are preserved across union.
-    for (const plan of getPlans(baseGeometry)) {
-      result.disjointAssembly.push(plan);
-    }
-    for (const geometry of geometries) {
-      for (const plan of getPlans(geometry)) {
-        result.disjointAssembly.push(plan);
-      }
-    }
-    // Connections
-    for (const connection of getConnections(baseGeometry)) {
-      result.disjointAssembly.push(connection);
-    }
-    // Items
-    for (const item of getItems(baseGeometry)) {
-      result.disjointAssembly.push(item);
-    }
-    // Points
-    for (const points of getPoints(baseGeometry)) {
-      // FIX: Actually subtract points.
-      result.disjointAssembly.push(points);
-    }
-    // FIX: Surfaces, Paths, etc.
-    return result;
+    };
+
+    return rewrite(geometry, op);
   };
 
   const union$4 = cache(unionImpl);
@@ -17344,8 +17715,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return isWatertight$1(this.toKeptGeometry());
     }
 
-    makeWatertight (onFixed = (_ => _)) {
-      return fromGeometry(makeWatertight$2(this.toKeptGeometry(), undefined));
+    makeWatertight (threshold) {
+      return fromGeometry(makeWatertight$1(this.toKeptGeometry(), undefined, undefined));
     }
   }
 
@@ -17492,6 +17863,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   addMethod.signature = 'Shape -> (...Shapes) -> Shape';
 
+  // x.addTo(y) === y.add(x)
+
+  const addToMethod = function (shape) { return union$5(shape, this); };
+  Shape.prototype.addTo = addToMethod;
+
+  addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
+
   /**
    *
    * # Intersection
@@ -17563,6 +17941,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
 
+  const clipFromMethod = function (shape) { return intersection$5(shape, this); };
+  Shape.prototype.clipFrom = clipFromMethod;
+
+  clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
+
   /**
    *
    * # Difference
@@ -17629,6 +18012,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   Shape.prototype.cut = cutMethod;
 
   cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';
+
+  // a.cut(b) === b.cutFrom(a)
+
+  const cutFromMethod = function (shape) { return difference$5(shape, this); };
+  Shape.prototype.cutFrom = cutFromMethod;
+
+  cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
 
   /**
    *
@@ -17712,6 +18102,28 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const facesMethod = function (...args) { return faces(this, ...args); };
   Shape.prototype.faces = facesMethod;
 
+  const inSolids = (shape, op = (_ => _)) => {
+    let nth = 0;
+    const rewritten = rewrite(shape.toKeptGeometry(),
+                              (geometry, descend) => {
+                                if (geometry.solid) {
+                                  // Operate on the solid.
+                                  const solid = op(Shape.fromGeometry(geometry), nth++);
+                                  // Replace the solid with the result (which might not be a solid).
+                                  return solid.toGeometry();
+                                } else {
+                                  return descend();
+                                }
+                              });
+    return Shape.fromGeometry(rewritten);
+  };
+
+  const inSolidsMethod = function (...args) { return inSolids(this, ...args); };
+  Shape.prototype.inSolids = inSolidsMethod;
+
+  inSolids.signature = 'inSolids(shape:Shape, op:function) -> Shapes';
+  inSolidsMethod.signature = 'Shape -> inSolids(op:function) -> Shapes';
+
   /**
    *
    * # Measure Bounding Box
@@ -17786,6 +18198,29 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const openEdgesMethod = function (...args) { return openEdges(this, ...args); };
   Shape.prototype.openEdges = openEdgesMethod;
+
+  const withOpenEdgesMethod = function (...args) { return assemble$1(this, openEdges(this, ...args)); };
+  Shape.prototype.withOpenEdges = withOpenEdgesMethod;
+
+  const solids = (shape, xform = (_ => _)) => {
+    const solids = [];
+    for (const solid of getSolids(shape.toKeptGeometry())) {
+      solids.push(xform(Shape.fromGeometry(solid)));
+    }
+    return solids;
+  };
+
+  const solidsMethod = function (...args) { return solids(this, ...args); };
+  Shape.prototype.solids = solidsMethod;
+
+  const tags = (shape) =>
+    [...allTags(shape.toGeometry())]
+        .filter(tag => tag.startsWith('user/'))
+        .map(tag => tag.substring(5));
+
+  const method = function () { return tags(this); };
+
+  Shape.prototype.tags = method;
 
   /**
    *
@@ -17901,10 +18336,25 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return assemble$1(...pieces);
   };
 
-  const method = function (options) { return wireframe(options, this); };
+  const method$1 = function (options) { return wireframe(options, this); };
 
-  Shape.prototype.wireframe = method;
+  Shape.prototype.wireframe = method$1;
   Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
+
+  const wireframeFaces = (shape, op = (x => x)) => {
+    const faces = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      for (const surface of solid) {
+        for (const path of surface) {
+          faces.push(op(Shape.fromGeometry({ paths: [path] }), faces.length));
+        }
+      }
+    }
+    return assemble$1(...faces);
+  };
+
+  const wireframeFacesMethod = function (...args) { return wireframeFaces(this, ...args); };
+  Shape.prototype.wireframeFaces = wireframeFacesMethod;
 
   /**
    *
@@ -17928,7 +18378,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const withMethod = function (...shapes) { return assemble$1(this, ...shapes); };
   Shape.prototype.with = withMethod;
 
-  const canonicalize$a = (shape) => Shape.fromGeometry(canonicalize$8(shape.toGeometry()));
+  const canonicalize$a = (shape) => Shape.fromGeometry(canonicalize$9(shape.toGeometry()));
 
   const canonicalizeMethod = function () { return canonicalize$a(this); };
   Shape.prototype.canonicalize = canonicalizeMethod;
@@ -20234,6 +20684,53 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   /**
    *
+   * # Write Shape Geometry
+   *
+   * This writes a shape as a tagged geometry in json format.
+   *
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * await Cube().writeShape('cube.shape');
+   * await readShape({ path: 'cube.shape' })
+   * ```
+   * :::
+   *
+   **/
+
+  const cacheShape = async (shape, path) => {
+    const geometry = shape.toGeometry();
+    await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+  };
+
+  const writeShape = async (shape, path) => {
+    const geometry = shape.toGeometry();
+    await writeFile({}, `output/${path}`, JSON.stringify(geometry));
+    await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  };
+
+  const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
+  Shape.prototype.writeShape = writeShapeMethod;
+
+  const readShape = async (path, build, { ephemeral = false, src } = {}) => {
+    let data = await readFile({ as: 'utf8', ephemeral }, `source/${path}`);
+    if (data === undefined && src) {
+      data = await readFile({ as: 'utf8', sources: [src], ephemeral }, `cache/${path}`);
+    }
+    if (data === undefined && build !== undefined) {
+      const shape = await build();
+      if (!ephemeral) {
+        await cacheShape(shape, `cache/${path}`);
+      }
+      return shape;
+    }
+    const geometry = JSON.parse(data);
+    return Shape.fromGeometry(geometry);
+  };
+
+  const make = (path, builder) => readShape(path, builder);
+
+  /**
+   *
    * # Material
    *
    * Produces a version of a shape with a given material.
@@ -20295,8 +20792,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const translate$5 = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
 
-  const method$1 = function (...args) { return translate$5(this, ...args); };
-  Shape.prototype.translate = method$1;
+  const method$2 = function (...args) { return translate$5(this, ...args); };
+  Shape.prototype.translate = method$2;
 
   /**
    *
@@ -20412,19 +20909,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
   orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-
-  const writeShape = async (options, shape) => {
-    if (typeof options === 'string') {
-      options = { path: options };
-    }
-    const { path } = options;
-    const geometry = shape.toGeometry();
-    await writeFile({}, `output/${path}`, JSON.stringify(geometry));
-    await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-  };
-
-  const writeShapeMethod = function (options = {}) { return writeShape(options, this); };
-  Shape.prototype.writeShape = writeShapeMethod;
 
   /**
    *
@@ -20641,1016 +21125,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const turnZMethod = function (angle) { return turnZ$1(this, angle); };
   Shape.prototype.turnZ = turnZMethod;
 
-  const Plan = ({ plan, marks = [], planes = [], tags = [], visualization, content }, context) => {
-    let visualizationGeometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
-    let contentGeometry = content === undefined ? { assembly: [] } : content.toKeptGeometry();
-    const shape = Shape.fromGeometry({
-      plan,
-      marks,
-      planes,
-      tags,
-      content: contentGeometry,
-      visualization: visualizationGeometry
-    },
-                                     context);
-    return shape;
-  };
-
-  /**
-   *
-   * # Connector
-   *
-   * Returns a connector plan.
-   * See connect().
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Connector('top').move(5))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).Connector('top').moveZ(5).connect(Sphere(5).Connector('bottom').flip().moveZ(-5))
-   * ```
-   * :::
-   **/
-
-  const shapeToConnect = Symbol('shapeToConnect');
-
-  // A connector expresses a joint-of-connection extending from origin along axis to end.
-  // The orientation expresses the direction of facing orthogonal to that axis.
-  // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
-  // Note: axis must be further than end from origin.
-
-  const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0], right = [1, 0, 0], start = [0, 0, 0], end = [0, 0, 0], shape, visualization } = {}) => {
-    const plan = Plan(// Geometry
-      {
-        plan: { connector },
-        marks: [center, right, start, end],
-        planes: [plane],
-        tags: [`connector/${connector}`],
-        visualization
-      },
-      // Context
-      {
-        [shapeToConnect]: shape
-      });
-    return plan;
-  };
-
-  Plan.Connector = Connector;
-
-  const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, [shapeToConnect]: this }); };
-  Shape.prototype.Connector = ConnectorMethod;
-
-  Connector.signature = 'Connector(id:string, { plane:Plane, center:Point, right:Point, start:Point, end:Point, shape:Shape, visualization:Shape }) -> Shape';
-
-  // Associates an existing connector with a shape.
-  const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
-  Shape.prototype.toConnector = toConnectorMethod;
-
-  /**
-   *
-   * # connectors
-   *
-   * Returns the set of connectors in an assembly by tag.
-   * See connect().
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Connector('top').moveZ(5))
-   *         .connectors()['top']
-   *         .connect(Prism(10, 10).with(Connector('bottom').flip().moveZ(-5))
-   *                               .connectors()['bottom']);
-   * ```
-   * :::
-   **/
-
-  const connectors = (shape) => {
-    const connectors = [];
-    for (const entry of getPlans(shape.toKeptGeometry())) {
-      if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-        connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
-      }
-    }
-    return connectors;
-  };
-
-  const connectorsMethod = function () { return connectors(this); };
-  Shape.prototype.connectors = connectorsMethod;
-
-  /**
-   *
-   * # connector
-   *
-   * Returns a connector from an assembly.
-   * See connect().
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Prism(10, 10).with(Connector('top').moveZ(5))
-   *              .connector('top')
-   *              .connect(Cube(10).with(Connector('bottom').flip().moveZ(-5))
-   *                               .connector('bottom'));
-   * ```
-   * :::
-   **/
-
-  const connector = (shape, id) => {
-    for (const connector of connectors(shape)) {
-      if (connector.toGeometry().plan.connector === id) {
-        return connector;
-      }
-    }
-  };
-
-  const connectorMethod = function (id) { return connector(this, id); };
-  Shape.prototype.connector = connectorMethod;
-
-  const connection = (shape, id) => {
-    const shapeGeometry = shape.toKeptGeometry();
-    const connections = getConnections(shapeGeometry);
-    for (const geometry of connections) {
-      if (geometry.connection === id) {
-        return Shape.fromGeometry(geometry);
-      }
-    }
-  };
-
-  const connectionMethod = function (id) { return connection(this, id); };
-  Shape.prototype.connection = connectionMethod;
-
-  // FIX:
-  // This will produce the average position, but that's probably not what we
-  // want, since it will include interior points produced by breaking up
-  // convexity.
-  const toPosition = (surface) => {
-    let sum = [0, 0, 0];
-    let count = 0;
-    for (const path of surface) {
-      for (const point of path) {
-        sum = add(sum, point);
-        count += 1;
-      }
-    }
-    const position = scale(1 / count, sum);
-    return position;
-  };
-
-  const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
-    let bestSurface;
-    let bestPosition;
-    let bestOrientationScore = -Infinity;
-    let bestPositionScore = -Infinity;
-
-    // FIX: This may be sensitive to noise.
-    const geometry = shape.toKeptGeometry();
-    for (const { solid } of getSolids(geometry)) {
-      for (const surface of solid) {
-        const orientationScore = scoreOrientation(surface);
-        if (orientationScore > bestOrientationScore) {
-          bestSurface = surface;
-          bestOrientationScore = orientationScore;
-          bestPosition = toPosition(surface);
-          bestPositionScore = scorePosition(bestPosition);
-        } else if (orientationScore === bestOrientationScore) {
-          const position = toPosition(surface);
-          const positionScore = scorePosition(position);
-          if (positionScore > bestPositionScore) {
-            bestSurface = surface;
-            bestPosition = position;
-            bestPositionScore = positionScore;
-          }
-        }
-      }
-    }
-
-    // FIX: We should have a consistent rule for deciding the rotational position of the connector.
-    const plane = toPlane$1(bestSurface);
-    return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
-  };
-
-  const toConnector = (shape, surface, id) => {
-    const center = toPosition(surface);
-    // FIX: Adding y + 1 is not always correct.
-    const plane = toPlane$1(surface);
-    return Connector(id, { plane, center, right: random(plane) });
-  };
-
-  const withConnector = (shape, surface, id) => {
-    return shape.toConnector(toConnector(shape, surface, id));
-  };
-
-  const Y$e = 1;
-
-  const back = (shape) =>
-    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$e]);
-
-  const backMethod = function () { return back(this); };
-  Shape.prototype.back = backMethod;
-
-  back.signature = 'back(shape:Shape) -> Shape';
-  backMethod.signature = 'Shape -> back() -> Shape';
-
-  const Z$b = 2;
-
-  const bottom = (shape) =>
-    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$b]);
-
-  const bottomMethod = function () { return bottom(this); };
-  Shape.prototype.bottom = bottomMethod;
-
-  bottom.signature = 'bottom(shape:Shape) -> Shape';
-  bottomMethod.signature = 'Shape -> bottom() -> Shape';
-
-  // Ideally this would be a plane of infinite extent.
-  // Unfortunately this makes things like interpolation tricky,
-  // so we approximate it with a very large polygon instead.
-
-  const Z$c = (z = 0) => {
-    const size = 1e5;
-    const min = -size;
-    const max = size;
-    // FIX: Why aren't we createing the connector directly?
-    const sheet = Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
-    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-  };
-
-  /**
-   *
-   * # Chop
-   *
-   * Remove the parts of a shape above surface, defaulting to Z(0).
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
-   * ```
-   * :::
-   *
-   **/
-
-  const toPlane$3 = (connector) => {
-    for (const entry of getPlans(connector.toKeptGeometry())) {
-      if (entry.plan && entry.plan.connector) {
-        return entry.planes[0];
-      }
-    }
-  };
-
-  const toSurface$1 = (plane) => {
-    const max = +1e5;
-    const min = -1e5;
-    const [, from] = toXYPlaneTransforms(plane);
-    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
-    const polygon = transform$1(from, path);
-    return [polygon];
-  };
-
-  const chop = (shape, connector = Z$c()) => {
-    const cuts = [];
-    const planeSurface = toSurface$1(toPlane$3(connector));
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const cutResult = cut$1(solid, planeSurface);
-      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
-    }
-    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
-      const cutSurface = surface || z0Surface;
-      const cutResult = cut(planeSurface, cutSurface);
-      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
-    }
-
-    return assemble$1(...cuts);
-  };
-
-  const chopMethod = function (surface) { return chop(this, surface); };
-  Shape.prototype.chop = chopMethod;
-
-  chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
-  chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
-
-  const Z$d = 2;
-
-  const findFlatTransforms = (shape) => {
-    let bestDepth = Infinity;
-    let bestTo;
-    let bestFrom;
-    let bestSurface;
-
-    const assay = (surface) => {
-      const plane = toPlane$1(surface);
-      if (plane !== undefined) {
-        const [to, from] = toXYPlaneTransforms(plane);
-        const flatShape = shape.transform(to);
-        const [min, max] = flatShape.measureBoundingBox();
-        const depth = max[Z$d] - min[Z$d];
-        if (depth < bestDepth) {
-          bestTo = to;
-          bestFrom = from;
-          bestSurface = surface;
-        }
-      }
-    };
-
-    const geometry = shape.toKeptGeometry();
-    for (const { solid } of getSolids(geometry)) {
-      for (const surface of solid) {
-        assay(surface);
-      }
-    }
-    for (const { surface } of getSurfaces(geometry)) {
-      assay(surface);
-    }
-    for (const { z0Surface } of getZ0Surfaces(geometry)) {
-      assay(z0Surface);
-    }
-
-    return [bestTo, bestFrom, bestSurface];
-  };
-
-  const flat = (shape) => {
-    const [, , bestSurface] = findFlatTransforms(shape);
-    return withConnector(shape, bestSurface, 'flat');
-  };
-
-  const flatMethod = function () { return flat(this); };
-  Shape.prototype.flat = flatMethod;
-
-  flat.signature = 'flat(shape:Shape) -> Connector';
-  flatMethod.signature = 'Shape -> flat() -> Connector';
-
-  // Perform an operation on the shape in its best flat orientation,
-  // returning the result in the original orientation.
-
-  const inFlat = (shape, op) => {
-    const [to, from] = findFlatTransforms(shape);
-    return op(shape.transform(to)).transform(from);
-  };
-
-  const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
-  Shape.prototype.inFlat = inFlatMethod;
-
-  const Y$f = 1;
-
-  const front = (shape) =>
-    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$f]);
-
-  const frontMethod = function () { return front(this); };
-  Shape.prototype.front = frontMethod;
-
-  front.signature = 'front(shape:Shape) -> Shape';
-  frontMethod.signature = 'Shape -> front() -> Shape';
-
-  const X$e = 0;
-
-  const left = (shape) =>
-    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$e]);
-
-  const leftMethod = function () { return left(this); };
-  Shape.prototype.left = leftMethod;
-
-  left.signature = 'left(shape:Shape) -> Shape';
-  leftMethod.signature = 'Shape -> left() -> Shape';
-
-  const on$1 = (above, below, op = _ => _) => above.bottom().from(below.top().op(op));
-  const onMethod = function (below, op) { return on$1(this, below, op); };
-
-  Shape.prototype.on = onMethod;
-
-  const X$f = 0;
-
-  const right = (shape) =>
-    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$f]);
-
-  const rightMethod = function () { return right(this); };
-  Shape.prototype.right = rightMethod;
-
-  right.signature = 'right(shape:Shape) -> Shape';
-  rightMethod.signature = 'Shape -> right() -> Shape';
-
-  const Z$e = 2;
-
-  const top = (shape) =>
-    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$e]);
-
-  const topMethod = function () { return top(this); };
-  Shape.prototype.top = topMethod;
-
-  top.signature = 'top(shape:Shape) -> Shape';
-  topMethod.signature = 'Shape -> top() -> Shape';
-
-  /**
-   *
-   * # Unfold
-   *
-   **/
-
-  // FIX: Does not handle convex solids.
-  const unfold = (shape) => {
-    const faces = shape.faces(f => f);
-    log$2(`Face count is ${faces.length}`);
-    const faceByEdge = new Map();
-
-    for (const face of faces) {
-      for (const edge of face.faceEdges()) {
-        faceByEdge.set(edge, face);
-      }
-    }
-
-    const reverseEdge = (edge) => {
-      const [a, b] = edge.split(':');
-      const reversedEdge = `${b}:${a}`;
-      return reversedEdge;
-    };
-
-    const seen = new Set();
-    const queue = [];
-
-    const enqueueNeighbors = (face) => {
-      for (const edge of face.faceEdges()) {
-        const redge = reverseEdge(edge);
-        const neighbor = faceByEdge.get(redge);
-        if (neighbor === undefined || seen.has(neighbor)) continue;
-        seen.add(neighbor);
-        queue.push({
-          face: neighbor,
-          to: `face/edge:${edge}`,
-          from: `face/edge:${redge}`
-        });
-      }
-    };
-
-    let root = faces[0];
-    enqueueNeighbors(root);
-
-    while (queue.length > 0) {
-      const { face, from, to } = queue.shift();
-      seen.add(face);
-      const fromConnector = face.connector(from);
-      const toConnector = root.connector(to);
-      if (fromConnector === undefined) {
-        log$2('bad from');
-        continue;
-      }
-      if (toConnector === undefined) {
-        log$2('bad to');
-        continue;
-      }
-      root = fromConnector.to(toConnector);
-      if (root === undefined) break;
-      enqueueNeighbors(face);
-    }
-
-    return root;
-  };
-
-  const method$2 = function (...args) { return unfold(this); };
-  Shape.prototype.unfold = method$2;
-
-  // Ideally this would be a plane of infinite extent.
-  // Unfortunately this makes things like interpolation tricky,
-  // so we approximate it with a very large polygon instead.
-
-  const X$g = (x = 0) => {
-    const size = 1e5;
-    const min = -size;
-    const max = size;
-    const sheet = Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
-    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-  };
-
-  // Ideally this would be a plane of infinite extent.
-  // Unfortunately this makes things like interpolation tricky,
-  // so we approximate it with a very large polygon instead.
-
-  const Y$g = (y = 0) => {
-    const size = 1e5;
-    const min = -size;
-    const max = size;
-    const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
-    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-  };
-
-  /**
-   *
-   * # Connect
-   *
-   * Connects two connectors.
-   *
-   * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).Connector('top').moveZ(5)
-   *         .connect(Sphere(10).Connector('bottom').flip().moveZ(-9))
-   * ```
-   * :::
-   **/
-
-  const toShape = (connector) => connector.getContext(shapeToConnect);
-
-  const dropConnector = (shape, ...connectors) => {
-    if (shape !== undefined) {
-      return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
-    }
-  };
-
-  const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
-  Shape.prototype.dropConnector = dropConnectorMethod;
-
-  const CENTER = 0;
-  const RIGHT = 1;
-
-  const measureAngle = ([aX, aY], [bX, bY]) => {
-    const a2 = Math.atan2(aX, aY);
-    const a1 = Math.atan2(bX, bY);
-    const sign = a1 > a2 ? 1 : -1;
-    const angle = a1 - a2;
-    const K = -sign * Math.PI * 2;
-    const absoluteAngle = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
-    return absoluteAngle * 180 / Math.PI;
-  };
-
-  // FIX: Separate the doConnect dispatched interfaces.
-  // Connect two shapes at the specified connector.
-  const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
-    const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
-    const aShape = toShape(aConnectorShape);
-    const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
-
-    const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
-    const bShape = toShape(bConnectorShape);
-    const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
-
-    // Flatten a.
-    const aFlatShape = aShape.transform(aTo);
-    const aFlatConnector = aConnectorShape.transform(aTo);
-    const aMarks = aFlatConnector.toKeptGeometry().marks;
-    const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
-    // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
-
-    // Flatten b's connector.
-    const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
-    const bMarks = bFlatConnector.marks;
-
-    // Rotate into alignment.
-    const aOrientation = subtract(aMarks[RIGHT], aMarks[CENTER]);
-    const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
-    const angle = measureAngle(aOrientation, bOrientation);
-    const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
-    // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
-
-    // Move a to the flat position of b.
-    const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
-    // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
-    // Move a to the oriented position of b.
-    const aMovedShape = aFlatBShape.transform(bFrom);
-    // const aMovedConnector = aFlatBConnector.transform(bFrom);
-
-    if (doConnect) {
-      if (doAssemble) {
-        return dropConnector(aMovedShape, aConnector.plan.connector)
-            .Item()
-            .with(dropConnector(bShape, bConnector.plan.connector))
-            .Item();
-      } else {
-        return dropConnector(aMovedShape, aConnector.plan.connector)
-            .Item()
-            .layer(dropConnector(bShape, bConnector.plan.connector))
-            .Item();
-      }
-      /*
-      return Shape.fromGeometry(
-        {
-          connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-          connectors: [aMovedConnector.toKeptGeometry(), bConnector],
-          geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
-              .concat(bShape === undefined
-                ? []
-                : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
-        });
-      */
-    } else {
-      return aMovedShape;
-    }
-  };
-
-  const toMethod = function (connector, options) { return connect(this, connector, options); };
-  Shape.prototype.to = toMethod;
-  toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
-
-  const fromMethod = function (connector, options) { return connect(connector, this, options); };
-  Shape.prototype.from = fromMethod;
-  fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
-
-  const atMethod = function (connector, options) { return connect(this, connector, { ...options, doConnect: false }); };
-  Shape.prototype.at = atMethod;
-  atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
-
-  connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
-
-  // FIX: The toKeptGeometry is almost certainly wrong.
-  const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, joint, leftJointConnectorId, rightArmConnectorId, rightArm) => {
-    // leftArm will remain stationary.
-    const leftArmConnector = leftArm.connector(leftArmConnectorId);
-    const rightJointConnector = joint.connector(rightJointConnectorId);
-    const [joinedJointShape, joinedJointConnector] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
-    const rightArmConnector = rightArm.connector(rightArmConnectorId, { doConnect: false });
-    const [joinedRightShape, joinedRightConnector] = rightArmConnector.connectTo(joinedJointShape.connector(leftJointConnectorId), { doConnect: false });
-    const result = Shape.fromGeometry(
-      {
-        connection: joinId,
-        connectors: [leftArmConnector.toKeptGeometry(),
-                     joinedJointConnector.toKeptGeometry(),
-                     joinedRightConnector.toKeptGeometry()],
-        geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
-                     joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
-                     joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
-        tags: [`joinLeft/${joinId}`]
-      });
-    return result;
-  };
-
-  const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
-  Shape.prototype.joinLeft = joinLeftMethod;
-
-  /**
-   *
-   * # Ease
-   *
-   * Produces a function for composing easing functions.
-   * ```
-   * ease(0.00, 0.25, t => sin(t * 25))(ease(0.25, 1.00, t => 5)())
-   * ```
-   *
-   **/
-
-  const ease = (start = 0.00, end = 1.00, op = t => 1) => {
-    const compose = (next = t => 1) => {
-      const fn = t => {
-        if (t >= start && t <= end) {
-          return op((t - start) / (end - start));
-        } else {
-          return next(t);
-        }
-      };
-      return fn;
-    };
-    return compose;
-  };
-
-  const linear = (start, end) => t => start + t * (end - start);
-  ease.linear = linear;
-
-  ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
-  linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
-
-  var Prando_umd = createCommonjsModule(function (module, exports) {
-  (function (global, factory) {
-  	 module.exports = factory() ;
-  }(commonjsGlobal, (function () {
-  	var Prando = /** @class */ (function () {
-  	    // ================================================================================================================
-  	    // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
-  	    /**
-  	     * Generate a new Prando pseudo-random number generator.
-  	     *
-  	     * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
-  	     */
-  	    function Prando(seed) {
-  	        this._value = NaN;
-  	        if (typeof (seed) === "string") {
-  	            // String seed
-  	            this._seed = this.hashCode(seed);
-  	        }
-  	        else if (typeof (seed) === "number") {
-  	            // Numeric seed
-  	            this._seed = this.getSafeSeed(seed);
-  	        }
-  	        else {
-  	            // Pseudo-random seed
-  	            this._seed = this.getSafeSeed(Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random()));
-  	        }
-  	        this.reset();
-  	    }
-  	    // ================================================================================================================
-  	    // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
-  	    /**
-  	     * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
-  	     *
-  	     * @param min - The minimum number that can be randomly generated.
-  	     * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
-  	     * @return The generated pseudo-random number.
-  	     */
-  	    Prando.prototype.next = function (min, pseudoMax) {
-  	        if (min === void 0) { min = 0; }
-  	        if (pseudoMax === void 0) { pseudoMax = 1; }
-  	        this.recalculate();
-  	        return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
-  	    };
-  	    /**
-  	     * Generates a pseudo-random integer number in a range (inclusive).
-  	     *
-  	     * @param min - The minimum number that can be randomly generated.
-  	     * @param max - The maximum number that can be randomly generated.
-  	     * @return The generated pseudo-random number.
-  	     */
-  	    Prando.prototype.nextInt = function (min, max) {
-  	        if (min === void 0) { min = 10; }
-  	        if (max === void 0) { max = 100; }
-  	        this.recalculate();
-  	        return Math.floor(this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1));
-  	    };
-  	    /**
-  	     * Generates a pseudo-random string sequence of a particular length from a specific character range.
-  	     *
-  	     * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
-  	     * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
-  	     * pre-existing ids, or employ a robust GUID/UUID generator.
-  	     *
-  	     * @param length - Length of the strting to be generated.
-  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
-  	     * @return The generated string sequence.
-  	     */
-  	    Prando.prototype.nextString = function (length, chars) {
-  	        if (length === void 0) { length = 16; }
-  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
-  	        var str = "";
-  	        while (str.length < length) {
-  	            str += this.nextChar(chars);
-  	        }
-  	        return str;
-  	    };
-  	    /**
-  	     * Generates a pseudo-random string of 1 character specific character range.
-  	     *
-  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
-  	     * @return The generated character.
-  	     */
-  	    Prando.prototype.nextChar = function (chars) {
-  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
-  	        this.recalculate();
-  	        return chars.substr(this.nextInt(0, chars.length - 1), 1);
-  	    };
-  	    /**
-  	     * Picks a pseudo-random item from an array. The array is left unmodified.
-  	     *
-  	     * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
-  	     * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
-  	     * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
-  	     * apply a *shuffle* transformation to the array instead, then read it linearly.
-  	     *
-  	     * @param array - Array of any type containing one or more candidates for random picking.
-  	     * @return An item from the array.
-  	     */
-  	    Prando.prototype.nextArrayItem = function (array) {
-  	        this.recalculate();
-  	        return array[this.nextInt(0, array.length - 1)];
-  	    };
-  	    /**
-  	     * Generates a pseudo-random boolean.
-  	     *
-  	     * @return A value of true or false.
-  	     */
-  	    Prando.prototype.nextBoolean = function () {
-  	        this.recalculate();
-  	        return this._value > 0.5;
-  	    };
-  	    /**
-  	     * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
-  	     * calling next() a specified number of times, but faster since it doesn't need to map the
-  	     * new random numbers to a range and return it.
-  	     *
-  	     * @param iterations - The number of items to skip ahead.
-  	     */
-  	    Prando.prototype.skip = function (iterations) {
-  	        if (iterations === void 0) { iterations = 1; }
-  	        while (iterations-- > 0) {
-  	            this.recalculate();
-  	        }
-  	    };
-  	    /**
-  	     * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
-  	     * will then produce the same sequence of numbers it had produced before. This is equivalent to
-  	     * creating a new Prando instance with the same seed as another Prando instance.
-  	     *
-  	     * Example:
-  	     * let rng = new Prando(12345678);
-  	     * console.log(rng.next()); // 0.6177754114889017
-  	     * console.log(rng.next()); // 0.5784605181725837
-  	     * rng.reset();
-  	     * console.log(rng.next()); // 0.6177754114889017 again
-  	     * console.log(rng.next()); // 0.5784605181725837 again
-  	     */
-  	    Prando.prototype.reset = function () {
-  	        this._value = this._seed;
-  	    };
-  	    // ================================================================================================================
-  	    // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
-  	    Prando.prototype.recalculate = function () {
-  	        this._value = this.xorshift(this._value);
-  	    };
-  	    Prando.prototype.xorshift = function (value) {
-  	        // Xorshift*32
-  	        // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
-  	        value ^= value << 13;
-  	        value ^= value >> 17;
-  	        value ^= value << 5;
-  	        return value;
-  	    };
-  	    Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
-  	        return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
-  	    };
-  	    Prando.prototype.hashCode = function (str) {
-  	        var hash = 0;
-  	        if (str) {
-  	            var l = str.length;
-  	            for (var i = 0; i < l; i++) {
-  	                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-  	                hash |= 0;
-  	                hash = this.xorshift(hash);
-  	            }
-  	        }
-  	        return this.getSafeSeed(hash);
-  	    };
-  	    Prando.prototype.getSafeSeed = function (seed) {
-  	        if (seed === 0)
-  	            return 1;
-  	        return seed;
-  	    };
-  	    Prando.MIN = -2147483648; // Int32 min
-  	    Prando.MAX = 2147483647; // Int32 max
-  	    return Prando;
-  	}());
-
-  	return Prando;
-
-  })));
-  module.exports.default = module.exports; // Terrible injection just so it works regardless of how it's required
-  });
-
-  const to = (g) => (to) => g() * to;
-  const vary = (g) => (degree) => (g() - 0.5) * degree * 2;
-
-  const Random = (seed = 0) => {
-    const rng = new Prando_umd(seed);
-    const g = () => rng.next();
-    g.to = to(g);
-    g.vary = vary(g);
-    return g;
-  };
-
-  /**
-   *
-   * # Arc Cosine
-   *
-   * Gives the arc cosine converted to degrees.
-   * ```
-   * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
-   *
-   * acos(0) = 90
-   * acos(0.5) = 60
-   * acos(1) = 0
-   * ```
-   *
-   **/
-
-  const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
-  acos.signature = 'acos(angle:number) -> number';
-
-  /**
-   *
-   * # Cosine
-   *
-   * Gives the cosine in degrees.
-   * ```
-   * cos(a) => Math.cos(a / 360 * Math.PI * 2);
-   *
-   * cos(0) = 1
-   * cos(45) = 0.707
-   * cos(90) = 0
-   * ```
-   *
-   **/
-
-  const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
-
-  cos.signature = 'cos(angle:number) -> number';
-
-  /**
-   *
-   * # Max
-   *
-   * Produces the maximum of a series of numbers.
-   *
-   * ```
-   * max(1, 2, 3, 4) == 4
-   * ```
-   *
-   **/
-
-  const max$1 = Math.max;
-
-  max$1.signature = 'max(...values:number) -> number';
-
-  /**
-   *
-   * # Min
-   *
-   * Produces the minimum of a series of numbers.
-   *
-   * ```
-   * min(1, 2, 3, 4) == 1
-   * ```
-   *
-   **/
-
-  const min$1 = Math.min;
-
-  min$1.signature = 'min(...values:number) -> number';
-
-  /**
-   *
-   * # Numbers
-   *
-   * ```
-   * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
-   * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
-   * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
-   * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
-   * ```
-   *
-   **/
-
-  const EPSILON$3 = 1e-5;
-
-  const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
-    const numbers = [];
-    if (by === undefined) {
-      if (resolution !== undefined) {
-        by = to / resolution;
-      } else {
-        by = 1;
-      }
-    }
-
-    if (to === undefined && upto === undefined) {
-      upto = 1;
-    }
-
-    if (upto !== undefined) {
-      // Exclusive
-      for (let number = from, nth = 0; number < to - EPSILON$3; number += by, nth++) {
-        numbers.push(thunk(number, nth));
-      }
-    } else if (to !== undefined) {
-      // Inclusive
-      for (let number = from, nth = 0; number <= to + EPSILON$3; number += by, nth++) {
-        numbers.push(thunk(number, nth));
-      }
-    }
-    return numbers;
-  };
-
-  numbers.signature = 'numbers(spec) -> numbers';
-
-  /**
-   *
-   * # Sine
-   *
-   * Gives the sine in degrees.
-   * ```
-   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
-   *
-   * sin(0) = 0
-   * sin(45) = 0.707
-   * sin(90) = 1
-   * ```
-   *
-   **/
-
-  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
-
-  /**
-   *
-   * # Square Root
-   *
-   * Gives the the square root of a number.
-   * ```
-   * sqrt(a) => Math.sqrt(a);
-   *
-   * sqrt(0) = 0
-   * sqrt(4) = 2
-   * sqrt(16) = 4
-   * ```
-   *
-   **/
-
-  const sqrt = Math.sqrt;
-
   const crumple = (shape, amount = 0.1, { resolution = 1, rng = Random() } = {}) => {
     const offset = v => v + (rng() - 0.5) * amount * 2;
     // FIX: Use a smooth noise function, maybe perlin.
@@ -21658,7 +21132,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$3(solid);
+      const [min, max] = measureBoundingBox$4(solid);
       assembly.push({ solid: deform(makeWatertight(solid), perturb, min, max, resolution), tags });
     }
 
@@ -21668,16 +21142,16 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const crumpleMethod = function (...args) { return crumple(this, ...args); };
   Shape.prototype.crumple = crumpleMethod;
 
-  const Z$f = 2;
+  const Z$b = 2;
 
   const scaleXY = (factor, [x, y, z]) => [...scale$1(factor, [x, y]), z];
 
   const thin = (shape, factor, { resolution = 1 } = {}) => {
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$3(solid);
-      const maxZ = max[Z$f];
-      const minZ = min[Z$f];
+      const [min, max] = measureBoundingBox$4(solid);
+      const maxZ = max[Z$b];
+      const minZ = min[Z$b];
       const height = maxZ - minZ;
       const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
       const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
@@ -21690,15 +21164,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const thinMethod = function (...args) { return thin(this, ...args); };
   Shape.prototype.thin = thinMethod;
 
-  const Z$g = 2;
+  const Z$c = 2;
 
   const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$3(solid);
-      const height = max[Z$g] - min[Z$g];
+      const [min, max] = measureBoundingBox$4(solid);
+      const height = max[Z$c] - min[Z$c];
       const radians = (angle / height) * (Math.PI / 180);
-      const rotate = point => rotateZ(point, radians * (point[Z$g] - min[Z$g]));
+      const rotate = point => rotateZ(point, radians * (point[Z$c] - min[Z$c]));
       assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
     }
 
@@ -21932,13 +21406,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   var binPacking_1 = binPacking.GrowingPacker;
   var binPacking_2 = binPacking.Packer;
 
-  const X$h = 0;
-  const Y$h = 1;
+  const X$e = 0;
+  const Y$e = 1;
 
   const measureSize = (geometry) => {
     const [min, max] = measureBoundingBox$5(geometry);
-    const width = max[X$h] - min[X$h];
-    const height = max[Y$h] - min[Y$h];
+    const width = max[X$e] - min[X$e];
+    const height = max[Y$e] - min[Y$e];
     return [width, height];
   };
 
@@ -25965,11 +25439,11 @@ return d[d.length-1];};return ", funcName].join("");
     if (cap) {
       const deduplicatedPath = deduplicate(lastPath);
       if (deduplicatedPath.length > 0) {
-        polygons.push(...flip$3(makeConvex$1([deduplicatedPath])));
+        polygons.push(...flip$4(makeConvex$1([deduplicatedPath])));
       }
     }
 
-    return { solid: fromPolygons({}, flip$3(polygons)) };
+    return { solid: fromPolygons({}, flip$4(polygons)) };
   };
 
   const fromPointsAndPaths = ({ points = [], paths = [] }) => {
@@ -26071,7 +25545,7 @@ return d[d.length-1];};return ", funcName].join("");
       polygons.push(...roof);
 
       // floor faces down.
-      const floor = translate$1([0, 0, depth], flip$3(surface));
+      const floor = translate$1([0, 0, depth], flip$4(surface));
       polygons.push(...floor);
     }
 
@@ -26727,7 +26201,7 @@ return d[d.length-1];};return ", funcName].join("");
   Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
   Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-  const Empty = (...shapes) => Shape.fromGeometry({ layers: [] });
+  const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
   /**
    *
@@ -27215,14 +26689,14 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Z$h = 2;
+  const Z$d = 2;
 
   const ChainedHull = (...shapes) => {
     const pointsets = shapes.map(shape => shape.toPoints());
     const chain = [];
     for (let nth = 1; nth < pointsets.length; nth++) {
       const points = [...pointsets[nth - 1], ...pointsets[nth]];
-      if (points.every(point => point[Z$h] === 0)) {
+      if (points.every(point => point[Z$d] === 0)) {
         chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
       } else {
         chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -27269,13 +26743,13 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Z$i = 2;
+  const Z$e = 2;
 
   const Hull = (...shapes) => {
     const points = [];
     shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
     // FIX: Detect planar hulls properly.
-    if (points.every(point => point[Z$i] === 0)) {
+    if (points.every(point => point[Z$e] === 0)) {
       return Shape.fromGeometry(buildConvexSurfaceHull(points));
     } else {
       return Shape.fromGeometry(buildConvexHull(points));
@@ -27287,6 +26761,642 @@ return d[d.length-1];};return ", funcName].join("");
 
   Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
   HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
+
+  const Plan = ({ plan, marks = [], planes = [], tags = [], visualization, content }, context) => {
+    let visualizationGeometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
+    let contentGeometry = content === undefined ? { assembly: [] } : content.toKeptGeometry();
+    const shape = Shape.fromGeometry({
+      plan,
+      marks,
+      planes,
+      tags,
+      content: contentGeometry,
+      visualization: visualizationGeometry
+    },
+                                     context);
+    return shape;
+  };
+
+  /**
+   *
+   * # Connector
+   *
+   * Returns a connector plan.
+   * See connect().
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Connector('top').move(5))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).Connector('top').moveZ(5).connect(Sphere(5).Connector('bottom').flip().moveZ(-5))
+   * ```
+   * :::
+   **/
+
+  const shapeToConnect = Symbol('shapeToConnect');
+
+  // A connector expresses a joint-of-connection extending from origin along axis to end.
+  // The orientation expresses the direction of facing orthogonal to that axis.
+  // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
+  // Note: axis must be further than end from origin.
+
+  const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0], right = [1, 0, 0], start = [0, 0, 0], end = [0, 0, 0], shape, visualization } = {}) => {
+    const plan = Plan(// Geometry
+      {
+        plan: { connector },
+        marks: [center, right, start, end],
+        planes: [plane],
+        tags: [`connector/${connector}`],
+        visualization
+      },
+      // Context
+      {
+        [shapeToConnect]: shape
+      });
+    return plan;
+  };
+
+  Plan.Connector = Connector;
+
+  const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, [shapeToConnect]: this }); };
+  Shape.prototype.Connector = ConnectorMethod;
+
+  Connector.signature = 'Connector(id:string, { plane:Plane, center:Point, right:Point, start:Point, end:Point, shape:Shape, visualization:Shape }) -> Shape';
+
+  // Associates an existing connector with a shape.
+  const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
+  Shape.prototype.toConnector = toConnectorMethod;
+
+  /**
+   *
+   * # connectors
+   *
+   * Returns the set of connectors in an assembly by tag.
+   * See connect().
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Connector('top').moveZ(5))
+   *         .connectors()['top']
+   *         .connect(Prism(10, 10).with(Connector('bottom').flip().moveZ(-5))
+   *                               .connectors()['bottom']);
+   * ```
+   * :::
+   **/
+
+  const connectors = (shape) => {
+    const connectors = [];
+    for (const entry of getPlans(shape.toKeptGeometry())) {
+      if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
+        connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
+      }
+    }
+    return connectors;
+  };
+
+  const connectorsMethod = function () { return connectors(this); };
+  Shape.prototype.connectors = connectorsMethod;
+
+  /**
+   *
+   * # connector
+   *
+   * Returns a connector from an assembly.
+   * See connect().
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Prism(10, 10).with(Connector('top').moveZ(5))
+   *              .connector('top')
+   *              .connect(Cube(10).with(Connector('bottom').flip().moveZ(-5))
+   *                               .connector('bottom'));
+   * ```
+   * :::
+   **/
+
+  const connector = (shape, id) => {
+    for (const connector of connectors(shape)) {
+      if (connector.toGeometry().plan.connector === id) {
+        return connector;
+      }
+    }
+  };
+
+  const connectorMethod = function (id) { return connector(this, id); };
+  Shape.prototype.connector = connectorMethod;
+
+  const connection = (shape, id) => {
+    const shapeGeometry = shape.toKeptGeometry();
+    const connections = getConnections(shapeGeometry);
+    for (const geometry of connections) {
+      if (geometry.connection === id) {
+        return Shape.fromGeometry(geometry);
+      }
+    }
+  };
+
+  const connectionMethod = function (id) { return connection(this, id); };
+  Shape.prototype.connection = connectionMethod;
+
+  // FIX:
+  // This will produce the average position, but that's probably not what we
+  // want, since it will include interior points produced by breaking up
+  // convexity.
+  const toPosition = (surface) => {
+    let sum = [0, 0, 0];
+    let count = 0;
+    for (const path of surface) {
+      for (const point of path) {
+        sum = add(sum, point);
+        count += 1;
+      }
+    }
+    const position = scale(1 / count, sum);
+    return position;
+  };
+
+  const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
+    let bestSurface;
+    let bestPosition;
+    let bestOrientationScore = -Infinity;
+    let bestPositionScore = -Infinity;
+
+    // FIX: This may be sensitive to noise.
+    const geometry = shape.toKeptGeometry();
+    for (const { solid } of getSolids(geometry)) {
+      for (const surface of solid) {
+        const orientationScore = scoreOrientation(surface);
+        if (orientationScore > bestOrientationScore) {
+          bestSurface = surface;
+          bestOrientationScore = orientationScore;
+          bestPosition = toPosition(surface);
+          bestPositionScore = scorePosition(bestPosition);
+        } else if (orientationScore === bestOrientationScore) {
+          const position = toPosition(surface);
+          const positionScore = scorePosition(position);
+          if (positionScore > bestPositionScore) {
+            bestSurface = surface;
+            bestPosition = position;
+            bestPositionScore = positionScore;
+          }
+        }
+      }
+    }
+
+    // FIX: We should have a consistent rule for deciding the rotational position of the connector.
+    const plane = toPlane$1(bestSurface);
+    return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
+  };
+
+  const toConnector = (shape, surface, id) => {
+    const center = toPosition(surface);
+    // FIX: Adding y + 1 is not always correct.
+    const plane = toPlane$1(surface);
+    return Connector(id, { plane, center, right: random(plane) });
+  };
+
+  const withConnector = (shape, surface, id) => {
+    return shape.toConnector(toConnector(shape, surface, id));
+  };
+
+  const Y$f = 1;
+
+  const back = (shape) =>
+    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$f]);
+
+  const backMethod = function () { return back(this); };
+  Shape.prototype.back = backMethod;
+
+  back.signature = 'back(shape:Shape) -> Shape';
+  backMethod.signature = 'Shape -> back() -> Shape';
+
+  const Z$f = 2;
+
+  const bottom = (shape) =>
+    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$f]);
+
+  const bottomMethod = function () { return bottom(this); };
+  Shape.prototype.bottom = bottomMethod;
+
+  bottom.signature = 'bottom(shape:Shape) -> Shape';
+  bottomMethod.signature = 'Shape -> bottom() -> Shape';
+
+  // Ideally this would be a plane of infinite extent.
+  // Unfortunately this makes things like interpolation tricky,
+  // so we approximate it with a very large polygon instead.
+
+  const Z$g = (z = 0) => {
+    const size = 1e5;
+    const min = -size;
+    const max = size;
+    // FIX: Why aren't we createing the connector directly?
+    const sheet = Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
+    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  };
+
+  /**
+   *
+   * # Chop
+   *
+   * Remove the parts of a shape above surface, defaulting to Z(0).
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
+   * ```
+   * :::
+   *
+   **/
+
+  const toPlane$3 = (connector) => {
+    for (const entry of getPlans(connector.toKeptGeometry())) {
+      if (entry.plan && entry.plan.connector) {
+        return entry.planes[0];
+      }
+    }
+  };
+
+  const toSurface$1 = (plane) => {
+    const max = +1e5;
+    const min = -1e5;
+    const [, from] = toXYPlaneTransforms(plane);
+    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+    const polygon = transform$1(from, path);
+    return [polygon];
+  };
+
+  const chop = (shape, connector = Z$g()) => {
+    const cuts = [];
+    const planeSurface = toSurface$1(toPlane$3(connector));
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const cutResult = cut$1(solid, planeSurface);
+      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+    }
+    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+      const cutSurface = surface || z0Surface;
+      const cutResult = cut(planeSurface, cutSurface);
+      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
+    }
+
+    return assemble$1(...cuts);
+  };
+
+  const chopMethod = function (surface) { return chop(this, surface); };
+  Shape.prototype.chop = chopMethod;
+
+  chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
+  chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
+
+  const Z$h = 2;
+
+  const findFlatTransforms = (shape) => {
+    let bestDepth = Infinity;
+    let bestTo;
+    let bestFrom;
+    let bestSurface;
+
+    const assay = (surface) => {
+      const plane = toPlane$1(surface);
+      if (plane !== undefined) {
+        const [to, from] = toXYPlaneTransforms(plane);
+        const flatShape = shape.transform(to);
+        const [min, max] = flatShape.measureBoundingBox();
+        const depth = max[Z$h] - min[Z$h];
+        if (depth < bestDepth) {
+          bestTo = to;
+          bestFrom = from;
+          bestSurface = surface;
+        }
+      }
+    };
+
+    const geometry = shape.toKeptGeometry();
+    for (const { solid } of getSolids(geometry)) {
+      for (const surface of solid) {
+        assay(surface);
+      }
+    }
+    for (const { surface } of getSurfaces(geometry)) {
+      assay(surface);
+    }
+    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+      assay(z0Surface);
+    }
+
+    return [bestTo, bestFrom, bestSurface];
+  };
+
+  const flat = (shape) => {
+    const [, , bestSurface] = findFlatTransforms(shape);
+    return withConnector(shape, bestSurface, 'flat');
+  };
+
+  const flatMethod = function () { return flat(this); };
+  Shape.prototype.flat = flatMethod;
+
+  flat.signature = 'flat(shape:Shape) -> Connector';
+  flatMethod.signature = 'Shape -> flat() -> Connector';
+
+  // Perform an operation on the shape in its best flat orientation,
+  // returning the result in the original orientation.
+
+  const inFlat = (shape, op) => {
+    const [to, from] = findFlatTransforms(shape);
+    return op(shape.transform(to)).transform(from);
+  };
+
+  const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
+  Shape.prototype.inFlat = inFlatMethod;
+
+  const Y$g = 1;
+
+  const front = (shape) =>
+    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$g]);
+
+  const frontMethod = function () { return front(this); };
+  Shape.prototype.front = frontMethod;
+
+  front.signature = 'front(shape:Shape) -> Shape';
+  frontMethod.signature = 'Shape -> front() -> Shape';
+
+  const X$f = 0;
+
+  const left = (shape) =>
+    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$f]);
+
+  const leftMethod = function () { return left(this); };
+  Shape.prototype.left = leftMethod;
+
+  left.signature = 'left(shape:Shape) -> Shape';
+  leftMethod.signature = 'Shape -> left() -> Shape';
+
+  const on$1 = (above, below, op = _ => _) => above.bottom().from(below.top().op(op));
+  const onMethod = function (below, op) { return on$1(this, below, op); };
+
+  Shape.prototype.on = onMethod;
+
+  const X$g = 0;
+
+  const right = (shape) =>
+    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$g]);
+
+  const rightMethod = function () { return right(this); };
+  Shape.prototype.right = rightMethod;
+
+  right.signature = 'right(shape:Shape) -> Shape';
+  rightMethod.signature = 'Shape -> right() -> Shape';
+
+  const Z$i = 2;
+
+  const top = (shape) =>
+    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$i]);
+
+  const topMethod = function () { return top(this); };
+  Shape.prototype.top = topMethod;
+
+  top.signature = 'top(shape:Shape) -> Shape';
+  topMethod.signature = 'Shape -> top() -> Shape';
+
+  /**
+   *
+   * # Unfold
+   *
+   **/
+
+  // FIX: Does not handle convex solids.
+  const unfold = (shape) => {
+    const faces = shape.faces(f => f);
+    log$2(`Face count is ${faces.length}`);
+    const faceByEdge = new Map();
+
+    for (const face of faces) {
+      for (const edge of face.faceEdges()) {
+        faceByEdge.set(edge, face);
+      }
+    }
+
+    const reverseEdge = (edge) => {
+      const [a, b] = edge.split(':');
+      const reversedEdge = `${b}:${a}`;
+      return reversedEdge;
+    };
+
+    const seen = new Set();
+    const queue = [];
+
+    const enqueueNeighbors = (face) => {
+      for (const edge of face.faceEdges()) {
+        const redge = reverseEdge(edge);
+        const neighbor = faceByEdge.get(redge);
+        if (neighbor === undefined || seen.has(neighbor)) continue;
+        seen.add(neighbor);
+        queue.push({
+          face: neighbor,
+          to: `face/edge:${edge}`,
+          from: `face/edge:${redge}`
+        });
+      }
+    };
+
+    let root = faces[0];
+    enqueueNeighbors(root);
+
+    while (queue.length > 0) {
+      const { face, from, to } = queue.shift();
+      seen.add(face);
+      const fromConnector = face.connector(from);
+      const toConnector = root.connector(to);
+      if (fromConnector === undefined) {
+        log$2('bad from');
+        continue;
+      }
+      if (toConnector === undefined) {
+        log$2('bad to');
+        continue;
+      }
+      root = fromConnector.to(toConnector);
+      if (root === undefined) break;
+      enqueueNeighbors(face);
+    }
+
+    return root;
+  };
+
+  const method$3 = function (...args) { return unfold(this); };
+  Shape.prototype.unfold = method$3;
+
+  // Ideally this would be a plane of infinite extent.
+  // Unfortunately this makes things like interpolation tricky,
+  // so we approximate it with a very large polygon instead.
+
+  const X$h = (x = 0) => {
+    const size = 1e5;
+    const min = -size;
+    const max = size;
+    const sheet = Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
+    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  };
+
+  // Ideally this would be a plane of infinite extent.
+  // Unfortunately this makes things like interpolation tricky,
+  // so we approximate it with a very large polygon instead.
+
+  const Y$h = (y = 0) => {
+    const size = 1e5;
+    const min = -size;
+    const max = size;
+    const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
+    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  };
+
+  /**
+   *
+   * # Connect
+   *
+   * Connects two connectors.
+   *
+   * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).Connector('top').moveZ(5)
+   *         .connect(Sphere(10).Connector('bottom').flip().moveZ(-9))
+   * ```
+   * :::
+   **/
+
+  const toShape = (connector) => connector.getContext(shapeToConnect);
+
+  const dropConnector = (shape, ...connectors) => {
+    if (shape !== undefined) {
+      return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+    }
+  };
+
+  const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
+  Shape.prototype.dropConnector = dropConnectorMethod;
+
+  const CENTER = 0;
+  const RIGHT = 1;
+
+  const measureAngle = ([aX, aY], [bX, bY]) => {
+    const a2 = Math.atan2(aX, aY);
+    const a1 = Math.atan2(bX, bY);
+    const sign = a1 > a2 ? 1 : -1;
+    const angle = a1 - a2;
+    const K = -sign * Math.PI * 2;
+    const absoluteAngle = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
+    return absoluteAngle * 180 / Math.PI;
+  };
+
+  // FIX: Separate the doConnect dispatched interfaces.
+  // Connect two shapes at the specified connector.
+  const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
+    const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
+    const aShape = toShape(aConnectorShape);
+    const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
+
+    const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
+    const bShape = toShape(bConnectorShape);
+    const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
+
+    // Flatten a.
+    const aFlatShape = aShape.transform(aTo);
+    const aFlatConnector = aConnectorShape.transform(aTo);
+    const aMarks = aFlatConnector.toKeptGeometry().marks;
+    const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
+    // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
+
+    // Flatten b's connector.
+    const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
+    const bMarks = bFlatConnector.marks;
+
+    // Rotate into alignment.
+    const aOrientation = subtract(aMarks[RIGHT], aMarks[CENTER]);
+    const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
+    const angle = measureAngle(aOrientation, bOrientation);
+    const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
+    // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
+
+    // Move a to the flat position of b.
+    const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
+    // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
+    // Move a to the oriented position of b.
+    const aMovedShape = aFlatBShape.transform(bFrom);
+    // const aMovedConnector = aFlatBConnector.transform(bFrom);
+
+    if (doConnect) {
+      if (doAssemble) {
+        return dropConnector(aMovedShape, aConnector.plan.connector)
+            .Item()
+            .with(dropConnector(bShape, bConnector.plan.connector))
+            .Item();
+      } else {
+        return dropConnector(aMovedShape, aConnector.plan.connector)
+            .Item()
+            .layer(dropConnector(bShape, bConnector.plan.connector))
+            .Item();
+      }
+      /*
+      return Shape.fromGeometry(
+        {
+          connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
+          connectors: [aMovedConnector.toKeptGeometry(), bConnector],
+          geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
+              .concat(bShape === undefined
+                ? []
+                : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
+        });
+      */
+    } else {
+      return aMovedShape;
+    }
+  };
+
+  const toMethod = function (connector, options) { return connect(this, connector, options); };
+  Shape.prototype.to = toMethod;
+  toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
+
+  const fromMethod = function (connector, options) { return connect(connector, this, options); };
+  Shape.prototype.from = fromMethod;
+  fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
+
+  const atMethod = function (connector, options) { return connect(this, connector, { ...options, doConnect: false }); };
+  Shape.prototype.at = atMethod;
+  atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
+
+  connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
+
+  // FIX: The toKeptGeometry is almost certainly wrong.
+  const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, joint, leftJointConnectorId, rightArmConnectorId, rightArm) => {
+    // leftArm will remain stationary.
+    const leftArmConnector = leftArm.connector(leftArmConnectorId);
+    const rightJointConnector = joint.connector(rightJointConnectorId);
+    const [joinedJointShape, joinedJointConnector] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
+    const rightArmConnector = rightArm.connector(rightArmConnectorId, { doConnect: false });
+    const [joinedRightShape, joinedRightConnector] = rightArmConnector.connectTo(joinedJointShape.connector(leftJointConnectorId), { doConnect: false });
+    const result = Shape.fromGeometry(
+      {
+        connection: joinId,
+        connectors: [leftArmConnector.toKeptGeometry(),
+                     joinedJointConnector.toKeptGeometry(),
+                     joinedRightConnector.toKeptGeometry()],
+        geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
+                     joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
+                     joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
+        tags: [`joinLeft/${joinId}`]
+      });
+    return result;
+  };
+
+  const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
+  Shape.prototype.joinLeft = joinLeftMethod;
 
   /**
    *
@@ -27300,7 +27410,7 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
-    const profile = shape.chop(Y$g(0));
+    const profile = shape.chop(Y$h(0));
     const outline = profile.outline();
     const solids = [];
     for (const geometry of getPaths(outline.toKeptGeometry())) {
@@ -27576,7 +27686,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const section$1 = (solidShape, ...connectors) => {
     if (connectors.length === 0) {
-      connectors.push(Z$c(0));
+      connectors.push(Z$g(0));
     }
     const planes = connectors.map(toPlane$4);
     const planeSurfaces = planes.map(toSurface$2);
@@ -27665,7 +27775,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [polygon];
   };
 
-  const stretch = (shape, length, connector = Z$c()) => {
+  const stretch = (shape, length, connector = Z$g()) => {
     const normalize = createNormalize3();
     const stretches = [];
     const planeSurface = toSurface$3(toPlaneFromConnector(connector));
@@ -27675,7 +27785,7 @@ return d[d.length-1];};return ", funcName].join("");
       }
       const bottom = cutOpen(solid, planeSurface, normalize);
       const [profile] = section(solid, [planeSurface], normalize);
-      const top = cutOpen(solid, flip$3(planeSurface), normalize);
+      const top = cutOpen(solid, flip$4(planeSurface), normalize);
       const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
       const z0SolidGeometry = extrude(transform$4(toZ0, profile), length, 0, false);
       const middle = transform$6(fromZ0, z0SolidGeometry);
@@ -27686,8 +27796,8 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...stretches);
   };
 
-  const method$3 = function (...args) { return stretch(this, ...args); };
-  Shape.prototype.stretch = method$3;
+  const method$4 = function (...args) { return stretch(this, ...args); };
+  Shape.prototype.stretch = method$4;
 
   /**
    *
@@ -27801,57 +27911,168 @@ return d[d.length-1];};return ", funcName].join("");
   const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
     Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
 
-  const method$4 = function (...options) { return toolpath(this, ...options); };
+  const method$5 = function (...options) { return toolpath(this, ...options); };
 
-  Shape.prototype.toolpath = method$4;
+  Shape.prototype.toolpath = method$5;
   Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
 
   const X$i = 0;
   const Y$i = 1;
   const Z$j = 2;
 
+  const floor$1 = (value, resolution) => Math.floor(value / resolution) * resolution;
+  const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
+
+  const floorPoint = ([x, y, z], resolution) => [floor$1(x, resolution), floor$1(y, resolution), floor$1(z, resolution)];
+  const ceilPoint = ([x, y, z], resolution) => [ceil(x, resolution), ceil(y, resolution), ceil(z, resolution)];
+
   const voxels = (shape, resolution = 1) => {
     const offset = resolution / 2;
-    const voxels = [];
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$3(solid);
-      const bsp = fromSolid(solid, createNormalize3());
-      const polygons = [];
-      for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
-        for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
-          for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
-            const state = containsPoint(bsp, [x, y, z]);
-            if (state !== containsPoint(bsp, [x + resolution, y, z])) {
-              const face = [[x + offset, y - offset, z - offset],
-                            [x + offset, y + offset, z - offset],
-                            [x + offset, y + offset, z + offset],
-                            [x + offset, y - offset, z + offset]];
-              polygons.push(state ? face : face.reverse());
-            }
-            if (state !== containsPoint(bsp, [x, y + resolution, z])) {
-              const face = [[x - offset, y + offset, z - offset],
-                            [x + offset, y + offset, z - offset],
-                            [x + offset, y + offset, z + offset],
-                            [x - offset, y + offset, z + offset]];
-              polygons.push(state ? face.reverse() : face);
-            }
-            if (state !== containsPoint(bsp, [x, y, z + resolution])) {
-              const face = [[x - offset, y - offset, z + offset],
-                            [x + offset, y - offset, z + offset],
-                            [x + offset, y + offset, z + offset],
-                            [x - offset, y + offset, z + offset]];
-              polygons.push(state ? face : face.reverse());
-            }
+    const geometry = shape.toKeptGeometry();
+    const normalize = createNormalize3();
+    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const classifiers = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      classifiers.push({ bsp: fromSolid(solid, normalize) });
+    }
+    const test = (point) => {
+      for (const { bsp } of classifiers) {
+        if (containsPoint(bsp, point)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const polygons = [];
+    for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
+      for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+        for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+          const state = test([x, y, z]);
+          if (state !== test([x + resolution, y, z])) {
+            const face = [[x + offset, y - offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x + offset, y - offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
+          }
+          if (state !== test([x, y + resolution, z])) {
+            const face = [[x - offset, y + offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face.reverse() : face);
+          }
+          if (state !== test([x, y, z + resolution])) {
+            const face = [[x - offset, y - offset, z + offset],
+                          [x + offset, y - offset, z + offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
           }
         }
       }
-      voxels.push(Shape.fromGeometry({ solid: fromPolygons({}, polygons), tags }));
     }
-    return assemble$1(...voxels);
+    return Shape.fromGeometry({ solid: fromPolygons({}, polygons) });
   };
 
   const voxelsMethod = function (...args) { return voxels(this, ...args); };
   Shape.prototype.voxels = voxelsMethod;
+
+  const surfaceCloud = (shape, resolution = 1) => {
+    const offset = resolution / 2;
+    const geometry = shape.toKeptGeometry();
+    const normalize = createNormalize3();
+    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const classifiers = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      classifiers.push({ bsp: fromSolid(solid, normalize) });
+    }
+    const test = (point) => {
+      for (const { bsp } of classifiers) {
+        if (containsPoint(bsp, point)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const paths = [];
+    for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
+      for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+        for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+          const state = test([x, y, z]);
+          if (state !== test([x + resolution, y, z])) {
+            paths.push([null, [x, y, z], [x + resolution, y, z]]);
+          }
+          if (state !== test([x, y + resolution, z])) {
+            paths.push([null, [x, y, z], [x, y + resolution, z]]);
+          }
+          if (state !== test([x, y, z + resolution])) {
+            paths.push([null, [x, y, z], [x, y, z + resolution]]);
+          }
+        }
+      }
+    }
+    return Shape.fromGeometry({ paths });
+  };
+
+  const surfaceCloudMethod = function (...args) { return surfaceCloud(this, ...args); };
+  Shape.prototype.surfaceCloud = surfaceCloudMethod;
+
+  const withSurfaceCloudMethod = function (...args) { return assemble$1(this, surfaceCloud(this, ...args)); };
+  Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
+
+  const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
+    const dX = aX - bX;
+    if (dX !== 0) {
+      return dX;
+    }
+    const dY = aY - bY;
+    if (dY !== 0) {
+      return dY;
+    }
+    const dZ = aZ - bZ;
+    return dZ;
+  };
+
+  const cloud = (shape, resolution = 1) => {
+    const offset = resolution / 2;
+    const geometry = shape.toKeptGeometry();
+    const normalize = createNormalize3();
+    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const classifiers = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      classifiers.push({ bsp: fromSolid(solid, normalize) });
+    }
+    const test = (point) => {
+      for (const { bsp } of classifiers) {
+        if (containsPoint(bsp, point)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const points = [];
+    for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
+      for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+        for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+          if (test([x, y, z])) {
+            points.push([x, y, z]);
+          }
+        }
+      }
+    }
+    points.sort(orderPoints);
+    return Shape.fromGeometry({ points });
+  };
+
+  const cloudMethod = function (...args) { return cloud(this, ...args); };
+  Shape.prototype.cloud = cloudMethod;
 
   // FIX: move this
   const containsPoint$1 = (shape, point) => {
@@ -27922,8 +28143,8 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...assembly);
   };
 
-  const method$5 = function (radius, resolution) { return shell(this, radius, resolution); };
-  Shape.prototype.shell = method$5;
+  const method$6 = function (radius, resolution) { return shell(this, radius, resolution); };
+  Shape.prototype.shell = method$6;
 
   /**
    *
@@ -30182,7 +30403,7 @@ return d[d.length-1];};return ", funcName].join("");
   var tan = Math.tan;
   var acos$1 = Math.acos;
   var sqrt$1 = Math.sqrt;
-  var ceil = Math.ceil;
+  var ceil$1 = Math.ceil;
   var τ = Math.PI * 2;
 
   var arcToCurves = curves;
@@ -30220,7 +30441,7 @@ return d[d.length-1];};return ", funcName].join("");
     var ang1 = centre[2];
     var ang2 = centre[3];
 
-    var segments = max$2(ceil(abs$1(ang2) / (τ / 4)), 1);
+    var segments = max$2(ceil$1(abs$1(ang2) / (τ / 4)), 1);
     if (!segments) return []
 
     var curves = [];
@@ -31247,7 +31468,7 @@ return d[d.length-1];};return ", funcName].join("");
     const width = max[X$j] - min[X$j];
     const height = max[Y$j] - min[Y$j];
     const translated = translate$4([width / 2, height / 2, 0], baseGeometry);
-    const geometry = canonicalize$8(toKeptGeometry(translated));
+    const geometry = canonicalize$9(toKeptGeometry(translated));
 
     const svg = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -31302,8 +31523,8 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$6 = function (...args) { return writeSvg(this, ...args); };
-  Shape.prototype.writeSvg = method$6;
+  const method$7 = function (...args) { return writeSvg(this, ...args); };
+  Shape.prototype.writeSvg = method$7;
 
   /**
    * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
@@ -31314,27 +31535,21 @@ return d[d.length-1];};return ", funcName].join("");
    * @returns {String} - the ascii STL output.
    */
 
-  const geometryToTriangles = (solids) => {
+  const fromSolidToTriangles = (solid) => {
     const triangles = [];
-    for (const { solid } of solids) {
-      for (const surface of solid) {
-        for (const triangle of toTriangles({}, surface)) {
-          triangles.push(triangle);
-        }
+    for (const surface of solid) {
+      for (const triangle of toTriangles({}, surface)) {
+        triangles.push(triangle);
       }
     }
     return triangles;
   };
 
   const toStl = async (geometry, options = {}) => {
-    const { doFixTJunctions = true } = options;
     const keptGeometry = toKeptGeometry(geometry);
-    let solids = getSolids(keptGeometry);
-    if (doFixTJunctions) {
-      solids = solids.map(solid => ({ ...solid, solid: makeWatertight(solid.solid) }));
-    }
-    const triangles = geometryToTriangles(solids);
-    return `solid JSxCAD\n${convertToFacets(options, canonicalize$9(triangles))}\nendsolid JSxCAD\n`;
+    let solids = getSolids(keptGeometry).map(({ solid }) => solid);
+    const triangles = fromSolidToTriangles(union$2(...solids));
+    return `solid JSxCAD\n${convertToFacets(options, canonicalize$4(triangles))}\nendsolid JSxCAD\n`;
   };
 
   const convertToFacets = (options, polygons) =>
@@ -31394,8 +31609,8 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$7 = function (...args) { return writeStl(this, ...args); };
-  Shape.prototype.writeStl = method$7;
+  const method$8 = function (...args) { return writeStl(this, ...args); };
+  Shape.prototype.writeStl = method$8;
 
   // Hershey simplex one line font.
   // See: http://paulbourke.net/dataformats/hershey/
@@ -45310,7 +45525,7 @@ return d[d.length-1];};return ", funcName].join("");
         // Outlining forces re-orientation.
         pathsets.push(reorient(paths));
       }
-      return scale$3([factor, factor, factor], { assembly: pathsets.map(pathset => ({ z0Surface: pathset })) });
+      return scale$3([factor, factor, factor], { z0Surface: union(...pathsets) });
     };
 
     return font;
@@ -47204,14 +47419,16 @@ return d[d.length-1];};return ", funcName].join("");
   var api = /*#__PURE__*/Object.freeze({
     __proto__: null,
     source: source,
-    X: X$g,
-    Y: Y$g,
-    Z: Z$c,
+    Connector: Connector,
+    X: X$h,
+    Y: Y$h,
+    Z: Z$g,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
     Shape: Shape,
     log: log$2,
+    make: make,
     pack: pack$1,
     Line2: Line2,
     Plan: Plan,
@@ -53558,14 +53775,16 @@ return d[d.length-1];};return ", funcName].join("");
     __proto__: null,
     importModule: importModule,
     source: source,
-    X: X$g,
-    Y: Y$g,
-    Z: Z$c,
+    Connector: Connector,
+    X: X$h,
+    Y: Y$h,
+    Z: Z$g,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
     Shape: Shape,
     log: log$2,
+    make: make,
     pack: pack$1,
     Line2: Line2,
     Plan: Plan,
@@ -104307,7 +104526,7 @@ return d[d.length-1];};return ", funcName].join("");
         case 'Over Cut Inside Corners':
           console.log('Overcutting corners');
           const overcutShape = Shape.fromGeometry(values[0]);
-          const overcutSection = overcutShape.section(Z$c());
+          const overcutSection = overcutShape.section(Z$g());
           const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
           const height = overcutShape.size().height;
           const sweep = toolpath.sweep(Circle(values[1])).extrude(height);
@@ -104346,7 +104565,6 @@ return d[d.length-1];};return ", funcName].join("");
         case 'tag':
           return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
         case 'specify':
-          console.log(Shape.fromGeometry(values[0]));
           return Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
         case 'translate':
           return Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();

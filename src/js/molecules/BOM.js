@@ -28,11 +28,6 @@ export default class AddBOMTag extends Atom{
          * @type {string}
          */
         this.name = 'Add BOM Tag'
-        /**
-         * This atom's radius as drawn on the screen. Probably inherited and can be deleted.
-         * @type {string}
-         */
-        this.radius = 20
         
         /**
          * The BOM item object created by this atom
@@ -78,7 +73,7 @@ export default class AddBOMTag extends Atom{
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.font = '30px Work Sans Bold'
-        GlobalVariables.c.fillText('B', this.x - (this.radius/2.2), this.y + (this.radius/2.1))
+        GlobalVariables.c.fillText('B', GlobalVariables.widthToPixels(this.x - (this.radius/2.7)), GlobalVariables.heightToPixels(this.y + (this.radius*2)))
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
         
