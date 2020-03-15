@@ -1335,7 +1335,7 @@ export default function GitHubModule(){
             }
             
             //Load the top level molecule from the file
-            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
+            // GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
             
             
@@ -1346,7 +1346,6 @@ export default function GitHubModule(){
             
             
             //Find the top level molecule
-            console.log("Top level molecule: ")
             var projectObject = listOfMoleculeAtoms.filter((molecule) => { return molecule.topLevel == true })[0]
             //Remove that element from the listOfMoleculeAtoms
             listOfMoleculeAtoms.splice(listOfMoleculeAtoms.findIndex(e => e.topLevel == true),1)
@@ -1383,7 +1382,8 @@ export default function GitHubModule(){
             console.log(projectObject)
             console.log("Final state of listOfMoleculeAtoms array: ")
             console.log(listOfMoleculeAtoms)
-                    
+            
+            GlobalVariables.topLevelMolecule.deserialize(projectObject)
         })
         octokit.repos.get({
             owner: currentUser,

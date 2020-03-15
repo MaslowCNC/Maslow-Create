@@ -450,33 +450,30 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Load the children of this from a JSON represntation
-     * @param {object} moleculeList - A list of all the atoms to be placed
-     * @param {number} moleculeID - The uniqueID of the molecule from the list to be loaded
+     * Load the children of this from a JSON representation
+     * @param {object} json - A json representation of the molecule
      */
-    deserialize(moleculeList, moleculeID){
+    deserialize(json){
         
         //Find the target molecule in the list
         let promiseArray = []
-        let moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
-        this.setValues(moleculeObject) //Grab the values of everything from the passed object
-        //Place the atoms
-        moleculeObject.allAtoms.forEach(atom => {
-            const promise = this.placeAtom(atom, moleculeList, GlobalVariables.availableTypes, false)
+        
+        this.setValues(json) //Grab the values of everything from the passed object
+        
+        this.allAtoms.forEach(atom => { //Place the atoms
+            const promise = this.placeAtom(atom, GlobalVariables.availableTypes, false)
             promiseArray.push(promise)
         })
         
         return Promise.all(promiseArray).then( ()=> {
             //Once all the atoms are placed we can finish
             
-            //reload the molecule object to prevent persistence issues
-            moleculeObject = moleculeList.filter((molecule) => { return molecule.uniqueID == moleculeID})[0]
             //Place the connectors
             /**
              * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
              * @param {array}
              */
-            this.savedConnectors = moleculeObject.allConnectors //Save a copy of the connectors so we can use them later if we want
+            this.savedConnectors = this.allConnectors //Save a copy of the connectors so we can use them later if we want
             this.savedConnectors.forEach(connector => {
                 this.placeConnector(connector)
             })
@@ -512,14 +509,13 @@ export default class Molecule extends Atom{
      * @param {object} typesList - A dictionary of all of the available types with references to their constructors
      * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.
      */
-    async placeAtom(newAtomObj, moleculeList, typesList, unlock){
-        //Place the atom - note that types not listed in typesList will not be placed with no warning
+    async placeAtom(newAtomObj, unlock){
         var promise = null
         
-        for(var key in typesList) {
-            if (typesList[key].atomType == newAtomObj.atomType){
+        for(var key in GlobalVariables.availableTypes) {
+            if (GlobalVariables.availableTypes[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
-                var atom = new typesList[key].creator(newAtomObj)
+                var atom = new GlobalVariables.availableTypes[key].creator(newAtomObj)
                 
                 //reassign the name of the Inputs to preserve linking
                 if(atom.atomType == 'Input' && typeof newAtomObj.name !== 'undefined'){
@@ -528,8 +524,8 @@ export default class Molecule extends Atom{
                 }
 
                 //If this is a molecule, de-serialize it
-                if(atom.atomType == 'Molecule' && moleculeList != null){
-                    promise = atom.deserialize(moleculeList, atom.uniqueID)
+                if(atom.atomType == 'Molecule'){
+                    promise = atom.deserialize(newAtomObj)
                 }
                 
                 //If this is a github molecule load it from the web
