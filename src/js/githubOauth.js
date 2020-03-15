@@ -543,6 +543,7 @@ export default function GitHubModule(){
                
         }) 
     }
+    
     /** 
      * Search for the name of a project and then return results which match that search.
      */
@@ -629,6 +630,7 @@ export default function GitHubModule(){
         })
 
     }
+    
     /** 
      * Adds a new project to the load projects display.
      */
@@ -1204,6 +1206,7 @@ export default function GitHubModule(){
             })
         }
     }
+    
     /** 
      * Creates saving/saved pop up
      */
@@ -1322,6 +1325,8 @@ export default function GitHubModule(){
             //content will be base64 encoded
             let rawFile = JSON.parse(atob(result.data.content))
             
+            console.log("Raw loaded JSON is: ")
+            console.log(rawFile)
             
             var moleculesList = rawFile.molecules
             
@@ -1332,6 +1337,53 @@ export default function GitHubModule(){
             //Load the top level molecule from the file
             GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
+            
+            
+            //-------------------------------------------------------------------------------------
+            //                                 New System
+            
+            var listOfMoleculeAtoms = moleculesList;
+            
+            
+            //Find the top level molecule
+            console.log("Top level molecule: ")
+            var projectObject = listOfMoleculeAtoms.filter((molecule) => { return molecule.topLevel == true })[0]
+            //Remove that element from the listOfMoleculeAtoms
+            listOfMoleculeAtoms.splice(listOfMoleculeAtoms.findIndex(e => e.topLevel == true),1)
+            
+            //Recursive function to walk the tree and find molecule placeholders
+            function walkForMolecules(projectObject){
+                projectObject.allAtoms.forEach(function(atom, allAtomsIndex, allAtomsObject) {
+                    if(atom.atomType == "Molecule"){
+                        console.log("Found a molecule at: " + allAtomsIndex)
+                        
+                        if(atom.allAtoms != undefined){ //If this molecule has allAtoms
+                            walkForMolecules(atom)//Walk it
+                        }
+                        else{ //Else replace it with a version which does have allAtoms from the list
+                            //Find the version in molecules list and plug it in
+                             allAtomsObject[allAtomsIndex] = listOfMoleculeAtoms.filter((molecule) => { return molecule.uniqueID == atom.uniqueID })[0]
+                            //Remove that element from the listOfMoleculeAtoms
+                            listOfMoleculeAtoms.splice(listOfMoleculeAtoms.findIndex(e => e.uniqueID == atom.uniqueID),1)
+                        }
+                    }
+                    else{
+                        console.log("Skipping: " + atom.atomType)
+                    }
+                })
+            }
+            
+            //Find any placeholder molecules in there (this needs to be a full tree walk for everything to work)
+            while(listOfMoleculeAtoms.length > 0){
+                walkForMolecules(projectObject)
+                console.log("Looping")
+            }
+            
+            console.log("Final product: ")
+            console.log(projectObject)
+            console.log("Final state of listOfMoleculeAtoms array: ")
+            console.log(listOfMoleculeAtoms)
+                    
         })
         octokit.repos.get({
             owner: currentUser,
