@@ -103,7 +103,7 @@ export default class Box extends Atom {
          * @type {number}
          */ 
             this.endX = x
-        /**
+            /**
          * Sets new box end to click target
          * @type {number}
          */

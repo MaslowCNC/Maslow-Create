@@ -103,7 +103,7 @@ export default class Molecule extends Atom{
         GlobalVariables.c.fill()
 
     }
-     /**
+    /**
      * Set the molecule's response to a mouse click
      * @param {number} x - The X cordinate of the click
      * @param {number} y - The Y cordinate of the click
