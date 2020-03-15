@@ -105,8 +105,9 @@ export default class Molecule extends Atom{
     }
 
     clickDown(x,y, clickProcessed){
+
         console.log("click")
-        if(GlobalVariables.ctrlDown){
+        if(GlobalVariables.ctrlDown && !clickProcessed){
             this.placeAtom({
                 parentMolecule: this, 
                 x: GlobalVariables.pixelsToWidth(x),

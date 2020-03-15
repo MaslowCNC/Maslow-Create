@@ -292,10 +292,6 @@ export default class Atom {
     }
 
     selectBox(x,y,xEnd,yEnd){
-        console.log(x)
-        console.log(y)
-        console.log(xEnd)
-        console.log(yEnd)
         let xIn = Math.min(x, xEnd)
         let xOut = Math.max(x, xEnd)
         let yIn = Math.min(y, yEnd)

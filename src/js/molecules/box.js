@@ -99,7 +99,6 @@ export default class Box extends Atom {
 
         if(GlobalVariables.ctrlDown){
 
-                console.log(this.endX)
                 GlobalVariables.c.beginPath()
                 GlobalVariables.c.fillStyle = '#80808080'
                 GlobalVariables.c.rect(
