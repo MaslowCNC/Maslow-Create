@@ -44,52 +44,34 @@ export default class Box extends Atom {
          */
         this.radius = 1/75
 
-
+        /**
+         * Mouse x position when moving
+         * @type {number}
+         */
         this.endX
-
+        /**
+         * Mouse y position when moving
+         * @type {number}
+         */
         this.endY
+        
+        /**
+         * Value to save for start position of box
+         * @type {number}
+         */
+        this.startX
+        /**
+         * Value to save for start position of box
+         * @type {number}
+         */
+        this.startY
 
         this.setValues(values)
-
-        this.startX
-        this.startY
-        this.width
-        this.length
         
     }
     
     /**
-     * Take the input value of this function and pass it to the parent Molecule to go up one level.
-     */ 
-    updateValue(){
-        if(this.inputs.every(x => x.ready)){
-            this.value = this.findIOValue('number or geometry')
-            this.parent.value = this.value
-            this.parent.propogate()
-            this.parent.processing = false
-            
-            //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
-            if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule" && !this.parent.topLevel){
-                this.parent.dumpBuffer(true)
-            }
-            
-            super.updateValue()
-        }
-    }
-    
-    /**
-     * I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.
-     */ 
-    setID(newID){
-        /**
-         * The unique ID of this atom.
-         * @type {number}
-         */ 
-        this.uniqueID = newID
-    }
-    
-    /**
-     * Draw the output shape on the screen.
+     * Draw the select box shape on the screen.
      */ 
     draw() {
 
@@ -112,13 +94,18 @@ export default class Box extends Atom {
         
     }
 
+    /**
+     * When mouse moves and Ctrl is down updates value for box width and height
+     */ 
     clickMove(x,y){
         if(GlobalVariables.ctrlDown){
         this.endX = x
         this.endY= y
         }
     }
-
+    /**
+     * Clears the drawing of box when clickUp and updates values for atom selection
+     */ 
     clickUp(x,y){  
         const xInPixels = GlobalVariables.widthToPixels(this.x)
         const yInPixels = GlobalVariables.heightToPixels(this.y)

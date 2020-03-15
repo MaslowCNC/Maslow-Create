@@ -289,6 +289,9 @@ export default class Atom {
         this.alertMessage = ''
     }
 
+    /**
+     * Delineates bounds for selection box.
+     */ 
     selectBox(x,y,xEnd,yEnd){
         let xIn = Math.min(x, xEnd)
         let xOut = Math.max(x, xEnd)
@@ -298,7 +301,7 @@ export default class Atom {
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         if(xInPixels >= xIn && xInPixels <= xOut){
             if(yInPixels >= yIn && yInPixels <= yOut){
-                this.isMoving = true
+                //this.isMoving = true
                 this.selected = true
                 this.updateSidebar()
                 this.sendToRender()
