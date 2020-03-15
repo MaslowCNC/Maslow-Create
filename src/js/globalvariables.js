@@ -1,5 +1,6 @@
 import { create, all }  from 'mathjs'
 import Assembly         from './molecules/assembly.js'
+import Box              from './molecules/box.js'
 import CutList          from './molecules/cutlist.js'
 import Circle           from './molecules/circle.js'
 import Color            from './molecules/color.js'
@@ -55,7 +56,8 @@ class GlobalVariables{
          * @type {array}
          */
         this.secretTypes = {
-            output:        {creator: Output, atomType: 'Output'}
+            output:        {creator: Output, atomType: 'Output'},
+            box:            {creator: Box, atomType: 'Box'}
         }
         /** 
         * An array of all of the available types of atoms which can be placed with a right click.

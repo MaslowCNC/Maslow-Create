@@ -65,6 +65,7 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, null, GlobalVariables.secretTypes)
     }
+
     
     /**
      * Gives this molecule inputs with the same names as all of it's parent's inputs
@@ -100,6 +101,22 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
+
+    }
+
+    clickDown(x,y, clickProcessed){
+        console.log("click")
+        if(GlobalVariables.ctrlDown){
+            this.placeAtom({
+                parentMolecule: this, 
+                x: GlobalVariables.pixelsToWidth(x),
+                y: GlobalVariables.pixelsToHeight(y),
+                parent: this,
+                name: 'Box',
+                atomType: 'Box'
+            }, null, GlobalVariables.secretTypes)
+        }
+
     }
     
     /**

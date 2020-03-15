@@ -66,6 +66,8 @@ flowCanvas.addEventListener('mousedown', event => {
     }
 
     var clickHandledByMolecule = false
+
+    GlobalVariables.currentMolecule.clickDown(event.clientX, event.clientY)
     
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         
@@ -76,6 +78,7 @@ flowCanvas.addEventListener('mousedown', event => {
     })
     
     if(!clickHandledByMolecule){
+
         GlobalVariables.currentMolecule.backgroundClick() 
     }
     else{

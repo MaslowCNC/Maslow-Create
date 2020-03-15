@@ -104,6 +104,8 @@ export default class Atom {
          * @type {number}
          */
         this.y = 0
+
+        this.box = false
         /** 
          * A warning message displayed next to the atom. Put text in here to have a warning automatically show up. Cleared each time the output is regenerated.
          * @type {string}
@@ -287,6 +289,24 @@ export default class Atom {
     clearAlert(){
         this.color = this.defaultColor
         this.alertMessage = ''
+    }
+
+    selectBox(x,y,xEnd,yEnd){
+        console.log(x)
+        console.log(y)
+        console.log(xEnd)
+        console.log(yEnd)
+        let xIn = Math.min(x, xEnd)
+        let xOut = Math.max(x, xEnd)
+        let yIn = Math.min(y, yEnd)
+        let yOut = Math.max(y, yEnd)
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        if(xInPixels >= xIn && xInPixels <= xOut){
+            if(yInPixels >= yIn && yInPixels <= yOut){
+                this.selected = true
+            }
+        }
     }
     
     /**
@@ -498,6 +518,7 @@ export default class Atom {
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
         GlobalVariables.currentMolecule.backgroundClick()
+
     }
     
     /**
