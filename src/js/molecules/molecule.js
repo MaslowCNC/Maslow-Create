@@ -103,7 +103,12 @@ export default class Molecule extends Atom{
         GlobalVariables.c.fill()
 
     }
-
+     /**
+     * Set the molecule's response to a mouse click
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
+     */ 
     clickDown(x,y, clickProcessed){
 
         if(GlobalVariables.ctrlDown && !clickProcessed){
@@ -181,7 +186,7 @@ export default class Molecule extends Atom{
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
                         if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){//Don't update the input if it hasn't changed
-                            
+                            //Sets to true processing variable??
                             this.processing = true
                             atom.updateValue()
                         }

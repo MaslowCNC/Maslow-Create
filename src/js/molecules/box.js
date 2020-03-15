@@ -77,20 +77,19 @@ export default class Box extends Atom {
 
         const xInPixels = GlobalVariables.widthToPixels(this.x)
         const yInPixels = GlobalVariables.heightToPixels(this.y)
-        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
-
+       
         if(GlobalVariables.ctrlDown){
 
-                GlobalVariables.c.beginPath()
-                GlobalVariables.c.fillStyle = '#80808080'
-                GlobalVariables.c.rect(
-                    xInPixels, 
-                    yInPixels, 
-                    this.endX - xInPixels, 
-                    this.endY - yInPixels)
-                GlobalVariables.c.fill()
-                GlobalVariables.c.closePath()
-            }
+            GlobalVariables.c.beginPath()
+            GlobalVariables.c.fillStyle = '#80808080'
+            GlobalVariables.c.rect(
+                xInPixels, 
+                yInPixels, 
+                this.endX - xInPixels, 
+                this.endY - yInPixels)
+            GlobalVariables.c.fill()
+            GlobalVariables.c.closePath()
+        }
         
     }
 
@@ -99,8 +98,16 @@ export default class Box extends Atom {
      */ 
     clickMove(x,y){
         if(GlobalVariables.ctrlDown){
-        this.endX = x
-        this.endY= y
+        /**
+         * Sets new box end to click target
+         * @type {number}
+         */ 
+            this.endX = x
+        /**
+         * Sets new box end to click target
+         * @type {number}
+         */
+            this.endY= y
         }
     }
     /**
@@ -109,14 +116,21 @@ export default class Box extends Atom {
     clickUp(x,y){  
         const xInPixels = GlobalVariables.widthToPixels(this.x)
         const yInPixels = GlobalVariables.heightToPixels(this.y)
-
+        /**
+         * Sets start value to molecule position
+         * @type {number}
+         */
         this.startX = xInPixels
+        /**
+         * Sets end value to molecule position
+         * @type {number}
+         */
         this.startY = yInPixels
         
         this.deleteNode()
         this.parent.nodesOnTheScreen.forEach(atom => {
-        atom.selectBox(this.startX, this.startY, x, y)
-    })
+            atom.selectBox(this.startX, this.startY, x, y)
+        })
     }
 
 }
