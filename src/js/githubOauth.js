@@ -1402,7 +1402,7 @@ export default function GitHubModule(){
             currentRepoName = repoName
         }
         
-        let rawFile = atob(result.data.content)
+        let rawFile = JSON.parse(atob(result.data.content))
         
         return this.convertFromOldFormat(rawFile)
     }

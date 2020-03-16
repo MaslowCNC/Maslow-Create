@@ -61,13 +61,13 @@ export default class GitHubMolecule extends Molecule {
         const result = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
         //Preserve values which will be overwritten by the de-serialize process. We only want to keep them if this is not the top level atom
-        // var preservedValues
-        // if(this.topLevel){
-            // preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
-        // }
-        // else{
-            // preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
-        // }
+        var preservedValues
+        if(this.topLevel){
+            preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
+        }
+        else{
+            preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+        }
         var promsie = this.deserialize(result)
         
         // this.setValues(preservedValues)
