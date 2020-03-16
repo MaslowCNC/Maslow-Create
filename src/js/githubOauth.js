@@ -1331,9 +1331,7 @@ export default function GitHubModule(){
             
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
             
-            const inNewFormat = this.convertFromOldFormat(rawFile)
-            
-            GlobalVariables.topLevelMolecule.deserialize(inNewFormat)
+            GlobalVariables.topLevelMolecule.deserialize(this.convertFromOldFormat(rawFile))
         })
         octokit.repos.get({
             owner: currentUser,
@@ -1349,6 +1347,8 @@ export default function GitHubModule(){
     this.convertFromOldFormat = function(json){
         
         var listOfMoleculeAtoms = json.molecules
+        console.log("Json: ")
+        console.log(json)
         
         //Find the top level molecule
         var projectObject = listOfMoleculeAtoms.filter((molecule) => { return molecule.topLevel == true })[0]
@@ -1402,7 +1402,9 @@ export default function GitHubModule(){
             currentRepoName = repoName
         }
         
-        return result
+        let rawFile = atob(result.data.content)
+        
+        return this.convertFromOldFormat(rawFile)
     }
     
     /** 
