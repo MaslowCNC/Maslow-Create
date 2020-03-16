@@ -18,7 +18,7 @@ export default class Molecule extends Atom{
         super(values)
         
         /** 
-         * A list of all of the atoms within this Molecule which should be drawn on the screen.
+         * A list of all of the atoms within this Molecule which should be drawn on the screen as objects.
          * @type {array}
          */
         this.nodesOnTheScreen = []
@@ -85,8 +85,6 @@ export default class Molecule extends Atom{
             })
         } 
     }
-
-    
     
     /**
      * Add the center dot to the molecule
@@ -460,21 +458,15 @@ export default class Molecule extends Atom{
         
         this.setValues(json) //Grab the values of everything from the passed object
         
-        this.allAtoms.forEach(atom => { //Place the atoms
+        json.allAtoms.forEach(atom => { //Place the atoms
             const promise = this.placeAtom(atom, GlobalVariables.availableTypes, false)
             promiseArray.push(promise)
         })
         
-        return Promise.all(promiseArray).then( ()=> {
-            //Once all the atoms are placed we can finish
+        return Promise.all(promiseArray).then( ()=> { //Once all the atoms are placed we can finish
             
             //Place the connectors
-            /**
-             * A copy of the connectors attached to this molecule which can be reattached later. Should be redone.
-             * @param {array}
-             */
-            this.savedConnectors = this.allConnectors //Save a copy of the connectors so we can use them later if we want
-            this.savedConnectors.forEach(connector => {
+            json.allConnectors.forEach(connector => {
                 this.placeConnector(connector)
             })
             
