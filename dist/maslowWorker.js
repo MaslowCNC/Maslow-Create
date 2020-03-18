@@ -819,6 +819,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   /**
+   * Calculates the euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} distance between a and b
+   */
+  const distance$1 = ([ax, ay], [bx, by]) => {
+    const x = bx - ax;
+    const y = by - ay;
+    return Math.sqrt(x * x + y * y);
+  };
+
+  /**
    * Calculates the dot product of two vec2's
    *
    * @param {vec2} a the first operand
@@ -830,6 +843,14 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const equals$1 = ([ax, ay], [bx, by]) => (ax === bx) && (ay === by);
 
   const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
+
+  /**
+   * Negates the components of a vec2
+   *
+   * @param {vec2} a vector to negate
+   * @returns {vec2} out
+   */
+  const negate$1 = ([x, y]) => [-x, -y];
 
   /**
    * Rotates a vec2 by an angle
@@ -14786,6 +14807,486 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const outline = reorient;
 
+  /**
+   * Creates a new unbounded 2D line initialized with the given values.
+   *
+   * This is a 2d plane, similar to the [x, y, z, w] form of the 3d plane.
+   *
+   * @param {Number} x X coordinate of the unit normal
+   * @param {Number} y Y coordinate of the unit normal
+   * @param {Number} w length (positive) of the normal segment
+   * @returns {line2} a new unbounded 2D line
+   */
+  const fromValues$2 = (x = 0, y = 1, w = 0) => [x, y, w];
+
+  /**
+   * Return the direction of the given line.
+   *
+   * @return {vec2} a new relative vector in the direction of the line
+   */
+  const direction = (line) => negate$1(normal(line));
+
+  /**
+   * Create a new 2D line that passes through the given points
+   *
+   * @param {vec2} p1 start point of the 2D line
+   * @param {vec2} p2 end point of the 2D line
+   * @returns {line2} a new unbounded 2D line
+   */
+  const fromPoints$2 = (p1, p2) => {
+    const direction = subtract$1(p2, p1);
+    const normalizedNormal = normalize$1(normal(direction));
+    const distance = dot$1(p1, normalizedNormal);
+    return fromValues$2(normalizedNormal[0], normalizedNormal[1], distance);
+  };
+
+  /**
+   * Return the point of intersection between the given lines.
+   *
+   * The point will have Infinity values if the lines are paralell.
+   * The point will have NaN values if the lines are the same.
+   *
+   * @param {line2} line1 a 2D line for reference
+   * @param {line2} line2 a 2D line for reference
+   * @return {vec2} the point of intersection
+   */
+  const intersectPointOfLines = (line1, line2) =>
+    solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
+
+  const EPS = 1e-5;
+  const X$7 = 0;
+  const Y$7 = 1;
+  const yCoordinateBinningFactor = 1e6;
+
+  const interpolateXForY = (point1, point2, y) => {
+    let f1 = y - point1[1];
+    let f2 = point2[1] - point1[1];
+    if (f2 < 0) {
+      f1 = -f1;
+      f2 = -f2;
+    }
+    let t;
+    if (f1 <= 0) {
+      t = 0.0;
+    } else if (f1 >= f2) {
+      t = 1.0;
+    } else if (f2 < 1e-10) { // FIXME Should this be EPS?
+      t = 0.5;
+    } else {
+      t = f1 / f2;
+    }
+    // lerp
+    let result = point1[0] + t * (point2[0] - point1[0]);
+    return result;
+  };
+
+  const fnNumberSort = (a, b) => {
+    return a - b;
+  };
+
+  const insertSorted = (data, element, comparator) => {
+    let leftBound = 0;
+    let rightBound = data.length;
+    while (rightBound > leftBound) {
+      const index = Math.floor((leftBound + rightBound) / 2);
+      if (comparator(element, data[index]) > 0) {
+        leftBound = index + 1;
+      } else {
+        rightBound = index;
+      }
+    }
+    data.splice(leftBound, 0, element);
+  };
+
+  const binY = (yCoordinateBins, y) => {
+    const yCoordinateBin = Math.floor(y * yCoordinateBinningFactor);
+    if (yCoordinateBins.has(yCoordinateBin)) {
+      return yCoordinateBins.get(yCoordinateBin);
+    } else if (yCoordinateBins.has(yCoordinateBin + 1)) {
+      return yCoordinateBins.get(yCoordinateBin + 1);
+    } else if (yCoordinateBins.has(yCoordinateBin - 1)) {
+      return yCoordinateBins.get(yCoordinateBin - 1);
+    } else {
+      yCoordinateBins.set(yCoordinateBin, y);
+      return y;
+    }
+  };
+
+  /**
+   * Retesselation for a z0Surface.
+   */
+
+  const binPolygons = (sourcePolygons) => {
+    const normalizedPolygons = [];
+    const polygonTopVertexIndexes = []; // array of indexes of topmost vertex per polygon
+    const topYToPolygonIndexes = {};
+    const topYToPolygon = new Map();
+    const yCoordinateToPolygonIndexes = {};
+
+    const yCoordinateBins = new Map();
+    const yCoordinateToPolygons = new Map();
+
+    // Make a list of all encountered y coordinates
+    // And build a map of all polygons that have a vertex at a certain y coordinate:
+    for (let polygonIndex = 0; polygonIndex < sourcePolygons.length; polygonIndex++) {
+      const polygon = sourcePolygons[polygonIndex];
+      let points = [];
+      let minIndex = -1;
+      if (polygon.length > 0) {
+        let minY = Infinity;
+        let maxY = -Infinity;
+        // The order of iteration here is significant.
+        // for (let index = 0; index < polygon.length; index++)
+        for (let index = polygon.length - 1; index >= 0; index--) {
+          const point = polygon[index];
+          // perform binning of y coordinates: If we have multiple vertices very
+          // close to each other, give them the same y coordinate:
+          const y = binY(yCoordinateBins, point[Y$7]);
+          if (y > maxY) {
+            maxY = y;
+          }
+          if (y < minY) {
+            minY = y;
+            minIndex = points.length;
+          }
+          points.push([point[X$7], y]);
+        }
+        for (let index = polygon.length - 1; index >= 0; index--) {
+          const y = points[index][Y$7];
+          if (!(y in yCoordinateToPolygonIndexes)) {
+            yCoordinateToPolygonIndexes[y] = {};
+          }
+          yCoordinateToPolygonIndexes[y][normalizedPolygons.length] = true;
+          if (!yCoordinateToPolygons.has(y)) {
+            yCoordinateToPolygons.set(y, []);
+          }
+          yCoordinateToPolygons.get(y).unshift(polygon);
+        }
+        if (minY >= maxY) {
+          // degenerate polygon, all vertices have same y coordinate. Just ignore it from now:
+          points = [];
+          minIndex = 0;
+          // Note that topYToPolygonIndexes is not updated for these cases.
+        } else {
+          if (!(minY in topYToPolygonIndexes)) {
+            topYToPolygonIndexes[minY] = [];
+          }
+          topYToPolygonIndexes[minY].unshift(normalizedPolygons.length);
+          if (!topYToPolygon.has(minY)) {
+            topYToPolygon.set(minY, polygon);
+          }
+        }
+      }
+      // This includes empty polygons.
+      // These are keyed by the polygon index.
+      normalizedPolygons.push(points);
+      polygonTopVertexIndexes.push(minIndex);
+    }
+
+    const yCoordinates = [...yCoordinateToPolygons.keys()].sort(fnNumberSort);
+
+    return {
+      yCoordinates,
+      yCoordinateToPolygons,
+      yCoordinateToPolygonIndexes,
+      topYToPolygonIndexes,
+      normalizedPolygons,
+      polygonTopVertexIndexes
+    };
+  };
+
+  const recomputeActivePolygons = ({ activePolygons, polygonIndexesWithCorner, normalizedPolygons, yCoordinate }) => {
+    for (let activePolygonIndex = 0; activePolygonIndex < activePolygons.length; activePolygonIndex++) {
+      const activePolygon = activePolygons[activePolygonIndex];
+      const polygonIndex = activePolygon.polygonIndex;
+      if (polygonIndexesWithCorner[polygonIndex]) {
+        // this active polygon has a corner at this y coordinate:
+        const polygon = normalizedPolygons[polygonIndex];
+        const numVertices = polygon.length;
+        let newLeftVertexIndex = activePolygon.leftVertexIndex;
+        let newRightVertexIndex = activePolygon.rightVertexIndex;
+        // See if we need to increase leftVertexIndex or decrease rightVertexIndex:
+        while (true) {
+          let nextLeftVertexIndex = newLeftVertexIndex + 1;
+          if (nextLeftVertexIndex >= numVertices) nextLeftVertexIndex = 0;
+          if (polygon[nextLeftVertexIndex][1] !== yCoordinate) break;
+          newLeftVertexIndex = nextLeftVertexIndex;
+        }
+        let nextRightVertexIndex = newRightVertexIndex - 1;
+        if (nextRightVertexIndex < 0) nextRightVertexIndex = numVertices - 1;
+        if (polygon[nextRightVertexIndex][1] === yCoordinate) {
+          newRightVertexIndex = nextRightVertexIndex;
+        }
+        if ((newLeftVertexIndex !== activePolygon.leftVertexIndex) && (newLeftVertexIndex === newRightVertexIndex)) {
+          // We have increased leftVertexIndex or decreased rightVertexIndex, and now they point to the same vertex
+          // This means that this is the bottom point of the polygon. We'll remove it:
+          activePolygons.splice(activePolygonIndex, 1);
+          activePolygonIndex -= 1;
+        } else {
+          activePolygon.leftVertexIndex = newLeftVertexIndex;
+          activePolygon.rightVertexIndex = newRightVertexIndex;
+          activePolygon.topLeft = polygon[newLeftVertexIndex];
+          activePolygon.topRight = polygon[newRightVertexIndex];
+          let nextLeftVertexIndex = newLeftVertexIndex + 1;
+          if (nextLeftVertexIndex >= numVertices) nextLeftVertexIndex = 0;
+          activePolygon.bottomLeft = polygon[nextLeftVertexIndex];
+          let nextRightVertexIndex = newRightVertexIndex - 1;
+          if (nextRightVertexIndex < 0) nextRightVertexIndex = numVertices - 1;
+          activePolygon.bottomRight = polygon[nextRightVertexIndex];
+        }
+      }
+    }
+  };
+
+  const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes, activePolygons }) => {
+    let nextYCoordinate;
+    if (yIndex >= yCoordinates.length - 1) {
+      // last row, all polygons must be finished here:
+      return null;
+    }
+    nextYCoordinate = Number(yCoordinates[yIndex + 1]);
+    const middleYCoordinate = 0.5 * (yCoordinate + nextYCoordinate);
+    // update activePolygons by adding any polygons that start here:
+    const startingPolygonIndexes = topYToPolygonIndexes[yCoordinate];
+    for (let polygonIndexKey in startingPolygonIndexes) {
+      const polygonIndex = startingPolygonIndexes[polygonIndexKey];
+      const polygon = normalizedPolygons[polygonIndex];
+      const numVertices = polygon.length;
+      const topVertexIndex = polygonTopVertexIndexes[polygonIndex];
+      // the top of the polygon may be a horizontal line. In that case topVertexIndex can point to any point on this line.
+      // Find the left and right topmost vertices which have the current y coordinate:
+      let topLeftVertexIndex = topVertexIndex;
+      while (true) {
+        let i = topLeftVertexIndex + 1;
+        if (i >= numVertices) i = 0;
+        if (polygon[i][1] !== yCoordinate) break;
+        if (i === topVertexIndex) break; // should not happen, but just to prevent endless loops
+        topLeftVertexIndex = i;
+      }
+      let topRightVertexIndex = topVertexIndex;
+      while (true) {
+        let i = topRightVertexIndex - 1;
+        if (i < 0) i = numVertices - 1;
+        if (polygon[i][1] !== yCoordinate) break;
+        if (i === topLeftVertexIndex) break; // should not happen, but just to prevent endless loops
+        topRightVertexIndex = i;
+      }
+      let nextLeftVertexIndex = topLeftVertexIndex + 1;
+      if (nextLeftVertexIndex >= numVertices) nextLeftVertexIndex = 0;
+      let nextRightVertexIndex = topRightVertexIndex - 1;
+      if (nextRightVertexIndex < 0) nextRightVertexIndex = numVertices - 1;
+      const newActivePolygon = {
+        polygonIndex,
+        leftVertexIndex: topLeftVertexIndex,
+        rightVertexIndex: topRightVertexIndex,
+        topLeft: polygon[topLeftVertexIndex],
+        topRight: polygon[topRightVertexIndex],
+        bottomLeft: polygon[nextLeftVertexIndex],
+        bottomRight: polygon[nextRightVertexIndex]
+      };
+      insertSorted(activePolygons, newActivePolygon, (el1, el2) => {
+        const x1 = interpolateXForY(el1.topLeft, el1.bottomLeft, middleYCoordinate);
+        const x2 = interpolateXForY(el2.topLeft, el2.bottomLeft, middleYCoordinate);
+        if (x1 > x2) return 1;
+        if (x1 < x2) return -1;
+        return 0;
+      });
+    }
+    return nextYCoordinate;
+  };
+
+  const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons }) => {
+    // Now activePolygons is up to date
+
+    // Build the output polygons for the next row in newPolygonRow:
+    for (let activepolygonKey in activePolygons) {
+      const activePolygon = activePolygons[activepolygonKey];
+
+      let x = interpolateXForY(activePolygon.topLeft, activePolygon.bottomLeft, yCoordinate);
+      const topLeft = [x, yCoordinate];
+      x = interpolateXForY(activePolygon.topRight, activePolygon.bottomRight, yCoordinate);
+      const topRight = [x, yCoordinate];
+      x = interpolateXForY(activePolygon.topLeft, activePolygon.bottomLeft, nextYCoordinate);
+      const bottomLeft = [x, nextYCoordinate];
+      x = interpolateXForY(activePolygon.topRight, activePolygon.bottomRight, nextYCoordinate);
+      const bottomRight = [x, nextYCoordinate];
+      const outPolygon = {
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+        leftLine: fromPoints$2(topLeft, bottomLeft),
+        rightLine: fromPoints$2(bottomRight, topRight)
+      };
+      if (newPolygonRow.length > 0) {
+        // Stitch together congruent edges.
+        const previousOutPolygon = newPolygonRow[newPolygonRow.length - 1];
+        // Note that must be equal for all tops and all bottoms.
+        // Which means that we can compare for overlap in x.
+
+        switch ('old') {
+          case 'old': {
+            const d1 = distance$1(outPolygon.topLeft, previousOutPolygon.topRight);
+            const d2 = distance$1(outPolygon.bottomLeft, previousOutPolygon.bottomRight);
+            if ((d1 < EPS) && (d2 < EPS)) {
+              // we can join this polygon with the one to the left:
+              outPolygon.topLeft = previousOutPolygon.topLeft;
+              outPolygon.leftLine = previousOutPolygon.leftLine;
+              outPolygon.bottomLeft = previousOutPolygon.bottomLeft;
+              // newPolygonRow.splice(newPolygonRow.length - 1, 1);
+              newPolygonRow.pop();
+            }
+            break;
+          }
+          case 'new': {
+            if (outPolygon.topLeft[X$7] <= previousOutPolygon.topRight[X$7] + EPS) {
+              // These polygons overlap x-wise.
+              // we can join this polygon with the one to the left:
+              outPolygon.topLeft = previousOutPolygon.topLeft;
+              outPolygon.leftLine = previousOutPolygon.leftLine;
+              outPolygon.bottomLeft = previousOutPolygon.bottomLeft;
+              newPolygonRow.pop();
+            }
+            break;
+          }
+        }
+      }
+      newPolygonRow.push(outPolygon);
+    }
+
+    // Merge the old row with the next row.
+    if (yIndex > 0) {
+      // try to match the new polygons against the previous row:
+      const previousContinuedIndexes = {};
+      const matchedIndexes = {};
+      for (let i = 0; i < newPolygonRow.length; i++) {
+        const thisPolygon = newPolygonRow[i];
+        for (let ii = 0; ii < previousPolygonRow.length; ii++) {
+          if (!matchedIndexes[ii]) { // not already processed?
+            // We have a match if the sidelines are equal or if the top coordinates
+            // are on the sidelines of the previous polygon
+            const previousPolygon = previousPolygonRow[ii];
+            if (distance$1(previousPolygon.bottomLeft, thisPolygon.topLeft) < EPS) {
+              if (distance$1(previousPolygon.bottomRight, thisPolygon.topRight) < EPS) {
+                // Yes, the top of this polygon matches the bottom of the previous:
+                matchedIndexes[ii] = true;
+                // Now check if the joined polygon would remain convex:
+                const v1 = direction(thisPolygon.leftLine);
+                const v2 = direction(previousPolygon.leftLine);
+                const d1 = v1[0] - v2[0];
+
+                const v3 = direction(thisPolygon.rightLine);
+                const v4 = direction(previousPolygon.rightLine);
+                const d2 = v3[0] - v4[0];
+
+                const leftLineContinues = Math.abs(d1) < EPS;
+                const rightLineContinues = Math.abs(d2) < EPS;
+                const leftLineIsConvex = leftLineContinues || (d1 >= 0);
+                const rightLineIsConvex = rightLineContinues || (d2 >= 0);
+                if (leftLineIsConvex && rightLineIsConvex) {
+                  // yes, both sides have convex corners:
+                  // This polygon will continue the previous polygon
+                  thisPolygon.outPolygon = previousPolygon.outPolygon;
+                  thisPolygon.leftLineContinues = leftLineContinues;
+                  thisPolygon.rightLineContinues = rightLineContinues;
+                  previousContinuedIndexes[ii] = true;
+                }
+                break;
+              }
+            }
+          }
+        }
+      }
+      const staging = [];
+      for (let ii = 0; ii < previousPolygonRow.length; ii++) {
+        if (!previousContinuedIndexes[ii]) {
+          // polygon ends here
+          // Finish the polygon with the last point(s):
+          const previousPolygon = previousPolygonRow[ii];
+          previousPolygon.outPolygon.rightPoints.push(previousPolygon.bottomRight);
+          if (distance$1(previousPolygon.bottomRight, previousPolygon.bottomLeft) > EPS) {
+            // polygon ends with a horizontal line:
+            previousPolygon.outPolygon.leftPoints.push(previousPolygon.bottomLeft);
+          }
+          // reverse the left half so we get a counterclockwise circle:
+          previousPolygon.outPolygon.leftPoints.reverse();
+          const polygon = previousPolygon.outPolygon.rightPoints.concat(previousPolygon.outPolygon.leftPoints);
+          staging.push(polygon);
+        }
+      }
+      destinationPolygons.push(...staging);
+    }
+
+    // Prepare for the next new row.
+    for (let i = 0; i < newPolygonRow.length; i++) {
+      const thisPolygon = newPolygonRow[i];
+      if (!thisPolygon.outPolygon) {
+        // polygon starts here:
+        thisPolygon.outPolygon = {
+          leftPoints: [],
+          rightPoints: []
+        };
+        thisPolygon.outPolygon.leftPoints.push(thisPolygon.topLeft);
+        if (distance$1(thisPolygon.topLeft, thisPolygon.topRight) > EPS) {
+          // we have a horizontal line at the top:
+          thisPolygon.outPolygon.rightPoints.push(thisPolygon.topRight);
+        }
+      } else {
+        // continuation of a previous row
+        if (!thisPolygon.leftLineContinues) {
+          thisPolygon.outPolygon.leftPoints.push(thisPolygon.topLeft);
+        }
+        if (!thisPolygon.rightLineContinues) {
+          thisPolygon.outPolygon.rightPoints.push(thisPolygon.topRight);
+        }
+      }
+    }
+    previousPolygonRow = newPolygonRow;
+
+    return previousPolygonRow;
+  };
+
+  const retessellate = (sourcePolygons) => {
+    if (sourcePolygons.length < 2) {
+      return sourcePolygons;
+    }
+    let { yCoordinates, yCoordinateToPolygonIndexes, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes } = binPolygons(sourcePolygons);
+    const destinationPolygons = [];
+    // Now we will iterate over all y coordinates, from lowest to highest y coordinate
+    // activePolygons: source polygons that are 'active', i.e. intersect with our y coordinate
+    //   Is sorted so the polygons are in left to right order
+    // Each element in activePolygons has these properties:
+    //        polygonIndex: the index of the source polygon (i.e. an index into the sourcepolygons
+    //                      and normalizedPolygons arrays)
+    //        leftVertexIndex: the index of the vertex at the left side of the polygon (lowest x)
+    //                         that is at or just above the current y coordinate
+    //        rightVertexIndex: dito at right hand side of polygon
+    //        topLeft, bottomLeft: coordinates of the left side of the polygon crossing the current y coordinate
+    //        topRight, bottomRight: coordinates of the right hand side of the polygon crossing the current y coordinate
+    let activePolygons = [];
+    let previousPolygonRow = [];
+    for (let yIndex = 0; yIndex < yCoordinates.length; yIndex++) {
+      const newPolygonRow = [];
+      const yCoordinate = yCoordinates[yIndex];
+
+      // update activePolygons for this y coordinate:
+      // - Remove any polygons that end at this y coordinate
+      // - update leftVertexIndex and rightVertexIndex (which point to the current vertex index
+      //   at the the left and right side of the polygon
+      // Iterate over all polygons that have a corner at this y coordinate:
+      const polygonIndexesWithCorner = yCoordinateToPolygonIndexes[yCoordinate];
+      recomputeActivePolygons({ activePolygons, polygonIndexesWithCorner, normalizedPolygons, yCoordinate });
+      const nextYCoordinate = findNextYCoordinate({ yIndex, yCoordinates, yCoordinate, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes, activePolygons });
+      if (nextYCoordinate === null) {
+        activePolygons = [];
+      }
+      previousPolygonRow = buildOutputPolygons({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons });
+    }
+    return destinationPolygons
+             .filter(polygon => polygon.length >= 3)
+             .map(polygon => polygon.map(([x, y]) => [x, y, 0]));
+  };
+
   // Cut the corners to produce triangles.
   const triangulateConvexPolygon = (polygon) => {
     const surface = [];
@@ -14871,7 +15372,21 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return transform$5(fromZ0, outlinedZ0Surface).map(path => path.map(normalize));
   };
 
-  const toPolygons = (options = {}, surface) => surface;
+  const retessellate$1 = (surface, normalize3 = createNormalize3(), plane) => {
+    if (surface.length < 2) {
+      return surface;
+    }
+    if (plane === undefined) {
+      plane = toPlane$1(surface);
+      if (plane === undefined) {
+        return [];
+      }
+    }
+    const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
+    const z0Surface = transform$5(toZ0, surface.map(path => path.map(normalize3)));
+    const retessellated = retessellate(z0Surface);
+    return transform$5(fromZ0, retessellated).map(path => path.map(normalize3));
+  };
 
   const transform$6 = (matrix, solid) => solid.map(surface => transform$4(matrix, surface));
 
@@ -14941,8 +15456,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // The resolution is 1 / multiplier.
   const multiplier = 1e5;
 
-  const X$7 = 0;
-  const Y$7 = 1;
+  const X$8 = 0;
+  const Y$8 = 1;
   const Z$4 = 2;
   const W$3 = 3;
 
@@ -14950,8 +15465,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const map = new Map();
     const normalize4 = (coordinate) => {
       // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$7] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$7] * multiplier - 0.5);
+      const nx = Math.floor(coordinate[X$8] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$8] * multiplier - 0.5);
       const nz = Math.floor(coordinate[Z$4] * multiplier - 0.5);
       const nw = Math.floor(coordinate[W$3] * multiplier - 0.5);
       // Look for an existing inhabitant.
@@ -14996,6 +15511,157 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return normalize4;
   };
 
+  // The resolution is 1 / multiplier.
+  const multiplier$1 = 1e5;
+
+  const X$9 = 0;
+  const Y$9 = 1;
+  const Z$5 = 2;
+  const W$4 = 3;
+
+  // FIX: Make this efficient.
+  // FIX: Move to math-plane.
+  const equals$4 = (a, b) => {
+    const map = new Map();
+    const normalize4 = (coordinate) => {
+      // Apply a spatial quantization to the 4 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$9] * multiplier$1 - 0.5);
+      const ny = Math.floor(coordinate[Y$9] * multiplier$1 - 0.5);
+      const nz = Math.floor(coordinate[Z$5] * multiplier$1 - 0.5);
+      const nw = Math.floor(coordinate[W$4] * multiplier$1 - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nz0 = nz;
+      const nw0 = nw;
+      const nx1 = nx0 + 1;
+      const ny1 = ny0 + 1;
+      const nz1 = nz0 + 1;
+      const nw1 = nw0 + 1;
+      // Populate the space of the quantized value and its adjacencies.
+      // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier, nw1 / multiplier];
+      // FIX: Rename the function to reflect that it seems that we cannot quantize planes,
+      // but we can form a consensus among nearby planes.
+      const normalized = coordinate;
+      map.set(`${nx0}/${ny0}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny0}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx0}/${ny0}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny0}/${nz1}/${nw1}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz1}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz1}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz1}/${nw1}`, normalized);
+      // This is now the normalized value for this region.
+      return normalized;
+    };
+
+    if (a === undefined || b === undefined) {
+      return false;
+    }
+
+    return normalize4(a) === normalize4(b);
+  };
+
+  const toPlane$2 = (surface) => {
+    if (surface.plane !== undefined) {
+      return surface.plane;
+    } else {
+      for (const polygon of surface) {
+        const plane = toPlane(polygon);
+        if (plane !== undefined) {
+          surface.plane = plane;
+          return surface.plane;
+        }
+      }
+    }
+  };
+
+  const transform$7 = (matrix, polygons) => polygons.map(polygon => transform$3(matrix, polygon));
+
+  const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
+
+  const difference$1 = (baseSurface, ...surfaces) => {
+    if (baseSurface.length === 0) {
+      // Empty geometry can't get more empty.
+      return [];
+    }
+    const baseBounds = measureBoundingSphere(baseSurface);
+    surfaces = surfaces.filter(surface => surface.length > 0 &&
+                                          equals$4(toPlane$2(baseSurface), toPlane$2(surface)) &&
+                                          mayOverlap(baseBounds, measureBoundingSphere(surface)));
+    if (surfaces.length === 0) {
+      // Nothing to be removed.
+      return baseSurface;
+    }
+    // FIX: Detect when the surfaces aren't in the same plane.
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(baseSurface));
+    const z0Surface = transform$7(toZ0, baseSurface);
+    const z0Surfaces = surfaces.map(surface => transform$7(toZ0, surface));
+    const z0Difference = difference(z0Surface, ...z0Surfaces);
+    return transform$7(fromZ0, z0Difference);
+  };
+
+  const intersection$1 = (...surfaces) => {
+    if (surfaces.length === 0) {
+      return [];
+    }
+    for (const surface of surfaces) {
+      if (surface.length === 0 || !equals$4(toPlane$2(surfaces[0]), toPlane$2(surface))) {
+        return [];
+      }
+    }
+    // FIX: Detect when the surfaces aren't in the same plane.
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(surfaces[0]));
+    const z0Surface = intersection(...surfaces.map(surface => transform$7(toZ0, surface)));
+    return transform$7(fromZ0, z0Surface);
+  };
+
+  const union$1 = (...surfaces) => {
+    // Trim initial empty surfaces.
+    while (surfaces.length > 0 && surfaces[0].length === 0) {
+      surfaces.shift();
+    }
+    if (surfaces.length === 0) {
+      return [];
+    }
+    // (But then, are these really the right semantics?)
+    const baseSurface = surfaces.shift();
+    const basePlane = toPlane$2(baseSurface);
+    surfaces = surfaces.filter(surface => surface.length >= 1 &&
+                               (equals$4(toPlane$2(baseSurface), toPlane$2(surface))));
+    if (surfaces.length === 0) {
+      return baseSurface;
+    }
+    const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
+    const z0Surface = union(transform$7(toZ0, baseSurface),
+                                      ...surfaces.map(surface => transform$7(toZ0, surface)));
+    return transform$7(fromZ0, z0Surface);
+  };
+
+  let doDefragment = 'default';
+
+  const clockOrder$1 = (a) => isClockwise(a) ? 1 : 0;
+
+  // Reorder in-place such that counterclockwise paths preceed clockwise paths.
+  const clockSort$1 = (surface) => {
+    surface.sort((a, b) => clockOrder$1(a) - clockOrder$1(b));
+    return surface;
+  };
+
   const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
     const normalize4 = createNormalize4();
     const coplanarGroups = new Map();
@@ -15029,27 +15695,46 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     // Erase substructure and make convex.
     for (const polygons of coplanarGroups.values()) {
-      // const surface = polygons;
-      const surface = makeConvex$1(polygons, normalize3, toPlane(polygons[0]));
+      clockSort$1(polygons);
+      let surface;
+      switch (doDefragment) {
+        default:
+          surface = polygons;
+          break;
+        case 'makeConvex':
+          surface = makeConvex$1(polygons, normalize3, toPlane(polygons[0]));
+          break;
+        case 'retessellate':
+          surface = retessellate$1(polygons, normalize3, toPlane(polygons[0]));
+          break;
+      }
       defragmented.push(surface);
     }
 
-    // return defragmented;
-
-    const w = makeWatertight(defragmented, normalize3);
-    return w;
+    return defragmented;
+    // return makeWatertight(defragmented, normalize3);
   };
 
-  const outline$2 = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
+  const outline$2 = (solid, normalize) => {
+    const polygons = [];
+    for (const surface of solid) {
+      const plane = toPlane$1(surface);
+      for (const polygon of outline$1(surface)) {
+        polygon.plane = plane;
+        polygons.push(polygon);
+      }
+    }
+    return polygons;
+  };
 
   const reconcile = (solid, normalize = createNormalize3()) =>
     alignVertices(solid, normalize);
 
   // Relax the coplanar arrangement into polygon soup.
-  const toPolygons$1 = (options = {}, solid) => {
+  const toPolygons = (solid) => {
     const polygons = [];
     for (const surface of solid) {
-      polygons.push(...toPolygons({}, surface));
+      polygons.push(...surface);
     }
     return polygons;
   };
@@ -15269,14 +15954,16 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   module.exports.default = module.exports; // Terrible injection just so it works regardless of how it's required
   });
 
-  const to = (g) => (to) => g() * to;
-  const vary = (g) => (degree) => (g() - 0.5) * degree * 2;
+  const makeTo = (g) => (to) => g() * to;
+  const makeIn = (g) => (from, to) => g() * (to - from) + from;
+  const makeVary = (g) => (degree) => (g() - 0.5) * degree * 2;
 
   const Random = (seed = 0) => {
     const rng = new Prando_umd(seed);
     const g = () => rng.next();
-    g.to = to(g);
-    g.vary = vary(g);
+    g.in = makeIn(g);
+    g.to = makeTo(g);
+    g.vary = makeVary(g);
     return g;
   };
 
@@ -15684,7 +16371,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   // FIX: Determine the correct behaviour here.
 
-  const difference$1 = (pathset, ...pathsets) => pathset;
+  const difference$2 = (pathset, ...pathsets) => pathset;
 
   const eachPoint$2 = (thunk, paths) => {
     for (const path of paths) {
@@ -15698,18 +16385,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const flip$6 = (paths) => paths.map(flip);
 
-  const intersection$1 = (pathset, ...pathsets) => pathset;
+  const intersection$2 = (pathset, ...pathsets) => pathset;
 
-  const transform$7 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
+  const transform$8 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
 
   // FIX: Deduplication.
 
-  const union$1 = (...pathsets) => [].concat(...pathsets);
+  const union$2 = (...pathsets) => [].concat(...pathsets);
 
-  const translate$2 = ([x = 0, y = 0, z = 0], paths) => transform$7(fromTranslation([x, y, z]), paths);
+  const translate$2 = ([x = 0, y = 0, z = 0], paths) => transform$8(fromTranslation([x, y, z]), paths);
 
-  const transform$8 = (matrix, points) => points.map(point => transform(matrix, point));
-  const translate$3 = ([x = 0, y = 0, z = 0], points) => transform$8(fromTranslation([x, y, z]), points);
+  const transform$9 = (matrix, points) => points.map(point => transform(matrix, point));
+  const translate$3 = ([x = 0, y = 0, z = 0], points) => transform$9(fromTranslation([x, y, z]), points);
 
   const canonicalize$8 = (points) => points.map(canonicalize);
 
@@ -15763,13 +16450,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           };
         } else if (geometry.paths) {
           return {
-            paths: transform$7(matrix, geometry.paths),
+            paths: transform$8(matrix, geometry.paths),
             tags
           };
         } else if (geometry.plan) {
           return {
             plan: geometry.plan,
-            marks: transform$8(matrix, geometry.marks),
+            marks: transform$9(matrix, geometry.marks),
             planes: geometry.planes.map(plane => transform$2(matrix, plane)),
             content: walk(matrix, geometry.content),
             visualization: walk(matrix, geometry.visualization),
@@ -15777,7 +16464,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           };
         } else if (geometry.points) {
           return {
-            points: transform$8(matrix, geometry.points),
+            points: transform$9(matrix, geometry.points),
             tags
           };
         } else if (geometry.solid) {
@@ -15916,6 +16603,99 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const pointType$1 = [];
 
+  const splitConvex = (normalize, plane, points, polygonPlane, back, front) => {
+    const buildList = (points) => {
+      const nodes = [];
+      let head = null;
+      let tail = null;
+      const addLink = (point, type, next = null, link = null, visited = false) => {
+        const node = { point, type, next, link, visited };
+        if (head === null) {
+          head = node;
+          head.next = head;
+        } else {
+          tail.next = node;
+        }
+        nodes.push(node);
+        tail = node;
+        tail.next = head;
+      };
+      for (let index = 0; index < points.length; index++) {
+        addLink(points[index], pointType$1[index]);
+      }
+      return nodes;
+    };
+
+    const orderSpans = (spans) => {
+      const trendVector = subtract(spans[0].point, spans[1].point);
+      const trend = (point) => dot$2(point, trendVector);
+      const orderByTrend = (a, b) => {
+        const ta = trend(a.point);
+        const tb = trend(b.point);
+        return ta - tb;
+      };
+      spans.sort(orderByTrend);
+      return spans;
+    };
+
+    const buildSpans = (head) => {
+      const spans = [];
+      let node = head;
+      do {
+        const next = node.next;
+        if ((node.type === FRONT$1 && next.type !== FRONT$1) ||
+            (node.type !== FRONT$1 && next.type === FRONT$1)) {
+          // Interpolate a span-point.
+          const spanPoint = normalize(splitLineSegmentByPlane(plane, node.point, next.point));
+          const span = { point: spanPoint, type: COPLANAR$1, next, link: null, visited: true };
+          node.next = span;
+          // Remember the split for ordering.
+          spans.push(span);
+        }
+        node = next;
+      } while (node !== head);
+      return orderSpans(spans);
+    };
+
+    const nodes = buildList(points);
+    const spans = buildSpans(nodes[0]);
+
+    while (spans.length >= 2) {
+      const a = spans.pop();
+      const b = spans.pop();
+      a.link = b;
+      b.link = a;
+    }
+
+    for (const start of nodes) {
+      if (start.visited === true) {
+        continue;
+      }
+
+      const points = [];
+      let node = start;
+      let type = 0;
+      do {
+        node.visited = true;
+        type |= node.type;
+        points.push(node.point);
+        if (node.link !== null) {
+          node = node.link;
+          points.push(node.point);
+          node.visited = true;
+        }
+        node = node.next;
+      } while (node !== start);
+      if (type === FRONT$1) {
+        pushWhenValid(front, points, polygonPlane);
+      } else if (type === BACK$1) {
+        pushWhenValid(back, points, polygonPlane);
+      } else {
+        throw Error('die');
+      }
+    }
+  };
+
   const splitPolygon$1 = (normalize, plane, polygon, back, abutting, overlapping, front) => {
     /*
       // This slows things down on average, probably due to not having the bounding sphere computed.
@@ -15975,6 +16755,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       case SPANNING$1: {
         const frontPoints = [];
         const backPoints = [];
+        const spanPoints = [];
+
         const last = polygon.length - 1;
         let startPoint = polygon[last];
         let startType = pointType$1[last];
@@ -15992,16 +16774,69 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           if ((startType | endType) === SPANNING$1) {
             // This should exclude COPLANAR points.
             // Compute the point that touches the splitting plane.
-            // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
-            const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
+            const spanPoint = normalize(splitLineSegmentByPlane(plane, startPoint, endPoint));
             frontPoints.push(spanPoint);
             backPoints.push(spanPoint);
+            spanPoints.push(spanPoint);
           }
           startPoint = endPoint;
           startType = endType;
         }
-        pushWhenValid(front, frontPoints, polygonPlane);
-        pushWhenValid(back, backPoints, polygonPlane);
+        if (spanPoints.length <= 2) {
+          pushWhenValid(front, frontPoints, polygonPlane);
+          pushWhenValid(back, backPoints, polygonPlane);
+        } else {
+          splitConvex(normalize, plane, polygon, polygonPlane, back, front);
+        }
+        /*
+        if ((spans.length % 2) === 0) {
+          throw Error('die: Even number of spans.');
+        }
+        if (spans.length > 3) {
+          const trendVector = subtract(spans[0][SPAN_POINT], spans[1][SPAN_POINT]);
+          const trend = (point) => dot(point, trendVector);
+          spans.sort(([a], [b]) => a === null ? -1 : trend(a) - trend(b));
+          // The order needs to be such that the span joins follow the winding
+          // direction.
+          for (let i = 0; i < spans; i++) {
+            spans[i][BACK_SPAN] = spans[spans.length - i][BACK_SPAN_BACKWARD];
+          }
+          // Each span-pair is now an enter + exit, given the winding rule.
+          // But not necessarily an enter + exit for the same contour.
+          // We must re-arrange so that the contours are connected properly.
+          // Check to split points.
+          // Now the span points are sequenced.
+          // Restitch the graph.
+          while (spans.length > 0) {
+            const exit = spans.pop();
+            const enter = spans.pop();
+            // Prepend the enter nodes to the exit nodes.
+            enter[FRONT_SPAN].unshift(...exit[FRONT_SPAN]);
+            enter[BACK_SPAN].unshift(...exit[BACK_SPAN]);
+            if (spans.length > 0) {
+              // If the enter ends with the next exit, join them up.
+              const nextExit = tail(spans);
+              if (equalsPoint(nextExit[SPAN_POINT], tail(enter[FRONT_SPAN]))) {
+                nextExit[FRONT_SPAN].unshift(...enter[FRONT_SPAN]);
+              } else {
+                pushWhenValid(front, enter[FRONT_SPAN], polygonPlane);
+              }
+              if (equalsPoint(nextExit[SPAN_POINT], tail(enter[BACK_SPAN]))) {
+                nextExit[BACK_SPAN].unshift(...enter[BACK_SPAN]);
+              } else {
+                pushWhenValid(back, enter[BACK_SPAN], polygonPlane);
+              }
+            } else {
+              // These are the final spans, they cannot be deferred.
+              pushWhenValid(front, enter[FRONT_SPAN], polygonPlane);
+              pushWhenValid(back, enter[BACK_SPAN], polygonPlane);
+            }
+          }
+        } else {
+          pushWhenValid(front, spans[0][FRONT_SPAN], polygonPlane);
+          pushWhenValid(back, spans[0][BACK_SPAN], polygonPlane);
+        }
+  */
         break;
       }
     }
@@ -16011,9 +16846,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const IN_LEAF = 1;
   const OUT_LEAF = 2;
 
-  const X$8 = 0;
-  const Y$8 = 1;
-  const Z$5 = 2;
+  const X$a = 0;
+  const Y$a = 1;
+  const Z$6 = 2;
 
   const inLeaf = {
     plane: null,
@@ -16037,32 +16872,32 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const bsp = {
       // Bottom
       kind: BRANCH,
-      plane: [0, 0, -1, -cMin[Z$5] + EPSILON$3 * 1000],
+      plane: [0, 0, -1, -cMin[Z$6] + EPSILON$3 * 1000],
       front,
       back: {
         // Top
         kind: BRANCH,
-        plane: [0, 0, 1, cMax[Z$5] + EPSILON$3 * 1000],
+        plane: [0, 0, 1, cMax[Z$6] + EPSILON$3 * 1000],
         front,
         back: {
           // Left
           kind: BRANCH,
-          plane: [-1, 0, 0, -cMin[X$8] + EPSILON$3 * 1000],
+          plane: [-1, 0, 0, -cMin[X$a] + EPSILON$3 * 1000],
           front,
           back: {
             // Right
             kind: BRANCH,
-            plane: [1, 0, 0, cMax[X$8] + EPSILON$3 * 1000],
+            plane: [1, 0, 0, cMax[X$a] + EPSILON$3 * 1000],
             front,
             back: {
               // Back
               kind: BRANCH,
-              plane: [0, -1, 0, -cMin[Y$8] + EPSILON$3 * 1000],
+              plane: [0, -1, 0, -cMin[Y$a] + EPSILON$3 * 1000],
               front,
               back: {
                 // Front
                 kind: BRANCH,
-                plane: [0, 1, 0, cMax[Y$8] + EPSILON$3 * 1000],
+                plane: [0, 1, 0, cMax[Y$a] + EPSILON$3 * 1000],
                 front: outLeaf,
                 back
               }
@@ -16358,7 +17193,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
                      bsp.plane,
                      polygons[i],
                      /* back= */inward,
-                     /* abutting= */inward, // keepward
+                     /* abutting= */outward, // dropward
                      /* overlapping= */outward, // dropward
                      /* front= */outward);
       }
@@ -16508,7 +17343,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const cut$1 = (solid, surface, normalize = createNormalize3()) => {
     // Build a classifier from the planar polygon.
     const cutBsp = fromPolygons$1(surface, normalize);
-    const solidPolygons = toPolygons$1({}, alignVertices(solid, normalize));
+    const solidPolygons = toPolygons(alignVertices(solid, normalize));
 
     // Classify the solid with it.
     const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -16524,7 +17359,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const cutOpen = (solid, surface, normalize = createNormalize3()) => {
     // Build a classifier from the planar polygon.
     const cutBsp = fromPolygons$1(surface, normalize);
-    const solidPolygons = toPolygons$1({}, alignVertices(solid, normalize));
+    const solidPolygons = toPolygons(alignVertices(solid, normalize));
 
     // Classify the solid with it.
     const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -16553,18 +17388,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const X$9 = 0;
-  const Y$9 = 1;
-  const Z$6 = 2;
+  const X$b = 0;
+  const Y$b = 1;
+  const Z$7 = 2;
 
   const walkX = (min, max, resolution) => {
-    if (min[X$9] + resolution > max[X$9]) {
+    if (min[X$b] + resolution > max[X$b]) {
       return inLeaf;
     }
-    const midX = (min[X$9] + max[X$9]) / 2;
+    const midX = (min[X$b] + max[X$b]) / 2;
     return {
-      back: walkY(min, [midX, max[Y$9], max[Z$6]], resolution),
-      front: walkY([midX, min[Y$9], min[Z$6]], max, resolution),
+      back: walkY(min, [midX, max[Y$b], max[Z$7]], resolution),
+      front: walkY([midX, min[Y$b], min[Z$7]], max, resolution),
       kind: BRANCH,
       plane: [1, 0, 0, midX],
       same: []
@@ -16572,13 +17407,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const walkY = (min, max, resolution) => {
-    if (min[Y$9] + resolution > max[Y$9]) {
+    if (min[Y$b] + resolution > max[Y$b]) {
       return inLeaf;
     }
-    const midY = (min[Y$9] + max[Y$9]) / 2;
+    const midY = (min[Y$b] + max[Y$b]) / 2;
     return {
-      back: walkZ(min, [max[X$9], midY, max[Z$6]], resolution),
-      front: walkZ([min[X$9], midY, min[Z$6]], max, resolution),
+      back: walkZ(min, [max[X$b], midY, max[Z$7]], resolution),
+      front: walkZ([min[X$b], midY, min[Z$7]], max, resolution),
       kind: BRANCH,
       plane: [0, 1, 0, midY],
       same: []
@@ -16586,13 +17421,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const walkZ = (min, max, resolution) => {
-    if (min[Z$6] + resolution > max[Z$6]) {
+    if (min[Z$7] + resolution > max[Z$7]) {
       return inLeaf;
     }
-    const midZ = (min[Z$6] + max[Z$6]) / 2;
+    const midZ = (min[Z$7] + max[Z$7]) / 2;
     return {
-      back: walkX(min, [max[X$9], max[Y$9], midZ], resolution),
-      front: walkX([min[X$9], min[Y$9], midZ], max, resolution),
+      back: walkX(min, [max[X$b], max[Y$b], midZ], resolution),
+      front: walkX([min[X$b], min[Y$b], midZ], max, resolution),
       kind: BRANCH,
       plane: [0, 0, 1, midZ],
       same: []
@@ -16602,7 +17437,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const deform = (solid, transform, min, max, resolution) => {
     const normalize = createNormalize3();
 
-    const solidPolygons = toPolygons$1({}, alignVertices(solid));
+    const solidPolygons = toPolygons(alignVertices(solid));
 
     const bsp = walkX(min, max, resolution);
 
@@ -16649,15 +17484,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const MIN = 0;
 
-  const difference$2 = (aSolid, ...bSolids) => {
+  const difference$3 = (aSolid, ...bSolids) => {
     if (bSolids.length === 0) {
       return aSolid;
     }
 
     const normalize = createNormalize3();
-    let a = toPolygons$1({}, alignVertices(aSolid, normalize));
+    let a = toPolygons(alignVertices(aSolid, normalize));
     let bs = bSolids
-        .map(b => toPolygons$1({}, alignVertices(b, normalize)))
+        .map(b => toPolygons(alignVertices(b, normalize)))
         .filter(b => !doesNotOverlap(a, b));
 
     while (bs.length > 0) {
@@ -16693,7 +17528,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           continue;
         }
       } else {
+        // Remove the parts of a that are inside b.
         const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
+        // Remove the parts of b that are outside a.
         const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
 
         a = clean([...aOut, ...aTrimmed, ...flip$3(bTrimmed)]);
@@ -16705,7 +17542,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const MIN$1 = 0;
 
   // An asymmetric binary merge.
-  const intersection$2 = (...solids) => {
+  const intersection$3 = (...solids) => {
     if (solids.length === 0) {
       return [];
     }
@@ -16713,7 +17550,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return solids[0];
     }
     const normalize = createNormalize3();
-    const s = solids.map(solid => toPolygons$1({}, alignVertices(solid, normalize)));
+    const s = solids.map(solid => toPolygons(alignVertices(solid, normalize)));
     while (s.length > 1) {
       const a = s.shift();
       const b = s.shift();
@@ -16769,7 +17606,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const MIN$2 = 0;
 
   // An asymmetric binary merge.
-  const union$2 = (...solids) => {
+  const union$3 = (...solids) => {
     if (solids.length === 0) {
       return [];
     }
@@ -16777,7 +17614,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return solids[0];
     }
     const normalize = createNormalize3();
-    const s = solids.map(solid => toPolygons$1({}, alignVertices(solid, normalize)));
+    const s = solids.map(solid => toPolygons(alignVertices(solid, normalize)));
     while (s.length >= 2) {
       const a = s.shift();
       const b = s.shift();
@@ -16827,147 +17664,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return fromPolygons({}, s[0], normalize);
   };
 
-  // The resolution is 1 / multiplier.
-  const multiplier$1 = 1e5;
-
-  const X$a = 0;
-  const Y$a = 1;
-  const Z$7 = 2;
-  const W$4 = 3;
-
-  // FIX: Make this efficient.
-  // FIX: Move to math-plane.
-  const equals$4 = (a, b) => {
-    const map = new Map();
-    const normalize4 = (coordinate) => {
-      // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$a] * multiplier$1 - 0.5);
-      const ny = Math.floor(coordinate[Y$a] * multiplier$1 - 0.5);
-      const nz = Math.floor(coordinate[Z$7] * multiplier$1 - 0.5);
-      const nw = Math.floor(coordinate[W$4] * multiplier$1 - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nz0 = nz;
-      const nw0 = nw;
-      const nx1 = nx0 + 1;
-      const ny1 = ny0 + 1;
-      const nz1 = nz0 + 1;
-      const nw1 = nw0 + 1;
-      // Populate the space of the quantized value and its adjacencies.
-      // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier, nw1 / multiplier];
-      // FIX: Rename the function to reflect that it seems that we cannot quantize planes,
-      // but we can form a consensus among nearby planes.
-      const normalized = coordinate;
-      map.set(`${nx0}/${ny0}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz1}/${nw1}`, normalized);
-      // This is now the normalized value for this region.
-      return normalized;
-    };
-
-    if (a === undefined || b === undefined) {
-      return false;
-    }
-
-    return normalize4(a) === normalize4(b);
-  };
-
-  const toPlane$2 = (surface) => {
-    if (surface.plane !== undefined) {
-      return surface.plane;
-    } else {
-      for (const polygon of surface) {
-        const plane = toPlane(polygon);
-        if (plane !== undefined) {
-          surface.plane = plane;
-          return surface.plane;
-        }
-      }
-    }
-  };
-
-  const transform$9 = (matrix, polygons) => polygons.map(polygon => transform$3(matrix, polygon));
-
-  const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
-
-  const difference$3 = (baseSurface, ...surfaces) => {
-    if (baseSurface.length === 0) {
-      // Empty geometry can't get more empty.
-      return [];
-    }
-    const baseBounds = measureBoundingSphere(baseSurface);
-    surfaces = surfaces.filter(surface => surface.length > 0 &&
-                                          equals$4(toPlane$2(baseSurface), toPlane$2(surface)) &&
-                                          mayOverlap(baseBounds, measureBoundingSphere(surface)));
-    if (surfaces.length === 0) {
-      // Nothing to be removed.
-      return baseSurface;
-    }
-    // FIX: Detect when the surfaces aren't in the same plane.
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(baseSurface));
-    const z0Surface = transform$9(toZ0, baseSurface);
-    const z0Surfaces = surfaces.map(surface => transform$9(toZ0, surface));
-    const z0Difference = difference(z0Surface, ...z0Surfaces);
-    return transform$9(fromZ0, z0Difference);
-  };
-
-  const intersection$3 = (...surfaces) => {
-    if (surfaces.length === 0) {
-      return [];
-    }
-    for (const surface of surfaces) {
-      if (surface.length === 0 || !equals$4(toPlane$2(surfaces[0]), toPlane$2(surface))) {
-        return [];
-      }
-    }
-    // FIX: Detect when the surfaces aren't in the same plane.
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(surfaces[0]));
-    const z0Surface = intersection(...surfaces.map(surface => transform$9(toZ0, surface)));
-    return transform$9(fromZ0, z0Surface);
-  };
-
-  const union$3 = (...surfaces) => {
-    // Trim initial empty surfaces.
-    while (surfaces.length > 0 && surfaces[0].length === 0) {
-      surfaces.shift();
-    }
-    if (surfaces.length === 0) {
-      return [];
-    }
-    // (But then, are these really the right semantics?)
-    const baseSurface = surfaces.shift();
-    const basePlane = toPlane$2(baseSurface);
-    surfaces = surfaces.filter(surface => surface.length >= 1 &&
-                               (equals$4(toPlane$2(baseSurface), toPlane$2(surface))));
-    if (surfaces.length === 0) {
-      return baseSurface;
-    }
-    const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
-    const z0Surface = union(transform$9(toZ0, baseSurface),
-                                      ...surfaces.map(surface => transform$9(toZ0, surface)));
-    return transform$9(fromZ0, z0Surface);
-  };
-
   const differenceImpl = (geometry, ...geometries) => {
     const op = (geometry, descend) => {
       if (geometry.solid) {
@@ -16977,7 +17673,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(solid);
           }
         }
-        return { solid: difference$2(geometry.solid, ...todo), tags: geometry.tags };
+        return { solid: difference$3(geometry.solid, ...todo), tags: geometry.tags };
       } else if (geometry.surface) {
         const todo = [];
         for (const geometry of geometries) {
@@ -16988,7 +17684,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(z0Surface);
           }
         }
-        return { surface: difference$3(geometry.surface, ...todo), tags: geometry.tags };
+        return { surface: difference$1(geometry.surface, ...todo), tags: geometry.tags };
       } else if (geometry.z0Surface) {
         const todoSurfaces = [];
         const todoZ0Surfaces = [];
@@ -17001,7 +17697,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           }
         }
         if (todoSurfaces.length > 0) {
-          return { surface: difference$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+          return { surface: difference$1(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
         } else {
           return { surface: difference(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
         }
@@ -17012,7 +17708,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(paths);
           }
         }
-        return { paths: difference$1(geometry.paths, ...todo), tags: geometry.tags };
+        return { paths: difference$2(geometry.paths, ...todo), tags: geometry.tags };
       } else {
         return descend();
       }
@@ -17256,7 +17952,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(solid);
           }
         }
-        return { solid: intersection$2(geometry.solid, ...todo), tags: geometry.tags };
+        return { solid: intersection$3(geometry.solid, ...todo), tags: geometry.tags };
       } else if (geometry.surface) {
         const todo = [];
         for (const geometry of geometries) {
@@ -17267,7 +17963,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(z0Surface);
           }
         }
-        return { surface: intersection$3(geometry.surface, ...todo), tags: geometry.tags };
+        return { surface: intersection$1(geometry.surface, ...todo), tags: geometry.tags };
       } else if (geometry.z0Surface) {
         const todoSurfaces = [];
         const todoZ0Surfaces = [];
@@ -17280,7 +17976,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           }
         }
         if (todoSurfaces.length > 0) {
-          return { surface: intersection$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+          return { surface: intersection$1(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
         } else {
           return { surface: intersection(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
         }
@@ -17291,7 +17987,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(paths);
           }
         }
-        return { paths: intersection$1(geometry.paths, ...todo), tags: geometry.tags };
+        return { paths: intersection$2(geometry.paths, ...todo), tags: geometry.tags };
       } else {
         return descend();
       }
@@ -17483,7 +18179,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const keptGeometry = toKeptGeometry(geometry);
     const outlines = [];
     for (const { solid } of getSolids(keptGeometry)) {
-      outlines.push(outline$2(solid, normalize));
+      outlines.push(outline$2(solid));
     }
     for (const { surface } of getSurfaces(keptGeometry)) {
       outlines.push(outline$1(surface, normalize));
@@ -17499,16 +18195,16 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // The resolution is 1 / multiplier.
   const multiplier$2 = 1e5;
 
-  const X$b = 0;
-  const Y$b = 1;
+  const X$c = 0;
+  const Y$c = 1;
   const Z$8 = 2;
 
   const createPointNormalizer = () => {
     const map = new Map();
     const normalize = (coordinate) => {
       // Apply a spatial quantization to the 3 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$b] * multiplier$2 - 0.5);
-      const ny = Math.floor(coordinate[Y$b] * multiplier$2 - 0.5);
+      const nx = Math.floor(coordinate[X$c] * multiplier$2 - 0.5);
+      const ny = Math.floor(coordinate[Y$c] * multiplier$2 - 0.5);
       const nz = Math.floor(coordinate[Z$8] * multiplier$2 - 0.5);
       // Look for an existing inhabitant.
       const value = map.get(`${nx}/${ny}/${nz}`);
@@ -17567,7 +18263,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(solid);
           }
         }
-        return { solid: union$2(geometry.solid, ...todo), tags: geometry.tags };
+        return { solid: union$3(geometry.solid, ...todo), tags: geometry.tags };
       } else if (geometry.surface) {
         const todo = [];
         for (const geometry of geometries) {
@@ -17578,7 +18274,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(z0Surface);
           }
         }
-        return { surface: union$3(geometry.surface, ...todo), tags: geometry.tags };
+        return { surface: union$1(geometry.surface, ...todo), tags: geometry.tags };
       } else if (geometry.z0Surface) {
         const todoSurfaces = [];
         const todoZ0Surfaces = [];
@@ -17591,7 +18287,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           }
         }
         if (todoSurfaces.length > 0) {
-          return { surface: union$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+          return { surface: union$1(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
         } else {
           return { surface: union(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
         }
@@ -17602,7 +18298,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(paths);
           }
         }
-        return { paths: union$1(geometry.paths, ...todo), tags: geometry.tags };
+        return { paths: union$2(geometry.paths, ...todo), tags: geometry.tags };
       } else if (geometry.assembly) {
         // Let's consider an assembly to have an implicit Empty() geometry at the end.
         // Then we can implement union over assembly by assemble.
@@ -18396,15 +19092,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * :::
    **/
 
-  const X$c = 0;
-  const Y$c = 1;
+  const X$d = 0;
+  const Y$d = 1;
   const Z$9 = 2;
 
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$6(shape);
     let center = scale(0.5, add(minPoint, maxPoint));
     // FIX: Find a more principled way to handle centering empty shapes.
-    if (isNaN(center[X$c]) || isNaN(center[Y$c]) || isNaN(center[Z$9])) {
+    if (isNaN(center[X$d]) || isNaN(center[Y$d]) || isNaN(center[Z$9])) {
       return shape;
     }
     const moved = shape.move(...negate(center));
@@ -21042,14 +21738,14 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const scaleMethod = function (factor) { return scale$4(factor, this); };
   Shape.prototype.scale = scaleMethod;
 
-  const X$d = 0;
-  const Y$d = 1;
+  const X$e = 0;
+  const Y$e = 1;
   const Z$a = 2;
 
   const size = (shape) => {
     const [min, max] = measureBoundingBox$6(shape);
-    const width = max[X$d] - min[X$d];
-    const length = max[Y$d] - min[Y$d];
+    const width = max[X$e] - min[X$e];
+    const length = max[Y$e] - min[Y$e];
     const height = max[Z$a] - min[Z$a];
     const center = scale(0.5, add(min, max));
     const radius = distance(center, max);
@@ -21406,13 +22102,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   var binPacking_1 = binPacking.GrowingPacker;
   var binPacking_2 = binPacking.Packer;
 
-  const X$e = 0;
-  const Y$e = 1;
+  const X$f = 0;
+  const Y$f = 1;
 
   const measureSize = (geometry) => {
     const [min, max] = measureBoundingBox$5(geometry);
-    const width = max[X$e] - min[X$e];
-    const height = max[Y$e] - min[Y$e];
+    const width = max[X$f] - min[X$f];
+    const height = max[Y$f] - min[Y$f];
     return [width, height];
   };
 
@@ -22332,7 +23028,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return out
   }
 
-  var distance_1 = distance$1;
+  var distance_1 = distance$2;
 
   /**
    * Calculates the euclidian distance between two vec3's
@@ -22341,7 +23037,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
-  function distance$1(a, b) {
+  function distance$2(a, b) {
       var x = b[0] - a[0],
           y = b[1] - a[1],
           z = b[2] - a[2];
@@ -26282,7 +26978,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
 
-  const fromPoints$2 = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+  const fromPoints$3 = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
   /**
    *
@@ -26299,8 +26995,8 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Path = (...points) => fromPoints$2(...points);
-  Path.fromPoints = fromPoints$2;
+  const Path = (...points) => fromPoints$3(...points);
+  Path.fromPoints = fromPoints$3;
 
   Path.signature = 'Path(...points:Point) -> Shape';
   Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';
@@ -26315,7 +27011,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   Point.signature = 'Point(point:Point) -> Shape';
 
-  const fromPoints$3 = (points) => Shape.fromPoints(points);
+  const fromPoints$4 = (points) => Shape.fromPoints(points);
 
   /**
    *
@@ -26352,8 +27048,8 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Points = (...args) => fromPoints$3(...args);
-  Points.fromPoints = fromPoints$3;
+  const Points = (...args) => fromPoints$4(...args);
+  Points.fromPoints = fromPoints$4;
 
   /**
    *
@@ -26962,10 +27658,10 @@ return d[d.length-1];};return ", funcName].join("");
     return shape.toConnector(toConnector(shape, surface, id));
   };
 
-  const Y$f = 1;
+  const Y$g = 1;
 
   const back = (shape) =>
-    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$f]);
+    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$g]);
 
   const backMethod = function () { return back(this); };
   Shape.prototype.back = backMethod;
@@ -27116,10 +27812,10 @@ return d[d.length-1];};return ", funcName].join("");
   const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
   Shape.prototype.inFlat = inFlatMethod;
 
-  const Y$g = 1;
+  const Y$h = 1;
 
   const front = (shape) =>
-    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$g]);
+    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$h]);
 
   const frontMethod = function () { return front(this); };
   Shape.prototype.front = frontMethod;
@@ -27127,10 +27823,10 @@ return d[d.length-1];};return ", funcName].join("");
   front.signature = 'front(shape:Shape) -> Shape';
   frontMethod.signature = 'Shape -> front() -> Shape';
 
-  const X$f = 0;
+  const X$g = 0;
 
   const left = (shape) =>
-    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$f]);
+    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$g]);
 
   const leftMethod = function () { return left(this); };
   Shape.prototype.left = leftMethod;
@@ -27143,10 +27839,10 @@ return d[d.length-1];};return ", funcName].join("");
 
   Shape.prototype.on = onMethod;
 
-  const X$g = 0;
+  const X$h = 0;
 
   const right = (shape) =>
-    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$g]);
+    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$h]);
 
   const rightMethod = function () { return right(this); };
   Shape.prototype.right = rightMethod;
@@ -27237,7 +27933,7 @@ return d[d.length-1];};return ", funcName].join("");
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const X$h = (x = 0) => {
+  const X$i = (x = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -27249,7 +27945,7 @@ return d[d.length-1];};return ", funcName].join("");
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const Y$h = (y = 0) => {
+  const Y$i = (y = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -27410,7 +28106,7 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
-    const profile = shape.chop(Y$h(0));
+    const profile = shape.chop(Y$i(0));
     const outline = profile.outline();
     const solids = [];
     for (const geometry of getPaths(outline.toKeptGeometry())) {
@@ -27510,9 +28206,9 @@ return d[d.length-1];};return ", funcName].join("");
       const [to, from] = toXYPlaneTransforms(plane);
       const flatSurface = transform$4(to, anySurface);
       for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
-        const flatPaths = transform$7(to, paths);
+        const flatPaths = transform$8(to, paths);
         const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
-        const fill = transform$7(from, flatFill);
+        const fill = transform$8(from, flatFill);
         fills.push(...fill);
       }
     }
@@ -27823,51 +28519,12 @@ return d[d.length-1];};return ", funcName].join("");
   Shape.prototype.sweep = sweepMethod;
   Shape.prototype.withSweep = function (tool) { return assemble$1(this, sweep(this, tool)); };
 
-  /**
-   * Creates a new unbounded 2D line initialized with the given values.
-   *
-   * This is a 2d plane, similar to the [x, y, z, w] form of the 3d plane.
-   *
-   * @param {Number} x X coordinate of the unit normal
-   * @param {Number} y Y coordinate of the unit normal
-   * @param {Number} w length (positive) of the normal segment
-   * @returns {line2} a new unbounded 2D line
-   */
-  const fromValues$2 = (x = 0, y = 1, w = 0) => [x, y, w];
-
-  /**
-   * Create a new 2D line that passes through the given points
-   *
-   * @param {vec2} p1 start point of the 2D line
-   * @param {vec2} p2 end point of the 2D line
-   * @returns {line2} a new unbounded 2D line
-   */
-  const fromPoints$4 = (p1, p2) => {
-    const direction = subtract$1(p2, p1);
-    const normalizedNormal = normalize$1(normal(direction));
-    const distance = dot$1(p1, normalizedNormal);
-    return fromValues$2(normalizedNormal[0], normalizedNormal[1], distance);
-  };
-
-  /**
-   * Return the point of intersection between the given lines.
-   *
-   * The point will have Infinity values if the lines are paralell.
-   * The point will have NaN values if the lines are the same.
-   *
-   * @param {line2} line1 a 2D line for reference
-   * @param {line2} line2 a 2D line for reference
-   * @return {vec2} the point of intersection
-   */
-  const intersectPointOfLines = (line1, line2) =>
-    solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
-
   const intersectionPoints = (cuts, overcut = 0) => {
     cuts.push(cuts[0]);
     var intersectionPointsList = [];
     var i = 0;
     while (i < cuts.length - 1) {
-      const point = intersectPointOfLines(fromPoints$4(...cuts[i]), fromPoints$4(...cuts[i + 1]));
+      const point = intersectPointOfLines(fromPoints$2(...cuts[i]), fromPoints$2(...cuts[i + 1]));
       point.push(cuts[i][0][2]);
       if (overcut) {
         intersectionPointsList.push(cuts[i][1]);
@@ -27916,8 +28573,8 @@ return d[d.length-1];};return ", funcName].join("");
   Shape.prototype.toolpath = method$5;
   Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
 
-  const X$i = 0;
-  const Y$i = 1;
+  const X$j = 0;
+  const Y$j = 1;
   const Z$j = 2;
 
   const floor$1 = (value, resolution) => Math.floor(value / resolution) * resolution;
@@ -27946,8 +28603,8 @@ return d[d.length-1];};return ", funcName].join("");
       return false;
     };
     const polygons = [];
-    for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
-      for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+    for (let x = min[X$j] - offset; x <= max[X$j] + offset; x += resolution) {
+      for (let y = min[Y$j] - offset; y <= max[Y$j] + offset; y += resolution) {
         for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
           const state = test([x, y, z]);
           if (state !== test([x + resolution, y, z])) {
@@ -28000,8 +28657,8 @@ return d[d.length-1];};return ", funcName].join("");
       return false;
     };
     const paths = [];
-    for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
-      for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+    for (let x = min[X$j] - offset; x <= max[X$j] + offset; x += resolution) {
+      for (let y = min[Y$j] - offset; y <= max[Y$j] + offset; y += resolution) {
         for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
           const state = test([x, y, z]);
           if (state !== test([x + resolution, y, z])) {
@@ -28058,8 +28715,8 @@ return d[d.length-1];};return ", funcName].join("");
       return false;
     };
     const points = [];
-    for (let x = min[X$i] - offset; x <= max[X$i] + offset; x += resolution) {
-      for (let y = min[Y$i] - offset; y <= max[Y$i] + offset; y += resolution) {
+    for (let x = min[X$j] - offset; x <= max[X$j] + offset; x += resolution) {
+      for (let y = min[Y$j] - offset; y <= max[Y$j] + offset; y += resolution) {
         for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
           if (test([x, y, z])) {
             points.push([x, y, z]);
@@ -30755,7 +31412,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     if (normalizeCoordinateSystem) {
       // Turn it upside down.
-      return transform$7(fromScaling([1, -1, 0]), simplifiedPaths);
+      return transform$8(fromScaling([1, -1, 0]), simplifiedPaths);
     } else {
       return simplifiedPaths;
     }
@@ -31449,8 +32106,8 @@ return d[d.length-1];};return ", funcName].join("");
   var cjs_2 = cjs.toPoints;
   var cjs_3 = cjs.toPath;
 
-  const X$j = 0;
-  const Y$j = 1;
+  const X$k = 0;
+  const Y$k = 1;
 
   const toColorFromTags = (tags, otherwise = 'black') => {
     if (tags !== undefined) {
@@ -31465,8 +32122,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const [min, max] = measureBoundingBox$5(baseGeometry);
-    const width = max[X$j] - min[X$j];
-    const height = max[Y$j] - min[Y$j];
+    const width = max[X$k] - min[X$k];
+    const height = max[Y$k] - min[Y$k];
     const translated = translate$4([width / 2, height / 2, 0], baseGeometry);
     const geometry = canonicalize$9(toKeptGeometry(translated));
 
@@ -31537,7 +32194,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const fromSolidToTriangles = (solid) => {
     const triangles = [];
-    for (const surface of solid) {
+    for (const surface of makeWatertight(solid)) {
       for (const triangle of toTriangles({}, surface)) {
         triangles.push(triangle);
       }
@@ -31548,7 +32205,7 @@ return d[d.length-1];};return ", funcName].join("");
   const toStl = async (geometry, options = {}) => {
     const keptGeometry = toKeptGeometry(geometry);
     let solids = getSolids(keptGeometry).map(({ solid }) => solid);
-    const triangles = fromSolidToTriangles(union$2(...solids));
+    const triangles = fromSolidToTriangles(union$3(...solids));
     return `solid JSxCAD\n${convertToFacets(options, canonicalize$4(triangles))}\nendsolid JSxCAD\n`;
   };
 
@@ -45799,8 +46456,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const MIN$3 = 0;
   const MAX = 1;
-  const X$k = 0;
-  const Y$k = 1;
+  const X$l = 0;
+  const Y$l = 1;
 
   const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...shapes) => {
     const layers = [];
@@ -45814,8 +46471,8 @@ return d[d.length-1];};return ", funcName].join("");
       // Content fits to page size.
       const packSize = [];
       const content = pack$1(Shape.fromGeometry({ layers }), { size, pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
-      const pageWidth = packSize[MAX][X$k] - packSize[MIN$3][X$k];
-      const pageLength = packSize[MAX][Y$k] - packSize[MIN$3][Y$k];
+      const pageWidth = packSize[MAX][X$l] - packSize[MIN$3][X$l];
+      const pageLength = packSize[MAX][Y$l] - packSize[MIN$3][Y$l];
       const plans = [];
       for (const layer of content.toKeptGeometry().layers) {
         plans.push(Plan({
@@ -45836,8 +46493,8 @@ return d[d.length-1];};return ", funcName].join("");
       const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
       // FIX: Using content.size() loses the margin, which is a problem for repacking.
       // Probably page plans should be generated by pack and count toward the size.
-      const pageWidth = packSize[MAX][X$k] - packSize[MIN$3][X$k];
-      const pageLength = packSize[MAX][Y$k] - packSize[MIN$3][Y$k];
+      const pageWidth = packSize[MAX][X$l] - packSize[MIN$3][X$l];
+      const pageLength = packSize[MAX][Y$l] - packSize[MIN$3][Y$l];
       if (isFinite(pageWidth) && isFinite(pageLength)) {
         const plans = [];
         for (const layer of content.toKeptGeometry().layers) {
@@ -45914,7 +46571,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const source = (path, source) => addSource(`cache/${path}`, source);
 
-  const ofPoints$1 = (a, b) => fromPoints$4(a, b);
+  const ofPoints$1 = (a, b) => fromPoints$2(a, b);
   const meet = (a, b) => intersectPointOfLines(a, b);
 
   const Line2 = (...args) => ofPoints$1(...args);
@@ -47420,8 +48077,8 @@ return d[d.length-1];};return ", funcName].join("");
     __proto__: null,
     source: source,
     Connector: Connector,
-    X: X$h,
-    Y: Y$h,
+    X: X$i,
+    Y: Y$i,
     Z: Z$g,
     ChainedHull: ChainedHull,
     Hull: Hull,
@@ -53776,8 +54433,8 @@ return d[d.length-1];};return ", funcName].join("");
     importModule: importModule,
     source: source,
     Connector: Connector,
-    X: X$h,
-    Y: Y$h,
+    X: X$i,
+    Y: Y$i,
     Z: Z$g,
     ChainedHull: ChainedHull,
     Hull: Hull,
@@ -104223,8 +104880,7 @@ return d[d.length-1];};return ", funcName].join("");
     const normals = [];
     const positions = [];
     for (const surface of solid) {
-      // These should already be convex.
-      for (const triangle of toTriangles({}, surface)) {
+      for (const triangle of toTriangles({}, makeConvex$1(surface))) {
         for (const point of triangle) {
           const plane = toPlane(triangle);
           if (plane === undefined) continue;
