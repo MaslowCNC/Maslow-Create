@@ -471,11 +471,11 @@ export default class Molecule extends Atom{
             })
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
-
-            if(this.topLevel){
-                this.backgroundClick()
-                this.beginPropogation()
-            }
+            // if(this.topLevel){
+                //console.log("Beginning propogation: ")
+                // this.backgroundClick()
+                // this.beginPropogation()
+            // }
         })
     }
     
@@ -503,7 +503,7 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, unlock){
         var promise = null
-        
+        console.log(newAtomObj)
         for(var key in GlobalVariables.availableTypes) {
             if (GlobalVariables.availableTypes[key].atomType == newAtomObj.atomType){
                 newAtomObj.parent = this
