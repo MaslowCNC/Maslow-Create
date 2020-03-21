@@ -520,6 +520,16 @@ export default class Molecule extends Atom{
                     promise = atom.deserialize(newAtomObj)
                 }
                 
+                //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
+                if(atom.atomType == 'Output'){
+                    //Check for existing outputs
+                    this.nodesOnTheScreen.forEach(atom => {
+                        if(atom.atomType == 'Output'){
+                            atom.deleteOutputAtom() //Remove them
+                        }
+                    })
+                }
+                
                 //If this is a github molecule load it from the web
                 if(atom.atomType == 'GitHubMolecule'){
                     promise = atom.loadProjectByID(atom.projectID)
