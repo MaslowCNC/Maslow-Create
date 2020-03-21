@@ -1408,10 +1408,20 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const watertight = Symbol('watertight');
 
-  const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
-    if (normalize === undefined) {
-      normalize = createNormalize3(1 / threshold);
-    }
+  const X$6 = 0;
+  const Y$6 = 1;
+  const Z$4 = 2;
+
+  const orderVertices = (a, b) => {
+    const dX = a[X$6] - b[X$6];
+    if (dX !== 0) return dX;
+    const dY = a[Y$6] - b[Y$6];
+    if (dY !== 0) return dY;
+    const dZ = a[Z$4] - b[Z$4];
+    return dZ;
+  };
+
+  const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
     if (!solid[watertight]) {
       if (isWatertight(solid)) {
         solid[watertight] = solid;
@@ -1419,7 +1429,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
 
     if (!solid[watertight]) {
-      let fixed = false;
+      if (normalize === undefined) {
+        normalize = createNormalize3(1 / threshold);
+      }
+
       const vertices = new Set();
 
       const reconciledSolid = [];
@@ -1440,6 +1453,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         reconciledSolid.push(reconciledSurface);
       }
 
+      const orderedVertices = [...vertices];
+      orderedVertices.sort(orderVertices);
+      for (let i = 0; i < orderedVertices.length; i++) {
+        orderedVertices[i].index = i;
+      }
+
       const watertightSolid = [];
       for (const surface of reconciledSolid) {
         const watertightPaths = [];
@@ -1449,16 +1468,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             watertightPath.push(start);
             const span = distance(start, end);
             const colinear = [];
-            for (const vertex of vertices) {
+            let limit = Math.max(start.index, end.index);
+            for (let i = Math.min(start.index, end.index); i < limit; i++) {
+              const vertex = orderedVertices[i];
               // FIX: Threshold
               if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
-                // Avoid trying to resolve t-junctions via self-intersection.
-                if (!path.includes(vertex)) {
-                  // FIX: Clip an ear instead.
-                  // Vertex is on the open edge.
-                  colinear.push(vertex);
-                  fixed = true;
-                }
+                colinear.push(vertex);
               }
             }
             // Arrange by distance from start.
@@ -1472,8 +1487,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       }
       // At this point we should have the correct structure for assembly into a solid.
       // We just need to ensure triangulation to support deformation.
-
-      onFixed(fixed);
 
       solid[watertight] = watertightSolid;
     }
@@ -13831,8 +13844,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const iota$1 = 1e-5;
-  const X$6 = 0;
-  const Y$6 = 1;
+  const X$7 = 0;
+  const Y$7 = 1;
 
   // No overlap tolerance.
   const doesNotOverlapOrAbut = (a, b) => {
@@ -13841,10 +13854,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     const [minA, maxA] = measureBoundingBox$2(a);
     const [minB, maxB] = measureBoundingBox$2(b);
-    if (maxA[X$6] < minB[X$6] - iota$1) { return true; }
-    if (maxA[Y$6] < minB[Y$6] - iota$1) { return true; }
-    if (maxB[X$6] < minA[X$6] - iota$1) { return true; }
-    if (maxB[Y$6] < minA[Y$6] - iota$1) { return true; }
+    if (maxA[X$7] < minB[X$7] - iota$1) { return true; }
+    if (maxA[Y$7] < minB[Y$7] - iota$1) { return true; }
+    if (maxB[X$7] < minA[X$7] - iota$1) { return true; }
+    if (maxB[Y$7] < minA[Y$7] - iota$1) { return true; }
     return false;
   };
 
@@ -14854,8 +14867,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     solve2Linear(line1[0], line1[1], line2[0], line2[1], line1[2], line2[2]);
 
   const EPS = 1e-5;
-  const X$7 = 0;
-  const Y$7 = 1;
+  const X$8 = 0;
+  const Y$8 = 1;
   const yCoordinateBinningFactor = 1e6;
 
   const interpolateXForY = (point1, point2, y) => {
@@ -14941,7 +14954,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           const point = polygon[index];
           // perform binning of y coordinates: If we have multiple vertices very
           // close to each other, give them the same y coordinate:
-          const y = binY(yCoordinateBins, point[Y$7]);
+          const y = binY(yCoordinateBins, point[Y$8]);
           if (y > maxY) {
             maxY = y;
           }
@@ -14949,10 +14962,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             minY = y;
             minIndex = points.length;
           }
-          points.push([point[X$7], y]);
+          points.push([point[X$8], y]);
         }
         for (let index = polygon.length - 1; index >= 0; index--) {
-          const y = points[index][Y$7];
+          const y = points[index][Y$8];
           if (!(y in yCoordinateToPolygonIndexes)) {
             yCoordinateToPolygonIndexes[y] = {};
           }
@@ -15139,7 +15152,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             break;
           }
           case 'new': {
-            if (outPolygon.topLeft[X$7] <= previousOutPolygon.topRight[X$7] + EPS) {
+            if (outPolygon.topLeft[X$8] <= previousOutPolygon.topRight[X$8] + EPS) {
               // These polygons overlap x-wise.
               // we can join this polygon with the one to the left:
               outPolygon.topLeft = previousOutPolygon.topLeft;
@@ -15456,18 +15469,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // The resolution is 1 / multiplier.
   const multiplier = 1e5;
 
-  const X$8 = 0;
-  const Y$8 = 1;
-  const Z$4 = 2;
+  const X$9 = 0;
+  const Y$9 = 1;
+  const Z$5 = 2;
   const W$3 = 3;
 
   const createNormalize4 = () => {
     const map = new Map();
     const normalize4 = (coordinate) => {
       // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$8] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$8] * multiplier - 0.5);
-      const nz = Math.floor(coordinate[Z$4] * multiplier - 0.5);
+      const nx = Math.floor(coordinate[X$9] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$9] * multiplier - 0.5);
+      const nz = Math.floor(coordinate[Z$5] * multiplier - 0.5);
       const nw = Math.floor(coordinate[W$3] * multiplier - 0.5);
       // Look for an existing inhabitant.
       const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
@@ -15511,156 +15524,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return normalize4;
   };
 
-  // The resolution is 1 / multiplier.
-  const multiplier$1 = 1e5;
-
-  const X$9 = 0;
-  const Y$9 = 1;
-  const Z$5 = 2;
-  const W$4 = 3;
-
-  // FIX: Make this efficient.
-  // FIX: Move to math-plane.
-  const equals$4 = (a, b) => {
-    const map = new Map();
-    const normalize4 = (coordinate) => {
-      // Apply a spatial quantization to the 4 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$9] * multiplier$1 - 0.5);
-      const ny = Math.floor(coordinate[Y$9] * multiplier$1 - 0.5);
-      const nz = Math.floor(coordinate[Z$5] * multiplier$1 - 0.5);
-      const nw = Math.floor(coordinate[W$4] * multiplier$1 - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nz0 = nz;
-      const nw0 = nw;
-      const nx1 = nx0 + 1;
-      const ny1 = ny0 + 1;
-      const nz1 = nz0 + 1;
-      const nw1 = nw0 + 1;
-      // Populate the space of the quantized value and its adjacencies.
-      // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier, nw1 / multiplier];
-      // FIX: Rename the function to reflect that it seems that we cannot quantize planes,
-      // but we can form a consensus among nearby planes.
-      const normalized = coordinate;
-      map.set(`${nx0}/${ny0}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny0}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx0}/${ny1}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny0}/${nz1}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz0}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz0}/${nw1}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz1}/${nw0}`, normalized);
-      map.set(`${nx1}/${ny1}/${nz1}/${nw1}`, normalized);
-      // This is now the normalized value for this region.
-      return normalized;
-    };
-
-    if (a === undefined || b === undefined) {
-      return false;
-    }
-
-    return normalize4(a) === normalize4(b);
-  };
-
-  const toPlane$2 = (surface) => {
-    if (surface.plane !== undefined) {
-      return surface.plane;
-    } else {
-      for (const polygon of surface) {
-        const plane = toPlane(polygon);
-        if (plane !== undefined) {
-          surface.plane = plane;
-          return surface.plane;
-        }
-      }
-    }
-  };
-
-  const transform$7 = (matrix, polygons) => polygons.map(polygon => transform$3(matrix, polygon));
-
-  const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
-
-  const difference$1 = (baseSurface, ...surfaces) => {
-    if (baseSurface.length === 0) {
-      // Empty geometry can't get more empty.
-      return [];
-    }
-    const baseBounds = measureBoundingSphere(baseSurface);
-    surfaces = surfaces.filter(surface => surface.length > 0 &&
-                                          equals$4(toPlane$2(baseSurface), toPlane$2(surface)) &&
-                                          mayOverlap(baseBounds, measureBoundingSphere(surface)));
-    if (surfaces.length === 0) {
-      // Nothing to be removed.
-      return baseSurface;
-    }
-    // FIX: Detect when the surfaces aren't in the same plane.
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(baseSurface));
-    const z0Surface = transform$7(toZ0, baseSurface);
-    const z0Surfaces = surfaces.map(surface => transform$7(toZ0, surface));
-    const z0Difference = difference(z0Surface, ...z0Surfaces);
-    return transform$7(fromZ0, z0Difference);
-  };
-
-  const intersection$1 = (...surfaces) => {
-    if (surfaces.length === 0) {
-      return [];
-    }
-    for (const surface of surfaces) {
-      if (surface.length === 0 || !equals$4(toPlane$2(surfaces[0]), toPlane$2(surface))) {
-        return [];
-      }
-    }
-    // FIX: Detect when the surfaces aren't in the same plane.
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(surfaces[0]));
-    const z0Surface = intersection(...surfaces.map(surface => transform$7(toZ0, surface)));
-    return transform$7(fromZ0, z0Surface);
-  };
-
-  const union$1 = (...surfaces) => {
-    // Trim initial empty surfaces.
-    while (surfaces.length > 0 && surfaces[0].length === 0) {
-      surfaces.shift();
-    }
-    if (surfaces.length === 0) {
-      return [];
-    }
-    // (But then, are these really the right semantics?)
-    const baseSurface = surfaces.shift();
-    const basePlane = toPlane$2(baseSurface);
-    surfaces = surfaces.filter(surface => surface.length >= 1 &&
-                               (equals$4(toPlane$2(baseSurface), toPlane$2(surface))));
-    if (surfaces.length === 0) {
-      return baseSurface;
-    }
-    const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
-    const z0Surface = union(transform$7(toZ0, baseSurface),
-                                      ...surfaces.map(surface => transform$7(toZ0, surface)));
-    return transform$7(fromZ0, z0Surface);
-  };
-
-  let doDefragment = 'default';
-
-  const clockOrder$1 = (a) => isClockwise(a) ? 1 : 0;
-
-  // Reorder in-place such that counterclockwise paths preceed clockwise paths.
-  const clockSort$1 = (surface) => {
-    surface.sort((a, b) => clockOrder$1(a) - clockOrder$1(b));
-    return surface;
-  };
+  let doDefragment = 'none';
 
   const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
     const normalize4 = createNormalize4();
@@ -15693,19 +15557,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     // The solid is a list of surfaces, which are lists of coplanar polygons.
     const defragmented = [];
 
-    // Erase substructure and make convex.
+    // Possibly erase substructure and make convex.
     for (const polygons of coplanarGroups.values()) {
-      clockSort$1(polygons);
       let surface;
       switch (doDefragment) {
-        default:
-          surface = polygons;
-          break;
         case 'makeConvex':
           surface = makeConvex$1(polygons, normalize3, toPlane(polygons[0]));
           break;
         case 'retessellate':
           surface = retessellate$1(polygons, normalize3, toPlane(polygons[0]));
+          break;
+        case 'none':
+        default:
+          surface = polygons;
           break;
       }
       defragmented.push(surface);
@@ -16371,7 +16235,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   // FIX: Determine the correct behaviour here.
 
-  const difference$2 = (pathset, ...pathsets) => pathset;
+  const difference$1 = (pathset, ...pathsets) => pathset;
 
   const eachPoint$2 = (thunk, paths) => {
     for (const path of paths) {
@@ -16385,18 +16249,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const flip$6 = (paths) => paths.map(flip);
 
-  const intersection$2 = (pathset, ...pathsets) => pathset;
+  const intersection$1 = (pathset, ...pathsets) => pathset;
 
-  const transform$8 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
+  const transform$7 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
 
   // FIX: Deduplication.
 
-  const union$2 = (...pathsets) => [].concat(...pathsets);
+  const union$1 = (...pathsets) => [].concat(...pathsets);
 
-  const translate$2 = ([x = 0, y = 0, z = 0], paths) => transform$8(fromTranslation([x, y, z]), paths);
+  const translate$2 = ([x = 0, y = 0, z = 0], paths) => transform$7(fromTranslation([x, y, z]), paths);
 
-  const transform$9 = (matrix, points) => points.map(point => transform(matrix, point));
-  const translate$3 = ([x = 0, y = 0, z = 0], points) => transform$9(fromTranslation([x, y, z]), points);
+  const transform$8 = (matrix, points) => points.map(point => transform(matrix, point));
+  const translate$3 = ([x = 0, y = 0, z = 0], points) => transform$8(fromTranslation([x, y, z]), points);
 
   const canonicalize$8 = (points) => points.map(canonicalize);
 
@@ -16450,13 +16314,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           };
         } else if (geometry.paths) {
           return {
-            paths: transform$8(matrix, geometry.paths),
+            paths: transform$7(matrix, geometry.paths),
             tags
           };
         } else if (geometry.plan) {
           return {
             plan: geometry.plan,
-            marks: transform$9(matrix, geometry.marks),
+            marks: transform$8(matrix, geometry.marks),
             planes: geometry.planes.map(plane => transform$2(matrix, plane)),
             content: walk(matrix, geometry.content),
             visualization: walk(matrix, geometry.visualization),
@@ -16464,7 +16328,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           };
         } else if (geometry.points) {
           return {
-            points: transform$9(matrix, geometry.points),
+            points: transform$8(matrix, geometry.points),
             tags
           };
         } else if (geometry.solid) {
@@ -17484,7 +17348,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const MIN = 0;
 
-  const difference$3 = (aSolid, ...bSolids) => {
+  const difference$2 = (aSolid, ...bSolids) => {
     if (bSolids.length === 0) {
       return aSolid;
     }
@@ -17542,7 +17406,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const MIN$1 = 0;
 
   // An asymmetric binary merge.
-  const intersection$3 = (...solids) => {
+  const intersection$2 = (...solids) => {
     if (solids.length === 0) {
       return [];
     }
@@ -17606,7 +17470,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const MIN$2 = 0;
 
   // An asymmetric binary merge.
-  const union$3 = (...solids) => {
+  const union$2 = (...solids) => {
     if (solids.length === 0) {
       return [];
     }
@@ -17664,6 +17528,147 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return fromPolygons({}, s[0], normalize);
   };
 
+  // The resolution is 1 / multiplier.
+  const multiplier$1 = 1e5;
+
+  const X$c = 0;
+  const Y$c = 1;
+  const Z$8 = 2;
+  const W$4 = 3;
+
+  // FIX: Make this efficient.
+  // FIX: Move to math-plane.
+  const equals$4 = (a, b) => {
+    const map = new Map();
+    const normalize4 = (coordinate) => {
+      // Apply a spatial quantization to the 4 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$c] * multiplier$1 - 0.5);
+      const ny = Math.floor(coordinate[Y$c] * multiplier$1 - 0.5);
+      const nz = Math.floor(coordinate[Z$8] * multiplier$1 - 0.5);
+      const nw = Math.floor(coordinate[W$4] * multiplier$1 - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nz0 = nz;
+      const nw0 = nw;
+      const nx1 = nx0 + 1;
+      const ny1 = ny0 + 1;
+      const nz1 = nz0 + 1;
+      const nw1 = nw0 + 1;
+      // Populate the space of the quantized value and its adjacencies.
+      // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier, nw1 / multiplier];
+      // FIX: Rename the function to reflect that it seems that we cannot quantize planes,
+      // but we can form a consensus among nearby planes.
+      const normalized = coordinate;
+      map.set(`${nx0}/${ny0}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny0}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx0}/${ny0}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny0}/${nz1}/${nw1}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx0}/${ny1}/${nz1}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny0}/${nz1}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz0}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz0}/${nw1}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz1}/${nw0}`, normalized);
+      map.set(`${nx1}/${ny1}/${nz1}/${nw1}`, normalized);
+      // This is now the normalized value for this region.
+      return normalized;
+    };
+
+    if (a === undefined || b === undefined) {
+      return false;
+    }
+
+    return normalize4(a) === normalize4(b);
+  };
+
+  const toPlane$2 = (surface) => {
+    if (surface.plane !== undefined) {
+      return surface.plane;
+    } else {
+      for (const polygon of surface) {
+        const plane = toPlane(polygon);
+        if (plane !== undefined) {
+          surface.plane = plane;
+          return surface.plane;
+        }
+      }
+    }
+  };
+
+  const transform$9 = (matrix, polygons) => polygons.map(polygon => transform$3(matrix, polygon));
+
+  const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
+
+  const difference$3 = (baseSurface, ...surfaces) => {
+    if (baseSurface.length === 0) {
+      // Empty geometry can't get more empty.
+      return [];
+    }
+    const baseBounds = measureBoundingSphere(baseSurface);
+    surfaces = surfaces.filter(surface => surface.length > 0 &&
+                                          equals$4(toPlane$2(baseSurface), toPlane$2(surface)) &&
+                                          mayOverlap(baseBounds, measureBoundingSphere(surface)));
+    if (surfaces.length === 0) {
+      // Nothing to be removed.
+      return baseSurface;
+    }
+    // FIX: Detect when the surfaces aren't in the same plane.
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(baseSurface));
+    const z0Surface = transform$9(toZ0, baseSurface);
+    const z0Surfaces = surfaces.map(surface => transform$9(toZ0, surface));
+    const z0Difference = difference(z0Surface, ...z0Surfaces);
+    return transform$9(fromZ0, z0Difference);
+  };
+
+  const intersection$3 = (...surfaces) => {
+    if (surfaces.length === 0) {
+      return [];
+    }
+    for (const surface of surfaces) {
+      if (surface.length === 0 || !equals$4(toPlane$2(surfaces[0]), toPlane$2(surface))) {
+        return [];
+      }
+    }
+    // FIX: Detect when the surfaces aren't in the same plane.
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(surfaces[0]));
+    const z0Surface = intersection(...surfaces.map(surface => transform$9(toZ0, surface)));
+    return transform$9(fromZ0, z0Surface);
+  };
+
+  const union$3 = (...surfaces) => {
+    // Trim initial empty surfaces.
+    while (surfaces.length > 0 && surfaces[0].length === 0) {
+      surfaces.shift();
+    }
+    if (surfaces.length === 0) {
+      return [];
+    }
+    // (But then, are these really the right semantics?)
+    const baseSurface = surfaces.shift();
+    const basePlane = toPlane$2(baseSurface);
+    surfaces = surfaces.filter(surface => surface.length >= 1 &&
+                               (equals$4(toPlane$2(baseSurface), toPlane$2(surface))));
+    if (surfaces.length === 0) {
+      return baseSurface;
+    }
+    const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
+    const z0Surface = union(transform$9(toZ0, baseSurface),
+                                      ...surfaces.map(surface => transform$9(toZ0, surface)));
+    return transform$9(fromZ0, z0Surface);
+  };
+
   const differenceImpl = (geometry, ...geometries) => {
     const op = (geometry, descend) => {
       if (geometry.solid) {
@@ -17673,7 +17678,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(solid);
           }
         }
-        return { solid: difference$3(geometry.solid, ...todo), tags: geometry.tags };
+        return { solid: difference$2(geometry.solid, ...todo), tags: geometry.tags };
       } else if (geometry.surface) {
         const todo = [];
         for (const geometry of geometries) {
@@ -17684,7 +17689,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(z0Surface);
           }
         }
-        return { surface: difference$1(geometry.surface, ...todo), tags: geometry.tags };
+        return { surface: difference$3(geometry.surface, ...todo), tags: geometry.tags };
       } else if (geometry.z0Surface) {
         const todoSurfaces = [];
         const todoZ0Surfaces = [];
@@ -17697,7 +17702,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           }
         }
         if (todoSurfaces.length > 0) {
-          return { surface: difference$1(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+          return { surface: difference$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
         } else {
           return { surface: difference(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
         }
@@ -17708,7 +17713,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(paths);
           }
         }
-        return { paths: difference$2(geometry.paths, ...todo), tags: geometry.tags };
+        return { paths: difference$1(geometry.paths, ...todo), tags: geometry.tags };
       } else {
         return descend();
       }
@@ -17952,7 +17957,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(solid);
           }
         }
-        return { solid: intersection$3(geometry.solid, ...todo), tags: geometry.tags };
+        return { solid: intersection$2(geometry.solid, ...todo), tags: geometry.tags };
       } else if (geometry.surface) {
         const todo = [];
         for (const geometry of geometries) {
@@ -17963,7 +17968,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(z0Surface);
           }
         }
-        return { surface: intersection$1(geometry.surface, ...todo), tags: geometry.tags };
+        return { surface: intersection$3(geometry.surface, ...todo), tags: geometry.tags };
       } else if (geometry.z0Surface) {
         const todoSurfaces = [];
         const todoZ0Surfaces = [];
@@ -17976,7 +17981,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           }
         }
         if (todoSurfaces.length > 0) {
-          return { surface: intersection$1(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+          return { surface: intersection$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
         } else {
           return { surface: intersection(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
         }
@@ -17987,7 +17992,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(paths);
           }
         }
-        return { paths: intersection$2(geometry.paths, ...todo), tags: geometry.tags };
+        return { paths: intersection$1(geometry.paths, ...todo), tags: geometry.tags };
       } else {
         return descend();
       }
@@ -18195,17 +18200,17 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // The resolution is 1 / multiplier.
   const multiplier$2 = 1e5;
 
-  const X$c = 0;
-  const Y$c = 1;
-  const Z$8 = 2;
+  const X$d = 0;
+  const Y$d = 1;
+  const Z$9 = 2;
 
   const createPointNormalizer = () => {
     const map = new Map();
     const normalize = (coordinate) => {
       // Apply a spatial quantization to the 3 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$c] * multiplier$2 - 0.5);
-      const ny = Math.floor(coordinate[Y$c] * multiplier$2 - 0.5);
-      const nz = Math.floor(coordinate[Z$8] * multiplier$2 - 0.5);
+      const nx = Math.floor(coordinate[X$d] * multiplier$2 - 0.5);
+      const ny = Math.floor(coordinate[Y$d] * multiplier$2 - 0.5);
+      const nz = Math.floor(coordinate[Z$9] * multiplier$2 - 0.5);
       // Look for an existing inhabitant.
       const value = map.get(`${nx}/${ny}/${nz}`);
       if (value !== undefined) {
@@ -18263,7 +18268,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(solid);
           }
         }
-        return { solid: union$3(geometry.solid, ...todo), tags: geometry.tags };
+        return { solid: union$2(geometry.solid, ...todo), tags: geometry.tags };
       } else if (geometry.surface) {
         const todo = [];
         for (const geometry of geometries) {
@@ -18274,7 +18279,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(z0Surface);
           }
         }
-        return { surface: union$1(geometry.surface, ...todo), tags: geometry.tags };
+        return { surface: union$3(geometry.surface, ...todo), tags: geometry.tags };
       } else if (geometry.z0Surface) {
         const todoSurfaces = [];
         const todoZ0Surfaces = [];
@@ -18287,7 +18292,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           }
         }
         if (todoSurfaces.length > 0) {
-          return { surface: union$1(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+          return { surface: union$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
         } else {
           return { surface: union(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
         }
@@ -18298,7 +18303,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
             todo.push(paths);
           }
         }
-        return { paths: union$2(geometry.paths, ...todo), tags: geometry.tags };
+        return { paths: union$1(geometry.paths, ...todo), tags: geometry.tags };
       } else if (geometry.assembly) {
         // Let's consider an assembly to have an implicit Empty() geometry at the end.
         // Then we can implement union over assembly by assemble.
@@ -19092,15 +19097,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * :::
    **/
 
-  const X$d = 0;
-  const Y$d = 1;
-  const Z$9 = 2;
+  const X$e = 0;
+  const Y$e = 1;
+  const Z$a = 2;
 
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$6(shape);
     let center = scale(0.5, add(minPoint, maxPoint));
     // FIX: Find a more principled way to handle centering empty shapes.
-    if (isNaN(center[X$d]) || isNaN(center[Y$d]) || isNaN(center[Z$9])) {
+    if (isNaN(center[X$e]) || isNaN(center[Y$e]) || isNaN(center[Z$a])) {
       return shape;
     }
     const moved = shape.move(...negate(center));
@@ -21369,7 +21374,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    *
    **/
 
-  const log$2 = (text) => log({ op: 'text', text: String(text) });
+  const log$2 = (text, level) => log({ op: 'text', text: String(text), level });
 
   const logOp = (shape, op) => log({ op: 'text', text: String(op(shape)) });
 
@@ -21738,15 +21743,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const scaleMethod = function (factor) { return scale$4(factor, this); };
   Shape.prototype.scale = scaleMethod;
 
-  const X$e = 0;
-  const Y$e = 1;
-  const Z$a = 2;
+  const X$f = 0;
+  const Y$f = 1;
+  const Z$b = 2;
 
   const size = (shape) => {
     const [min, max] = measureBoundingBox$6(shape);
-    const width = max[X$e] - min[X$e];
-    const length = max[Y$e] - min[Y$e];
-    const height = max[Z$a] - min[Z$a];
+    const width = max[X$f] - min[X$f];
+    const length = max[Y$f] - min[Y$f];
+    const height = max[Z$b] - min[Z$b];
     const center = scale(0.5, add(min, max));
     const radius = distance(center, max);
     return { length, width, height, max, min, center, radius };
@@ -21838,7 +21843,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const crumpleMethod = function (...args) { return crumple(this, ...args); };
   Shape.prototype.crumple = crumpleMethod;
 
-  const Z$b = 2;
+  const Z$c = 2;
 
   const scaleXY = (factor, [x, y, z]) => [...scale$1(factor, [x, y]), z];
 
@@ -21846,8 +21851,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
       const [min, max] = measureBoundingBox$4(solid);
-      const maxZ = max[Z$b];
-      const minZ = min[Z$b];
+      const maxZ = max[Z$c];
+      const minZ = min[Z$c];
       const height = maxZ - minZ;
       const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
       const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
@@ -21860,15 +21865,15 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const thinMethod = function (...args) { return thin(this, ...args); };
   Shape.prototype.thin = thinMethod;
 
-  const Z$c = 2;
+  const Z$d = 2;
 
   const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const assembly = [];
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
       const [min, max] = measureBoundingBox$4(solid);
-      const height = max[Z$c] - min[Z$c];
+      const height = max[Z$d] - min[Z$d];
       const radians = (angle / height) * (Math.PI / 180);
-      const rotate = point => rotateZ(point, radians * (point[Z$c] - min[Z$c]));
+      const rotate = point => rotateZ(point, radians * (point[Z$d] - min[Z$d]));
       assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
     }
 
@@ -22102,13 +22107,13 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   var binPacking_1 = binPacking.GrowingPacker;
   var binPacking_2 = binPacking.Packer;
 
-  const X$f = 0;
-  const Y$f = 1;
+  const X$g = 0;
+  const Y$g = 1;
 
   const measureSize = (geometry) => {
     const [min, max] = measureBoundingBox$5(geometry);
-    const width = max[X$f] - min[X$f];
-    const height = max[Y$f] - min[Y$f];
+    const width = max[X$g] - min[X$g];
+    const height = max[Y$g] - min[Y$g];
     return [width, height];
   };
 
@@ -27385,14 +27390,14 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Z$d = 2;
+  const Z$e = 2;
 
   const ChainedHull = (...shapes) => {
     const pointsets = shapes.map(shape => shape.toPoints());
     const chain = [];
     for (let nth = 1; nth < pointsets.length; nth++) {
       const points = [...pointsets[nth - 1], ...pointsets[nth]];
-      if (points.every(point => point[Z$d] === 0)) {
+      if (points.every(point => point[Z$e] === 0)) {
         chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
       } else {
         chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -27439,13 +27444,13 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const Z$e = 2;
+  const Z$f = 2;
 
   const Hull = (...shapes) => {
     const points = [];
     shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
     // FIX: Detect planar hulls properly.
-    if (points.every(point => point[Z$e] === 0)) {
+    if (points.every(point => point[Z$f] === 0)) {
       return Shape.fromGeometry(buildConvexSurfaceHull(points));
     } else {
       return Shape.fromGeometry(buildConvexHull(points));
@@ -27658,10 +27663,10 @@ return d[d.length-1];};return ", funcName].join("");
     return shape.toConnector(toConnector(shape, surface, id));
   };
 
-  const Y$g = 1;
+  const Y$h = 1;
 
   const back = (shape) =>
-    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$g]);
+    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$h]);
 
   const backMethod = function () { return back(this); };
   Shape.prototype.back = backMethod;
@@ -27669,10 +27674,10 @@ return d[d.length-1];};return ", funcName].join("");
   back.signature = 'back(shape:Shape) -> Shape';
   backMethod.signature = 'Shape -> back() -> Shape';
 
-  const Z$f = 2;
+  const Z$g = 2;
 
   const bottom = (shape) =>
-    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$f]);
+    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$g]);
 
   const bottomMethod = function () { return bottom(this); };
   Shape.prototype.bottom = bottomMethod;
@@ -27684,7 +27689,7 @@ return d[d.length-1];};return ", funcName].join("");
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const Z$g = (z = 0) => {
+  const Z$h = (z = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -27729,7 +27734,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [polygon];
   };
 
-  const chop = (shape, connector = Z$g()) => {
+  const chop = (shape, connector = Z$h()) => {
     const cuts = [];
     const planeSurface = toSurface$1(toPlane$3(connector));
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
@@ -27751,7 +27756,7 @@ return d[d.length-1];};return ", funcName].join("");
   chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
   chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
 
-  const Z$h = 2;
+  const Z$i = 2;
 
   const findFlatTransforms = (shape) => {
     let bestDepth = Infinity;
@@ -27765,7 +27770,7 @@ return d[d.length-1];};return ", funcName].join("");
         const [to, from] = toXYPlaneTransforms(plane);
         const flatShape = shape.transform(to);
         const [min, max] = flatShape.measureBoundingBox();
-        const depth = max[Z$h] - min[Z$h];
+        const depth = max[Z$i] - min[Z$i];
         if (depth < bestDepth) {
           bestTo = to;
           bestFrom = from;
@@ -27812,10 +27817,10 @@ return d[d.length-1];};return ", funcName].join("");
   const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
   Shape.prototype.inFlat = inFlatMethod;
 
-  const Y$h = 1;
+  const Y$i = 1;
 
   const front = (shape) =>
-    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$h]);
+    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$i]);
 
   const frontMethod = function () { return front(this); };
   Shape.prototype.front = frontMethod;
@@ -27823,10 +27828,10 @@ return d[d.length-1];};return ", funcName].join("");
   front.signature = 'front(shape:Shape) -> Shape';
   frontMethod.signature = 'Shape -> front() -> Shape';
 
-  const X$g = 0;
+  const X$h = 0;
 
   const left = (shape) =>
-    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$g]);
+    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$h]);
 
   const leftMethod = function () { return left(this); };
   Shape.prototype.left = leftMethod;
@@ -27839,10 +27844,10 @@ return d[d.length-1];};return ", funcName].join("");
 
   Shape.prototype.on = onMethod;
 
-  const X$h = 0;
+  const X$i = 0;
 
   const right = (shape) =>
-    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$h]);
+    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$i]);
 
   const rightMethod = function () { return right(this); };
   Shape.prototype.right = rightMethod;
@@ -27850,10 +27855,10 @@ return d[d.length-1];};return ", funcName].join("");
   right.signature = 'right(shape:Shape) -> Shape';
   rightMethod.signature = 'Shape -> right() -> Shape';
 
-  const Z$i = 2;
+  const Z$j = 2;
 
   const top = (shape) =>
-    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$i]);
+    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$j]);
 
   const topMethod = function () { return top(this); };
   Shape.prototype.top = topMethod;
@@ -27933,7 +27938,7 @@ return d[d.length-1];};return ", funcName].join("");
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const X$i = (x = 0) => {
+  const X$j = (x = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -27945,7 +27950,7 @@ return d[d.length-1];};return ", funcName].join("");
   // Unfortunately this makes things like interpolation tricky,
   // so we approximate it with a very large polygon instead.
 
-  const Y$i = (y = 0) => {
+  const Y$j = (y = 0) => {
     const size = 1e5;
     const min = -size;
     const max = size;
@@ -28106,7 +28111,7 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
-    const profile = shape.chop(Y$i(0));
+    const profile = shape.chop(Y$j(0));
     const outline = profile.outline();
     const solids = [];
     for (const geometry of getPaths(outline.toKeptGeometry())) {
@@ -28206,9 +28211,9 @@ return d[d.length-1];};return ", funcName].join("");
       const [to, from] = toXYPlaneTransforms(plane);
       const flatSurface = transform$4(to, anySurface);
       for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
-        const flatPaths = transform$8(to, paths);
+        const flatPaths = transform$7(to, paths);
         const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
-        const fill = transform$8(from, flatFill);
+        const fill = transform$7(from, flatFill);
         fills.push(...fill);
       }
     }
@@ -28382,7 +28387,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const section$1 = (solidShape, ...connectors) => {
     if (connectors.length === 0) {
-      connectors.push(Z$g(0));
+      connectors.push(Z$h(0));
     }
     const planes = connectors.map(toPlane$4);
     const planeSurfaces = planes.map(toSurface$2);
@@ -28471,7 +28476,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [polygon];
   };
 
-  const stretch = (shape, length, connector = Z$g()) => {
+  const stretch = (shape, length, connector = Z$h()) => {
     const normalize = createNormalize3();
     const stretches = [];
     const planeSurface = toSurface$3(toPlaneFromConnector(connector));
@@ -28573,9 +28578,9 @@ return d[d.length-1];};return ", funcName].join("");
   Shape.prototype.toolpath = method$5;
   Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
 
-  const X$j = 0;
-  const Y$j = 1;
-  const Z$j = 2;
+  const X$k = 0;
+  const Y$k = 1;
+  const Z$k = 2;
 
   const floor$1 = (value, resolution) => Math.floor(value / resolution) * resolution;
   const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
@@ -28603,9 +28608,9 @@ return d[d.length-1];};return ", funcName].join("");
       return false;
     };
     const polygons = [];
-    for (let x = min[X$j] - offset; x <= max[X$j] + offset; x += resolution) {
-      for (let y = min[Y$j] - offset; y <= max[Y$j] + offset; y += resolution) {
-        for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+    for (let x = min[X$k] - offset; x <= max[X$k] + offset; x += resolution) {
+      for (let y = min[Y$k] - offset; y <= max[Y$k] + offset; y += resolution) {
+        for (let z = min[Z$k] - offset; z <= max[Z$k] + offset; z += resolution) {
           const state = test([x, y, z]);
           if (state !== test([x + resolution, y, z])) {
             const face = [[x + offset, y - offset, z - offset],
@@ -28657,9 +28662,9 @@ return d[d.length-1];};return ", funcName].join("");
       return false;
     };
     const paths = [];
-    for (let x = min[X$j] - offset; x <= max[X$j] + offset; x += resolution) {
-      for (let y = min[Y$j] - offset; y <= max[Y$j] + offset; y += resolution) {
-        for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+    for (let x = min[X$k] - offset; x <= max[X$k] + offset; x += resolution) {
+      for (let y = min[Y$k] - offset; y <= max[Y$k] + offset; y += resolution) {
+        for (let z = min[Z$k] - offset; z <= max[Z$k] + offset; z += resolution) {
           const state = test([x, y, z]);
           if (state !== test([x + resolution, y, z])) {
             paths.push([null, [x, y, z], [x + resolution, y, z]]);
@@ -28715,9 +28720,9 @@ return d[d.length-1];};return ", funcName].join("");
       return false;
     };
     const points = [];
-    for (let x = min[X$j] - offset; x <= max[X$j] + offset; x += resolution) {
-      for (let y = min[Y$j] - offset; y <= max[Y$j] + offset; y += resolution) {
-        for (let z = min[Z$j] - offset; z <= max[Z$j] + offset; z += resolution) {
+    for (let x = min[X$k] - offset; x <= max[X$k] + offset; x += resolution) {
+      for (let y = min[Y$k] - offset; y <= max[Y$k] + offset; y += resolution) {
+        for (let z = min[Z$k] - offset; z <= max[Z$k] + offset; z += resolution) {
           if (test([x, y, z])) {
             points.push([x, y, z]);
           }
@@ -31412,7 +31417,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     if (normalizeCoordinateSystem) {
       // Turn it upside down.
-      return transform$8(fromScaling([1, -1, 0]), simplifiedPaths);
+      return transform$7(fromScaling([1, -1, 0]), simplifiedPaths);
     } else {
       return simplifiedPaths;
     }
@@ -32106,8 +32111,8 @@ return d[d.length-1];};return ", funcName].join("");
   var cjs_2 = cjs.toPoints;
   var cjs_3 = cjs.toPath;
 
-  const X$k = 0;
-  const Y$k = 1;
+  const X$l = 0;
+  const Y$l = 1;
 
   const toColorFromTags = (tags, otherwise = 'black') => {
     if (tags !== undefined) {
@@ -32122,8 +32127,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const [min, max] = measureBoundingBox$5(baseGeometry);
-    const width = max[X$k] - min[X$k];
-    const height = max[Y$k] - min[Y$k];
+    const width = max[X$l] - min[X$l];
+    const height = max[Y$l] - min[Y$l];
     const translated = translate$4([width / 2, height / 2, 0], baseGeometry);
     const geometry = canonicalize$9(toKeptGeometry(translated));
 
@@ -32205,7 +32210,7 @@ return d[d.length-1];};return ", funcName].join("");
   const toStl = async (geometry, options = {}) => {
     const keptGeometry = toKeptGeometry(geometry);
     let solids = getSolids(keptGeometry).map(({ solid }) => solid);
-    const triangles = fromSolidToTriangles(union$3(...solids));
+    const triangles = fromSolidToTriangles(union$2(...solids));
     return `solid JSxCAD\n${convertToFacets(options, canonicalize$4(triangles))}\nendsolid JSxCAD\n`;
   };
 
@@ -32260,10 +32265,14 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const writeStl = async (shape, name, options = {}) => {
+    const start = new Date();
+    log$2(`writeStl start: ${start}`, 'serious');
     for (const { stl, leaf, index } of await toStl$1(shape, {})) {
       await writeFile({}, `output/${name}_${index}.stl`, stl);
       await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
     }
+    const end = new Date();
+    log$2(`writeStl end: ${end - start}`, 'serious');
   };
 
   const method$8 = function (...args) { return writeStl(this, ...args); };
@@ -46456,8 +46465,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const MIN$3 = 0;
   const MAX = 1;
-  const X$l = 0;
-  const Y$l = 1;
+  const X$m = 0;
+  const Y$m = 1;
 
   const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...shapes) => {
     const layers = [];
@@ -46471,8 +46480,8 @@ return d[d.length-1];};return ", funcName].join("");
       // Content fits to page size.
       const packSize = [];
       const content = pack$1(Shape.fromGeometry({ layers }), { size, pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
-      const pageWidth = packSize[MAX][X$l] - packSize[MIN$3][X$l];
-      const pageLength = packSize[MAX][Y$l] - packSize[MIN$3][Y$l];
+      const pageWidth = packSize[MAX][X$m] - packSize[MIN$3][X$m];
+      const pageLength = packSize[MAX][Y$m] - packSize[MIN$3][Y$m];
       const plans = [];
       for (const layer of content.toKeptGeometry().layers) {
         plans.push(Plan({
@@ -46493,8 +46502,8 @@ return d[d.length-1];};return ", funcName].join("");
       const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
       // FIX: Using content.size() loses the margin, which is a problem for repacking.
       // Probably page plans should be generated by pack and count toward the size.
-      const pageWidth = packSize[MAX][X$l] - packSize[MIN$3][X$l];
-      const pageLength = packSize[MAX][Y$l] - packSize[MIN$3][Y$l];
+      const pageWidth = packSize[MAX][X$m] - packSize[MIN$3][X$m];
+      const pageLength = packSize[MAX][Y$m] - packSize[MIN$3][Y$m];
       if (isFinite(pageWidth) && isFinite(pageLength)) {
         const plans = [];
         for (const layer of content.toKeptGeometry().layers) {
@@ -48077,9 +48086,9 @@ return d[d.length-1];};return ", funcName].join("");
     __proto__: null,
     source: source,
     Connector: Connector,
-    X: X$i,
-    Y: Y$i,
-    Z: Z$g,
+    X: X$j,
+    Y: Y$j,
+    Z: Z$h,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
@@ -54433,9 +54442,9 @@ return d[d.length-1];};return ", funcName].join("");
     importModule: importModule,
     source: source,
     Connector: Connector,
-    X: X$i,
-    Y: Y$i,
-    Z: Z$g,
+    X: X$j,
+    Y: Y$j,
+    Z: Z$h,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
@@ -104880,7 +104889,7 @@ return d[d.length-1];};return ", funcName].join("");
     const normals = [];
     const positions = [];
     for (const surface of solid) {
-      for (const triangle of toTriangles({}, makeConvex$1(surface))) {
+      for (const triangle of toTriangles({}, surface)) {
         for (const point of triangle) {
           const plane = toPlane(triangle);
           if (plane === undefined) continue;
@@ -105182,7 +105191,7 @@ return d[d.length-1];};return ", funcName].join("");
         case 'Over Cut Inside Corners':
           console.log('Overcutting corners');
           const overcutShape = Shape.fromGeometry(values[0]);
-          const overcutSection = overcutShape.section(Z$g());
+          const overcutSection = overcutShape.section(Z$h());
           const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
           const height = overcutShape.size().height;
           const sweep = toolpath.sweep(Circle(values[1])).extrude(height);
