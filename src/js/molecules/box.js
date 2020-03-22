@@ -78,7 +78,7 @@ export default class Box extends Atom {
         const xInPixels = GlobalVariables.widthToPixels(this.x)
         const yInPixels = GlobalVariables.heightToPixels(this.y)
        
-        if(GlobalVariables.ctrlDown){
+        //if(GlobalVariables.ctrlDown){
 
             GlobalVariables.c.beginPath()
             GlobalVariables.c.fillStyle = '#80808080'
@@ -89,7 +89,7 @@ export default class Box extends Atom {
                 this.endY - yInPixels)
             GlobalVariables.c.fill()
             GlobalVariables.c.closePath()
-        }
+       //}
         
     }
 
@@ -97,7 +97,7 @@ export default class Box extends Atom {
      * When mouse moves and Ctrl is down updates value for box width and height
      */ 
     clickMove(x,y){
-        if(GlobalVariables.ctrlDown){
+       // if(GlobalVariables.ctrlDown){
         /**
          * Sets new box end to click target
          * @type {number}
@@ -108,7 +108,7 @@ export default class Box extends Atom {
          * @type {number}
          */
             this.endY= y
-        }
+        //}
     }
     /**
      * Clears the drawing of box when clickUp and updates values for atom selection
