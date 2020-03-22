@@ -110,8 +110,24 @@ export default class Molecule extends Atom{
      * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
      */ 
     clickDown(x,y, clickProcessed){
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
-        if(GlobalVariables.ctrlDown && !clickProcessed){
+        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
+        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){       
+            this.isMoving = true
+            this.selected = true
+            this.updateSidebar()
+            this.sendToRender()
+            clickProcessed = true
+            //GlobalVariables.atomsToCopy.push(this.serialize())  //This is causing an error message when you try to select click on one molecule and then another. We should only be running serialize() when control+c is pressed because the serialize process is super slow
+        }
+        else if (!GlobalVariables.ctrlDown){
+            this.selected = false
+        }
+
+        else if(GlobalVariables.ctrlDown && !clickProcessed){
             this.placeAtom({
                 parentMolecule: this, 
                 x: GlobalVariables.pixelsToWidth(x),
