@@ -305,12 +305,10 @@ export default class Atom {
                 this.selected = true
                 this.updateSidebar()
                 this.sendToRender()
-                GlobalVariables.atomsToCopy.push(this)
             }
         }
     }
 
-    
     /**
      * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D
      * @param {number} x - The X cordinate of the click
@@ -331,6 +329,7 @@ export default class Atom {
             this.sendToRender()
             clickProcessed = true
         }
+        //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
         }         

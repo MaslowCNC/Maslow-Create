@@ -112,6 +112,20 @@ export default class Molecule extends Atom{
         })
     }
 
+    keyPress(e){
+        if (GlobalVariables.ctrlDown && e == "c" && document.activeElement.id == "mainBody") {
+        GlobalVariables.currentMolecule.copy()
+        }
+        if (GlobalVariables.ctrlDown && e == "v" && document.activeElement.id == "mainBody" ) {
+            console.log("pasting")
+            GlobalVariables.atomsToCopy.forEach(item => {
+            let newAtomID = GlobalVariables.generateUniqueID()
+            item.uniqueID = newAtomID
+            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+            })   
+        }
+    }
+
     /**
      * Set the molecule's response to a mouse click
      * @param {number} x - The X cordinate of the click
