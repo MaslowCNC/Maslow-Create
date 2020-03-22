@@ -308,7 +308,7 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            GlobalVariables.atomsToCopy.push(this.serialize())
+            //GlobalVariables.atomsToCopy.push(this.serialize())  //This is causing an error message when you try to select click on one molecule and then another. We should only be running serialize() when control+c is pressed because the serialize process is super slow
         }
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
@@ -405,7 +405,7 @@ export default class Atom {
         if (['Delete', 'Backspace'].includes(key)){
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.deleteNode()     
+                this.deleteNode()
             }
         }
         this.inputs.forEach(child => {
