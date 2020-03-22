@@ -8062,6 +8062,20 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   });
   });
 
+  let dbInstance;
+
+  const db = () => {
+    if (dbInstance === undefined) {
+      dbInstance = localforage.createInstance({
+        name: 'jsxcad',
+        driver: localforage.INDEXEDDB,
+        storeName: 'jsxcad',
+        description: 'jsxcad local filesystem'
+      });
+    }
+    return dbInstance;
+  };
+
   /* global self */
 
   const watchers = new Set();
@@ -13368,148 +13382,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   var nodeFetch = {};
 
-  var toByteArray_1 = toByteArray$1;
-  var fromByteArray_1 = fromByteArray$1;
-
-  var lookup$1 = [];
-  var revLookup$1 = [];
-  var Arr$1 = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
-
-  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  for (var i = 0, len = code.length; i < len; ++i) {
-    lookup$1[i] = code[i];
-    revLookup$1[code.charCodeAt(i)] = i;
-  }
-
-  // Support decoding URL-safe base64 strings, as Node.js does.
-  // See: https://en.wikipedia.org/wiki/Base64#URL_applications
-  revLookup$1['-'.charCodeAt(0)] = 62;
-  revLookup$1['_'.charCodeAt(0)] = 63;
-
-  function getLens (b64) {
-    var len = b64.length;
-
-    if (len % 4 > 0) {
-      throw new Error('Invalid string. Length must be a multiple of 4')
-    }
-
-    // Trim off extra bytes after placeholder bytes are found
-    // See: https://github.com/beatgammit/base64-js/issues/42
-    var validLen = b64.indexOf('=');
-    if (validLen === -1) validLen = len;
-
-    var placeHoldersLen = validLen === len
-      ? 0
-      : 4 - (validLen % 4);
-
-    return [validLen, placeHoldersLen]
-  }
-
-  function _byteLength (b64, validLen, placeHoldersLen) {
-    return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-  }
-
-  function toByteArray$1 (b64) {
-    var tmp;
-    var lens = getLens(b64);
-    var validLen = lens[0];
-    var placeHoldersLen = lens[1];
-
-    var arr = new Arr$1(_byteLength(b64, validLen, placeHoldersLen));
-
-    var curByte = 0;
-
-    // if there are placeholders, only get up to the last complete 4 chars
-    var len = placeHoldersLen > 0
-      ? validLen - 4
-      : validLen;
-
-    var i;
-    for (i = 0; i < len; i += 4) {
-      tmp =
-        (revLookup$1[b64.charCodeAt(i)] << 18) |
-        (revLookup$1[b64.charCodeAt(i + 1)] << 12) |
-        (revLookup$1[b64.charCodeAt(i + 2)] << 6) |
-        revLookup$1[b64.charCodeAt(i + 3)];
-      arr[curByte++] = (tmp >> 16) & 0xFF;
-      arr[curByte++] = (tmp >> 8) & 0xFF;
-      arr[curByte++] = tmp & 0xFF;
-    }
-
-    if (placeHoldersLen === 2) {
-      tmp =
-        (revLookup$1[b64.charCodeAt(i)] << 2) |
-        (revLookup$1[b64.charCodeAt(i + 1)] >> 4);
-      arr[curByte++] = tmp & 0xFF;
-    }
-
-    if (placeHoldersLen === 1) {
-      tmp =
-        (revLookup$1[b64.charCodeAt(i)] << 10) |
-        (revLookup$1[b64.charCodeAt(i + 1)] << 4) |
-        (revLookup$1[b64.charCodeAt(i + 2)] >> 2);
-      arr[curByte++] = (tmp >> 8) & 0xFF;
-      arr[curByte++] = tmp & 0xFF;
-    }
-
-    return arr
-  }
-
-  function tripletToBase64$1 (num) {
-    return lookup$1[num >> 18 & 0x3F] +
-      lookup$1[num >> 12 & 0x3F] +
-      lookup$1[num >> 6 & 0x3F] +
-      lookup$1[num & 0x3F]
-  }
-
-  function encodeChunk$1 (uint8, start, end) {
-    var tmp;
-    var output = [];
-    for (var i = start; i < end; i += 3) {
-      tmp =
-        ((uint8[i] << 16) & 0xFF0000) +
-        ((uint8[i + 1] << 8) & 0xFF00) +
-        (uint8[i + 2] & 0xFF);
-      output.push(tripletToBase64$1(tmp));
-    }
-    return output.join('')
-  }
-
-  function fromByteArray$1 (uint8) {
-    var tmp;
-    var len = uint8.length;
-    var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
-    var parts = [];
-    var maxChunkLength = 16383; // must be multiple of 3
-
-    // go through the array every three bytes, we'll deal with trailing stuff later
-    for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-      parts.push(encodeChunk$1(
-        uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-      ));
-    }
-
-    // pad the end with zeros, but make sure to not forget the extra bytes
-    if (extraBytes === 1) {
-      tmp = uint8[len - 1];
-      parts.push(
-        lookup$1[tmp >> 2] +
-        lookup$1[(tmp << 4) & 0x3F] +
-        '=='
-      );
-    } else if (extraBytes === 2) {
-      tmp = (uint8[len - 2] << 8) + uint8[len - 1];
-      parts.push(
-        lookup$1[tmp >> 10] +
-        lookup$1[(tmp >> 4) & 0x3F] +
-        lookup$1[(tmp << 2) & 0x3F] +
-        '='
-      );
-    }
-
-    return parts.join('')
-  }
-
   // Copyright Joyent, Inc. and other Node contributors.
 
   // Split a filename into [root, dir, basename, ext], unix version
@@ -13584,7 +13456,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         } catch (error) {
         }
       } else if (isBrowser) {
-        await localforage.setItem(persistentPath, fromByteArray_1(data));
+        await db().setItem(persistentPath, data);
       }
     }
 
@@ -13614,10 +13486,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       };
     } else if (isBrowser) {
       return async (path) => {
-        const data = await localforage.getItem(qualify(path));
-        if (data !== null) {
-          return new Uint8Array(toByteArray_1(data));
-        }
+        const data = await db().getItem(qualify(path));
+        return data;
       };
     } else {
       throw Error('die');
@@ -18112,29 +17982,21 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const measureBoundingBoxGeneric = (geometry) => {
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
-    let empty = true;
     eachPoint$4(point => {
       minPoint = min(minPoint, point);
       maxPoint = max(maxPoint, point);
-      empty = false;
     },
               geometry);
-    if (empty) {
-      return [[0, 0, 0], [0, 0, 0]];
-    } else {
-      return [minPoint, maxPoint];
-    }
+    return [minPoint, maxPoint];
   };
 
   const measureBoundingBox$5 = (rawGeometry) => {
     const geometry = toKeptGeometry(rawGeometry);
-    let empty = true;
 
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
 
     const update = ([itemMinPoint, itemMaxPoint]) => {
-      empty = false;
       minPoint = min(minPoint, itemMinPoint);
       maxPoint = max(maxPoint, itemMaxPoint);
     };
@@ -18168,11 +18030,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     walk(geometry);
 
-    if (empty) {
-      return [[0, 0, 0], [0, 0, 0]];
-    } else {
-      return [minPoint, maxPoint];
-    }
+    return [minPoint, maxPoint];
   };
 
   const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
@@ -18259,62 +18117,90 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   // Union is a little more complex, since it can make violate disjointAssembly invariants.
 
+  const unifySolids = (geometry, ...geometries) => {
+    const todo = [];
+    for (const geometry of geometries) {
+      for (const { solid } of getSolids(geometry)) {
+        todo.push(solid);
+      }
+    }
+    return { solid: union$2(geometry.solid, ...todo), tags: geometry.tags };
+  };
+
+  const unifySurfaces = (geometry, ...geometries) => {
+    const todo = [];
+    for (const geometry of geometries) {
+      for (const { surface } of getSurfaces(geometry)) {
+        todo.push(surface);
+      }
+      for (const { z0Surface } of getZ0Surfaces(geometry)) {
+        todo.push(z0Surface);
+      }
+    }
+    return { surface: union$3(geometry.surface, ...todo), tags: geometry.tags };
+  };
+
+  const unifyZ0Surfaces = (geometry, ...geometries) => {
+    const todoSurfaces = [];
+    const todoZ0Surfaces = [];
+    for (const geometry of geometries) {
+      for (const { surface } of getSurfaces(geometry)) {
+        todoSurfaces.push(surface);
+      }
+      for (const { z0Surface } of getZ0Surfaces(geometry)) {
+        todoZ0Surfaces.push(z0Surface);
+      }
+    }
+    if (todoSurfaces.length > 0) {
+      return { surface: union$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+    } else {
+      return { surface: union(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+    }
+  };
+
+  const unifyPaths = (geometry, ...geometries) => {
+    const todo = [];
+    for (const geometry of geometries) {
+      for (const { paths } of getPaths(geometry)) {
+        todo.push(paths);
+      }
+    }
+    return { paths: union$1(geometry.paths, ...todo), tags: geometry.tags };
+  };
+
   const unionImpl = (geometry, ...geometries) => {
     const op = (geometry, descend) => {
       if (geometry.solid) {
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { solid } of getSolids(geometry)) {
-            todo.push(solid);
-          }
-        }
-        return { solid: union$2(geometry.solid, ...todo), tags: geometry.tags };
+        return unifySolids(geometry, ...geometries);
       } else if (geometry.surface) {
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { surface } of getSurfaces(geometry)) {
-            todo.push(surface);
-          }
-          for (const { z0Surface } of getZ0Surfaces(geometry)) {
-            todo.push(z0Surface);
-          }
-        }
-        return { surface: union$3(geometry.surface, ...todo), tags: geometry.tags };
+        return unifySurfaces(geometry, ...geometries);
       } else if (geometry.z0Surface) {
-        const todoSurfaces = [];
-        const todoZ0Surfaces = [];
-        for (const geometry of geometries) {
-          for (const { surface } of getSurfaces(geometry)) {
-            todoSurfaces.push(surface);
-          }
-          for (const { z0Surface } of getZ0Surfaces(geometry)) {
-            todoZ0Surfaces.push(z0Surface);
-          }
-        }
-        if (todoSurfaces.length > 0) {
-          return { surface: union$3(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
-        } else {
-          return { surface: union(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
-        }
+        return unifyZ0Surfaces(geometry, ...geometries);
       } else if (geometry.paths) {
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { paths } of getPaths(geometry)) {
-            todo.push(paths);
-          }
-        }
-        return { paths: union$1(geometry.paths, ...todo), tags: geometry.tags };
-      } else if (geometry.assembly) {
-        // Let's consider an assembly to have an implicit Empty() geometry at the end.
-        // Then we can implement union over assembly by assemble.
-        return { assembly: [...geometry.assembly, ...geometries], tags: geometry.tags };
-      } else if (geometry.disjointAssembly) {
-        // Likewise for disjointAssembly, but it needs to revert to an assembly, since it is no-longer disjoint.
-        return { assembly: [...geometry.disjointAssembly, ...geometries], tags: geometry.tags };
+        return unifyPaths(geometry, ...geometries);
+      } else if (geometry.assembly || geometry.disjointAssembly) {
+        const payload = geometry.assembly || geometry.disjointAssembly;
+        // We consider assemblies to have an implicit Empty() at the end.
+        return {
+          assembly: [
+            ...payload,
+            unifySolids({ solid: [] }, ...geometries),
+            unifySurfaces({ surface: [] }, ...geometries),
+            unifyPaths({ paths: [] }, ...geometries)
+          ],
+          tags: geometry.tags
+        };
       } else if (geometry.layers) {
-        // We union with layers by appending a new layer.
-        // It is not entirely that this is ideal, but will preserve semantics for layer to assembly conversion.
-        return { layers: [...geometry.layers, ...geometries], tags: geometry.tags };
+        // We consider layers to have an implicit Empty() at the end.
+        return {
+          layers: [
+            ...geometry.layers,
+            unifySolids({ solid: [] }, ...geometries),
+            unifySurfaces({ surface: [] }, ...geometries),
+            unifyPaths({ paths: [] }, ...geometries)
+          ],
+          tags: geometry.tags
+        };
       } else {
         return descend();
       }
@@ -22149,6 +22035,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     for (const geometry of geometries) {
       const [width, height] = measureSize(geometry);
+      if (!isFinite(width) || !isFinite(height)) {
+        continue;
+      }
       const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
       blocks.push({ w, h, geometry });
     }
@@ -26902,7 +26791,9 @@ return d[d.length-1];};return ", funcName].join("");
   Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
   Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-  const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
+  const Difference = (...args) => difference$5(...args);
+
+  const Empty = (...shapes) => Shape.fromGeometry({ disjointAssembly: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
   /**
    *
@@ -26980,6 +26871,8 @@ return d[d.length-1];};return ", funcName].join("");
   Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
   Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
   Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+
+  const Intersection = (...args) => intersection$5(...args);
 
   const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
 
@@ -27334,6 +27227,11 @@ return d[d.length-1];};return ", funcName].join("");
   Triangle.ofApothem = ofApothem$8;
   Triangle.ofRadius = ofRadius$c;
   Triangle.ofDiameter = ofDiameter$b;
+
+  const Union = (...args) => Empty().add(...args);
+
+  const UnionMethod = function (...args) { return Union(this, ...args); };
+  Shape.prototype.Union = UnionMethod;
 
   const Void = (shape) => Shape.fromGeometry(rewriteTags(['compose/non-positive'], [], shape.toGeometry()));
 
@@ -48105,9 +48003,11 @@ return d[d.length-1];};return ", funcName].join("");
     Cone: Cone,
     Cube: Cube,
     Cylinder: Cylinder,
+    Difference: Difference,
     Empty: Empty,
     Hexagon: Hexagon,
     Icosahedron: Icosahedron,
+    Intersection: Intersection,
     Layers: Layers,
     Line: Line,
     Path: Path,
@@ -48122,6 +48022,7 @@ return d[d.length-1];};return ", funcName].join("");
     Tetrahedron: Tetrahedron,
     Torus: Torus,
     Triangle: Triangle,
+    Union: Union,
     Void: Void,
     Wave: Wave,
     Item: Item$1,
@@ -54461,9 +54362,11 @@ return d[d.length-1];};return ", funcName].join("");
     Cone: Cone,
     Cube: Cube,
     Cylinder: Cylinder,
+    Difference: Difference,
     Empty: Empty,
     Hexagon: Hexagon,
     Icosahedron: Icosahedron,
+    Intersection: Intersection,
     Layers: Layers,
     Line: Line,
     Path: Path,
@@ -54478,6 +54381,7 @@ return d[d.length-1];};return ", funcName].join("");
     Tetrahedron: Tetrahedron,
     Torus: Torus,
     Triangle: Triangle,
+    Union: Union,
     Void: Void,
     Wave: Wave,
     Item: Item$1,
@@ -105220,7 +105124,7 @@ return d[d.length-1];};return ", funcName].join("");
         case 'stretch':
           return Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
         case 'svg':
-          const svgString = await toSvg(Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
+          const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
         case 'SVG Picture':
           const shape = Shape.fromGeometry(values[0]).center();

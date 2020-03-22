@@ -405,7 +405,7 @@ export default class Atom {
         if (['Delete', 'Backspace'].includes(key)){
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.deleteNode()     
+                this.deleteNode()
             }
         }
         this.inputs.forEach(child => {
