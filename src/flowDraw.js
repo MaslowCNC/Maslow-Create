@@ -140,10 +140,10 @@ window.addEventListener('keydown', e => {
         GlobalVariables.ctrlDown = true
     } 
     if (GlobalVariables.ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") {
-        newAtom = GlobalVariables.atomsToCopy
+        GlobalVariables.currentMolecule.copy()
     }
     if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody" ) {
-        newAtom.forEach(item => {
+        GlobalVariables.atomsToCopy.forEach(item => {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
             GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    

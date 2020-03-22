@@ -305,10 +305,11 @@ export default class Atom {
                 this.selected = true
                 this.updateSidebar()
                 this.sendToRender()
-                GlobalVariables.atomsToCopy.push(this.serialize())
+                GlobalVariables.atomsToCopy.push(this)
             }
         }
     }
+
     
     /**
      * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D
@@ -329,12 +330,10 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            //GlobalVariables.atomsToCopy.push(this.serialize())  //This is causing an error message when you try to select click on one molecule and then another. We should only be running serialize() when control+c is pressed because the serialize process is super slow
         }
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
-        }
-            
+        }         
         //Returns true if something was done with the click
         this.inputs.forEach(child => {
             if(child.clickDown(x,y, clickProcessed) == true){
@@ -346,8 +345,7 @@ export default class Atom {
                 clickProcessed = true
             }
         }
-       
-        
+           
         return clickProcessed 
     }
 
