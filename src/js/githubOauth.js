@@ -1347,8 +1347,6 @@ export default function GitHubModule(){
     this.convertFromOldFormat = function(json){
         
         var listOfMoleculeAtoms = json.molecules
-        console.log("Json: ")
-        console.log(json)
         
         //Find the top level molecule
         var projectObject = listOfMoleculeAtoms.filter((molecule) => { return molecule.topLevel == true })[0]
