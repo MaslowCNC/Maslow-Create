@@ -222,8 +222,10 @@ function placeGitHubMolecule(ev){
     menu.style.left = '-200%'  
 
     let clr = ev.target.id
-    const containerX = parseInt(cmenu._container.style.left, 10)
-    const containerY = parseInt(cmenu._container.style.top, 10)
+    const containerXinPixels = parseInt(cmenu._container.style.left, 10)
+    const containerYinPixels = parseInt(cmenu._container.style.top, 10)
+    const containerX = GlobalVariables.pixelsToWidth(containerXinPixels)
+    const containerY = GlobalVariables.pixelsToHeight(containerYinPixels)
     GlobalVariables.currentMolecule.placeAtom({
         x: containerX, 
         y: containerY, 
