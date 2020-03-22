@@ -458,6 +458,9 @@ export default class Molecule extends Atom{
         
         this.setValues(json) //Grab the values of everything from the passed object
         
+        console.log("All Atoms: ")
+        console.log(json.allAtoms)
+        
         json.allAtoms.forEach(atom => { //Place the atoms
             const promise = this.placeAtom(atom, GlobalVariables.availableTypes, false)
             promiseArray.push(promise)
@@ -502,76 +505,88 @@ export default class Molecule extends Atom{
      * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.
      */
     async placeAtom(newAtomObj, unlock){
-        var promise = null
-        console.log(newAtomObj)
-        for(var key in GlobalVariables.availableTypes) {
-            if (GlobalVariables.availableTypes[key].atomType == newAtomObj.atomType){
-                newAtomObj.parent = this
-                var atom = new GlobalVariables.availableTypes[key].creator(newAtomObj)
-                
-                //reassign the name of the Inputs to preserve linking
-                if(atom.atomType == 'Input' && typeof newAtomObj.name !== 'undefined'){
-                    atom.name = newAtomObj.name
-                    atom.draw() //The poling happens in draw :roll_eyes:
-                }
-
-                //If this is a molecule, de-serialize it
-                if(atom.atomType == 'Molecule'){
-                    promise = atom.deserialize(newAtomObj)
-                }
-                
-                //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
-                if(atom.atomType == 'Output'){
-                    //Check for existing outputs
-                    this.nodesOnTheScreen.forEach(atom => {
-                        if(atom.atomType == 'Output'){
-                            atom.deleteOutputAtom() //Remove them
-                        }
-                    })
-                }
-                
-                //If this is a github molecule load it from the web
-                if(atom.atomType == 'GitHubMolecule'){
-                    promise = atom.loadProjectByID(atom.projectID)
-                }
-                
-                //Add the atom to the list to display
-                this.nodesOnTheScreen.push(atom)
-                
-                if(unlock){
+        
+        try{
+            var promise = null
+            
+            if( newAtomObj == undefined){
+                console.log("UNDEFINED SEEN")
+                console.trace()
+            }
+            
+            for(var key in GlobalVariables.availableTypes) {
+                if (GlobalVariables.availableTypes[key].atomType == newAtomObj.atomType){
+                    newAtomObj.parent = this
+                    var atom = new GlobalVariables.availableTypes[key].creator(newAtomObj)
                     
-                    //Make this molecule spawn with all of it's parent's inputs
-                    if(atom.atomType == 'Molecule'){ //Not GitHubMolecule
-                        atom.copyInputsFromParent()
+                    //reassign the name of the Inputs to preserve linking
+                    if(atom.atomType == 'Input' && typeof newAtomObj.name !== 'undefined'){
+                        atom.name = newAtomObj.name
+                        atom.draw() //The poling happens in draw :roll_eyes:
+                    }
+
+                    //If this is a molecule, de-serialize it
+                    if(atom.atomType == 'Molecule'){
+                        promise = atom.deserialize(newAtomObj)
                     }
                     
-                    //Make it spawn ready to update right away
-                    if(promise != null){
-                        promise.then( ()=> {
-                            atom.beginPropogation()
+                    //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
+                    if(atom.atomType == 'Output'){
+                        //Check for existing outputs
+                        this.nodesOnTheScreen.forEach(atom => {
+                            if(atom.atomType == 'Output'){
+                                atom.deleteOutputAtom() //Remove them
+                            }
                         })
                     }
-                    else{
-                        atom.beginPropogation()
+                    
+                    //If this is a github molecule load it from the web
+                    if(atom.atomType == 'GitHubMolecule'){
+                        promise = atom.loadProjectByID(atom.projectID)
                     }
                     
-                    //Fake a click on the newly placed atom
-                    const downEvt = new MouseEvent('mousedown', {
-                        clientX: atom.x,
-                        clientY: atom.y
-                    })
-                    const upEvt = new MouseEvent('mouseup', {
-                        clientX: atom.x,
-                        clientY: atom.y
-                    })
+                    //Add the atom to the list to display
+                    this.nodesOnTheScreen.push(atom)
                     
-                    document.getElementById('flow-canvas').dispatchEvent(downEvt)
-                    document.getElementById('flow-canvas').dispatchEvent(upEvt)
-                    
+                    if(unlock){
+                        
+                        //Make this molecule spawn with all of it's parent's inputs
+                        if(atom.atomType == 'Molecule'){ //Not GitHubMolecule
+                            atom.copyInputsFromParent()
+                        }
+                        
+                        //Make it spawn ready to update right away
+                        if(promise != null){
+                            promise.then( ()=> {
+                                atom.beginPropogation()
+                            })
+                        }
+                        else{
+                            atom.beginPropogation()
+                        }
+                        
+                        //Fake a click on the newly placed atom
+                        const downEvt = new MouseEvent('mousedown', {
+                            clientX: atom.x,
+                            clientY: atom.y
+                        })
+                        const upEvt = new MouseEvent('mouseup', {
+                            clientX: atom.x,
+                            clientY: atom.y
+                        })
+                        
+                        document.getElementById('flow-canvas').dispatchEvent(downEvt)
+                        document.getElementById('flow-canvas').dispatchEvent(upEvt)
+                        
+                    }
                 }
             }
+            return promise
+        }catch(err){
+            console.warn("Unable to place: " + newAtomObj)
+            console.warn(err)
+            return Promise.resolve()
         }
-        return promise
     }
     
     /**
