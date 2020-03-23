@@ -121,13 +121,10 @@ export default class Molecule extends Atom{
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
-            clickProcessed = true  //Now we are only pushing the object when it's selected and only serializing when copying
+            clickProcessed = true  
         }
-        else if (!GlobalVariables.ctrlDown){
+        else if(!clickProcessed){
             this.selected = false
-        }
-
-        if(!clickProcessed){
             this.placeAtom({
                 parentMolecule: this, 
                 x: GlobalVariables.pixelsToWidth(x),
@@ -137,9 +134,29 @@ export default class Molecule extends Atom{
                 atomType: 'Box'
             }, null, GlobalVariables.secretTypes)
         }
+        
+        else if (!GlobalVariables.ctrlDown){
+            this.selected = false
+        }
 
     }
     
+    /**
+     * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
+    clickUp(x,y){
+        this.isMoving = false
+        
+        this.inputs.forEach(child => {
+            child.clickUp(x,y)     
+        })
+        if(this.output){
+            this.output.clickUp(x,y)
+        }
+    }
+
     /**
      * Handle double clicks by replacing the molecule currently on the screen with this one, esentially diving into it.
      * @param {number} x - The x cordinate of the click
