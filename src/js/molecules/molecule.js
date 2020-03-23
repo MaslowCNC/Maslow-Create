@@ -555,11 +555,11 @@ export default class Molecule extends Atom{
                         //Make it spawn ready to update right away
                         if(promise != null){
                             promise.then( ()=> {
-                                atom.beginPropogation()
+                                //atom.beginPropogation()
                             })
                         }
                         else{
-                            atom.beginPropogation()
+                            //atom.beginPropogation()
                         }
                         
                         //Fake a click on the newly placed atom
