@@ -25,17 +25,6 @@ const ctrlKey = 17
 * @type {number}
 */
 const cmdKey = 91
-/** 
-* V event key
-* @type {number}
-*/
-const vKey = 86
-/** 
-* C event key
-* @type {number}
-*/
-const cKey = 67
-
 
 // Event Listeners
 /** 
@@ -132,14 +121,10 @@ flowCanvas.addEventListener('mouseup', event => {
 * Array containing selected atoms to copy or delete
 * @type {array}
 */
-let newAtom
-
 window.addEventListener('keydown', e => {
-
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = true
-    } 
-    
+    }  
     //every time a key is pressed in molecule
     GlobalVariables.currentMolecule.keyPress(event.key)      
     //every time a key is pressed

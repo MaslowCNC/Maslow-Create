@@ -104,28 +104,6 @@ export default class Molecule extends Atom{
 
     }
 
-    copy(){
-        this.nodesOnTheScreen.forEach(atom => {
-            if(atom.selected){
-                GlobalVariables.atomsToCopy.push(atom.serialize())
-            }
-        })
-    }
-
-    keyPress(e){
-        if (GlobalVariables.ctrlDown && e == "c" && document.activeElement.id == "mainBody") {
-        GlobalVariables.currentMolecule.copy()
-        }
-        if (GlobalVariables.ctrlDown && e == "v" && document.activeElement.id == "mainBody" ) {
-            console.log("pasting")
-            GlobalVariables.atomsToCopy.forEach(item => {
-            let newAtomID = GlobalVariables.generateUniqueID()
-            item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
-            })   
-        }
-    }
-
     /**
      * Set the molecule's response to a mouse click
      * @param {number} x - The X cordinate of the click
@@ -201,6 +179,34 @@ export default class Molecule extends Atom{
         this.updateSidebar()
         this.sendToRender()
     }
+
+    /**
+     * Pushes serialized atoms into array if selected
+     */
+    copy(){
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.selected){
+                GlobalVariables.atomsToCopy.push(atom.serialize())
+            }
+        })
+    }
+    /**
+     * Runs everytime a key is pressed
+     * @param {event} The key that is pressed
+     */
+    keyPress(e){
+        if (GlobalVariables.ctrlDown && e == "c" && document.activeElement.id == "mainBody") {
+            GlobalVariables.currentMolecule.copy()
+        }
+        if (GlobalVariables.ctrlDown && e == "v" && document.activeElement.id == "mainBody" ) {
+            GlobalVariables.atomsToCopy.forEach(item => {
+                let newAtomID = GlobalVariables.generateUniqueID()
+                item.uniqueID = newAtomID
+                GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+            })   
+        }
+    }
+
     
     /**
      * Unselect this molecule

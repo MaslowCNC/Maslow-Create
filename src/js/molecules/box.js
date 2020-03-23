@@ -80,16 +80,16 @@ export default class Box extends Atom {
        
         //if(GlobalVariables.ctrlDown){
 
-            GlobalVariables.c.beginPath()
-            GlobalVariables.c.fillStyle = '#80808080'
-            GlobalVariables.c.rect(
-                xInPixels, 
-                yInPixels, 
-                this.endX - xInPixels, 
-                this.endY - yInPixels)
-            GlobalVariables.c.fill()
-            GlobalVariables.c.closePath()
-       //}
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#80808080'
+        GlobalVariables.c.rect(
+            xInPixels, 
+            yInPixels, 
+            this.endX - xInPixels, 
+            this.endY - yInPixels)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        //}
         
     }
 
@@ -97,17 +97,17 @@ export default class Box extends Atom {
      * When mouse moves and Ctrl is down updates value for box width and height
      */ 
     clickMove(x,y){
-       // if(GlobalVariables.ctrlDown){
+        // if(GlobalVariables.ctrlDown){
         /**
          * Sets new box end to click target
          * @type {number}
          */ 
-            this.endX = x
-            /**
+        this.endX = x
+        /**
          * Sets new box end to click target
          * @type {number}
          */
-            this.endY= y
+        this.endY= y
         //}
     }
     /**
