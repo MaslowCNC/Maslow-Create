@@ -123,22 +123,10 @@ export default class Molecule extends Atom{
             this.sendToRender()
             clickProcessed = true  
         }
-        else if(!clickProcessed){
-            this.selected = false
-            this.placeAtom({
-                parentMolecule: this, 
-                x: GlobalVariables.pixelsToWidth(x),
-                y: GlobalVariables.pixelsToHeight(y),
-                parent: this,
-                name: 'Box',
-                atomType: 'Box'
-            }, null, GlobalVariables.secretTypes)
-        }
-        
+
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
         }
-
     }
     
     /**
@@ -147,14 +135,9 @@ export default class Molecule extends Atom{
      * @param {number} y - The Y cordinate of the click
      */ 
     clickUp(x,y){
-        this.isMoving = false
-        
-        this.inputs.forEach(child => {
-            child.clickUp(x,y)     
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =>{
+         atom.isMoving = false
         })
-        if(this.output){
-            this.output.clickUp(x,y)
-        }
     }
 
     /**

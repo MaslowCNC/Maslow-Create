@@ -64,6 +64,18 @@ flowCanvas.addEventListener('mousedown', event => {
 
     })
 
+    if (!clickHandledByMolecule){
+
+        GlobalVariables.currentMolecule.placeAtom({
+                parentMolecule: GlobalVariables.currentMolecule, 
+                x: GlobalVariables.pixelsToWidth(event.clientX),
+                y: GlobalVariables.pixelsToHeight(event.clientY),
+                parent: GlobalVariables.currentMolecule,
+                name: 'Box',
+                atomType: 'Box'
+            }, null, GlobalVariables.secretTypes)
+    }
+
     GlobalVariables.currentMolecule.clickDown(event.clientX, event.clientY, clickHandledByMolecule)
     
     
@@ -115,6 +127,7 @@ flowCanvas.addEventListener('mouseup', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY)      
     })
+    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)      
 })
 
 /** 
