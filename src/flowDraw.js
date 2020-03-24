@@ -75,9 +75,6 @@ flowCanvas.addEventListener('mousedown', event => {
                 atomType: 'Box'
             }, null, GlobalVariables.secretTypes)
     }
-
-    GlobalVariables.currentMolecule.clickDown(event.clientX, event.clientY, clickHandledByMolecule)
-    
     
     if(!clickHandledByMolecule){
 

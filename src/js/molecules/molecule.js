@@ -103,31 +103,6 @@ export default class Molecule extends Atom{
         GlobalVariables.c.fill()
 
     }
-
-    /**
-     * Set the molecule's response to a mouse click
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
-     * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
-     */ 
-    clickDown(x,y, clickProcessed){
-        let xInPixels = GlobalVariables.widthToPixels(this.x)
-        let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
-
-        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
-        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){        
-            this.isMoving = true
-            this.selected = true
-            this.updateSidebar()
-            this.sendToRender()
-            clickProcessed = true  
-        }
-
-        else if (!GlobalVariables.ctrlDown){
-            this.selected = false
-        }
-    }
     
     /**
      * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.
