@@ -55,22 +55,28 @@ export default class Readme extends Atom{
 
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         
         super.draw() //Super call to draw the rest
         
         //draw the two slashes on the node//
         GlobalVariables.c.strokeStyle = '#949294'
-        GlobalVariables.c.lineWidth = 3
+        GlobalVariables.c.lineWidth = 2
         GlobalVariables.c.lineCap = 'round'
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(xInPixels - 11, yInPixels + 10)
-        GlobalVariables.c.lineTo(xInPixels, yInPixels - 10)
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/1.5, yInPixels + radiusInPixels/3)
+        GlobalVariables.c.lineTo(xInPixels, yInPixels - radiusInPixels)
+        GlobalVariables.c.stroke()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/1.5)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels - radiusInPixels/1.5)
         GlobalVariables.c.stroke()
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(xInPixels, yInPixels + 10)
-        GlobalVariables.c.lineTo(xInPixels + 11, yInPixels - 10)
+        GlobalVariables.c.moveTo(xInPixels, yInPixels + radiusInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/1.5, yInPixels - radiusInPixels/3)
         GlobalVariables.c.stroke()
     }
     
