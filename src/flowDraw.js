@@ -154,8 +154,12 @@ window.addEventListener('keydown', e => {
             GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
         })   
     }
+    console.log(e.keyCode)
     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+       /* if (e.keyCode == "8"){
+        molecule.deleteNode()  
+        }*/
         molecule.keyPress(event.key)      
     })
 
