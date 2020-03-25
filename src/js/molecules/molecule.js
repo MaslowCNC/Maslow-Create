@@ -63,7 +63,7 @@ export default class Molecule extends Atom{
             parent: this,
             name: 'Output',
             atomType: 'Output'
-        }, null, GlobalVariables.secretTypes)
+        }, false)
     }
     
     /**
@@ -459,7 +459,7 @@ export default class Molecule extends Atom{
         this.setValues(json) //Grab the values of everything from the passed object
         
         json.allAtoms.forEach(atom => { //Place the atoms
-            const promise = this.placeAtom(atom, GlobalVariables.availableTypes, false)
+            const promise = this.placeAtom(atom, false)
             promiseArray.push(promise)
         })
         
@@ -502,6 +502,9 @@ export default class Molecule extends Atom{
      * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.
      */
     async placeAtom(newAtomObj, unlock){
+        
+        console.log("Unlock?: " + unlock)
+        console.trace()
         
         try{
             var promise = null
@@ -547,19 +550,21 @@ export default class Molecule extends Atom{
                     
                     if(unlock){
                         
+                        console.log("Place unlock")
+                        
                         //Make this molecule spawn with all of it's parent's inputs
                         if(atom.atomType == 'Molecule'){ //Not GitHubMolecule
                             atom.copyInputsFromParent()
                         }
                         
-                        //Make it spawn ready to update right away
+                        //Make begin propogation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
-                                //atom.beginPropogation()
+                                atom.beginPropogation()
                             })
                         }
                         else{
-                            //atom.beginPropogation()
+                            atom.beginPropogation()
                         }
                         
                         //Fake a click on the newly placed atom
@@ -574,7 +579,6 @@ export default class Molecule extends Atom{
                         
                         document.getElementById('flow-canvas').dispatchEvent(downEvt)
                         document.getElementById('flow-canvas').dispatchEvent(upEvt)
-                        
                     }
                 }
             }
