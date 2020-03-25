@@ -13,7 +13,16 @@ GlobalVariables.runMode = window.location.href.includes('run') //Check if we are
 
 GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
-
+/** 
+* V event key
+* @type {number}
+*/
+const vKey = 86
+/** 
+* C event key
+* @type {number}
+*/
+const cKey = 67
 
 /** 
 * Ctrl event key
@@ -67,13 +76,13 @@ flowCanvas.addEventListener('mousedown', event => {
     if (!clickHandledByMolecule){
 
         GlobalVariables.currentMolecule.placeAtom({
-                parentMolecule: GlobalVariables.currentMolecule, 
-                x: GlobalVariables.pixelsToWidth(event.clientX),
-                y: GlobalVariables.pixelsToHeight(event.clientY),
-                parent: GlobalVariables.currentMolecule,
-                name: 'Box',
-                atomType: 'Box'
-            }, null, GlobalVariables.secretTypes)
+            parentMolecule: GlobalVariables.currentMolecule, 
+            x: GlobalVariables.pixelsToWidth(event.clientX),
+            y: GlobalVariables.pixelsToHeight(event.clientY),
+            parent: GlobalVariables.currentMolecule,
+            name: 'Box',
+            atomType: 'Box'
+        }, null, GlobalVariables.secretTypes)
     }
     
     if(!clickHandledByMolecule){
@@ -134,9 +143,17 @@ flowCanvas.addEventListener('mouseup', event => {
 window.addEventListener('keydown', e => {
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = true
-    }  
-    //every time a key is pressed in molecule
-    GlobalVariables.currentMolecule.keyPress(event.key)      
+    }      
+    if (GlobalVariables.ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") {
+        GlobalVariables.currentMolecule.copy()
+    }
+    if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody" ) {
+        GlobalVariables.atomsToCopy.forEach(item => {
+            let newAtomID = GlobalVariables.generateUniqueID()
+            item.uniqueID = newAtomID
+            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+        })   
+    }
     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.keyPress(event.key)      

@@ -109,9 +109,9 @@ export default class Molecule extends Atom{
      * @param {number} x - The X cordinate of the click
      * @param {number} y - The Y cordinate of the click
      */ 
-    clickUp(x,y){
+    clickUp(){
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =>{
-         atom.isMoving = false
+            atom.isMoving = false
         })
     }
 
@@ -165,23 +165,6 @@ export default class Molecule extends Atom{
             }
         })
     }
-    /**
-     * Runs everytime a key is pressed
-     * @param {event} The key that is pressed
-     */
-    keyPress(e){
-        if (GlobalVariables.ctrlDown && e == "c" && document.activeElement.id == "mainBody") {
-            GlobalVariables.currentMolecule.copy()
-        }
-        if (GlobalVariables.ctrlDown && e == "v" && document.activeElement.id == "mainBody" ) {
-            GlobalVariables.atomsToCopy.forEach(item => {
-                let newAtomID = GlobalVariables.generateUniqueID()
-                item.uniqueID = newAtomID
-                GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
-            })   
-        }
-    }
-
     
     /**
      * Unselect this molecule
