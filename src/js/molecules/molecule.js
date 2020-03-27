@@ -471,11 +471,11 @@ export default class Molecule extends Atom{
             })
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
-            // if(this.topLevel){
-                //console.log("Beginning propogation: ")
-                // this.backgroundClick()
-                // this.beginPropogation()
-            // }
+            if(this.topLevel){
+                console.log("Beginning propagation: ")
+                this.backgroundClick()
+                this.beginPropogation()
+            }
         })
     }
     
@@ -503,16 +503,8 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, unlock){
         
-        console.log("Unlock?: " + unlock)
-        console.trace()
-        
         try{
             var promise = null
-            
-            if( newAtomObj == undefined){
-                console.log("UNDEFINED SEEN")
-                console.trace()
-            }
             
             for(var key in GlobalVariables.availableTypes) {
                 if (GlobalVariables.availableTypes[key].atomType == newAtomObj.atomType){
@@ -545,12 +537,12 @@ export default class Molecule extends Atom{
                         promise = atom.loadProjectByID(atom.projectID)
                     }
                     
+                    atom.setValues([]) //This is a big of a hack to make the atom spawn any inputs it needs
+                    
                     //Add the atom to the list to display
                     this.nodesOnTheScreen.push(atom)
                     
                     if(unlock){
-                        
-                        console.log("Place unlock")
                         
                         //Make this molecule spawn with all of it's parent's inputs
                         if(atom.atomType == 'Molecule'){ //Not GitHubMolecule
