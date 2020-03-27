@@ -420,12 +420,6 @@ export default class Atom {
      */ 
     keyPress(key){
         //runs whenever a key is pressed
-        if (['Delete', 'Backspace'].includes(key)){
-            if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
-                //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.deleteNode()     
-            }
-        }
         this.inputs.forEach(child => {
             child.keyPress(key)
         })

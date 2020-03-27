@@ -156,13 +156,18 @@ window.addEventListener('keydown', e => {
     }
     console.log(e.keyCode)
     //every time a key is pressed
+    let listToDelete = []
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-       /* if (e.keyCode == "8"){
-        molecule.deleteNode()  
-        }*/
+       if (e.keyCode == "8"){
+        listToDelete.push(molecule)
+        }
         molecule.keyPress(event.key)      
     })
-
+    listToDelete.forEach(atom =>{
+            if (atom.selected){
+            atom.deleteNode()  
+            }
+        })
 })
 
 window.addEventListener('keyup', e => {
