@@ -358,7 +358,7 @@ export default class Molecule extends Atom{
             list.appendChild(document.createElement('br'))
             list.appendChild(document.createElement('br'))
             
-            var div = document.createElement('h3')
+            var div = document.createElement('h2')
             div.setAttribute('style','text-align:center;')
             list.appendChild(div)
             var valueText = document.createTextNode('ReadMe')
