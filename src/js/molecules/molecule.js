@@ -416,8 +416,8 @@ export default class Molecule extends Atom{
         var sortableAtomsList = this.nodesOnTheScreen
         sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)})
         
-        sortableAtomsList.forEach(molecule => {
-            generatedReadme = generatedReadme.concat(molecule.requestReadme())
+        sortableAtomsList.forEach(atom => {
+            generatedReadme = generatedReadme.concat(atom.requestReadme())
         })
         
         //Check to see if any of the children added anything if not, remove the bit we added
