@@ -315,8 +315,6 @@ function animate() {
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
         atom.update()
-
-
     })
 
     GlobalVariables.display.render()
