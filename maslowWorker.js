@@ -105023,7 +105023,6 @@ return d[d.length-1];};return ", funcName].join("");
     
     try {
       var { key, values } = question;
-      console.log('Thread doing: ' + key);
       clearCache();
       switch (key) {
         case 'assemble':
@@ -105065,15 +105064,10 @@ return d[d.length-1];};return ", funcName].join("");
           // Extract shapes
           let items = solidToSplit.bom();
           
-          console.log("Here:");
-          console.log(items);
-          
           var shapes = [];
           items.forEach(item => {
               shapes.push(solidToSplit.keep(item));
           });
-          
-          console.log(shapes);
           
           const sheetX = values[2];
           const sheetY = values[3];
@@ -105093,7 +105087,6 @@ return d[d.length-1];};return ", funcName].join("");
         case 'rectangle':
           return Square(values[0], values[1]).toDisjointGeometry();
         case 'Over Cut Inside Corners':
-          console.log('Overcutting corners');
           const overcutShape = Shape.fromGeometry(values[0]);
           const overcutSection = overcutShape.section(Z$h());
           const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });

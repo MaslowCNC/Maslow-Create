@@ -151,6 +151,20 @@ export default class Output extends Atom {
     }
     
     /**
+     * Override super delete function to prevent output from being deleted
+     */ 
+    deleteNode(){
+        
+    }
+    
+    /**
+     * A function to allow you to still call the delete function if needed.
+     */
+    deleteOutputAtom(){
+        super.deleteNode()
+    }
+    
+    /**
      * I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.
      */ 
     setID(newID){

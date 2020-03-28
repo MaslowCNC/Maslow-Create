@@ -936,12 +936,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/globalvariables.js~globalvariables#secrettypes",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-secretTypes",
-    "src/js/globalvariables.js~GlobalVariables#secretTypes",
-    "member"
-  ],
-  [
     "src/js/globalvariables.js~globalvariables#widthtopixels",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-widthToPixels",
     "src/js/globalvariables.js~GlobalVariables#widthToPixels",
@@ -1950,12 +1944,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#savedconnectors",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-savedConnectors",
-    "src/js/molecules/molecule.js~Molecule#savedConnectors",
-    "member"
-  ],
-  [
     "src/js/molecules/molecule.js~molecule#selected",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-selected",
     "src/js/molecules/molecule.js~Molecule#selected",
@@ -2013,6 +2001,18 @@ window.esdocSearchIndex = [
     "src/js/molecules/output.js~output#constructor",
     "class/src/js/molecules/output.js~Output.html#instance-constructor-constructor",
     "src/js/molecules/output.js~Output#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/output.js~output#deletenode",
+    "class/src/js/molecules/output.js~Output.html#instance-method-deleteNode",
+    "src/js/molecules/output.js~Output#deleteNode",
+    "method"
+  ],
+  [
+    "src/js/molecules/output.js~output#deleteoutputatom",
+    "class/src/js/molecules/output.js~Output.html#instance-method-deleteOutputAtom",
+    "src/js/molecules/output.js~Output#deleteOutputAtom",
     "method"
   ],
   [
