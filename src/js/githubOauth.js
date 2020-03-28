@@ -1363,7 +1363,7 @@ export default function GitHubModule(){
                     }
                     else{ //Else replace it with a version which does have allAtoms from the list
                         //Find the version in molecules list and plug it in
-                         allAtomsObject[allAtomsIndex] = listOfMoleculeAtoms.filter((molecule) => { return molecule.uniqueID == atom.uniqueID })[0]
+                        allAtomsObject[allAtomsIndex] = listOfMoleculeAtoms.filter((molecule) => { return molecule.uniqueID == atom.uniqueID })[0]
                         //Remove that element from the listOfMoleculeAtoms
                         listOfMoleculeAtoms.splice(listOfMoleculeAtoms.findIndex(e => e.uniqueID == atom.uniqueID),1)
                     }
