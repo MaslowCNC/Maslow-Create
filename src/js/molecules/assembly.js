@@ -43,8 +43,6 @@ export default class Assembly extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
-        
-        addOrDeletePorts(this)
     }
     
     /**

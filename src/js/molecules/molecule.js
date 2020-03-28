@@ -472,7 +472,6 @@ export default class Molecule extends Atom{
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
             if(this.topLevel){
-                console.log("Beginning propagation: ")
                 this.backgroundClick()
                 this.beginPropogation()
             }
@@ -536,8 +535,6 @@ export default class Molecule extends Atom{
                     if(atom.atomType == 'GitHubMolecule'){
                         promise = atom.loadProjectByID(atom.projectID)
                     }
-                    
-                    atom.setValues([]) //This is a big of a hack to make the atom spawn any inputs it needs
                     
                     //Add the atom to the list to display
                     this.nodesOnTheScreen.push(atom)

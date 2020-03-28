@@ -70,7 +70,7 @@ export default class GitHubMolecule extends Molecule {
         }
         var promsie = this.deserialize(result)
         
-        // this.setValues(preservedValues)
+        this.setValues(preservedValues)
         
         return promsie
     }
