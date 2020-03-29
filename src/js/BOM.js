@@ -45,7 +45,8 @@ export const extractBomTags = async(geometry) => {
     var bomItems = []
     
     var result = await GlobalVariables.ask({values: [geometry], key: "getBOM"})
-    
+    console.log("BOM result: ")
+    console.log(result)
     if (result != -1 ){
         //Filter for only bomItems
         bomItems = result.filter(item => {
@@ -53,14 +54,14 @@ export const extractBomTags = async(geometry) => {
         })
         
         bomItems = bomItems.map(JSON.parse)
-        //bomItems = bomItems.map(JSON.parse)
         
         //Consolidate similar items into a single item
         var compiledArray = []
         bomItems.forEach(function (bomElement) {
-            if (!this[bomElement.BOMitemName]) {
-                this[bomElement.BOMitemName] = new BOMEntry
-                this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName
+            if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn't already have one of these
+                this[bomElement.BOMitemName] = new BOMEntry             //Create one
+                this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
+                this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
                 this[bomElement.BOMitemName].source = bomElement.source
                 compiledArray.push(this[bomElement.BOMitemName])
             }
