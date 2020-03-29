@@ -45,8 +45,7 @@ export const extractBomTags = async(geometry) => {
     var bomItems = []
     
     var result = await GlobalVariables.ask({values: [geometry], key: "getBOM"})
-    console.log("BOM result: ")
-    console.log(result)
+    
     if (result != -1 ){
         //Filter for only bomItems
         bomItems = result.filter(item => {
