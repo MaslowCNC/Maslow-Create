@@ -458,17 +458,21 @@ export default class Molecule extends Atom{
         
         this.setValues(json) //Grab the values of everything from the passed object
         
-        json.allAtoms.forEach(atom => { //Place the atoms
-            const promise = this.placeAtom(atom, false)
-            promiseArray.push(promise)
-        })
+        if(json.allAtoms){
+            json.allAtoms.forEach(atom => { //Place the atoms
+                const promise = this.placeAtom(atom, false)
+                promiseArray.push(promise)
+            })
+        }
         
         return Promise.all(promiseArray).then( ()=> { //Once all the atoms are placed we can finish
             
             //Place the connectors
-            json.allConnectors.forEach(connector => {
-                this.placeConnector(connector)
-            })
+            if(json.allConnectors){
+                json.allConnectors.forEach(connector => {
+                    this.placeConnector(connector)
+                })
+            }
             
             this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
             if(this.topLevel){

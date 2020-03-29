@@ -571,7 +571,6 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.ready = true
-            this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. This prevents...what? What does this do?
             this.output.setValue(this.value)
         }
     }
@@ -590,6 +589,8 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.processing = true
+            
+            this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             
             this.clearAlert()
             
