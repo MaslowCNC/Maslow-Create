@@ -307,7 +307,6 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            console.log(this.uniqueID)
         }
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
