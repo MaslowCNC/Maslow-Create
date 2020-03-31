@@ -108,7 +108,7 @@ export default class AttachmentPoint {
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
          */
-        this.ready = false
+        this.ready = true
         /** 
          * A list of all of the connectors attached to this attachmet point
          * @type {object}
@@ -403,9 +403,9 @@ export default class AttachmentPoint {
     }
     
     /**
-     * Can be called to see if the target cordinates are within this ap. Returns true/false.
-     * @param {number} x - The x cordinate of the target
-     * @param {number} y - The y cordinate of the target
+     * Can be called to see if the target coordinates are within this ap. Returns true/false.
+     * @param {number} x - The x coordinate of the target
+     * @param {number} y - The y coordinate of the target
      */ 
     wasConnectionMade(x,y){
 
@@ -450,6 +450,11 @@ export default class AttachmentPoint {
             if(this.parentMolecule.output){
                 this.parentMolecule.output.waitOnComingInformation()
             }
+        }
+        
+        //Check if this is the output of a molecule. Pass the command out.
+        if(this.parentMolecule.atomType == "Output"){
+            this.parentMolecule.parent.output.waitOnComingInformation()
         }
     }
     

@@ -105060,19 +105060,24 @@ return d[d.length-1];};return ", funcName].join("");
             return returnVal;
           }
         case 'layout':
+          console.log("Doing layout");
           const solidToSplit = Shape.fromGeometry(values[0]);
-          // Extract shapes
-          let items = solidToSplit.bom();
           
-          var shapes = [];
-          items.forEach(item => {
-              shapes.push(solidToSplit.keep(item));
+          console.log("Updated 11:29");
+          
+          var flatItems = [];
+          solidToSplit.items().forEach(item => {
+              flatItems.push(item.flat().to(Z$h(0)));
           });
           
-          const sheetX = values[2];
-          const sheetY = values[3];
-          const sheet = Layers(...shapes).squash().Page({ size: [2438, 1219] });
-          return sheet.toDisjointGeometry();
+          console.log(flatItems);
+          
+          const laidOut = Layers(...flatItems).Page();
+          
+          console.log(laidOut);
+          
+          //return api.Layers(...flatItems).Page().toDisjointGeometry();
+          return laidOut.toDisjointGeometry();
         case 'difference':
           return Shape.fromGeometry(values[0]).cut(Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
         case 'extractTag':
