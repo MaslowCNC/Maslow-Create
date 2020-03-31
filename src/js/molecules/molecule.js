@@ -152,7 +152,7 @@ export default class Molecule extends Atom{
      * Grab values from the inputs and push them out to the input atoms.
      */ 
     updateValue(){
-        
+        this.output.waitOnComingInformation()
         if(this.inputs.every(x => x.ready)){
             
             this.clearAlert()

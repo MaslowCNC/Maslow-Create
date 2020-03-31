@@ -108,7 +108,7 @@ export default class AttachmentPoint {
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
          */
-        this.ready = false
+        this.ready = true
         /** 
          * A list of all of the connectors attached to this attachmet point
          * @type {object}
