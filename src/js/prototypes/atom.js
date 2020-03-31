@@ -307,7 +307,7 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            //GlobalVariables.atomsToCopy.push(this.serialize())  //This is causing an error message when you try to select click on one molecule and then another. We should only be running serialize() when control+c is pressed because the serialize process is super slow
+            console.log(this.uniqueID)
         }
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
@@ -616,12 +616,6 @@ export default class Atom {
         }
     }
     
-    /**
-     * This locks all the inputs downstream of this which will need to wait for it to update
-     */
-    waitOnComingInformation(){
-        this.output.waitOnComingInformation()
-    }
     
     /**
      * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.

@@ -56,7 +56,6 @@ export default class ShrinkWrap extends Atom{
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 
     updateValue(){
-        this.output.waitOnComingInformation()
         if(this.inputs.every(x => x.ready)){
             try{
                 var inputsList = []
