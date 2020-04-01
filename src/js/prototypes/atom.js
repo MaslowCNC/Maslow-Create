@@ -456,14 +456,15 @@ export default class Atom {
         if (this.atomType == 'Molecule' ){
             
             let headerBar_title = document.querySelector('#headerBar_title')
-            while (headerBar_title.firstChild) {
-                headerBar_title.removeChild(headerBar_title.firstChild)
+            if(headerBar_title){
+                while (headerBar_title.firstChild) {
+                    headerBar_title.removeChild(headerBar_title.firstChild)
+                }
+               
+                var name1 = document.createElement('p')
+                name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
+                headerBar_title.appendChild(name1)
             }
-           
-            var name1 = document.createElement('p')
-            name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
-            headerBar_title.appendChild(name1)
-
         }
 
         //Create a list element
