@@ -1166,8 +1166,11 @@ export default function GitHubModule(){
             threadCompute([shape], "SVG Picture").then(contentSvg => {
                 this.progressSave(10)
                 
+                console.warn("Saving svg thumbnail is broken. Discarding: " + contentSvg)
+                
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
+                    
                     var totalParts = 0
                     var totalCost  = 0
                     if(bomItems != undefined){
@@ -1187,14 +1190,13 @@ export default function GitHubModule(){
                     })
                     
                     const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)
-                    
                     this.createCommit(octokit,{
                         owner: saveUser,
                         repo: saveRepoName,
                         base: 'master', /* optional: defaults to default branch */
                         changes: {
                             files: {
-                                'project.svg': contentSvg,
+                                //'project.svg': contentSvg,
                                 'BillOfMaterials.md': bomContent,
                                 'README.md': readmeContent,
                                 'project.maslowcreate': projectContent

@@ -274,8 +274,6 @@ function init() {
             })
             GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
             GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
-                GlobalVariables.evalLock = false
-                GlobalVariables.topLevelMolecule.unlock()
                 GlobalVariables.topLevelMolecule.backgroundClick()
             })
         }
