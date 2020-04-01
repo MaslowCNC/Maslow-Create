@@ -1166,6 +1166,8 @@ export default function GitHubModule(){
             threadCompute([shape], "SVG Picture").then(contentSvg => {
                 this.progressSave(10)
                 
+                console.warn("Saving svg thumbnail is broken. Discarding: " + contentSvg)
+                
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
                     
