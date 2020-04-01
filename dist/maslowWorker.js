@@ -108849,8 +108849,6 @@ return d[d.length-1];};return ", funcName].join("");
           console.log("Doing layout");
           const solidToSplit = Shape.fromGeometry(values[0]);
           
-          console.log("Updated 11:29");
-          
           var flatItems = [];
           solidToSplit.items().forEach(item => {
               flatItems.push(item.flat().to(Z$k(0)));

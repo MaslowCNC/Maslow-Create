@@ -773,6 +773,9 @@ export default class Display {
                 dataset.mesh = new THREE.Mesh(threejsGeometry, this.buildMeshMaterial(tags))
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
+            } else if (geometry.threejsPlan){
+                walk(geometry.threejsVisualization)
+                walk(geometry.threejsContent)
             }
         }
         walk(threejsGeometry)
