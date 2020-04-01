@@ -317,11 +317,11 @@ export default class AttachmentPoint {
                 
             }
             this.showHoverText = true
-            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels/1.2 ){
-                this.expandedRadius = true    
+            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels/2.1 ){
+                this.expandedRadius = true
             }  
             else{
-                this.expandedRadius = false      
+                this.expandedRadius = false
             }
         }
         else{
@@ -408,10 +408,10 @@ export default class AttachmentPoint {
      * @param {number} y - The y coordinate of the target
      */ 
     wasConnectionMade(x,y){
-
+        
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius/2.1)
 
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels && this.type == 'input'){  //If we have released the mouse here and this is an input...
