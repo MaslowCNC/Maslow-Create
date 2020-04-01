@@ -108810,7 +108810,6 @@ return d[d.length-1];};return ", funcName].join("");
     try {
       var { key, values } = question;
       clearCache();
-      console.log("computing: " + key);
       switch (key) {
         case 'assemble':
           var inputs = values[0].map(Shape.fromGeometry);
@@ -108863,7 +108862,6 @@ return d[d.length-1];};return ", funcName].join("");
           
           console.log(laidOut);
           
-          //return api.Layers(...flatItems).Page().toDisjointGeometry();
           return laidOut.toDisjointGeometry();
         case 'difference':
           return Shape.fromGeometry(values[0]).cut(Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
