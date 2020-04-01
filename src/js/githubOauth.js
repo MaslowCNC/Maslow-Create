@@ -1168,6 +1168,7 @@ export default function GitHubModule(){
                 
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
+                    console.log("Extract bom tags returned")
                     var totalParts = 0
                     var totalCost  = 0
                     if(bomItems != undefined){
@@ -1180,14 +1181,14 @@ export default function GitHubModule(){
                     bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
                     bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                     
-                    
+                    console.log("Got to 1184")
                     var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
                     GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
                         readmeContent = readmeContent + item + "\n\n\n"
                     })
-                    
+                    console.log("Got to 1189")
                     const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)
-                    
+                    console.log("Creating commit")
                     this.createCommit(octokit,{
                         owner: saveUser,
                         repo: saveRepoName,

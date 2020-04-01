@@ -108810,6 +108810,7 @@ return d[d.length-1];};return ", funcName].join("");
     try {
       var { key, values } = question;
       clearCache();
+      console.log("computing: " + key);
       switch (key) {
         case 'assemble':
           var inputs = values[0].map(Shape.fromGeometry);
