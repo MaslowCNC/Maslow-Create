@@ -76,7 +76,6 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/cutlist.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
-import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * This class creates the Add To Cutlist atom.
@@ -112,7 +111,7 @@ export default class CutList extends Atom{
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue(&apos;geometry&apos;), &quot;cutList&quot;+GlobalVariables.generateUniqueID()]
+            const values = [this.findIOValue(&apos;geometry&apos;), &quot;cutList&quot;]
             this.basicThreadValueProcessing(values, &quot;specify&quot;)
         }catch(err){this.setAlert(err)}
         super.updateValue()

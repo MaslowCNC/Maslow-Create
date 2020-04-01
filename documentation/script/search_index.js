@@ -2796,12 +2796,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/prototypes/atom.js~atom#waitoncominginformation",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-waitOnComingInformation",
-    "src/js/prototypes/atom.js~Atom#waitOnComingInformation",
-    "method"
-  ],
-  [
     "src/js/prototypes/atom.js~atom#x",
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-x",
     "src/js/prototypes/atom.js~Atom#x",

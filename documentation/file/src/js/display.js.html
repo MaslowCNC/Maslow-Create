@@ -379,7 +379,7 @@ export default class Display {
          * The camera which controls how the scene is rendered.
          * @type {object}
          */
-        this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 10500);
+        this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 50500);
         [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, -30, 50]
         //
         /** 
@@ -850,6 +850,9 @@ export default class Display {
                 dataset.mesh = new THREE.Mesh(threejsGeometry, this.buildMeshMaterial(tags))
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
+            } else if (geometry.threejsPlan){
+                walk(geometry.threejsVisualization)
+                walk(geometry.threejsContent)
             }
         }
         walk(threejsGeometry)

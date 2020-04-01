@@ -116,13 +116,13 @@ export default class CutLayout extends Atom{
     }
 
     /**
-* Pass the input geometry to a worker function to compute the translation.
-*/ 
+    * Pass the input geometry to a worker function to compute the translation.
+    */ 
     updateValue(){
         try{
-            const values = [this.findIOValue(&apos;geometry&apos;), this.findIOValue(&apos;Spacing&apos;), this.findIOValue(&apos;Sheet Width&apos;), this.findIOValue(&apos;Sheet Length&apos;)] 
+            const values = [this.findIOValue(&apos;geometry&apos;)]
             
-            this.basicThreadValueProcessing(values, &quot;getLayoutSvgs&quot;)
+            this.basicThreadValueProcessing(values, &quot;layout&quot;)
         }catch(err){
             this.setAlert(err)
         }

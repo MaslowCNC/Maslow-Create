@@ -1,7 +1,7 @@
 {
   "coverage": "98.5%",
-  "expectCount": 468,
-  "actualCount": 461,
+  "expectCount": 467,
+  "actualCount": 460,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 10,
@@ -196,16 +196,16 @@
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 51,
-      "actualCount": 51,
+      "expectCount": 50,
+      "actualCount": 50,
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
       "expectCount": 42,
       "actualCount": 40,
       "undocumentLines": [
-        511,
-        512
+        516,
+        517
       ]
     },
     "src/js/prototypes/connector.js": {
