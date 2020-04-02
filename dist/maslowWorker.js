@@ -3911,7 +3911,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           else {
               // path
               if (!clipper.addPath(pathOrPaths, polyType, closed_1)) {
-                  throw new ClipperError_1.ClipperError("invalid path");
+                  throw new ClipperError_1.ClipperError(`invalid path: ${JSON.stringify(pathOrPaths)}`);
               }
           }
       }
@@ -13640,9 +13640,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const fromSurfaceAsClosedPaths = (surface, normalize) => {
     const normalized = surface.map(path => path.map(normalize));
-    const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-    const filtered = scaled.filter(path => toPlane(path) !== undefined);
+    const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+    const filtered = integers.filter(path => toPlane(path) !== undefined);
     return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+  };
+
+  const fromSurfaceToIntegers = (surface, normalize) => {
+    const normalized = surface.map(path => path.map(normalize));
+    const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+    return integers;
+  };
+
+  const fromIntegersToClosedPaths = (integers) => {
+    return integers.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
   };
 
   const fromOpenPaths = (paths, normalize) => {
@@ -14601,7 +14611,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return normalized;
   };
 
-  const THRESHOLD$1 = 1e-5;
+  // import { RESOLUTION } from './convert';
+
+  const THRESHOLD$1 = 1e-5; // * RESOLUTION;
 
   // We expect a surface of reconciled triangles.
 
@@ -14634,8 +14646,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         // Insert into the path.
         watertightPath.push(...colinear);
       }
-      const deduplicated = deduplicate(watertightPath);
-      watertightPaths.push(deduplicated);
+      pushWhenValid(watertightPaths, watertightPath);
     }
 
     return watertightPaths;
@@ -14645,18 +14656,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // This reorients the most exterior paths to be ccw.
 
   const reorient = (surface, normalize = p => p) => {
-    const subjectInputs = fromSurfaceAsClosedPaths(fixTJunctions(surface), normalize);
+    const integers = fromSurfaceToIntegers(surface, normalize);
+    const fixed = fixTJunctions(integers);
+    const subjectInputs = fromIntegersToClosedPaths(fixed);
     if (subjectInputs.length === 0) {
       return [];
     }
-    const result = clipper$1.clipToPaths(
-      {
-        clipType: jsAngusjClipperjsWeb_2.Union,
-        subjectInputs,
-        subjectFillType: jsAngusjClipperjsWeb_8.NonZero
-      });
-    const surfaceResult = toSurface(result, normalize);
-    return surfaceResult;
+    const result = clipper$1.clipToPaths({
+      clipType: jsAngusjClipperjsWeb_2.Union,
+      subjectInputs,
+      subjectFillType: jsAngusjClipperjsWeb_8.NonZero
+    });
+    return toSurface(result, normalize);
   };
 
   /**
@@ -58080,9 +58091,7 @@ return d[d.length-1];};return ", funcName].join("");
     return md;
   };
 
-  // Bootstrap importModule.
-
-  const extendedApi = { ...api };
+  const extendedApi = { ...api, toSvg };
 
   const importModule = buildImportModule(extendedApi);
 
@@ -108806,7 +108815,6 @@ return d[d.length-1];};return ", funcName].join("");
 
   const say = (message) => postMessage(message);
   const agent = async ({ ask, question }) => {
-    
     try {
       var { key, values } = question;
       clearCache();
@@ -108846,19 +108854,16 @@ return d[d.length-1];};return ", funcName].join("");
             return returnVal;
           }
         case 'layout':
-          console.log("Doing layout");
+          console.log('Doing layout');
           const solidToSplit = Shape.fromGeometry(values[0]);
-          
           var flatItems = [];
           solidToSplit.items().forEach(item => {
-              flatItems.push(item.flat().to(Z$k(0)));
+            flatItems.push(item.flat().to(Z$k(0)));
           });
           
           console.log(flatItems);
           
           const laidOut = Layers(...flatItems).Page();
-          
-          console.log(laidOut);
           
           return laidOut.toDisjointGeometry();
         case 'difference':
