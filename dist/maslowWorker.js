@@ -108821,11 +108821,7 @@ return d[d.length-1];};return ", funcName].join("");
       switch (key) {
         case 'assemble':
           var inputs = values[0].map(Shape.fromGeometry);
-          if (values[1]) {
-            return Assembly(...inputs).drop('cutAway').toKeptGeometry();
-          } else {
-            return Assembly(...inputs).toDisjointGeometry();
-          }
+          return Assembly(...inputs).toDisjointGeometry();
         case 'bounding box':
           return Shape.fromGeometry(values[0]).measureBoundingBox();
         case 'circle':
