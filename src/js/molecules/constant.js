@@ -29,10 +29,14 @@ export default class Constant extends Atom{
          */
         this.atomType = 'Constant'
         /**
-         * This atom's height as drawn on the screen...probably doesn't need to be in this scope
-         * @type {string}
+         * This atom's height as drawn on the screen
          */
         this.height = 16
+        /**
+         * A flag to indicate if this constant should be evolved by genetic algorithms
+         * @type {boolean}
+         */
+        this.evolve = false
         
         this.setValues(values)
         
@@ -59,6 +63,23 @@ export default class Constant extends Atom{
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
+        
+        this.createCheckbox(valueList,"Evolve",this.evolve,(event)=>{
+            if(event.target.checked){
+                console.log("Box checked")
+                this.evolve = true
+                this.updateSidebar()
+            } else{
+                console.log("Box unchecked")
+                this.evolve = false
+                this.updateSidebar()
+            }
+        })
+        
+        if(this.evolve){
+            this.createEditableValueListItem(valueList,this,'min', 'Min', true)
+            this.createEditableValueListItem(valueList,this,'max', 'Max', true)
+        }
     }
     
     /**
@@ -70,7 +91,8 @@ export default class Constant extends Atom{
         
         valuesObj.ioValues = [{
             name: 'number',
-            ioValue: this.output.getValue()
+            ioValue: this.output.getValue(),
+            evolve: this.evolve
         }]
         
         return valuesObj
