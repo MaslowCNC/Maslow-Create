@@ -37,6 +37,16 @@ export default class Constant extends Atom{
          * @type {boolean}
          */
         this.evolve = false
+        /**
+         * Minimum value to be used when evolving constant
+         * @type {float}
+         */
+        this.min = 0
+        /**
+         * Maximum value to be used when evolving constant
+         * @type {float}
+         */
+        this.max = 20
         
         this.setValues(values)
         
@@ -45,6 +55,7 @@ export default class Constant extends Atom{
         if (typeof this.ioValues == 'object') {
             this.output.setValue(this.ioValues[0].ioValue)
         }
+        
     }
     
     /**
@@ -66,11 +77,9 @@ export default class Constant extends Atom{
         
         this.createCheckbox(valueList,"Evolve",this.evolve,(event)=>{
             if(event.target.checked){
-                console.log("Box checked")
                 this.evolve = true
                 this.updateSidebar()
             } else{
-                console.log("Box unchecked")
                 this.evolve = false
                 this.updateSidebar()
             }
@@ -91,9 +100,12 @@ export default class Constant extends Atom{
         
         valuesObj.ioValues = [{
             name: 'number',
-            ioValue: this.output.getValue(),
-            evolve: this.evolve
+            ioValue: this.output.getValue()
         }]
+        
+        valuesObj.evolve = this.evolve
+        valuesObj.min = this.min
+        valuesObj.max = this.max
         
         return valuesObj
         
