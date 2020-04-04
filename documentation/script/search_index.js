@@ -1086,12 +1086,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/assembly.js~assembly#updatesidebar",
-    "class/src/js/molecules/assembly.js~Assembly.html#instance-method-updateSidebar",
-    "src/js/molecules/assembly.js~Assembly#updateSidebar",
-    "method"
-  ],
-  [
     "src/js/molecules/assembly.js~assembly#updatevalue",
     "class/src/js/molecules/assembly.js~Assembly.html#instance-method-updateValue",
     "src/js/molecules/assembly.js~Assembly#updateValue",
@@ -1278,9 +1272,27 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/constant.js~constant#evolve",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-evolve",
+    "src/js/molecules/constant.js~Constant#evolve",
+    "member"
+  ],
+  [
     "src/js/molecules/constant.js~constant#height",
     "class/src/js/molecules/constant.js~Constant.html#instance-member-height",
     "src/js/molecules/constant.js~Constant#height",
+    "member"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#max",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-max",
+    "src/js/molecules/constant.js~Constant#max",
+    "member"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#min",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-min",
+    "src/js/molecules/constant.js~Constant#min",
     "member"
   ],
   [

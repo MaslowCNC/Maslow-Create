@@ -106,10 +106,24 @@ export default class Constant extends Atom{
          */
         this.atomType = &apos;Constant&apos;
         /**
-         * This atom&apos;s height as drawn on the screen...probably doesn&apos;t need to be in this scope
-         * @type {string}
+         * This atom&apos;s height as drawn on the screen
          */
         this.height = 16
+        /**
+         * A flag to indicate if this constant should be evolved by genetic algorithms
+         * @type {boolean}
+         */
+        this.evolve = false
+        /**
+         * Minimum value to be used when evolving constant
+         * @type {float}
+         */
+        this.min = 0
+        /**
+         * Maximum value to be used when evolving constant
+         * @type {float}
+         */
+        this.max = 20
         
         this.setValues(values)
         
@@ -118,6 +132,7 @@ export default class Constant extends Atom{
         if (typeof this.ioValues == &apos;object&apos;) {
             this.output.setValue(this.ioValues[0].ioValue)
         }
+        
     }
     
     /**
@@ -136,6 +151,21 @@ export default class Constant extends Atom{
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,&apos;name&apos;, &apos;Name&apos;, false)
         this.createEditableValueListItem(valueList,this.output,&apos;value&apos;, &apos;Value&apos;, true)
+        
+        this.createCheckbox(valueList,&quot;Evolve&quot;,this.evolve,(event)=&gt;{
+            if(event.target.checked){
+                this.evolve = true
+                this.updateSidebar()
+            } else{
+                this.evolve = false
+                this.updateSidebar()
+            }
+        })
+        
+        if(this.evolve){
+            this.createEditableValueListItem(valueList,this,&apos;min&apos;, &apos;Min&apos;, true)
+            this.createEditableValueListItem(valueList,this,&apos;max&apos;, &apos;Max&apos;, true)
+        }
     }
     
     /**
@@ -149,6 +179,10 @@ export default class Constant extends Atom{
             name: &apos;number&apos;,
             ioValue: this.output.getValue()
         }]
+        
+        valuesObj.evolve = this.evolve
+        valuesObj.min = this.min
+        valuesObj.max = this.max
         
         return valuesObj
         

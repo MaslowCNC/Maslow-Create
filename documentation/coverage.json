@@ -1,7 +1,7 @@
 {
   "coverage": "98.5%",
-  "expectCount": 467,
-  "actualCount": 460,
+  "expectCount": 469,
+  "actualCount": 462,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 10,
@@ -39,8 +39,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/assembly.js": {
-      "expectCount": 9,
-      "actualCount": 9,
+      "expectCount": 8,
+      "actualCount": 8,
       "undocumentLines": []
     },
     "src/js/molecules/BOM.js": {
@@ -64,8 +64,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/constant.js": {
-      "expectCount": 13,
-      "actualCount": 13,
+      "expectCount": 16,
+      "actualCount": 16,
       "undocumentLines": []
     },
     "src/js/molecules/cutlayout.js": {
