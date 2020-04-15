@@ -356,7 +356,7 @@ export default class Molecule extends Atom{
             list.appendChild(document.createElement('br'))
             list.appendChild(document.createElement('br'))
             
-            var div = document.createElement('h3')
+            var div = document.createElement('h2')
             div.setAttribute('style','text-align:center;')
             list.appendChild(div)
             var valueText = document.createTextNode('ReadMe')
@@ -403,22 +403,16 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Generates and returns a JSON represntation of this molecule and all of its children.
-     * @param {object} savedObject - A JSON object to append the represntation of this atom to.
+     * Generates and returns a object represntation of this molecule and all of its children.
      */
-    serialize(savedObject){
-        //Save this molecule.
+    serialize(){
         
-        //This one is a little confusing. Basically each molecule saves like an atom, but also creates a second object 
-        //record of itself in the object "savedObject" object.
-            
-        var allAtoms = [] //An array of all the atoms containted in this molecule
-        var allConnectors = [] //An array of all the connectors contained in this molelcule
-        
+        var allAtoms = [] //An array of all the atoms contained in this molecule
+        var allConnectors = [] //An array of all the connectors contained in this molecule
         
         this.nodesOnTheScreen.forEach(atom => {
             //Store a representation of the atom
-            allAtoms.push(atom.serialize(savedObject))
+            allAtoms.push(atom.serialize())
             //Store a representation of the atom's connectors
             if(atom.output){
                 atom.output.connectors.forEach(connector => {
@@ -427,24 +421,13 @@ export default class Molecule extends Atom{
             }
         })
         
-        var thisAsObject = super.serialize(savedObject)
+        var thisAsObject = super.serialize()    //Do the atom serialization to create an object, then add all the bits of this one to it
         thisAsObject.topLevel = this.topLevel
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
         thisAsObject.fileTypeVersion = 1
         
-        //Add a JSON representation of this object to the file being saved
-        savedObject.molecules.push(thisAsObject)
-        savedObject.circleSegmentSize = GlobalVariables.circleSegmentSize
-            
-        if(this.topLevel == true){
-            //If this is the top level, return the complete file to be saved
-            return savedObject
-        }
-        else{
-            //If not, return a placeholder for this molecule
-            return super.serialize(savedObject)
-        }
+        return thisAsObject
     }
     
     /**
@@ -452,7 +435,6 @@ export default class Molecule extends Atom{
      * @param {object} json - A json representation of the molecule
      */
     deserialize(json){
-        
         //Find the target molecule in the list
         let promiseArray = []
         

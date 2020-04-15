@@ -1189,7 +1189,11 @@ export default function GitHubModule(){
                         readmeContent = readmeContent + item + "\n\n\n"
                     })
                     
-                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)
+                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                    jsonRepOfProject.filetypeVersion = 1
+                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+                    
                     this.createCommit(octokit,{
                         owner: saveUser,
                         repo: saveRepoName,
@@ -1333,7 +1337,12 @@ export default function GitHubModule(){
             
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
             
-            GlobalVariables.topLevelMolecule.deserialize(this.convertFromOldFormat(rawFile))
+            if(rawFile.filetypeVersion == 1){
+                GlobalVariables.topLevelMolecule.deserialize(rawFile)
+            }
+            else{
+                GlobalVariables.topLevelMolecule.deserialize(this.convertFromOldFormat(rawFile))
+            }
         })
         octokit.repos.get({
             owner: currentUser,
