@@ -161,35 +161,35 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 499,
+        "lineNumber": 481,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 500,
+        "lineNumber": 482,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 501,
+        "lineNumber": 483,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 502,
+        "lineNumber": 484,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 503,
+        "lineNumber": 485,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 504,
+        "lineNumber": 486,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 505,
+        "lineNumber": 487,
         "line": "     */\r"
       },
       {
-        "lineNumber": 506,
+        "lineNumber": 488,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],
