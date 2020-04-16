@@ -291,6 +291,7 @@ function init() {
 function onWindowResize() {
 
     GlobalVariables.canvas.width = window.innerWidth
+
     //reset screen parameters 
     if(!GlobalVariables.runMode){
         document.querySelector('.flex-parent').setAttribute('style','height:'+ (window.innerHeight - GlobalVariables.canvas.height)+'px')
@@ -298,7 +299,6 @@ function onWindowResize() {
         document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
-
     GlobalVariables.display.onWindowResize()
 
 }
