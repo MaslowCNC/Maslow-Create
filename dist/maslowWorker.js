@@ -104,89 +104,161 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   }
 
-  const X = 0;
-  const Y = 1;
+  /**
+   * Set a mat4 to the identity matrix
+   *
+   * @returns {mat4} out
+   */
+  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-  // The resolution is 1 / multiplier.
-  const createNormalize2 = (multiplier = 1e5) => {
-    const map = new Map();
-    const update = (key, value) => {
-      if (!map.has(key)) {
-        map.set(key, value);
-      }
-    };
-    const normalize2 = (coordinate) => {
-      // Apply a spatial quantization to the 2 dimensional coordinate.
-      const nx = Math.floor(coordinate[X] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nx1 = nx + 1;
-      const ny1 = ny + 1;
-      // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = coordinate;
-      update(`${nx0}/${ny0}`, normalized);
-      update(`${nx0}/${ny1}`, normalized);
-      update(`${nx1}/${ny0}`, normalized);
-      update(`${nx1}/${ny1}`, normalized);
-      // This is now the normalized coordinate for this region.
-      return normalized;
-    };
-    return normalize2;
+  const EPSILON = 1e-5;
+
+  /**
+   * Creates a matrix from a given angle around a given axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotate(dest, dest, rad, axis);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {Number} rad the angle to rotate the matrix by
+   * @param {vec3} axis the axis to rotate around
+   * @returns {mat4} out
+   */
+  const fromRotation = (rad, [x, y, z]) => {
+    let len = Math.sqrt(x * x + y * y + z * z);
+
+    if (Math.abs(len) < EPSILON) {
+      return identity();
+    }
+
+    len = 1 / len;
+    x *= len;
+    y *= len;
+    z *= len;
+
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    const t = 1 - c;
+
+    // Perform rotation-specific matrix multiplication
+    return [x * x * t + c,
+            y * x * t + z * s,
+            z * x * t - y * s,
+            0,
+            x * y * t - z * s,
+            y * y * t + c,
+            z * y * t + x * s,
+            0,
+            x * z * t + y * s,
+            y * z * t - x * s,
+            z * z * t + c,
+            0,
+            0,
+            0,
+            0,
+            1];
   };
 
-  const X$1 = 0;
-  const Y$1 = 1;
-  const Z = 2;
+  /**
+   * Creates a matrix from a vector scaling
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.scale(dest, dest, vec);
+   *
+   * @param {vec3} v Scaling vector
+   * @returns {mat4} out
+   */
+  const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
 
-  // The resolution is 1 / multiplier.
-  // export const createNormalize3 = (multiplier = 1e5) => {
-  const createNormalize3 = (multiplier = 1e5 * 2) => {
-    const map = new Map();
-    const update = (key, value) => {
-      if (!map.has(key)) {
-        map.set(key, value);
-      }
-    };
-    const normalize3 = (coordinate) => {
-      // Apply a spatial quantization to the 2 dimensional coordinate.
-      const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
-      const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
-      const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
-      // Look for an existing inhabitant.
-      const value = map.get(`${nx}/${ny}/${nz}`);
-      if (value !== undefined) {
-        return value;
-      }
-      // One of the ~0 or ~1 values will match the rounded values above.
-      // The other will match the adjacent cell.
-      const nx0 = nx;
-      const ny0 = ny;
-      const nz0 = nz;
-      const nx1 = nx + 1;
-      const ny1 = ny + 1;
-      const nz1 = nz + 1;
-      // Populate the space of the quantized coordinate and its adjacencies.
-      const normalized = coordinate;
-      update(`${nx0}/${ny0}/${nz0}`, normalized);
-      update(`${nx0}/${ny0}/${nz1}`, normalized);
-      update(`${nx0}/${ny1}/${nz0}`, normalized);
-      update(`${nx0}/${ny1}/${nz1}`, normalized);
-      update(`${nx1}/${ny0}/${nz0}`, normalized);
-      update(`${nx1}/${ny0}/${nz1}`, normalized);
-      update(`${nx1}/${ny1}/${nz0}`, normalized);
-      update(`${nx1}/${ny1}/${nz1}`, normalized);
-      // This is now the normalized coordinate for this region.
-      return normalized;
-    };
-    return normalize3;
+  /**
+   * Creates a matrix from a vector translation
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.translate(dest, dest, vec);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {vec3} v Translation vector
+   * @returns {mat4} out
+   */
+  const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+
+  /**
+   * Create a new mat4 with the given values
+   *
+   * @param {Number} m00 Component in column 0, row 0 position (index 0)
+   * @param {Number} m01 Component in column 0, row 1 position (index 1)
+   * @param {Number} m02 Component in column 0, row 2 position (index 2)
+   * @param {Number} m03 Component in column 0, row 3 position (index 3)
+   * @param {Number} m10 Component in column 1, row 0 position (index 4)
+   * @param {Number} m11 Component in column 1, row 1 position (index 5)
+   * @param {Number} m12 Component in column 1, row 2 position (index 6)
+   * @param {Number} m13 Component in column 1, row 3 position (index 7)
+   * @param {Number} m20 Component in column 2, row 0 position (index 8)
+   * @param {Number} m21 Component in column 2, row 1 position (index 9)
+   * @param {Number} m22 Component in column 2, row 2 position (index 10)
+   * @param {Number} m23 Component in column 2, row 3 position (index 11)
+   * @param {Number} m30 Component in column 3, row 0 position (index 12)
+   * @param {Number} m31 Component in column 3, row 1 position (index 13)
+   * @param {Number} m32 Component in column 3, row 2 position (index 14)
+   * @param {Number} m33 Component in column 3, row 3 position (index 15)
+   * @returns {mat4} A new mat4
+   */
+  const fromValues = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
+    [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
+
+  /**
+   * Creates a matrix from the given angle around the X axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateX(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromXRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+
+    // Perform axis-specific matrix multiplication
+    return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Creates a matrix from the given angle around the Y axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateY(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromYRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    // Perform axis-specific matrix multiplication
+    return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Creates a matrix from the given angle around the Z axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateZ(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromZRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    // Perform axis-specific matrix multiplication
+    return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   };
 
   /**
@@ -336,7 +408,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
    * @param {Number} z Z component
    * @returns {vec3} a new 3D vector
    */
-  const fromValues = (x = 0, y = 0, z = 0) => [x, y, z];
+  const fromValues$1 = (x = 0, y = 0, z = 0) => [x, y, z];
 
   // extend to a 3D vector by adding a z coordinate:
   const fromVec2 = ([x = 0, y = 0], z = 0) => [x, y, z];
@@ -554,7 +626,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     equals: equals,
     fromPoint: fromPoint,
     fromScalar: fromScalar,
-    fromValues: fromValues,
+    fromValues: fromValues$1,
     fromVec2: fromVec2,
     length: length,
     lerp: lerp,
@@ -577,163 +649,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     turnZ: turnZ,
     unit: unit
   });
-
-  /**
-   * Set a mat4 to the identity matrix
-   *
-   * @returns {mat4} out
-   */
-  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-
-  const EPSILON = 1e-5;
-
-  /**
-   * Creates a matrix from a given angle around a given axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotate(dest, dest, rad, axis);
-   *
-   * @param {mat4} out mat4 receiving operation result
-   * @param {Number} rad the angle to rotate the matrix by
-   * @param {vec3} axis the axis to rotate around
-   * @returns {mat4} out
-   */
-  const fromRotation = (rad, [x, y, z]) => {
-    let len = Math.sqrt(x * x + y * y + z * z);
-
-    if (Math.abs(len) < EPSILON) {
-      return identity();
-    }
-
-    len = 1 / len;
-    x *= len;
-    y *= len;
-    z *= len;
-
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    const t = 1 - c;
-
-    // Perform rotation-specific matrix multiplication
-    return [x * x * t + c,
-            y * x * t + z * s,
-            z * x * t - y * s,
-            0,
-            x * y * t - z * s,
-            y * y * t + c,
-            z * y * t + x * s,
-            0,
-            x * z * t + y * s,
-            y * z * t - x * s,
-            z * z * t + c,
-            0,
-            0,
-            0,
-            0,
-            1];
-  };
-
-  /**
-   * Creates a matrix from a vector scaling
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.scale(dest, dest, vec);
-   *
-   * @param {vec3} v Scaling vector
-   * @returns {mat4} out
-   */
-  const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
-
-  /**
-   * Creates a matrix from a vector translation
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.translate(dest, dest, vec);
-   *
-   * @param {mat4} out mat4 receiving operation result
-   * @param {vec3} v Translation vector
-   * @returns {mat4} out
-   */
-  const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
-
-  /**
-   * Create a new mat4 with the given values
-   *
-   * @param {Number} m00 Component in column 0, row 0 position (index 0)
-   * @param {Number} m01 Component in column 0, row 1 position (index 1)
-   * @param {Number} m02 Component in column 0, row 2 position (index 2)
-   * @param {Number} m03 Component in column 0, row 3 position (index 3)
-   * @param {Number} m10 Component in column 1, row 0 position (index 4)
-   * @param {Number} m11 Component in column 1, row 1 position (index 5)
-   * @param {Number} m12 Component in column 1, row 2 position (index 6)
-   * @param {Number} m13 Component in column 1, row 3 position (index 7)
-   * @param {Number} m20 Component in column 2, row 0 position (index 8)
-   * @param {Number} m21 Component in column 2, row 1 position (index 9)
-   * @param {Number} m22 Component in column 2, row 2 position (index 10)
-   * @param {Number} m23 Component in column 2, row 3 position (index 11)
-   * @param {Number} m30 Component in column 3, row 0 position (index 12)
-   * @param {Number} m31 Component in column 3, row 1 position (index 13)
-   * @param {Number} m32 Component in column 3, row 2 position (index 14)
-   * @param {Number} m33 Component in column 3, row 3 position (index 15)
-   * @returns {mat4} A new mat4
-   */
-  const fromValues$1 = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
-    [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
-
-  /**
-   * Creates a matrix from the given angle around the X axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateX(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromXRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-
-    // Perform axis-specific matrix multiplication
-    return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Creates a matrix from the given angle around the Y axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateY(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromYRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    // Perform axis-specific matrix multiplication
-    return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Creates a matrix from the given angle around the Z axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateZ(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromZRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    // Perform axis-specific matrix multiplication
-    return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-  };
 
   /**
    * determine whether the input matrix is a mirroring transformation
@@ -984,8 +899,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return edges;
   };
 
-  const X$2 = 0;
-  const Y$2 = 1;
+  const X = 0;
+  const Y = 1;
 
   /**
    * Measure the area of a path as though it were a polygon.
@@ -998,7 +913,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     let current = (path[0] === null) ? 1 : 0;
     let twiceArea = 0;
     for (; current < path.length; last = current++) {
-      twiceArea += path[last][X$2] * path[current][Y$2] - path[last][Y$2] * path[current][X$2];
+      twiceArea += path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
     }
     return twiceArea / 2;
   };
@@ -1033,6 +948,91 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const rotateX$1 = (radians, path) => transform$1(fromXRotation(radians), path);
   const rotateZ$1 = (radians, path) => transform$1(fromZRotation(radians), path);
   const scale$2 = (vector, path) => transform$1(fromScaling(vector), path);
+
+  const X$1 = 0;
+  const Y$1 = 1;
+
+  // The resolution is 1 / multiplier.
+  const createNormalize2 = (multiplier = 1e5) => {
+    const map = new Map();
+    const update = (key, value) => {
+      if (!map.has(key)) {
+        map.set(key, value);
+      }
+    };
+    const normalize2 = (coordinate) => {
+      // Apply a spatial quantization to the 2 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nx1 = nx + 1;
+      const ny1 = ny + 1;
+      // Populate the space of the quantized coordinate and its adjacencies.
+      const normalized = coordinate;
+      update(`${nx0}/${ny0}`, normalized);
+      update(`${nx0}/${ny1}`, normalized);
+      update(`${nx1}/${ny0}`, normalized);
+      update(`${nx1}/${ny1}`, normalized);
+      // This is now the normalized coordinate for this region.
+      return normalized;
+    };
+    return normalize2;
+  };
+
+  const X$2 = 0;
+  const Y$2 = 1;
+  const Z = 2;
+
+  // The resolution is 1 / multiplier.
+  // export const createNormalize3 = (multiplier = 1e5) => {
+  const createNormalize3 = (multiplier = 1e5 * 2) => {
+    const map = new Map();
+    const update = (key, value) => {
+      if (!map.has(key)) {
+        map.set(key, value);
+      }
+    };
+    const normalize3 = (coordinate) => {
+      // Apply a spatial quantization to the 2 dimensional coordinate.
+      const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
+      const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
+      const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
+      // Look for an existing inhabitant.
+      const value = map.get(`${nx}/${ny}/${nz}`);
+      if (value !== undefined) {
+        return value;
+      }
+      // One of the ~0 or ~1 values will match the rounded values above.
+      // The other will match the adjacent cell.
+      const nx0 = nx;
+      const ny0 = ny;
+      const nz0 = nz;
+      const nx1 = nx + 1;
+      const ny1 = ny + 1;
+      const nz1 = nz + 1;
+      // Populate the space of the quantized coordinate and its adjacencies.
+      const normalized = coordinate;
+      update(`${nx0}/${ny0}/${nz0}`, normalized);
+      update(`${nx0}/${ny0}/${nz1}`, normalized);
+      update(`${nx0}/${ny1}/${nz0}`, normalized);
+      update(`${nx0}/${ny1}/${nz1}`, normalized);
+      update(`${nx1}/${ny0}/${nz0}`, normalized);
+      update(`${nx1}/${ny0}/${nz1}`, normalized);
+      update(`${nx1}/${ny1}/${nz0}`, normalized);
+      update(`${nx1}/${ny1}/${nz1}`, normalized);
+      // This is now the normalized coordinate for this region.
+      return normalized;
+    };
+    return normalize3;
+  };
 
   /**
    * Transforms the vertices of a polygon, producing a new poly3.
@@ -1194,12 +1194,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const u = cross(v, plane);
     const p = multiply(plane, fromScalar(plane[W$2]));
 
-    const to = fromValues$1(u[X$4], v[X$4], plane[X$4], 0,
+    const to = fromValues(u[X$4], v[X$4], plane[X$4], 0,
                           u[Y$4], v[Y$4], plane[Y$4], 0,
                           u[Z$2], v[Z$2], plane[Z$2], 0,
                           0, 0, -plane[W$2], 1);
 
-    const from = fromValues$1(u[X$4], u[Y$4], u[Z$2], 0,
+    const from = fromValues(u[X$4], u[Y$4], u[Z$2], 0,
                             v[X$4], v[Y$4], v[Z$2], 0,
                             plane[X$4], plane[Y$4], plane[Z$2], 0,
                             p[X$4], p[Y$4], p[Z$2], 1);
@@ -3911,7 +3911,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
           else {
               // path
               if (!clipper.addPath(pathOrPaths, polyType, closed_1)) {
-                  throw new ClipperError_1.ClipperError("invalid path");
+                  throw new ClipperError_1.ClipperError(`invalid path: ${JSON.stringify(pathOrPaths)}`);
               }
           }
       }
@@ -5206,6 +5206,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       await task();
     }
   };
+
+  const emitted = [];
+
+  const emit$1 = (value) => emitted.push(value);
 
   // When base is undefined the persistent filesystem is disabled.
   let base;
@@ -8119,6 +8123,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     };
     return { ask, hear };
   };
+
+
+
+  var v8 = /*#__PURE__*/Object.freeze({
+    __proto__: null
+  });
 
   /*! https://mths.be/punycode v1.4.1 by @mathias */
 
@@ -13413,6 +13423,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   /* global self */
 
   const { promises } = fs;
+  const { serialize } = v8;
 
   // FIX Convert data by representation.
 
@@ -13423,16 +13434,12 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
       return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
     }
 
-    const { as = 'utf8', ephemeral, project = getFilesystem() } = options;
+    const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
     let originalProject = getFilesystem();
     if (project !== originalProject) {
       log({ op: 'text', text: `Write ${path} of ${project}` });
       // Switch to the source filesystem, if necessary.
       setupFilesystem({ fileBase: project });
-    }
-
-    if (typeof data === 'string') {
-      data = new TextEncoder(as).encode(data);
     }
 
     await log({ op: 'text', text: `Write ${path}` });
@@ -13452,6 +13459,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         } catch (error) {
         }
         try {
+          if (doSerialize) {
+            data = serialize(data);
+          }
           await promises.writeFile(persistentPath, data);
         } catch (error) {
         }
@@ -13469,6 +13479,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   /* global self */
 
   const { promises: promises$1 } = fs;
+  const { deserialize } = v8;
 
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
@@ -13478,16 +13489,22 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
   };
 
-  const getFileFetcher = async (qualify = qualifyPath) => {
+  const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
     if (isNode) {
       // FIX: Put this through getFile, also.
       return async (path) => {
-        return promises$1.readFile(qualify(path));
+        let data = await promises$1.readFile(qualify(path));
+        if (doSerialize) {
+          data = deserialize(data);
+        }
+        return data;
       };
     } else if (isBrowser) {
       return async (path) => {
         const data = await db().getItem(qualify(path));
-        return data;
+        if (data !== null) {
+          return data;
+        }
       };
     } else {
       throw Error('die');
@@ -13495,11 +13512,11 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   // Fetch from internal store.
-  const fetchPersistent = async (path) => {
+  const fetchPersistent = async (path, doSerialize) => {
     try {
       const base = getBase();
       if (base !== undefined) {
-        const fetchFile = await getFileFetcher();
+        const fetchFile = await getFileFetcher(qualifyPath, doSerialize);
         const data = await fetchFile(path);
         return data;
       }
@@ -13514,7 +13531,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // Fetch from external sources.
   const fetchSources = async (options = {}, sources) => {
     const fetchUrl = await getUrlFetcher();
-    const fetchFile = await getFileFetcher(path => path);
+    const fetchFile = await getFileFetcher(path => path, false);
     // Try to load the data from a source.
     for (const source of sources) {
       if (typeof source === 'string') {
@@ -13541,7 +13558,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   };
 
   const readFile = async (options, path) => {
-    const { allowFetch = true, ephemeral, as = 'utf8' } = options;
+    const { allowFetch = true, ephemeral } = options;
     if (isWebWorker) {
       return self.ask({ readFile: { options, path } });
     }
@@ -13556,7 +13573,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     }
     const file = await getFile(options, path);
     if (file.data === undefined || useCache === false) {
-      file.data = await fetchPersistent(path);
+      file.data = await fetchPersistent(path, true);
     }
     if (project !== originalProject) {
       // Switch back to the original filesystem, if necessary.
@@ -13565,8 +13582,8 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     if (file.data === undefined && allowFetch) {
       file.data = await fetchSources({}, sources);
       if (!ephemeral && file.data !== undefined) {
-        // Update persistent storage.
-        await writeFile(options, path, file.data);
+        // Update persistent cache.
+        await writeFile({ ...options, doSerialize: true }, path, file.data);
       }
     }
     if (file.data !== undefined) {
@@ -13575,13 +13592,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         file.data = await file.data;
       }
     }
-    if (file.data !== undefined) {
-      if (as === 'bytes') {
-        return file.data;
-      } else {
-        return new TextDecoder('utf8').decode(file.data);
-      }
-    }
+    return file.data;
   };
 
   let clipper$1;
@@ -13629,9 +13640,19 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const fromSurfaceAsClosedPaths = (surface, normalize) => {
     const normalized = surface.map(path => path.map(normalize));
-    const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-    const filtered = scaled.filter(path => toPlane(path) !== undefined);
+    const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+    const filtered = integers.filter(path => toPlane(path) !== undefined);
     return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+  };
+
+  const fromSurfaceToIntegers = (surface, normalize) => {
+    const normalized = surface.map(path => path.map(normalize));
+    const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+    return integers;
+  };
+
+  const fromIntegersToClosedPaths = (integers) => {
+    return integers.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
   };
 
   const fromOpenPaths = (paths, normalize) => {
@@ -14590,7 +14611,9 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return normalized;
   };
 
-  const THRESHOLD$1 = 1e-5;
+  // import { RESOLUTION } from './convert';
+
+  const THRESHOLD$1 = 1e-5; // * RESOLUTION;
 
   // We expect a surface of reconciled triangles.
 
@@ -14623,8 +14646,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         // Insert into the path.
         watertightPath.push(...colinear);
       }
-      const deduplicated = deduplicate(watertightPath);
-      watertightPaths.push(deduplicated);
+      pushWhenValid(watertightPaths, watertightPath);
     }
 
     return watertightPaths;
@@ -14634,19 +14656,18 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   // This reorients the most exterior paths to be ccw.
 
   const reorient = (surface, normalize = p => p) => {
-    const polygons = fromSurface(fixTJunctions(surface), normalize);
-    if (polygons.length === 0) {
+    const integers = fromSurfaceToIntegers(surface, normalize);
+    const fixed = fixTJunctions(integers);
+    const subjectInputs = fromIntegersToClosedPaths(fixed);
+    if (subjectInputs.length === 0) {
       return [];
     }
-    const subjectInputs = polygons.map(polygon => ({ data: polygon, closed: true }));
-    const result = clipper$1.clipToPaths(
-      {
-        clipType: jsAngusjClipperjsWeb_2.Union,
-        subjectInputs,
-        subjectFillType: jsAngusjClipperjsWeb_8.NonZero
-      });
-    const surfaceResult = toSurface(result, normalize);
-    return surfaceResult;
+    const result = clipper$1.clipToPaths({
+      clipType: jsAngusjClipperjsWeb_2.Union,
+      subjectInputs,
+      subjectFillType: jsAngusjClipperjsWeb_8.NonZero
+    });
+    return toSurface(result, normalize);
   };
 
   /**
@@ -15473,382 +15494,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return polygons;
   };
 
-  /**
-   *
-   * # Ease
-   *
-   * Produces a function for composing easing functions.
-   * ```
-   * ease(0.00, 0.25, t => sin(t * 25))(ease(0.25, 1.00, t => 5)())
-   * ```
-   *
-   **/
-
-  const ease = (start = 0.00, end = 1.00, op = t => 1) => {
-    const compose = (next = t => 1) => {
-      const fn = t => {
-        if (t >= start && t <= end) {
-          return op((t - start) / (end - start));
-        } else {
-          return next(t);
-        }
-      };
-      return fn;
-    };
-    return compose;
-  };
-
-  const linear = (start, end) => t => start + t * (end - start);
-  ease.linear = linear;
-
-  ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
-  linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
-
-  var Prando_umd = createCommonjsModule(function (module, exports) {
-  (function (global, factory) {
-  	 module.exports = factory() ;
-  }(commonjsGlobal, (function () {
-  	var Prando = /** @class */ (function () {
-  	    // ================================================================================================================
-  	    // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
-  	    /**
-  	     * Generate a new Prando pseudo-random number generator.
-  	     *
-  	     * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
-  	     */
-  	    function Prando(seed) {
-  	        this._value = NaN;
-  	        if (typeof (seed) === "string") {
-  	            // String seed
-  	            this._seed = this.hashCode(seed);
-  	        }
-  	        else if (typeof (seed) === "number") {
-  	            // Numeric seed
-  	            this._seed = this.getSafeSeed(seed);
-  	        }
-  	        else {
-  	            // Pseudo-random seed
-  	            this._seed = this.getSafeSeed(Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random()));
-  	        }
-  	        this.reset();
-  	    }
-  	    // ================================================================================================================
-  	    // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
-  	    /**
-  	     * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
-  	     *
-  	     * @param min - The minimum number that can be randomly generated.
-  	     * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
-  	     * @return The generated pseudo-random number.
-  	     */
-  	    Prando.prototype.next = function (min, pseudoMax) {
-  	        if (min === void 0) { min = 0; }
-  	        if (pseudoMax === void 0) { pseudoMax = 1; }
-  	        this.recalculate();
-  	        return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
-  	    };
-  	    /**
-  	     * Generates a pseudo-random integer number in a range (inclusive).
-  	     *
-  	     * @param min - The minimum number that can be randomly generated.
-  	     * @param max - The maximum number that can be randomly generated.
-  	     * @return The generated pseudo-random number.
-  	     */
-  	    Prando.prototype.nextInt = function (min, max) {
-  	        if (min === void 0) { min = 10; }
-  	        if (max === void 0) { max = 100; }
-  	        this.recalculate();
-  	        return Math.floor(this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1));
-  	    };
-  	    /**
-  	     * Generates a pseudo-random string sequence of a particular length from a specific character range.
-  	     *
-  	     * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
-  	     * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
-  	     * pre-existing ids, or employ a robust GUID/UUID generator.
-  	     *
-  	     * @param length - Length of the strting to be generated.
-  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
-  	     * @return The generated string sequence.
-  	     */
-  	    Prando.prototype.nextString = function (length, chars) {
-  	        if (length === void 0) { length = 16; }
-  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
-  	        var str = "";
-  	        while (str.length < length) {
-  	            str += this.nextChar(chars);
-  	        }
-  	        return str;
-  	    };
-  	    /**
-  	     * Generates a pseudo-random string of 1 character specific character range.
-  	     *
-  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
-  	     * @return The generated character.
-  	     */
-  	    Prando.prototype.nextChar = function (chars) {
-  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
-  	        this.recalculate();
-  	        return chars.substr(this.nextInt(0, chars.length - 1), 1);
-  	    };
-  	    /**
-  	     * Picks a pseudo-random item from an array. The array is left unmodified.
-  	     *
-  	     * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
-  	     * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
-  	     * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
-  	     * apply a *shuffle* transformation to the array instead, then read it linearly.
-  	     *
-  	     * @param array - Array of any type containing one or more candidates for random picking.
-  	     * @return An item from the array.
-  	     */
-  	    Prando.prototype.nextArrayItem = function (array) {
-  	        this.recalculate();
-  	        return array[this.nextInt(0, array.length - 1)];
-  	    };
-  	    /**
-  	     * Generates a pseudo-random boolean.
-  	     *
-  	     * @return A value of true or false.
-  	     */
-  	    Prando.prototype.nextBoolean = function () {
-  	        this.recalculate();
-  	        return this._value > 0.5;
-  	    };
-  	    /**
-  	     * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
-  	     * calling next() a specified number of times, but faster since it doesn't need to map the
-  	     * new random numbers to a range and return it.
-  	     *
-  	     * @param iterations - The number of items to skip ahead.
-  	     */
-  	    Prando.prototype.skip = function (iterations) {
-  	        if (iterations === void 0) { iterations = 1; }
-  	        while (iterations-- > 0) {
-  	            this.recalculate();
-  	        }
-  	    };
-  	    /**
-  	     * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
-  	     * will then produce the same sequence of numbers it had produced before. This is equivalent to
-  	     * creating a new Prando instance with the same seed as another Prando instance.
-  	     *
-  	     * Example:
-  	     * let rng = new Prando(12345678);
-  	     * console.log(rng.next()); // 0.6177754114889017
-  	     * console.log(rng.next()); // 0.5784605181725837
-  	     * rng.reset();
-  	     * console.log(rng.next()); // 0.6177754114889017 again
-  	     * console.log(rng.next()); // 0.5784605181725837 again
-  	     */
-  	    Prando.prototype.reset = function () {
-  	        this._value = this._seed;
-  	    };
-  	    // ================================================================================================================
-  	    // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
-  	    Prando.prototype.recalculate = function () {
-  	        this._value = this.xorshift(this._value);
-  	    };
-  	    Prando.prototype.xorshift = function (value) {
-  	        // Xorshift*32
-  	        // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
-  	        value ^= value << 13;
-  	        value ^= value >> 17;
-  	        value ^= value << 5;
-  	        return value;
-  	    };
-  	    Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
-  	        return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
-  	    };
-  	    Prando.prototype.hashCode = function (str) {
-  	        var hash = 0;
-  	        if (str) {
-  	            var l = str.length;
-  	            for (var i = 0; i < l; i++) {
-  	                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-  	                hash |= 0;
-  	                hash = this.xorshift(hash);
-  	            }
-  	        }
-  	        return this.getSafeSeed(hash);
-  	    };
-  	    Prando.prototype.getSafeSeed = function (seed) {
-  	        if (seed === 0)
-  	            return 1;
-  	        return seed;
-  	    };
-  	    Prando.MIN = -2147483648; // Int32 min
-  	    Prando.MAX = 2147483647; // Int32 max
-  	    return Prando;
-  	}());
-
-  	return Prando;
-
-  })));
-  module.exports.default = module.exports; // Terrible injection just so it works regardless of how it's required
-  });
-
-  const makeTo = (g) => (to) => g() * to;
-  const makeIn = (g) => (from, to) => g() * (to - from) + from;
-  const makeVary = (g) => (degree) => (g() - 0.5) * degree * 2;
-
-  const Random = (seed = 0) => {
-    const rng = new Prando_umd(seed);
-    const g = () => rng.next();
-    g.in = makeIn(g);
-    g.to = makeTo(g);
-    g.vary = makeVary(g);
-    return g;
-  };
-
-  /**
-   *
-   * # Arc Cosine
-   *
-   * Gives the arc cosine converted to degrees.
-   * ```
-   * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
-   *
-   * acos(0) = 90
-   * acos(0.5) = 60
-   * acos(1) = 0
-   * ```
-   *
-   **/
-
-  const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
-  acos.signature = 'acos(angle:number) -> number';
-
-  /**
-   *
-   * # Cosine
-   *
-   * Gives the cosine in degrees.
-   * ```
-   * cos(a) => Math.cos(a / 360 * Math.PI * 2);
-   *
-   * cos(0) = 1
-   * cos(45) = 0.707
-   * cos(90) = 0
-   * ```
-   *
-   **/
-
-  const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
-
-  cos.signature = 'cos(angle:number) -> number';
-
-  /**
-   *
-   * # Max
-   *
-   * Produces the maximum of a series of numbers.
-   *
-   * ```
-   * max(1, 2, 3, 4) == 4
-   * ```
-   *
-   **/
-
-  const max$1 = Math.max;
-
-  max$1.signature = 'max(...values:number) -> number';
-
-  /**
-   *
-   * # Min
-   *
-   * Produces the minimum of a series of numbers.
-   *
-   * ```
-   * min(1, 2, 3, 4) == 1
-   * ```
-   *
-   **/
-
-  const min$1 = Math.min;
-
-  min$1.signature = 'min(...values:number) -> number';
-
-  /**
-   *
-   * # Numbers
-   *
-   * ```
-   * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
-   * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
-   * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
-   * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
-   * ```
-   *
-   **/
-
-  const EPSILON$2 = 1e-5;
-
-  const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
-    const numbers = [];
-    if (by === undefined) {
-      if (resolution !== undefined) {
-        by = to / resolution;
-      } else {
-        by = 1;
-      }
-    }
-
-    if (to === undefined && upto === undefined) {
-      upto = 1;
-    }
-
-    if (upto !== undefined) {
-      // Exclusive
-      for (let number = from, nth = 0; number < to - EPSILON$2; number += by, nth++) {
-        numbers.push(thunk(number, nth));
-      }
-    } else if (to !== undefined) {
-      // Inclusive
-      for (let number = from, nth = 0; number <= to + EPSILON$2; number += by, nth++) {
-        numbers.push(thunk(number, nth));
-      }
-    }
-    return numbers;
-  };
-
-  numbers.signature = 'numbers(spec) -> numbers';
-
-  /**
-   *
-   * # Sine
-   *
-   * Gives the sine in degrees.
-   * ```
-   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
-   *
-   * sin(0) = 0
-   * sin(45) = 0.707
-   * sin(90) = 1
-   * ```
-   *
-   **/
-
-  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
-
-  /**
-   *
-   * # Square Root
-   *
-   * Gives the the square root of a number.
-   * ```
-   * sqrt(a) => Math.sqrt(a);
-   *
-   * sqrt(0) = 0
-   * sqrt(4) = 2
-   * sqrt(16) = 4
-   * ```
-   *
-   **/
-
-  const sqrt = Math.sqrt;
-
   const update = (geometry, updates) => {
     const updated = {};
     for (const key of Object.keys(geometry)) {
@@ -16313,7 +15958,7 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return z0Surfaces;
   };
 
-  const EPSILON$3 = 1e-5;
+  const EPSILON$2 = 1e-5;
   // const EPSILON2 = 1e-10;
 
   const COPLANAR$1 = 0; // Neither front nor back.
@@ -16456,10 +16101,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
         // const t = planeDistance(plane, point);
         const point = polygon[nth];
         const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
-        if (t < -EPSILON$3) {
+        if (t < -EPSILON$2) {
           polygonType |= BACK$1;
           pointType$1[nth] = BACK$1;
-        } else if (t > EPSILON$3) {
+        } else if (t > EPSILON$2) {
           polygonType |= FRONT$1;
           pointType$1[nth] = FRONT$1;
         } else {
@@ -16606,32 +16251,32 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     const bsp = {
       // Bottom
       kind: BRANCH,
-      plane: [0, 0, -1, -cMin[Z$6] + EPSILON$3 * 1000],
+      plane: [0, 0, -1, -cMin[Z$6] + EPSILON$2 * 1000],
       front,
       back: {
         // Top
         kind: BRANCH,
-        plane: [0, 0, 1, cMax[Z$6] + EPSILON$3 * 1000],
+        plane: [0, 0, 1, cMax[Z$6] + EPSILON$2 * 1000],
         front,
         back: {
           // Left
           kind: BRANCH,
-          plane: [-1, 0, 0, -cMin[X$a] + EPSILON$3 * 1000],
+          plane: [-1, 0, 0, -cMin[X$a] + EPSILON$2 * 1000],
           front,
           back: {
             // Right
             kind: BRANCH,
-            plane: [1, 0, 0, cMax[X$a] + EPSILON$3 * 1000],
+            plane: [1, 0, 0, cMax[X$a] + EPSILON$2 * 1000],
             front,
             back: {
               // Back
               kind: BRANCH,
-              plane: [0, -1, 0, -cMin[Y$a] + EPSILON$3 * 1000],
+              plane: [0, -1, 0, -cMin[Y$a] + EPSILON$2 * 1000],
               front,
               back: {
                 // Front
                 kind: BRANCH,
-                plane: [0, 1, 0, cMax[Y$a] + EPSILON$3 * 1000],
+                plane: [0, 1, 0, cMax[Y$a] + EPSILON$2 * 1000],
                 front: outLeaf,
                 back
               }
@@ -17127,43 +16772,37 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const Z$7 = 2;
 
   const walkX = (min, max, resolution) => {
-    if (min[X$b] + resolution > max[X$b]) {
-      return inLeaf;
-    }
-    const midX = (min[X$b] + max[X$b]) / 2;
+    const midX = Math.floor((min[X$b] + max[X$b]) / 2);
+    if (midX === min[X$b]) { return walkY(min, max, resolution); }
     return {
-      back: walkY(min, [midX, max[Y$b], max[Z$7]], resolution),
-      front: walkY([midX, min[Y$b], min[Z$7]], max, resolution),
+      back: walkX(min, [midX, max[Y$b], max[Z$7]], resolution),
+      front: walkX([midX, min[Y$b], min[Z$7]], max, resolution),
       kind: BRANCH,
-      plane: [1, 0, 0, midX],
+      plane: [1, 0, 0, midX * resolution],
       same: []
     };
   };
 
   const walkY = (min, max, resolution) => {
-    if (min[Y$b] + resolution > max[Y$b]) {
-      return inLeaf;
-    }
-    const midY = (min[Y$b] + max[Y$b]) / 2;
+    const midY = Math.floor((min[Y$b] + max[Y$b]) / 2);
+    if (midY === min[Y$b]) { return walkZ(min, max, resolution); }
     return {
-      back: walkZ(min, [max[X$b], midY, max[Z$7]], resolution),
-      front: walkZ([min[X$b], midY, min[Z$7]], max, resolution),
+      back: walkY(min, [max[X$b], midY, max[Z$7]], resolution),
+      front: walkY([min[X$b], midY, min[Z$7]], max, resolution),
       kind: BRANCH,
-      plane: [0, 1, 0, midY],
+      plane: [0, 1, 0, midY * resolution],
       same: []
     };
   };
 
   const walkZ = (min, max, resolution) => {
-    if (min[Z$7] + resolution > max[Z$7]) {
-      return inLeaf;
-    }
-    const midZ = (min[Z$7] + max[Z$7]) / 2;
+    const midZ = Math.floor((min[Z$7] + max[Z$7]) / 2);
+    if (midZ === min[Z$7]) { return inLeaf; }
     return {
-      back: walkX(min, [max[X$b], max[Y$b], midZ], resolution),
-      front: walkX([min[X$b], min[Y$b], midZ], max, resolution),
+      back: walkZ(min, [max[X$b], max[Y$b], midZ], resolution),
+      front: walkZ([min[X$b], min[Y$b], midZ], max, resolution),
       kind: BRANCH,
-      plane: [0, 0, 1, midZ],
+      plane: [0, 0, 1, midZ * resolution],
       same: []
     };
   };
@@ -17173,7 +16812,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
     const solidPolygons = toPolygons(alignVertices(solid));
 
-    const bsp = walkX(min, max, resolution);
+    const floor = ([x, y, z]) => [Math.floor(x / resolution), Math.floor(y / resolution), Math.floor(z / resolution)];
+    const ceil = ([x, y, z]) => [Math.ceil(x / resolution), Math.ceil(y / resolution), Math.ceil(z / resolution)];
+
+    const bsp = walkX(floor(min), ceil(max), resolution);
 
     // Classify the solid with it.
     const dividedPolygons = [];
@@ -21286,32 +20928,35 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const cacheShape = async (shape, path) => {
     const geometry = shape.toGeometry();
-    await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+    await writeFile({}, `cache/${path}`, geometry);
   };
 
   const writeShape = async (shape, path) => {
     const geometry = shape.toGeometry();
-    await writeFile({}, `output/${path}`, JSON.stringify(geometry));
-    await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+    await writeFile({ doSerialize: false }, `output/${path}`, JSON.stringify(geometry));
+    await writeFile({}, `geometry/${path}`, geometry);
   };
 
   const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
   Shape.prototype.writeShape = writeShapeMethod;
 
   const readShape = async (path, build, { ephemeral = false, src } = {}) => {
-    let data = await readFile({ as: 'utf8', ephemeral }, `source/${path}`);
+    let data = await readFile({ ephemeral }, `source/${path}`);
     if (data === undefined && src) {
-      data = await readFile({ as: 'utf8', sources: [src], ephemeral }, `cache/${path}`);
+      data = await readFile({ sources: [src], ephemeral }, `cache/${path}`);
     }
     if (data === undefined && build !== undefined) {
+      data = await readFile({ ephemeral }, `cache/${path}`);
+      if (data !== undefined) {
+        return Shape.fromGeometry(data);
+      }
       const shape = await build();
       if (!ephemeral) {
-        await cacheShape(shape, `cache/${path}`);
+        await cacheShape(shape, path);
       }
       return shape;
     }
-    const geometry = JSON.parse(data);
-    return Shape.fromGeometry(geometry);
+    return Shape.fromGeometry(data);
   };
 
   const make = (path, builder) => readShape(path, builder);
@@ -21712,533 +21357,538 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   const turnZMethod = function (angle) { return turnZ$1(this, angle); };
   Shape.prototype.turnZ = turnZMethod;
 
-  const crumple = (shape, amount = 0.1, { resolution = 1, rng = Random() } = {}) => {
-    const offset = v => v + (rng() - 0.5) * amount * 2;
-    // FIX: Use a smooth noise function, maybe perlin.
-    const perturb = ([x, y, z]) => [offset(x), offset(y), offset(z)];
+  const registry = [];
 
-    const assembly = [];
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$4(solid);
-      assembly.push({ solid: deform(makeWatertight(solid), perturb, min, max, resolution), tags });
+  // FIX: Need to clear out temporary registrations.
+
+  const fromDesignator = (designator) => {
+    for (const { parser, constructor } of registry) {
+      const spec = parser(designator);
+      if (spec !== undefined && spec !== null && spec !== false) {
+        return constructor(spec);
+      }
     }
-
-    return Shape.fromGeometry({ assembly });
+    throw Error('die');
   };
 
-  const crumpleMethod = function (...args) { return crumple(this, ...args); };
-  Shape.prototype.crumple = crumpleMethod;
+  // Later definitions override earlier definitions.
+  const registerDesignator = (parser, constructor) =>
+    registry.unshift({ parser, constructor });
 
-  const Z$c = 2;
+  /**
+   *
+   * # Item
+   *
+   * Encapsulates a geometry as a discrete item.
+   *
+   **/
 
-  const scaleXY = (factor, [x, y, z]) => [...scale$1(factor, [x, y]), z];
-
-  const thin = (shape, factor, { resolution = 1 } = {}) => {
-    const assembly = [];
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$4(solid);
-      const maxZ = max[Z$c];
-      const minZ = min[Z$c];
-      const height = maxZ - minZ;
-      const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
-      const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
-      assembly.push({ solid: deform(makeWatertight(solid), squeeze, min, max, resolution), tags });
+  // Constructs an item from the designator.
+  const Item$1 = (designator) => {
+    if (typeof designator === 'string') {
+      return fromDesignator(designator);
+    } else if (designator instanceof Array) {
+      return fromDesignator(...designator);
     }
-
-    return Shape.fromGeometry({ assembly });
   };
 
-  const thinMethod = function (...args) { return thin(this, ...args); };
-  Shape.prototype.thin = thinMethod;
-
-  const Z$d = 2;
-
-  const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
-    const assembly = [];
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const [min, max] = measureBoundingBox$4(solid);
-      const height = max[Z$d] - min[Z$d];
-      const radians = (angle / height) * (Math.PI / 180);
-      const rotate = point => rotateZ(point, radians * (point[Z$d] - min[Z$d]));
-      assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
-    }
-
-    return Shape.fromGeometry({ assembly });
+  // Turns the current shape into an item.
+  const itemMethod = function (id) {
+    const shape = Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }));
+    // Register the designator for re-use.
+    registerDesignator(d => (d === id), () => shape);
+    return shape;
   };
 
-  const twistMethod = function (...args) { return twist(this, ...args); };
-  Shape.prototype.twist = twistMethod;
+  Shape.prototype.Item = itemMethod;
+  Shape.prototype.toItem = itemMethod;
 
-  var binPacking = createCommonjsModule(function (module, exports) {
+  Item$1.signature = 'Item(shape:Shape, id:string) -> Shape';
+  itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
+
+  /**
+   *
+   * # Bill Of Materials
+   *
+   **/
+
+  const bom = (shape) => {
+    const bom = [];
+    visit(shape.toKeptGeometry(),
+          (geometry, descend) => {
+            if (geometry.item) {
+              bom.push(geometry.tags.filter(tag => tag.startsWith('item/'))
+                  .map(tag => tag.substring(5)));
+            }
+            descend();
+          });
+    return bom;
+  };
+
+  const bomMethod = function (...args) { return bom(this); };
+  Shape.prototype.bom = bomMethod;
+
+  bomMethod.signature = 'Shape -> bom() -> string';
+
+  const fuse = (shape, op = (_ => _)) =>
+    Shape.fromGeometry(rewrite(shape.toKeptGeometry(),
+                               (geometry, descend, walk) => {
+                                 if (geometry.item) {
+                                   return walk(geometry.item);
+                                 } else {
+                                   return descend();
+                                 }
+                               }));
+
+  const fuseMethod = function (...args) { return fuse(this, ...args); };
+  Shape.prototype.fuse = fuseMethod;
+
+  fuse.signature = 'fuse(shape:Shape, op:function) -> Shapes';
+  fuseMethod.signature = 'Shape -> fuse(op:function) -> Shapes';
+
+  const inItems = (shape, op = (_ => _)) => {
+    const rewritten = rewrite(shape.toKeptGeometry(),
+                              (geometry, descend) => {
+                                if (geometry.item) {
+                                  // Operate on the interior of the items.
+                                  const item = op(Shape.fromGeometry(geometry.item));
+                                  // Reassemble as an item equivalent to the original.
+                                  return update(geometry, { item: item.toGeometry() });
+                                } else {
+                                  return descend();
+                                }
+                              });
+    return Shape.fromGeometry(rewritten);
+  };
+
+  const inItemsMethod = function (...args) { return inItems(this, ...args); };
+  Shape.prototype.inItems = inItemsMethod;
+
+  inItems.signature = 'inItems(shape:Shape, op:function) -> Shapes';
+  inItemsMethod.signature = 'Shape -> inItems(op:function) -> Shapes';
+
+  const items = (shape, op = (_ => _)) => {
+    const items = [];
+    for (const item of getItems(shape.toKeptGeometry())) {
+      items.push(op(Shape.fromGeometry(item)));
+    }
+    return items;
+  };
+
+  const itemsMethod = function (...args) { return items(this, ...args); };
+  Shape.prototype.items = itemsMethod;
+
+  items.signature = 'items(shape:Shape, op:function) -> Shapes';
+  itemsMethod.signature = 'Shape -> items(op:function) -> Shapes';
+
+  const leafs = (shape, op = (_ => _)) => {
+    const leafs = [];
+    for (const leaf of getLeafs(shape.toKeptGeometry())) {
+      leafs.push(op(Shape.fromGeometry(leaf)));
+    }
+    return leafs;
+  };
+
+  const leafsMethod = function (...args) { return leafs(this, ...args); };
+  Shape.prototype.leafs = leafsMethod;
+
+  leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
+  leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
+
+  const toBillOfMaterial = (shape) => {
+    const specifications = [];
+    for (const { tags } of getItems(shape.toKeptGeometry())) {
+      for (const tag of tags) {
+        if (tag.startsWith('item/')) {
+          const specification = tag.substring(5);
+          specifications.push(specification);
+        }
+      }
+    }
+    return specifications;
+  };
+
+  const toBillOfMaterialMethod = function (options = {}) { return toBillOfMaterial(this); };
+
+  Shape.prototype.toBillOfMaterial = toBillOfMaterialMethod;
+
+  /**
+   *
+   * # Ease
+   *
+   * Produces a function for composing easing functions.
+   * ```
+   * ease(0.00, 0.25, t => sin(t * 25))(ease(0.25, 1.00, t => 5)())
+   * ```
+   *
+   **/
+
+  const ease = (start = 0.00, end = 1.00, op = t => 1) => {
+    const compose = (next = t => 1) => {
+      const fn = t => {
+        if (t >= start && t <= end) {
+          return op((t - start) / (end - start));
+        } else {
+          return next(t);
+        }
+      };
+      return fn;
+    };
+    return compose;
+  };
+
+  const linear = (start, end) => t => start + t * (end - start);
+  ease.linear = linear;
+
+  ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
+  linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
+
+  var Prando_umd = createCommonjsModule(function (module, exports) {
   (function (global, factory) {
-     factory(exports) ;
-  }(commonjsGlobal, (function (exports) {
-  /******************************************************************************
+  	 module.exports = factory() ;
+  }(commonjsGlobal, (function () {
+  	var Prando = /** @class */ (function () {
+  	    // ================================================================================================================
+  	    // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
+  	    /**
+  	     * Generate a new Prando pseudo-random number generator.
+  	     *
+  	     * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
+  	     */
+  	    function Prando(seed) {
+  	        this._value = NaN;
+  	        if (typeof (seed) === "string") {
+  	            // String seed
+  	            this._seed = this.hashCode(seed);
+  	        }
+  	        else if (typeof (seed) === "number") {
+  	            // Numeric seed
+  	            this._seed = this.getSafeSeed(seed);
+  	        }
+  	        else {
+  	            // Pseudo-random seed
+  	            this._seed = this.getSafeSeed(Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random()));
+  	        }
+  	        this.reset();
+  	    }
+  	    // ================================================================================================================
+  	    // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
+  	    /**
+  	     * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
+  	     *
+  	     * @param min - The minimum number that can be randomly generated.
+  	     * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
+  	     * @return The generated pseudo-random number.
+  	     */
+  	    Prando.prototype.next = function (min, pseudoMax) {
+  	        if (min === void 0) { min = 0; }
+  	        if (pseudoMax === void 0) { pseudoMax = 1; }
+  	        this.recalculate();
+  	        return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
+  	    };
+  	    /**
+  	     * Generates a pseudo-random integer number in a range (inclusive).
+  	     *
+  	     * @param min - The minimum number that can be randomly generated.
+  	     * @param max - The maximum number that can be randomly generated.
+  	     * @return The generated pseudo-random number.
+  	     */
+  	    Prando.prototype.nextInt = function (min, max) {
+  	        if (min === void 0) { min = 10; }
+  	        if (max === void 0) { max = 100; }
+  	        this.recalculate();
+  	        return Math.floor(this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1));
+  	    };
+  	    /**
+  	     * Generates a pseudo-random string sequence of a particular length from a specific character range.
+  	     *
+  	     * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
+  	     * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
+  	     * pre-existing ids, or employ a robust GUID/UUID generator.
+  	     *
+  	     * @param length - Length of the strting to be generated.
+  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+  	     * @return The generated string sequence.
+  	     */
+  	    Prando.prototype.nextString = function (length, chars) {
+  	        if (length === void 0) { length = 16; }
+  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
+  	        var str = "";
+  	        while (str.length < length) {
+  	            str += this.nextChar(chars);
+  	        }
+  	        return str;
+  	    };
+  	    /**
+  	     * Generates a pseudo-random string of 1 character specific character range.
+  	     *
+  	     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+  	     * @return The generated character.
+  	     */
+  	    Prando.prototype.nextChar = function (chars) {
+  	        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
+  	        this.recalculate();
+  	        return chars.substr(this.nextInt(0, chars.length - 1), 1);
+  	    };
+  	    /**
+  	     * Picks a pseudo-random item from an array. The array is left unmodified.
+  	     *
+  	     * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
+  	     * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
+  	     * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
+  	     * apply a *shuffle* transformation to the array instead, then read it linearly.
+  	     *
+  	     * @param array - Array of any type containing one or more candidates for random picking.
+  	     * @return An item from the array.
+  	     */
+  	    Prando.prototype.nextArrayItem = function (array) {
+  	        this.recalculate();
+  	        return array[this.nextInt(0, array.length - 1)];
+  	    };
+  	    /**
+  	     * Generates a pseudo-random boolean.
+  	     *
+  	     * @return A value of true or false.
+  	     */
+  	    Prando.prototype.nextBoolean = function () {
+  	        this.recalculate();
+  	        return this._value > 0.5;
+  	    };
+  	    /**
+  	     * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
+  	     * calling next() a specified number of times, but faster since it doesn't need to map the
+  	     * new random numbers to a range and return it.
+  	     *
+  	     * @param iterations - The number of items to skip ahead.
+  	     */
+  	    Prando.prototype.skip = function (iterations) {
+  	        if (iterations === void 0) { iterations = 1; }
+  	        while (iterations-- > 0) {
+  	            this.recalculate();
+  	        }
+  	    };
+  	    /**
+  	     * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
+  	     * will then produce the same sequence of numbers it had produced before. This is equivalent to
+  	     * creating a new Prando instance with the same seed as another Prando instance.
+  	     *
+  	     * Example:
+  	     * let rng = new Prando(12345678);
+  	     * console.log(rng.next()); // 0.6177754114889017
+  	     * console.log(rng.next()); // 0.5784605181725837
+  	     * rng.reset();
+  	     * console.log(rng.next()); // 0.6177754114889017 again
+  	     * console.log(rng.next()); // 0.5784605181725837 again
+  	     */
+  	    Prando.prototype.reset = function () {
+  	        this._value = this._seed;
+  	    };
+  	    // ================================================================================================================
+  	    // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
+  	    Prando.prototype.recalculate = function () {
+  	        this._value = this.xorshift(this._value);
+  	    };
+  	    Prando.prototype.xorshift = function (value) {
+  	        // Xorshift*32
+  	        // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
+  	        value ^= value << 13;
+  	        value ^= value >> 17;
+  	        value ^= value << 5;
+  	        return value;
+  	    };
+  	    Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
+  	        return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
+  	    };
+  	    Prando.prototype.hashCode = function (str) {
+  	        var hash = 0;
+  	        if (str) {
+  	            var l = str.length;
+  	            for (var i = 0; i < l; i++) {
+  	                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+  	                hash |= 0;
+  	                hash = this.xorshift(hash);
+  	            }
+  	        }
+  	        return this.getSafeSeed(hash);
+  	    };
+  	    Prando.prototype.getSafeSeed = function (seed) {
+  	        if (seed === 0)
+  	            return 1;
+  	        return seed;
+  	    };
+  	    Prando.MIN = -2147483648; // Int32 min
+  	    Prando.MAX = 2147483647; // Int32 max
+  	    return Prando;
+  	}());
 
-  This is a binary tree based bin packing algorithm that is more complex than
-  the simple Packer (packer.js). Instead of starting off with a fixed width and
-  height, it starts with the width and height of the first block passed and then
-  grows as necessary to accomodate each subsequent block. As it grows it attempts
-  to maintain a roughly square ratio by making 'smart' choices about whether to
-  grow right or down.
-
-  When growing, the algorithm can only grow to the right OR down. Therefore, if
-  the new block is BOTH wider and taller than the current target then it will be
-  rejected. This makes it very important to initialize with a sensible starting
-  width and height. If you are providing sorted input (largest first) then this
-  will not be an issue.
-
-  A potential way to solve this limitation would be to allow growth in BOTH
-  directions at once, but this requires maintaining a more complex tree
-  with 3 children (down, right and center) and that complexity can be avoided
-  by simply chosing a sensible starting block.
-
-  Best results occur when the input blocks are sorted by height, or even better
-  when sorted by max(width,height).
-
-  Inputs:
-  ------
-
-    blocks: array of any objects that have .w and .h attributes
-
-  Outputs:
-  -------
-
-    marks each block that fits with a .fit attribute pointing to a
-    node with .x and .y coordinates
-
-  Example:
-  -------
-
-    var blocks = [
-      { w: 100, h: 100 },
-      { w: 100, h: 100 },
-      { w:  80, h:  80 },
-      { w:  80, h:  80 },
-      etc
-      etc
-    ];
-
-    var packer = new GrowingPacker();
-    packer.fit(blocks);
-
-    for(var n = 0 ; n < blocks.length ; n++) {
-      var block = blocks[n];
-      if (block.fit) {
-        Draw(block.fit.x, block.fit.y, block.w, block.h);
-      }
-    }
-
-
-  ******************************************************************************/
-
-  function GrowingPacker() {}
-
-  GrowingPacker.prototype = {
-
-    fit: function fit(blocks) {
-      var n,
-          node,
-          block,
-          len = blocks.length;
-      var w = len > 0 ? blocks[0].w : 0;
-      var h = len > 0 ? blocks[0].h : 0;
-      this.root = { x: 0, y: 0, w: w, h: h };
-      for (n = 0; n < len; n++) {
-        block = blocks[n];
-        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);else block.fit = this.growNode(block.w, block.h);
-      }
-    },
-
-    findNode: function findNode(root, w, h) {
-      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
-    },
-
-    splitNode: function splitNode(node, w, h) {
-      node.used = true;
-      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
-      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
-      return node;
-    },
-
-    growNode: function growNode(w, h) {
-      var canGrowDown = w <= this.root.w;
-      var canGrowRight = h <= this.root.h;
-
-      var shouldGrowRight = canGrowRight && this.root.h >= this.root.w + w; // attempt to keep square-ish by growing right when height is much greater than width
-      var shouldGrowDown = canGrowDown && this.root.w >= this.root.h + h; // attempt to keep square-ish by growing down  when width  is much greater than height
-
-      if (shouldGrowRight) return this.growRight(w, h);else if (shouldGrowDown) return this.growDown(w, h);else if (canGrowRight) return this.growRight(w, h);else if (canGrowDown) return this.growDown(w, h);else return null; // need to ensure sensible root starting size to avoid this happening
-    },
-
-    growRight: function growRight(w, h) {
-      var node;
-      this.root = {
-        used: true,
-        x: 0,
-        y: 0,
-        w: this.root.w + w,
-        h: this.root.h,
-        down: this.root,
-        right: { x: this.root.w, y: 0, w: w, h: this.root.h }
-      };
-      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
-    },
-
-    growDown: function growDown(w, h) {
-      var node;
-      this.root = {
-        used: true,
-        x: 0,
-        y: 0,
-        w: this.root.w,
-        h: this.root.h + h,
-        down: { x: 0, y: this.root.h, w: this.root.w, h: h },
-        right: this.root
-      };
-      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
-    }
-
-  };
-
-  /******************************************************************************
-
-  This is a very simple binary tree based bin packing algorithm that is initialized
-  with a fixed width and height and will fit each block into the first node where
-  it fits and then split that node into 2 parts (down and right) to track the
-  remaining whitespace.
-
-  Best results occur when the input blocks are sorted by height, or even better
-  when sorted by max(width,height).
-
-  Inputs:
-  ------
-
-    w:       width of target rectangle
-    h:      height of target rectangle
-    blocks: array of any objects that have .w and .h attributes
-
-  Outputs:
-  -------
-
-    marks each block that fits with a .fit attribute pointing to a
-    node with .x and .y coordinates
-
-  Example:
-  -------
-
-    var blocks = [
-      { w: 100, h: 100 },
-      { w: 100, h: 100 },
-      { w:  80, h:  80 },
-      { w:  80, h:  80 },
-      etc
-      etc
-    ];
-
-    var packer = new Packer(500, 500);
-    packer.fit(blocks);
-
-    for(var n = 0 ; n < blocks.length ; n++) {
-      var block = blocks[n];
-      if (block.fit) {
-        Draw(block.fit.x, block.fit.y, block.w, block.h);
-      }
-    }
-
-
-  ******************************************************************************/
-
-  function Packer(w, h) {
-    this.init(w, h);
-  }
-
-  Packer.prototype = {
-
-    init: function init(w, h) {
-      this.root = { x: 0, y: 0, w: w, h: h };
-    },
-
-    fit: function fit(blocks) {
-      var n, node, block;
-      for (n = 0; n < blocks.length; n++) {
-        block = blocks[n];
-        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);
-      }
-    },
-
-    findNode: function findNode(root, w, h) {
-      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
-    },
-
-    splitNode: function splitNode(node, w, h) {
-      node.used = true;
-      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
-      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
-      return node;
-    }
-
-  };
-
-  exports.GrowingPacker = GrowingPacker;
-  exports.Packer = Packer;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
+  	return Prando;
 
   })));
-
+  module.exports.default = module.exports; // Terrible injection just so it works regardless of how it's required
   });
 
-  unwrapExports(binPacking);
-  var binPacking_1 = binPacking.GrowingPacker;
-  var binPacking_2 = binPacking.Packer;
+  const makeTo = (g) => (to) => g() * to;
+  const makeIn = (g) => (from, to) => g() * (to - from) + from;
+  const makeVary = (g) => (degree) => (g() - 0.5) * degree * 2;
+  const makePick = (g) => (options) => options[Math.floor(g() * options.length)];
 
-  const X$g = 0;
-  const Y$g = 1;
-
-  const measureSize = (geometry) => {
-    const [min, max] = measureBoundingBox$5(geometry);
-    const width = max[X$g] - min[X$g];
-    const height = max[Y$g] - min[Y$g];
-    return [width, height];
+  const Random = (seed = 0) => {
+    const rng = new Prando_umd(seed);
+    const g = () => rng.next();
+    g.in = makeIn(g);
+    g.to = makeTo(g);
+    g.vary = makeVary(g);
+    g.pick = makePick(g);
+    return g;
   };
 
-  const measureOrigin = (geometry) => {
-    const [min] = measureBoundingBox$5(geometry);
-    const [x, y] = min;
-    return [x, y];
-  };
+  /**
+   *
+   * # Arc Cosine
+   *
+   * Gives the arc cosine converted to degrees.
+   * ```
+   * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
+   *
+   * acos(0) = 90
+   * acos(0.5) = 60
+   * acos(1) = 0
+   * ```
+   *
+   **/
 
-  const measureOffsets = (size, pageMargin) => {
-    if (size) {
-      const [width, height] = size;
+  const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+  acos.signature = 'acos(angle:number) -> number';
 
-      // Center the output to match pages.
-      const xOffset = width / -2;
-      const yOffset = height / -2;
-      const packer = new binPacking_2(width - pageMargin * 2, height - pageMargin * 2);
+  /**
+   *
+   * # Cosine
+   *
+   * Gives the cosine in degrees.
+   * ```
+   * cos(a) => Math.cos(a / 360 * Math.PI * 2);
+   *
+   * cos(0) = 1
+   * cos(45) = 0.707
+   * cos(90) = 0
+   * ```
+   *
+   **/
 
-      return [xOffset, yOffset, packer];
-    } else {
-      const packer = new binPacking_1();
-      return [0, 0, packer];
-    }
-  };
+  const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
 
-  const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
-    const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
+  cos.signature = 'cos(angle:number) -> number';
 
-    const packedGeometries = [];
-    const unpackedGeometries = [];
+  /**
+   *
+   * # Max
+   *
+   * Produces the maximum of a series of numbers.
+   *
+   * ```
+   * max(1, 2, 3, 4) == 4
+   * ```
+   *
+   **/
 
-    const blocks = [];
+  const max$1 = Math.max;
 
-    for (const geometry of geometries) {
-      const [width, height] = measureSize(geometry);
-      if (!isFinite(width) || !isFinite(height)) {
-        continue;
-      }
-      const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
-      blocks.push({ w, h, geometry });
-    }
+  max$1.signature = 'max(...values:number) -> number';
 
-    // Place largest cells first
-    blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
+  /**
+   *
+   * # Min
+   *
+   * Produces the minimum of a series of numbers.
+   *
+   * ```
+   * min(1, 2, 3, 4) == 1
+   * ```
+   *
+   **/
 
-    packer.fit(blocks);
+  const min$1 = Math.min;
 
-    let minPoint = [Infinity, Infinity, 0];
-    let maxPoint = [-Infinity, -Infinity, 0];
+  min$1.signature = 'min(...values:number) -> number';
 
-    for (const { geometry, fit } of blocks) {
-      if (fit && fit.used) {
-        const [x, y] = measureOrigin(geometry);
-        const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
-        const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
-        minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
-        maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
-        const transformed = toTransformedGeometry(translate$4([xo, yo, 0], geometry));
-        packedGeometries.push(transformed);
+  /**
+   *
+   * # Numbers
+   *
+   * ```
+   * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
+   * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
+   * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
+   * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
+   * ```
+   *
+   **/
+
+  const EPSILON$3 = 1e-5;
+
+  const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
+    const numbers = [];
+    if (by === undefined) {
+      if (resolution !== undefined) {
+        by = to / resolution;
       } else {
-        unpackedGeometries.push(geometry);
+        by = 1;
       }
     }
 
-    return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
+    if (to === undefined && upto === undefined) {
+      upto = 1;
+    }
+
+    if (upto !== undefined) {
+      // Exclusive
+      for (let number = from, nth = 0; number < to - EPSILON$3; number += by, nth++) {
+        numbers.push(thunk(number, nth));
+      }
+    } else if (to !== undefined) {
+      // Inclusive
+      for (let number = from, nth = 0; number <= to + EPSILON$3; number += by, nth++) {
+        numbers.push(thunk(number, nth));
+      }
+    }
+    return numbers;
   };
 
-  const pack$1 = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }) => {
-    if (perLayout === 0) {
-      // Packing was disabled -- do nothing.
-      return shape;
-    }
+  numbers.signature = 'numbers(spec) -> numbers';
 
-    let todo = [];
-    for (const leaf of getLeafs(shape.toKeptGeometry())) {
-      todo.push(leaf);
-    }
-    const packedLayers = [];
-    while (todo.length > 0) {
-      const input = [];
-      while (todo.length > 0 && input.length < perLayout) {
-        input.push(todo.shift());
-      }
-      const [packed, unpacked, minPoint, maxPoint] = pack({ size, pageMargin, itemMargin }, ...input);
-      packSize[0] = minPoint;
-      packSize[1] = maxPoint;
-      if (packed.length === 0) {
-        break;
-      } else {
-        packedLayers.push({ item: { disjointAssembly: packed } });
-      }
-      todo.unshift(...unpacked);
-    }
-    let packedShape = Shape.fromGeometry({ layers: packedLayers });
-    if (size === undefined) {
-      packedShape = packedShape.center();
-    }
-    return packedShape;
-  };
+  /**
+   *
+   * # Sine
+   *
+   * Gives the sine in degrees.
+   * ```
+   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
+   *
+   * sin(0) = 0
+   * sin(45) = 0.707
+   * sin(90) = 1
+   * ```
+   *
+   **/
 
-  const packMethod = function (...args) { return pack$1(this, ...args); };
-  Shape.prototype.pack = packMethod;
+  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
 
-  pack$1.signature = 'pack({ size, margin = 5 }, ...shapes:Shape) -> [packed:Shapes, unpacked:Shapes]';
+  /**
+   *
+   * # Square Root
+   *
+   * Gives the the square root of a number.
+   * ```
+   * sqrt(a) => Math.sqrt(a);
+   *
+   * sqrt(0) = 0
+   * sqrt(4) = 2
+   * sqrt(16) = 4
+   * ```
+   *
+   **/
 
-  const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
-  const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
-
-  const black = [0, 0, 0];
-
-  // Not entirely sure how conformant this is, but it seems to work for simple
-  // cases.
-
-  // Width and height are in post-script points.
-  const header = ({ scale = 1, width = 210, height = 297, trim = 5, lineWidth = 0.096 }) => {
-    const mediaX1 = 0 * scale;
-    const mediaY1 = 0 * scale;
-    const mediaX2 = width * scale;
-    const mediaY2 = height * scale;
-    const trimX1 = trim * scale;
-    const trimY1 = trim * scale;
-    const trimX2 = (width - trim) * scale;
-    const trimY2 = (height - trim) * scale;
-    return [
-      `%PDF-1.5`,
-      `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
-      `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,
-      `3 0 obj <<`,
-      `  /Contents 4 0 R`,
-      `  /MediaBox [ ${mediaX1.toFixed(9)} ${mediaY1.toFixed(9)} ${mediaX2.toFixed(9)} ${mediaY2.toFixed(9)} ]`,
-      `  /TrimBox [ ${trimX1.toFixed(9)} ${trimY1.toFixed(9)} ${trimX2.toFixed(9)} ${trimY2.toFixed(9)} ]`,
-      `  /Parent 2 0 R`,
-      `  /Type /Page`,
-      `>>`,
-      `endobj`,
-      `4 0 obj << >>`,
-      `stream`,
-      `${lineWidth.toFixed(9)} w`
-    ];
-  };
-
-  const footer =
-     [`endstream`,
-      `endobj`,
-      `trailer << /Root 1 0 R /Size 4 >>`,
-      `%%EOF`];
-
-  const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) => {
-    geometry = await geometry;
-
-    // This is the size of a post-script point in mm.
-    const pointSize = 0.352777778;
-    const scale = 1 / pointSize;
-    const [width, height] = size;
-    const lines = [];
-    const matrix = multiply$1(fromTranslation([width * scale / 2, height * scale / 2, 0]),
-                            fromScaling([scale, scale, scale]));
-    const keptGeometry = toKeptGeometry(transform$a(matrix, geometry));
-    for (const { tags, surface } of getSurfaces(keptGeometry)) {
-      lines.push(toFillColor(toRgbFromTags(tags, black)));
-      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
-      for (const path of outline$1(surface)) {
-        let nth = (path[0] === null) ? 1 : 0;
-        const [x1, y1] = path[nth];
-        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-        for (nth++; nth < path.length; nth++) {
-          const [x2, y2] = path[nth];
-          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-        }
-        lines.push(`h`); // Surface paths are always closed.
-      }
-      lines.push(`f`); // Surface paths are always filled.
-    }
-    for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
-      lines.push(toFillColor(toRgbFromTags(tags, black)));
-      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
-      // FIX: Avoid making the surface convex.
-      for (const path of outline$1(z0Surface)) {
-        let nth = (path[0] === null) ? 1 : 0;
-        const [x1, y1] = path[nth];
-        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-        for (nth++; nth < path.length; nth++) {
-          const [x2, y2] = path[nth];
-          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-        }
-        lines.push(`h`); // Surface paths are always closed.
-      }
-      lines.push(`f`); // Surface paths are always filled.
-    }
-    for (const { tags, paths } of getPaths(keptGeometry)) {
-      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
-      for (const path of paths) {
-        let nth = (path[0] === null) ? 1 : 0;
-        const [x1, y1] = path[nth];
-        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-        for (nth++; nth < path.length; nth++) {
-          const [x2, y2] = path[nth];
-          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-        }
-        if (path[0] !== null) {
-          // A leading null indicates an open path.
-          lines.push(`h`); // close path.
-        }
-        lines.push(`S`); // stroke.
-      }
-    }
-
-    return [].concat(header({ scale, width, height, lineWidth }),
-                     lines,
-                     footer).join('\n');
-  };
-
-  // FIX: Support multi-page pdf, and multi-page preview.
-
-  const toPdf$1 = async (shape, { lineWidth = 0.096 } = {}) => {
-    const pages = [];
-    // CHECK: Should this be limited to Page plans?
-    const geometry = shape.toKeptGeometry();
-    for (const entry of getPlans(geometry)) {
-      if (entry.plan.page) {
-        const { size } = entry.plan.page;
-        for (let leaf of getLeafs(entry.content)) {
-          const pdf = await toPdf(leaf, { lineWidth, size });
-          pages.push({ pdf, leaf: { ...entry, content: leaf }, index: pages.length });
-        }
-      }
-    }
-    return pages;
-  };
-
-  const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
-    for (const { pdf, leaf, index } of await toPdf$1(shape, { lineWidth })) {
-      await writeFile({}, `output/${name}_${index}.pdf`, pdf);
-      await writeFile({}, `geometry/${name}_${index}.pdf`, JSON.stringify(toKeptGeometry(leaf)));
-    }
-  };
-
-  const writePdfMethod = function (...args) { return writePdf(this, ...args); };
-  Shape.prototype.writePdf = writePdfMethod;
+  const sqrt = Math.sqrt;
 
   /**
    *
@@ -27264,1504 +26914,30 @@ return d[d.length-1];};return ", funcName].join("");
     return Shape.fromPath(path);
   };
 
-  /**
-   *
-   * # Chained Hull
-   *
-   * Builds a convex hull between adjacent pairs in a sequence of shapes.
-   *
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * chainHull(Cube(3).move(-5, 5),
-   *           Sphere(3).move(5, -5),
-   *           Cylinder(3, 10).move(-10, -10))
-   *   .move(10, 10)
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [80, 80, 0] } }
-   * ```
-   * chainHull(Circle(20).moveZ(-10),
-   *           Circle(10),
-   *           Circle(20).moveZ(10))
-   * ```
-   * :::
-   *
-   **/
+  // Hershey simplex one line font.
+  // See: http://paulbourke.net/dataformats/hershey/
 
-  const Z$e = 2;
+  const hersheyPaths = { '32': [[null]], '33': [[null, [5, 21, 0], [5, 7, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '34': [[null, [4, 21, 0], [4, 14, 0]], [null, [12, 21, 0], [12, 14, 0]], [null]], '35': [[null, [11, 25, 0], [4, -7, 0]], [null, [17, 25, 0], [10, -7, 0]], [null, [4, 12, 0], [18, 12, 0]], [null, [3, 6, 0], [17, 6, 0]], [null]], '36': [[null, [8, 25, 0], [8, -4, 0]], [null, [12, 25, 0], [12, -4, 0]], [null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '37': [[null, [21, 21, 0], [3, 0, 0]], [null, [8, 21, 0], [10, 19, 0], [10, 17, 0], [9, 15, 0], [7, 14, 0], [5, 14, 0], [3, 16, 0], [3, 18, 0], [4, 20, 0], [6, 21, 0], [8, 21, 0], [10, 20, 0], [13, 19, 0], [16, 19, 0], [19, 20, 0], [21, 21, 0]], [null, [17, 7, 0], [15, 6, 0], [14, 4, 0], [14, 2, 0], [16, 0, 0], [18, 0, 0], [20, 1, 0], [21, 3, 0], [21, 5, 0], [19, 7, 0], [17, 7, 0]], [null]], '38': [[null, [23, 12, 0], [23, 13, 0], [22, 14, 0], [21, 14, 0], [20, 13, 0], [19, 11, 0], [17, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [7, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 6, 0], [4, 8, 0], [5, 9, 0], [12, 13, 0], [13, 14, 0], [14, 16, 0], [14, 18, 0], [13, 20, 0], [11, 21, 0], [9, 20, 0], [8, 18, 0], [8, 16, 0], [9, 13, 0], [11, 10, 0], [16, 3, 0], [18, 1, 0], [20, 0, 0], [22, 0, 0], [23, 1, 0], [23, 2, 0]], [null]], '39': [[null, [5, 19, 0], [4, 20, 0], [5, 21, 0], [6, 20, 0], [6, 18, 0], [5, 16, 0], [4, 15, 0]], [null]], '40': [[null, [11, 25, 0], [9, 23, 0], [7, 20, 0], [5, 16, 0], [4, 11, 0], [4, 7, 0], [5, 2, 0], [7, -2, 0], [9, -5, 0], [11, -7, 0]], [null]], '41': [[null, [3, 25, 0], [5, 23, 0], [7, 20, 0], [9, 16, 0], [10, 11, 0], [10, 7, 0], [9, 2, 0], [7, -2, 0], [5, -5, 0], [3, -7, 0]], [null]], '42': [[null, [8, 21, 0], [8, 9, 0]], [null, [3, 18, 0], [13, 12, 0]], [null, [13, 18, 0], [3, 12, 0]], [null]], '43': [[null, [13, 18, 0], [13, 0, 0]], [null, [4, 9, 0], [22, 9, 0]], [null]], '44': [[null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '45': [[null, [4, 9, 0], [22, 9, 0]], [null]], '46': [[null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '47': [[null, [20, 25, 0], [2, -7, 0]], [null]], '48': [[null, [9, 21, 0], [6, 20, 0], [4, 17, 0], [3, 12, 0], [3, 9, 0], [4, 4, 0], [6, 1, 0], [9, 0, 0], [11, 0, 0], [14, 1, 0], [16, 4, 0], [17, 9, 0], [17, 12, 0], [16, 17, 0], [14, 20, 0], [11, 21, 0], [9, 21, 0]], [null]], '49': [[null, [6, 17, 0], [8, 18, 0], [11, 21, 0], [11, 0, 0]], [null]], '50': [[null, [4, 16, 0], [4, 17, 0], [5, 19, 0], [6, 20, 0], [8, 21, 0], [12, 21, 0], [14, 20, 0], [15, 19, 0], [16, 17, 0], [16, 15, 0], [15, 13, 0], [13, 10, 0], [3, 0, 0], [17, 0, 0]], [null]], '51': [[null, [5, 21, 0], [16, 21, 0], [10, 13, 0], [13, 13, 0], [15, 12, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '52': [[null, [13, 21, 0], [3, 7, 0], [18, 7, 0]], [null, [13, 21, 0], [13, 0, 0]], [null]], '53': [[null, [15, 21, 0], [5, 21, 0], [4, 12, 0], [5, 13, 0], [8, 14, 0], [11, 14, 0], [14, 13, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '54': [[null, [16, 18, 0], [15, 20, 0], [12, 21, 0], [10, 21, 0], [7, 20, 0], [5, 17, 0], [4, 12, 0], [4, 7, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [11, 0, 0], [14, 1, 0], [16, 3, 0], [17, 6, 0], [17, 7, 0], [16, 10, 0], [14, 12, 0], [11, 13, 0], [10, 13, 0], [7, 12, 0], [5, 10, 0], [4, 7, 0]], [null]], '55': [[null, [17, 21, 0], [7, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null]], '56': [[null, [8, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 14, 0], [7, 13, 0], [11, 12, 0], [14, 11, 0], [16, 9, 0], [17, 7, 0], [17, 4, 0], [16, 2, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 7, 0], [4, 9, 0], [6, 11, 0], [9, 12, 0], [13, 13, 0], [15, 14, 0], [16, 16, 0], [16, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0]], [null]], '57': [[null, [16, 14, 0], [15, 11, 0], [13, 9, 0], [10, 8, 0], [9, 8, 0], [6, 9, 0], [4, 11, 0], [3, 14, 0], [3, 15, 0], [4, 18, 0], [6, 20, 0], [9, 21, 0], [10, 21, 0], [13, 20, 0], [15, 18, 0], [16, 14, 0], [16, 9, 0], [15, 4, 0], [13, 1, 0], [10, 0, 0], [8, 0, 0], [5, 1, 0], [4, 3, 0]], [null]], '58': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '59': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '60': [[null, [20, 18, 0], [4, 9, 0], [20, 0, 0]], [null]], '61': [[null, [4, 12, 0], [22, 12, 0]], [null, [4, 6, 0], [22, 6, 0]], [null]], '62': [[null, [4, 18, 0], [20, 9, 0], [4, 0, 0]], [null]], '63': [[null, [3, 16, 0], [3, 17, 0], [4, 19, 0], [5, 20, 0], [7, 21, 0], [11, 21, 0], [13, 20, 0], [14, 19, 0], [15, 17, 0], [15, 15, 0], [14, 13, 0], [13, 12, 0], [9, 10, 0], [9, 7, 0]], [null, [9, 2, 0], [8, 1, 0], [9, 0, 0], [10, 1, 0], [9, 2, 0]], [null]], '64': [[null, [18, 13, 0], [17, 15, 0], [15, 16, 0], [12, 16, 0], [10, 15, 0], [9, 14, 0], [8, 11, 0], [8, 8, 0], [9, 6, 0], [11, 5, 0], [14, 5, 0], [16, 6, 0], [17, 8, 0]], [null, [12, 16, 0], [10, 14, 0], [9, 11, 0], [9, 8, 0], [10, 6, 0], [11, 5, 0]], [null, [18, 16, 0], [17, 8, 0], [17, 6, 0], [19, 5, 0], [21, 5, 0], [23, 7, 0], [24, 10, 0], [24, 12, 0], [23, 15, 0], [22, 17, 0], [20, 19, 0], [18, 20, 0], [15, 21, 0], [12, 21, 0], [9, 20, 0], [7, 19, 0], [5, 17, 0], [4, 15, 0], [3, 12, 0], [3, 9, 0], [4, 6, 0], [5, 4, 0], [7, 2, 0], [9, 1, 0], [12, 0, 0], [15, 0, 0], [18, 1, 0], [20, 2, 0], [21, 3, 0]], [null, [19, 16, 0], [18, 8, 0], [18, 6, 0], [19, 5, 0]]], '65': [[null, [9, 21, 0], [1, 0, 0]], [null, [9, 21, 0], [17, 0, 0]], [null, [4, 7, 0], [14, 7, 0]], [null]], '66': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0]], [null, [4, 11, 0], [13, 11, 0], [16, 10, 0], [17, 9, 0], [18, 7, 0], [18, 4, 0], [17, 2, 0], [16, 1, 0], [13, 0, 0], [4, 0, 0]], [null]], '67': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0]], [null]], '68': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [11, 21, 0], [14, 20, 0], [16, 18, 0], [17, 16, 0], [18, 13, 0], [18, 8, 0], [17, 5, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [4, 0, 0]], [null]], '69': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null, [4, 0, 0], [17, 0, 0]], [null]], '70': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null]], '71': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [18, 8, 0]], [null, [13, 8, 0], [18, 8, 0]], [null]], '72': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null, [4, 11, 0], [18, 11, 0]], [null]], '73': [[null, [4, 21, 0], [4, 0, 0]], [null]], '74': [[null, [12, 21, 0], [12, 5, 0], [11, 2, 0], [10, 1, 0], [8, 0, 0], [6, 0, 0], [4, 1, 0], [3, 2, 0], [2, 5, 0], [2, 7, 0]], [null]], '75': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [4, 7, 0]], [null, [9, 12, 0], [18, 0, 0]], [null]], '76': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 0, 0], [16, 0, 0]], [null]], '77': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [20, 0, 0]], [null]], '78': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [18, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null]], '79': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null]], '80': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 14, 0], [17, 12, 0], [16, 11, 0], [13, 10, 0], [4, 10, 0]], [null]], '81': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null, [12, 4, 0], [18, -2, 0]], [null]], '82': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0], [4, 11, 0]], [null, [11, 11, 0], [18, 0, 0]], [null]], '83': [[null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '84': [[null, [8, 21, 0], [8, 0, 0]], [null, [1, 21, 0], [15, 21, 0]], [null]], '85': [[null, [4, 21, 0], [4, 6, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [12, 0, 0], [15, 1, 0], [17, 3, 0], [18, 6, 0], [18, 21, 0]], [null]], '86': [[null, [1, 21, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 0, 0]], [null]], '87': [[null, [2, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [17, 0, 0]], [null, [22, 21, 0], [17, 0, 0]], [null]], '88': [[null, [3, 21, 0], [17, 0, 0]], [null, [17, 21, 0], [3, 0, 0]], [null]], '89': [[null, [1, 21, 0], [9, 11, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 11, 0]], [null]], '90': [[null, [17, 21, 0], [3, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null, [3, 0, 0], [17, 0, 0]], [null]], '91': [[null, [4, 25, 0], [4, -7, 0]], [null, [5, 25, 0], [5, -7, 0]], [null, [4, 25, 0], [11, 25, 0]], [null, [4, -7, 0], [11, -7, 0]], [null]], '92': [[null, [0, 21, 0], [14, -3, 0]], [null]], '93': [[null, [9, 25, 0], [9, -7, 0]], [null, [10, 25, 0], [10, -7, 0]], [null, [3, 25, 0], [10, 25, 0]], [null, [3, -7, 0], [10, -7, 0]], [null]], '94': [[null, [6, 15, 0], [8, 18, 0], [10, 15, 0]], [null, [3, 12, 0], [8, 17, 0], [13, 12, 0]], [null, [8, 17, 0], [8, 0, 0]], [null]], '95': [[null, [0, -2, 0], [16, -2, 0]], [null]], '96': [[null, [6, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 15, 0], [6, 16, 0], [5, 17, 0]], [null]], '97': [[null, [15, 14, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '98': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '99': [[null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '100': [[null, [15, 21, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '101': [[null, [3, 8, 0], [15, 8, 0], [15, 10, 0], [14, 12, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '102': [[null, [10, 21, 0], [8, 21, 0], [6, 20, 0], [5, 17, 0], [5, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '103': [[null, [15, 14, 0], [15, -2, 0], [14, -5, 0], [13, -6, 0], [11, -7, 0], [8, -7, 0], [6, -6, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '104': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '105': [[null, [3, 21, 0], [4, 20, 0], [5, 21, 0], [4, 22, 0], [3, 21, 0]], [null, [4, 14, 0], [4, 0, 0]], [null]], '106': [[null, [5, 21, 0], [6, 20, 0], [7, 21, 0], [6, 22, 0], [5, 21, 0]], [null, [6, 14, 0], [6, -3, 0], [5, -6, 0], [3, -7, 0], [1, -7, 0]], [null]], '107': [[null, [4, 21, 0], [4, 0, 0]], [null, [14, 14, 0], [4, 4, 0]], [null, [8, 8, 0], [15, 0, 0]], [null]], '108': [[null, [4, 21, 0], [4, 0, 0]], [null]], '109': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null, [15, 10, 0], [18, 13, 0], [20, 14, 0], [23, 14, 0], [25, 13, 0], [26, 10, 0], [26, 0, 0]], [null]], '110': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '111': [[null, [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0], [16, 6, 0], [16, 8, 0], [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0]], [null]], '112': [[null, [4, 14, 0], [4, -7, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '113': [[null, [15, 14, 0], [15, -7, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '114': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 8, 0], [5, 11, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0]], [null]], '115': [[null, [14, 11, 0], [13, 13, 0], [10, 14, 0], [7, 14, 0], [4, 13, 0], [3, 11, 0], [4, 9, 0], [6, 8, 0], [11, 7, 0], [13, 6, 0], [14, 4, 0], [14, 3, 0], [13, 1, 0], [10, 0, 0], [7, 0, 0], [4, 1, 0], [3, 3, 0]], [null]], '116': [[null, [5, 21, 0], [5, 4, 0], [6, 1, 0], [8, 0, 0], [10, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '117': [[null, [4, 14, 0], [4, 4, 0], [5, 1, 0], [7, 0, 0], [10, 0, 0], [12, 1, 0], [15, 4, 0]], [null, [15, 14, 0], [15, 0, 0]], [null]], '118': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0]], [null]], '119': [[null, [3, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [15, 0, 0]], [null, [19, 14, 0], [15, 0, 0]], [null]], '120': [[null, [3, 14, 0], [14, 0, 0]], [null, [14, 14, 0], [3, 0, 0]], [null]], '121': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0], [6, -4, 0], [4, -6, 0], [2, -7, 0], [1, -7, 0]], [null]], '122': [[null, [14, 14, 0], [3, 0, 0]], [null, [3, 14, 0], [14, 14, 0]], [null, [3, 0, 0], [14, 0, 0]], [null]], '123': [[null, [9, 25, 0], [7, 24, 0], [6, 23, 0], [5, 21, 0], [5, 19, 0], [6, 17, 0], [7, 16, 0], [8, 14, 0], [8, 12, 0], [6, 10, 0]], [null, [7, 24, 0], [6, 22, 0], [6, 20, 0], [7, 18, 0], [8, 17, 0], [9, 15, 0], [9, 13, 0], [8, 11, 0], [4, 9, 0], [8, 7, 0], [9, 5, 0], [9, 3, 0], [8, 1, 0], [7, 0, 0], [6, -2, 0], [6, -4, 0], [7, -6, 0]], [null, [6, 8, 0], [8, 6, 0], [8, 4, 0], [7, 2, 0], [6, 1, 0], [5, -1, 0], [5, -3, 0], [6, -5, 0], [7, -6, 0], [9, -7, 0]], [null]], '124': [[null, [4, 25, 0], [4, -7, 0]], [null]], '125': [[null, [5, 25, 0], [7, 24, 0], [8, 23, 0], [9, 21, 0], [9, 19, 0], [8, 17, 0], [7, 16, 0], [6, 14, 0], [6, 12, 0], [8, 10, 0]], [null, [7, 24, 0], [8, 22, 0], [8, 20, 0], [7, 18, 0], [6, 17, 0], [5, 15, 0], [5, 13, 0], [6, 11, 0], [10, 9, 0], [6, 7, 0], [5, 5, 0], [5, 3, 0], [6, 1, 0], [7, 0, 0], [8, -2, 0], [8, -4, 0], [7, -6, 0]], [null, [8, 8, 0], [6, 6, 0], [6, 4, 0], [7, 2, 0], [8, 1, 0], [9, -1, 0], [9, -3, 0], [8, -5, 0], [7, -6, 0], [5, -7, 0]], [null]], '126': [[null, [3, 6, 0], [3, 8, 0], [4, 11, 0], [6, 12, 0], [8, 12, 0], [10, 11, 0], [14, 8, 0], [16, 7, 0], [18, 7, 0], [20, 8, 0], [21, 10, 0]], [null, [3, 8, 0], [4, 10, 0], [6, 11, 0], [8, 11, 0], [10, 10, 0], [14, 7, 0], [16, 6, 0], [18, 6, 0], [20, 7, 0], [21, 10, 0], [21, 12, 0]], [null]] };
 
-  const ChainedHull = (...shapes) => {
-    const pointsets = shapes.map(shape => shape.toPoints());
-    const chain = [];
-    for (let nth = 1; nth < pointsets.length; nth++) {
-      const points = [...pointsets[nth - 1], ...pointsets[nth]];
-      if (points.every(point => point[Z$e] === 0)) {
-        chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
-      } else {
-        chain.push(Shape.fromGeometry(buildConvexHull(points)));
-      }
+  const hersheyWidth = { '32': 16, '33': 10, '34': 16, '35': 21, '36': 20, '37': 24, '38': 26, '39': 10, '40': 14, '41': 14, '42': 16, '43': 26, '44': 10, '45': 26, '46': 10, '47': 22, '48': 20, '49': 20, '50': 20, '51': 20, '52': 20, '53': 20, '54': 20, '55': 20, '56': 20, '57': 20, '58': 10, '59': 10, '60': 24, '61': 26, '62': 24, '63': 18, '64': 27, '65': 18, '66': 21, '67': 21, '68': 21, '69': 19, '70': 18, '71': 21, '72': 22, '73': 8, '74': 16, '75': 21, '76': 17, '77': 24, '78': 22, '79': 22, '80': 21, '81': 22, '82': 21, '83': 20, '84': 16, '85': 22, '86': 18, '87': 24, '88': 20, '89': 18, '90': 20, '91': 14, '92': 14, '93': 14, '94': 16, '95': 16, '96': 10, '97': 19, '98': 19, '99': 18, '100': 19, '101': 18, '102': 12, '103': 19, '104': 19, '105': 8, '106': 10, '107': 17, '108': 8, '109': 30, '110': 19, '111': 19, '112': 19, '113': 19, '114': 13, '115': 17, '116': 12, '117': 19, '118': 16, '119': 22, '120': 17, '121': 16, '122': 17, '123': 14, '124': 8, '125': 14, '126': 24 };
+
+  const toPaths$1 = (letters) => {
+    let xOffset = 0;
+    const mergedPaths = [];
+    for (const letter of letters) {
+      const code = letter.charCodeAt(0);
+      const paths = hersheyPaths[code] || [];
+      mergedPaths.push(...translate$2([xOffset, 0, 0], paths));
+      xOffset += hersheyWidth[code] || 0;
     }
-    return union$5(...chain);
+    return Shape.fromGeometry({ paths: mergedPaths }).scale(1 / 28);
   };
 
-  const ChainedHullMethod = function (...args) { return ChainedHull(this, ...args); };
-  Shape.prototype.ChainedHull = ChainedHullMethod;
-
-  ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
-
-  /**
-   *
-   * # Hull
-   *
-   * Builds the convex hull of a set of shapes.
-   *
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * hull(Point([0, 0, 10]),
-   *      Circle(10))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * assemble(Point([0, 0, 10]),
-   *          Circle(10))
-   *   .hull()
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * Point([0, 0, 10]).hull(Circle(10))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [30, 30, 30] } }
-   * ```
-   * hull(Circle(4),
-   *      Circle(2).move(8));
-   * ```
-   * :::
-   *
-   **/
-
-  const Z$f = 2;
-
-  const Hull = (...shapes) => {
-    const points = [];
-    shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
-    // FIX: Detect planar hulls properly.
-    if (points.every(point => point[Z$f] === 0)) {
-      return Shape.fromGeometry(buildConvexSurfaceHull(points));
-    } else {
-      return Shape.fromGeometry(buildConvexHull(points));
-    }
-  };
-
-  const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
-  Shape.prototype.Hull = HullMethod;
-
-  Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
-  HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
-
-  const Plan = ({ plan, marks = [], planes = [], tags = [], visualization, content }, context) => {
-    let visualizationGeometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
-    let contentGeometry = content === undefined ? { assembly: [] } : content.toKeptGeometry();
-    const shape = Shape.fromGeometry({
-      plan,
-      marks,
-      planes,
-      tags,
-      content: contentGeometry,
-      visualization: visualizationGeometry
-    },
-                                     context);
-    return shape;
-  };
-
-  /**
-   *
-   * # Connector
-   *
-   * Returns a connector plan.
-   * See connect().
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Connector('top').move(5))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).Connector('top').moveZ(5).connect(Sphere(5).Connector('bottom').flip().moveZ(-5))
-   * ```
-   * :::
-   **/
-
-  const shapeToConnect = Symbol('shapeToConnect');
-
-  // A connector expresses a joint-of-connection extending from origin along axis to end.
-  // The orientation expresses the direction of facing orthogonal to that axis.
-  // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
-  // Note: axis must be further than end from origin.
-
-  const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0], right = [1, 0, 0], start = [0, 0, 0], end = [0, 0, 0], shape, visualization } = {}) => {
-    const plan = Plan(// Geometry
-      {
-        plan: { connector },
-        marks: [center, right, start, end],
-        planes: [plane],
-        tags: [`connector/${connector}`],
-        visualization
-      },
-      // Context
-      {
-        [shapeToConnect]: shape
-      });
-    return plan;
-  };
-
-  Plan.Connector = Connector;
-
-  const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, [shapeToConnect]: this }); };
-  Shape.prototype.Connector = ConnectorMethod;
-
-  Connector.signature = 'Connector(id:string, { plane:Plane, center:Point, right:Point, start:Point, end:Point, shape:Shape, visualization:Shape }) -> Shape';
-
-  // Associates an existing connector with a shape.
-  const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
-  Shape.prototype.toConnector = toConnectorMethod;
-
-  /**
-   *
-   * # connectors
-   *
-   * Returns the set of connectors in an assembly by tag.
-   * See connect().
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Connector('top').moveZ(5))
-   *         .connectors()['top']
-   *         .connect(Prism(10, 10).with(Connector('bottom').flip().moveZ(-5))
-   *                               .connectors()['bottom']);
-   * ```
-   * :::
-   **/
-
-  const connectors = (shape) => {
-    const connectors = [];
-    for (const entry of getPlans(shape.toKeptGeometry())) {
-      if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-        connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
-      }
-    }
-    return connectors;
-  };
-
-  const connectorsMethod = function () { return connectors(this); };
-  Shape.prototype.connectors = connectorsMethod;
-
-  /**
-   *
-   * # connector
-   *
-   * Returns a connector from an assembly.
-   * See connect().
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Prism(10, 10).with(Connector('top').moveZ(5))
-   *              .connector('top')
-   *              .connect(Cube(10).with(Connector('bottom').flip().moveZ(-5))
-   *                               .connector('bottom'));
-   * ```
-   * :::
-   **/
-
-  const connector = (shape, id) => {
-    for (const connector of connectors(shape)) {
-      if (connector.toGeometry().plan.connector === id) {
-        return connector;
-      }
-    }
-  };
-
-  const connectorMethod = function (id) { return connector(this, id); };
-  Shape.prototype.connector = connectorMethod;
-
-  const connection = (shape, id) => {
-    const shapeGeometry = shape.toKeptGeometry();
-    const connections = getConnections(shapeGeometry);
-    for (const geometry of connections) {
-      if (geometry.connection === id) {
-        return Shape.fromGeometry(geometry);
-      }
-    }
-  };
-
-  const connectionMethod = function (id) { return connection(this, id); };
-  Shape.prototype.connection = connectionMethod;
-
-  // FIX:
-  // This will produce the average position, but that's probably not what we
-  // want, since it will include interior points produced by breaking up
-  // convexity.
-  const toPosition = (surface) => {
-    let sum = [0, 0, 0];
-    let count = 0;
-    for (const path of surface) {
-      for (const point of path) {
-        sum = add(sum, point);
-        count += 1;
-      }
-    }
-    const position = scale(1 / count, sum);
-    return position;
-  };
-
-  const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
-    let bestSurface;
-    let bestPosition;
-    let bestOrientationScore = -Infinity;
-    let bestPositionScore = -Infinity;
-
-    // FIX: This may be sensitive to noise.
-    const geometry = shape.toKeptGeometry();
-    for (const { solid } of getSolids(geometry)) {
-      for (const surface of solid) {
-        const orientationScore = scoreOrientation(surface);
-        if (orientationScore > bestOrientationScore) {
-          bestSurface = surface;
-          bestOrientationScore = orientationScore;
-          bestPosition = toPosition(surface);
-          bestPositionScore = scorePosition(bestPosition);
-        } else if (orientationScore === bestOrientationScore) {
-          const position = toPosition(surface);
-          const positionScore = scorePosition(position);
-          if (positionScore > bestPositionScore) {
-            bestSurface = surface;
-            bestPosition = position;
-            bestPositionScore = positionScore;
-          }
-        }
-      }
-    }
-
-    // FIX: We should have a consistent rule for deciding the rotational position of the connector.
-    const plane = toPlane$1(bestSurface);
-    return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
-  };
-
-  const toConnector = (shape, surface, id) => {
-    const center = toPosition(surface);
-    // FIX: Adding y + 1 is not always correct.
-    const plane = toPlane$1(surface);
-    return Connector(id, { plane, center, right: random(plane) });
-  };
-
-  const withConnector = (shape, surface, id) => {
-    return shape.toConnector(toConnector(shape, surface, id));
-  };
-
-  const Y$h = 1;
-
-  const back = (shape) =>
-    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$h]);
-
-  const backMethod = function () { return back(this); };
-  Shape.prototype.back = backMethod;
-
-  back.signature = 'back(shape:Shape) -> Shape';
-  backMethod.signature = 'Shape -> back() -> Shape';
-
-  const Z$g = 2;
-
-  const bottom = (shape) =>
-    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$g]);
-
-  const bottomMethod = function () { return bottom(this); };
-  Shape.prototype.bottom = bottomMethod;
-
-  bottom.signature = 'bottom(shape:Shape) -> Shape';
-  bottomMethod.signature = 'Shape -> bottom() -> Shape';
-
-  // Ideally this would be a plane of infinite extent.
-  // Unfortunately this makes things like interpolation tricky,
-  // so we approximate it with a very large polygon instead.
-
-  const Z$h = (z = 0) => {
-    const size = 1e5;
-    const min = -size;
-    const max = size;
-    // FIX: Why aren't we createing the connector directly?
-    const sheet = Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
-    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-  };
-
-  /**
-   *
-   * # Chop
-   *
-   * Remove the parts of a shape above surface, defaulting to Z(0).
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
-   * ```
-   * :::
-   *
-   **/
-
-  const toPlane$3 = (connector) => {
-    for (const entry of getPlans(connector.toKeptGeometry())) {
-      if (entry.plan && entry.plan.connector) {
-        return entry.planes[0];
-      }
-    }
-  };
-
-  const toSurface$1 = (plane) => {
-    const max = +1e5;
-    const min = -1e5;
-    const [, from] = toXYPlaneTransforms(plane);
-    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
-    const polygon = transform$1(from, path);
-    return [polygon];
-  };
-
-  const chop = (shape, connector = Z$h()) => {
-    const cuts = [];
-    const planeSurface = toSurface$1(toPlane$3(connector));
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const cutResult = cut$1(solid, planeSurface);
-      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
-    }
-    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
-      const cutSurface = surface || z0Surface;
-      const cutResult = cut(planeSurface, cutSurface);
-      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
-    }
-
-    return assemble$1(...cuts);
-  };
-
-  const chopMethod = function (surface) { return chop(this, surface); };
-  Shape.prototype.chop = chopMethod;
-
-  chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
-  chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
-
-  const Z$i = 2;
-
-  const findFlatTransforms = (shape) => {
-    let bestDepth = Infinity;
-    let bestTo;
-    let bestFrom;
-    let bestSurface;
-
-    const assay = (surface) => {
-      const plane = toPlane$1(surface);
-      if (plane !== undefined) {
-        const [to, from] = toXYPlaneTransforms(plane);
-        const flatShape = shape.transform(to);
-        const [min, max] = flatShape.measureBoundingBox();
-        const depth = max[Z$i] - min[Z$i];
-        if (depth < bestDepth) {
-          bestTo = to;
-          bestFrom = from;
-          bestSurface = surface;
-        }
-      }
-    };
-
-    const geometry = shape.toKeptGeometry();
-    for (const { solid } of getSolids(geometry)) {
-      for (const surface of solid) {
-        assay(surface);
-      }
-    }
-    for (const { surface } of getSurfaces(geometry)) {
-      assay(surface);
-    }
-    for (const { z0Surface } of getZ0Surfaces(geometry)) {
-      assay(z0Surface);
-    }
-
-    return [bestTo, bestFrom, bestSurface];
-  };
-
-  const flat = (shape) => {
-    const [, , bestSurface] = findFlatTransforms(shape);
-    return withConnector(shape, bestSurface, 'flat');
-  };
-
-  const flatMethod = function () { return flat(this); };
-  Shape.prototype.flat = flatMethod;
-
-  flat.signature = 'flat(shape:Shape) -> Connector';
-  flatMethod.signature = 'Shape -> flat() -> Connector';
-
-  // Perform an operation on the shape in its best flat orientation,
-  // returning the result in the original orientation.
-
-  const inFlat = (shape, op) => {
-    const [to, from] = findFlatTransforms(shape);
-    return op(shape.transform(to)).transform(from);
-  };
-
-  const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
-  Shape.prototype.inFlat = inFlatMethod;
-
-  const Y$i = 1;
-
-  const front = (shape) =>
-    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$i]);
-
-  const frontMethod = function () { return front(this); };
-  Shape.prototype.front = frontMethod;
-
-  front.signature = 'front(shape:Shape) -> Shape';
-  frontMethod.signature = 'Shape -> front() -> Shape';
-
-  const X$h = 0;
-
-  const left = (shape) =>
-    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$h]);
-
-  const leftMethod = function () { return left(this); };
-  Shape.prototype.left = leftMethod;
-
-  left.signature = 'left(shape:Shape) -> Shape';
-  leftMethod.signature = 'Shape -> left() -> Shape';
-
-  const on$1 = (above, below, op = _ => _) => above.bottom().from(below.top().op(op));
-  const onMethod = function (below, op) { return on$1(this, below, op); };
-
-  Shape.prototype.on = onMethod;
-
-  const X$i = 0;
-
-  const right = (shape) =>
-    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$i]);
-
-  const rightMethod = function () { return right(this); };
-  Shape.prototype.right = rightMethod;
-
-  right.signature = 'right(shape:Shape) -> Shape';
-  rightMethod.signature = 'Shape -> right() -> Shape';
-
-  const Z$j = 2;
-
-  const top = (shape) =>
-    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$j]);
-
-  const topMethod = function () { return top(this); };
-  Shape.prototype.top = topMethod;
-
-  top.signature = 'top(shape:Shape) -> Shape';
-  topMethod.signature = 'Shape -> top() -> Shape';
-
-  /**
-   *
-   * # Unfold
-   *
-   **/
-
-  // FIX: Does not handle convex solids.
-  const unfold = (shape) => {
-    const faces = shape.faces(f => f);
-    log$2(`Face count is ${faces.length}`);
-    const faceByEdge = new Map();
-
-    for (const face of faces) {
-      for (const edge of face.faceEdges()) {
-        faceByEdge.set(edge, face);
-      }
-    }
-
-    const reverseEdge = (edge) => {
-      const [a, b] = edge.split(':');
-      const reversedEdge = `${b}:${a}`;
-      return reversedEdge;
-    };
-
-    const seen = new Set();
-    const queue = [];
-
-    const enqueueNeighbors = (face) => {
-      for (const edge of face.faceEdges()) {
-        const redge = reverseEdge(edge);
-        const neighbor = faceByEdge.get(redge);
-        if (neighbor === undefined || seen.has(neighbor)) continue;
-        seen.add(neighbor);
-        queue.push({
-          face: neighbor,
-          to: `face/edge:${edge}`,
-          from: `face/edge:${redge}`
-        });
-      }
-    };
-
-    let root = faces[0];
-    enqueueNeighbors(root);
-
-    while (queue.length > 0) {
-      const { face, from, to } = queue.shift();
-      seen.add(face);
-      const fromConnector = face.connector(from);
-      const toConnector = root.connector(to);
-      if (fromConnector === undefined) {
-        log$2('bad from');
-        continue;
-      }
-      if (toConnector === undefined) {
-        log$2('bad to');
-        continue;
-      }
-      root = fromConnector.to(toConnector);
-      if (root === undefined) break;
-      enqueueNeighbors(face);
-    }
-
-    return root;
-  };
-
-  const method$3 = function (...args) { return unfold(this); };
-  Shape.prototype.unfold = method$3;
-
-  // Ideally this would be a plane of infinite extent.
-  // Unfortunately this makes things like interpolation tricky,
-  // so we approximate it with a very large polygon instead.
-
-  const X$j = (x = 0) => {
-    const size = 1e5;
-    const min = -size;
-    const max = size;
-    const sheet = Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
-    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-  };
-
-  // Ideally this would be a plane of infinite extent.
-  // Unfortunately this makes things like interpolation tricky,
-  // so we approximate it with a very large polygon instead.
-
-  const Y$j = (y = 0) => {
-    const size = 1e5;
-    const min = -size;
-    const max = size;
-    const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
-    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-  };
-
-  /**
-   *
-   * # Connect
-   *
-   * Connects two connectors.
-   *
-   * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).Connector('top').moveZ(5)
-   *         .connect(Sphere(10).Connector('bottom').flip().moveZ(-9))
-   * ```
-   * :::
-   **/
-
-  const toShape = (connector) => connector.getContext(shapeToConnect);
-
-  const dropConnector = (shape, ...connectors) => {
-    if (shape !== undefined) {
-      return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
-    }
-  };
-
-  const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
-  Shape.prototype.dropConnector = dropConnectorMethod;
-
-  const CENTER = 0;
-  const RIGHT = 1;
-
-  const measureAngle = ([aX, aY], [bX, bY]) => {
-    const a2 = Math.atan2(aX, aY);
-    const a1 = Math.atan2(bX, bY);
-    const sign = a1 > a2 ? 1 : -1;
-    const angle = a1 - a2;
-    const K = -sign * Math.PI * 2;
-    const absoluteAngle = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
-    return absoluteAngle * 180 / Math.PI;
-  };
-
-  // FIX: Separate the doConnect dispatched interfaces.
-  // Connect two shapes at the specified connector.
-  const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
-    const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
-    const aShape = toShape(aConnectorShape);
-    const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
-
-    const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
-    const bShape = toShape(bConnectorShape);
-    const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
-
-    // Flatten a.
-    const aFlatShape = aShape.transform(aTo);
-    const aFlatConnector = aConnectorShape.transform(aTo);
-    const aMarks = aFlatConnector.toKeptGeometry().marks;
-    const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
-    // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
-
-    // Flatten b's connector.
-    const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
-    const bMarks = bFlatConnector.marks;
-
-    // Rotate into alignment.
-    const aOrientation = subtract(aMarks[RIGHT], aMarks[CENTER]);
-    const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
-    const angle = measureAngle(aOrientation, bOrientation);
-    const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
-    // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
-
-    // Move a to the flat position of b.
-    const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
-    // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
-    // Move a to the oriented position of b.
-    const aMovedShape = aFlatBShape.transform(bFrom);
-    // const aMovedConnector = aFlatBConnector.transform(bFrom);
-
-    if (doConnect) {
-      if (doAssemble) {
-        return dropConnector(aMovedShape, aConnector.plan.connector)
-            .Item()
-            .with(dropConnector(bShape, bConnector.plan.connector))
-            .Item();
-      } else {
-        return dropConnector(aMovedShape, aConnector.plan.connector)
-            .Item()
-            .layer(dropConnector(bShape, bConnector.plan.connector))
-            .Item();
-      }
-      /*
-      return Shape.fromGeometry(
-        {
-          connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-          connectors: [aMovedConnector.toKeptGeometry(), bConnector],
-          geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
-              .concat(bShape === undefined
-                ? []
-                : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
-        });
-      */
-    } else {
-      return aMovedShape;
-    }
-  };
-
-  const toMethod = function (connector, options) { return connect(this, connector, options); };
-  Shape.prototype.to = toMethod;
-  toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
-
-  const fromMethod = function (connector, options) { return connect(connector, this, options); };
-  Shape.prototype.from = fromMethod;
-  fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
-
-  const atMethod = function (connector, options) { return connect(this, connector, { ...options, doConnect: false }); };
-  Shape.prototype.at = atMethod;
-  atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
-
-  connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
-
-  // FIX: The toKeptGeometry is almost certainly wrong.
-  const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, joint, leftJointConnectorId, rightArmConnectorId, rightArm) => {
-    // leftArm will remain stationary.
-    const leftArmConnector = leftArm.connector(leftArmConnectorId);
-    const rightJointConnector = joint.connector(rightJointConnectorId);
-    const [joinedJointShape, joinedJointConnector] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
-    const rightArmConnector = rightArm.connector(rightArmConnectorId, { doConnect: false });
-    const [joinedRightShape, joinedRightConnector] = rightArmConnector.connectTo(joinedJointShape.connector(leftJointConnectorId), { doConnect: false });
-    const result = Shape.fromGeometry(
-      {
-        connection: joinId,
-        connectors: [leftArmConnector.toKeptGeometry(),
-                     joinedJointConnector.toKeptGeometry(),
-                     joinedRightConnector.toKeptGeometry()],
-        geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
-                     joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
-                     joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
-        tags: [`joinLeft/${joinId}`]
-      });
-    return result;
-  };
-
-  const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
-  Shape.prototype.joinLeft = joinLeftMethod;
-
-  /**
-   *
-   * # Lathe
-   *
-   * ::: illustration { "view": { "position": [-80, -80, 80] } }
-   * ```
-   * ```
-   * :::
-   *
-   **/
-
-  const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
-    const profile = shape.chop(Y$j(0));
-    const outline = profile.outline();
-    const solids = [];
-    for (const geometry of getPaths(outline.toKeptGeometry())) {
-      for (const path of geometry.paths) {
-        for (let startDegrees = 0; startDegrees < endDegrees; startDegrees += 360) {
-          solids.push(Shape.fromGeometry(loop(path, Math.min(360, endDegrees - startDegrees) * Math.PI / 180, sides, pitch)).moveX(pitch * startDegrees / 360));
-        }
-      }
-    }
-    return assemble$1(...solids);
-  };
-
-  const LoopMethod = function (...args) { return Loop(this, ...args); };
-  Shape.prototype.Loop = LoopMethod;
-
-  /**
-   *
-   * # Extrude
-   *
-   * Generates a solid from a surface by linear extrusion.
-   *
-   * ```
-   * shape.extrude(height, depth, { twist = 0, steps = 1 })
-   * ```
-   *
-   * ::: illustration
-   * ```
-   * Circle(10).cut(Circle(8))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * Circle(10).cut(Circle(8)).extrude(10)
-   * ```
-   * :::
-   *
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * Triangle(10).extrude(5, -2)
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
-   * ```
-   * :::
-   *
-   **/
-
-  const extrude$1 = (shape, height = 1, depth = 0) => {
-    if (height < depth) {
-      [height, depth] = [depth, height];
-    }
-    // FIX: Handle extrusion along a vector properly.
-    const solids = [];
-    const keptGeometry = shape.toKeptGeometry();
-    for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
-      if (z0Surface.length > 0) {
-        const solid = alignVertices(extrude(z0Surface, height, depth));
-        solids.push(Shape.fromGeometry({ solid, tags }));
-      }
-    }
-    for (const { surface, tags } of getSurfaces(keptGeometry)) {
-      if (surface.length > 0) {
-        const plane = toPlane$1(surface);
-        if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
-          // Detect Z0.
-          // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
-          const solid = extrude(surface, height, depth);
-          solids.push(Shape.fromGeometry({ solid, tags }));
-        } else {
-          const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-          const z0SolidGeometry = extrude(transform$4(toZ0, surface), height, depth);
-          const solid = alignVertices(transform$6(fromZ0, z0SolidGeometry));
-          solids.push(Shape.fromGeometry({ solid, tags }));
-        }
-      }
-    }
-    // Keep plans.
-    for (const entry of getPlans(keptGeometry)) {
-      solids.push(entry);
-    }
-    return assemble$1(...solids);
-  };
-
-  const extrudeMethod = function (...args) { return extrude$1(this, ...args); };
-  Shape.prototype.extrude = extrudeMethod;
-
-  extrude$1.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
-  extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
-
-  const fill = (shape, pathsShape) => {
-    const fills = [];
-    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
-      const anySurface = surface || z0Surface;
-      const plane = toPlane$1(anySurface);
-      const [to, from] = toXYPlaneTransforms(plane);
-      const flatSurface = transform$4(to, anySurface);
-      for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
-        const flatPaths = transform$7(to, paths);
-        const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
-        const fill = transform$7(from, flatFill);
-        fills.push(...fill);
-      }
-    }
-    return Shape.fromGeometry({ paths: fills });
-  };
-
-  const fillMethod = function (...args) { return fill(this, ...args); };
-  Shape.prototype.fill = fillMethod;
-
-  const withFillMethod = function (...args) { return assemble$1(this, fill(this, ...args)); };
-  Shape.prototype.withFill = withFillMethod;
-
-  fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
-  fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
-  withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
-
-  /**
-   *
-   * # Interior
-   *
-   * Generates a surface from the interior of a simple closed path.
-   *
-   * ::: illustration
-   * ```
-   * Circle(10)
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * Circle(10)
-   *   .outline()
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * Circle(10)
-   *   .outline()
-   *   .interior()
-   * ```
-   * :::
-   *
-   **/
-
-  const interior = (shape) => {
-    const surfaces = [];
-    for (const { paths } of getPaths(shape.toKeptGeometry())) {
-      // FIX: Check paths for coplanarity.
-      surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
-    }
-    return assemble$1(...surfaces);
-  };
-
-  const interiorMethod = function (...args) { return interior(this); };
-  Shape.prototype.interior = interiorMethod;
-
-  interior.signature = 'interior(shape:Shape) -> Shape';
-  interiorMethod.signature = 'Shape -> interior() -> Shape';
-
-  /**
-   *
-   * # Minkowski (convex)
-   *
-   * Generates the minkowski sum of a two convex shapes.
-   *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
-   * ```
-   * minkowski(Cube(10),
-   *           Sphere(3));
-   * ```
-   * :::
-   *
-   **/
-
-  // TODO: Generalize for more operands?
-  const minkowski = (a, b) => {
-    const aPoints = [];
-    const bPoints = [];
-    a.eachPoint(point => aPoints.push(point));
-    b.eachPoint(point => bPoints.push(point));
-    return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
-  };
-
-  const minkowskiMethod = function (shape) { return minkowski(this, shape); };
-  Shape.prototype.minkowski = minkowskiMethod;
-
-  minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
-
-  /**
-   *
-   * # Outline
-   *
-   * Generates the outline of a surface.
-   *
-   * ::: illustration
-   * ```
-   * difference(Circle(10),
-   *            Circle(2).move([-4]),
-   *            Circle(2).move([4]))
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * difference(Circle(10),
-   *            Circle(2).move([-4]),
-   *            Circle(2).move([4]))
-   *   .outline()
-   * ```
-   * :::
-   *
-   **/
-
-  const outline$4 = (shape) =>
-    assemble$1(...outline$3(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
-
-  const outlineMethod = function (options) { return outline$4(this); };
-  const withOutlineMethod = function (options) { return assemble$1(this, outline$4(this)); };
-
-  Shape.prototype.outline = outlineMethod;
-  Shape.prototype.withOutline = withOutlineMethod;
-
-  outline$4.signature = 'outline(shape:Surface) -> Shape';
-  outlineMethod.signature = 'Shape -> outline() -> Shape';
-  withOutlineMethod.signature = 'Shape -> outline() -> Shape';
-
-  /**
-   *
-   * # Section
-   *
-   * Produces a cross-section of a solid as a surface.
-   *
-   * ::: illustration { "view": { "position": [40, 40, 60] } }
-   * ```
-   * difference(Cylinder(10, 10),
-   *            Cylinder(8, 10))
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * difference(Sphere(10),
-   *            Sphere(8))
-   *   .section()
-   * ```
-   * :::
-   * ::: illustration
-   * ```
-   * difference(Sphere(10),
-   *            Sphere(8))
-   *   .section()
-   *   .outline()
-   * ```
-   * :::
-   *
-   **/
-
-  const toPlane$4 = (connector) => {
-    for (const entry of getPlans(connector.toKeptGeometry())) {
-      if (entry.plan && entry.plan.connector) {
-        return entry.planes[0];
-      }
-    }
-  };
-
-  const toSurface$2 = (plane) => {
-    const max = +1e5;
-    const min = -1e5;
-    const [, from] = toXYPlaneTransforms(plane);
-    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
-    const polygon = transform$1(from, path);
-    return [polygon];
-  };
-
-  const section$1 = (solidShape, ...connectors) => {
-    if (connectors.length === 0) {
-      connectors.push(Z$h(0));
-    }
-    const planes = connectors.map(toPlane$4);
-    const planeSurfaces = planes.map(toSurface$2);
-    const shapes = [];
-    const normalize = createNormalize3();
-    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const sections = section(solid, planeSurfaces, normalize);
-      const surfaces = sections.map(section => makeConvex$1(section, normalize));
-      // const surfaces = sections.map(section => outlineSurface(section, normalize));
-      // const surfaces = sections.map(section => section);
-      // const surfaces = sections;
-      for (let i = 0; i < surfaces.length; i++) {
-        surfaces[i].plane = planes[i];
-        shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
-      }
-    }
-    return layer(...shapes);
-  };
-
-  const sectionMethod = function (...args) { return section$1(this, ...args); };
-  Shape.prototype.section = sectionMethod;
-
-  const squash = (shape) => {
-    const geometry = shape.toKeptGeometry();
-    const result = { layers: [] };
-    for (const { solid, tags } of getSolids(geometry)) {
-      const polygons = [];
-      for (const surface of solid) {
-        for (const path of surface) {
-          const flat = path.map(([x, y]) => [x, y, 0]);
-          if (toPlane(flat) === undefined) continue;
-          polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
-        }
-      }
-      result.layers.push({ z0Surface: outline(polygons), tags });
-    }
-    for (const { surface, tags } of getSurfaces(geometry)) {
-      const polygons = [];
-      for (const path of surface) {
-        const flat = path.map(([x, y]) => [x, y, 0]);
-        if (toPlane(flat) === undefined) continue;
-        polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
-      }
-      result.layers.push({ z0Surface: polygons, tags });
-    }
-    for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
-      const polygons = [];
-      for (const path of z0Surface) {
-        polygons.push(path);
-      }
-      result.layers.push({ z0Surface: polygons, tags });
-    }
-    for (const { paths, tags } of getPaths(geometry)) {
-      const flatPaths = [];
-      for (const path of paths) {
-        flatPaths.push(path.map(([x, y]) => [x, y, 0]));
-      }
-      result.layers.push({ paths: flatPaths, tags });
-    }
-    return Shape.fromGeometry(result);
-  };
-
-  const squashMethod = function () { return squash(this); };
-  Shape.prototype.squash = squashMethod;
-
-  /**
-   *
-   * # Stretch
-   *
-   **/
-
-  const toPlaneFromConnector = (connector) => {
-    for (const entry of getPlans(connector.toKeptGeometry())) {
-      if (entry.plan && entry.plan.connector) {
-        return entry.planes[0];
-      }
-    }
-  };
-
-  const toSurface$3 = (plane) => {
-    const max = +1e5;
-    const min = -1e5;
-    const [, from] = toXYPlaneTransforms(plane);
-    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
-    const polygon = transform$1(from, path);
-    return [polygon];
-  };
-
-  const stretch = (shape, length, connector = Z$h()) => {
-    const normalize = createNormalize3();
-    const stretches = [];
-    const planeSurface = toSurface$3(toPlaneFromConnector(connector));
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      if (solid.length === 0) {
-        continue;
-      }
-      const bottom = cutOpen(solid, planeSurface, normalize);
-      const [profile] = section(solid, [planeSurface], normalize);
-      const top = cutOpen(solid, flip$4(planeSurface), normalize);
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-      const z0SolidGeometry = extrude(transform$4(toZ0, profile), length, 0, false);
-      const middle = transform$6(fromZ0, z0SolidGeometry);
-      const topMoved = transform$6(fromTranslation(scale(length, toPlane$1(profile))), top);
-      stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
-    }
-
-    return assemble$1(...stretches);
-  };
-
-  const method$4 = function (...args) { return stretch(this, ...args); };
-  Shape.prototype.stretch = method$4;
-
-  /**
-   *
-   * # Sweep
-   *
-   * Sweep a tool profile along a path, to produce a surface.
-   *
-   **/
-
-  // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
-  const sweep = (toolpath, tool) => {
-    const chains = [];
-    for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
-      for (const path of paths) {
-        chains.push(ChainedHull(...path.map(point => tool.move(...point))));
-      }
-    }
-    return union$5(...chains);
-  };
-
-  const sweepMethod = function (tool) { return sweep(this, tool); };
-
-  Shape.prototype.sweep = sweepMethod;
-  Shape.prototype.withSweep = function (tool) { return assemble$1(this, sweep(this, tool)); };
-
-  const intersectionPoints = (cuts, overcut = 0) => {
-    cuts.push(cuts[0]);
-    var intersectionPointsList = [];
-    var i = 0;
-    while (i < cuts.length - 1) {
-      const point = intersectPointOfLines(fromPoints$2(...cuts[i]), fromPoints$2(...cuts[i + 1]));
-      point.push(cuts[i][0][2]);
-      if (overcut) {
-        intersectionPointsList.push(cuts[i][1]);
-      }
-      intersectionPointsList.push(point);
-      i++;
-    }
-    return intersectionPointsList;
-  };
-
-  const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
-    var cuts = [];
-    for (const [start, end] of getEdges(path)) {
-      const direction = normalize(subtract(start, end));
-      const angleRadians = Math.PI / 2;
-      const offsetDirection = rotateZ(direction, angleRadians);
-      const offset = scale(radius, offsetDirection);
-      const frontcut = scale(-overcut, direction);
-      const backcut = scale(overcut, direction);
-      const startCut = add(start, add(backcut, offset));
-      const endCut = add(end, add(frontcut, offset));
-      cuts.push([startCut, endCut]);
-    }
-    if (joinPaths) {
-      cuts = [intersectionPoints(cuts, overcut)];
-    }
-    return cuts;
-  };
-
-  const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
-    const cuts = [];
-    for (const { paths } of getPaths(geometry)) {
-      for (const path of paths) {
-        cuts.push(...overcutPathEdges(path, radius, overcut, joinPaths));
-      }
-    }
-    return cuts;
-  };
-
-  // Return an assembly of paths so that each toolpath can have its own tag.
-  const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
-    Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
-
-  const method$5 = function (...options) { return toolpath(this, ...options); };
-
-  Shape.prototype.toolpath = method$5;
-  Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
-
-  const X$k = 0;
-  const Y$k = 1;
-  const Z$k = 2;
-
-  const floor$1 = (value, resolution) => Math.floor(value / resolution) * resolution;
-  const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
-
-  const floorPoint = ([x, y, z], resolution) => [floor$1(x, resolution), floor$1(y, resolution), floor$1(z, resolution)];
-  const ceilPoint = ([x, y, z], resolution) => [ceil(x, resolution), ceil(y, resolution), ceil(z, resolution)];
-
-  const voxels = (shape, resolution = 1) => {
-    const offset = resolution / 2;
-    const geometry = shape.toKeptGeometry();
-    const normalize = createNormalize3();
-    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
-    const min = floorPoint(boxMin, resolution);
-    const max = ceilPoint(boxMax, resolution);
-    const classifiers = [];
-    for (const { solid } of getSolids(shape.toKeptGeometry())) {
-      classifiers.push({ bsp: fromSolid(solid, normalize) });
-    }
-    const test = (point) => {
-      for (const { bsp } of classifiers) {
-        if (containsPoint(bsp, point)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const polygons = [];
-    for (let x = min[X$k] - offset; x <= max[X$k] + offset; x += resolution) {
-      for (let y = min[Y$k] - offset; y <= max[Y$k] + offset; y += resolution) {
-        for (let z = min[Z$k] - offset; z <= max[Z$k] + offset; z += resolution) {
-          const state = test([x, y, z]);
-          if (state !== test([x + resolution, y, z])) {
-            const face = [[x + offset, y - offset, z - offset],
-                          [x + offset, y + offset, z - offset],
-                          [x + offset, y + offset, z + offset],
-                          [x + offset, y - offset, z + offset]];
-            polygons.push(state ? face : face.reverse());
-          }
-          if (state !== test([x, y + resolution, z])) {
-            const face = [[x - offset, y + offset, z - offset],
-                          [x + offset, y + offset, z - offset],
-                          [x + offset, y + offset, z + offset],
-                          [x - offset, y + offset, z + offset]];
-            polygons.push(state ? face.reverse() : face);
-          }
-          if (state !== test([x, y, z + resolution])) {
-            const face = [[x - offset, y - offset, z + offset],
-                          [x + offset, y - offset, z + offset],
-                          [x + offset, y + offset, z + offset],
-                          [x - offset, y + offset, z + offset]];
-            polygons.push(state ? face : face.reverse());
-          }
-        }
-      }
-    }
-    return Shape.fromGeometry({ solid: fromPolygons({}, polygons) });
-  };
-
-  const voxelsMethod = function (...args) { return voxels(this, ...args); };
-  Shape.prototype.voxels = voxelsMethod;
-
-  const surfaceCloud = (shape, resolution = 1) => {
-    const offset = resolution / 2;
-    const geometry = shape.toKeptGeometry();
-    const normalize = createNormalize3();
-    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
-    const min = floorPoint(boxMin, resolution);
-    const max = ceilPoint(boxMax, resolution);
-    const classifiers = [];
-    for (const { solid } of getSolids(shape.toKeptGeometry())) {
-      classifiers.push({ bsp: fromSolid(solid, normalize) });
-    }
-    const test = (point) => {
-      for (const { bsp } of classifiers) {
-        if (containsPoint(bsp, point)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const paths = [];
-    for (let x = min[X$k] - offset; x <= max[X$k] + offset; x += resolution) {
-      for (let y = min[Y$k] - offset; y <= max[Y$k] + offset; y += resolution) {
-        for (let z = min[Z$k] - offset; z <= max[Z$k] + offset; z += resolution) {
-          const state = test([x, y, z]);
-          if (state !== test([x + resolution, y, z])) {
-            paths.push([null, [x, y, z], [x + resolution, y, z]]);
-          }
-          if (state !== test([x, y + resolution, z])) {
-            paths.push([null, [x, y, z], [x, y + resolution, z]]);
-          }
-          if (state !== test([x, y, z + resolution])) {
-            paths.push([null, [x, y, z], [x, y, z + resolution]]);
-          }
-        }
-      }
-    }
-    return Shape.fromGeometry({ paths });
-  };
-
-  const surfaceCloudMethod = function (...args) { return surfaceCloud(this, ...args); };
-  Shape.prototype.surfaceCloud = surfaceCloudMethod;
-
-  const withSurfaceCloudMethod = function (...args) { return assemble$1(this, surfaceCloud(this, ...args)); };
-  Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
-
-  const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
-    const dX = aX - bX;
-    if (dX !== 0) {
-      return dX;
-    }
-    const dY = aY - bY;
-    if (dY !== 0) {
-      return dY;
-    }
-    const dZ = aZ - bZ;
-    return dZ;
-  };
-
-  const cloud = (shape, resolution = 1) => {
-    const offset = resolution / 2;
-    const geometry = shape.toKeptGeometry();
-    const normalize = createNormalize3();
-    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
-    const min = floorPoint(boxMin, resolution);
-    const max = ceilPoint(boxMax, resolution);
-    const classifiers = [];
-    for (const { solid } of getSolids(shape.toKeptGeometry())) {
-      classifiers.push({ bsp: fromSolid(solid, normalize) });
-    }
-    const test = (point) => {
-      for (const { bsp } of classifiers) {
-        if (containsPoint(bsp, point)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const points = [];
-    for (let x = min[X$k] - offset; x <= max[X$k] + offset; x += resolution) {
-      for (let y = min[Y$k] - offset; y <= max[Y$k] + offset; y += resolution) {
-        for (let z = min[Z$k] - offset; z <= max[Z$k] + offset; z += resolution) {
-          if (test([x, y, z])) {
-            points.push([x, y, z]);
-          }
-        }
-      }
-    }
-    points.sort(orderPoints);
-    return Shape.fromGeometry({ points });
-  };
-
-  const cloudMethod = function (...args) { return cloud(this, ...args); };
-  Shape.prototype.cloud = cloudMethod;
-
-  // FIX: move this
-  const containsPoint$1 = (shape, point) => {
-    for (const { solid } of getSolids(shape.toKeptGeometry())) {
-      const bsp = fromSolid(solid, createNormalize3());
-      if (containsPoint(bsp, point)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const containsPointMethod = function (point) { return containsPoint$1(this, point); };
-  Shape.prototype.containsPoint = containsPointMethod;
-
-  /**
-   *
-   * # Shell
-   *
-   * Converts a solid into a hollow shell of a given thickness.
-   *
-   * ::: illustration
-   * ```
-   * Cube(10).shell(1);
-   * ```
-   * :::
-   *
-   **/
-
-  const shell = (shape, radius = 1, resolution = 8) => {
-    resolution = Math.max(resolution, 3);
-    const keptGeometry = shape.toKeptGeometry();
-    const assembly = [];
-
-    // Handle solid aspects.
-    const shells = [];
-    for (const { solid, tags = [] } of getSolids(keptGeometry)) {
-      const pieces = [];
-      for (const surface of solid) {
-        for (const polygon of surface) {
-          pieces.push(Hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
-        }
-      }
-      shells.push(union$5(...pieces).as(...tags));
-    }
-    assembly.push(union$5(...shells));
-
-    // Handle surface aspects.
-    for (const geometry of getAnySurfaces(keptGeometry)) {
-      const anySurface = geometry.surface || geometry.z0Surface;
-      const plane = toPlane$1(anySurface);
-      if (plane === undefined) {
-        continue;
-      }
-      const [to, from] = toXYPlaneTransforms(plane);
-      const pieces = [];
-      for (const { paths } of outline$3(transform$a(to, geometry))) {
-        for (const path of paths) {
-          for (const edge of getEdges(path)) {
-            // FIX: Handle non-z0-surfaces properly.
-            pieces.push(Hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y))));
-          }
-        }
-      }
-      assembly.push(assemble$1(...pieces.map(piece => piece.transform(from))).as(...(geometry.tags || [])));
-    }
-
-    return assemble$1(...assembly);
-  };
-
-  const method$6 = function (radius, resolution) { return shell(this, radius, resolution); };
-  Shape.prototype.shell = method$6;
-
-  /**
-   *
-   * # grow
-   *
-   * Moves the edges of the shape inward by the specified amount.
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).with(Cube(10).moveX(10).grow(2))
-   * ```
-   * :::
-   **/
-
-  const grow = (shape, amount = 1, { resolution = 16 } = {}) =>
-    (amount >= 0)
-      ? shape.union(shell(shape, amount, resolution))
-      : shape.cut(shell(shape, -amount, resolution));
-
-  const growMethod = function (...args) { return grow(this, ...args); };
-  Shape.prototype.grow = growMethod;
-
-  grow.signature = 'grow(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-  growMethod.signature = 'Shape -> grow(amount:number = 1, { resolution:number = 16 }) -> Shape';
-
-  const offset = (shape, radius = 1, resolution = 16) => outline$4(grow(shape, radius, resolution));
-
-  const offsetMethod = function (radius, resolution) { return offset(this, radius, resolution); };
-  Shape.prototype.offset = offsetMethod;
-
-  offset.signature = 'offset(shape:Shape, radius:number = 1, resolution:number = 16) -> Shape';
-  offsetMethod.signature = 'Shape -> offset(radius:number = 1, resolution:number = 16) -> Shape';
-
-  /**
-   *
-   * # shrink
-   *
-   * Moves the edges of the shape inward by the specified amount.
-   *
-   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
-   * ```
-   * Cube(10).wireframe().with(Cube(10).shrink(2))
-   * ```
-   * :::
-   **/
-
-  const byRadius = (shape, amount = 1, { resolution = 16 } = {}) => grow(shape, -amount, resolution);
-
-  const shrink = (...args) => byRadius(...args);
-
-  shrink.byRadius = byRadius;
-
-  const shrinkMethod = function (radius, resolution) { return shrink(this, radius, resolution); };
-  Shape.prototype.shrink = shrinkMethod;
-
-  shrink.signature = 'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-  shrinkMethod.signature = 'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';
+  const ofSize$2 = (size) => (text) => toPaths$1(text).scale(size);
+
+  const Hershey = (size) => ofSize$2(size);
+  Hershey.ofSize = ofSize$2;
+  Hershey.toPaths = toPaths$1;
 
   //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
   //[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
@@ -30963,7 +29139,7 @@ return d[d.length-1];};return ", funcName].join("");
   var tan = Math.tan;
   var acos$1 = Math.acos;
   var sqrt$1 = Math.sqrt;
-  var ceil$1 = Math.ceil;
+  var ceil = Math.ceil;
   var τ = Math.PI * 2;
 
   var arcToCurves = curves;
@@ -31001,7 +29177,7 @@ return d[d.length-1];};return ", funcName].join("");
     var ang1 = centre[2];
     var ang2 = centre[3];
 
-    var segments = max$2(ceil$1(abs$1(ang2) / (τ / 4)), 1);
+    var segments = max$2(ceil(abs$1(ang2) / (τ / 4)), 1);
     if (!segments) return []
 
     var curves = [];
@@ -31258,7 +29434,7 @@ return d[d.length-1];};return ", funcName].join("");
     return unrepeated;
   };
 
-  const toPaths$1 = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
+  const toPaths$2 = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
     const paths = [];
     let path = [null];
 
@@ -31322,7 +29498,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const fromSvgPath = (svgPath, options = {}) => {
-    const paths = toPaths$1(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath))));
+    const paths = toPaths$2(options, curvifySvgPath(absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))));
     for (const path of paths) {
       assertGood(path);
     }
@@ -32009,8 +30185,8 @@ return d[d.length-1];};return ", funcName].join("");
   var cjs_2 = cjs.toPoints;
   var cjs_3 = cjs.toPath;
 
-  const X$l = 0;
-  const Y$l = 1;
+  const X$g = 0;
+  const Y$g = 1;
 
   const toColorFromTags = (tags, otherwise = 'black') => {
     if (tags !== undefined) {
@@ -32025,8 +30201,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const [min, max] = measureBoundingBox$5(baseGeometry);
-    const width = max[X$l] - min[X$l];
-    const height = max[Y$l] - min[Y$l];
+    const width = max[X$g] - min[X$g];
+    const height = max[Y$g] - min[Y$g];
     const translated = translate$4([width / 2, height / 2, 0], baseGeometry);
     const geometry = canonicalize$9(toKeptGeometry(translated));
 
@@ -32058,148 +30234,9 @@ return d[d.length-1];};return ", funcName].join("");
       }
     }
     svg.push('</svg>');
-    return svg.join('\n');
+    const output = svg.join('\n');
+    return new TextEncoder('utf8').encode(output);
   };
-
-  const toSvg$1 = async (shape, options = {}) => {
-    const pages = [];
-    // CHECK: Should this be limited to Page plans?
-    const geometry = shape.toKeptGeometry();
-    for (const entry of getPlans(geometry)) {
-      if (entry.plan.page) {
-        for (let leaf of getLeafs(entry.content)) {
-          const svg = await toSvg(leaf);
-          pages.push({ svg, leaf: { ...entry, content: leaf }, index: pages.length });
-        }
-      }
-    }
-    return pages;
-  };
-
-  const writeSvg = async (shape, name, options = {}) => {
-    for (const { svg, leaf, index } of await toSvg$1(shape, options)) {
-      await writeFile({}, `output/${name}_${index}.svg`, svg);
-      await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
-    }
-  };
-
-  const method$7 = function (...args) { return writeSvg(this, ...args); };
-  Shape.prototype.writeSvg = method$7;
-
-  /**
-   * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
-   * The exterior side of a polygon is determined by a CCW point ordering.
-   *
-   * @param {Object} options.
-   * @param {Polygon Array} polygons - An array of arrays of points.
-   * @returns {String} - the ascii STL output.
-   */
-
-  const fromSolidToTriangles = (solid) => {
-    const triangles = [];
-    for (const surface of makeWatertight(solid)) {
-      for (const triangle of toTriangles({}, surface)) {
-        triangles.push(triangle);
-      }
-    }
-    return triangles;
-  };
-
-  const toStl = async (geometry, options = {}) => {
-    const keptGeometry = toKeptGeometry(geometry);
-    let solids = getSolids(keptGeometry).map(({ solid }) => solid);
-    const triangles = fromSolidToTriangles(union$2(...solids));
-    return `solid JSxCAD\n${convertToFacets(options, canonicalize$4(triangles))}\nendsolid JSxCAD\n`;
-  };
-
-  const convertToFacets = (options, polygons) =>
-    polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
-
-  const toStlVector = vector =>
-    `${vector[0]} ${vector[1]} ${vector[2]}`;
-
-  const toStlVertex = vertex =>
-    `vertex ${toStlVector(vertex)}`;
-
-  const convertToFacet = (polygon) => {
-    const plane = toPlane(polygon);
-    if (plane !== undefined) {
-      return `facet normal ${toStlVector(toPlane(polygon))}\n` +
-             `outer loop\n` +
-             `${toStlVertex(polygon[0])}\n` +
-             `${toStlVertex(polygon[1])}\n` +
-             `${toStlVertex(polygon[2])}\n` +
-             `endloop\n` +
-             `endfacet`;
-    }
-  };
-
-  /**
-   *
-   * # Write STL
-   *
-   * ::: illustration { "view": { "position": [5, 5, 5] } }
-   * ```
-   * await Cube().writeStl('cube.stl');
-   * await readStl({ path: 'cube.stl' });
-   * ```
-   * :::
-   *
-   **/
-
-  const toStl$1 = async (shape, options = {}) => {
-    const pages = [];
-    // CHECK: Should this be limited to Page plans?
-    const geometry = shape.toKeptGeometry();
-    for (const entry of getPlans(geometry)) {
-      if (entry.plan.page) {
-        for (let leaf of getLeafs(entry.content)) {
-          const stl = await toStl(leaf, {});
-          pages.push({ stl, leaf: { ...entry, content: leaf }, index: pages.length });
-        }
-      }
-    }
-    return pages;
-  };
-
-  const writeStl = async (shape, name, options = {}) => {
-    const start = new Date();
-    log$2(`writeStl start: ${start}`, 'serious');
-    for (const { stl, leaf, index } of await toStl$1(shape, {})) {
-      await writeFile({}, `output/${name}_${index}.stl`, stl);
-      await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
-    }
-    const end = new Date();
-    log$2(`writeStl end: ${end - start}`, 'serious');
-  };
-
-  const method$8 = function (...args) { return writeStl(this, ...args); };
-  Shape.prototype.writeStl = method$8;
-
-  // Hershey simplex one line font.
-  // See: http://paulbourke.net/dataformats/hershey/
-
-  const hersheyPaths = { '32': [[null]], '33': [[null, [5, 21, 0], [5, 7, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '34': [[null, [4, 21, 0], [4, 14, 0]], [null, [12, 21, 0], [12, 14, 0]], [null]], '35': [[null, [11, 25, 0], [4, -7, 0]], [null, [17, 25, 0], [10, -7, 0]], [null, [4, 12, 0], [18, 12, 0]], [null, [3, 6, 0], [17, 6, 0]], [null]], '36': [[null, [8, 25, 0], [8, -4, 0]], [null, [12, 25, 0], [12, -4, 0]], [null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '37': [[null, [21, 21, 0], [3, 0, 0]], [null, [8, 21, 0], [10, 19, 0], [10, 17, 0], [9, 15, 0], [7, 14, 0], [5, 14, 0], [3, 16, 0], [3, 18, 0], [4, 20, 0], [6, 21, 0], [8, 21, 0], [10, 20, 0], [13, 19, 0], [16, 19, 0], [19, 20, 0], [21, 21, 0]], [null, [17, 7, 0], [15, 6, 0], [14, 4, 0], [14, 2, 0], [16, 0, 0], [18, 0, 0], [20, 1, 0], [21, 3, 0], [21, 5, 0], [19, 7, 0], [17, 7, 0]], [null]], '38': [[null, [23, 12, 0], [23, 13, 0], [22, 14, 0], [21, 14, 0], [20, 13, 0], [19, 11, 0], [17, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [7, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 6, 0], [4, 8, 0], [5, 9, 0], [12, 13, 0], [13, 14, 0], [14, 16, 0], [14, 18, 0], [13, 20, 0], [11, 21, 0], [9, 20, 0], [8, 18, 0], [8, 16, 0], [9, 13, 0], [11, 10, 0], [16, 3, 0], [18, 1, 0], [20, 0, 0], [22, 0, 0], [23, 1, 0], [23, 2, 0]], [null]], '39': [[null, [5, 19, 0], [4, 20, 0], [5, 21, 0], [6, 20, 0], [6, 18, 0], [5, 16, 0], [4, 15, 0]], [null]], '40': [[null, [11, 25, 0], [9, 23, 0], [7, 20, 0], [5, 16, 0], [4, 11, 0], [4, 7, 0], [5, 2, 0], [7, -2, 0], [9, -5, 0], [11, -7, 0]], [null]], '41': [[null, [3, 25, 0], [5, 23, 0], [7, 20, 0], [9, 16, 0], [10, 11, 0], [10, 7, 0], [9, 2, 0], [7, -2, 0], [5, -5, 0], [3, -7, 0]], [null]], '42': [[null, [8, 21, 0], [8, 9, 0]], [null, [3, 18, 0], [13, 12, 0]], [null, [13, 18, 0], [3, 12, 0]], [null]], '43': [[null, [13, 18, 0], [13, 0, 0]], [null, [4, 9, 0], [22, 9, 0]], [null]], '44': [[null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '45': [[null, [4, 9, 0], [22, 9, 0]], [null]], '46': [[null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '47': [[null, [20, 25, 0], [2, -7, 0]], [null]], '48': [[null, [9, 21, 0], [6, 20, 0], [4, 17, 0], [3, 12, 0], [3, 9, 0], [4, 4, 0], [6, 1, 0], [9, 0, 0], [11, 0, 0], [14, 1, 0], [16, 4, 0], [17, 9, 0], [17, 12, 0], [16, 17, 0], [14, 20, 0], [11, 21, 0], [9, 21, 0]], [null]], '49': [[null, [6, 17, 0], [8, 18, 0], [11, 21, 0], [11, 0, 0]], [null]], '50': [[null, [4, 16, 0], [4, 17, 0], [5, 19, 0], [6, 20, 0], [8, 21, 0], [12, 21, 0], [14, 20, 0], [15, 19, 0], [16, 17, 0], [16, 15, 0], [15, 13, 0], [13, 10, 0], [3, 0, 0], [17, 0, 0]], [null]], '51': [[null, [5, 21, 0], [16, 21, 0], [10, 13, 0], [13, 13, 0], [15, 12, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '52': [[null, [13, 21, 0], [3, 7, 0], [18, 7, 0]], [null, [13, 21, 0], [13, 0, 0]], [null]], '53': [[null, [15, 21, 0], [5, 21, 0], [4, 12, 0], [5, 13, 0], [8, 14, 0], [11, 14, 0], [14, 13, 0], [16, 11, 0], [17, 8, 0], [17, 6, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0]], [null]], '54': [[null, [16, 18, 0], [15, 20, 0], [12, 21, 0], [10, 21, 0], [7, 20, 0], [5, 17, 0], [4, 12, 0], [4, 7, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [11, 0, 0], [14, 1, 0], [16, 3, 0], [17, 6, 0], [17, 7, 0], [16, 10, 0], [14, 12, 0], [11, 13, 0], [10, 13, 0], [7, 12, 0], [5, 10, 0], [4, 7, 0]], [null]], '55': [[null, [17, 21, 0], [7, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null]], '56': [[null, [8, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 14, 0], [7, 13, 0], [11, 12, 0], [14, 11, 0], [16, 9, 0], [17, 7, 0], [17, 4, 0], [16, 2, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [4, 2, 0], [3, 4, 0], [3, 7, 0], [4, 9, 0], [6, 11, 0], [9, 12, 0], [13, 13, 0], [15, 14, 0], [16, 16, 0], [16, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0]], [null]], '57': [[null, [16, 14, 0], [15, 11, 0], [13, 9, 0], [10, 8, 0], [9, 8, 0], [6, 9, 0], [4, 11, 0], [3, 14, 0], [3, 15, 0], [4, 18, 0], [6, 20, 0], [9, 21, 0], [10, 21, 0], [13, 20, 0], [15, 18, 0], [16, 14, 0], [16, 9, 0], [15, 4, 0], [13, 1, 0], [10, 0, 0], [8, 0, 0], [5, 1, 0], [4, 3, 0]], [null]], '58': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]], '59': [[null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]], [null, [6, 1, 0], [5, 0, 0], [4, 1, 0], [5, 2, 0], [6, 1, 0], [6, -1, 0], [5, -3, 0], [4, -4, 0]], [null]], '60': [[null, [20, 18, 0], [4, 9, 0], [20, 0, 0]], [null]], '61': [[null, [4, 12, 0], [22, 12, 0]], [null, [4, 6, 0], [22, 6, 0]], [null]], '62': [[null, [4, 18, 0], [20, 9, 0], [4, 0, 0]], [null]], '63': [[null, [3, 16, 0], [3, 17, 0], [4, 19, 0], [5, 20, 0], [7, 21, 0], [11, 21, 0], [13, 20, 0], [14, 19, 0], [15, 17, 0], [15, 15, 0], [14, 13, 0], [13, 12, 0], [9, 10, 0], [9, 7, 0]], [null, [9, 2, 0], [8, 1, 0], [9, 0, 0], [10, 1, 0], [9, 2, 0]], [null]], '64': [[null, [18, 13, 0], [17, 15, 0], [15, 16, 0], [12, 16, 0], [10, 15, 0], [9, 14, 0], [8, 11, 0], [8, 8, 0], [9, 6, 0], [11, 5, 0], [14, 5, 0], [16, 6, 0], [17, 8, 0]], [null, [12, 16, 0], [10, 14, 0], [9, 11, 0], [9, 8, 0], [10, 6, 0], [11, 5, 0]], [null, [18, 16, 0], [17, 8, 0], [17, 6, 0], [19, 5, 0], [21, 5, 0], [23, 7, 0], [24, 10, 0], [24, 12, 0], [23, 15, 0], [22, 17, 0], [20, 19, 0], [18, 20, 0], [15, 21, 0], [12, 21, 0], [9, 20, 0], [7, 19, 0], [5, 17, 0], [4, 15, 0], [3, 12, 0], [3, 9, 0], [4, 6, 0], [5, 4, 0], [7, 2, 0], [9, 1, 0], [12, 0, 0], [15, 0, 0], [18, 1, 0], [20, 2, 0], [21, 3, 0]], [null, [19, 16, 0], [18, 8, 0], [18, 6, 0], [19, 5, 0]]], '65': [[null, [9, 21, 0], [1, 0, 0]], [null, [9, 21, 0], [17, 0, 0]], [null, [4, 7, 0], [14, 7, 0]], [null]], '66': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0]], [null, [4, 11, 0], [13, 11, 0], [16, 10, 0], [17, 9, 0], [18, 7, 0], [18, 4, 0], [17, 2, 0], [16, 1, 0], [13, 0, 0], [4, 0, 0]], [null]], '67': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0]], [null]], '68': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [11, 21, 0], [14, 20, 0], [16, 18, 0], [17, 16, 0], [18, 13, 0], [18, 8, 0], [17, 5, 0], [16, 3, 0], [14, 1, 0], [11, 0, 0], [4, 0, 0]], [null]], '69': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null, [4, 0, 0], [17, 0, 0]], [null]], '70': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [17, 21, 0]], [null, [4, 11, 0], [12, 11, 0]], [null]], '71': [[null, [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [18, 8, 0]], [null, [13, 8, 0], [18, 8, 0]], [null]], '72': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null, [4, 11, 0], [18, 11, 0]], [null]], '73': [[null, [4, 21, 0], [4, 0, 0]], [null]], '74': [[null, [12, 21, 0], [12, 5, 0], [11, 2, 0], [10, 1, 0], [8, 0, 0], [6, 0, 0], [4, 1, 0], [3, 2, 0], [2, 5, 0], [2, 7, 0]], [null]], '75': [[null, [4, 21, 0], [4, 0, 0]], [null, [18, 21, 0], [4, 7, 0]], [null, [9, 12, 0], [18, 0, 0]], [null]], '76': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 0, 0], [16, 0, 0]], [null]], '77': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [12, 0, 0]], [null, [20, 21, 0], [20, 0, 0]], [null]], '78': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [18, 0, 0]], [null, [18, 21, 0], [18, 0, 0]], [null]], '79': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null]], '80': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 14, 0], [17, 12, 0], [16, 11, 0], [13, 10, 0], [4, 10, 0]], [null]], '81': [[null, [9, 21, 0], [7, 20, 0], [5, 18, 0], [4, 16, 0], [3, 13, 0], [3, 8, 0], [4, 5, 0], [5, 3, 0], [7, 1, 0], [9, 0, 0], [13, 0, 0], [15, 1, 0], [17, 3, 0], [18, 5, 0], [19, 8, 0], [19, 13, 0], [18, 16, 0], [17, 18, 0], [15, 20, 0], [13, 21, 0], [9, 21, 0]], [null, [12, 4, 0], [18, -2, 0]], [null]], '82': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 21, 0], [13, 21, 0], [16, 20, 0], [17, 19, 0], [18, 17, 0], [18, 15, 0], [17, 13, 0], [16, 12, 0], [13, 11, 0], [4, 11, 0]], [null, [11, 11, 0], [18, 0, 0]], [null]], '83': [[null, [17, 18, 0], [15, 20, 0], [12, 21, 0], [8, 21, 0], [5, 20, 0], [3, 18, 0], [3, 16, 0], [4, 14, 0], [5, 13, 0], [7, 12, 0], [13, 10, 0], [15, 9, 0], [16, 8, 0], [17, 6, 0], [17, 3, 0], [15, 1, 0], [12, 0, 0], [8, 0, 0], [5, 1, 0], [3, 3, 0]], [null]], '84': [[null, [8, 21, 0], [8, 0, 0]], [null, [1, 21, 0], [15, 21, 0]], [null]], '85': [[null, [4, 21, 0], [4, 6, 0], [5, 3, 0], [7, 1, 0], [10, 0, 0], [12, 0, 0], [15, 1, 0], [17, 3, 0], [18, 6, 0], [18, 21, 0]], [null]], '86': [[null, [1, 21, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 0, 0]], [null]], '87': [[null, [2, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [7, 0, 0]], [null, [12, 21, 0], [17, 0, 0]], [null, [22, 21, 0], [17, 0, 0]], [null]], '88': [[null, [3, 21, 0], [17, 0, 0]], [null, [17, 21, 0], [3, 0, 0]], [null]], '89': [[null, [1, 21, 0], [9, 11, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 11, 0]], [null]], '90': [[null, [17, 21, 0], [3, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null, [3, 0, 0], [17, 0, 0]], [null]], '91': [[null, [4, 25, 0], [4, -7, 0]], [null, [5, 25, 0], [5, -7, 0]], [null, [4, 25, 0], [11, 25, 0]], [null, [4, -7, 0], [11, -7, 0]], [null]], '92': [[null, [0, 21, 0], [14, -3, 0]], [null]], '93': [[null, [9, 25, 0], [9, -7, 0]], [null, [10, 25, 0], [10, -7, 0]], [null, [3, 25, 0], [10, 25, 0]], [null, [3, -7, 0], [10, -7, 0]], [null]], '94': [[null, [6, 15, 0], [8, 18, 0], [10, 15, 0]], [null, [3, 12, 0], [8, 17, 0], [13, 12, 0]], [null, [8, 17, 0], [8, 0, 0]], [null]], '95': [[null, [0, -2, 0], [16, -2, 0]], [null]], '96': [[null, [6, 21, 0], [5, 20, 0], [4, 18, 0], [4, 16, 0], [5, 15, 0], [6, 16, 0], [5, 17, 0]], [null]], '97': [[null, [15, 14, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '98': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '99': [[null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '100': [[null, [15, 21, 0], [15, 0, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '101': [[null, [3, 8, 0], [15, 8, 0], [15, 10, 0], [14, 12, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '102': [[null, [10, 21, 0], [8, 21, 0], [6, 20, 0], [5, 17, 0], [5, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '103': [[null, [15, 14, 0], [15, -2, 0], [14, -5, 0], [13, -6, 0], [11, -7, 0], [8, -7, 0], [6, -6, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '104': [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '105': [[null, [3, 21, 0], [4, 20, 0], [5, 21, 0], [4, 22, 0], [3, 21, 0]], [null, [4, 14, 0], [4, 0, 0]], [null]], '106': [[null, [5, 21, 0], [6, 20, 0], [7, 21, 0], [6, 22, 0], [5, 21, 0]], [null, [6, 14, 0], [6, -3, 0], [5, -6, 0], [3, -7, 0], [1, -7, 0]], [null]], '107': [[null, [4, 21, 0], [4, 0, 0]], [null, [14, 14, 0], [4, 4, 0]], [null, [8, 8, 0], [15, 0, 0]], [null]], '108': [[null, [4, 21, 0], [4, 0, 0]], [null]], '109': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null, [15, 10, 0], [18, 13, 0], [20, 14, 0], [23, 14, 0], [25, 13, 0], [26, 10, 0], [26, 0, 0]], [null]], '110': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 10, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0], [14, 13, 0], [15, 10, 0], [15, 0, 0]], [null]], '111': [[null, [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0], [16, 6, 0], [16, 8, 0], [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0]], [null]], '112': [[null, [4, 14, 0], [4, -7, 0]], [null, [4, 11, 0], [6, 13, 0], [8, 14, 0], [11, 14, 0], [13, 13, 0], [15, 11, 0], [16, 8, 0], [16, 6, 0], [15, 3, 0], [13, 1, 0], [11, 0, 0], [8, 0, 0], [6, 1, 0], [4, 3, 0]], [null]], '113': [[null, [15, 14, 0], [15, -7, 0]], [null, [15, 11, 0], [13, 13, 0], [11, 14, 0], [8, 14, 0], [6, 13, 0], [4, 11, 0], [3, 8, 0], [3, 6, 0], [4, 3, 0], [6, 1, 0], [8, 0, 0], [11, 0, 0], [13, 1, 0], [15, 3, 0]], [null]], '114': [[null, [4, 14, 0], [4, 0, 0]], [null, [4, 8, 0], [5, 11, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0]], [null]], '115': [[null, [14, 11, 0], [13, 13, 0], [10, 14, 0], [7, 14, 0], [4, 13, 0], [3, 11, 0], [4, 9, 0], [6, 8, 0], [11, 7, 0], [13, 6, 0], [14, 4, 0], [14, 3, 0], [13, 1, 0], [10, 0, 0], [7, 0, 0], [4, 1, 0], [3, 3, 0]], [null]], '116': [[null, [5, 21, 0], [5, 4, 0], [6, 1, 0], [8, 0, 0], [10, 0, 0]], [null, [2, 14, 0], [9, 14, 0]], [null]], '117': [[null, [4, 14, 0], [4, 4, 0], [5, 1, 0], [7, 0, 0], [10, 0, 0], [12, 1, 0], [15, 4, 0]], [null, [15, 14, 0], [15, 0, 0]], [null]], '118': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0]], [null]], '119': [[null, [3, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [7, 0, 0]], [null, [11, 14, 0], [15, 0, 0]], [null, [19, 14, 0], [15, 0, 0]], [null]], '120': [[null, [3, 14, 0], [14, 0, 0]], [null, [14, 14, 0], [3, 0, 0]], [null]], '121': [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0], [6, -4, 0], [4, -6, 0], [2, -7, 0], [1, -7, 0]], [null]], '122': [[null, [14, 14, 0], [3, 0, 0]], [null, [3, 14, 0], [14, 14, 0]], [null, [3, 0, 0], [14, 0, 0]], [null]], '123': [[null, [9, 25, 0], [7, 24, 0], [6, 23, 0], [5, 21, 0], [5, 19, 0], [6, 17, 0], [7, 16, 0], [8, 14, 0], [8, 12, 0], [6, 10, 0]], [null, [7, 24, 0], [6, 22, 0], [6, 20, 0], [7, 18, 0], [8, 17, 0], [9, 15, 0], [9, 13, 0], [8, 11, 0], [4, 9, 0], [8, 7, 0], [9, 5, 0], [9, 3, 0], [8, 1, 0], [7, 0, 0], [6, -2, 0], [6, -4, 0], [7, -6, 0]], [null, [6, 8, 0], [8, 6, 0], [8, 4, 0], [7, 2, 0], [6, 1, 0], [5, -1, 0], [5, -3, 0], [6, -5, 0], [7, -6, 0], [9, -7, 0]], [null]], '124': [[null, [4, 25, 0], [4, -7, 0]], [null]], '125': [[null, [5, 25, 0], [7, 24, 0], [8, 23, 0], [9, 21, 0], [9, 19, 0], [8, 17, 0], [7, 16, 0], [6, 14, 0], [6, 12, 0], [8, 10, 0]], [null, [7, 24, 0], [8, 22, 0], [8, 20, 0], [7, 18, 0], [6, 17, 0], [5, 15, 0], [5, 13, 0], [6, 11, 0], [10, 9, 0], [6, 7, 0], [5, 5, 0], [5, 3, 0], [6, 1, 0], [7, 0, 0], [8, -2, 0], [8, -4, 0], [7, -6, 0]], [null, [8, 8, 0], [6, 6, 0], [6, 4, 0], [7, 2, 0], [8, 1, 0], [9, -1, 0], [9, -3, 0], [8, -5, 0], [7, -6, 0], [5, -7, 0]], [null]], '126': [[null, [3, 6, 0], [3, 8, 0], [4, 11, 0], [6, 12, 0], [8, 12, 0], [10, 11, 0], [14, 8, 0], [16, 7, 0], [18, 7, 0], [20, 8, 0], [21, 10, 0]], [null, [3, 8, 0], [4, 10, 0], [6, 11, 0], [8, 11, 0], [10, 10, 0], [14, 7, 0], [16, 6, 0], [18, 6, 0], [20, 7, 0], [21, 10, 0], [21, 12, 0]], [null]] };
-
-  const hersheyWidth = { '32': 16, '33': 10, '34': 16, '35': 21, '36': 20, '37': 24, '38': 26, '39': 10, '40': 14, '41': 14, '42': 16, '43': 26, '44': 10, '45': 26, '46': 10, '47': 22, '48': 20, '49': 20, '50': 20, '51': 20, '52': 20, '53': 20, '54': 20, '55': 20, '56': 20, '57': 20, '58': 10, '59': 10, '60': 24, '61': 26, '62': 24, '63': 18, '64': 27, '65': 18, '66': 21, '67': 21, '68': 21, '69': 19, '70': 18, '71': 21, '72': 22, '73': 8, '74': 16, '75': 21, '76': 17, '77': 24, '78': 22, '79': 22, '80': 21, '81': 22, '82': 21, '83': 20, '84': 16, '85': 22, '86': 18, '87': 24, '88': 20, '89': 18, '90': 20, '91': 14, '92': 14, '93': 14, '94': 16, '95': 16, '96': 10, '97': 19, '98': 19, '99': 18, '100': 19, '101': 18, '102': 12, '103': 19, '104': 19, '105': 8, '106': 10, '107': 17, '108': 8, '109': 30, '110': 19, '111': 19, '112': 19, '113': 19, '114': 13, '115': 17, '116': 12, '117': 19, '118': 16, '119': 22, '120': 17, '121': 16, '122': 17, '123': 14, '124': 8, '125': 14, '126': 24 };
-
-  const toPaths$2 = (letters) => {
-    let xOffset = 0;
-    const mergedPaths = [];
-    for (const letter of letters) {
-      const code = letter.charCodeAt(0);
-      const paths = hersheyPaths[code] || [];
-      mergedPaths.push(...translate$2([xOffset, 0, 0], paths));
-      xOffset += hersheyWidth[code] || 0;
-    }
-    return Shape.fromGeometry({ paths: mergedPaths }).scale(1 / 28);
-  };
-
-  const ofSize$2 = (size) => (text) => toPaths$2(text).scale(size);
-
-  const Hershey = (size) => ofSize$2(size);
-  Hershey.ofSize = ofSize$2;
-  Hershey.toPaths = toPaths$2;
 
   var opentype = createCommonjsModule(function (module, exports) {
   /**
@@ -46072,8 +44109,10 @@ return d[d.length-1];};return ", funcName].join("");
   unwrapExports(opentype);
   var opentype_1 = opentype.parse;
 
-  const toFont = (options = {}, bytes) => {
-    const fontData = opentype_1(bytes.buffer);
+  const toFont = (options = {}, data) => {
+    // Unfortunately opentype.js wants a buffer but doesn't take an offset.
+    // Trim the buffer back so that we get one where offset 0 is the start of data.
+    const fontData = opentype_1(data.buffer.slice(data.byteOffset));
 
     const font = (options, text) => {
       const { emSize = 1, curveSegments = 32, size = 72, kerning = true, features, hinting = false } = options;
@@ -46085,7 +44124,7 @@ return d[d.length-1];};return ", funcName].join("");
                               svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
                             });
       const pathsets = [];
-      for (let { paths } of svgPaths.map(svgPath => fromSvgPath(svgPath, { curveSegments: curveSegments }))) {
+      for (let { paths } of svgPaths.map(svgPath => fromSvgPath(new TextEncoder('utf8').encode(svgPath), { curveSegments: curveSegments }))) {
         // Outlining forces re-orientation.
         pathsets.push(reorient(paths));
       }
@@ -46136,9 +44175,9 @@ return d[d.length-1];};return ", funcName].join("");
   const toEmSizeFromMm = (mm) => mm * 1.5;
 
   const readFont = async (path, { src } = {}) => {
-    let data = await readFile({ as: 'bytes' }, `source/${path}`);
+    let data = await readFile({ doSerialize: false }, `source/${path}`);
     if (data === undefined) {
-      data = await readFile({ as: 'bytes', sources: [src] }, `cache/${path}`);
+      data = await readFile({ sources: [src] }, `cache/${path}`);
     }
     const font = toFont({ path }, data);
     const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
@@ -46156,6 +44195,433 @@ return d[d.length-1];};return ", funcName].join("");
   Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
   Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
   Font.read.signature = 'Font.read(path:string, { flip:boolean = false }) -> Font';
+
+  const Plan = ({ plan, marks = [], planes = [], tags = [], visualization, content }, context) => {
+    let visualizationGeometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
+    let contentGeometry = content === undefined ? { assembly: [] } : content.toKeptGeometry();
+    const shape = Shape.fromGeometry({
+      plan,
+      marks,
+      planes,
+      tags,
+      content: contentGeometry,
+      visualization: visualizationGeometry
+    },
+                                     context);
+    return shape;
+  };
+
+  var binPacking = createCommonjsModule(function (module, exports) {
+  (function (global, factory) {
+     factory(exports) ;
+  }(commonjsGlobal, (function (exports) {
+  /******************************************************************************
+
+  This is a binary tree based bin packing algorithm that is more complex than
+  the simple Packer (packer.js). Instead of starting off with a fixed width and
+  height, it starts with the width and height of the first block passed and then
+  grows as necessary to accomodate each subsequent block. As it grows it attempts
+  to maintain a roughly square ratio by making 'smart' choices about whether to
+  grow right or down.
+
+  When growing, the algorithm can only grow to the right OR down. Therefore, if
+  the new block is BOTH wider and taller than the current target then it will be
+  rejected. This makes it very important to initialize with a sensible starting
+  width and height. If you are providing sorted input (largest first) then this
+  will not be an issue.
+
+  A potential way to solve this limitation would be to allow growth in BOTH
+  directions at once, but this requires maintaining a more complex tree
+  with 3 children (down, right and center) and that complexity can be avoided
+  by simply chosing a sensible starting block.
+
+  Best results occur when the input blocks are sorted by height, or even better
+  when sorted by max(width,height).
+
+  Inputs:
+  ------
+
+    blocks: array of any objects that have .w and .h attributes
+
+  Outputs:
+  -------
+
+    marks each block that fits with a .fit attribute pointing to a
+    node with .x and .y coordinates
+
+  Example:
+  -------
+
+    var blocks = [
+      { w: 100, h: 100 },
+      { w: 100, h: 100 },
+      { w:  80, h:  80 },
+      { w:  80, h:  80 },
+      etc
+      etc
+    ];
+
+    var packer = new GrowingPacker();
+    packer.fit(blocks);
+
+    for(var n = 0 ; n < blocks.length ; n++) {
+      var block = blocks[n];
+      if (block.fit) {
+        Draw(block.fit.x, block.fit.y, block.w, block.h);
+      }
+    }
+
+
+  ******************************************************************************/
+
+  function GrowingPacker() {}
+
+  GrowingPacker.prototype = {
+
+    fit: function fit(blocks) {
+      var n,
+          node,
+          block,
+          len = blocks.length;
+      var w = len > 0 ? blocks[0].w : 0;
+      var h = len > 0 ? blocks[0].h : 0;
+      this.root = { x: 0, y: 0, w: w, h: h };
+      for (n = 0; n < len; n++) {
+        block = blocks[n];
+        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);else block.fit = this.growNode(block.w, block.h);
+      }
+    },
+
+    findNode: function findNode(root, w, h) {
+      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
+    },
+
+    splitNode: function splitNode(node, w, h) {
+      node.used = true;
+      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
+      return node;
+    },
+
+    growNode: function growNode(w, h) {
+      var canGrowDown = w <= this.root.w;
+      var canGrowRight = h <= this.root.h;
+
+      var shouldGrowRight = canGrowRight && this.root.h >= this.root.w + w; // attempt to keep square-ish by growing right when height is much greater than width
+      var shouldGrowDown = canGrowDown && this.root.w >= this.root.h + h; // attempt to keep square-ish by growing down  when width  is much greater than height
+
+      if (shouldGrowRight) return this.growRight(w, h);else if (shouldGrowDown) return this.growDown(w, h);else if (canGrowRight) return this.growRight(w, h);else if (canGrowDown) return this.growDown(w, h);else return null; // need to ensure sensible root starting size to avoid this happening
+    },
+
+    growRight: function growRight(w, h) {
+      var node;
+      this.root = {
+        used: true,
+        x: 0,
+        y: 0,
+        w: this.root.w + w,
+        h: this.root.h,
+        down: this.root,
+        right: { x: this.root.w, y: 0, w: w, h: this.root.h }
+      };
+      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
+    },
+
+    growDown: function growDown(w, h) {
+      var node;
+      this.root = {
+        used: true,
+        x: 0,
+        y: 0,
+        w: this.root.w,
+        h: this.root.h + h,
+        down: { x: 0, y: this.root.h, w: this.root.w, h: h },
+        right: this.root
+      };
+      if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
+    }
+
+  };
+
+  /******************************************************************************
+
+  This is a very simple binary tree based bin packing algorithm that is initialized
+  with a fixed width and height and will fit each block into the first node where
+  it fits and then split that node into 2 parts (down and right) to track the
+  remaining whitespace.
+
+  Best results occur when the input blocks are sorted by height, or even better
+  when sorted by max(width,height).
+
+  Inputs:
+  ------
+
+    w:       width of target rectangle
+    h:      height of target rectangle
+    blocks: array of any objects that have .w and .h attributes
+
+  Outputs:
+  -------
+
+    marks each block that fits with a .fit attribute pointing to a
+    node with .x and .y coordinates
+
+  Example:
+  -------
+
+    var blocks = [
+      { w: 100, h: 100 },
+      { w: 100, h: 100 },
+      { w:  80, h:  80 },
+      { w:  80, h:  80 },
+      etc
+      etc
+    ];
+
+    var packer = new Packer(500, 500);
+    packer.fit(blocks);
+
+    for(var n = 0 ; n < blocks.length ; n++) {
+      var block = blocks[n];
+      if (block.fit) {
+        Draw(block.fit.x, block.fit.y, block.w, block.h);
+      }
+    }
+
+
+  ******************************************************************************/
+
+  function Packer(w, h) {
+    this.init(w, h);
+  }
+
+  Packer.prototype = {
+
+    init: function init(w, h) {
+      this.root = { x: 0, y: 0, w: w, h: h };
+    },
+
+    fit: function fit(blocks) {
+      var n, node, block;
+      for (n = 0; n < blocks.length; n++) {
+        block = blocks[n];
+        if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);
+      }
+    },
+
+    findNode: function findNode(root, w, h) {
+      if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
+    },
+
+    splitNode: function splitNode(node, w, h) {
+      node.used = true;
+      node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+      node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
+      return node;
+    }
+
+  };
+
+  exports.GrowingPacker = GrowingPacker;
+  exports.Packer = Packer;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+  })));
+
+  });
+
+  unwrapExports(binPacking);
+  var binPacking_1 = binPacking.GrowingPacker;
+  var binPacking_2 = binPacking.Packer;
+
+  const X$h = 0;
+  const Y$h = 1;
+
+  const measureSize = (geometry) => {
+    const [min, max] = measureBoundingBox$5(geometry);
+    const width = max[X$h] - min[X$h];
+    const height = max[Y$h] - min[Y$h];
+    return [width, height];
+  };
+
+  const measureOrigin = (geometry) => {
+    const [min] = measureBoundingBox$5(geometry);
+    const [x, y] = min;
+    return [x, y];
+  };
+
+  const measureOffsets = (size, pageMargin) => {
+    if (size) {
+      const [width, height] = size;
+
+      // Center the output to match pages.
+      const xOffset = width / -2;
+      const yOffset = height / -2;
+      const packer = new binPacking_2(width - pageMargin * 2, height - pageMargin * 2);
+
+      return [xOffset, yOffset, packer];
+    } else {
+      const packer = new binPacking_1();
+      return [0, 0, packer];
+    }
+  };
+
+  const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
+    const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
+
+    const packedGeometries = [];
+    const unpackedGeometries = [];
+
+    const blocks = [];
+
+    for (const geometry of geometries) {
+      const [width, height] = measureSize(geometry);
+      if (!isFinite(width) || !isFinite(height)) {
+        continue;
+      }
+      const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
+      blocks.push({ w, h, geometry });
+    }
+
+    // Place largest cells first
+    blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
+
+    packer.fit(blocks);
+
+    let minPoint = [Infinity, Infinity, 0];
+    let maxPoint = [-Infinity, -Infinity, 0];
+
+    for (const { geometry, fit } of blocks) {
+      if (fit && fit.used) {
+        const [x, y] = measureOrigin(geometry);
+        const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
+        const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
+        minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
+        maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
+        const transformed = toTransformedGeometry(translate$4([xo, yo, 0], geometry));
+        packedGeometries.push(transformed);
+      } else {
+        unpackedGeometries.push(geometry);
+      }
+    }
+
+    return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
+  };
+
+  const pack$1 = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }) => {
+    if (perLayout === 0) {
+      // Packing was disabled -- do nothing.
+      return shape;
+    }
+
+    let todo = [];
+    for (const leaf of getLeafs(shape.toKeptGeometry())) {
+      todo.push(leaf);
+    }
+    const packedLayers = [];
+    while (todo.length > 0) {
+      const input = [];
+      while (todo.length > 0 && input.length < perLayout) {
+        input.push(todo.shift());
+      }
+      const [packed, unpacked, minPoint, maxPoint] = pack({ size, pageMargin, itemMargin }, ...input);
+      packSize[0] = minPoint;
+      packSize[1] = maxPoint;
+      if (packed.length === 0) {
+        break;
+      } else {
+        packedLayers.push({ item: { disjointAssembly: packed } });
+      }
+      todo.unshift(...unpacked);
+    }
+    let packedShape = Shape.fromGeometry({ layers: packedLayers });
+    if (size === undefined) {
+      packedShape = packedShape.center();
+    }
+    return packedShape;
+  };
+
+  const packMethod = function (...args) { return pack$1(this, ...args); };
+  Shape.prototype.pack = packMethod;
+
+  pack$1.signature = 'pack({ size, margin = 5 }, ...shapes:Shape) -> [packed:Shapes, unpacked:Shapes]';
+
+  const MIN$3 = 0;
+  const MAX = 1;
+  const X$i = 0;
+  const Y$i = 1;
+
+  const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...shapes) => {
+    const layers = [];
+    for (const shape of shapes) {
+      for (const leaf of getLeafs(shape.toKeptGeometry())) {
+        layers.push(leaf);
+      }
+    }
+    const r = (v) => Math.floor(v * 100) / 100;
+    if (size) {
+      // Content fits to page size.
+      const packSize = [];
+      const content = pack$1(Shape.fromGeometry({ layers }), { size, pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
+      const pageWidth = packSize[MAX][X$i] - packSize[MIN$3][X$i];
+      const pageLength = packSize[MAX][Y$i] - packSize[MIN$3][Y$i];
+      const plans = [];
+      for (const layer of content.toKeptGeometry().layers) {
+        plans.push(Plan({
+          plan: { page: { size, margin: pageMargin } },
+          marks: packSize,
+          content: Shape.fromGeometry(layer),
+          visualization:
+                        Square(pageWidth, pageLength)
+                            .outline()
+                            .with(Hershey(max$1(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
+                            .color('red')
+        }).Item());
+      }
+      return Layers(...plans);
+    } else {
+      const packSize = [];
+      // Page fits to content size.
+      const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
+      // FIX: Using content.size() loses the margin, which is a problem for repacking.
+      // Probably page plans should be generated by pack and count toward the size.
+      const pageWidth = packSize[MAX][X$i] - packSize[MIN$3][X$i];
+      const pageLength = packSize[MAX][Y$i] - packSize[MIN$3][Y$i];
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        const plans = [];
+        for (const layer of content.toKeptGeometry().layers) {
+          plans.push(Plan({
+            plan: { page: { size, margin: pageMargin } },
+            content: Shape.fromGeometry(layer).center(),
+            marks: packSize,
+            visualization:
+                          Square(pageWidth, pageLength)
+                              .outline()
+                              .with(Hershey(max$1(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
+                              .color('red')
+          }).Item());
+        }
+        return Layers(...plans);
+      } else {
+        return Empty();
+      }
+    }
+  };
+
+  Plan.Page = Page;
+
+  const PageMethod = function (options = {}) { return Page(options, this); };
+  Shape.prototype.Page = PageMethod;
+
+  const ensurePages = (geometry) => {
+    const pages = getPlans(geometry).filter(entry => entry.plan.page);
+    if (pages.length === 0) {
+      return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry());
+    } else {
+      return pages;
+    }
+  };
 
   const dp2 = (number) => Math.round(number * 100) / 100;
 
@@ -46206,228 +44672,6 @@ return d[d.length-1];};return ", funcName].join("");
   };
   Plan.Length = Length;
 
-  const registry = [];
-
-  // FIX: Need to clear out temporary registrations.
-
-  const fromDesignator = (designator) => {
-    for (const { parser, constructor } of registry) {
-      const spec = parser(designator);
-      if (spec !== undefined && spec !== null && spec !== false) {
-        return constructor(spec);
-      }
-    }
-    throw Error('die');
-  };
-
-  // Later definitions override earlier definitions.
-  const registerDesignator = (parser, constructor) =>
-    registry.unshift({ parser, constructor });
-
-  /**
-   *
-   * # Item
-   *
-   * Encapsulates a geometry as a discrete item.
-   *
-   **/
-
-  // Constructs an item from the designator.
-  const Item$1 = (designator) => {
-    if (typeof designator === 'string') {
-      return fromDesignator(designator);
-    } else if (designator instanceof Array) {
-      return fromDesignator(...designator);
-    }
-  };
-
-  // Turns the current shape into an item.
-  const itemMethod = function (id) {
-    const shape = Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }));
-    // Register the designator for re-use.
-    registerDesignator(d => (d === id), () => shape);
-    return shape;
-  };
-
-  Shape.prototype.Item = itemMethod;
-  Shape.prototype.toItem = itemMethod;
-
-  Item$1.signature = 'Item(shape:Shape, id:string) -> Shape';
-  itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
-
-  /**
-   *
-   * # Bill Of Materials
-   *
-   **/
-
-  const bom = (shape) => {
-    const bom = [];
-    visit(shape.toKeptGeometry(),
-          (geometry, descend) => {
-            if (geometry.item) {
-              bom.push(geometry.tags.filter(tag => tag.startsWith('item/'))
-                  .map(tag => tag.substring(5)));
-            }
-            descend();
-          });
-    return bom;
-  };
-
-  const bomMethod = function (...args) { return bom(this); };
-  Shape.prototype.bom = bomMethod;
-
-  bomMethod.signature = 'Shape -> bom() -> string';
-
-  const fuse = (shape, op = (_ => _)) =>
-    Shape.fromGeometry(rewrite(shape.toKeptGeometry(),
-                               (geometry, descend, walk) => {
-                                 if (geometry.item) {
-                                   return walk(geometry.item);
-                                 } else {
-                                   return descend();
-                                 }
-                               }));
-
-  const fuseMethod = function (...args) { return fuse(this, ...args); };
-  Shape.prototype.fuse = fuseMethod;
-
-  fuse.signature = 'fuse(shape:Shape, op:function) -> Shapes';
-  fuseMethod.signature = 'Shape -> fuse(op:function) -> Shapes';
-
-  const inItems = (shape, op = (_ => _)) => {
-    const rewritten = rewrite(shape.toKeptGeometry(),
-                              (geometry, descend) => {
-                                if (geometry.item) {
-                                  // Operate on the interior of the items.
-                                  const item = op(Shape.fromGeometry(geometry.item));
-                                  // Reassemble as an item equivalent to the original.
-                                  return update(geometry, { item: item.toGeometry() });
-                                } else {
-                                  return descend();
-                                }
-                              });
-    return Shape.fromGeometry(rewritten);
-  };
-
-  const inItemsMethod = function (...args) { return inItems(this, ...args); };
-  Shape.prototype.inItems = inItemsMethod;
-
-  inItems.signature = 'inItems(shape:Shape, op:function) -> Shapes';
-  inItemsMethod.signature = 'Shape -> inItems(op:function) -> Shapes';
-
-  const items = (shape, op = (_ => _)) => {
-    const items = [];
-    for (const item of getItems(shape.toKeptGeometry())) {
-      items.push(op(Shape.fromGeometry(item)));
-    }
-    return items;
-  };
-
-  const itemsMethod = function (...args) { return items(this, ...args); };
-  Shape.prototype.items = itemsMethod;
-
-  items.signature = 'items(shape:Shape, op:function) -> Shapes';
-  itemsMethod.signature = 'Shape -> items(op:function) -> Shapes';
-
-  const leafs = (shape, op = (_ => _)) => {
-    const leafs = [];
-    for (const leaf of getLeafs(shape.toKeptGeometry())) {
-      leafs.push(op(Shape.fromGeometry(leaf)));
-    }
-    return leafs;
-  };
-
-  const leafsMethod = function (...args) { return leafs(this, ...args); };
-  Shape.prototype.leafs = leafsMethod;
-
-  leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
-  leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
-
-  const toBillOfMaterial = (shape) => {
-    const specifications = [];
-    for (const { tags } of getItems(shape.toKeptGeometry())) {
-      for (const tag of tags) {
-        if (tag.startsWith('item/')) {
-          const specification = tag.substring(5);
-          specifications.push(specification);
-        }
-      }
-    }
-    return specifications;
-  };
-
-  const toBillOfMaterialMethod = function (options = {}) { return toBillOfMaterial(this); };
-
-  Shape.prototype.toBillOfMaterial = toBillOfMaterialMethod;
-
-  const MIN$3 = 0;
-  const MAX = 1;
-  const X$m = 0;
-  const Y$m = 1;
-
-  const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...shapes) => {
-    const layers = [];
-    for (const shape of shapes) {
-      for (const leaf of getLeafs(shape.toKeptGeometry())) {
-        layers.push(leaf);
-      }
-    }
-    const r = (v) => Math.floor(v * 100) / 100;
-    if (size) {
-      // Content fits to page size.
-      const packSize = [];
-      const content = pack$1(Shape.fromGeometry({ layers }), { size, pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
-      const pageWidth = packSize[MAX][X$m] - packSize[MIN$3][X$m];
-      const pageLength = packSize[MAX][Y$m] - packSize[MIN$3][Y$m];
-      const plans = [];
-      for (const layer of content.toKeptGeometry().layers) {
-        plans.push(Plan({
-          plan: { page: { size, margin: pageMargin } },
-          marks: packSize,
-          content: Shape.fromGeometry(layer),
-          visualization:
-                        Square(pageWidth, pageLength)
-                            .outline()
-                            .with(Hershey(max$1(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
-                            .color('red')
-        }).Item());
-      }
-      return Layers(...plans);
-    } else {
-      const packSize = [];
-      // Page fits to content size.
-      const content = pack$1(Shape.fromGeometry({ layers }), { pageMargin, itemMargin, perLayout: itemsPerPage, packSize });
-      // FIX: Using content.size() loses the margin, which is a problem for repacking.
-      // Probably page plans should be generated by pack and count toward the size.
-      const pageWidth = packSize[MAX][X$m] - packSize[MIN$3][X$m];
-      const pageLength = packSize[MAX][Y$m] - packSize[MIN$3][Y$m];
-      if (isFinite(pageWidth) && isFinite(pageLength)) {
-        const plans = [];
-        for (const layer of content.toKeptGeometry().layers) {
-          plans.push(Plan({
-            plan: { page: { size, margin: pageMargin } },
-            content: Shape.fromGeometry(layer).center(),
-            marks: packSize,
-            visualization:
-                          Square(pageWidth, pageLength)
-                              .outline()
-                              .with(Hershey(max$1(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
-                              .color('red')
-          }).Item());
-        }
-        return Layers(...plans);
-      } else {
-        return Empty();
-      }
-    }
-  };
-
-  Plan.Page = Page;
-
-  const PageMethod = function (options = {}) { return Page(options, this); };
-  Shape.prototype.Page = PageMethod;
-
   // Radius
 
   const Radius = (radius = 1, center = [0, 0, 0]) =>
@@ -46454,27 +44698,5571 @@ return d[d.length-1];};return ", funcName].join("");
   Shape.prototype.sketch = function (...args) { return Sketch(this); };
   Shape.prototype.withSketch = function (...args) { return assemble$1(this, Sketch(this)); };
 
-  const preview = async (shape, name = 'preview', { width, height, view } = {}) => {
-    const output = Layers(...shape.leafs(l => l.Page())).Page().toKeptGeometry();
-    return writeFile({}, `geometry/${name}`, JSON.stringify(output.item.content));
+  // FIX: We shouldn't need to supply a path to this.
+  const view = (shape, { width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
+    for (const entry of ensurePages(shape.toKeptGeometry())) {
+      for (let leaf of getLeafs(entry.content)) {
+        emit$1({ geometry: { width, height, position, geometry: leaf } });
+      }
+    }
+    return shape;
   };
 
-  const previewMethod = function (...args) { return preview(this, ...args); };
-  Shape.prototype.preview = previewMethod;
+  Shape.prototype.view = function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) {
+    return view(this, { width, height, position });
+  };
 
-  const view = async (shape, name = 'preview', { width, height, view } = {}) => {
-    let index = 0;
-    for (const entry of getPlans(shape.toKeptGeometry())) {
-      if (entry.plan.page) {
-        for (let leaf of getLeafs(entry.content)) {
-          await writeFile({}, `geometry/${name}_${index++}`, JSON.stringify(leaf));
+  Shape.prototype.smallView = function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.bigView = function ({ width = 1024, height = 512, position = [100, -100, 100] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.topView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.smallTopView = function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = [0, 0, 100] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, -100, 0] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.smallFrontView = function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  Shape.prototype.bigFrontView = function ({ width = 1024, height = 512, position = [0, -100, 0] } = {}) {
+    return view(this, { width, height, position });
+  };
+
+  const Z$c = 2;
+
+  // TODO: Radial distortion rather than just lift?
+  const arch = (shape, factor, { resolution = 1 } = {}) => {
+    const assembly = [];
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const [min, max] = measureBoundingBox$4(solid);
+      const maxZ = max[Z$c];
+      const minZ = min[Z$c];
+      const height = maxZ - minZ;
+      const liftAt = z => factor * Math.sin((z - minZ) / height * Math.PI);
+      const lift = ([x, y, z]) => [x + liftAt(z), y, z];
+      assembly.push({ solid: deform(makeWatertight(solid), lift, min, max, resolution), tags });
+    }
+
+    return Shape.fromGeometry({ assembly });
+  };
+
+  const archMethod = function (...args) { return arch(this, ...args); };
+  Shape.prototype.arch = archMethod;
+
+  var constants$1 = createCommonjsModule(function (module, exports) {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.NORM_2D = 1.0 / 47.0;
+  exports.NORM_3D = 1.0 / 103.0;
+  exports.NORM_4D = 1.0 / 30.0;
+  exports.SQUISH_2D = (Math.sqrt(2 + 1) - 1) / 2;
+  exports.SQUISH_3D = (Math.sqrt(3 + 1) - 1) / 3;
+  exports.SQUISH_4D = (Math.sqrt(4 + 1) - 1) / 4;
+  exports.STRETCH_2D = (1 / Math.sqrt(2 + 1) - 1) / 2;
+  exports.STRETCH_3D = (1 / Math.sqrt(3 + 1) - 1) / 3;
+  exports.STRETCH_4D = (1 / Math.sqrt(4 + 1) - 1) / 4;
+  exports.base2D = [
+      [1, 1, 0, 1, 0, 1, 0, 0, 0],
+      [1, 1, 0, 1, 0, 1, 2, 1, 1]
+  ];
+  exports.base3D = [
+      [0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1],
+      [2, 1, 1, 0, 2, 1, 0, 1, 2, 0, 1, 1, 3, 1, 1, 1],
+      [1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 2, 1, 1, 0, 2, 1, 0, 1, 2, 0, 1, 1]
+  ];
+  exports.base4D = [
+      [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
+      [3, 1, 1, 1, 0, 3, 1, 1, 0, 1, 3, 1, 0, 1, 1, 3, 0, 1, 1, 1, 4, 1, 1, 1, 1],
+      [
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          2,
+          1,
+          0,
+          1,
+          0,
+          2,
+          1,
+          0,
+          0,
+          1,
+          2,
+          0,
+          1,
+          1,
+          0,
+          2,
+          0,
+          1,
+          0,
+          1,
+          2,
+          0,
+          0,
+          1,
+          1
+      ],
+      [
+          3,
+          1,
+          1,
+          1,
+          0,
+          3,
+          1,
+          1,
+          0,
+          1,
+          3,
+          1,
+          0,
+          1,
+          1,
+          3,
+          0,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          2,
+          1,
+          0,
+          1,
+          0,
+          2,
+          1,
+          0,
+          0,
+          1,
+          2,
+          0,
+          1,
+          1,
+          0,
+          2,
+          0,
+          1,
+          0,
+          1,
+          2,
+          0,
+          0,
+          1,
+          1
+      ]
+  ];
+  exports.gradients2D = [
+      5,
+      2,
+      2,
+      5,
+      -5,
+      2,
+      -2,
+      5,
+      5,
+      -2,
+      2,
+      -5,
+      -5,
+      -2,
+      -2,
+      -5
+  ];
+  exports.gradients3D = [
+      -11,
+      4,
+      4,
+      -4,
+      11,
+      4,
+      -4,
+      4,
+      11,
+      11,
+      4,
+      4,
+      4,
+      11,
+      4,
+      4,
+      4,
+      11,
+      -11,
+      -4,
+      4,
+      -4,
+      -11,
+      4,
+      -4,
+      -4,
+      11,
+      11,
+      -4,
+      4,
+      4,
+      -11,
+      4,
+      4,
+      -4,
+      11,
+      -11,
+      4,
+      -4,
+      -4,
+      11,
+      -4,
+      -4,
+      4,
+      -11,
+      11,
+      4,
+      -4,
+      4,
+      11,
+      -4,
+      4,
+      4,
+      -11,
+      -11,
+      -4,
+      -4,
+      -4,
+      -11,
+      -4,
+      -4,
+      -4,
+      -11,
+      11,
+      -4,
+      -4,
+      4,
+      -11,
+      -4,
+      4,
+      -4,
+      -11
+  ];
+  exports.gradients4D = [
+      3,
+      1,
+      1,
+      1,
+      1,
+      3,
+      1,
+      1,
+      1,
+      1,
+      3,
+      1,
+      1,
+      1,
+      1,
+      3,
+      -3,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      3,
+      -1,
+      1,
+      1,
+      1,
+      -3,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      -3,
+      -1,
+      1,
+      1,
+      -1,
+      -3,
+      1,
+      1,
+      -1,
+      -1,
+      3,
+      1,
+      -1,
+      -1,
+      1,
+      3,
+      3,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      -1,
+      1,
+      1,
+      1,
+      -3,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      -3,
+      1,
+      -1,
+      1,
+      -1,
+      3,
+      -1,
+      1,
+      -1,
+      1,
+      -3,
+      1,
+      -1,
+      1,
+      -1,
+      3,
+      3,
+      -1,
+      -1,
+      1,
+      1,
+      -3,
+      -1,
+      1,
+      1,
+      -1,
+      -3,
+      1,
+      1,
+      -1,
+      -1,
+      3,
+      -3,
+      -1,
+      -1,
+      1,
+      -1,
+      -3,
+      -1,
+      1,
+      -1,
+      -1,
+      -3,
+      1,
+      -1,
+      -1,
+      -1,
+      3,
+      3,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      -1,
+      1,
+      1,
+      1,
+      -3,
+      -3,
+      1,
+      1,
+      -1,
+      -1,
+      3,
+      1,
+      -1,
+      -1,
+      1,
+      3,
+      -1,
+      -1,
+      1,
+      1,
+      -3,
+      3,
+      -1,
+      1,
+      -1,
+      1,
+      -3,
+      1,
+      -1,
+      1,
+      -1,
+      3,
+      -1,
+      1,
+      -1,
+      1,
+      -3,
+      -3,
+      -1,
+      1,
+      -1,
+      -1,
+      -3,
+      1,
+      -1,
+      -1,
+      -1,
+      3,
+      -1,
+      -1,
+      -1,
+      1,
+      -3,
+      3,
+      1,
+      -1,
+      -1,
+      1,
+      3,
+      -1,
+      -1,
+      1,
+      1,
+      -3,
+      -1,
+      1,
+      1,
+      -1,
+      -3,
+      -3,
+      1,
+      -1,
+      -1,
+      -1,
+      3,
+      -1,
+      -1,
+      -1,
+      1,
+      -3,
+      -1,
+      -1,
+      1,
+      -1,
+      -3,
+      3,
+      -1,
+      -1,
+      -1,
+      1,
+      -3,
+      -1,
+      -1,
+      1,
+      -1,
+      -3,
+      -1,
+      1,
+      -1,
+      -1,
+      -3,
+      -3,
+      -1,
+      -1,
+      -1,
+      -1,
+      -3,
+      -1,
+      -1,
+      -1,
+      -1,
+      -3,
+      -1,
+      -1,
+      -1,
+      -1,
+      -3
+  ];
+  exports.lookupPairs2D = [
+      0,
+      1,
+      1,
+      0,
+      4,
+      1,
+      17,
+      0,
+      20,
+      2,
+      21,
+      2,
+      22,
+      5,
+      23,
+      5,
+      26,
+      4,
+      39,
+      3,
+      42,
+      4,
+      43,
+      3
+  ];
+  exports.lookupPairs3D = [
+      0,
+      2,
+      1,
+      1,
+      2,
+      2,
+      5,
+      1,
+      6,
+      0,
+      7,
+      0,
+      32,
+      2,
+      34,
+      2,
+      129,
+      1,
+      133,
+      1,
+      160,
+      5,
+      161,
+      5,
+      518,
+      0,
+      519,
+      0,
+      546,
+      4,
+      550,
+      4,
+      645,
+      3,
+      647,
+      3,
+      672,
+      5,
+      673,
+      5,
+      674,
+      4,
+      677,
+      3,
+      678,
+      4,
+      679,
+      3,
+      680,
+      13,
+      681,
+      13,
+      682,
+      12,
+      685,
+      14,
+      686,
+      12,
+      687,
+      14,
+      712,
+      20,
+      714,
+      18,
+      809,
+      21,
+      813,
+      23,
+      840,
+      20,
+      841,
+      21,
+      1198,
+      19,
+      1199,
+      22,
+      1226,
+      18,
+      1230,
+      19,
+      1325,
+      23,
+      1327,
+      22,
+      1352,
+      15,
+      1353,
+      17,
+      1354,
+      15,
+      1357,
+      17,
+      1358,
+      16,
+      1359,
+      16,
+      1360,
+      11,
+      1361,
+      10,
+      1362,
+      11,
+      1365,
+      10,
+      1366,
+      9,
+      1367,
+      9,
+      1392,
+      11,
+      1394,
+      11,
+      1489,
+      10,
+      1493,
+      10,
+      1520,
+      8,
+      1521,
+      8,
+      1878,
+      9,
+      1879,
+      9,
+      1906,
+      7,
+      1910,
+      7,
+      2005,
+      6,
+      2007,
+      6,
+      2032,
+      8,
+      2033,
+      8,
+      2034,
+      7,
+      2037,
+      6,
+      2038,
+      7,
+      2039,
+      6
+  ];
+  exports.lookupPairs4D = [
+      0,
+      3,
+      1,
+      2,
+      2,
+      3,
+      5,
+      2,
+      6,
+      1,
+      7,
+      1,
+      8,
+      3,
+      9,
+      2,
+      10,
+      3,
+      13,
+      2,
+      16,
+      3,
+      18,
+      3,
+      22,
+      1,
+      23,
+      1,
+      24,
+      3,
+      26,
+      3,
+      33,
+      2,
+      37,
+      2,
+      38,
+      1,
+      39,
+      1,
+      41,
+      2,
+      45,
+      2,
+      54,
+      1,
+      55,
+      1,
+      56,
+      0,
+      57,
+      0,
+      58,
+      0,
+      59,
+      0,
+      60,
+      0,
+      61,
+      0,
+      62,
+      0,
+      63,
+      0,
+      256,
+      3,
+      258,
+      3,
+      264,
+      3,
+      266,
+      3,
+      272,
+      3,
+      274,
+      3,
+      280,
+      3,
+      282,
+      3,
+      2049,
+      2,
+      2053,
+      2,
+      2057,
+      2,
+      2061,
+      2,
+      2081,
+      2,
+      2085,
+      2,
+      2089,
+      2,
+      2093,
+      2,
+      2304,
+      9,
+      2305,
+      9,
+      2312,
+      9,
+      2313,
+      9,
+      16390,
+      1,
+      16391,
+      1,
+      16406,
+      1,
+      16407,
+      1,
+      16422,
+      1,
+      16423,
+      1,
+      16438,
+      1,
+      16439,
+      1,
+      16642,
+      8,
+      16646,
+      8,
+      16658,
+      8,
+      16662,
+      8,
+      18437,
+      6,
+      18439,
+      6,
+      18469,
+      6,
+      18471,
+      6,
+      18688,
+      9,
+      18689,
+      9,
+      18690,
+      8,
+      18693,
+      6,
+      18694,
+      8,
+      18695,
+      6,
+      18696,
+      9,
+      18697,
+      9,
+      18706,
+      8,
+      18710,
+      8,
+      18725,
+      6,
+      18727,
+      6,
+      131128,
+      0,
+      131129,
+      0,
+      131130,
+      0,
+      131131,
+      0,
+      131132,
+      0,
+      131133,
+      0,
+      131134,
+      0,
+      131135,
+      0,
+      131352,
+      7,
+      131354,
+      7,
+      131384,
+      7,
+      131386,
+      7,
+      133161,
+      5,
+      133165,
+      5,
+      133177,
+      5,
+      133181,
+      5,
+      133376,
+      9,
+      133377,
+      9,
+      133384,
+      9,
+      133385,
+      9,
+      133400,
+      7,
+      133402,
+      7,
+      133417,
+      5,
+      133421,
+      5,
+      133432,
+      7,
+      133433,
+      5,
+      133434,
+      7,
+      133437,
+      5,
+      147510,
+      4,
+      147511,
+      4,
+      147518,
+      4,
+      147519,
+      4,
+      147714,
+      8,
+      147718,
+      8,
+      147730,
+      8,
+      147734,
+      8,
+      147736,
+      7,
+      147738,
+      7,
+      147766,
+      4,
+      147767,
+      4,
+      147768,
+      7,
+      147770,
+      7,
+      147774,
+      4,
+      147775,
+      4,
+      149509,
+      6,
+      149511,
+      6,
+      149541,
+      6,
+      149543,
+      6,
+      149545,
+      5,
+      149549,
+      5,
+      149558,
+      4,
+      149559,
+      4,
+      149561,
+      5,
+      149565,
+      5,
+      149566,
+      4,
+      149567,
+      4,
+      149760,
+      9,
+      149761,
+      9,
+      149762,
+      8,
+      149765,
+      6,
+      149766,
+      8,
+      149767,
+      6,
+      149768,
+      9,
+      149769,
+      9,
+      149778,
+      8,
+      149782,
+      8,
+      149784,
+      7,
+      149786,
+      7,
+      149797,
+      6,
+      149799,
+      6,
+      149801,
+      5,
+      149805,
+      5,
+      149814,
+      4,
+      149815,
+      4,
+      149816,
+      7,
+      149817,
+      5,
+      149818,
+      7,
+      149821,
+      5,
+      149822,
+      4,
+      149823,
+      4,
+      149824,
+      37,
+      149825,
+      37,
+      149826,
+      36,
+      149829,
+      34,
+      149830,
+      36,
+      149831,
+      34,
+      149832,
+      37,
+      149833,
+      37,
+      149842,
+      36,
+      149846,
+      36,
+      149848,
+      35,
+      149850,
+      35,
+      149861,
+      34,
+      149863,
+      34,
+      149865,
+      33,
+      149869,
+      33,
+      149878,
+      32,
+      149879,
+      32,
+      149880,
+      35,
+      149881,
+      33,
+      149882,
+      35,
+      149885,
+      33,
+      149886,
+      32,
+      149887,
+      32,
+      150080,
+      49,
+      150082,
+      48,
+      150088,
+      49,
+      150098,
+      48,
+      150104,
+      47,
+      150106,
+      47,
+      151873,
+      46,
+      151877,
+      45,
+      151881,
+      46,
+      151909,
+      45,
+      151913,
+      44,
+      151917,
+      44,
+      152128,
+      49,
+      152129,
+      46,
+      152136,
+      49,
+      152137,
+      46,
+      166214,
+      43,
+      166215,
+      42,
+      166230,
+      43,
+      166247,
+      42,
+      166262,
+      41,
+      166263,
+      41,
+      166466,
+      48,
+      166470,
+      43,
+      166482,
+      48,
+      166486,
+      43,
+      168261,
+      45,
+      168263,
+      42,
+      168293,
+      45,
+      168295,
+      42,
+      168512,
+      31,
+      168513,
+      28,
+      168514,
+      31,
+      168517,
+      28,
+      168518,
+      25,
+      168519,
+      25,
+      280952,
+      40,
+      280953,
+      39,
+      280954,
+      40,
+      280957,
+      39,
+      280958,
+      38,
+      280959,
+      38,
+      281176,
+      47,
+      281178,
+      47,
+      281208,
+      40,
+      281210,
+      40,
+      282985,
+      44,
+      282989,
+      44,
+      283001,
+      39,
+      283005,
+      39,
+      283208,
+      30,
+      283209,
+      27,
+      283224,
+      30,
+      283241,
+      27,
+      283256,
+      22,
+      283257,
+      22,
+      297334,
+      41,
+      297335,
+      41,
+      297342,
+      38,
+      297343,
+      38,
+      297554,
+      29,
+      297558,
+      24,
+      297562,
+      29,
+      297590,
+      24,
+      297594,
+      21,
+      297598,
+      21,
+      299365,
+      26,
+      299367,
+      23,
+      299373,
+      26,
+      299383,
+      23,
+      299389,
+      20,
+      299391,
+      20,
+      299584,
+      31,
+      299585,
+      28,
+      299586,
+      31,
+      299589,
+      28,
+      299590,
+      25,
+      299591,
+      25,
+      299592,
+      30,
+      299593,
+      27,
+      299602,
+      29,
+      299606,
+      24,
+      299608,
+      30,
+      299610,
+      29,
+      299621,
+      26,
+      299623,
+      23,
+      299625,
+      27,
+      299629,
+      26,
+      299638,
+      24,
+      299639,
+      23,
+      299640,
+      22,
+      299641,
+      22,
+      299642,
+      21,
+      299645,
+      20,
+      299646,
+      21,
+      299647,
+      20,
+      299648,
+      61,
+      299649,
+      60,
+      299650,
+      61,
+      299653,
+      60,
+      299654,
+      59,
+      299655,
+      59,
+      299656,
+      58,
+      299657,
+      57,
+      299666,
+      55,
+      299670,
+      54,
+      299672,
+      58,
+      299674,
+      55,
+      299685,
+      52,
+      299687,
+      51,
+      299689,
+      57,
+      299693,
+      52,
+      299702,
+      54,
+      299703,
+      51,
+      299704,
+      56,
+      299705,
+      56,
+      299706,
+      53,
+      299709,
+      50,
+      299710,
+      53,
+      299711,
+      50,
+      299904,
+      61,
+      299906,
+      61,
+      299912,
+      58,
+      299922,
+      55,
+      299928,
+      58,
+      299930,
+      55,
+      301697,
+      60,
+      301701,
+      60,
+      301705,
+      57,
+      301733,
+      52,
+      301737,
+      57,
+      301741,
+      52,
+      301952,
+      79,
+      301953,
+      79,
+      301960,
+      76,
+      301961,
+      76,
+      316038,
+      59,
+      316039,
+      59,
+      316054,
+      54,
+      316071,
+      51,
+      316086,
+      54,
+      316087,
+      51,
+      316290,
+      78,
+      316294,
+      78,
+      316306,
+      73,
+      316310,
+      73,
+      318085,
+      77,
+      318087,
+      77,
+      318117,
+      70,
+      318119,
+      70,
+      318336,
+      79,
+      318337,
+      79,
+      318338,
+      78,
+      318341,
+      77,
+      318342,
+      78,
+      318343,
+      77,
+      430776,
+      56,
+      430777,
+      56,
+      430778,
+      53,
+      430781,
+      50,
+      430782,
+      53,
+      430783,
+      50,
+      431000,
+      75,
+      431002,
+      72,
+      431032,
+      75,
+      431034,
+      72,
+      432809,
+      74,
+      432813,
+      69,
+      432825,
+      74,
+      432829,
+      69,
+      433032,
+      76,
+      433033,
+      76,
+      433048,
+      75,
+      433065,
+      74,
+      433080,
+      75,
+      433081,
+      74,
+      447158,
+      71,
+      447159,
+      68,
+      447166,
+      71,
+      447167,
+      68,
+      447378,
+      73,
+      447382,
+      73,
+      447386,
+      72,
+      447414,
+      71,
+      447418,
+      72,
+      447422,
+      71,
+      449189,
+      70,
+      449191,
+      70,
+      449197,
+      69,
+      449207,
+      68,
+      449213,
+      69,
+      449215,
+      68,
+      449408,
+      67,
+      449409,
+      67,
+      449410,
+      66,
+      449413,
+      64,
+      449414,
+      66,
+      449415,
+      64,
+      449416,
+      67,
+      449417,
+      67,
+      449426,
+      66,
+      449430,
+      66,
+      449432,
+      65,
+      449434,
+      65,
+      449445,
+      64,
+      449447,
+      64,
+      449449,
+      63,
+      449453,
+      63,
+      449462,
+      62,
+      449463,
+      62,
+      449464,
+      65,
+      449465,
+      63,
+      449466,
+      65,
+      449469,
+      63,
+      449470,
+      62,
+      449471,
+      62,
+      449472,
+      19,
+      449473,
+      19,
+      449474,
+      18,
+      449477,
+      16,
+      449478,
+      18,
+      449479,
+      16,
+      449480,
+      19,
+      449481,
+      19,
+      449490,
+      18,
+      449494,
+      18,
+      449496,
+      17,
+      449498,
+      17,
+      449509,
+      16,
+      449511,
+      16,
+      449513,
+      15,
+      449517,
+      15,
+      449526,
+      14,
+      449527,
+      14,
+      449528,
+      17,
+      449529,
+      15,
+      449530,
+      17,
+      449533,
+      15,
+      449534,
+      14,
+      449535,
+      14,
+      449728,
+      19,
+      449729,
+      19,
+      449730,
+      18,
+      449734,
+      18,
+      449736,
+      19,
+      449737,
+      19,
+      449746,
+      18,
+      449750,
+      18,
+      449752,
+      17,
+      449754,
+      17,
+      449784,
+      17,
+      449786,
+      17,
+      451520,
+      19,
+      451521,
+      19,
+      451525,
+      16,
+      451527,
+      16,
+      451528,
+      19,
+      451529,
+      19,
+      451557,
+      16,
+      451559,
+      16,
+      451561,
+      15,
+      451565,
+      15,
+      451577,
+      15,
+      451581,
+      15,
+      451776,
+      19,
+      451777,
+      19,
+      451784,
+      19,
+      451785,
+      19,
+      465858,
+      18,
+      465861,
+      16,
+      465862,
+      18,
+      465863,
+      16,
+      465874,
+      18,
+      465878,
+      18,
+      465893,
+      16,
+      465895,
+      16,
+      465910,
+      14,
+      465911,
+      14,
+      465918,
+      14,
+      465919,
+      14,
+      466114,
+      18,
+      466118,
+      18,
+      466130,
+      18,
+      466134,
+      18,
+      467909,
+      16,
+      467911,
+      16,
+      467941,
+      16,
+      467943,
+      16,
+      468160,
+      13,
+      468161,
+      13,
+      468162,
+      13,
+      468163,
+      13,
+      468164,
+      13,
+      468165,
+      13,
+      468166,
+      13,
+      468167,
+      13,
+      580568,
+      17,
+      580570,
+      17,
+      580585,
+      15,
+      580589,
+      15,
+      580598,
+      14,
+      580599,
+      14,
+      580600,
+      17,
+      580601,
+      15,
+      580602,
+      17,
+      580605,
+      15,
+      580606,
+      14,
+      580607,
+      14,
+      580824,
+      17,
+      580826,
+      17,
+      580856,
+      17,
+      580858,
+      17,
+      582633,
+      15,
+      582637,
+      15,
+      582649,
+      15,
+      582653,
+      15,
+      582856,
+      12,
+      582857,
+      12,
+      582872,
+      12,
+      582873,
+      12,
+      582888,
+      12,
+      582889,
+      12,
+      582904,
+      12,
+      582905,
+      12,
+      596982,
+      14,
+      596983,
+      14,
+      596990,
+      14,
+      596991,
+      14,
+      597202,
+      11,
+      597206,
+      11,
+      597210,
+      11,
+      597214,
+      11,
+      597234,
+      11,
+      597238,
+      11,
+      597242,
+      11,
+      597246,
+      11,
+      599013,
+      10,
+      599015,
+      10,
+      599021,
+      10,
+      599023,
+      10,
+      599029,
+      10,
+      599031,
+      10,
+      599037,
+      10,
+      599039,
+      10,
+      599232,
+      13,
+      599233,
+      13,
+      599234,
+      13,
+      599235,
+      13,
+      599236,
+      13,
+      599237,
+      13,
+      599238,
+      13,
+      599239,
+      13,
+      599240,
+      12,
+      599241,
+      12,
+      599250,
+      11,
+      599254,
+      11,
+      599256,
+      12,
+      599257,
+      12,
+      599258,
+      11,
+      599262,
+      11,
+      599269,
+      10,
+      599271,
+      10,
+      599272,
+      12,
+      599273,
+      12,
+      599277,
+      10,
+      599279,
+      10,
+      599282,
+      11,
+      599285,
+      10,
+      599286,
+      11,
+      599287,
+      10,
+      599288,
+      12,
+      599289,
+      12,
+      599290,
+      11,
+      599293,
+      10,
+      599294,
+      11,
+      599295,
+      10
+  ];
+  exports.p2D = [
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      2,
+      1,
+      1,
+      1,
+      2,
+      2,
+      0,
+      1,
+      2,
+      0,
+      2,
+      1,
+      0,
+      0,
+      0
+  ];
+  exports.p3D = [
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      2,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      2,
+      1,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      1,
+      0,
+      2,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      1,
+      1,
+      1,
+      3,
+      2,
+      1,
+      0,
+      3,
+      1,
+      2,
+      0,
+      1,
+      3,
+      2,
+      0,
+      1,
+      3,
+      1,
+      0,
+      2,
+      1,
+      3,
+      0,
+      2,
+      1,
+      3,
+      0,
+      1,
+      2,
+      1,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      2,
+      0,
+      2,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      -1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      2,
+      3,
+      1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      2,
+      2,
+      3,
+      1,
+      1,
+      1,
+      2,
+      2,
+      0,
+      0,
+      2,
+      3,
+      1,
+      1,
+      1,
+      2,
+      0,
+      2,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      2,
+      0,
+      0,
+      2,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      2,
+      2,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      2,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      2,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      2,
+      2,
+      0,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      2,
+      0,
+      2,
+      0
+  ];
+  exports.p4D = [
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      2,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      0,
+      2,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      0,
+      2,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      -1,
+      0,
+      2,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      0,
+      2,
+      0,
+      1,
+      0,
+      1,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      0,
+      2,
+      0,
+      0,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      1,
+      1,
+      4,
+      2,
+      1,
+      1,
+      0,
+      4,
+      1,
+      2,
+      1,
+      0,
+      4,
+      1,
+      1,
+      2,
+      0,
+      1,
+      4,
+      2,
+      1,
+      0,
+      1,
+      4,
+      1,
+      2,
+      0,
+      1,
+      4,
+      1,
+      1,
+      0,
+      2,
+      1,
+      4,
+      2,
+      0,
+      1,
+      1,
+      4,
+      1,
+      0,
+      2,
+      1,
+      4,
+      1,
+      0,
+      1,
+      2,
+      1,
+      4,
+      0,
+      2,
+      1,
+      1,
+      4,
+      0,
+      1,
+      2,
+      1,
+      4,
+      0,
+      1,
+      1,
+      2,
+      1,
+      2,
+      1,
+      1,
+      0,
+      0,
+      3,
+      2,
+      1,
+      0,
+      0,
+      3,
+      1,
+      2,
+      0,
+      0,
+      1,
+      2,
+      1,
+      0,
+      1,
+      0,
+      3,
+      2,
+      0,
+      1,
+      0,
+      3,
+      1,
+      0,
+      2,
+      0,
+      1,
+      2,
+      0,
+      1,
+      1,
+      0,
+      3,
+      0,
+      2,
+      1,
+      0,
+      3,
+      0,
+      1,
+      2,
+      0,
+      1,
+      2,
+      1,
+      0,
+      0,
+      1,
+      3,
+      2,
+      0,
+      0,
+      1,
+      3,
+      1,
+      0,
+      0,
+      2,
+      1,
+      2,
+      0,
+      1,
+      0,
+      1,
+      3,
+      0,
+      2,
+      0,
+      1,
+      3,
+      0,
+      1,
+      0,
+      2,
+      1,
+      2,
+      0,
+      0,
+      1,
+      1,
+      3,
+      0,
+      0,
+      2,
+      1,
+      3,
+      0,
+      0,
+      1,
+      2,
+      2,
+      3,
+      1,
+      1,
+      1,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      3,
+      1,
+      1,
+      0,
+      1,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      3,
+      1,
+      0,
+      1,
+      1,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      3,
+      1,
+      1,
+      1,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      3,
+      1,
+      1,
+      0,
+      1,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      3,
+      0,
+      1,
+      1,
+      1,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      3,
+      1,
+      1,
+      1,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      3,
+      1,
+      0,
+      1,
+      1,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      3,
+      0,
+      1,
+      1,
+      1,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      3,
+      1,
+      1,
+      0,
+      1,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      3,
+      1,
+      0,
+      1,
+      1,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      3,
+      0,
+      1,
+      1,
+      1,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      -1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      -1,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1,
+      -1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      -1,
+      1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      3,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      1,
+      0,
+      1,
+      0,
+      0,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      1,
+      0,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      1,
+      0,
+      1,
+      0,
+      0,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      1,
+      0,
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      1,
+      0,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      1,
+      0,
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      1,
+      0,
+      1,
+      0,
+      0,
+      2,
+      0,
+      2,
+      0,
+      0,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      3,
+      1,
+      0,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      3,
+      1,
+      0,
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0,
+      2,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      2,
+      1,
+      0,
+      0,
+      3,
+      1,
+      2,
+      0,
+      0,
+      4,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      2,
+      0,
+      1,
+      0,
+      3,
+      1,
+      0,
+      2,
+      0,
+      4,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      2,
+      1,
+      0,
+      3,
+      0,
+      1,
+      2,
+      0,
+      4,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      2,
+      0,
+      0,
+      1,
+      3,
+      1,
+      0,
+      0,
+      2,
+      4,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      2,
+      0,
+      1,
+      3,
+      0,
+      1,
+      0,
+      2,
+      4,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      0,
+      2,
+      1,
+      3,
+      0,
+      0,
+      1,
+      2,
+      4,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      2,
+      1,
+      0,
+      0,
+      3,
+      1,
+      2,
+      0,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      3,
+      2,
+      0,
+      1,
+      0,
+      3,
+      1,
+      0,
+      2,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      3,
+      0,
+      2,
+      1,
+      0,
+      3,
+      0,
+      1,
+      2,
+      0,
+      2,
+      1,
+      1,
+      1,
+      -1,
+      3,
+      3,
+      2,
+      1,
+      0,
+      0,
+      3,
+      1,
+      2,
+      0,
+      0,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      3,
+      2,
+      0,
+      0,
+      1,
+      3,
+      1,
+      0,
+      0,
+      2,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      3,
+      0,
+      2,
+      0,
+      1,
+      3,
+      0,
+      1,
+      0,
+      2,
+      2,
+      1,
+      1,
+      -1,
+      1,
+      3,
+      3,
+      2,
+      0,
+      1,
+      0,
+      3,
+      1,
+      0,
+      2,
+      0,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      3,
+      2,
+      0,
+      0,
+      1,
+      3,
+      1,
+      0,
+      0,
+      2,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      0,
+      2,
+      1,
+      3,
+      0,
+      0,
+      1,
+      2,
+      2,
+      1,
+      -1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      2,
+      1,
+      0,
+      3,
+      0,
+      1,
+      2,
+      0,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      2,
+      0,
+      1,
+      3,
+      0,
+      1,
+      0,
+      2,
+      2,
+      -1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      0,
+      0,
+      2,
+      1,
+      3,
+      0,
+      0,
+      1,
+      2,
+      2,
+      -1,
+      1,
+      1,
+      1
+  ];
+  });
+
+  unwrapExports(constants$1);
+  var constants_1$1 = constants$1.NORM_2D;
+  var constants_2 = constants$1.NORM_3D;
+  var constants_3 = constants$1.NORM_4D;
+  var constants_4 = constants$1.SQUISH_2D;
+  var constants_5 = constants$1.SQUISH_3D;
+  var constants_6 = constants$1.SQUISH_4D;
+  var constants_7 = constants$1.STRETCH_2D;
+  var constants_8 = constants$1.STRETCH_3D;
+  var constants_9 = constants$1.STRETCH_4D;
+  var constants_10 = constants$1.base2D;
+  var constants_11 = constants$1.base3D;
+  var constants_12 = constants$1.base4D;
+  var constants_13 = constants$1.gradients2D;
+  var constants_14 = constants$1.gradients3D;
+  var constants_15 = constants$1.gradients4D;
+  var constants_16 = constants$1.lookupPairs2D;
+  var constants_17 = constants$1.lookupPairs3D;
+  var constants_18 = constants$1.lookupPairs4D;
+  var constants_19 = constants$1.p2D;
+  var constants_20 = constants$1.p3D;
+  var constants_21 = constants$1.p4D;
+
+  var lib = createCommonjsModule(function (module, exports) {
+  Object.defineProperty(exports, "__esModule", { value: true });
+
+  function contribution2D(multiplier, xsb, ysb) {
+      return {
+          dx: -xsb - multiplier * constants$1.SQUISH_2D,
+          dy: -ysb - multiplier * constants$1.SQUISH_2D,
+          xsb: xsb,
+          ysb: ysb
+      };
+  }
+  function contribution3D(multiplier, xsb, ysb, zsb) {
+      return {
+          dx: -xsb - multiplier * constants$1.SQUISH_3D,
+          dy: -ysb - multiplier * constants$1.SQUISH_3D,
+          dz: -zsb - multiplier * constants$1.SQUISH_3D,
+          xsb: xsb,
+          ysb: ysb,
+          zsb: zsb
+      };
+  }
+  function contribution4D(multiplier, xsb, ysb, zsb, wsb) {
+      return {
+          dx: -xsb - multiplier * constants$1.SQUISH_4D,
+          dy: -ysb - multiplier * constants$1.SQUISH_4D,
+          dz: -zsb - multiplier * constants$1.SQUISH_4D,
+          dw: -wsb - multiplier * constants$1.SQUISH_4D,
+          xsb: xsb,
+          ysb: ysb,
+          zsb: zsb,
+          wsb: wsb
+      };
+  }
+  function makeNoise2D(clientSeed) {
+      var contributions = [];
+      for (var i = 0; i < constants$1.p2D.length; i += 4) {
+          var baseSet = constants$1.base2D[constants$1.p2D[i]];
+          var previous = null;
+          var current = null;
+          for (var k = 0; k < baseSet.length; k += 3) {
+              current = contribution2D(baseSet[k], baseSet[k + 1], baseSet[k + 2]);
+              if (previous === null)
+                  contributions[i / 4] = current;
+              else
+                  previous.next = current;
+              previous = current;
+          }
+          current.next = contribution2D(constants$1.p2D[i + 1], constants$1.p2D[i + 2], constants$1.p2D[i + 3]);
+      }
+      var lookup = [];
+      for (var i = 0; i < constants$1.lookupPairs2D.length; i += 2) {
+          lookup[constants$1.lookupPairs2D[i]] = contributions[constants$1.lookupPairs2D[i + 1]];
+      }
+      var perm = new Uint8Array(256);
+      var perm2D = new Uint8Array(256);
+      var source = new Uint8Array(256);
+      for (var i = 0; i < 256; i++)
+          source[i] = i;
+      var seed = new Uint32Array(1);
+      seed[0] = clientSeed;
+      seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
+      for (var i = 255; i >= 0; i--) {
+          seed = shuffleSeed(seed);
+          var r = new Uint32Array(1);
+          r[0] = (seed[0] + 31) % (i + 1);
+          if (r[0] < 0)
+              r[0] += i + 1;
+          perm[i] = source[r[0]];
+          perm2D[i] = perm[i] & 0x0e;
+          source[r[0]] = source[i];
+      }
+      return function (x, y) {
+          var stretchOffset = (x + y) * constants$1.STRETCH_2D;
+          var xs = x + stretchOffset;
+          var ys = y + stretchOffset;
+          var xsb = Math.floor(xs);
+          var ysb = Math.floor(ys);
+          var squishOffset = (xsb + ysb) * constants$1.SQUISH_2D;
+          var dx0 = x - (xsb + squishOffset);
+          var dy0 = y - (ysb + squishOffset);
+          var xins = xs - xsb;
+          var yins = ys - ysb;
+          var inSum = xins + yins;
+          var hash = (xins - yins + 1) |
+              (inSum << 1) |
+              ((inSum + yins) << 2) |
+              ((inSum + xins) << 4);
+          var value = 0;
+          for (var c = lookup[hash]; c !== undefined; c = c.next) {
+              var dx = dx0 + c.dx;
+              var dy = dy0 + c.dy;
+              var attn = 2 - dx * dx - dy * dy;
+              if (attn > 0) {
+                  var px = xsb + c.xsb;
+                  var py = ysb + c.ysb;
+                  var indexPartA = perm[px & 0xff];
+                  var index = perm2D[(indexPartA + py) & 0xff];
+                  var valuePart = constants$1.gradients2D[index] * dx + constants$1.gradients2D[index + 1] * dy;
+                  value += attn * attn * attn * attn * valuePart;
+              }
+          }
+          return value * constants$1.NORM_2D;
+      };
+  }
+  exports.makeNoise2D = makeNoise2D;
+  function makeNoise3D(clientSeed) {
+      var contributions = [];
+      for (var i = 0; i < constants$1.p3D.length; i += 9) {
+          var baseSet = constants$1.base3D[constants$1.p3D[i]];
+          var previous = null;
+          var current = null;
+          for (var k = 0; k < baseSet.length; k += 4) {
+              current = contribution3D(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3]);
+              if (previous === null)
+                  contributions[i / 9] = current;
+              else
+                  previous.next = current;
+              previous = current;
+          }
+          current.next = contribution3D(constants$1.p3D[i + 1], constants$1.p3D[i + 2], constants$1.p3D[i + 3], constants$1.p3D[i + 4]);
+          current.next.next = contribution3D(constants$1.p3D[i + 5], constants$1.p3D[i + 6], constants$1.p3D[i + 7], constants$1.p3D[i + 8]);
+      }
+      var lookup = [];
+      for (var i = 0; i < constants$1.lookupPairs3D.length; i += 2) {
+          lookup[constants$1.lookupPairs3D[i]] = contributions[constants$1.lookupPairs3D[i + 1]];
+      }
+      var perm = new Uint8Array(256);
+      var perm3D = new Uint8Array(256);
+      var source = new Uint8Array(256);
+      for (var i = 0; i < 256; i++)
+          source[i] = i;
+      var seed = new Uint32Array(1);
+      seed[0] = clientSeed;
+      seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
+      for (var i = 255; i >= 0; i--) {
+          seed = shuffleSeed(seed);
+          var r = new Uint32Array(1);
+          r[0] = (seed[0] + 31) % (i + 1);
+          if (r[0] < 0)
+              r[0] += i + 1;
+          perm[i] = source[r[0]];
+          perm3D[i] = (perm[i] % 24) * 3;
+          source[r[0]] = source[i];
+      }
+      return function (x, y, z) {
+          var stretchOffset = (x + y + z) * constants$1.STRETCH_3D;
+          var xs = x + stretchOffset;
+          var ys = y + stretchOffset;
+          var zs = z + stretchOffset;
+          var xsb = Math.floor(xs);
+          var ysb = Math.floor(ys);
+          var zsb = Math.floor(zs);
+          var squishOffset = (xsb + ysb + zsb) * constants$1.SQUISH_3D;
+          var dx0 = x - (xsb + squishOffset);
+          var dy0 = y - (ysb + squishOffset);
+          var dz0 = z - (zsb + squishOffset);
+          var xins = xs - xsb;
+          var yins = ys - ysb;
+          var zins = zs - zsb;
+          var inSum = xins + yins + zins;
+          var hash = (yins - zins + 1) |
+              ((xins - yins + 1) << 1) |
+              ((xins - zins + 1) << 2) |
+              (inSum << 3) |
+              ((inSum + zins) << 5) |
+              ((inSum + yins) << 7) |
+              ((inSum + xins) << 9);
+          var value = 0;
+          for (var c = lookup[hash]; c !== undefined; c = c.next) {
+              var dx = dx0 + c.dx;
+              var dy = dy0 + c.dy;
+              var dz = dz0 + c.dz;
+              var attn = 2 - dx * dx - dy * dy - dz * dz;
+              if (attn > 0) {
+                  var px = xsb + c.xsb;
+                  var py = ysb + c.ysb;
+                  var pz = zsb + c.zsb;
+                  var indexPartA = perm[px & 0xff];
+                  var indexPartB = perm[(indexPartA + py) & 0xff];
+                  var index = perm3D[(indexPartB + pz) & 0xff];
+                  var valuePart = constants$1.gradients3D[index] * dx +
+                      constants$1.gradients3D[index + 1] * dy +
+                      constants$1.gradients3D[index + 2] * dz;
+                  value += attn * attn * attn * attn * valuePart;
+              }
+          }
+          return value * constants$1.NORM_3D;
+      };
+  }
+  exports.makeNoise3D = makeNoise3D;
+  function makeNoise4D(clientSeed) {
+      var contributions = [];
+      for (var i = 0; i < constants$1.p4D.length; i += 16) {
+          var baseSet = constants$1.base4D[constants$1.p4D[i]];
+          var previous = null;
+          var current = null;
+          for (var k = 0; k < baseSet.length; k += 5) {
+              current = contribution4D(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3], baseSet[k + 4]);
+              if (previous === null)
+                  contributions[i / 16] = current;
+              else
+                  previous.next = current;
+              previous = current;
+          }
+          current.next = contribution4D(constants$1.p4D[i + 1], constants$1.p4D[i + 2], constants$1.p4D[i + 3], constants$1.p4D[i + 4], constants$1.p4D[i + 5]);
+          current.next.next = contribution4D(constants$1.p4D[i + 6], constants$1.p4D[i + 7], constants$1.p4D[i + 8], constants$1.p4D[i + 9], constants$1.p4D[i + 10]);
+          current.next.next.next = contribution4D(constants$1.p4D[i + 11], constants$1.p4D[i + 12], constants$1.p4D[i + 13], constants$1.p4D[i + 14], constants$1.p4D[i + 15]);
+      }
+      var lookup = [];
+      for (var i = 0; i < constants$1.lookupPairs4D.length; i += 2) {
+          lookup[constants$1.lookupPairs4D[i]] = contributions[constants$1.lookupPairs4D[i + 1]];
+      }
+      var perm = new Uint8Array(256);
+      var perm4D = new Uint8Array(256);
+      var source = new Uint8Array(256);
+      for (var i = 0; i < 256; i++)
+          source[i] = i;
+      var seed = new Uint32Array(1);
+      seed[0] = clientSeed;
+      seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
+      for (var i = 255; i >= 0; i--) {
+          seed = shuffleSeed(seed);
+          var r = new Uint32Array(1);
+          r[0] = (seed[0] + 31) % (i + 1);
+          if (r[0] < 0)
+              r[0] += i + 1;
+          perm[i] = source[r[0]];
+          perm4D[i] = perm[i] & 0xfc;
+          source[r[0]] = source[i];
+      }
+      return function (x, y, z, w) {
+          var stretchOffset = (x + y + z + w) * constants$1.STRETCH_4D;
+          var xs = x + stretchOffset;
+          var ys = y + stretchOffset;
+          var zs = z + stretchOffset;
+          var ws = w + stretchOffset;
+          var xsb = Math.floor(xs);
+          var ysb = Math.floor(ys);
+          var zsb = Math.floor(zs);
+          var wsb = Math.floor(ws);
+          var squishOffset = (xsb + ysb + zsb + wsb) * constants$1.SQUISH_4D;
+          var dx0 = x - (xsb + squishOffset);
+          var dy0 = y - (ysb + squishOffset);
+          var dz0 = z - (zsb + squishOffset);
+          var dw0 = w - (wsb + squishOffset);
+          var xins = xs - xsb;
+          var yins = ys - ysb;
+          var zins = zs - zsb;
+          var wins = ws - wsb;
+          var inSum = xins + yins + zins + wins;
+          var hash = (zins - wins + 1) |
+              ((yins - zins + 1) << 1) |
+              ((yins - wins + 1) << 2) |
+              ((xins - yins + 1) << 3) |
+              ((xins - zins + 1) << 4) |
+              ((xins - wins + 1) << 5) |
+              (inSum << 6) |
+              ((inSum + wins) << 8) |
+              ((inSum + zins) << 11) |
+              ((inSum + yins) << 14) |
+              ((inSum + xins) << 17);
+          var value = 0;
+          for (var c = lookup[hash]; c !== undefined; c = c.next) {
+              var dx = dx0 + c.dx;
+              var dy = dy0 + c.dy;
+              var dz = dz0 + c.dz;
+              var dw = dw0 + c.dw;
+              var attn = 2 - dx * dx - dy * dy - dz * dz - dw * dw;
+              if (attn > 0) {
+                  var px = xsb + c.xsb;
+                  var py = ysb + c.ysb;
+                  var pz = zsb + c.zsb;
+                  var pw = wsb + c.wsb;
+                  var indexPartA = perm[px & 0xff];
+                  var indexPartB = perm[(indexPartA + py) & 0xff];
+                  var indexPartC = perm[(indexPartB + pz) & 0xff];
+                  var index = perm4D[(indexPartC + pw) & 0xff];
+                  var valuePart = constants$1.gradients4D[index] * dx +
+                      constants$1.gradients4D[index + 1] * dy +
+                      constants$1.gradients4D[index + 2] * dz +
+                      constants$1.gradients4D[index + 3] * dw;
+                  value += attn * attn * attn * attn * valuePart;
+              }
+          }
+          return value * constants$1.NORM_4D;
+      };
+  }
+  exports.makeNoise4D = makeNoise4D;
+  function shuffleSeed(seed) {
+      var newSeed = new Uint32Array(1);
+      newSeed[0] = seed[0] * 1664525 + 1013904223;
+      return newSeed;
+  }
+  });
+
+  unwrapExports(lib);
+  var lib_1 = lib.makeNoise2D;
+  var lib_2 = lib.makeNoise3D;
+  var lib_3 = lib.makeNoise4D;
+
+  const X$j = 0;
+  const Y$j = 1;
+  const Z$d = 2;
+
+  const crumple = (shape, amount = 0.1, { resolution = 1, seed = 1 } = {}) => {
+    const scale = amount / 2;
+
+    const noiseX = lib_2(seed + 0);
+    const noiseY = lib_2(seed + 1);
+    const noiseZ = lib_2(seed + 2);
+
+    const perturb = (point) => [point[X$j] + noiseX(...point) * scale,
+                                point[Y$j] + noiseY(...point) * scale,
+                                point[Z$d] + noiseZ(...point) * scale];
+
+    const assembly = [];
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const [min, max] = measureBoundingBox$4(solid);
+      assembly.push({ solid: deform(makeWatertight(solid), perturb, min, max, resolution), tags });
+    }
+
+    return Shape.fromGeometry({ assembly });
+  };
+
+  const crumpleMethod = function (...args) { return crumple(this, ...args); };
+  Shape.prototype.crumple = crumpleMethod;
+
+  const Z$e = 0;
+
+  const skew$1 = (shape, factor, { resolution = 1 } = {}) => {
+    const assembly = [];
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const [min, max] = measureBoundingBox$4(solid);
+      const maxZ = max[Z$e];
+      const minZ = min[Z$e];
+      const height = maxZ - minZ;
+      const shiftAt = z => 1 - (z - minZ) / height * (1 - factor);
+      const shift = ([x, y, z]) => [x + shiftAt(z), y + shiftAt(z), z];
+      assembly.push({ solid: deform(makeWatertight(solid), shift, min, max, resolution), tags });
+    }
+
+    return Shape.fromGeometry({ assembly });
+  };
+
+  const skewMethod = function (...args) { return skew$1(this, ...args); };
+  Shape.prototype.skew = skewMethod;
+
+  const Z$f = 2;
+
+  const scaleXY = (factor, [x, y, z]) => [...scale$1(factor, [x, y]), z];
+
+  // TODO: Support different factors for x and y.
+  const taper = (shape, factor, { resolution = 1 } = {}) => {
+    const assembly = [];
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const [min, max] = measureBoundingBox$4(solid);
+      const maxZ = max[Z$f];
+      const minZ = min[Z$f];
+      const height = maxZ - minZ;
+      const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
+      const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
+      assembly.push({ solid: deform(makeWatertight(solid), squeeze, min, max, resolution), tags });
+    }
+
+    return Shape.fromGeometry({ assembly });
+  };
+
+  const taperMethod = function (...args) { return taper(this, ...args); };
+  Shape.prototype.taper = taperMethod;
+
+  const Z$g = 2;
+
+  const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
+    const assembly = [];
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const [min, max] = measureBoundingBox$4(solid);
+      const height = max[Z$g] - min[Z$g];
+      const radians = (angle / height) * (Math.PI / 180);
+      const rotate = point => rotateZ(point, radians * (point[Z$g] - min[Z$g]));
+      assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
+    }
+
+    return Shape.fromGeometry({ assembly });
+  };
+
+  const twistMethod = function (...args) { return twist(this, ...args); };
+  Shape.prototype.twist = twistMethod;
+
+  const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
+  const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
+
+  const black = [0, 0, 0];
+
+  // Not entirely sure how conformant this is, but it seems to work for simple
+  // cases.
+
+  // Width and height are in post-script points.
+  const header = ({ scale = 1, width = 210, height = 297, trim = 5, lineWidth = 0.096 }) => {
+    const mediaX1 = 0 * scale;
+    const mediaY1 = 0 * scale;
+    const mediaX2 = width * scale;
+    const mediaY2 = height * scale;
+    const trimX1 = trim * scale;
+    const trimY1 = trim * scale;
+    const trimX2 = (width - trim) * scale;
+    const trimY2 = (height - trim) * scale;
+    return [
+      `%PDF-1.5`,
+      `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
+      `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,
+      `3 0 obj <<`,
+      `  /Contents 4 0 R`,
+      `  /MediaBox [ ${mediaX1.toFixed(9)} ${mediaY1.toFixed(9)} ${mediaX2.toFixed(9)} ${mediaY2.toFixed(9)} ]`,
+      `  /TrimBox [ ${trimX1.toFixed(9)} ${trimY1.toFixed(9)} ${trimX2.toFixed(9)} ${trimY2.toFixed(9)} ]`,
+      `  /Parent 2 0 R`,
+      `  /Type /Page`,
+      `>>`,
+      `endobj`,
+      `4 0 obj << >>`,
+      `stream`,
+      `${lineWidth.toFixed(9)} w`
+    ];
+  };
+
+  const footer =
+     [`endstream`,
+      `endobj`,
+      `trailer << /Root 1 0 R /Size 4 >>`,
+      `%%EOF`];
+
+  const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) => {
+    geometry = await geometry;
+
+    // This is the size of a post-script point in mm.
+    const pointSize = 0.352777778;
+    const scale = 1 / pointSize;
+    const [width, height] = size;
+    const lines = [];
+    const matrix = multiply$1(fromTranslation([width * scale / 2, height * scale / 2, 0]),
+                            fromScaling([scale, scale, scale]));
+    const keptGeometry = toKeptGeometry(transform$a(matrix, geometry));
+    for (const { tags, surface } of getSurfaces(keptGeometry)) {
+      lines.push(toFillColor(toRgbFromTags(tags, black)));
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      for (const path of outline$1(surface)) {
+        let nth = (path[0] === null) ? 1 : 0;
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
         }
+        lines.push(`h`); // Surface paths are always closed.
+      }
+      lines.push(`f`); // Surface paths are always filled.
+    }
+    for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
+      lines.push(toFillColor(toRgbFromTags(tags, black)));
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      // FIX: Avoid making the surface convex.
+      for (const path of outline$1(z0Surface)) {
+        let nth = (path[0] === null) ? 1 : 0;
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+        }
+        lines.push(`h`); // Surface paths are always closed.
+      }
+      lines.push(`f`); // Surface paths are always filled.
+    }
+    for (const { tags, paths } of getPaths(keptGeometry)) {
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      for (const path of paths) {
+        let nth = (path[0] === null) ? 1 : 0;
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+        }
+        if (path[0] !== null) {
+          // A leading null indicates an open path.
+          lines.push(`h`); // close path.
+        }
+        lines.push(`S`); // stroke.
+      }
+    }
+
+    const output = [].concat(header({ scale, width, height, lineWidth }),
+                             lines,
+                             footer).join('\n');
+    return new TextEncoder('utf8').encode(output);
+  };
+
+  const downloadPdf = (shape, name, { lineWidth = 0.096 } = {}) => {
+    // CHECK: Should this be limited to Page plans?
+    let index = 0;
+    const entries = [];
+    for (const entry of ensurePages(shape.toKeptGeometry())) {
+      const { size } = entry.plan.page;
+      for (let leaf of getLeafs(entry.content)) {
+        const op = toPdf(leaf, { lineWidth, size });
+        entries.push({ data: op, filename: `${name}_${++index}.pdf`, type: 'application/pdf' });
+      }
+    }
+    emit$1({ download: { entries } });
+    return shape;
+  };
+
+  const downloadPdfMethod = function (...args) { return downloadPdf(this, ...args); };
+  Shape.prototype.downloadPdf = downloadPdfMethod;
+
+  // FIX: Support multi-page pdf, and multi-page preview.
+
+  const toPdf$1 = async (shape, { lineWidth = 0.096 } = {}) => {
+    const pages = [];
+    // CHECK: Should this be limited to Page plans?
+    const geometry = shape.toKeptGeometry();
+    for (const entry of getPlans(geometry)) {
+      if (entry.plan.page) {
+        const { size } = entry.plan.page;
+        for (let leaf of getLeafs(entry.content)) {
+          const pdf = await toPdf(leaf, { lineWidth, size });
+          pages.push({ pdf, leaf: { ...entry, content: leaf }, index: pages.length });
+        }
+      }
+    }
+    return pages;
+  };
+
+  const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
+    for (const { pdf, leaf, index } of await toPdf$1(shape, { lineWidth })) {
+      await writeFile({ doSerialize: false }, `output/${name}_${index}.pdf`, pdf);
+      await writeFile({}, `geometry/${name}_${index}.pdf`, toKeptGeometry(leaf));
+    }
+  };
+
+  const writePdfMethod = function (...args) { return writePdf(this, ...args); };
+  Shape.prototype.writePdf = writePdfMethod;
+
+  /**
+   *
+   * # Chained Hull
+   *
+   * Builds a convex hull between adjacent pairs in a sequence of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * chainHull(Cube(3).move(-5, 5),
+   *           Sphere(3).move(5, -5),
+   *           Cylinder(3, 10).move(-10, -10))
+   *   .move(10, 10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [80, 80, 0] } }
+   * ```
+   * chainHull(Circle(20).moveZ(-10),
+   *           Circle(10),
+   *           Circle(20).moveZ(10))
+   * ```
+   * :::
+   *
+   **/
+
+  const Z$h = 2;
+
+  const ChainedHull = (...shapes) => {
+    const pointsets = shapes.map(shape => shape.toPoints());
+    const chain = [];
+    for (let nth = 1; nth < pointsets.length; nth++) {
+      const points = [...pointsets[nth - 1], ...pointsets[nth]];
+      if (points.every(point => point[Z$h] === 0)) {
+        chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
+      } else {
+        chain.push(Shape.fromGeometry(buildConvexHull(points)));
+      }
+    }
+    return union$5(...chain);
+  };
+
+  const ChainedHullMethod = function (...args) { return ChainedHull(this, ...args); };
+  Shape.prototype.ChainedHull = ChainedHullMethod;
+
+  ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
+
+  /**
+   *
+   * # Hull
+   *
+   * Builds the convex hull of a set of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(Point([0, 0, 10]),
+   *      Circle(10))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * assemble(Point([0, 0, 10]),
+   *          Circle(10))
+   *   .hull()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * Point([0, 0, 10]).hull(Circle(10))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(Circle(4),
+   *      Circle(2).move(8));
+   * ```
+   * :::
+   *
+   **/
+
+  const Z$i = 2;
+
+  const Hull = (...shapes) => {
+    const points = [];
+    shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
+    // FIX: Detect planar hulls properly.
+    if (points.every(point => point[Z$i] === 0)) {
+      return Shape.fromGeometry(buildConvexSurfaceHull(points));
+    } else {
+      return Shape.fromGeometry(buildConvexHull(points));
+    }
+  };
+
+  const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
+  Shape.prototype.Hull = HullMethod;
+
+  Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
+  HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
+
+  /**
+   *
+   * # Connector
+   *
+   * Returns a connector plan.
+   * See connect().
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Connector('top').move(5))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).Connector('top').moveZ(5).connect(Sphere(5).Connector('bottom').flip().moveZ(-5))
+   * ```
+   * :::
+   **/
+
+  const shapeToConnect = Symbol('shapeToConnect');
+
+  // A connector expresses a joint-of-connection extending from origin along axis to end.
+  // The orientation expresses the direction of facing orthogonal to that axis.
+  // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
+  // Note: axis must be further than end from origin.
+
+  const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0], right = [1, 0, 0], start = [0, 0, 0], end = [0, 0, 0], shape, visualization } = {}) => {
+    const plan = Plan(// Geometry
+      {
+        plan: { connector },
+        marks: [center, right, start, end],
+        planes: [plane],
+        tags: [`connector/${connector}`],
+        visualization
+      },
+      // Context
+      {
+        [shapeToConnect]: shape
+      });
+    return plan;
+  };
+
+  Plan.Connector = Connector;
+
+  const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, [shapeToConnect]: this }); };
+  Shape.prototype.Connector = ConnectorMethod;
+
+  Connector.signature = 'Connector(id:string, { plane:Plane, center:Point, right:Point, start:Point, end:Point, shape:Shape, visualization:Shape }) -> Shape';
+
+  // Associates an existing connector with a shape.
+  const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
+  Shape.prototype.toConnector = toConnectorMethod;
+
+  /**
+   *
+   * # connectors
+   *
+   * Returns the set of connectors in an assembly by tag.
+   * See connect().
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Connector('top').moveZ(5))
+   *         .connectors()['top']
+   *         .connect(Prism(10, 10).with(Connector('bottom').flip().moveZ(-5))
+   *                               .connectors()['bottom']);
+   * ```
+   * :::
+   **/
+
+  const connectors = (shape) => {
+    const connectors = [];
+    for (const entry of getPlans(shape.toKeptGeometry())) {
+      if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
+        connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
+      }
+    }
+    return connectors;
+  };
+
+  const connectorsMethod = function () { return connectors(this); };
+  Shape.prototype.connectors = connectorsMethod;
+
+  /**
+   *
+   * # connector
+   *
+   * Returns a connector from an assembly.
+   * See connect().
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Prism(10, 10).with(Connector('top').moveZ(5))
+   *              .connector('top')
+   *              .connect(Cube(10).with(Connector('bottom').flip().moveZ(-5))
+   *                               .connector('bottom'));
+   * ```
+   * :::
+   **/
+
+  const connector = (shape, id) => {
+    for (const connector of connectors(shape)) {
+      if (connector.toGeometry().plan.connector === id) {
+        return connector;
       }
     }
   };
 
-  const viewMethod = function (...args) { return view(this, ...args); };
-  Shape.prototype.view = viewMethod;
+  const connectorMethod = function (id) { return connector(this, id); };
+  Shape.prototype.connector = connectorMethod;
+
+  const connection = (shape, id) => {
+    const shapeGeometry = shape.toKeptGeometry();
+    const connections = getConnections(shapeGeometry);
+    for (const geometry of connections) {
+      if (geometry.connection === id) {
+        return Shape.fromGeometry(geometry);
+      }
+    }
+  };
+
+  const connectionMethod = function (id) { return connection(this, id); };
+  Shape.prototype.connection = connectionMethod;
+
+  // FIX:
+  // This will produce the average position, but that's probably not what we
+  // want, since it will include interior points produced by breaking up
+  // convexity.
+  const toPosition = (surface) => {
+    let sum = [0, 0, 0];
+    let count = 0;
+    for (const path of surface) {
+      for (const point of path) {
+        sum = add(sum, point);
+        count += 1;
+      }
+    }
+    const position = scale(1 / count, sum);
+    return position;
+  };
+
+  const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
+    let bestSurface;
+    let bestPosition;
+    let bestOrientationScore = -Infinity;
+    let bestPositionScore = -Infinity;
+
+    // FIX: This may be sensitive to noise.
+    const geometry = shape.toKeptGeometry();
+    for (const { solid } of getSolids(geometry)) {
+      for (const surface of solid) {
+        const orientationScore = scoreOrientation(surface);
+        if (orientationScore > bestOrientationScore) {
+          bestSurface = surface;
+          bestOrientationScore = orientationScore;
+          bestPosition = toPosition(surface);
+          bestPositionScore = scorePosition(bestPosition);
+        } else if (orientationScore === bestOrientationScore) {
+          const position = toPosition(surface);
+          const positionScore = scorePosition(position);
+          if (positionScore > bestPositionScore) {
+            bestSurface = surface;
+            bestPosition = position;
+            bestPositionScore = positionScore;
+          }
+        }
+      }
+    }
+
+    // FIX: We should have a consistent rule for deciding the rotational position of the connector.
+    const plane = toPlane$1(bestSurface);
+    return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
+  };
+
+  const toConnector = (shape, surface, id) => {
+    const center = toPosition(surface);
+    // FIX: Adding y + 1 is not always correct.
+    const plane = toPlane$1(surface);
+    return Connector(id, { plane, center, right: random(plane) });
+  };
+
+  const withConnector = (shape, surface, id) => {
+    return shape.toConnector(toConnector(shape, surface, id));
+  };
+
+  const Y$k = 1;
+
+  const back = (shape) =>
+    shape.connector('back') || faceConnector(shape, 'back', (surface) => dot(toPlane$1(surface), [0, 1, 0, 0]), (point) => point[Y$k]);
+
+  const backMethod = function () { return back(this); };
+  Shape.prototype.back = backMethod;
+
+  back.signature = 'back(shape:Shape) -> Shape';
+  backMethod.signature = 'Shape -> back() -> Shape';
+
+  const Z$j = 2;
+
+  const bottom = (shape) =>
+    shape.connector('bottom') || faceConnector(shape, 'bottom', (surface) => dot(toPlane$1(surface), [0, 0, -1, 0]), (point) => -point[Z$j]);
+
+  const bottomMethod = function () { return bottom(this); };
+  Shape.prototype.bottom = bottomMethod;
+
+  bottom.signature = 'bottom(shape:Shape) -> Shape';
+  bottomMethod.signature = 'Shape -> bottom() -> Shape';
+
+  // Ideally this would be a plane of infinite extent.
+  // Unfortunately this makes things like interpolation tricky,
+  // so we approximate it with a very large polygon instead.
+
+  const Z$k = (z = 0) => {
+    const size = 1e5;
+    const min = -size;
+    const max = size;
+    // FIX: Why aren't we createing the connector directly?
+    const sheet = Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
+    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  };
+
+  /**
+   *
+   * # Chop
+   *
+   * Remove the parts of a shape above surface, defaulting to Z(0).
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
+   * ```
+   * :::
+   *
+   **/
+
+  const toPlane$3 = (connector) => {
+    for (const entry of getPlans(connector.toKeptGeometry())) {
+      if (entry.plan && entry.plan.connector) {
+        return entry.planes[0];
+      }
+    }
+  };
+
+  const toSurface$1 = (plane) => {
+    const max = +1e5;
+    const min = -1e5;
+    const [, from] = toXYPlaneTransforms(plane);
+    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+    const polygon = transform$1(from, path);
+    return [polygon];
+  };
+
+  const chop = (shape, connector = Z$k()) => {
+    const cuts = [];
+    const planeSurface = toSurface$1(toPlane$3(connector));
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const cutResult = cut$1(solid, planeSurface);
+      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+    }
+    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+      const cutSurface = surface || z0Surface;
+      const cutResult = cut(planeSurface, cutSurface);
+      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
+    }
+
+    return assemble$1(...cuts);
+  };
+
+  const chopMethod = function (surface) { return chop(this, surface); };
+  Shape.prototype.chop = chopMethod;
+
+  chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
+  chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
+
+  const Z$l = 2;
+
+  const findFlatTransforms = (shape) => {
+    let bestDepth = Infinity;
+    let bestTo;
+    let bestFrom;
+    let bestSurface;
+
+    const assay = (surface) => {
+      const plane = toPlane$1(surface);
+      if (plane !== undefined) {
+        const [to, from] = toXYPlaneTransforms(plane);
+        const flatShape = shape.transform(to);
+        const [min, max] = flatShape.measureBoundingBox();
+        const depth = max[Z$l] - min[Z$l];
+        if (depth < bestDepth) {
+          bestDepth = depth;
+          bestTo = to;
+          bestFrom = from;
+          bestSurface = surface;
+        }
+      }
+    };
+
+    const geometry = shape.toKeptGeometry();
+    for (const { solid } of getSolids(geometry)) {
+      for (const surface of solid) {
+        assay(surface);
+      }
+    }
+    for (const { surface } of getSurfaces(geometry)) {
+      assay(surface);
+    }
+    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+      assay(z0Surface);
+    }
+
+    return [bestTo, bestFrom, bestSurface];
+  };
+
+  const flat = (shape) => {
+    const [, , bestSurface] = findFlatTransforms(shape);
+    return withConnector(shape, bestSurface, 'flat');
+  };
+
+  const flatMethod = function () { return flat(this); };
+  Shape.prototype.flat = flatMethod;
+
+  flat.signature = 'flat(shape:Shape) -> Connector';
+  flatMethod.signature = 'Shape -> flat() -> Connector';
+
+  // Perform an operation on the shape in its best flat orientation,
+  // returning the result in the original orientation.
+
+  const inFlat = (shape, op) => {
+    const [to, from] = findFlatTransforms(shape);
+    return op(shape.transform(to)).transform(from);
+  };
+
+  const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
+  Shape.prototype.inFlat = inFlatMethod;
+
+  const Y$l = 1;
+
+  const front = (shape) =>
+    shape.connector('front') || faceConnector(shape, 'front', (surface) => dot(toPlane$1(surface), [0, -1, 0, 0]), (point) => -point[Y$l]);
+
+  const frontMethod = function () { return front(this); };
+  Shape.prototype.front = frontMethod;
+
+  front.signature = 'front(shape:Shape) -> Shape';
+  frontMethod.signature = 'Shape -> front() -> Shape';
+
+  const X$k = 0;
+
+  const left = (shape) =>
+    shape.connector('left') || faceConnector(shape, 'left', (surface) => dot(toPlane$1(surface), [-1, 0, 0, 0]), (point) => -point[X$k]);
+
+  const leftMethod = function () { return left(this); };
+  Shape.prototype.left = leftMethod;
+
+  left.signature = 'left(shape:Shape) -> Shape';
+  leftMethod.signature = 'Shape -> left() -> Shape';
+
+  const on$1 = (above, below, op = _ => _) => above.bottom().from(below.top().op(op));
+  const onMethod = function (below, op) { return on$1(this, below, op); };
+
+  Shape.prototype.on = onMethod;
+
+  const X$l = 0;
+
+  const right = (shape) =>
+    shape.connector('right') || faceConnector(shape, 'right', (surface) => dot(toPlane$1(surface), [1, 0, 0, 0]), (point) => point[X$l]);
+
+  const rightMethod = function () { return right(this); };
+  Shape.prototype.right = rightMethod;
+
+  right.signature = 'right(shape:Shape) -> Shape';
+  rightMethod.signature = 'Shape -> right() -> Shape';
+
+  const Z$m = 2;
+
+  const top = (shape) =>
+    shape.connector('top') || faceConnector(shape, 'top', (surface) => dot(toPlane$1(surface), [0, 0, 1, 0]), (point) => point[Z$m]);
+
+  const topMethod = function () { return top(this); };
+  Shape.prototype.top = topMethod;
+
+  top.signature = 'top(shape:Shape) -> Shape';
+  topMethod.signature = 'Shape -> top() -> Shape';
+
+  /**
+   *
+   * # Unfold
+   *
+   **/
+
+  // FIX: Does not handle convex solids.
+  const unfold = (shape) => {
+    const faces = shape.faces(f => f);
+    log$2(`Face count is ${faces.length}`);
+    const faceByEdge = new Map();
+
+    for (const face of faces) {
+      for (const edge of face.faceEdges()) {
+        faceByEdge.set(edge, face);
+      }
+    }
+
+    const reverseEdge = (edge) => {
+      const [a, b] = edge.split(':');
+      const reversedEdge = `${b}:${a}`;
+      return reversedEdge;
+    };
+
+    const seen = new Set();
+    const queue = [];
+
+    const enqueueNeighbors = (face) => {
+      for (const edge of face.faceEdges()) {
+        const redge = reverseEdge(edge);
+        const neighbor = faceByEdge.get(redge);
+        if (neighbor === undefined || seen.has(neighbor)) continue;
+        seen.add(neighbor);
+        queue.push({
+          face: neighbor,
+          to: `face/edge:${edge}`,
+          from: `face/edge:${redge}`
+        });
+      }
+    };
+
+    let root = faces[0];
+    enqueueNeighbors(root);
+
+    while (queue.length > 0) {
+      const { face, from, to } = queue.shift();
+      seen.add(face);
+      const fromConnector = face.connector(from);
+      const toConnector = root.connector(to);
+      if (fromConnector === undefined) {
+        log$2('bad from');
+        continue;
+      }
+      if (toConnector === undefined) {
+        log$2('bad to');
+        continue;
+      }
+      root = fromConnector.to(toConnector);
+      if (root === undefined) break;
+      enqueueNeighbors(face);
+    }
+
+    return root;
+  };
+
+  const method$3 = function (...args) { return unfold(this); };
+  Shape.prototype.unfold = method$3;
+
+  // Ideally this would be a plane of infinite extent.
+  // Unfortunately this makes things like interpolation tricky,
+  // so we approximate it with a very large polygon instead.
+
+  const X$m = (x = 0) => {
+    const size = 1e5;
+    const min = -size;
+    const max = size;
+    const sheet = Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
+    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  };
+
+  // Ideally this would be a plane of infinite extent.
+  // Unfortunately this makes things like interpolation tricky,
+  // so we approximate it with a very large polygon instead.
+
+  const Y$m = (y = 0) => {
+    const size = 1e5;
+    const min = -size;
+    const max = size;
+    const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
+    return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+  };
+
+  /**
+   *
+   * # Connect
+   *
+   * Connects two connectors.
+   *
+   * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).Connector('top').moveZ(5)
+   *         .connect(Sphere(10).Connector('bottom').flip().moveZ(-9))
+   * ```
+   * :::
+   **/
+
+  const toShape = (connector) => connector.getContext(shapeToConnect);
+
+  const dropConnector = (shape, ...connectors) => {
+    if (shape !== undefined) {
+      return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+    }
+  };
+
+  const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
+  Shape.prototype.dropConnector = dropConnectorMethod;
+
+  const CENTER = 0;
+  const RIGHT = 1;
+
+  const measureAngle = ([aX, aY], [bX, bY]) => {
+    const a2 = Math.atan2(aX, aY);
+    const a1 = Math.atan2(bX, bY);
+    const sign = a1 > a2 ? 1 : -1;
+    const angle = a1 - a2;
+    const K = -sign * Math.PI * 2;
+    const absoluteAngle = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
+    return absoluteAngle * 180 / Math.PI;
+  };
+
+  // FIX: Separate the doConnect dispatched interfaces.
+  // Connect two shapes at the specified connector.
+  const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
+    const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
+    const aShape = toShape(aConnectorShape);
+    const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
+
+    const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
+    const bShape = toShape(bConnectorShape);
+    const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
+
+    // Flatten a.
+    const aFlatShape = aShape.transform(aTo);
+    const aFlatConnector = aConnectorShape.transform(aTo);
+    const aMarks = aFlatConnector.toKeptGeometry().marks;
+    const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
+    // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
+
+    // Flatten b's connector.
+    const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
+    const bMarks = bFlatConnector.marks;
+
+    // Rotate into alignment.
+    const aOrientation = subtract(aMarks[RIGHT], aMarks[CENTER]);
+    const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
+    const angle = measureAngle(aOrientation, bOrientation);
+    const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
+    // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
+
+    // Move a to the flat position of b.
+    const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
+    // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
+    // Move a to the oriented position of b.
+    const aMovedShape = aFlatBShape.transform(bFrom);
+    // const aMovedConnector = aFlatBConnector.transform(bFrom);
+
+    if (doConnect) {
+      if (doAssemble) {
+        return dropConnector(aMovedShape, aConnector.plan.connector)
+            .Item()
+            .with(dropConnector(bShape, bConnector.plan.connector))
+            .Item();
+      } else {
+        return dropConnector(aMovedShape, aConnector.plan.connector)
+            .Item()
+            .layer(dropConnector(bShape, bConnector.plan.connector))
+            .Item();
+      }
+      /*
+      return Shape.fromGeometry(
+        {
+          connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
+          connectors: [aMovedConnector.toKeptGeometry(), bConnector],
+          geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
+              .concat(bShape === undefined
+                ? []
+                : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
+        });
+      */
+    } else {
+      return aMovedShape;
+    }
+  };
+
+  const toMethod = function (connector, options) { return connect(this, connector, options); };
+  Shape.prototype.to = toMethod;
+  toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
+
+  const fromMethod = function (connector, options) { return connect(connector, this, options); };
+  Shape.prototype.from = fromMethod;
+  fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
+
+  const atMethod = function (connector, options) { return connect(this, connector, { ...options, doConnect: false }); };
+  Shape.prototype.at = atMethod;
+  atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
+
+  connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
+
+  // FIX: The toKeptGeometry is almost certainly wrong.
+  const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, joint, leftJointConnectorId, rightArmConnectorId, rightArm) => {
+    // leftArm will remain stationary.
+    const leftArmConnector = leftArm.connector(leftArmConnectorId);
+    const rightJointConnector = joint.connector(rightJointConnectorId);
+    const [joinedJointShape, joinedJointConnector] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
+    const rightArmConnector = rightArm.connector(rightArmConnectorId, { doConnect: false });
+    const [joinedRightShape, joinedRightConnector] = rightArmConnector.connectTo(joinedJointShape.connector(leftJointConnectorId), { doConnect: false });
+    const result = Shape.fromGeometry(
+      {
+        connection: joinId,
+        connectors: [leftArmConnector.toKeptGeometry(),
+                     joinedJointConnector.toKeptGeometry(),
+                     joinedRightConnector.toKeptGeometry()],
+        geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
+                     joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
+                     joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
+        tags: [`joinLeft/${joinId}`]
+      });
+    return result;
+  };
+
+  const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
+  Shape.prototype.joinLeft = joinLeftMethod;
+
+  /**
+   *
+   * # Lathe
+   *
+   * ::: illustration { "view": { "position": [-80, -80, 80] } }
+   * ```
+   * ```
+   * :::
+   *
+   **/
+
+  const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
+    const profile = shape.chop(Y$m(0));
+    const outline = profile.outline();
+    const solids = [];
+    for (const geometry of getPaths(outline.toKeptGeometry())) {
+      for (const path of geometry.paths) {
+        for (let startDegrees = 0; startDegrees < endDegrees; startDegrees += 360) {
+          solids.push(Shape.fromGeometry(loop(path, Math.min(360, endDegrees - startDegrees) * Math.PI / 180, sides, pitch)).moveX(pitch * startDegrees / 360));
+        }
+      }
+    }
+    return assemble$1(...solids);
+  };
+
+  const LoopMethod = function (...args) { return Loop(this, ...args); };
+  Shape.prototype.Loop = LoopMethod;
+
+  /**
+   *
+   * # Extrude
+   *
+   * Generates a solid from a surface by linear extrusion.
+   *
+   * ```
+   * shape.extrude(height, depth, { twist = 0, steps = 1 })
+   * ```
+   *
+   * ::: illustration
+   * ```
+   * Circle(10).cut(Circle(8))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * Circle(10).cut(Circle(8)).extrude(10)
+   * ```
+   * :::
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * Triangle(10).extrude(5, -2)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
+   * ```
+   * :::
+   *
+   **/
+
+  const extrude$1 = (shape, height = 1, depth = 0) => {
+    if (height < depth) {
+      [height, depth] = [depth, height];
+    }
+    // FIX: Handle extrusion along a vector properly.
+    const solids = [];
+    const keptGeometry = shape.toKeptGeometry();
+    for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
+      if (z0Surface.length > 0) {
+        const solid = alignVertices(extrude(z0Surface, height, depth));
+        solids.push(Shape.fromGeometry({ solid, tags }));
+      }
+    }
+    for (const { surface, tags } of getSurfaces(keptGeometry)) {
+      if (surface.length > 0) {
+        const plane = toPlane$1(surface);
+        if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
+          // Detect Z0.
+          // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
+          const solid = extrude(surface, height, depth);
+          solids.push(Shape.fromGeometry({ solid, tags }));
+        } else {
+          const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
+          const z0SolidGeometry = extrude(transform$4(toZ0, surface), height, depth);
+          const solid = alignVertices(transform$6(fromZ0, z0SolidGeometry));
+          solids.push(Shape.fromGeometry({ solid, tags }));
+        }
+      }
+    }
+    // Keep plans.
+    for (const entry of getPlans(keptGeometry)) {
+      solids.push(entry);
+    }
+    return assemble$1(...solids);
+  };
+
+  const extrudeMethod = function (...args) { return extrude$1(this, ...args); };
+  Shape.prototype.extrude = extrudeMethod;
+
+  extrude$1.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
+  extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
+
+  const fill = (shape, pathsShape) => {
+    const fills = [];
+    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+      const anySurface = surface || z0Surface;
+      const plane = toPlane$1(anySurface);
+      const [to, from] = toXYPlaneTransforms(plane);
+      const flatSurface = transform$4(to, anySurface);
+      for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
+        const flatPaths = transform$7(to, paths);
+        const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
+        const fill = transform$7(from, flatFill);
+        fills.push(...fill);
+      }
+    }
+    return Shape.fromGeometry({ paths: fills });
+  };
+
+  const fillMethod = function (...args) { return fill(this, ...args); };
+  Shape.prototype.fill = fillMethod;
+
+  const withFillMethod = function (...args) { return assemble$1(this, fill(this, ...args)); };
+  Shape.prototype.withFill = withFillMethod;
+
+  fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
+  fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
+  withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
+
+  /**
+   *
+   * # Interior
+   *
+   * Generates a surface from the interior of a simple closed path.
+   *
+   * ::: illustration
+   * ```
+   * Circle(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * Circle(10)
+   *   .outline()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * Circle(10)
+   *   .outline()
+   *   .interior()
+   * ```
+   * :::
+   *
+   **/
+
+  const interior = (shape) => {
+    const surfaces = [];
+    for (const { paths } of getPaths(shape.toKeptGeometry())) {
+      // FIX: Check paths for coplanarity.
+      surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
+    }
+    return assemble$1(...surfaces);
+  };
+
+  const interiorMethod = function (...args) { return interior(this); };
+  Shape.prototype.interior = interiorMethod;
+
+  interior.signature = 'interior(shape:Shape) -> Shape';
+  interiorMethod.signature = 'Shape -> interior() -> Shape';
+
+  /**
+   *
+   * # Minkowski (convex)
+   *
+   * Generates the minkowski sum of a two convex shapes.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * minkowski(Cube(10),
+   *           Sphere(3));
+   * ```
+   * :::
+   *
+   **/
+
+  // TODO: Generalize for more operands?
+  const minkowski = (a, b) => {
+    const aPoints = [];
+    const bPoints = [];
+    a.eachPoint(point => aPoints.push(point));
+    b.eachPoint(point => bPoints.push(point));
+    return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
+  };
+
+  const minkowskiMethod = function (shape) { return minkowski(this, shape); };
+  Shape.prototype.minkowski = minkowskiMethod;
+
+  minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
+
+  /**
+   *
+   * # Outline
+   *
+   * Generates the outline of a surface.
+   *
+   * ::: illustration
+   * ```
+   * difference(Circle(10),
+   *            Circle(2).move([-4]),
+   *            Circle(2).move([4]))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(Circle(10),
+   *            Circle(2).move([-4]),
+   *            Circle(2).move([4]))
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const outline$4 = (shape) =>
+    assemble$1(...outline$3(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
+
+  const outlineMethod = function (options) { return outline$4(this); };
+  const withOutlineMethod = function (options) { return assemble$1(this, outline$4(this)); };
+
+  Shape.prototype.outline = outlineMethod;
+  Shape.prototype.withOutline = withOutlineMethod;
+
+  outline$4.signature = 'outline(shape:Surface) -> Shape';
+  outlineMethod.signature = 'Shape -> outline() -> Shape';
+  withOutlineMethod.signature = 'Shape -> outline() -> Shape';
+
+  /**
+   *
+   * # Section
+   *
+   * Produces a cross-section of a solid as a surface.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * difference(Cylinder(10, 10),
+   *            Cylinder(8, 10))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(Sphere(10),
+   *            Sphere(8))
+   *   .section()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(Sphere(10),
+   *            Sphere(8))
+   *   .section()
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const toPlane$4 = (connector) => {
+    for (const entry of getPlans(connector.toKeptGeometry())) {
+      if (entry.plan && entry.plan.connector) {
+        return entry.planes[0];
+      }
+    }
+  };
+
+  const toSurface$2 = (plane) => {
+    const max = +1e5;
+    const min = -1e5;
+    const [, from] = toXYPlaneTransforms(plane);
+    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+    const polygon = transform$1(from, path);
+    return [polygon];
+  };
+
+  const section$1 = (solidShape, ...connectors) => {
+    if (connectors.length === 0) {
+      connectors.push(Z$k(0));
+    }
+    const planes = connectors.map(toPlane$4);
+    const planeSurfaces = planes.map(toSurface$2);
+    const shapes = [];
+    const normalize = createNormalize3();
+    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+      const sections = section(solid, planeSurfaces, normalize);
+      const surfaces = sections.map(section => makeConvex$1(section, normalize));
+      // const surfaces = sections.map(section => outlineSurface(section, normalize));
+      // const surfaces = sections.map(section => section);
+      // const surfaces = sections;
+      for (let i = 0; i < surfaces.length; i++) {
+        surfaces[i].plane = planes[i];
+        shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+      }
+    }
+    return layer(...shapes);
+  };
+
+  const sectionMethod = function (...args) { return section$1(this, ...args); };
+  Shape.prototype.section = sectionMethod;
+
+  const squash = (shape) => {
+    const geometry = shape.toKeptGeometry();
+    const result = { layers: [] };
+    for (const { solid, tags } of getSolids(geometry)) {
+      const polygons = [];
+      for (const surface of solid) {
+        for (const path of surface) {
+          const flat = path.map(([x, y]) => [x, y, 0]);
+          if (toPlane(flat) === undefined) continue;
+          polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
+        }
+      }
+      result.layers.push({ z0Surface: outline(polygons), tags });
+    }
+    for (const { surface, tags } of getSurfaces(geometry)) {
+      const polygons = [];
+      for (const path of surface) {
+        const flat = path.map(([x, y]) => [x, y, 0]);
+        if (toPlane(flat) === undefined) continue;
+        polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
+      }
+      result.layers.push({ z0Surface: polygons, tags });
+    }
+    for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
+      const polygons = [];
+      for (const path of z0Surface) {
+        polygons.push(path);
+      }
+      result.layers.push({ z0Surface: polygons, tags });
+    }
+    for (const { paths, tags } of getPaths(geometry)) {
+      const flatPaths = [];
+      for (const path of paths) {
+        flatPaths.push(path.map(([x, y]) => [x, y, 0]));
+      }
+      result.layers.push({ paths: flatPaths, tags });
+    }
+    return Shape.fromGeometry(result);
+  };
+
+  const squashMethod = function () { return squash(this); };
+  Shape.prototype.squash = squashMethod;
+
+  /**
+   *
+   * # Stretch
+   *
+   **/
+
+  const toPlaneFromConnector = (connector) => {
+    for (const entry of getPlans(connector.toKeptGeometry())) {
+      if (entry.plan && entry.plan.connector) {
+        return entry.planes[0];
+      }
+    }
+  };
+
+  const toSurface$3 = (plane) => {
+    const max = +1e5;
+    const min = -1e5;
+    const [, from] = toXYPlaneTransforms(plane);
+    const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+    const polygon = transform$1(from, path);
+    return [polygon];
+  };
+
+  const stretch = (shape, length, connector = Z$k()) => {
+    const normalize = createNormalize3();
+    const stretches = [];
+    const planeSurface = toSurface$3(toPlaneFromConnector(connector));
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      if (solid.length === 0) {
+        continue;
+      }
+      const bottom = cutOpen(solid, planeSurface, normalize);
+      const [profile] = section(solid, [planeSurface], normalize);
+      const top = cutOpen(solid, flip$4(planeSurface), normalize);
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
+      const z0SolidGeometry = extrude(transform$4(toZ0, profile), length, 0, false);
+      const middle = transform$6(fromZ0, z0SolidGeometry);
+      const topMoved = transform$6(fromTranslation(scale(length, toPlane$1(profile))), top);
+      stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
+    }
+
+    return assemble$1(...stretches);
+  };
+
+  const method$4 = function (...args) { return stretch(this, ...args); };
+  Shape.prototype.stretch = method$4;
+
+  /**
+   *
+   * # Sweep
+   *
+   * Sweep a tool profile along a path, to produce a surface.
+   *
+   **/
+
+  // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
+  const sweep = (toolpath, tool) => {
+    const chains = [];
+    for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
+      for (const path of paths) {
+        chains.push(ChainedHull(...path.map(point => tool.move(...point))));
+      }
+    }
+    return union$5(...chains);
+  };
+
+  const sweepMethod = function (tool) { return sweep(this, tool); };
+
+  Shape.prototype.sweep = sweepMethod;
+  Shape.prototype.withSweep = function (tool) { return assemble$1(this, sweep(this, tool)); };
+
+  const intersectionPoints = (cuts, overcut = 0) => {
+    cuts.push(cuts[0]);
+    var intersectionPointsList = [];
+    var i = 0;
+    while (i < cuts.length - 1) {
+      const point = intersectPointOfLines(fromPoints$2(...cuts[i]), fromPoints$2(...cuts[i + 1]));
+      point.push(cuts[i][0][2]);
+      if (overcut) {
+        intersectionPointsList.push(cuts[i][1]);
+      }
+      intersectionPointsList.push(point);
+      i++;
+    }
+    return intersectionPointsList;
+  };
+
+  const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
+    var cuts = [];
+    for (const [start, end] of getEdges(path)) {
+      const direction = normalize(subtract(start, end));
+      const angleRadians = Math.PI / 2;
+      const offsetDirection = rotateZ(direction, angleRadians);
+      const offset = scale(radius, offsetDirection);
+      const frontcut = scale(-overcut, direction);
+      const backcut = scale(overcut, direction);
+      const startCut = add(start, add(backcut, offset));
+      const endCut = add(end, add(frontcut, offset));
+      cuts.push([startCut, endCut]);
+    }
+    if (joinPaths) {
+      cuts = [intersectionPoints(cuts, overcut)];
+    }
+    return cuts;
+  };
+
+  const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
+    const cuts = [];
+    for (const { paths } of getPaths(geometry)) {
+      for (const path of paths) {
+        cuts.push(...overcutPathEdges(path, radius, overcut, joinPaths));
+      }
+    }
+    return cuts;
+  };
+
+  // Return an assembly of paths so that each toolpath can have its own tag.
+  const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
+    Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
+
+  const method$5 = function (...options) { return toolpath(this, ...options); };
+
+  Shape.prototype.toolpath = method$5;
+  Shape.prototype.withToolpath = function (...args) { return assemble$1(this, toolpath(this, ...args)); };
+
+  const X$n = 0;
+  const Y$n = 1;
+  const Z$n = 2;
+
+  const floor$1 = (value, resolution) => Math.floor(value / resolution) * resolution;
+  const ceil$1 = (value, resolution) => Math.ceil(value / resolution) * resolution;
+
+  const floorPoint = ([x, y, z], resolution) => [floor$1(x, resolution), floor$1(y, resolution), floor$1(z, resolution)];
+  const ceilPoint = ([x, y, z], resolution) => [ceil$1(x, resolution), ceil$1(y, resolution), ceil$1(z, resolution)];
+
+  const voxels = (shape, resolution = 1) => {
+    const offset = resolution / 2;
+    const geometry = shape.toKeptGeometry();
+    const normalize = createNormalize3();
+    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const classifiers = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      classifiers.push({ bsp: fromSolid(solid, normalize) });
+    }
+    const test = (point) => {
+      for (const { bsp } of classifiers) {
+        if (containsPoint(bsp, point)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const polygons = [];
+    for (let x = min[X$n] - offset; x <= max[X$n] + offset; x += resolution) {
+      for (let y = min[Y$n] - offset; y <= max[Y$n] + offset; y += resolution) {
+        for (let z = min[Z$n] - offset; z <= max[Z$n] + offset; z += resolution) {
+          const state = test([x, y, z]);
+          if (state !== test([x + resolution, y, z])) {
+            const face = [[x + offset, y - offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x + offset, y - offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
+          }
+          if (state !== test([x, y + resolution, z])) {
+            const face = [[x - offset, y + offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face.reverse() : face);
+          }
+          if (state !== test([x, y, z + resolution])) {
+            const face = [[x - offset, y - offset, z + offset],
+                          [x + offset, y - offset, z + offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
+          }
+        }
+      }
+    }
+    return Shape.fromGeometry({ solid: fromPolygons({}, polygons) });
+  };
+
+  const voxelsMethod = function (...args) { return voxels(this, ...args); };
+  Shape.prototype.voxels = voxelsMethod;
+
+  const surfaceCloud = (shape, resolution = 1) => {
+    const offset = resolution / 2;
+    const geometry = shape.toKeptGeometry();
+    const normalize = createNormalize3();
+    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const classifiers = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      classifiers.push({ bsp: fromSolid(solid, normalize) });
+    }
+    const test = (point) => {
+      for (const { bsp } of classifiers) {
+        if (containsPoint(bsp, point)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const paths = [];
+    for (let x = min[X$n] - offset; x <= max[X$n] + offset; x += resolution) {
+      for (let y = min[Y$n] - offset; y <= max[Y$n] + offset; y += resolution) {
+        for (let z = min[Z$n] - offset; z <= max[Z$n] + offset; z += resolution) {
+          const state = test([x, y, z]);
+          if (state !== test([x + resolution, y, z])) {
+            paths.push([null, [x, y, z], [x + resolution, y, z]]);
+          }
+          if (state !== test([x, y + resolution, z])) {
+            paths.push([null, [x, y, z], [x, y + resolution, z]]);
+          }
+          if (state !== test([x, y, z + resolution])) {
+            paths.push([null, [x, y, z], [x, y, z + resolution]]);
+          }
+        }
+      }
+    }
+    return Shape.fromGeometry({ paths });
+  };
+
+  const surfaceCloudMethod = function (...args) { return surfaceCloud(this, ...args); };
+  Shape.prototype.surfaceCloud = surfaceCloudMethod;
+
+  const withSurfaceCloudMethod = function (...args) { return assemble$1(this, surfaceCloud(this, ...args)); };
+  Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
+
+  const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
+    const dX = aX - bX;
+    if (dX !== 0) {
+      return dX;
+    }
+    const dY = aY - bY;
+    if (dY !== 0) {
+      return dY;
+    }
+    const dZ = aZ - bZ;
+    return dZ;
+  };
+
+  const cloud = (shape, resolution = 1) => {
+    const offset = resolution / 2;
+    const geometry = shape.toKeptGeometry();
+    const normalize = createNormalize3();
+    const [boxMin, boxMax] = measureBoundingBox$5(geometry);
+    const min = floorPoint(boxMin, resolution);
+    const max = ceilPoint(boxMax, resolution);
+    const classifiers = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      classifiers.push({ bsp: fromSolid(solid, normalize) });
+    }
+    const test = (point) => {
+      for (const { bsp } of classifiers) {
+        if (containsPoint(bsp, point)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const points = [];
+    for (let x = min[X$n] - offset; x <= max[X$n] + offset; x += resolution) {
+      for (let y = min[Y$n] - offset; y <= max[Y$n] + offset; y += resolution) {
+        for (let z = min[Z$n] - offset; z <= max[Z$n] + offset; z += resolution) {
+          if (test([x, y, z])) {
+            points.push([x, y, z]);
+          }
+        }
+      }
+    }
+    points.sort(orderPoints);
+    return Shape.fromGeometry({ points });
+  };
+
+  const cloudMethod = function (...args) { return cloud(this, ...args); };
+  Shape.prototype.cloud = cloudMethod;
+
+  // FIX: move this
+  const containsPoint$1 = (shape, point) => {
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      const bsp = fromSolid(solid, createNormalize3());
+      if (containsPoint(bsp, point)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const containsPointMethod = function (point) { return containsPoint$1(this, point); };
+  Shape.prototype.containsPoint = containsPointMethod;
+
+  /**
+   *
+   * # Shell
+   *
+   * Converts a solid into a hollow shell of a given thickness.
+   *
+   * ::: illustration
+   * ```
+   * Cube(10).shell(1);
+   * ```
+   * :::
+   *
+   **/
+
+  const shell = (shape, radius = 1, resolution = 8) => {
+    resolution = Math.max(resolution, 3);
+    const keptGeometry = shape.toKeptGeometry();
+    const assembly = [];
+
+    // Handle solid aspects.
+    const shells = [];
+    for (const { solid, tags = [] } of getSolids(keptGeometry)) {
+      const pieces = [];
+      for (const surface of solid) {
+        for (const polygon of surface) {
+          pieces.push(Hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
+        }
+      }
+      shells.push(union$5(...pieces).as(...tags));
+    }
+    assembly.push(union$5(...shells));
+
+    // Handle surface aspects.
+    for (const geometry of getAnySurfaces(keptGeometry)) {
+      const anySurface = geometry.surface || geometry.z0Surface;
+      const plane = toPlane$1(anySurface);
+      if (plane === undefined) {
+        continue;
+      }
+      const [to, from] = toXYPlaneTransforms(plane);
+      const pieces = [];
+      for (const { paths } of outline$3(transform$a(to, geometry))) {
+        for (const path of paths) {
+          for (const edge of getEdges(path)) {
+            // FIX: Handle non-z0-surfaces properly.
+            pieces.push(Hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+          }
+        }
+      }
+      assembly.push(assemble$1(...pieces.map(piece => piece.transform(from))).as(...(geometry.tags || [])));
+    }
+
+    return assemble$1(...assembly);
+  };
+
+  const method$6 = function (radius, resolution) { return shell(this, radius, resolution); };
+  Shape.prototype.shell = method$6;
+
+  /**
+   *
+   * # grow
+   *
+   * Moves the edges of the shape inward by the specified amount.
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).with(Cube(10).moveX(10).grow(2))
+   * ```
+   * :::
+   **/
+
+  const grow = (shape, amount = 1, { resolution = 16 } = {}) =>
+    (amount >= 0)
+      ? shape.union(shell(shape, amount, resolution))
+      : shape.cut(shell(shape, -amount, resolution));
+
+  const growMethod = function (...args) { return grow(this, ...args); };
+  Shape.prototype.grow = growMethod;
+
+  grow.signature = 'grow(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+  growMethod.signature = 'Shape -> grow(amount:number = 1, { resolution:number = 16 }) -> Shape';
+
+  const offset = (shape, radius = 1, resolution = 16) => outline$4(grow(shape, radius, resolution));
+
+  const offsetMethod = function (radius, resolution) { return offset(this, radius, resolution); };
+  Shape.prototype.offset = offsetMethod;
+
+  offset.signature = 'offset(shape:Shape, radius:number = 1, resolution:number = 16) -> Shape';
+  offsetMethod.signature = 'Shape -> offset(radius:number = 1, resolution:number = 16) -> Shape';
+
+  /**
+   *
+   * # shrink
+   *
+   * Moves the edges of the shape inward by the specified amount.
+   *
+   * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+   * ```
+   * Cube(10).wireframe().with(Cube(10).shrink(2))
+   * ```
+   * :::
+   **/
+
+  const byRadius = (shape, amount = 1, { resolution = 16 } = {}) => grow(shape, -amount, resolution);
+
+  const shrink = (...args) => byRadius(...args);
+
+  shrink.byRadius = byRadius;
+
+  const shrinkMethod = function (radius, resolution) { return shrink(this, radius, resolution); };
+  Shape.prototype.shrink = shrinkMethod;
+
+  shrink.signature = 'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+  shrinkMethod.signature = 'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';
+
+  const downloadSvg = (shape, name, options = {}) => {
+    let index = 0;
+    const entries = [];
+    for (const entry of ensurePages(shape.toKeptGeometry())) {
+      for (let leaf of getLeafs(entry.content)) {
+        const op = toSvg(leaf, options);
+        entries.push({ data: op, filename: `${name}_${++index}.svg`, type: 'image/svg+xml' });
+      }
+    }
+    emit$1({ download: { entries } });
+    return shape;
+  };
+
+  const downloadSvgMethod = function (...args) { return downloadSvg(this, ...args); };
+  Shape.prototype.downloadSvg = downloadSvgMethod;
+
+  const toSvg$1 = async (shape, options = {}) => {
+    const pages = [];
+    // CHECK: Should this be limited to Page plans?
+    const geometry = shape.toKeptGeometry();
+    for (const entry of getPlans(geometry)) {
+      if (entry.plan.page) {
+        for (let leaf of getLeafs(entry.content)) {
+          const svg = await toSvg(leaf);
+          pages.push({ svg, leaf: { ...entry, content: leaf }, index: pages.length });
+        }
+      }
+    }
+    return pages;
+  };
+
+  const writeSvg = async (shape, name, options = {}) => {
+    for (const { svg, leaf, index } of await toSvg$1(shape, options)) {
+      await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
+      await writeFile({}, `geometry/${name}_${index}.svg`, toKeptGeometry(leaf));
+    }
+  };
+
+  const method$7 = function (...args) { return writeSvg(this, ...args); };
+  Shape.prototype.writeSvg = method$7;
+
+  /**
+   * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
+   * The exterior side of a polygon is determined by a CCW point ordering.
+   *
+   * @param {Object} options.
+   * @param {Polygon Array} polygons - An array of arrays of points.
+   * @returns {String} - the ascii STL output.
+   */
+
+  const fromSolidToTriangles = (solid) => {
+    const triangles = [];
+    for (const surface of makeWatertight(solid)) {
+      for (const triangle of toTriangles({}, surface)) {
+        triangles.push(triangle);
+      }
+    }
+    return triangles;
+  };
+
+  const toStl = async (geometry, options = {}) => {
+    const keptGeometry = toKeptGeometry(geometry);
+    let solids = getSolids(keptGeometry).map(({ solid }) => solid);
+    const triangles = fromSolidToTriangles(union$2(...solids));
+    const output = `solid JSxCAD\n${convertToFacets(options, canonicalize$4(triangles))}\nendsolid JSxCAD\n`;
+    return new TextEncoder('utf8').encode(output);
+  };
+
+  const convertToFacets = (options, polygons) =>
+    polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
+
+  const toStlVector = vector =>
+    `${vector[0]} ${vector[1]} ${vector[2]}`;
+
+  const toStlVertex = vertex =>
+    `vertex ${toStlVector(vertex)}`;
+
+  const convertToFacet = (polygon) => {
+    const plane = toPlane(polygon);
+    if (plane !== undefined) {
+      return `facet normal ${toStlVector(toPlane(polygon))}\n` +
+             `outer loop\n` +
+             `${toStlVertex(polygon[0])}\n` +
+             `${toStlVertex(polygon[1])}\n` +
+             `${toStlVertex(polygon[2])}\n` +
+             `endloop\n` +
+             `endfacet`;
+    }
+  };
+
+  /**
+   *
+   * # Write STL
+   *
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * await Cube().writeStl('cube.stl');
+   * await readStl({ path: 'cube.stl' });
+   * ```
+   * :::
+   *
+   **/
+
+  const downloadStl = (shape, name, options = {}) => {
+    // CHECK: Should this be limited to Page plans?
+    let index = 0;
+    const entries = [];
+    for (const entry of ensurePages(shape.toKeptGeometry())) {
+      for (let leaf of getLeafs(entry.content)) {
+        const op = toStl(leaf, options);
+        entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });
+      }
+    }
+    emit$1({ download: { entries } });
+    return shape;
+  };
+
+  const downloadStlMethod = function (...args) { return downloadStl(this, ...args); };
+  Shape.prototype.downloadStl = downloadStlMethod;
+
+  const toStl$1 = async (shape, options = {}) => {
+    const pages = [];
+    // CHECK: Should this be limited to Page plans?
+    const geometry = shape.toKeptGeometry();
+    for (const entry of getPlans(geometry)) {
+      if (entry.plan.page) {
+        for (let leaf of getLeafs(entry.content)) {
+          const stl = await toStl(leaf, {});
+          pages.push({ stl, leaf: { ...entry, content: leaf }, index: pages.length });
+        }
+      }
+    }
+    return pages;
+  };
+
+  const writeStl = async (shape, name, options = {}) => {
+    const start = new Date();
+    log$2(`writeStl start: ${start}`, 'serious');
+    for (const { stl, leaf, index } of await toStl$1(shape, {})) {
+      await writeFile({ doSerialize: false }, `output/${name}_${index}.stl`, stl);
+      await writeFile({}, `geometry/${name}_${index}.stl`, toKeptGeometry(leaf));
+    }
+    const end = new Date();
+    log$2(`writeStl end: ${end - start}`, 'serious');
+  };
+
+  const method$8 = function (...args) { return writeStl(this, ...args); };
+  Shape.prototype.writeStl = method$8;
 
   const source = (path, source) => addSource(`cache/${path}`, source);
 
@@ -47982,11 +51770,12 @@ return d[d.length-1];};return ", funcName].join("");
 
   var api = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    emit: emit$1,
     source: source,
     Connector: Connector,
-    X: X$j,
-    Y: Y$j,
-    Z: Z$h,
+    X: X$m,
+    Y: Y$m,
+    Z: Z$k,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
@@ -54296,9 +58085,13 @@ return d[d.length-1];};return ", funcName].join("");
       return module;
     };
 
-  // Bootstrap importModule.
+  const md = (strings, ...placeholders) => {
+    const md = strings.reduce((result, string, i) => (result + placeholders[i - 1] + string));
+    emit$1({ md });
+    return md;
+  };
 
-  const extendedApi = { ...api };
+  const extendedApi = { ...api, toSvg };
 
   const importModule = buildImportModule(extendedApi);
 
@@ -54341,11 +58134,13 @@ return d[d.length-1];};return ", funcName].join("");
   var api$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
     importModule: importModule,
+    md: md,
+    emit: emit$1,
     source: source,
     Connector: Connector,
-    X: X$j,
-    Y: Y$j,
-    Z: Z$h,
+    X: X$m,
+    Y: Y$m,
+    Z: Z$k,
     ChainedHull: ChainedHull,
     Hull: Hull,
     Loop: Loop,
@@ -105013,26 +108808,20 @@ return d[d.length-1];};return ", funcName].join("");
     if (includeXmlHeader) {
       svg = header$1 + svg;
     }
-    return svg;
+    return new TextEncoder('utf8').encode(svg);
   };
 
   /* global postMessage, onmessage:writable, self */
 
   const say = (message) => postMessage(message);
   const agent = async ({ ask, question }) => {
-    
     try {
       var { key, values } = question;
-      console.log('Thread doing: ' + key);
       clearCache();
       switch (key) {
         case 'assemble':
           var inputs = values[0].map(Shape.fromGeometry);
-          if (values[1]) {
-            return Assembly(...inputs).drop('cutAway').toKeptGeometry();
-          } else {
-            return Assembly(...inputs).toDisjointGeometry();
-          }
+          return Assembly(...inputs).toDisjointGeometry();
         case 'bounding box':
           return Shape.fromGeometry(values[0]).measureBoundingBox();
         case 'circle':
@@ -105061,24 +108850,18 @@ return d[d.length-1];};return ", funcName].join("");
             return returnVal;
           }
         case 'layout':
+          console.log('Doing layout');
           const solidToSplit = Shape.fromGeometry(values[0]);
-          // Extract shapes
-          let items = solidToSplit.bom();
-          
-          console.log("Here:");
-          console.log(items);
-          
-          var shapes = [];
-          items.forEach(item => {
-              shapes.push(solidToSplit.keep(item));
+          var flatItems = [];
+          solidToSplit.items().forEach(item => {
+            flatItems.push(item.flat().to(Z$k(0)));
           });
           
-          console.log(shapes);
+          console.log(flatItems);
           
-          const sheetX = values[2];
-          const sheetY = values[3];
-          const sheet = Layers(...shapes).squash().Page({ size: [2438, 1219] });
-          return sheet.toDisjointGeometry();
+          const laidOut = Layers(...flatItems).Page();
+          
+          return laidOut.toDisjointGeometry();
         case 'difference':
           return Shape.fromGeometry(values[0]).cut(Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
         case 'extractTag':
@@ -105093,9 +108876,8 @@ return d[d.length-1];};return ", funcName].join("");
         case 'rectangle':
           return Square(values[0], values[1]).toDisjointGeometry();
         case 'Over Cut Inside Corners':
-          console.log('Overcutting corners');
           const overcutShape = Shape.fromGeometry(values[0]);
-          const overcutSection = overcutShape.section(Z$h());
+          const overcutSection = overcutShape.section(Z$k());
           const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
           const height = overcutShape.size().height;
           const sweep = toolpath.sweep(Circle(values[1])).extrude(height);

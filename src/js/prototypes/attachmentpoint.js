@@ -108,7 +108,7 @@ export default class AttachmentPoint {
          * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.
          * @type {string}
          */
-        this.ready = false
+        this.ready = true
         /** 
          * A list of all of the connectors attached to this attachmet point
          * @type {object}
@@ -317,11 +317,11 @@ export default class AttachmentPoint {
                 
             }
             this.showHoverText = true
-            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels/1.2 ){
-                this.expandedRadius = true    
+            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels/2.1 ){
+                this.expandedRadius = true
             }  
             else{
-                this.expandedRadius = false      
+                this.expandedRadius = false
             }
         }
         else{
@@ -403,15 +403,15 @@ export default class AttachmentPoint {
     }
     
     /**
-     * Can be called to see if the target cordinates are within this ap. Returns true/false.
-     * @param {number} x - The x cordinate of the target
-     * @param {number} y - The y cordinate of the target
+     * Can be called to see if the target coordinates are within this ap. Returns true/false.
+     * @param {number} x - The x coordinate of the target
+     * @param {number} y - The y coordinate of the target
      */ 
     wasConnectionMade(x,y){
-
+        
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius/2.1)
 
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels && this.type == 'input'){  //If we have released the mouse here and this is an input...
@@ -450,6 +450,11 @@ export default class AttachmentPoint {
             if(this.parentMolecule.output){
                 this.parentMolecule.output.waitOnComingInformation()
             }
+        }
+        
+        //Check if this is the output of a molecule. Pass the command out.
+        if(this.parentMolecule.atomType == "Output"){
+            this.parentMolecule.parent.output.waitOnComingInformation()
         }
     }
     

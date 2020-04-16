@@ -51,17 +51,14 @@ export default class Assembly extends Atom{
     updateValue(){
         if(this.inputs.every(x => x.ready)){
             try{
-                var inputs = []
+                var inputValues = []
                 this.inputs.forEach( io => {
                     if(io.connectors.length > 0 && io.type == 'input'){
-                        inputs.push(io.getValue())
+                        inputValues.push(io.getValue())
                     }
                 })
-                const mappedInputs = inputs.map(x => {
-                    return x
-                })
                 
-                const values = [mappedInputs, this.removeCutawayGeometry]
+                const values = [inputValues]
                 
                 this.basicThreadValueProcessing(values, "assemble")
                 this.clearAlert()
@@ -73,65 +70,10 @@ export default class Assembly extends Atom{
     }
     
     /**
-    * Updates the side bar to add check boxes to turn on and off different elements.
-    */
-    updateSidebar(){
-        var sideBar = super.updateSidebar()
-        
-        this.inputs.forEach(input => {
-            if(input.connectors.length != 0){
-                
-                var shouldThisBeChecked = true
-                if(input.getValue().tags){  //Check to see if this part is currently being cut away
-                    if(input.getValue().tags.indexOf("user/cutAway") > -1){
-                        shouldThisBeChecked = false
-                    }
-                }
-                
-                this.createCheckbox(sideBar,input.name,shouldThisBeChecked,(event)=>{
-                    var updatedValue = input.getValue()
-                    
-                    if(!event.target.checked){ //If the box has just been unchecked
-                        if(updatedValue.tags){
-                            updatedValue.tags.push("user/cutAway")
-                        }
-                        else{
-                            updatedValue.tags = ["user/cutAway"]
-                        }
-                        input.setValue(updatedValue)
-                    }
-                    else{
-                        var index = updatedValue.tags.indexOf("user/cutAway")
-                        if (index > -1) {
-                            updatedValue.tags.splice(index, 1)
-                        }
-                        input.setValue(updatedValue)
-                    }
-                })
-            }
-        })
-        
-        //Add a checkbox for deciding if the cutaway geometry should be kept
-        this.createCheckbox(sideBar,"Remove Cutaway Geometry", this.removeCutawayGeometry,(event)=>{
-            
-            if(!event.target.checked){ //If the box has just been unchecked
-                this.removeCutawayGeometry = false
-                this.updateValue()
-            }
-            else{
-                this.removeCutawayGeometry = true
-                this.updateValue()
-            }
-        })
-    }
-    
-    /**
     * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.
     */ 
     serialize(savedObject){
         var thisAsObject = super.serialize(savedObject)
-        
-        thisAsObject.removeCutawayGeometry = this.removeCutawayGeometry
         
         var ioValues = []
         this.inputs.forEach(io => {
@@ -147,7 +89,5 @@ export default class Assembly extends Atom{
         thisAsObject.ioValues = ioValues
         
         return thisAsObject
-        
     }
-    
 }

@@ -145,7 +145,6 @@ export default class Atom {
             })
         }
     }
-
    
     /**
      * Draws the atom on the screen
@@ -424,6 +423,7 @@ export default class Atom {
             child.keyPress(key)
         })
     }
+    
     /**
      * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.
      */ 
@@ -469,14 +469,15 @@ export default class Atom {
         if (this.atomType == 'Molecule' ){
             
             let headerBar_title = document.querySelector('#headerBar_title')
-            while (headerBar_title.firstChild) {
-                headerBar_title.removeChild(headerBar_title.firstChild)
+            if(headerBar_title){
+                while (headerBar_title.firstChild) {
+                    headerBar_title.removeChild(headerBar_title.firstChild)
+                }
+               
+                var name1 = document.createElement('p')
+                name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
+                headerBar_title.appendChild(name1)
             }
-           
-            var name1 = document.createElement('p')
-            name1.textContent = "- " + GlobalVariables.topLevelMolecule.name
-            headerBar_title.appendChild(name1)
-
         }
 
         //Create a list element
@@ -584,7 +585,6 @@ export default class Atom {
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
             this.output.ready = true
-            this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. This prevents...what? What does this do?
             this.output.setValue(this.value)
         }
     }
@@ -603,6 +603,8 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.processing = true
+            
+            this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             
             this.clearAlert()
             
@@ -628,12 +630,6 @@ export default class Atom {
         }
     }
     
-    /**
-     * This locks all the inputs downstream of this which will need to wait for it to update
-     */
-    waitOnComingInformation(){
-        this.output.waitOnComingInformation()
-    }
     
     /**
      * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
