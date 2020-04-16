@@ -274,8 +274,6 @@ function init() {
             })
             GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
             GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
-                GlobalVariables.evalLock = false
-                GlobalVariables.topLevelMolecule.unlock()
                 GlobalVariables.topLevelMolecule.backgroundClick()
             })
         }
@@ -315,8 +313,6 @@ function animate() {
     GlobalVariables.c.clearRect(0, 0, GlobalVariables.canvas.width, GlobalVariables.canvas.height)
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
         atom.update()
-
-
     })
 
     GlobalVariables.display.render()

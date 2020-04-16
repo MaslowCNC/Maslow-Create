@@ -51,13 +51,6 @@ class GlobalVariables{
          */
         this.c = null
         /** 
-         * An array of all of the secret types of atoms which can not be placed by the user.
-         * @type {array}
-         */
-        this.secretTypes = {
-            output:        {creator: Output, atomType: 'Output'}
-        }
-        /** 
         * An array of all of the available types of atoms which can be placed with a right click.
         * @type {array}
         */
@@ -95,7 +88,8 @@ class GlobalVariables{
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Import/Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Import/Export'},
             cutLayout:          {creator: CutLayout, atomType: "CutLayout", atomCategory: 'Import/Export'},
-            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Import/Export'}
+            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Import/Export'},
+            output:             {creator: Output, atomType: 'Output'}
         }
         /** 
          * A reference to the molecule curently being displayed on the screen.

@@ -65,12 +65,26 @@ export default class Output extends Atom {
             this.parent.processing = false
             
             //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
-            if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule" && !this.parent.topLevel){
-                this.parent.dumpBuffer(true)
-            }
+            // if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule" && !this.parent.topLevel){
+            // this.parent.dumpBuffer(true)
+            // }
             
             super.updateValue()
         }
+    }
+    
+    /**
+     * Override super delete function to prevent output from being deleted
+     */ 
+    deleteNode(){
+        
+    }
+    
+    /**
+     * A function to allow you to still call the delete function if needed.
+     */
+    deleteOutputAtom(){
+        super.deleteNode()
     }
     
     /**

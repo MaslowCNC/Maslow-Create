@@ -29,10 +29,24 @@ export default class Constant extends Atom{
          */
         this.atomType = 'Constant'
         /**
-         * This atom's height as drawn on the screen...probably doesn't need to be in this scope
-         * @type {string}
+         * This atom's height as drawn on the screen
          */
         this.height = 16
+        /**
+         * A flag to indicate if this constant should be evolved by genetic algorithms
+         * @type {boolean}
+         */
+        this.evolve = false
+        /**
+         * Minimum value to be used when evolving constant
+         * @type {float}
+         */
+        this.min = 0
+        /**
+         * Maximum value to be used when evolving constant
+         * @type {float}
+         */
+        this.max = 20
         
         this.setValues(values)
         
@@ -41,6 +55,7 @@ export default class Constant extends Atom{
         if (typeof this.ioValues == 'object') {
             this.output.setValue(this.ioValues[0].ioValue)
         }
+        
     }
     
     /**
@@ -59,6 +74,21 @@ export default class Constant extends Atom{
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,'name', 'Name', false)
         this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)
+        
+        this.createCheckbox(valueList,"Evolve",this.evolve,(event)=>{
+            if(event.target.checked){
+                this.evolve = true
+                this.updateSidebar()
+            } else{
+                this.evolve = false
+                this.updateSidebar()
+            }
+        })
+        
+        if(this.evolve){
+            this.createEditableValueListItem(valueList,this,'min', 'Min', true)
+            this.createEditableValueListItem(valueList,this,'max', 'Max', true)
+        }
     }
     
     /**
@@ -72,6 +102,10 @@ export default class Constant extends Atom{
             name: 'number',
             ioValue: this.output.getValue()
         }]
+        
+        valuesObj.evolve = this.evolve
+        valuesObj.min = this.min
+        valuesObj.max = this.max
         
         return valuesObj
         

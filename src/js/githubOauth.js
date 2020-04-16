@@ -543,6 +543,7 @@ export default function GitHubModule(){
                
         }) 
     }
+    
     /** 
      * Search for the name of a project and then return results which match that search.
      */
@@ -629,6 +630,7 @@ export default function GitHubModule(){
         })
 
     }
+    
     /** 
      * Adds a new project to the load projects display.
      */
@@ -1164,8 +1166,11 @@ export default function GitHubModule(){
             threadCompute([shape], "SVG Picture").then(contentSvg => {
                 this.progressSave(10)
                 
+                console.warn("Saving svg thumbnail is broken. Discarding: " + contentSvg)
+                
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
+                    
                     var totalParts = 0
                     var totalCost  = 0
                     if(bomItems != undefined){
@@ -1184,7 +1189,10 @@ export default function GitHubModule(){
                         readmeContent = readmeContent + item + "\n\n\n"
                     })
                     
-                    const projectContent = JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)
+                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                    jsonRepOfProject.filetypeVersion = 1
+                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
                     
                     this.createCommit(octokit,{
                         owner: saveUser,
@@ -1192,7 +1200,7 @@ export default function GitHubModule(){
                         base: 'master', /* optional: defaults to default branch */
                         changes: {
                             files: {
-                                'project.svg': contentSvg,
+                                //'project.svg': contentSvg,
                                 'BillOfMaterials.md': bomContent,
                                 'README.md': readmeContent,
                                 'project.maslowcreate': projectContent
@@ -1204,6 +1212,7 @@ export default function GitHubModule(){
             })
         }
     }
+    
     /** 
      * Creates saving/saved pop up
      */
@@ -1322,16 +1331,18 @@ export default function GitHubModule(){
             //content will be base64 encoded
             let rawFile = JSON.parse(atob(result.data.content))
             
-            
-            var moleculesList = rawFile.molecules
-            
             if(rawFile.circleSegmentSize){
                 GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
             }
             
-            //Load the top level molecule from the file
-            GlobalVariables.topLevelMolecule.deserialize(moleculesList, moleculesList.filter((molecule) => { return molecule.topLevel == true })[0].uniqueID)
             intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
+            
+            if(rawFile.filetypeVersion == 1){
+                GlobalVariables.topLevelMolecule.deserialize(rawFile)
+            }
+            else{
+                GlobalVariables.topLevelMolecule.deserialize(this.convertFromOldFormat(rawFile))
+            }
         })
         octokit.repos.get({
             owner: currentUser,
@@ -1340,8 +1351,43 @@ export default function GitHubModule(){
             GlobalVariables.fork = result.data.fork
             if(!GlobalVariables.fork){
                 document.getElementById("pull_top").style.display = "none"
-            }      
-        })                
+            }
+        })
+    }
+    
+    this.convertFromOldFormat = function(json){
+        
+        var listOfMoleculeAtoms = json.molecules
+        
+        //Find the top level molecule
+        var projectObject = listOfMoleculeAtoms.filter((molecule) => { return molecule.topLevel == true })[0]
+        //Remove that element from the listOfMoleculeAtoms
+        listOfMoleculeAtoms.splice(listOfMoleculeAtoms.findIndex(e => e.topLevel == true),1)
+        
+        //Recursive function to walk the tree and find molecule placeholders
+        function walkForMolecules(projectObject){
+            projectObject.allAtoms.forEach(function(atom, allAtomsIndex, allAtomsObject) {
+                if(atom.atomType == "Molecule"){
+                    
+                    if(atom.allAtoms != undefined){ //If this molecule has allAtoms
+                        walkForMolecules(atom)//Walk it
+                    }
+                    else{ //Else replace it with a version which does have allAtoms from the list
+                        //Find the version in molecules list and plug it in
+                        allAtomsObject[allAtomsIndex] = listOfMoleculeAtoms.filter((molecule) => { return molecule.uniqueID == atom.uniqueID })[0]
+                        //Remove that element from the listOfMoleculeAtoms
+                        listOfMoleculeAtoms.splice(listOfMoleculeAtoms.findIndex(e => e.uniqueID == atom.uniqueID),1)
+                    }
+                }
+            })
+        }
+        
+        //Find any placeholder molecules in there (this needs to be a full tree walk for everything to work)
+        while(listOfMoleculeAtoms.length > 0){
+            walkForMolecules(projectObject)
+        }
+        
+        return projectObject
     }
     
     /** 
@@ -1365,7 +1411,9 @@ export default function GitHubModule(){
             currentRepoName = repoName
         }
         
-        return result
+        let rawFile = JSON.parse(atob(result.data.content))
+        
+        return this.convertFromOldFormat(rawFile)
     }
     
     /** 
