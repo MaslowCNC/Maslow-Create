@@ -57,6 +57,8 @@ class GlobalVariables{
         */
         this.availableTypes = {
 
+        	box:            	{creator: Box, atomType: 'Box'},
+
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},

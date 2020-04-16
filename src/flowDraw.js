@@ -82,7 +82,7 @@ flowCanvas.addEventListener('mousedown', event => {
             parent: GlobalVariables.currentMolecule,
             name: 'Box',
             atomType: 'Box'
-        }, null, GlobalVariables.secretTypes)
+        }, null, GlobalVariables.availableTypes)
     }
     
     if(!clickHandledByMolecule){
