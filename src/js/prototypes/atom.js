@@ -399,8 +399,10 @@ export default class Atom {
      * @param {string} key - The key which has been pressed.
      */ 
     keyPress(key){
+         
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){
+            event.preventDefault()
             if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
                 this.deleteNode()

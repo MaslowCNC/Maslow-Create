@@ -1413,7 +1413,12 @@ export default function GitHubModule(){
         
         let rawFile = JSON.parse(atob(result.data.content))
         
-        return this.convertFromOldFormat(rawFile)
+        if(rawFile.filetypeVersion == 1){
+            return rawFile
+        }
+        else{
+            return this.convertFromOldFormat(rawFile)
+        }
     }
     
     /** 
