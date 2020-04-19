@@ -108929,6 +108929,8 @@ return d[d.length-1];};return ", funcName].join("");
               i++;
           }
           
+          console.log(profiles);
+          
           const assembledPaths = Assembly(...profiles);
           
           return assembledPaths.toKeptGeometry();
