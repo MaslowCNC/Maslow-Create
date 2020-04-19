@@ -170,7 +170,7 @@ window.addEventListener('keydown', e => {
 })
 
 window.addEventListener('keyup', e => {
-    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+    if (e.key == "Control" || e.key == "Meta") {
         GlobalVariables.ctrlDown = false
     }
 })
