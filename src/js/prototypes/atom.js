@@ -419,7 +419,6 @@ export default class Atom {
      */ 
     keyPress(key){ 
 
-       
         //runs whenever a key is pressed
         if (['Delete', 'Backspace'].includes(key)){  
             if(this.selected == true && document.activeElement.id == "mainBody"){
