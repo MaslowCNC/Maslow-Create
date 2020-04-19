@@ -504,9 +504,7 @@ export default function GitHubModule(){
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
-                if(result.data.items.length == 0 && searchString == ''){ //If the empty search returned no results on loading
-                    this.cloneExampleProjectPopup()
-                }
+                
             }) 
         } 
     }
