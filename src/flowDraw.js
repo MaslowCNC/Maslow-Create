@@ -85,11 +85,9 @@ flowCanvas.addEventListener('mousedown', event => {
         }, null, GlobalVariables.availableTypes)
     }
     
-    if(clickHandledByMolecule){
-        GlobalVariables.currentMolecule.selected = false
-    }
-    else{
-        GlobalVariables.currentMolecule.backgroundClick()
+    if(!clickHandledByMolecule){
+
+        GlobalVariables.currentMolecule.backgroundClick() 
     }
     
     //hide the menu if it is visible
@@ -149,17 +147,18 @@ window.addEventListener('keydown', e => {
     if(!event.srcElement.isContentEditable && e.key == "Backspace"){
         event.preventDefault()
     }
-    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+    if (e.key == "Control" || e.key == "Meta") {
         GlobalVariables.ctrlDown = true
     }      
-    if (GlobalVariables.ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") {
+    if (GlobalVariables.ctrlDown &&  e.key == "c" && document.activeElement.id == "mainBody") {
+        GlobalVariables.atomsToCopy = []
         GlobalVariables.currentMolecule.copy()
     }
-    if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody" ) {
+    if (GlobalVariables.ctrlDown &&  e.key == "v" && document.activeElement.id == "mainBody" ) {
         GlobalVariables.atomsToCopy.forEach(item => {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+            GlobalVariables.currentMolecule.placeAtom(item, true)    
         })   
     }
     //every time a key is pressed
