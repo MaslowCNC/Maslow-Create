@@ -143,8 +143,8 @@ flowCanvas.addEventListener('mouseup', event => {
 * @type {array}
 */
 window.addEventListener('keydown', e => {
-    console.log(e.key)
-     if(!event.srcElement.isContentEditable && e.key == "Backspace"){
+
+    if(!event.srcElement.isContentEditable && e.key == "Backspace"){
         event.preventDefault()
     }
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
