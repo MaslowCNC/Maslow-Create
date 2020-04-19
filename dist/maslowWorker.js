@@ -108859,7 +108859,7 @@ return d[d.length-1];};return ", funcName].join("");
           
           console.log(flatItems);
           
-          const laidOut = Layers(...flatItems).Page();
+          const laidOut = Layers(...flatItems).Page({itemMargin: values[1]});
           
           return laidOut.toDisjointGeometry();
         case 'difference':
@@ -108920,7 +108920,7 @@ return d[d.length-1];};return ", funcName].join("");
           
           const distPerPass    = -1*thickness/numberOfPasses;
           
-          const oneProfile = gcodeShape.center().section().toolpath(toolSize, { joinPaths: true });
+          const oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
           
           const profiles = [];
           var i = 1;
