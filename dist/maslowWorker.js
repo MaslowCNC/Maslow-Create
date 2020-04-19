@@ -108915,6 +108915,8 @@ return d[d.length-1];};return ", funcName].join("");
           const bounds = shape.measureBoundingBox();
           const cameraDistance = 6 * Math.max(...bounds[1]);
           return toSvg$2({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+        case 'size':
+          return Shape.fromGeometry(values[0]).size();
         case 'tag':
           return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
         case 'specify':

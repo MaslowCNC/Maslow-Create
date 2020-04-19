@@ -27,9 +27,12 @@ export default class Gcode extends Atom {
          */
         this.atomType = 'Gcode'
         
-        this.addIO('input', 'geometry', this, 'geometry', GlobalVariables.api.sphere())
-        this.addIO('input', 'tool size', this, 'number', 5.35)
+        this.addIO('input', 'tool size', this, 'number', 6.35)
         this.addIO('input', 'passes', this, 'number', 6)
+        this.addIO('input', 'speed', this, 'number', 500)
+        this.addIO('input', 'tabs', this, 'number', 1)
+        this.addIO('input', 'safe height', this, 'number', 6)
+        this.addIO('input', 'geometry', this, 'geometry', null)
         this.addIO('output', 'gcode', this, 'geometry', '')
         
         this.setValues(values)
@@ -48,7 +51,7 @@ export default class Gcode extends Atom {
         this.processing = true
         this.clearAlert()
         
-        const computeSvg = async (values, key) => {
+        const callWorker = async (values, key) => {
             try{
                 return await GlobalVariables.ask({values: values, key: key})
             }catch(err){this.setAlert(err)}
@@ -57,21 +60,25 @@ export default class Gcode extends Atom {
         try{
             const input = this.findIOValue('geometry')
             
-            computeSvg([input], "svg").then(result => {
-                if (result != -1 ){
+            callWorker([input], "svg").then(svg => {
+                if (svg != -1 ){
                     
-                    const bounds = input.measureBoundingBox()
-                    const partThickness = bounds[1][2]-bounds[0][2]
+                    console.log("svg: ")
+                    console.log(svg)
                     
-                    /**
-                     * Assign the atom value to be the new computed results.
-                     */
-                    this.value = this.svg2gcode(result, {
-                        passes: this.findIOValue('passes'),
-                        materialWidth: -1*partThickness,
-                        bitWidth: this.findIOValue('tool size')
+                    callWorker([input], "size").then(size => {
+                        
+                        const partThickness = size.height
+                        
+                        /**
+                         * Assign the atom value to be the new computed results.
+                         */
+                        this.value = this.svg2gcode(svg, {
+                            passes: this.findIOValue('passes'),
+                            materialWidth: -1*partThickness,
+                            bitWidth: this.findIOValue('tool size')
+                        })
                     })
-                    
                 }else{
                     this.setAlert("Unable to compute")
                 }
