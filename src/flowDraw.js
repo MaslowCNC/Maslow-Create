@@ -13,27 +13,6 @@ GlobalVariables.runMode = window.location.href.includes('run') //Check if we are
 
 GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
-/** 
-* V event key
-* @type {number}
-*/
-const vKey = 86
-/** 
-* C event key
-* @type {number}
-*/
-const cKey = 67
-
-/** 
-* Ctrl event key
-* @type {number}
-*/
-const ctrlKey = 17
-/** 
-* Cmmd event key
-* @type {number}
-*/
-const cmdKey = 91
 
 // Event Listeners
 /** 
