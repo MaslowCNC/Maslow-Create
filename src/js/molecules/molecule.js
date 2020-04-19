@@ -206,7 +206,7 @@ export default class Molecule extends Atom{
         }
         
         //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
+        if(this.selected){
             this.sendToRender()
         }
     }
