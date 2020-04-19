@@ -417,12 +417,12 @@ export default class Atom {
      * Set the atom's response to a key press. Is used to delete the atom if it is selected.
      * @param {string} key - The key which has been pressed.
      */ 
-    keyPress(key){
-         
+    keyPress(key){ 
+
+       
         //runs whenever a key is pressed
-        if (['Delete', 'Backspace'].includes(key)){
-            event.preventDefault()
-            if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
+        if (['Delete', 'Backspace'].includes(key)){  
+            if(this.selected == true && document.activeElement.id == "mainBody"){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
                 this.deleteNode()
             }

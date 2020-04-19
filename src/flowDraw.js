@@ -136,11 +136,17 @@ flowCanvas.addEventListener('mouseup', event => {
     GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)      
 })
 
+
+   
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
 */
 window.addEventListener('keydown', e => {
+    console.log(e.key)
+     if(!event.srcElement.isContentEditable && e.key == "Backspace"){
+        event.preventDefault()
+    }
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = true
     }      
@@ -155,17 +161,10 @@ window.addEventListener('keydown', e => {
         })   
     }
     //every time a key is pressed
-    let listToDelete = []
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (e.keyCode == "8" & molecule.selected){
-            listToDelete.push(molecule)
-        }
-        molecule.keyPress(event.key)      
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {  
+        molecule.keyPress(e.key)      
     })
-    //Deletes all atoms that have populated the array
-    listToDelete.forEach(atom => {
-        atom.deleteNode()  
-    })
+   
 })
 
 window.addEventListener('keyup', e => {
