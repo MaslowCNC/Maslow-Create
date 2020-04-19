@@ -108908,6 +108908,22 @@ return d[d.length-1];};return ", funcName].join("");
         case 'svg':
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
+        case 'stackedOutline':
+          console.log("Running stacked outline");
+          const gcodeShape = Shape.fromGeometry(values[0]);
+          const thickness = gcodeShape.size().height;
+          console.log("Thickness: " + thickness);
+          const toolSize       = values[1];
+          const numberOfPasses = values[2];
+          const speed          = values[3];
+          const tabs           = values[4];
+          
+          
+          const oneProfile = gcodeShape.center().section().toolpath(6, { joinPaths: true });
+          
+          return oneProfile.toKeptGeometry();
+        case 'gcode':
+          return "G0 would be here"
         case 'outline':
           return Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry();
         case 'SVG Picture':
