@@ -1,7 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
 import saveAs from '../lib/FileSaver.js'
-import SVGReader from '../lib/SVGReader.js'
 
 /**
  * This class creates the circle atom.
