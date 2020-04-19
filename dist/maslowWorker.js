@@ -108909,7 +108909,7 @@ return d[d.length-1];};return ", funcName].join("");
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
         case 'stackedOutline':
-          console.log("Running stacked outline");
+          console.log("Running stacked outline 11:02");
           const gcodeShape = Shape.fromGeometry(values[0]);
           const thickness = gcodeShape.size().height;
           console.log("Thickness: " + thickness);
@@ -108918,10 +108918,20 @@ return d[d.length-1];};return ", funcName].join("");
           const speed          = values[3];
           const tabs           = values[4];
           
+          const distPerPass    = -1*thickness/numberOfPasses;
           
-          const oneProfile = gcodeShape.center().section().toolpath(6, { joinPaths: true });
+          const oneProfile = gcodeShape.center().section().toolpath(toolSize, { joinPaths: true });
           
-          return oneProfile.toKeptGeometry();
+          const profiles = [];
+          var i = 1;
+          while(i <= numberOfPasses){
+              profiles.push(oneProfile.move(0,0,i*distPerPass));
+              i++;
+          }
+          
+          const assembledPaths = Assembly(...profiles);
+          
+          return assembledPaths.toKeptGeometry();
         case 'gcode':
           return "G0 would be here"
         case 'outline':
