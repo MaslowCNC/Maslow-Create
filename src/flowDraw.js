@@ -144,9 +144,10 @@ flowCanvas.addEventListener('mouseup', event => {
 */
 window.addEventListener('keydown', e => {
 
-    if(!event.srcElement.isContentEditable && e.key == "Backspace"){
+    if(!event.srcElement.isContentEditable && ['c', 'v', 'Backspace'].includes(e.key)){
         event.preventDefault()
     }
+
     if (e.key == "Control" || e.key == "Meta") {
         GlobalVariables.ctrlDown = true
     }      
