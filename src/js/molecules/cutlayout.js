@@ -31,8 +31,8 @@ export default class CutLayout extends Atom{
         this.addIO('input', 'geometry', this, 'geometry', null)
 
         this.addIO('input', 'Spacing', this, 'number', 5)
-        this.addIO('input', 'Sheet Width', this, 'number', 50)
-        this.addIO('input', 'Sheet Length', this, 'number', 50)
+        //this.addIO('input', 'Sheet Width', this, 'number', 50)
+        //this.addIO('input', 'Sheet Length', this, 'number', 50)
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         this.setValues(values)
@@ -43,7 +43,7 @@ export default class CutLayout extends Atom{
     */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry')]
+            const values = [this.findIOValue('geometry'), this.findIOValue('Spacing')]
             
             this.basicThreadValueProcessing(values, "layout")
         }catch(err){
