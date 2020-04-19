@@ -287,7 +287,27 @@ export default class Atom {
         this.color = this.defaultColor
         this.alertMessage = ''
     }
-    
+
+    /**
+     * Delineates bounds for selection box.
+     */ 
+    selectBox(x,y,xEnd,yEnd){
+        let xIn = Math.min(x, xEnd)
+        let xOut = Math.max(x, xEnd)
+        let yIn = Math.min(y, yEnd)
+        let yOut = Math.max(y, yEnd)
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        if(xInPixels >= xIn && xInPixels <= xOut){
+            if(yInPixels >= yIn && yInPixels <= yOut){
+                //this.isMoving = true
+                this.selected = true
+                this.updateSidebar()
+                this.sendToRender()
+            }
+        }
+    }
+
     /**
      * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D
      * @param {number} x - The X cordinate of the click
@@ -308,10 +328,10 @@ export default class Atom {
             this.sendToRender()
             clickProcessed = true
         }
+        //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
-        }
-            
+        }         
         //Returns true if something was done with the click
         this.inputs.forEach(child => {
             if(child.clickDown(x,y, clickProcessed) == true){
@@ -323,8 +343,7 @@ export default class Atom {
                 clickProcessed = true
             }
         }
-       
-        
+           
         return clickProcessed 
     }
 
@@ -398,12 +417,11 @@ export default class Atom {
      * Set the atom's response to a key press. Is used to delete the atom if it is selected.
      * @param {string} key - The key which has been pressed.
      */ 
-    keyPress(key){
-         
+    keyPress(key){ 
+
         //runs whenever a key is pressed
-        if (['Delete', 'Backspace'].includes(key)){
-            event.preventDefault()
-            if(this.selected == true && document.getElementsByTagName('BODY')[0] == document.activeElement){
+        if (['Delete', 'Backspace'].includes(key)){  
+            if(this.selected == true && document.activeElement.id == "mainBody"){
                 //If this atom is selected AND the body is active (meaning we are not typing in a text box)
                 this.deleteNode()
             }
@@ -500,6 +518,7 @@ export default class Atom {
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
         GlobalVariables.currentMolecule.backgroundClick()
+
     }
     
     /**
@@ -592,7 +611,9 @@ export default class Atom {
         if(go){     //Then we update the value
             this.processing = true
             
-            this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
+            if(this.output){  //If this atom has an ouput
+                this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
+            }
             
             this.clearAlert()
             

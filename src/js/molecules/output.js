@@ -68,8 +68,6 @@ export default class Output extends Atom {
             // if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule" && !this.parent.topLevel){
             // this.parent.dumpBuffer(true)
             // }
-            
-            super.updateValue()
         }
     }
     

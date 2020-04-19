@@ -13,18 +13,6 @@ GlobalVariables.runMode = window.location.href.includes('run') //Check if we are
 
 GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
-
-
-/** 
-* Ctrl event key
-* @type {number}
-*/
-const ctrlKey = 17
-/** 
-* Cmmd event key
-* @type {number}
-*/
-const cmdKey = 91
 /** 
 * V event key
 * @type {number}
@@ -36,6 +24,16 @@ const vKey = 86
 */
 const cKey = 67
 
+/** 
+* Ctrl event key
+* @type {number}
+*/
+const ctrlKey = 17
+/** 
+* Cmmd event key
+* @type {number}
+*/
+const cmdKey = 91
 
 // Event Listeners
 /** 
@@ -66,7 +64,7 @@ flowCanvas.addEventListener('mousedown', event => {
     }
 
     var clickHandledByMolecule = false
-    
+
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         
         if (molecule.clickDown(event.clientX,event.clientY,clickHandledByMolecule) == true){
@@ -74,9 +72,24 @@ flowCanvas.addEventListener('mousedown', event => {
         }
 
     })
+
+    if (!clickHandledByMolecule){
+
+        GlobalVariables.currentMolecule.placeAtom({
+            parentMolecule: GlobalVariables.currentMolecule, 
+            x: GlobalVariables.pixelsToWidth(event.clientX),
+            y: GlobalVariables.pixelsToHeight(event.clientY),
+            parent: GlobalVariables.currentMolecule,
+            name: 'Box',
+            atomType: 'Box'
+        }, null, GlobalVariables.availableTypes)
+    }
     
-    if(!clickHandledByMolecule){
-        GlobalVariables.currentMolecule.backgroundClick() 
+    if(clickHandledByMolecule){
+        GlobalVariables.currentMolecule.selected = false
+    }
+    else{
+        GlobalVariables.currentMolecule.backgroundClick()
     }
     
     //hide the menu if it is visible
@@ -122,34 +135,38 @@ flowCanvas.addEventListener('mouseup', event => {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY)      
     })
+    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)      
 })
 
+
+   
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
 */
-let newAtom
-
 window.addEventListener('keydown', e => {
 
+    if(!event.srcElement.isContentEditable && e.key == "Backspace"){
+        event.preventDefault()
+    }
     if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
         GlobalVariables.ctrlDown = true
-    } 
+    }      
     if (GlobalVariables.ctrlDown && e.keyCode == cKey && document.activeElement.id == "mainBody") {
-        newAtom = GlobalVariables.atomsToCopy
+        GlobalVariables.currentMolecule.copy()
     }
     if (GlobalVariables.ctrlDown && e.keyCode == vKey && document.activeElement.id == "mainBody" ) {
-        newAtom.forEach(item => {
+        GlobalVariables.atomsToCopy.forEach(item => {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
             GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
         })   
     }
     //every time a key is pressed
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.keyPress(event.key)      
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {  
+        molecule.keyPress(e.key)      
     })
-
+   
 })
 
 window.addEventListener('keyup', e => {
