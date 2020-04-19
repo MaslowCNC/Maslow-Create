@@ -108908,6 +108908,8 @@ return d[d.length-1];};return ", funcName].join("");
         case 'svg':
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
+        case 'outline':
+          return Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry();
         case 'SVG Picture':
           const shape = Shape.fromGeometry(values[0]).center();
           const bounds = shape.measureBoundingBox();
