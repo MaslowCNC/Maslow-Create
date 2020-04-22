@@ -108859,7 +108859,7 @@ return d[d.length-1];};return ", funcName].join("");
           
           console.log(flatItems);
           
-          const laidOut = Layers(...flatItems).Page();
+          const laidOut = Layers(...flatItems).Page({itemMargin: values[1]});
           
           return laidOut.toDisjointGeometry();
         case 'difference':
@@ -108908,6 +108908,34 @@ return d[d.length-1];};return ", funcName].join("");
         case 'svg':
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
+        case 'stackedOutline':
+          console.log("Running stacked outline 11:02");
+          const gcodeShape = Shape.fromGeometry(values[0]);
+          const thickness = gcodeShape.size().height;
+          console.log("Thickness: " + thickness);
+          const toolSize       = values[1];
+          const numberOfPasses = values[2];
+          const speed          = values[3];
+          const tabs           = values[4];
+          
+          const distPerPass    = -1*thickness/numberOfPasses;
+          
+          const oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
+          
+          const profiles = [];
+          var i = 1;
+          while(i <= numberOfPasses){
+              profiles.push(oneProfile.move(0,0,i*distPerPass));
+              i++;
+          }
+          
+          console.log(profiles);
+          
+          const assembledPaths = Assembly(...profiles);
+          
+          return assembledPaths.toKeptGeometry();
+        case 'gcode':
+          return "G0 would be here"
         case 'outline':
           return Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry();
         case 'SVG Picture':
@@ -108915,6 +108943,8 @@ return d[d.length-1];};return ", funcName].join("");
           const bounds = shape.measureBoundingBox();
           const cameraDistance = 6 * Math.max(...bounds[1]);
           return toSvg$2({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+        case 'size':
+          return Shape.fromGeometry(values[0]).size();
         case 'tag':
           return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
         case 'specify':
