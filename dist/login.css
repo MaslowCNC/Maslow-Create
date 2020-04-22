@@ -503,8 +503,8 @@ animation-delay: 0s;
 
 .browseDiv{
     width: 500px;
-    height: 100px;
-    display: inline-block;
+    height: 100px; 
+    display: inline-flex;;
     padding: 10px;
     font-size:13px;
     justify-content: space-between;
