@@ -206,13 +206,6 @@ export default function GitHubModule(){
 
         //Event listeners 
 
-       /* yoursButton.addEventListener("click", (e) => {
-            mine.innerHTML = "My Projects"
-            yoursButton.setAttribute("style", "display:block")
-            myTab = "yoursButton"
-            this.openTab(e, "yoursButton")
-        })*/
-
         browseDisplay1.addEventListener("click", () => {
             titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
@@ -223,8 +216,6 @@ export default function GitHubModule(){
             browseDisplay2.classList.add("active_filter")
             this.openTab(document.getElementById(myTab), myTab)
         })
-
-         //yoursButton.click()  >> went back to your projects if clicked
     }
 
     /** 
@@ -522,13 +513,12 @@ export default function GitHubModule(){
         //create a project element to display
 
         if (document.getElementById("thumb").classList.contains("active_filter")){
-            
             this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
             var project = document.createElement("DIV")
             var projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
-            projectPicture.setAttribute("style", "width: 100%; height: 100%;")
+            projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(projectPicture)
             project.appendChild(document.createElement("BR"))
             
@@ -538,6 +528,10 @@ export default function GitHubModule(){
             }
             else{
                 shortProjectName = document.createTextNode(projectName)
+            }
+            if (owned){
+                console.log("mine")
+                project.style.backgroundColor = "blue"
             }
             project.classList.add("project")
             project.setAttribute("id", projectName)
