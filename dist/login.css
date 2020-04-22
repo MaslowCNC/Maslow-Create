@@ -432,6 +432,7 @@ animation-delay: 0s;
 }
 
 .newProject{
+  border: 2px solid red;
     position:relative;
     left:10px;
     width: 48%;
@@ -493,6 +494,15 @@ animation-delay: 0s;
 
 .project{
     width: 100px;
+    height: 100px;
+    display: inline-block;
+    padding: 10px;
+    font-size:13px;
+    justify-content: space-between;
+}
+
+.browseDiv{
+    width: 500px;
     height: 100px;
     display: inline-block;
     padding: 10px;

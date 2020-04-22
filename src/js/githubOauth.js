@@ -128,53 +128,7 @@ export default function GitHubModule(){
  
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
-        //tabButtons.setAttribute("style", "display: none;")
         popup.appendChild(tabButtons)
-        
-        //My projects button
-        var yoursButton = document.createElement("button")
-        yoursButton.setAttribute("class", "tablinks active browseButton")
-        yoursButton.appendChild(document.createTextNode("Back to my projects"))
-        yoursButton.setAttribute("id", "yoursButton")
-        tabButtons.appendChild(yoursButton)
-        
-        var topBrowseDiv = document.createElement("div")
-        popup.appendChild(topBrowseDiv)
-
-        //New project div
-        var createNewProject = document.createElement("div")
-        createNewProject.setAttribute("class", "newProject")
-        topBrowseDiv.appendChild(createNewProject) 
-        this.NewProject("New Project", null, true, "newProject.svg")
-
-        //Browse all projects box
-        var browseDiv = document.createElement("div")
-        browseDiv.classList.add("newProject")
-        var browseDivInner = document.createElement("div")
-        browseDiv.appendChild(browseDivInner)
-        browseDivInner.classList.add("newProjectdiv")
-        browseDivInner.classList.add("tablinks") 
-        browseDivInner.setAttribute("id", "githubButton")
-
-        var projectPicture = document.createElement("IMG")
-        projectPicture.setAttribute("src", '/defaultThumbnail.svg')
-        projectPicture.setAttribute("style", "height: 80%;")
-        browseDivInner.appendChild(projectPicture)
-        
-        //Browse Prompt
-        var checkOut = document.createElement("div")
-        browseDivInner.appendChild(checkOut)
-        checkOut.innerHTML = "Check out what others have made on Maslow Create"
-        checkOut.setAttribute("style", "align-self:center; width:70%")
-
-        topBrowseDiv.appendChild(browseDiv) 
-        topBrowseDiv.setAttribute("class", "topBrowse")
-        
-        //My projects title
-        var mine = document.createElement("div")
-        mine.innerHTML = "My Projects"
-        mine.setAttribute("style", "justify-content:flex-start;display: inline; align-self: flex-start; margin-left: 30px; margin-top: 15px;")
-        popup.appendChild(mine)
      
         var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
@@ -240,16 +194,25 @@ export default function GitHubModule(){
 
         popup.appendChild(titlesDiv)
 
+        this.projectsSpaceDiv = document.createElement("DIV")
+        this.projectsSpaceDiv.setAttribute("class", "float-left-div")
+        this.projectsSpaceDiv.setAttribute("style", "overflow-x: hidden; margin-top: 10px;")
+        popup.appendChild(this.projectsSpaceDiv)
+
+        
+        this.openTab("yoursButton")
+        this.openTab("githubButton")
+
 
         //Event listeners 
 
-        yoursButton.addEventListener("click", (e) => {
+       /* yoursButton.addEventListener("click", (e) => {
             mine.innerHTML = "My Projects"
             yoursButton.setAttribute("style", "display:block")
             myTab = "yoursButton"
             this.openTab(e, "yoursButton")
-        })
-        browseDivInner.addEventListener("click", (e) => {
+        })*/
+        checkOut.addEventListener("click", (e) => {
 
             mine.innerHTML = "All Maslow Create Projects"
             myTab = "githubButton"
@@ -266,12 +229,7 @@ export default function GitHubModule(){
             this.openTab(document.getElementById(myTab), myTab)
         })
 
-        this.projectsSpaceDiv = document.createElement("DIV")
-        this.projectsSpaceDiv.setAttribute("class", "float-left-div")
-        this.projectsSpaceDiv.setAttribute("style", "overflow-x: hidden; margin-top: 10px; border-top: 1px solid #44444442;")
-        popup.appendChild(this.projectsSpaceDiv)
-        
-        yoursButton.click()
+         //yoursButton.click()  >> went back to your projects if clicked
     }
 
     /** 
@@ -466,18 +424,36 @@ export default function GitHubModule(){
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(ev, searchString, sorting){
+    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting){
 
         if(ev.key == "Enter" || ev.target == document.getElementById("filterDrop")){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
+            // add initial projects to div
+        var browseDiv = document.createElement("div")
+        browseDiv.setAttribute("class", "browseDiv")
+        this.projectsSpaceDiv.appendChild(browseDiv)
+
+        //New project div
+        var createNewProject = document.createElement("div")
+        createNewProject.setAttribute("class", "newProject")
+
+        browseDiv.appendChild(createNewProject)
+        this.NewProject("New Project", null, true, "")
+
+
+        //Documentation Prompt
+        var checkOut = document.createElement("div")
+        checkOut.innerHTML = "Documentation"
+        checkOut.setAttribute("class", "newProject")
+        browseDiv.appendChild(checkOut)
             //Load projects
             var query
             var owned
             var sortMethod = sorting  //drop down input. temporarily inactive until we figure some better way to sort
-            if(document.getElementsByClassName("tablinks active")[0].id == "yoursButton"){
+            if(tabName == "yoursButton"){
                 owned = true
                 query = searchString + ' ' + 'fork:true user:' + currentUser + ' topic:maslowcreate'
             }
@@ -549,6 +525,7 @@ export default function GitHubModule(){
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
         //create a project element to display
+
         if (document.getElementById("thumb").classList.contains("active_filter")){
             
             this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
@@ -644,39 +621,19 @@ export default function GitHubModule(){
     /** 
      * Runs when you switch tabs up top.
      */
-    this.openTab = function(evt, tabName) {
+    this.openTab = function(tabName) {
 
         // Declare all variables
         var i, tabcontent, tablinks
 
-        // Get all elements with class="tabcontent" and hide them
-        tabcontent = document.getElementsByClassName("tabcontent")
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none"
-        }
-
-        // Get all elements with class="tablinks" and remove the class "active"
-        tablinks = document.getElementsByClassName("tablinks")
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "")
-        }
+        
 
         // Show the current tab, and add an "active" class to the button that opened the tab
-        if (tabName == "yoursButton"){
-            document.getElementById(tabName).style.display = "none"
-            document.querySelector(".topBrowse").style.display = "flex"
-        }
-        else{
-            document.getElementById("yoursButton").style.display = "block"
-            document.querySelector(".topBrowse").style.display = "none"
-        }
-        document.getElementById(myTab).className += " active"
-      
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
       
       
-        this.loadProjectsBySearch({key: "Enter"}, document.getElementById("project_search").value)
+        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value)
     }
     
     /** 
