@@ -191,14 +191,14 @@ export default function GitHubModule(){
         titles5.innerHTML = "Last Modified"
         titles5.setAttribute("class","browseColumn")
         titlesDiv.appendChild(titles5)
-
         popup.appendChild(titlesDiv)
+        
 
         this.projectsSpaceDiv = document.createElement("DIV")
         this.projectsSpaceDiv.setAttribute("class", "float-left-div")
         this.projectsSpaceDiv.setAttribute("style", "overflow-x: hidden; margin-top: 10px;")
         popup.appendChild(this.projectsSpaceDiv)
-
+        
         
         this.openTab("yoursButton")
         this.openTab("githubButton")
@@ -209,12 +209,14 @@ export default function GitHubModule(){
         browseDisplay1.addEventListener("click", () => {
             titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
-            this.openTab(document.getElementById(myTab), myTab)
+            this.openTab("yoursButton")
+            this.openTab("githubButton")
         })
         browseDisplay2.addEventListener("click", () => {
             titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
-            this.openTab(document.getElementById(myTab), myTab)
+            this.openTab("yoursButton")
+            this.openTab("githubButton")
         })
     }
 
