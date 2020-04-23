@@ -168,30 +168,6 @@ export default function GitHubModule(){
         searchBar.addEventListener('keyup', (e) => {
             this.loadProjectsBySearch(e, searchBar.value, "updated") // updated just sorts content by most recently updated
         })
-        //header for project list style display
-        var titlesDiv = document.createElement("div")
-        titlesDiv.setAttribute("id","titlesDiv")
-        var titles = document.createElement("div")
-        titles.innerHTML = ""
-        titles.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles)
-        var titles2 = document.createElement("div")
-        titles2.innerHTML = "Project"
-        titles2.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles2)
-        var titles3 = document.createElement("div")
-        titles3.innerHTML = "Creator"
-        titles3.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles3)
-        var titles4 = document.createElement("div")
-        titles4.innerHTML = "Created on"
-        titles4.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles4)
-        var titles5 = document.createElement("div")
-        titles5.innerHTML = "Last Modified"
-        titles5.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles5)
-        popup.appendChild(titlesDiv)
         
 
         this.projectsSpaceDiv = document.createElement("DIV")
@@ -203,17 +179,16 @@ export default function GitHubModule(){
         this.openTab("yoursButton")
         this.openTab("githubButton")
 
-
         //Event listeners 
 
         browseDisplay1.addEventListener("click", () => {
-            titlesDiv.style.display = "flex"
+           // titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
             this.openTab("yoursButton")
             this.openTab("githubButton")
         })
         browseDisplay2.addEventListener("click", () => {
-            titlesDiv.style.display = "none"
+           // titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
             this.openTab("yoursButton")
             this.openTab("githubButton")
@@ -343,6 +318,8 @@ export default function GitHubModule(){
         titles5.setAttribute("class","browseColumn")
         titlesDiv.appendChild(titles5)
 
+
+
         popup.appendChild(titlesDiv)
 
         this.projectsSpaceDiv = document.createElement("DIV")
@@ -429,7 +406,39 @@ export default function GitHubModule(){
         createNewProject.setAttribute("class", "newProject")
 
         browseDiv.appendChild(createNewProject)
+        //header for project list style display
+        var titlesDiv = document.createElement("div")
+        titlesDiv.setAttribute("id","titlesDiv")
+        var titles = document.createElement("div")
+        titles.innerHTML = ""
+        titles.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles)
+        var titles2 = document.createElement("div")
+        titles2.innerHTML = "Project"
+        titles2.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles2)
+        var titles3 = document.createElement("div")
+        titles3.innerHTML = "Creator"
+        titles3.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles3)
+        var titles4 = document.createElement("div")
+        titles4.innerHTML = "Created on"
+        titles4.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles4)
+        var titles5 = document.createElement("div")
+        titles5.innerHTML = "Last Modified"
+        titles5.setAttribute("class","browseColumn")
+        titlesDiv.appendChild(titles5)
+
+        if (!document.getElementById("thumb").classList.contains("active_filter")){
+            titlesDiv.style.display = "flex"
+        }
+
+        this.projectsSpaceDiv.appendChild(titlesDiv)
+
         this.NewProject("New Project", null, true, "")
+
+        
 
             //Load projects
             var query
@@ -602,8 +611,6 @@ export default function GitHubModule(){
 
         // Declare all variables
         var i, tabcontent, tablinks
-
-        
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
