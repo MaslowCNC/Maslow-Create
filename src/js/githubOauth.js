@@ -466,13 +466,6 @@ export default function GitHubModule(){
     }
     
     /** 
-     * Clone a copy of the example project.
-     */
-    this.cloneExampleProjectPopup = function(){
-        this.forkByID(177732883) //This is the ID of the example project
-    }
-    
-    /** 
      * Adds a new project to the load projects display.
      */
     this.NewProject = function(projectName, id, owned, thumbnailPath){

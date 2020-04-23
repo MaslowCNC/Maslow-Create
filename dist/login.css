@@ -221,6 +221,7 @@ animation-delay: 0s;
 }
 
 .closeButton{
+    display: block;
     padding: 0px;
     position: relative;
     width: 20px;
