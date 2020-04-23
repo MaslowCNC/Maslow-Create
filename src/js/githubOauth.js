@@ -429,12 +429,6 @@ export default function GitHubModule(){
         browseDiv.appendChild(createNewProject)
         this.NewProject("New Project", null, true, "")
 
-
-        //Documentation Prompt
-        var checkOut = document.createElement("div")
-        checkOut.innerHTML = "Documentation"
-        checkOut.setAttribute("class", "newProject")
-        browseDiv.appendChild(checkOut)
             //Load projects
             var query
             var owned
@@ -530,8 +524,7 @@ export default function GitHubModule(){
                 shortProjectName = document.createTextNode(projectName)
             }
             if (owned){
-                console.log("mine")
-                project.style.backgroundColor = "blue"
+               project.classList.add("mine")
             }
             project.classList.add("project")
             project.setAttribute("id", projectName)

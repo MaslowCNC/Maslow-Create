@@ -432,10 +432,10 @@ animation-delay: 0s;
 }
 
 .newProject{
-  border: 2px solid red;
+    border: 2px solid white;
     position:relative;
     left:10px;
-    width: 48%;
+    width: 90%;
     height: 120px;
   }
 
@@ -448,7 +448,7 @@ animation-delay: 0s;
     display: flex;
     align-content: center;
     justify-content: space-around;
-    background-color: #ddd;
+    background-color: white;
     flex-wrap: wrap;
 
   }
@@ -493,6 +493,7 @@ animation-delay: 0s;
 }
 
 .project{
+    margin: 2px;
     width: 100px;
     height: 100px;
     display: inline-block;
@@ -502,16 +503,20 @@ animation-delay: 0s;
 }
 
 .browseDiv{
-    width: 500px;
-    height: 100px; 
-    display: inline-flex;;
+    width: 400px;
+    height: 100px;
+    display: inline-flex;
     padding: 10px;
-    font-size:13px;
-    justify-content: space-between;
+    font-size: 13px;
+    justify-content: flex-start;
 }
 
 .project:hover{
     background-color: #ffffff;
+}
+
+.mine{
+    background-color : #e6e6ff;
 }
 
 /* width */
