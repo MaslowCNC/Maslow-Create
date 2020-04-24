@@ -437,13 +437,11 @@ export default function GitHubModule(){
         }
         
         this.projectsSpaceDiv.appendChild(titlesDiv)
-
         this.NewProject("New Project", null, true, "")
 
             //Load projects
             var query
             var owned
-
 
             var sortMethod = sorting  //drop down input. temporarily inactive until we figure some better way to sort
             if(tabName == "yoursButton"){
