@@ -46,12 +46,6 @@ export default function GitHubModule(){
      */
     var intervalTimer
 
-    /** 
-     * Flag for active tab
-     * @type {string}
-     */
-    var myTab = "yoursButton"
-
     //Github pop up event listeners
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
@@ -141,6 +135,7 @@ export default function GitHubModule(){
 
         var searchBar = document.createElement("input")
         searchBar.setAttribute("type", "text")
+        searchBar.setAttribute("contenteditable", "true")
         searchBar.setAttribute("placeholder", "Search for project..")
         searchBar.setAttribute("class", "menu_search")
         searchBar.setAttribute("id", "project_search")
@@ -182,13 +177,13 @@ export default function GitHubModule(){
         //Event listeners 
 
         browseDisplay1.addEventListener("click", () => {
-           // titlesDiv.style.display = "flex"
+            // titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
             this.openTab("yoursButton")
             this.openTab("githubButton")
         })
         browseDisplay2.addEventListener("click", () => {
-           // titlesDiv.style.display = "none"
+            // titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
             this.openTab("yoursButton")
             this.openTab("githubButton")
@@ -396,48 +391,48 @@ export default function GitHubModule(){
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
             // add initial projects to div
-        var browseDiv = document.createElement("div")
-        browseDiv.setAttribute("class", "browseDiv")
-        this.projectsSpaceDiv.appendChild(browseDiv)
+            var browseDiv = document.createElement("div")
+            browseDiv.setAttribute("class", "browseDiv")
+            this.projectsSpaceDiv.appendChild(browseDiv)
 
-        //New project div
-        var createNewProject = document.createElement("div")
-        createNewProject.setAttribute("class", "newProject")
+            //New project div
+            var createNewProject = document.createElement("div")
+            createNewProject.setAttribute("class", "newProject")
 
-        browseDiv.appendChild(createNewProject)
-        //header for project list style display
-        var titlesDiv = document.createElement("div")
-        titlesDiv.setAttribute("id","titlesDiv")
-        var titles = document.createElement("div")
-        titles.innerHTML = ""
-        titles.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles)
-        var titles2 = document.createElement("div")
-        titles2.innerHTML = "Project"
-        titles2.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles2)
-        var titles3 = document.createElement("div")
-        titles3.innerHTML = "Creator"
-        titles3.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles3)
-        var titles4 = document.createElement("div")
-        titles4.innerHTML = "Created on"
-        titles4.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles4)
-        var titles5 = document.createElement("div")
-        titles5.innerHTML = "Last Modified"
-        titles5.setAttribute("class","browseColumn")
-        titlesDiv.appendChild(titles5)
+            browseDiv.appendChild(createNewProject)
+            //header for project list style display
+            var titlesDiv = document.createElement("div")
+            titlesDiv.setAttribute("id","titlesDiv")
+            var titles = document.createElement("div")
+            titles.innerHTML = ""
+            titles.setAttribute("class","browseColumn")
+            titlesDiv.appendChild(titles)
+            var titles2 = document.createElement("div")
+            titles2.innerHTML = "Project"
+            titles2.setAttribute("class","browseColumn")
+            titlesDiv.appendChild(titles2)
+            var titles3 = document.createElement("div")
+            titles3.innerHTML = "Creator"
+            titles3.setAttribute("class","browseColumn")
+            titlesDiv.appendChild(titles3)
+            var titles4 = document.createElement("div")
+            titles4.innerHTML = "Created on"
+            titles4.setAttribute("class","browseColumn")
+            titlesDiv.appendChild(titles4)
+            var titles5 = document.createElement("div")
+            titles5.innerHTML = "Last Modified"
+            titles5.setAttribute("class","browseColumn")
+            titlesDiv.appendChild(titles5)
 
-        if (!document.getElementById("thumb").classList.contains("active_filter")){
-            titlesDiv.style.display = "flex"
-            titlesDiv.style.marginTop = "10px"
-            browseDiv.style.width = "100%"
-            createNewProject.style.height = "80px"
-        }
+            if (!document.getElementById("thumb").classList.contains("active_filter")){
+                titlesDiv.style.display = "flex"
+                titlesDiv.style.marginTop = "10px"
+                browseDiv.style.width = "100%"
+                createNewProject.style.height = "80px"
+            }
         
-        this.projectsSpaceDiv.appendChild(titlesDiv)
-        this.NewProject("New Project", null, true, "")
+            this.projectsSpaceDiv.appendChild(titlesDiv)
+            this.NewProject("New Project", null, true, "")
 
             //Load projects
             var query
@@ -509,8 +504,7 @@ export default function GitHubModule(){
      * Adds a new project to the load projects display.
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
-        console.log("when does addproject run?")
-        console.log(owned)
+    
         //create a project element to display
         if (document.getElementById("thumb").classList.contains("active_filter")){
             this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
@@ -530,7 +524,7 @@ export default function GitHubModule(){
                 shortProjectName = document.createTextNode(projectName)
             }
             if (owned){
-               project.classList.add("mine")
+                project.classList.add("mine")
             }
             project.classList.add("project")
             
@@ -561,7 +555,7 @@ export default function GitHubModule(){
             project.appendChild(shortProjectName) 
 
             if (owned){
-               project.classList.add("mine")
+                project.classList.add("mine")
             }
 
             var ownerName = document.createElement("DIV")
@@ -616,13 +610,9 @@ export default function GitHubModule(){
      */
     this.openTab = function(tabName) {
 
-        // Declare all variables
-        var i, tabcontent, tablinks
-
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
-      
       
         this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value)
     }
