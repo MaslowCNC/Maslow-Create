@@ -378,7 +378,6 @@ export default function GitHubModule(){
             }
         }).then(result => {
             result.data.items.forEach(repo => {
-                   
                 const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                 this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
             })
@@ -391,7 +390,7 @@ export default function GitHubModule(){
      */
     this.loadProjectsBySearch = function(tabName, ev, searchString, sorting){
 
-        if(ev.key == "Enter" || ev.target == document.getElementById("filterDrop")){
+        if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
@@ -432,17 +431,20 @@ export default function GitHubModule(){
 
         if (!document.getElementById("thumb").classList.contains("active_filter")){
             titlesDiv.style.display = "flex"
+            titlesDiv.style.marginTop = "10px"
+            browseDiv.style.width = "100%"
+            createNewProject.style.height = "80px"
         }
-
+        
         this.projectsSpaceDiv.appendChild(titlesDiv)
 
         this.NewProject("New Project", null, true, "")
 
-        
-
             //Load projects
             var query
             var owned
+
+
             var sortMethod = sorting  //drop down input. temporarily inactive until we figure some better way to sort
             if(tabName == "yoursButton"){
                 owned = true
@@ -468,6 +470,7 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
+                    
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
@@ -508,8 +511,9 @@ export default function GitHubModule(){
      * Adds a new project to the load projects display.
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
+        console.log("when does addproject run?")
+        console.log(owned)
         //create a project element to display
-
         if (document.getElementById("thumb").classList.contains("active_filter")){
             this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
             var project = document.createElement("DIV")
@@ -531,6 +535,7 @@ export default function GitHubModule(){
                project.classList.add("mine")
             }
             project.classList.add("project")
+            
             project.setAttribute("id", projectName)
             project.appendChild(shortProjectName) 
             this.projectsSpaceDiv.appendChild(project) 
@@ -556,6 +561,10 @@ export default function GitHubModule(){
             project.setAttribute("id", projectName)
             project.classList.add("project")
             project.appendChild(shortProjectName) 
+
+            if (owned){
+               project.classList.add("mine")
+            }
 
             var ownerName = document.createElement("DIV")
             var ownerNameIn = document.createTextNode(owner)
