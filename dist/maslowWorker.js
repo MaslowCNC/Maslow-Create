@@ -108918,29 +108918,21 @@ return d[d.length-1];};return ", funcName].join("");
           
           const distPerPass    = -1*thickness/numberOfPasses;
           
-          const oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
-          
+          var oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
           
           console.log(oneProfile.geometry.paths);
           
           oneProfile.geometry.paths.forEach((path, index) => {
-              var i = 2;                                               //We start on the second path because the first one is created by shifting the base path down
+              var newPath = [];
+              var i = 1;
               while(i <= numberOfPasses){
                   path.forEach(point => {
-                      path.push([point[0], point[1], point[2] + i*distPerPass]);
+                      newPath.push([point[0], point[1], point[2] + i*distPerPass]);
                   });
                   i++;
               }
+              oneProfile.geometry.paths[index] = newPath;
           });
-          
-          // const profiles = []
-          // var i = 1
-          // while(i <= numberOfPasses){
-              // profiles.push(oneProfile.move(0,0,i*distPerPass));
-              // i++;
-          // }
-          
-          // const assembledPaths = api.Assembly(...profiles);
           
           return oneProfile.toKeptGeometry();
         case 'gcode':
