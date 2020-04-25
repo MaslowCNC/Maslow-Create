@@ -108909,10 +108909,8 @@ return d[d.length-1];};return ", funcName].join("");
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
         case 'stackedOutline':
-          console.log("Running stacked outline 11:02");
           const gcodeShape = Shape.fromGeometry(values[0]);
           const thickness = gcodeShape.size().height;
-          console.log("Thickness: " + thickness);
           const toolSize       = values[1];
           const numberOfPasses = values[2];
           const speed          = values[3];
@@ -108922,18 +108920,29 @@ return d[d.length-1];};return ", funcName].join("");
           
           const oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
           
-          const profiles = [];
-          var i = 1;
-          while(i <= numberOfPasses){
-              profiles.push(oneProfile.move(0,0,i*distPerPass));
-              i++;
-          }
           
-          console.log(profiles);
+          console.log(oneProfile.geometry.paths);
           
-          const assembledPaths = Assembly(...profiles);
+          oneProfile.geometry.paths.forEach((path, index) => {
+              var i = 2;                                               //We start on the second path because the first one is created by shifting the base path down
+              while(i <= numberOfPasses){
+                  path.forEach(point => {
+                      path.push([point[0], point[1], point[2] + i*distPerPass]);
+                  });
+                  i++;
+              }
+          });
           
-          return assembledPaths.toKeptGeometry();
+          // const profiles = []
+          // var i = 1
+          // while(i <= numberOfPasses){
+              // profiles.push(oneProfile.move(0,0,i*distPerPass));
+              // i++;
+          // }
+          
+          // const assembledPaths = api.Assembly(...profiles);
+          
+          return oneProfile.toKeptGeometry();
         case 'gcode':
           return "G0 would be here"
         case 'outline':
