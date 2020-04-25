@@ -56,8 +56,14 @@ export default class Gcode extends Atom {
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
-        this.createButton(valueList,this,'Download Gcode',() => {
-            const blob = new Blob([this.value], {type: 'text/plain;charset=utf-8'})
+        this.createButton(valueList,this,'Download Gcode',() => {const feedRate = this.findIOValue('speed')
+            var gcodeString = "G20 \nG90 \n"
+            
+            this.value.paths[0].forEach(point => {
+                gcodeString += "G1 X" + point[0] + " Y" + point[1] + " Z" + point[2] + " F" + feedRate + "\n"
+            })
+            
+            const blob = new Blob([gcodeString], {type: 'text/plain;charset=utf-8'})
             saveAs(blob, GlobalVariables.topLevelMolecule.name+'.nc')
         })
     }
