@@ -108909,31 +108909,50 @@ return d[d.length-1];};return ", funcName].join("");
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
         case 'stackedOutline':
-          console.log("Running stacked outline 11:02");
           const gcodeShape = Shape.fromGeometry(values[0]);
           const thickness = gcodeShape.size().height;
-          console.log("Thickness: " + thickness);
           const toolSize       = values[1];
           const numberOfPasses = values[2];
           const speed          = values[3];
           const tabs           = values[4];
+          const safeHeight     = values[5];
           
           const distPerPass    = -1*thickness/numberOfPasses;
           
-          const oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
+          var oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
           
-          const profiles = [];
-          var i = 1;
-          while(i <= numberOfPasses){
-              profiles.push(oneProfile.move(0,0,i*distPerPass));
-              i++;
-          }
+          console.log(oneProfile.geometry.paths);
           
-          console.log(profiles);
           
-          const assembledPaths = Assembly(...profiles);
+          //Split each path into it's layers
+          oneProfile.geometry.paths.forEach((path, index) => {
+              var newPath = [];
+              var i = 1;
+              while(i <= numberOfPasses){
+                  newPath.push([path[0][0], path[0][1], safeHeight]);    //Move to the starting position before plunging
+                  path.forEach(point => {
+                      newPath.push([point[0], point[1], point[2] + i*distPerPass]);
+                  });
+                  newPath.push([path[0][0], path[0][1], path[0][2] + i*distPerPass]);   //Add the first point again to close the path
+                  i++;
+              }
+              const lastIndex = newPath.length - 1;
+              newPath.push([newPath[lastIndex][0], newPath[lastIndex][1], safeHeight]);    //Retract back to safe height after finishing move
+              oneProfile.geometry.paths[index] = newPath;
+          });
           
-          return assembledPaths.toKeptGeometry();
+          //Join all the layers into a single continuous path
+          var completePath = [[0,0, safeHeight]];
+          oneProfile.geometry.paths.forEach(path => {
+              completePath = completePath.concat(path);
+          });
+          
+          console.log("Complete path");
+          console.log(completePath);
+          
+          oneProfile.geometry.paths = [completePath];
+          
+          return oneProfile.toKeptGeometry();
         case 'gcode':
           return "G0 would be here"
         case 'outline':
