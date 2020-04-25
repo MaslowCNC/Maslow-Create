@@ -160,8 +160,10 @@ export default function GitHubModule(){
 
         //Input to search for projects
 
-        searchBar.addEventListener('keyup', (e) => {
-            this.loadProjectsBySearch(e, searchBar.value, "updated") // updated just sorts content by most recently updated
+        searchBar.addEventListener('keydown', (e) => {
+            
+            this.loadProjectsBySearch("yoursButton",e, searchBar.value, "updated")
+            this.loadProjectsBySearch("githubButton",e, searchBar.value, "updated") // updated just sorts content by most recently updated
         })
         
 
@@ -386,6 +388,7 @@ export default function GitHubModule(){
     this.loadProjectsBySearch = function(tabName, ev, searchString, sorting){
 
         if(ev.key == "Enter"){
+            console.log("What?")
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
