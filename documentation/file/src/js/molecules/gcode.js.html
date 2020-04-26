@@ -40,6 +40,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
@@ -78,7 +79,6 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
 import GlobalVariables from &apos;../globalvariables.js&apos;
 import saveAs from &apos;../lib/FileSaver.js&apos;
-import SVGReader from &apos;../lib/SVGReader.js&apos;
 
 /**
  * This class creates the circle atom.
@@ -104,56 +104,27 @@ export default class Gcode extends Atom {
          */
         this.atomType = &apos;Gcode&apos;
         
-        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, GlobalVariables.api.sphere())
-        this.addIO(&apos;input&apos;, &apos;tool size&apos;, this, &apos;number&apos;, 5.35)
+        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
+        this.addIO(&apos;input&apos;, &apos;tool size&apos;, this, &apos;number&apos;, 6.35)
         this.addIO(&apos;input&apos;, &apos;passes&apos;, this, &apos;number&apos;, 6)
+        this.addIO(&apos;input&apos;, &apos;speed&apos;, this, &apos;number&apos;, 500)
+        this.addIO(&apos;input&apos;, &apos;tabs&apos;, this, &apos;string&apos;, &quot;true&quot;)
+        this.addIO(&apos;input&apos;, &apos;safe height&apos;, this, &apos;number&apos;, 6)
+        
         this.addIO(&apos;output&apos;, &apos;gcode&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         this.setValues(values)
         
-        //generate the correct codeblock for this atom on creation
         this.updateValue()
     }
     
     /**
-     * Generate a new .svg file from the input geometry, then compute a gcode path from it. Processing takes place in a worker thread
+     * Generate a layered outline of the part where the tool will cut
      */ 
     updateValue(){
-        /**
-         * Flag that the attom is now processing.
-         */
-        this.processing = true
-        this.clearAlert()
-        
-        const computeSvg = async (values, key) =&gt; {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
-            }catch(err){this.setAlert(err)}
-        }
-        
         try{
-            const input = this.findIOValue(&apos;geometry&apos;)
-            
-            computeSvg([input], &quot;svg&quot;).then(result =&gt; {
-                if (result != -1 ){
-                    
-                    const bounds = input.measureBoundingBox()
-                    const partThickness = bounds[1][2]-bounds[0][2]
-                    
-                    /**
-                     * Assign the atom value to be the new computed results.
-                     */
-                    this.value = this.svg2gcode(result, {
-                        passes: this.findIOValue(&apos;passes&apos;),
-                        materialWidth: -1*partThickness,
-                        bitWidth: this.findIOValue(&apos;tool size&apos;)
-                    })
-                    
-                }else{
-                    this.setAlert(&quot;Unable to compute&quot;)
-                }
-                this.processing = false
-            })
+            const values = [this.findIOValue(&apos;geometry&apos;), this.findIOValue(&apos;tool size&apos;), this.findIOValue(&apos;passes&apos;), this.findIOValue(&apos;speed&apos;), this.findIOValue(&apos;tabs&apos;), this.findIOValue(&apos;safe height&apos;)]
+            this.basicThreadValueProcessing(values, &quot;stackedOutline&quot;)
         }catch(err){this.setAlert(err)}
     }
     
@@ -163,157 +134,18 @@ export default class Gcode extends Atom {
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
-        this.createButton(valueList,this,&apos;Download Gcode&apos;,() =&gt; {
-            const blob = new Blob([this.value], {type: &apos;text/plain;charset=utf-8&apos;})
+        this.createButton(valueList,this,&apos;Download Gcode&apos;,() =&gt; {const feedRate = this.findIOValue(&apos;speed&apos;)
+            var gcodeString = &quot;G20 \nG90 \n&quot;
+            
+            this.value.paths[0].forEach(point =&gt; {
+                gcodeString += &quot;G1 X&quot; + point[0] + &quot; Y&quot; + point[1] + &quot; Z&quot; + point[2] + &quot; F&quot; + feedRate + &quot;\n&quot;
+            })
+            
+            const blob = new Blob([gcodeString], {type: &apos;text/plain;charset=utf-8&apos;})
             saveAs(blob, GlobalVariables.topLevelMolecule.name+&apos;.nc&apos;)
         })
     }
     
-    /**
-     * Does nothing, just here to supress the normal send to render behavior
-     */ 
-    sendToRender(){
-    }
-    
-    /**
-     * This function was taken from github. It needs to be more well documented.
-     */ 
-    svg2gcode(svg, settings) {
-        // clean off any preceding whitespace
-        svg = svg.replace(/^[\n\r \t]/gm, &apos;&apos;)
-        settings = settings || {}
-        settings.passes = settings.passes || 1
-        settings.materialWidth = settings.materialWidth || 6
-        settings.passWidth = settings.materialWidth/settings.passes
-        settings.scale = settings.scale || 1
-        settings.cutZ = settings.cutZ || 0 // cut z
-        settings.safeZ = settings.safeZ || 10   // safe z
-        settings.feedRate = settings.feedRate || 1400
-        settings.seekRate = settings.seekRate || 1100
-        settings.bitWidth = settings.bitWidth || 1 // in mm
-
-        var
-            scale=function(val) {
-                return val * settings.scale
-            },
-            paths = SVGReader.parse(svg, {}).allcolors,
-            gcode,
-            path
-
-        var idx = paths.length
-        while(idx--) {
-            var subidx = paths[idx].length
-            var bounds = { x : Infinity , y : Infinity, x2 : -Infinity, y2: -Infinity, area : 0}
-
-            // find lower and upper bounds
-            while(subidx--) {
-                if (paths[idx][subidx][0] &lt; bounds.x) {
-                    bounds.x = paths[idx][subidx][0]
-                }
-
-                if (paths[idx][subidx][1] &lt; bounds.y) {
-                    bounds.y = paths[idx][subidx][0]
-                }
-
-                if (paths[idx][subidx][0] &gt; bounds.x2) {
-                    bounds.x2 = paths[idx][subidx][0]
-                }
-                if (paths[idx][subidx][1] &gt; bounds.y2) {
-                    bounds.y2 = paths[idx][subidx][0]
-                }
-            }
-
-            // calculate area
-            bounds.area = (1 + bounds.x2 - bounds.x) * (1 + bounds.y2-bounds.y)
-            paths[idx].bounds = bounds
-        }
-
-        // cut the inside parts first
-        paths.sort(function(a, b) {
-        // sort by area
-            return (a.bounds.area &lt; b.bounds.area) ? -1 : 1
-        })
-
-        gcode = [
-            &apos;G90&apos;,
-            &apos;G21&apos;,
-            &apos;G1 Z&apos; + settings.safeZ,
-            &apos;G82&apos;,
-            &apos;M4&apos;
-        ]
-
-        for (var pathIdx = 0, pathLength = paths.length; pathIdx &lt; pathLength; pathIdx++) {
-            path = paths[pathIdx]
-
-            // seek to index 0
-            gcode.push([&apos;G1&apos;,
-                &apos;X&apos; + scale(path[0].x),
-                &apos;Y&apos; + scale(path[0].y),
-                &apos;F&apos; + settings.seekRate
-            ].join(&apos; &apos;))
-        
-            for (var p = settings.passWidth; p&gt;=settings.materialWidth; p-=-1*settings.passWidth) {
-
-                // begin the cut by dropping the tool to the work
-                gcode.push([&apos;G1&apos;,
-                    &apos;Z&apos; + (settings.cutZ + p),
-                    &apos;F&apos; + &apos;200&apos;
-                ].join(&apos; &apos;))
-
-                // keep track of the current path being cut, as we may need to reverse it
-                var localPath = []
-                for (var segmentIdx=0, segmentLength = path.length; segmentIdx&lt;segmentLength; segmentIdx++) {
-                    var segment = path[segmentIdx]
-
-                    var localSegment = [&apos;G1&apos;,
-                        &apos;X&apos; + scale(segment.x),
-                        &apos;Y&apos; + scale(segment.y),
-                        &apos;F&apos; + settings.feedRate
-                    ].join(&apos; &apos;)
-
-                    // feed through the material
-                    gcode.push(localSegment)
-                    localPath.push(localSegment)
-
-                    // if the path is not closed, reverse it, drop to the next cut depth and cut
-                    // this handles lines
-                    if (segmentIdx === segmentLength - 1 &amp;&amp;
-                (segment.x !== path[0].x || segment.y !== path[0].y))
-                    {
-
-                        p+=settings.passWidth
-                        if (p&lt;settings.materialWidth) {
-                            // begin the cut by dropping the tool to the work
-                            gcode.push([&apos;G1&apos;,
-                                &apos;Z&apos; + (settings.cutZ + p),
-                                &apos;F&apos; + &apos;200&apos;
-                            ].join(&apos; &apos;))
-
-                            Array.prototype.push.apply(gcode, localPath.reverse())
-                        }
-                    }
-                }
-            }
-
-            // go safe
-            gcode.push([&apos;G1&apos;,
-                &apos;Z&apos; + settings.safeZ,
-                &apos;F&apos; + &apos;300&apos;
-            ].join(&apos; &apos;))
-        }
-
-        // just wait there for a second
-        gcode.push(&apos;G4 P1&apos;)
-
-        // turn off the spindle
-        gcode.push(&apos;M5&apos;)
-
-        // go home
-        gcode.push(&apos;G1 Z&apos; + settings.safeZ + &apos; F300&apos;)
-        gcode.push(&apos;G1 X0 Y0 F800&apos;)
-
-        return gcode.join(&apos;\n&apos;)
-    }
 }</code></pre>
 
 </div>

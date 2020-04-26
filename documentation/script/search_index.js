@@ -30,6 +30,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/box.js~box",
+    "class/src/js/molecules/box.js~Box.html",
+    "<span>Box</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/box.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/circle.js~circle",
     "class/src/js/molecules/circle.js~Circle.html",
     "<span>Circle</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/circle.js</span>",
@@ -1092,6 +1098,96 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/box.js",
+    "file/src/js/molecules/box.js.html",
+    "src/js/molecules/box.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/box.js~box#atomtype",
+    "class/src/js/molecules/box.js~Box.html#instance-member-atomType",
+    "src/js/molecules/box.js~Box#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#clickmove",
+    "class/src/js/molecules/box.js~Box.html#instance-method-clickMove",
+    "src/js/molecules/box.js~Box#clickMove",
+    "method"
+  ],
+  [
+    "src/js/molecules/box.js~box#clickup",
+    "class/src/js/molecules/box.js~Box.html#instance-method-clickUp",
+    "src/js/molecules/box.js~Box#clickUp",
+    "method"
+  ],
+  [
+    "src/js/molecules/box.js~box#constructor",
+    "class/src/js/molecules/box.js~Box.html#instance-constructor-constructor",
+    "src/js/molecules/box.js~Box#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/box.js~box#draw",
+    "class/src/js/molecules/box.js~Box.html#instance-method-draw",
+    "src/js/molecules/box.js~Box#draw",
+    "method"
+  ],
+  [
+    "src/js/molecules/box.js~box#endx",
+    "class/src/js/molecules/box.js~Box.html#instance-member-endX",
+    "src/js/molecules/box.js~Box#endX",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#endy",
+    "class/src/js/molecules/box.js~Box.html#instance-member-endY",
+    "src/js/molecules/box.js~Box#endY",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#height",
+    "class/src/js/molecules/box.js~Box.html#instance-member-height",
+    "src/js/molecules/box.js~Box#height",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#name",
+    "class/src/js/molecules/box.js~Box.html#instance-member-name",
+    "src/js/molecules/box.js~Box#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#radius",
+    "class/src/js/molecules/box.js~Box.html#instance-member-radius",
+    "src/js/molecules/box.js~Box#radius",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#startx",
+    "class/src/js/molecules/box.js~Box.html#instance-member-startX",
+    "src/js/molecules/box.js~Box#startX",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#starty",
+    "class/src/js/molecules/box.js~Box.html#instance-member-startY",
+    "src/js/molecules/box.js~Box#startY",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#type",
+    "class/src/js/molecules/box.js~Box.html#instance-member-type",
+    "src/js/molecules/box.js~Box#type",
+    "member"
+  ],
+  [
+    "src/js/molecules/box.js~box#value",
+    "class/src/js/molecules/box.js~Box.html#instance-member-value",
+    "src/js/molecules/box.js~Box#value",
+    "member"
+  ],
+  [
     "src/js/molecules/circle.js",
     "file/src/js/molecules/circle.js.html",
     "src/js/molecules/circle.js",
@@ -1578,24 +1674,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/gcode.js~gcode#processing",
-    "class/src/js/molecules/gcode.js~Gcode.html#instance-member-processing",
-    "src/js/molecules/gcode.js~Gcode#processing",
-    "member"
-  ],
-  [
-    "src/js/molecules/gcode.js~gcode#sendtorender",
-    "class/src/js/molecules/gcode.js~Gcode.html#instance-method-sendToRender",
-    "src/js/molecules/gcode.js~Gcode#sendToRender",
-    "method"
-  ],
-  [
-    "src/js/molecules/gcode.js~gcode#svg2gcode",
-    "class/src/js/molecules/gcode.js~Gcode.html#instance-method-svg2gcode",
-    "src/js/molecules/gcode.js~Gcode#svg2gcode",
-    "method"
-  ],
-  [
     "src/js/molecules/gcode.js~gcode#updatesidebar",
     "class/src/js/molecules/gcode.js~Gcode.html#instance-method-updateSidebar",
     "src/js/molecules/gcode.js~Gcode#updateSidebar",
@@ -1606,12 +1684,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/gcode.js~Gcode.html#instance-method-updateValue",
     "src/js/molecules/gcode.js~Gcode#updateValue",
     "method"
-  ],
-  [
-    "src/js/molecules/gcode.js~gcode#value",
-    "class/src/js/molecules/gcode.js~Gcode.html#instance-member-value",
-    "src/js/molecules/gcode.js~Gcode#value",
-    "member"
   ],
   [
     "src/js/molecules/githubmolecule.js",
@@ -1830,9 +1902,21 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#clickup",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-clickUp",
+    "src/js/molecules/molecule.js~Molecule#clickUp",
+    "method"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#constructor",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-constructor-constructor",
     "src/js/molecules/molecule.js~Molecule#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#copy",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-copy",
+    "src/js/molecules/molecule.js~Molecule#copy",
     "method"
   ],
   [
@@ -2733,6 +2817,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#requestreadme",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-requestReadme",
     "src/js/prototypes/atom.js~Atom#requestReadme",
+    "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#selectbox",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-selectBox",
+    "src/js/prototypes/atom.js~Atom#selectBox",
     "method"
   ],
   [

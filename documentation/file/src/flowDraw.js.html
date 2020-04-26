@@ -40,6 +40,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
@@ -91,29 +92,6 @@ GlobalVariables.runMode = window.location.href.includes(&apos;run&apos;) //Check
 GlobalVariables.canvas.width = window.innerWidth
 GlobalVariables.canvas.height = window.innerHeight/2.5
 
-
-/** 
-* Ctrl event key
-* @type {number}
-*/
-const ctrlKey = 17
-/** 
-* Cmmd event key
-* @type {number}
-*/
-const cmdKey = 91
-/** 
-* V event key
-* @type {number}
-*/
-const vKey = 86
-/** 
-* C event key
-* @type {number}
-*/
-const cKey = 67
-
-
 // Event Listeners
 /** 
  * The cansvas on which the atoms are placed.
@@ -143,7 +121,7 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
     }
 
     var clickHandledByMolecule = false
-    
+
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
         
         if (molecule.clickDown(event.clientX,event.clientY,clickHandledByMolecule) == true){
@@ -151,8 +129,21 @@ flowCanvas.addEventListener(&apos;mousedown&apos;, event =&gt; {
         }
 
     })
+
+    if (!clickHandledByMolecule){
+
+        GlobalVariables.currentMolecule.placeAtom({
+            parentMolecule: GlobalVariables.currentMolecule, 
+            x: GlobalVariables.pixelsToWidth(event.clientX),
+            y: GlobalVariables.pixelsToHeight(event.clientY),
+            parent: GlobalVariables.currentMolecule,
+            name: &apos;Box&apos;,
+            atomType: &apos;Box&apos;
+        }, null, GlobalVariables.availableTypes)
+    }
     
     if(!clickHandledByMolecule){
+
         GlobalVariables.currentMolecule.backgroundClick() 
     }
     
@@ -199,38 +190,44 @@ flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
         molecule.clickUp(event.clientX,event.clientY)      
     })
+    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)      
 })
 
+
+   
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
 */
-let newAtom
-
 window.addEventListener(&apos;keydown&apos;, e =&gt; {
 
-    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
-        GlobalVariables.ctrlDown = true
-    } 
-    if (GlobalVariables.ctrlDown &amp;&amp; e.keyCode == cKey &amp;&amp; document.activeElement.id == &quot;mainBody&quot;) {
-        newAtom = GlobalVariables.atomsToCopy
+    if(!event.srcElement.isContentEditable &amp;&amp; [&apos;c&apos;, &apos;v&apos;, &apos;Backspace&apos;].includes(e.key)){
+        event.preventDefault()
     }
-    if (GlobalVariables.ctrlDown &amp;&amp; e.keyCode == vKey &amp;&amp; document.activeElement.id == &quot;mainBody&quot; ) {
-        newAtom.forEach(item =&gt; {
+
+    if (e.key == &quot;Control&quot; || e.key == &quot;Meta&quot;) {
+        GlobalVariables.ctrlDown = true
+    }      
+    if (GlobalVariables.ctrlDown &amp;&amp;  e.key == &quot;c&quot; &amp;&amp; document.activeElement.id == &quot;mainBody&quot;) {
+        GlobalVariables.atomsToCopy = []
+        GlobalVariables.currentMolecule.copy()
+    }
+    if (GlobalVariables.ctrlDown &amp;&amp;  e.key == &quot;v&quot; &amp;&amp; document.activeElement.id == &quot;mainBody&quot; ) {
+        GlobalVariables.atomsToCopy.forEach(item =&gt; {
             let newAtomID = GlobalVariables.generateUniqueID()
             item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, null, GlobalVariables.availableTypes, true)    
+            GlobalVariables.currentMolecule.placeAtom(item, true)    
         })   
     }
     //every time a key is pressed
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
-        molecule.keyPress(event.key)      
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {  
+        molecule.keyPress(e.key)      
     })
-
+   
 })
 
 window.addEventListener(&apos;keyup&apos;, e =&gt; {
-    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) {
+    if (e.key == &quot;Control&quot; || e.key == &quot;Meta&quot;) {
         GlobalVariables.ctrlDown = false
     }
 })
@@ -368,6 +365,7 @@ function init() {
 function onWindowResize() {
 
     GlobalVariables.canvas.width = window.innerWidth
+
     //reset screen parameters 
     if(!GlobalVariables.runMode){
         document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+ (window.innerHeight - GlobalVariables.canvas.height)+&apos;px&apos;)
@@ -375,7 +373,6 @@ function onWindowResize() {
         document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
     }
     document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/1.7+&apos;px&apos;)
-
     GlobalVariables.display.onWindowResize()
 
 }

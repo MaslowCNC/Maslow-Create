@@ -40,6 +40,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
@@ -257,35 +258,6 @@ export default function GitHubModule(){
         middleBrowseDiv.setAttribute(&quot;class&quot;, &quot;middleBrowse&quot;)
         popup.appendChild(middleBrowseDiv)
 
-        /*
-        //Filter Dropdown
-        var filterDiv = document.createElement(&quot;div&quot;)
-        var filterLabel = document.createElement(&quot;LABEL&quot;)
-        filterLabel.textContent = &quot;Sort by&quot;
-        filterLabel.setAttribute(&quot;style&quot;,&quot;padding-top: 12px; font-size: 12px&quot;)
-        middleBrowseDiv.appendChild(filterLabel)
-        filterDiv.setAttribute(&quot;class&quot;,&quot;custom-select&quot;)
-        //filterDiv.setAttribute(&quot;style&quot;,&quot;margin-right:0; width:200px&quot;)
-        var filterDrop = document.createElement(&quot;select&quot;)
-        filterDrop.setAttribute(&quot;id&quot;,&quot;filterDrop&quot;)
-
-
-        var filterDrop1 = document.createElement(&quot;option&quot;)
-        filterDrop1.textContent = &quot;stars&quot;
-        filterDrop1.setAttribute(&quot;value&quot;,&quot;1&quot;)
-        filterDrop.appendChild(filterDrop1)
-        var filterDrop2 = document.createElement(&quot;option&quot;)
-        filterDrop2.textContent = &quot;updated&quot;
-        filterDrop2.setAttribute(&quot;value&quot;,&quot;2&quot;)
-        filterDrop.appendChild(filterDrop2)
-        var filterDrop3 = document.createElement(&quot;option&quot;)
-        filterDrop3.textContent = &quot;Forks&quot;
-        filterDrop3.setAttribute(&quot;value&quot;,&quot;3&quot;)
-        filterDrop.appendChild(filterDrop3)  
-
-        middleBrowseDiv.appendChild(filterDiv)
-        filterDiv.appendChild(filterDrop) */
-
         var searchIcon = document.createElement(&quot;IMG&quot;)
         searchIcon.setAttribute(&quot;src&quot;, &apos;/imgs/search_icon.svg&apos;)
         searchIcon.setAttribute(&quot;style&quot;, &quot;width: 20px; float: right; color: white; position: relative;right: 3px; opacity: 0.5;&quot;)
@@ -317,23 +289,9 @@ export default function GitHubModule(){
 
         //Input to search for projects
 
-        /*var middleBrowseDiv2 = document.createElement(&quot;div&quot;)
-        middleBrowseDiv2.setAttribute(&quot;class&quot;, &quot;middleBrowse2&quot;)
-        popup.appendChild(middleBrowseDiv2) */
-
         searchBar.addEventListener(&apos;keyup&apos;, (e) =&gt; {
-            //var opt = document.getElementById(&quot;filterDrop&quot;)
-            //var strUser = opt.options[opt.selectedIndex].textContent
             this.loadProjectsBySearch(e, searchBar.value, &quot;updated&quot;) // updated just sorts content by most recently updated
         })
-        /*filterDiv.addEventListener(&quot;change&quot;, (e) =&gt; {
-
-            var opt = document.getElementById(&quot;filterDrop&quot;)
-            opt.classList.toggle(&quot;open&quot;)
-            var strUser = opt.options[opt.selectedIndex].textContent
-            this.loadProjectsBySearch(e, searchBar.value, strUser)
-            
-        })*/
         //header for project list style display
         var titlesDiv = document.createElement(&quot;div&quot;)
         titlesDiv.setAttribute(&quot;id&quot;,&quot;titlesDiv&quot;)
@@ -460,35 +418,6 @@ export default function GitHubModule(){
         searchBar.setAttribute(&quot;id&quot;, &quot;project_search&quot;)
         middleBrowseDiv.appendChild(searchBar)
 
-        /*temporarily removed //Filter Dropdown
-        var filterDiv = document.createElement(&quot;div&quot;)
-        var filterLabel = document.createElement(&quot;LABEL&quot;)
-        filterLabel.textContent = &quot;Sort by&quot;
-        filterLabel.setAttribute(&quot;style&quot;,&quot;padding-top: 12px; font-size: 12px&quot;)
-        middleBrowseDiv.appendChild(filterLabel)
-        filterDiv.setAttribute(&quot;class&quot;,&quot;custom-select&quot;)
-        //filterDiv.setAttribute(&quot;style&quot;,&quot;margin-right:0; width:200px&quot;)
-        var filterDrop = document.createElement(&quot;select&quot;)
-        filterDrop.setAttribute(&quot;id&quot;,&quot;filterDrop&quot;)
-        filterDrop.setAttribute(&quot;class&quot;,&quot;select-box1&quot;)
-
-        var filterDrop1 = document.createElement(&quot;option&quot;)
-        filterDrop1.textContent = &quot;stars&quot;
-        filterDrop1.setAttribute(&quot;value&quot;,&quot;1&quot;)
-        filterDrop.appendChild(filterDrop1)
-        var filterDrop2 = document.createElement(&quot;option&quot;)
-        filterDrop2.textContent = &quot;updated&quot;
-        filterDrop2.setAttribute(&quot;value&quot;,&quot;2&quot;)
-        filterDrop.appendChild(filterDrop2)
-        var filterDrop3 = document.createElement(&quot;option&quot;)
-        filterDrop3.textContent = &quot;Forks&quot;
-        filterDrop3.setAttribute(&quot;value&quot;,&quot;3&quot;)
-        filterDrop.appendChild(filterDrop3)
-
-        middleBrowseDiv.appendChild(filterDiv)
-        filterDiv.appendChild(filterDrop)
-        */
-
         //Display option buttons
         var browseDisplay1 = document.createElement(&quot;div&quot;)
         browseDisplay1.setAttribute(&quot;class&quot;, &quot;browseDisplay&quot;)
@@ -522,15 +451,6 @@ export default function GitHubModule(){
             var strUser = opt.options[opt.selectedIndex].textContent
             this.loadNonGit(strUser)
         })
-        
-        /* filterDiv.addEventListener(&quot;change&quot;, () =&gt; {
-
-            var opt = document.getElementById(&quot;filterDrop&quot;)
-            var strUser = opt.options[opt.selectedIndex].textContent
-            this.loadNonGit(strUser)
-        })*/
-        
-
         //header for project list style display
         var titlesDiv = document.createElement(&quot;div&quot;)
         titlesDiv.setAttribute(&quot;id&quot;,&quot;titlesDiv&quot;)
@@ -563,7 +483,7 @@ export default function GitHubModule(){
         popup.appendChild(this.projectsSpaceDiv)
         
         this.loadNonGit()
-
+ 
         //display options event listeners
 
         browseDisplay1.addEventListener(&quot;click&quot;, () =&gt; {
@@ -647,10 +567,6 @@ export default function GitHubModule(){
             //Figure out how many repos this user has, search will throw an error if they have 0;
             octokit.repos.list({
                 affiliation: &apos;owner&apos;,
-            }).then(({data}) =&gt; {
-                if(data.length == 0){                   //If the user has no repos at all, the search will fail so we want to spawn a popup here and clone the example
-                    this.cloneExampleProjectPopup()
-                }
             })
             
             octokit.search.repos({
@@ -666,9 +582,7 @@ export default function GitHubModule(){
                     const thumbnailPath = &quot;https://raw.githubusercontent.com/&quot;+repo.full_name+&quot;/master/project.svg?sanitize=true&quot;
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
-                if(result.data.items.length == 0 &amp;&amp; searchString == &apos;&apos;){ //If the empty search returned no results on loading
-                    this.cloneExampleProjectPopup()
-                }
+                
             }) 
         } 
     }
@@ -1490,7 +1404,12 @@ export default function GitHubModule(){
         
         let rawFile = JSON.parse(atob(result.data.content))
         
-        return this.convertFromOldFormat(rawFile)
+        if(rawFile.filetypeVersion == 1){
+            return rawFile
+        }
+        else{
+            return this.convertFromOldFormat(rawFile)
+        }
     }
     
     /** 

@@ -40,6 +40,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
@@ -142,6 +143,7 @@ export default class Molecule extends Atom{
             atomType: &apos;Output&apos;
         }, false)
     }
+
     
     /**
      * Gives this molecule inputs with the same names as all of it&apos;s parent&apos;s inputs
@@ -175,8 +177,20 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
+
     }
     
+    /**
+     * Set the atom&apos;s response to a mouse click up. If the atom is moving this makes it stop moving.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
+    clickUp(){
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =&gt;{
+            atom.isMoving = false
+        })
+    }
+
     /**
      * Handle double clicks by replacing the molecule currently on the screen with this one, esentially diving into it.
      * @param {number} x - The x cordinate of the click
@@ -205,16 +219,23 @@ export default class Molecule extends Atom{
      * Handle a background click (a click which doesn&apos;t land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
-        /* Only erase copy array if control isn&apos;t pressed */
-        if(!GlobalVariables.ctrlDown){
-            GlobalVariables.atomsToCopy.length = 0
-        }
         /**
          * Flag that the attom is now selected.
          */
         this.selected = true
         this.updateSidebar()
         this.sendToRender()
+    }
+
+    /**
+     * Pushes serialized atoms into array if selected
+     */
+    copy(){
+        this.nodesOnTheScreen.forEach(atom =&gt; {
+            if(atom.selected){
+                GlobalVariables.atomsToCopy.push(atom.serialize())
+            }
+        })
     }
     
     /**
@@ -239,7 +260,7 @@ export default class Molecule extends Atom{
                 this.nodesOnTheScreen.forEach(atom =&gt; {
                     if(atom.atomType == &apos;Input&apos; &amp;&amp; moleculeInput.name == atom.name){
                         if(atom.getOutput() != moleculeInput.getValue() &amp;&amp; atom.output.connectors.length &gt; 0){//Don&apos;t update the input if it hasn&apos;t changed
-                            
+                            //Sets to true processing variable??
                             this.processing = true
                             atom.updateValue()
                         }
@@ -259,7 +280,7 @@ export default class Molecule extends Atom{
         }
         
         //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
+        if(this.selected){
             this.sendToRender()
         }
     }

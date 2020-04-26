@@ -1,11 +1,11 @@
 {
-  "coverage": "98.5%",
-  "expectCount": 469,
-  "actualCount": 462,
+  "coverage": "98.53%",
+  "expectCount": 479,
+  "actualCount": 472,
   "files": {
     "src/flowDraw.js": {
-      "expectCount": 10,
-      "actualCount": 10,
+      "expectCount": 6,
+      "actualCount": 6,
       "undocumentLines": []
     },
     "src/js/alwaysOneFreeInput.js": {
@@ -46,6 +46,11 @@
     "src/js/molecules/BOM.js": {
       "expectCount": 11,
       "actualCount": 11,
+      "undocumentLines": []
+    },
+    "src/js/molecules/box.js": {
+      "expectCount": 15,
+      "actualCount": 15,
       "undocumentLines": []
     },
     "src/js/molecules/circle.js": {
@@ -99,8 +104,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/gcode.js": {
-      "expectCount": 10,
-      "actualCount": 10,
+      "expectCount": 6,
+      "actualCount": 6,
       "undocumentLines": []
     },
     "src/js/molecules/githubmolecule.js": {
@@ -119,10 +124,10 @@
       "undocumentLines": []
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 32,
-      "actualCount": 31,
+      "expectCount": 34,
+      "actualCount": 33,
       "undocumentLines": [
-        166
+        186
       ]
     },
     "src/js/molecules/output.js": {
@@ -196,8 +201,8 @@
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 50,
-      "actualCount": 50,
+      "expectCount": 51,
+      "actualCount": 51,
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {

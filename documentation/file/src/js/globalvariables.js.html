@@ -40,6 +40,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
@@ -77,6 +78,7 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/globalvariables.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { create, all }  from &apos;mathjs&apos;
 import Assembly         from &apos;./molecules/assembly.js&apos;
+import Box              from &apos;./molecules/box.js&apos;
 import CutList          from &apos;./molecules/cutlist.js&apos;
 import Circle           from &apos;./molecules/circle.js&apos;
 import Color            from &apos;./molecules/color.js&apos;
@@ -132,7 +134,8 @@ class GlobalVariables{
         * @type {array}
         */
         this.availableTypes = {
-
+        
+            box:                {creator: Box, atomType: &apos;Box&apos;},
             intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;, atomCategory: &apos;Interactions&apos;},
             difference:         {creator: Difference, atomType: &apos;Difference&apos;, atomCategory: &apos;Interactions&apos;},
             assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;, atomCategory: &apos;Interactions&apos;},

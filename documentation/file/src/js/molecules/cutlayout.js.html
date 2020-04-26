@@ -40,6 +40,7 @@
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
@@ -108,8 +109,8 @@ export default class CutLayout extends Atom{
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
 
         this.addIO(&apos;input&apos;, &apos;Spacing&apos;, this, &apos;number&apos;, 5)
-        this.addIO(&apos;input&apos;, &apos;Sheet Width&apos;, this, &apos;number&apos;, 50)
-        this.addIO(&apos;input&apos;, &apos;Sheet Length&apos;, this, &apos;number&apos;, 50)
+        //this.addIO(&apos;input&apos;, &apos;Sheet Width&apos;, this, &apos;number&apos;, 50)
+        //this.addIO(&apos;input&apos;, &apos;Sheet Length&apos;, this, &apos;number&apos;, 50)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         this.setValues(values)
@@ -120,7 +121,7 @@ export default class CutLayout extends Atom{
     */ 
     updateValue(){
         try{
-            const values = [this.findIOValue(&apos;geometry&apos;)]
+            const values = [this.findIOValue(&apos;geometry&apos;), this.findIOValue(&apos;Spacing&apos;)]
             
             this.basicThreadValueProcessing(values, &quot;layout&quot;)
         }catch(err){
