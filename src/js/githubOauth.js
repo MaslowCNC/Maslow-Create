@@ -46,6 +46,12 @@ export default function GitHubModule(){
      */
     var intervalTimer
 
+     /** 
+     * The timer used to trigger saving of the file.
+     * @type {object}
+     */
+    var page = 1
+
     //Github pop up event listeners
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
@@ -178,21 +184,18 @@ export default function GitHubModule(){
         pageBack.setAttribute("class", "page_change")
         pageBack.innerHTML = "&#8249;"
 
-
         const pageForward = document.createElement("button")
         pageChange.appendChild(pageBack)
         pageChange.appendChild(pageForward)
         pageForward.setAttribute("id", "forward")
         pageForward.setAttribute("class", "page_change")
-
         pageForward.innerHTML = "&#8250;"
-
 
         popup.appendChild(pageChange)
 
         
-        this.openTab("yoursButton")
-        this.openTab("githubButton")
+        this.openTab("yoursButton", page)
+        this.openTab("githubButton", page)
 
         //Event listeners 
 
@@ -207,6 +210,16 @@ export default function GitHubModule(){
             browseDisplay2.classList.add("active_filter")
             this.openTab("yoursButton")
             this.openTab("githubButton")
+        })
+        pageForward.addEventListener("click", () => {
+            page +=1
+            this.openTab("yoursButton", page)
+            this.openTab("githubButton", page) 
+        })
+        pageBack.addEventListener("click", () => {
+            page -=1
+            this.openTab("yoursButton", page)
+            this.openTab("githubButton", page) 
         })
     }
 
@@ -403,7 +416,7 @@ export default function GitHubModule(){
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting){
+    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber){
 
         if(ev.key == "Enter"){
             console.log("What?")
@@ -478,7 +491,7 @@ export default function GitHubModule(){
                 q: query,
                 sort: sortMethod,
                 per_page: 50,
-                page: 1,
+                page: pageNumber,
                 headers: {
                     accept: 'application/vnd.github.mercy-preview+json'
                 }
@@ -629,13 +642,13 @@ export default function GitHubModule(){
     /** 
      * Runs when you switch tabs up top.
      */
-    this.openTab = function(tabName) {
+    this.openTab = function(tabName, page) {
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
       
-        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value)
+        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
     }
     
     /** 
