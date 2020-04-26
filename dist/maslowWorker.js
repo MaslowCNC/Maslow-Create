@@ -108859,7 +108859,7 @@ return d[d.length-1];};return ", funcName].join("");
           
           console.log(flatItems);
           
-          const laidOut = Layers(...flatItems).Page();
+          const laidOut = Layers(...flatItems).Page({itemMargin: values[1]});
           
           return laidOut.toDisjointGeometry();
         case 'difference':
@@ -108908,11 +108908,62 @@ return d[d.length-1];};return ", funcName].join("");
         case 'svg':
           const svgString = await toSvg(Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
           return svgString;
+        case 'stackedOutline':
+          const gcodeShape = Shape.fromGeometry(values[0]);
+          const thickness = gcodeShape.size().height;
+          const toolSize       = values[1];
+          const numberOfPasses = values[2];
+          const speed          = values[3];
+          const tabs           = values[4];
+          const safeHeight     = values[5];
+          
+          const distPerPass    = -1*thickness/numberOfPasses;
+          
+          var oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
+          
+          console.log(oneProfile.geometry.paths);
+          
+          
+          //Split each path into it's layers
+          oneProfile.geometry.paths.forEach((path, index) => {
+              var newPath = [];
+              var i = 1;
+              while(i <= numberOfPasses){
+                  newPath.push([path[0][0], path[0][1], safeHeight]);    //Move to the starting position before plunging
+                  path.forEach(point => {
+                      newPath.push([point[0], point[1], point[2] + i*distPerPass]);
+                  });
+                  newPath.push([path[0][0], path[0][1], path[0][2] + i*distPerPass]);   //Add the first point again to close the path
+                  i++;
+              }
+              const lastIndex = newPath.length - 1;
+              newPath.push([newPath[lastIndex][0], newPath[lastIndex][1], safeHeight]);    //Retract back to safe height after finishing move
+              oneProfile.geometry.paths[index] = newPath;
+          });
+          
+          //Join all the layers into a single continuous path
+          var completePath = [[0,0, safeHeight]];
+          oneProfile.geometry.paths.forEach(path => {
+              completePath = completePath.concat(path);
+          });
+          
+          console.log("Complete path");
+          console.log(completePath);
+          
+          oneProfile.geometry.paths = [completePath];
+          
+          return oneProfile.toKeptGeometry();
+        case 'gcode':
+          return "G0 would be here"
+        case 'outline':
+          return Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry();
         case 'SVG Picture':
           const shape = Shape.fromGeometry(values[0]).center();
           const bounds = shape.measureBoundingBox();
           const cameraDistance = 6 * Math.max(...bounds[1]);
           return toSvg$2({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+        case 'size':
+          return Shape.fromGeometry(values[0]).size();
         case 'tag':
           return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
         case 'specify':

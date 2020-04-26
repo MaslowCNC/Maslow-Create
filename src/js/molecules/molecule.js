@@ -65,6 +65,7 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, false)
     }
+
     
     /**
      * Gives this molecule inputs with the same names as all of it's parent's inputs
@@ -98,8 +99,20 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
+
     }
     
+    /**
+     * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
+    clickUp(){
+        GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =>{
+            atom.isMoving = false
+        })
+    }
+
     /**
      * Handle double clicks by replacing the molecule currently on the screen with this one, esentially diving into it.
      * @param {number} x - The x cordinate of the click
@@ -128,16 +141,23 @@ export default class Molecule extends Atom{
      * Handle a background click (a click which doesn't land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
-        /* Only erase copy array if control isn't pressed */
-        if(!GlobalVariables.ctrlDown){
-            GlobalVariables.atomsToCopy.length = 0
-        }
         /**
          * Flag that the attom is now selected.
          */
         this.selected = true
         this.updateSidebar()
         this.sendToRender()
+    }
+
+    /**
+     * Pushes serialized atoms into array if selected
+     */
+    copy(){
+        this.nodesOnTheScreen.forEach(atom => {
+            if(atom.selected){
+                GlobalVariables.atomsToCopy.push(atom.serialize())
+            }
+        })
     }
     
     /**
@@ -162,7 +182,7 @@ export default class Molecule extends Atom{
                 this.nodesOnTheScreen.forEach(atom => {
                     if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
                         if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){//Don't update the input if it hasn't changed
-                            
+                            //Sets to true processing variable??
                             this.processing = true
                             atom.updateValue()
                         }
@@ -182,7 +202,7 @@ export default class Molecule extends Atom{
         }
         
         //If this molecule is selected, send the updated value to the renderer
-        if (this.selected){
+        if(this.selected){
             this.sendToRender()
         }
     }
