@@ -212,12 +212,12 @@ export default function GitHubModule(){
             this.openTab("githubButton")
         })
         pageForward.addEventListener("click", () => {
-            page +=1
+            if (page >=1){ page +=1 }
             this.openTab("yoursButton", page)
             this.openTab("githubButton", page) 
         })
         pageBack.addEventListener("click", () => {
-            page -=1
+            if (page >1){page -=1}
             this.openTab("yoursButton", page)
             this.openTab("githubButton", page) 
         })
