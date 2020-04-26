@@ -172,6 +172,24 @@ export default function GitHubModule(){
         this.projectsSpaceDiv.setAttribute("style", "overflow-x: hidden; margin-top: 10px;")
         popup.appendChild(this.projectsSpaceDiv)
         
+        const pageChange = document.createElement("div")
+        const pageBack = document.createElement("button")
+        pageBack.setAttribute("id", "back")
+        pageBack.setAttribute("class", "page_change")
+        pageBack.innerHTML = "&#8249;"
+
+
+        const pageForward = document.createElement("button")
+        pageChange.appendChild(pageBack)
+        pageChange.appendChild(pageForward)
+        pageForward.setAttribute("id", "forward")
+        pageForward.setAttribute("class", "page_change")
+
+        pageForward.innerHTML = "&#8250;"
+
+
+        popup.appendChild(pageChange)
+
         
         this.openTab("yoursButton")
         this.openTab("githubButton")
@@ -459,7 +477,7 @@ export default function GitHubModule(){
             octokit.search.repos({
                 q: query,
                 sort: sortMethod,
-                per_page: 100,
+                per_page: 50,
                 page: 1,
                 headers: {
                     accept: 'application/vnd.github.mercy-preview+json'

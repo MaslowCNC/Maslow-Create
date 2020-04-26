@@ -540,3 +540,20 @@ animation-delay: 0s;
 ::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
+
+.page_change{
+  margin-top: 10px;
+  position:relative;
+  bottom:10px;
+  height:25px;
+  width:50px;
+  height: 35px;
+  border: none;
+  background-color: Transparent;
+  font-size: 20px;
+}
+
+}
+
+#back{}
+#forward{}
