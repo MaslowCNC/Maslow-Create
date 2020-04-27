@@ -114,7 +114,7 @@ export default function GitHubModule(){
         welcome2.setAttribute("src", "/imgs/maslowcreate.svg" )
         welcome2.setAttribute("style", "height:20px; padding: 10px;")
         welcome.appendChild(welcome2)
- 
+        var middleBrowseDiv = document.createElement("div")
 
         if (auth == undefined){
 
@@ -137,6 +137,8 @@ export default function GitHubModule(){
         welcome3.innerHTML = "Maslow Create User Projects"
         welcome3.setAttribute("style", "justify-content: flex-start; display: inline; width: 100%; font-size: 18px;")
         popup.appendChild(welcome3)
+
+        middleBrowseDiv.setAttribute("style","margin-top:25px")
         }
         
         popup.classList.remove('off')
@@ -156,7 +158,6 @@ export default function GitHubModule(){
         tabButtons.setAttribute("class", "tab")
         popup.appendChild(tabButtons)
      
-        var middleBrowseDiv = document.createElement("div")
         middleBrowseDiv.setAttribute("class", "middleBrowse")
         popup.appendChild(middleBrowseDiv)
 
