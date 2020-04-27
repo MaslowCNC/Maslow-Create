@@ -95,13 +95,12 @@ export default function GitHubModule(){
      * Display projects which can be loaded in the popup.
      */
     this.showProjectsToLoad = function(auth){
-        console.log(auth)
         //Remove everything in the popup now
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
         }
 
-         //Welcome title
+        //Welcome title
         var welcome = document.createElement("div")
         welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
         popup.appendChild(welcome)
@@ -118,27 +117,27 @@ export default function GitHubModule(){
 
         if (auth == undefined){
 
-        var githubSign = document.createElement("button")
-        githubSign.setAttribute("id", "loginButton2" )
-        githubSign.setAttribute("class", "form browseButton githubSign")
-        githubSign.setAttribute("style", "width: 90px; font-size: .7rem; margin-left: auto;")
-        githubSign.textContent = "Login"
-        welcome.appendChild(githubSign)   
+            var githubSign = document.createElement("button")
+            githubSign.setAttribute("id", "loginButton2" )
+            githubSign.setAttribute("class", "form browseButton githubSign")
+            githubSign.setAttribute("style", "width: 90px; font-size: .7rem; margin-left: auto;")
+            githubSign.textContent = "Login"
+            welcome.appendChild(githubSign)   
 
-        var githubSignUp = document.createElement("button")
-        githubSignUp.setAttribute("class", "form browseButton githubSign")
-        githubSignUp.setAttribute("onclick", "window.open('https://github.com/join')")
-        githubSignUp.setAttribute("style", "width: 130px; font-size: .7rem;margin-left: 5px;")
-        githubSignUp.textContent = "Create an account"
-        welcome.appendChild(githubSignUp)  
+            var githubSignUp = document.createElement("button")
+            githubSignUp.setAttribute("class", "form browseButton githubSign")
+            githubSignUp.setAttribute("onclick", "window.open('https://github.com/join')")
+            githubSignUp.setAttribute("style", "width: 130px; font-size: .7rem;margin-left: 5px;")
+            githubSignUp.textContent = "Create an account"
+            welcome.appendChild(githubSignUp)  
 
-        //Welcome title
-        var welcome3 = document.createElement("div")
-        welcome3.innerHTML = "Maslow Create User Projects"
-        welcome3.setAttribute("style", "justify-content: flex-start; display: inline; width: 100%; font-size: 18px;")
-        popup.appendChild(welcome3)
+            //Welcome title
+            var welcome3 = document.createElement("div")
+            welcome3.innerHTML = "Maslow Create User Projects"
+            welcome3.setAttribute("style", "justify-content: flex-start; display: inline; width: 100%; font-size: 18px;")
+            popup.appendChild(welcome3)
 
-        middleBrowseDiv.setAttribute("style","margin-top:25px")
+            middleBrowseDiv.setAttribute("style","margin-top:25px")
         }
         
         popup.classList.remove('off')
@@ -264,15 +263,15 @@ export default function GitHubModule(){
 
             //New project div
             if (auth !== undefined){
-            var browseDiv = document.createElement("div")
-            browseDiv.setAttribute("class", "browseDiv")
-            this.projectsSpaceDiv.appendChild(browseDiv)
+                var browseDiv = document.createElement("div")
+                browseDiv.setAttribute("class", "browseDiv")
+                this.projectsSpaceDiv.appendChild(browseDiv)
             
-            var createNewProject = document.createElement("div")
-            createNewProject.setAttribute("class", "newProject")
+                var createNewProject = document.createElement("div")
+                createNewProject.setAttribute("class", "newProject")
 
-            browseDiv.appendChild(createNewProject)
-              this.NewProject("New Project", null, true, "")
+                browseDiv.appendChild(createNewProject)
+                this.NewProject("New Project", null, true, "")
             }
             //header for project list style display
             var titlesDiv = document.createElement("div")
