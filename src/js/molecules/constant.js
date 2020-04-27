@@ -62,6 +62,8 @@ export default class Constant extends Atom{
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
+        console.log("Updating value with value: ")
+        console.log(this.value)
         this.displayAndPropogate()
     }
     
@@ -88,6 +90,16 @@ export default class Constant extends Atom{
         if(this.evolve){
             this.createEditableValueListItem(valueList,this,'min', 'Min', true)
             this.createEditableValueListItem(valueList,this,'max', 'Max', true)
+        }
+    }
+    
+    /**
+     * Used to walk back out the tree generating a list of constants
+     */ 
+    walkBackForConstants(callback){
+        //If this constant can evolve then add it to the target list
+        if(this.evolve){
+            callback(this)
         }
     }
     
