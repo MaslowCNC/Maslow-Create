@@ -220,39 +220,39 @@ export default function GitHubModule(){
         popup.appendChild(pageChange)
 
         
-        this.openTab("yoursButton", page)
-        this.openTab("githubButton", page)
+        this.openTab("yoursButton", page, auth)
+        this.openTab("githubButton", page, auth)
 
         //Event listeners 
 
         browseDisplay1.addEventListener("click", () => {
             // titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
-            this.openTab("yoursButton")
-            this.openTab("githubButton")
+            this.openTab("yoursButton", page, auth)
+            this.openTab("githubButton", page, auth)
         })
         browseDisplay2.addEventListener("click", () => {
             // titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
-            this.openTab("yoursButton")
-            this.openTab("githubButton")
+            this.openTab("yoursButton", page, auth)
+            this.openTab("githubButton", page, auth)
         })
         pageForward.addEventListener("click", () => {
             if (page >=1){ page +=1 }
-            this.openTab("yoursButton", page)
-            this.openTab("githubButton", page) 
+            this.openTab("yoursButton", page, auth)
+            this.openTab("githubButton", page, auth) 
         })
         pageBack.addEventListener("click", () => {
             if (page >1){page -=1}
-            this.openTab("yoursButton", page)
-            this.openTab("githubButton", page) 
+            this.openTab("yoursButton", page, auth)
+            this.openTab("githubButton", page, auth) 
         })
     }
 
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber){
+    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber, auth){
 
         if(ev.key == "Enter"){
             //Remove projects shown now
@@ -260,15 +260,19 @@ export default function GitHubModule(){
                 this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
             }
             // add initial projects to div
+
+            //New project div
+            if (auth !== undefined){
             var browseDiv = document.createElement("div")
             browseDiv.setAttribute("class", "browseDiv")
             this.projectsSpaceDiv.appendChild(browseDiv)
-
-            //New project div
+            
             var createNewProject = document.createElement("div")
             createNewProject.setAttribute("class", "newProject")
 
             browseDiv.appendChild(createNewProject)
+              this.NewProject("New Project", null, true, "")
+            }
             //header for project list style display
             var titlesDiv = document.createElement("div")
             titlesDiv.setAttribute("id","titlesDiv")
@@ -301,7 +305,7 @@ export default function GitHubModule(){
             }
         
             this.projectsSpaceDiv.appendChild(titlesDiv)
-            this.NewProject("New Project", null, true, "")
+              
 
             //Load projects
             var query
@@ -477,13 +481,13 @@ export default function GitHubModule(){
     /** 
      * Runs when you switch tabs up top.
      */
-    this.openTab = function(tabName, page) {
+    this.openTab = function(tabName, page, auth) {
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
       
-        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
+        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
     }
     
     /** 
