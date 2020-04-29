@@ -122,9 +122,11 @@ flowCanvas.addEventListener('mouseup', event => {
 * @type {array}
 */
 window.addEventListener('keydown', e => {
-
-    if(!event.srcElement.isContentEditable && ['c', 'v', 'Backspace'].includes(e.key)){
-        event.preventDefault()
+    if(e.srcElement.tagName.toLowerCase() == "textarea"){
+        e.srcElement.setAttribute("contenteditable","true")
+    }
+    if(!e.srcElement.isContentEditable && ['c', 'v', 'Backspace'].includes(e.key)){
+        e.preventDefault()
     }
 
     if (e.key == "Control" || e.key == "Meta") {
