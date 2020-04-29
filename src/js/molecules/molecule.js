@@ -107,7 +107,8 @@ export default class Molecule extends Atom{
      * @param {number} x - The X cordinate of the click
      * @param {number} y - The Y cordinate of the click
      */ 
-    clickUp(){
+    clickUp(x,y){
+        super.clickUp(x,y)
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =>{
             atom.isMoving = false
         })
