@@ -122,13 +122,15 @@ flowCanvas.addEventListener('mouseup', event => {
 * @type {array}
 */
 window.addEventListener('keydown', e => {
+    //makes textarea tag content editable
     if(e.srcElement.tagName.toLowerCase() == "textarea"){
         e.srcElement.setAttribute("contenteditable","true")
     }
+    //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
     if(!e.srcElement.isContentEditable && ['c', 'v', 'Backspace'].includes(e.key)){
         e.preventDefault()
     }
-
+    //Copy /paste listeners
     if (e.key == "Control" || e.key == "Meta") {
         GlobalVariables.ctrlDown = true
     }      
