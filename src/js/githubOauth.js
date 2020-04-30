@@ -95,7 +95,6 @@ export default function GitHubModule(){
      * Display projects which can be loaded in the popup.
      */
     this.showProjectsToLoad = function(auth){
-        console.log(currentUser)
         //Remove everything in the popup now
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
@@ -124,7 +123,6 @@ export default function GitHubModule(){
         welcome2.setAttribute("style", "height:20px; padding: 10px;")
         welcome.appendChild(welcome2)
         var middleBrowseDiv = document.createElement("div")
-        console.log(currentUser)
         if (currentUser == null){
 
             var githubSign = document.createElement("button")
@@ -148,6 +146,10 @@ export default function GitHubModule(){
             popup.appendChild(welcome3)
 
             middleBrowseDiv.setAttribute("style","margin-top:25px")
+
+            githubSign.addEventListener("mousedown", () => {
+                this.tryLogin()
+            })
         }
         
         popup.classList.remove('off')
@@ -220,34 +222,35 @@ export default function GitHubModule(){
         popup.appendChild(pageChange)
 
         
-        this.openTab(page, auth)
+        this.openTab(page)
 
         //Event listeners 
 
         browseDisplay1.addEventListener("click", () => {
             // titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
-            this.openTab(page, auth)
+            this.openTab(page)
         })
         browseDisplay2.addEventListener("click", () => {
             // titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
-            this.openTab(page, auth)
+            this.openTab(page)
         })
         pageForward.addEventListener("click", () => {
             if (page >=1){ page +=1 }
-            this.openTab(page, auth)
+            this.openTab(page)
         })
         pageBack.addEventListener("click", () => {
             if (page >1){page -=1}
-            this.openTab(page, auth)
+            this.openTab(page)
         })
+
     }
 
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber, auth){
+    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber){
         if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
@@ -456,14 +459,14 @@ export default function GitHubModule(){
     /** 
      * Runs owned search first and then full github search
      */
-    this.openTab = function(page, auth) {
+    this.openTab = function(page) {
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
         
-        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
-        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
+        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
+        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
     }
     
     /** 
