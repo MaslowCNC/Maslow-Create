@@ -124,8 +124,8 @@ export default function GitHubModule(){
         welcome2.setAttribute("style", "height:20px; padding: 10px;")
         welcome.appendChild(welcome2)
         var middleBrowseDiv = document.createElement("div")
-
-        if (currentUser == undefined){
+        console.log(currentUser)
+        if (currentUser == null){
 
             var githubSign = document.createElement("button")
             githubSign.setAttribute("id", "loginButton2" )
@@ -256,7 +256,7 @@ export default function GitHubModule(){
             // add initial projects to div
 
             //New project div
-            if (currentUser !== undefined){
+            if (currentUser !== null){
                 var browseDiv = document.createElement("div")
                 browseDiv.setAttribute("class", "browseDiv")
                 this.projectsSpaceDiv.appendChild(browseDiv)
