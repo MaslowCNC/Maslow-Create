@@ -126,7 +126,6 @@ window.addEventListener('keydown', e => {
     if((e.srcElement.tagName.toLowerCase() !== "textarea")
         &&(!e.srcElement.isContentEditable)
         && ['c', 'v', 'Backspace'].includes(e.key)){
-        console.log("whastff")
         e.preventDefault()
     }
     //Copy /paste listeners
