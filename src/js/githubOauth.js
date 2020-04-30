@@ -86,7 +86,7 @@ export default function GitHubModule(){
             //Test the authentication 
             octokit.users.getAuthenticated({}).then(result => {
                 currentUser = result.data.login
-                this.showProjectsToLoad(currentUser)
+                this.showProjectsToLoad()
             })
         })
     }
@@ -94,7 +94,7 @@ export default function GitHubModule(){
     /** 
      * Display projects which can be loaded in the popup.
      */
-    this.showProjectsToLoad = function(auth){
+    this.showProjectsToLoad = function(){
         //Remove everything in the popup now
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
