@@ -257,7 +257,7 @@ export default function GitHubModule(){
             // add initial projects to div
 
             //New project div
-            if (auth !== undefined){
+            if (currentUser !== undefined){
                 var browseDiv = document.createElement("div")
                 browseDiv.setAttribute("class", "browseDiv")
                 this.projectsSpaceDiv.appendChild(browseDiv)
