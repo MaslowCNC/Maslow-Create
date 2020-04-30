@@ -404,8 +404,6 @@ export default function GitHubModule(){
             this.projectsSpaceDiv.appendChild(project) 
             
             document.getElementById(projectName).addEventListener('click', () => {
-                console.log("owned in add")
-                console.log(owned)
                 this.projectClicked(projectName, id, owned)
             })
         }
@@ -466,9 +464,6 @@ export default function GitHubModule(){
      * Runs when you click on a project.
      */
     this.projectClicked = function(projectName, projectID, owned){
-        console.log("owned in click")
-        console.log(owned)
-        console.trace(this.projectClicked)
         //runs when you click on one of the projects
         if(projectName == "New Project"){
             this.createNewProjectPopup()
