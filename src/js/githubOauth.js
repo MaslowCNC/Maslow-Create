@@ -253,7 +253,7 @@ export default function GitHubModule(){
      * Search for the name of a project and then return results which match that search.
      */
     this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber, auth){
-
+        console.log(auth)
         if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
@@ -306,7 +306,6 @@ export default function GitHubModule(){
         
             this.projectsSpaceDiv.appendChild(titlesDiv)
               
-
             //Load projects
             var query
             var owned
@@ -318,7 +317,7 @@ export default function GitHubModule(){
             }
             else{
                 owned = false
-                query = searchString + ' topic:maslowcreate'
+                query = searchString + ' topic:maslowcreate -user:' + currentUser
             }
             
             //Figure out how many repos this user has, search will throw an error if they have 0;
@@ -336,7 +335,6 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
@@ -406,6 +404,8 @@ export default function GitHubModule(){
             this.projectsSpaceDiv.appendChild(project) 
             
             document.getElementById(projectName).addEventListener('click', () => {
+                console.log("owned in add")
+                console.log(owned)
                 this.projectClicked(projectName, id, owned)
             })
         }
@@ -415,7 +415,7 @@ export default function GitHubModule(){
             project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; width: 100%; border-bottom: 1px solid darkgrey;")
             projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
-            //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+            projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
             projectPicture.setAttribute("class", "browseColumn")
             project.appendChild(projectPicture)
             
@@ -466,6 +466,9 @@ export default function GitHubModule(){
      * Runs when you click on a project.
      */
     this.projectClicked = function(projectName, projectID, owned){
+        console.log("owned in click")
+        console.log(owned)
+        console.trace(this.projectClicked)
         //runs when you click on one of the projects
         if(projectName == "New Project"){
             this.createNewProjectPopup()
