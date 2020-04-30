@@ -220,32 +220,27 @@ export default function GitHubModule(){
         popup.appendChild(pageChange)
 
         
-        this.openTab("yoursButton", page, auth)
-        this.openTab("githubButton", page, auth)
+        this.openTab(page, auth)
 
         //Event listeners 
 
         browseDisplay1.addEventListener("click", () => {
             // titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth)
+            this.openTab(page, auth)
         })
         browseDisplay2.addEventListener("click", () => {
             // titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth)
+            this.openTab(page, auth)
         })
         pageForward.addEventListener("click", () => {
             if (page >=1){ page +=1 }
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth) 
+            this.openTab(page, auth)
         })
         pageBack.addEventListener("click", () => {
             if (page >1){page -=1}
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth) 
+            this.openTab(page, auth)
         })
     }
 
@@ -459,15 +454,16 @@ export default function GitHubModule(){
     }
     
     /** 
-     * Runs when you switch tabs up top.
+     * Runs owned search first and then full github search
      */
-    this.openTab = function(tabName, page, auth) {
+    this.openTab = function(page, auth) {
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
-      
-        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
+        
+        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
+        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
     }
     
     /** 
