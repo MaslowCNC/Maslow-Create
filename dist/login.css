@@ -223,20 +223,20 @@ animation-delay: 0s;
 .closeButton{
     display: block;
     padding: 0px;
-    position: relative;
+    position: absolute;
     width: 20px;
     height: 20px;
     border: 2px solid #eef5df;
     background-color: #ff5248;
     border-radius: 50%;
-    top: 7px;
-    left: 7px;
+    top: 5px;
+    right:5px;
 }
 .closeButton::before {
   content: "\2715";
   color:black;
   display: none;
-
+  position:relative;
   }
 
 .closeButton:hover { cursor: pointer; }
@@ -369,7 +369,7 @@ animation-delay: 0s;
     width: 50%;
     flex-flow: row;
     justify-content: flex-end;
-    margin-top: -25px;
+    margin-top: -10px;
     margin-right: 10px;
 }
 

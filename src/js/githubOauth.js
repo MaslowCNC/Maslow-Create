@@ -101,6 +101,15 @@ export default function GitHubModule(){
             popup.removeChild(popup.firstChild)
         }
 
+        //Close button (Mac style)
+        if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
+            var closeButton = document.createElement("button")
+            closeButton.setAttribute("class", "closeButton")
+            closeButton.addEventListener("click", () => {
+                popup.classList.add('off')
+            })
+            popup.appendChild(closeButton)
+        }
         //Welcome title
         var welcome = document.createElement("div")
         welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
@@ -143,16 +152,6 @@ export default function GitHubModule(){
         
         popup.classList.remove('off')
         popup.setAttribute("style", "padding: 0;text-align: center; background-color: #f9f6f6; border: 10px solid #3e3d3d;")
-        
-        //Close button (Mac style)
-        if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
-            var closeButton = document.createElement("button")
-            closeButton.setAttribute("class", "closeButton")
-            closeButton.addEventListener("click", () => {
-                popup.classList.add('off')
-            })
-            popup.appendChild(closeButton)
-        }
        
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
