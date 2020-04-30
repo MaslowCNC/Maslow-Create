@@ -370,18 +370,18 @@ export default function GitHubModule(){
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
         
-            this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
-            var project = document.createElement("DIV")
-            var projectPicture = document.createElement("IMG")
-            projectPicture.setAttribute("src", thumbnailPath)
-            projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
-            project.appendChild(projectPicture)
-            project.setAttribute("id", projectName)
-            project.classList.add("project")
+        this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
+        var project = document.createElement("DIV")
+        var projectPicture = document.createElement("IMG")
+        projectPicture.setAttribute("src", thumbnailPath)
+        projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+        project.appendChild(projectPicture)
+        project.setAttribute("id", projectName)
+        project.classList.add("project")
 
-            if (owned){
-                project.classList.add("mine")
-            }
+        if (owned){
+            project.classList.add("mine")
+        }
 
         //create a project element to display
         if (document.getElementById("thumb").classList.contains("active_filter")){
@@ -430,11 +430,11 @@ export default function GitHubModule(){
    
         }
 
-            this.projectsSpaceDiv.appendChild(project) 
+        this.projectsSpaceDiv.appendChild(project) 
 
-            document.getElementById(projectName).addEventListener('click', () => {
-                this.projectClicked(projectName, id, owned)
-            })
+        document.getElementById(projectName).addEventListener('click', () => {
+            this.projectClicked(projectName, id, owned)
+        })
     }
     
     /** 
