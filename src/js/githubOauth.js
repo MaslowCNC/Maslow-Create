@@ -95,6 +95,7 @@ export default function GitHubModule(){
      * Display projects which can be loaded in the popup.
      */
     this.showProjectsToLoad = function(auth){
+        console.log(currentUser)
         //Remove everything in the popup now
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
@@ -115,7 +116,7 @@ export default function GitHubModule(){
         welcome.appendChild(welcome2)
         var middleBrowseDiv = document.createElement("div")
 
-        if (auth == undefined){
+        if (currentUser == undefined){
 
             var githubSign = document.createElement("button")
             githubSign.setAttribute("id", "loginButton2" )
