@@ -253,7 +253,6 @@ export default function GitHubModule(){
      * Search for the name of a project and then return results which match that search.
      */
     this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber, auth){
-        console.log(auth)
         if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
@@ -375,16 +374,24 @@ export default function GitHubModule(){
      * Adds a new project to the load projects display.
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
-    
-        //create a project element to display
-        if (document.getElementById("thumb").classList.contains("active_filter")){
+        
             this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
             var project = document.createElement("DIV")
             var projectPicture = document.createElement("IMG")
             projectPicture.setAttribute("src", thumbnailPath)
             projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
-            projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(projectPicture)
+            project.setAttribute("id", projectName)
+            project.classList.add("project")
+
+            if (owned){
+                project.classList.add("mine")
+            }
+
+        //create a project element to display
+        if (document.getElementById("thumb").classList.contains("active_filter")){
+            
+            projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(document.createElement("BR"))
             
             var shortProjectName
@@ -394,47 +401,22 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
-            if (owned){
-                project.classList.add("mine")
-            }
-            project.classList.add("project")
-            
-            project.setAttribute("id", projectName)
             project.appendChild(shortProjectName) 
-            this.projectsSpaceDiv.appendChild(project) 
-            
-            document.getElementById(projectName).addEventListener('click', () => {
-                this.projectClicked(projectName, id, owned)
-            })
         }
         else{
-            this.projectsSpaceDiv.classList.add("float-left-div-thumb")
-            project = document.createElement("DIV")
             project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; width: 100%; border-bottom: 1px solid darkgrey;")
-            projectPicture = document.createElement("IMG")
-            projectPicture.setAttribute("src", thumbnailPath)
-            projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
             projectPicture.setAttribute("class", "browseColumn")
-            project.appendChild(projectPicture)
             
             shortProjectName = document.createElement("DIV")
             shortProjectName.innerHTML = projectName
             shortProjectName.setAttribute("class", "browseColumn")
-            
-            project.setAttribute("id", projectName)
-            project.classList.add("project")
             project.appendChild(shortProjectName) 
-
-            if (owned){
-                project.classList.add("mine")
-            }
 
             var ownerName = document.createElement("DIV")
             var ownerNameIn = document.createTextNode(owner)
             ownerName.appendChild(ownerNameIn) 
             ownerName.setAttribute("class", "browseColumn")
             project.appendChild(ownerName) 
-            
 
             var date = new Date(createdAt)
             var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -450,14 +432,14 @@ export default function GitHubModule(){
             updatedTime.appendChild(updatedTimeIn)
             updatedTime.setAttribute("class", "browseColumn")
             project.appendChild(updatedTime) 
+   
+        }
 
             this.projectsSpaceDiv.appendChild(project) 
-            
+
             document.getElementById(projectName).addEventListener('click', () => {
                 this.projectClicked(projectName, id, owned)
             })
-        }
-
     }
     
     /** 
