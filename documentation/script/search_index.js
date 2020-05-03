@@ -156,12 +156,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/molecules/overcutcorners.js~overcutcorners",
-    "class/src/js/molecules/OverCutCorners.js~OverCutCorners.html",
-    "<span>OverCutCorners</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/OverCutCorners.js</span>",
-    "class"
-  ],
-  [
     "canvas-template/src/js/molecules/readme.js~readme",
     "class/src/js/molecules/readme.js~Readme.html",
     "<span>Readme</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/readme.js</span>",
@@ -1017,36 +1011,6 @@ window.esdocSearchIndex = [
     "src/js/molecules/bom.js~addbomtag#updatevalue",
     "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-method-updateValue",
     "src/js/molecules/BOM.js~AddBOMTag#updateValue",
-    "method"
-  ],
-  [
-    "src/js/molecules/overcutcorners.js",
-    "file/src/js/molecules/OverCutCorners.js.html",
-    "src/js/molecules/OverCutCorners.js",
-    "file"
-  ],
-  [
-    "src/js/molecules/overcutcorners.js~overcutcorners#atomtype",
-    "class/src/js/molecules/OverCutCorners.js~OverCutCorners.html#instance-member-atomType",
-    "src/js/molecules/OverCutCorners.js~OverCutCorners#atomType",
-    "member"
-  ],
-  [
-    "src/js/molecules/overcutcorners.js~overcutcorners#constructor",
-    "class/src/js/molecules/OverCutCorners.js~OverCutCorners.html#instance-constructor-constructor",
-    "src/js/molecules/OverCutCorners.js~OverCutCorners#constructor",
-    "method"
-  ],
-  [
-    "src/js/molecules/overcutcorners.js~overcutcorners#name",
-    "class/src/js/molecules/OverCutCorners.js~OverCutCorners.html#instance-member-name",
-    "src/js/molecules/OverCutCorners.js~OverCutCorners#name",
-    "member"
-  ],
-  [
-    "src/js/molecules/overcutcorners.js~overcutcorners#updatevalue",
-    "class/src/js/molecules/OverCutCorners.js~OverCutCorners.html#instance-method-updateValue",
-    "src/js/molecules/OverCutCorners.js~OverCutCorners#updateValue",
     "method"
   ],
   [

@@ -65,23 +65,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 184,
+        "lineNumber": 182,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 185,
+        "lineNumber": 183,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 186,
+        "lineNumber": 184,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 187,
+        "lineNumber": 185,
         "line": "    */\r"
       },
       {
-        "lineNumber": 188,
+        "lineNumber": 186,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -97,23 +97,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 192,
+        "lineNumber": 190,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 193,
+        "lineNumber": 191,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 194,
+        "lineNumber": 192,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 195,
+        "lineNumber": 193,
         "line": "    */\r"
       },
       {
-        "lineNumber": 196,
+        "lineNumber": 194,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -129,23 +129,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 201,
+        "lineNumber": 199,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 202,
+        "lineNumber": 200,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 203,
+        "lineNumber": 201,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 204,
+        "lineNumber": 202,
         "line": "    */\r"
       },
       {
-        "lineNumber": 205,
+        "lineNumber": 203,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
@@ -157,74 +157,39 @@
     ]
   },
   {
-    "name": "Molecule#clickUp",
-    "filePath": "src/js/molecules/molecule.js",
-    "lines": [
-      {
-        "lineNumber": 104,
-        "line": "    /**\r"
-      },
-      {
-        "lineNumber": 105,
-        "line": "     * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.\r"
-      },
-      {
-        "lineNumber": 106,
-        "line": "     * @param {number} x - The X cordinate of the click\r"
-      },
-      {
-        "lineNumber": 107,
-        "line": "     * @param {number} y - The Y cordinate of the click\r"
-      },
-      {
-        "lineNumber": 108,
-        "line": "     */ \r"
-      },
-      {
-        "lineNumber": 109,
-        "line": "    clickUp(){\r"
-      }
-    ],
-    "codeParams": [],
-    "docParams": [
-      "x",
-      "y"
-    ]
-  },
-  {
     "name": "Molecule#placeAtom",
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 501,
+        "lineNumber": 502,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 502,
+        "lineNumber": 503,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 503,
+        "lineNumber": 504,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 504,
+        "lineNumber": 505,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 505,
+        "lineNumber": 506,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 506,
+        "lineNumber": 507,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 507,
+        "lineNumber": 508,
         "line": "     */\r"
       },
       {
-        "lineNumber": 508,
+        "lineNumber": 509,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],

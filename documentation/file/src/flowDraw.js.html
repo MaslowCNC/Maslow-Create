@@ -38,7 +38,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/OverCutCorners.js~OverCutCorners.html">OverCutCorners</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
@@ -200,11 +199,13 @@ flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
 * @type {array}
 */
 window.addEventListener(&apos;keydown&apos;, e =&gt; {
-
-    if(!event.srcElement.isContentEditable &amp;&amp; [&apos;c&apos;, &apos;v&apos;, &apos;Backspace&apos;].includes(e.key)){
-        event.preventDefault()
+    //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
+    if((e.srcElement.tagName.toLowerCase() !== &quot;textarea&quot;)
+        &amp;&amp;(!e.srcElement.isContentEditable)
+        &amp;&amp; [&apos;c&apos;, &apos;v&apos;, &apos;Backspace&apos;].includes(e.key)){
+        e.preventDefault()
     }
-
+    //Copy /paste listeners
     if (e.key == &quot;Control&quot; || e.key == &quot;Meta&quot;) {
         GlobalVariables.ctrlDown = true
     }      
