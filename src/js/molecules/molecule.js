@@ -130,6 +130,9 @@ export default class Molecule extends Atom{
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
         
         if (distFromClick < this.radius*2){
+            GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
+                atom.selected = false
+            })
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
             clickProcessed = true
@@ -139,11 +142,11 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Handle a background click (a click which doesn't land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
+     * Handle a background click (a click which doesn't land on one of the contained molecules) by deselected everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
         /**
-         * Flag that the attom is now selected.
+         * Flag that the atom is now selected.
          */
         this.selected = true
         this.updateSidebar()
@@ -396,6 +399,9 @@ export default class Molecule extends Atom{
     goToParentMolecule(){
         //Go to the parent molecule if there is one
         if(!GlobalVariables.currentMolecule.topLevel){
+            this.nodesOnTheScreen.forEach(atom => {
+                atom.selected = false
+            })
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
         }
