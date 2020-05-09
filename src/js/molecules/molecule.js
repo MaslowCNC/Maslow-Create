@@ -130,11 +130,9 @@ export default class Molecule extends Atom{
         var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
         
         if (distFromClick < this.radius*2){
-            GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
-                atom.selected = false
-            })
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
+            this.selected = false
             clickProcessed = true
         }
         
