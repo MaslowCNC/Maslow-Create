@@ -51,9 +51,9 @@ flowCanvas.addEventListener('mousedown', event => {
         }
 
     })
-
+    
+    //Draw the selection box
     if (!clickHandledByMolecule){
-
         GlobalVariables.currentMolecule.placeAtom({
             parentMolecule: GlobalVariables.currentMolecule, 
             x: GlobalVariables.pixelsToWidth(event.clientX),
@@ -65,8 +65,10 @@ flowCanvas.addEventListener('mousedown', event => {
     }
     
     if(!clickHandledByMolecule){
-
         GlobalVariables.currentMolecule.backgroundClick() 
+    }
+    else{
+        GlobalVariables.currentMolecule.selected = false
     }
     
     //hide the menu if it is visible
@@ -122,11 +124,13 @@ flowCanvas.addEventListener('mouseup', event => {
 * @type {array}
 */
 window.addEventListener('keydown', e => {
-
-    if(!event.srcElement.isContentEditable && ['c', 'v', 'Backspace'].includes(e.key)){
-        event.preventDefault()
+    //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
+    if((e.srcElement.tagName.toLowerCase() !== "textarea")
+        &&(!e.srcElement.isContentEditable)
+        && ['c', 'v', 'Backspace'].includes(e.key)){
+        e.preventDefault()
     }
-
+    //Copy /paste listeners
     if (e.key == "Control" || e.key == "Meta") {
         GlobalVariables.ctrlDown = true
     }      
@@ -180,8 +184,8 @@ function openTopMenu(){
             a.style.transform = `translateX(${step}%)` 
             step-=100
             document.getElementById('goup_top').style.visibility = "hidden"
-        }           
-    })     
+        }
+    })
 }
 
 /**

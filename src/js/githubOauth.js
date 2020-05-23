@@ -86,7 +86,7 @@ export default function GitHubModule(){
             //Test the authentication 
             octokit.users.getAuthenticated({}).then(result => {
                 currentUser = result.data.login
-                this.showProjectsToLoad(currentUser)
+                this.showProjectsToLoad()
             })
         })
     }
@@ -94,12 +94,21 @@ export default function GitHubModule(){
     /** 
      * Display projects which can be loaded in the popup.
      */
-    this.showProjectsToLoad = function(auth){
+    this.showProjectsToLoad = function(){
         //Remove everything in the popup now
         while (popup.firstChild) {
             popup.removeChild(popup.firstChild)
         }
 
+        //Close button (Mac style)
+        if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
+            var closeButton = document.createElement("button")
+            closeButton.setAttribute("class", "closeButton")
+            closeButton.addEventListener("click", () => {
+                popup.classList.add('off')
+            })
+            popup.appendChild(closeButton)
+        }
         //Welcome title
         var welcome = document.createElement("div")
         welcome.setAttribute("style", " display: flex; margin: 10px; align-items: center;")
@@ -114,8 +123,7 @@ export default function GitHubModule(){
         welcome2.setAttribute("style", "height:20px; padding: 10px;")
         welcome.appendChild(welcome2)
         var middleBrowseDiv = document.createElement("div")
-
-        if (auth == undefined){
+        if (currentUser == null){
 
             var githubSign = document.createElement("button")
             githubSign.setAttribute("id", "loginButton2" )
@@ -138,20 +146,14 @@ export default function GitHubModule(){
             popup.appendChild(welcome3)
 
             middleBrowseDiv.setAttribute("style","margin-top:25px")
+
+            githubSign.addEventListener("mousedown", () => {
+                this.tryLogin()
+            })
         }
         
         popup.classList.remove('off')
         popup.setAttribute("style", "padding: 0;text-align: center; background-color: #f9f6f6; border: 10px solid #3e3d3d;")
-        
-        //Close button (Mac style)
-        if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
-            var closeButton = document.createElement("button")
-            closeButton.setAttribute("class", "closeButton")
-            closeButton.addEventListener("click", () => {
-                popup.classList.add('off')
-            })
-            popup.appendChild(closeButton)
-        }
        
         var tabButtons = document.createElement("DIV")
         tabButtons.setAttribute("class", "tab")
@@ -220,40 +222,35 @@ export default function GitHubModule(){
         popup.appendChild(pageChange)
 
         
-        this.openTab("yoursButton", page, auth)
-        this.openTab("githubButton", page, auth)
+        this.openTab(page)
 
         //Event listeners 
 
         browseDisplay1.addEventListener("click", () => {
             // titlesDiv.style.display = "flex"
             browseDisplay2.classList.remove("active_filter")
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth)
+            this.openTab(page)
         })
         browseDisplay2.addEventListener("click", () => {
             // titlesDiv.style.display = "none"
             browseDisplay2.classList.add("active_filter")
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth)
+            this.openTab(page)
         })
         pageForward.addEventListener("click", () => {
             if (page >=1){ page +=1 }
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth) 
+            this.openTab(page)
         })
         pageBack.addEventListener("click", () => {
             if (page >1){page -=1}
-            this.openTab("yoursButton", page, auth)
-            this.openTab("githubButton", page, auth) 
+            this.openTab(page)
         })
+
     }
 
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber, auth){
-
+    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber){
         if(ev.key == "Enter"){
             //Remove projects shown now
             while (this.projectsSpaceDiv.firstChild) {
@@ -262,7 +259,7 @@ export default function GitHubModule(){
             // add initial projects to div
 
             //New project div
-            if (auth !== undefined){
+            if (currentUser !== null){
                 var browseDiv = document.createElement("div")
                 browseDiv.setAttribute("class", "browseDiv")
                 this.projectsSpaceDiv.appendChild(browseDiv)
@@ -306,7 +303,6 @@ export default function GitHubModule(){
         
             this.projectsSpaceDiv.appendChild(titlesDiv)
               
-
             //Load projects
             var query
             var owned
@@ -318,7 +314,7 @@ export default function GitHubModule(){
             }
             else{
                 owned = false
-                query = searchString + ' topic:maslowcreate'
+                query = searchString + ' topic:maslowcreate -user:' + currentUser
             }
             
             //Figure out how many repos this user has, search will throw an error if they have 0;
@@ -336,7 +332,6 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
@@ -377,16 +372,24 @@ export default function GitHubModule(){
      * Adds a new project to the load projects display.
      */
     this.addProject = function(projectName, id, owner, createdAt, updatedAt, owned, thumbnailPath){
-    
+        
+        this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
+        var project = document.createElement("DIV")
+        var projectPicture = document.createElement("IMG")
+        projectPicture.setAttribute("src", thumbnailPath)
+        projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+        project.appendChild(projectPicture)
+        project.setAttribute("id", projectName)
+        project.classList.add("project")
+
+        if (owned){
+            project.classList.add("mine")
+        }
+
         //create a project element to display
         if (document.getElementById("thumb").classList.contains("active_filter")){
-            this.projectsSpaceDiv.classList.remove("float-left-div-thumb")
-            var project = document.createElement("DIV")
-            var projectPicture = document.createElement("IMG")
-            projectPicture.setAttribute("src", thumbnailPath)
-            projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
+            
             projectPicture.setAttribute("style", "width: 100%; height: 80%;")
-            project.appendChild(projectPicture)
             project.appendChild(document.createElement("BR"))
             
             var shortProjectName
@@ -396,47 +399,22 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
-            if (owned){
-                project.classList.add("mine")
-            }
-            project.classList.add("project")
-            
-            project.setAttribute("id", projectName)
             project.appendChild(shortProjectName) 
-            this.projectsSpaceDiv.appendChild(project) 
-            
-            document.getElementById(projectName).addEventListener('click', () => {
-                this.projectClicked(projectName, id, owned)
-            })
         }
         else{
-            this.projectsSpaceDiv.classList.add("float-left-div-thumb")
-            project = document.createElement("DIV")
             project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; width: 100%; border-bottom: 1px solid darkgrey;")
-            projectPicture = document.createElement("IMG")
-            projectPicture.setAttribute("src", thumbnailPath)
-            //projectPicture.setAttribute("onerror", "this.src='/defaultThumbnail.svg'")
             projectPicture.setAttribute("class", "browseColumn")
-            project.appendChild(projectPicture)
             
             shortProjectName = document.createElement("DIV")
             shortProjectName.innerHTML = projectName
             shortProjectName.setAttribute("class", "browseColumn")
-            
-            project.setAttribute("id", projectName)
-            project.classList.add("project")
             project.appendChild(shortProjectName) 
-
-            if (owned){
-                project.classList.add("mine")
-            }
 
             var ownerName = document.createElement("DIV")
             var ownerNameIn = document.createTextNode(owner)
             ownerName.appendChild(ownerNameIn) 
             ownerName.setAttribute("class", "browseColumn")
             project.appendChild(ownerName) 
-            
 
             var date = new Date(createdAt)
             var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -452,14 +430,14 @@ export default function GitHubModule(){
             updatedTime.appendChild(updatedTimeIn)
             updatedTime.setAttribute("class", "browseColumn")
             project.appendChild(updatedTime) 
-
-            this.projectsSpaceDiv.appendChild(project) 
-            
-            document.getElementById(projectName).addEventListener('click', () => {
-                this.projectClicked(projectName, id, owned)
-            })
+   
         }
 
+        this.projectsSpaceDiv.appendChild(project) 
+
+        document.getElementById(projectName).addEventListener('click', () => {
+            this.projectClicked(projectName, id, owned)
+        })
     }
     
     /** 
@@ -479,15 +457,16 @@ export default function GitHubModule(){
     }
     
     /** 
-     * Runs when you switch tabs up top.
+     * Runs owned search first and then full github search
      */
-    this.openTab = function(tabName, page, auth) {
+    this.openTab = function(page) {
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
-      
-        this.loadProjectsBySearch(tabName, {key: "Enter"}, document.getElementById("project_search").value, "updated", page, auth)
+        
+        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
+        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
     }
     
     /** 
