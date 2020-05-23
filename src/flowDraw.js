@@ -51,9 +51,9 @@ flowCanvas.addEventListener('mousedown', event => {
         }
 
     })
-
+    
+    //Draw the selection box
     if (!clickHandledByMolecule){
-
         GlobalVariables.currentMolecule.placeAtom({
             parentMolecule: GlobalVariables.currentMolecule, 
             x: GlobalVariables.pixelsToWidth(event.clientX),
@@ -65,8 +65,10 @@ flowCanvas.addEventListener('mousedown', event => {
     }
     
     if(!clickHandledByMolecule){
-
         GlobalVariables.currentMolecule.backgroundClick() 
+    }
+    else{
+        GlobalVariables.currentMolecule.selected = false
     }
     
     //hide the menu if it is visible
@@ -182,8 +184,8 @@ function openTopMenu(){
             a.style.transform = `translateX(${step}%)` 
             step-=100
             document.getElementById('goup_top').style.visibility = "hidden"
-        }           
-    })     
+        }
+    })
 }
 
 /**
