@@ -161,35 +161,35 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 502,
+        "lineNumber": 506,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 503,
+        "lineNumber": 507,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 504,
+        "lineNumber": 508,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 505,
+        "lineNumber": 509,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 506,
+        "lineNumber": 510,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 507,
+        "lineNumber": 511,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 508,
+        "lineNumber": 512,
         "line": "     */\r"
       },
       {
-        "lineNumber": 509,
+        "lineNumber": 513,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],
@@ -299,27 +299,27 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 815,
+        "lineNumber": 814,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 816,
+        "lineNumber": 815,
         "line": "     * Creates a html representation of the passed text. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 817,
+        "lineNumber": 816,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 818,
+        "lineNumber": 817,
         "line": "     * @param {string} texxt - The text used to generate the markdown html.\r"
       },
       {
-        "lineNumber": 819,
+        "lineNumber": 818,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 820,
+        "lineNumber": 819,
         "line": "    createMarkdownListItem(list, text){\r"
       }
     ],
@@ -337,43 +337,43 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 834,
+        "lineNumber": 833,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 835,
+        "lineNumber": 834,
         "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 836,
+        "lineNumber": 835,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 837,
+        "lineNumber": 836,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 838,
+        "lineNumber": 837,
         "line": "     * @param {array} options - A list of options to display in the drop down.\r"
       },
       {
-        "lineNumber": 839,
+        "lineNumber": 838,
         "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
       },
       {
-        "lineNumber": 840,
+        "lineNumber": 839,
         "line": "     * @param {string} description - A description of what the dropdown does.\r"
       },
       {
-        "lineNumber": 841,
+        "lineNumber": 840,
         "line": "     * @param {object} Callback function\r"
       },
       {
-        "lineNumber": 842,
+        "lineNumber": 841,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 843,
+        "lineNumber": 842,
         "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
       }
     ],
@@ -399,35 +399,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 919,
+        "lineNumber": 918,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 920,
+        "lineNumber": 919,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 921,
+        "lineNumber": 920,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 922,
+        "lineNumber": 921,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 923,
+        "lineNumber": 922,
         "line": "     * @param {boolean} - Flag to see if checkbox is checked\r"
       },
       {
-        "lineNumber": 924,
+        "lineNumber": 923,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 925,
+        "lineNumber": 924,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 926,
+        "lineNumber": 925,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],

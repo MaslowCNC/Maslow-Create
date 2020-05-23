@@ -10551,6 +10551,10 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return watertight;
   };
 
+  const isNotVoid = ({ tags }) => tags === undefined || tags.includes('compose/non-positive') === false;
+
+  const isVoid = (geometry) => !isNotVoid(geometry);
+
   const allTags = (geometry) => {
     const collectedTags = new Set();
     const op = ({ tags }, descend) => {
@@ -12459,10 +12463,6 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
 
   const intersection$4 = cache(intersectionImpl);
 
-  const isNotVoid = ({ tags }) => tags === undefined || tags.includes('compose/non-positive') === false;
-
-  const isVoid = (geometry) => !isNotVoid(geometry);
-
   const linkDisjointAssembly = Symbol('linkDisjointAssembly');
 
   const toDisjointGeometry = (geometry) => {
@@ -13436,6 +13436,38 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
   measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
   measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
+  const noPlan = (shape, tags, select) => {
+    const op = (geometry, descend) => {
+      if (geometry.plan) {
+        return { layers: [] };
+      } else {
+        return descend();
+      }
+    };
+
+    const rewritten = rewrite(shape.toKeptGeometry(), op);
+    return Shape.fromGeometry(rewritten);
+  };
+
+  const noPlanMethod = function (...tags) { return noPlan(this); };
+  Shape.prototype.noPlan = noPlanMethod;
+
+  const noVoid = (shape, tags, select) => {
+    const op = (geometry, descend) => {
+      if (isVoid(geometry)) {
+        return { layers: [] };
+      } else {
+        return descend();
+      }
+    };
+
+    const rewritten = rewrite(shape.toKeptGeometry(), op);
+    return Shape.fromGeometry(rewritten);
+  };
+
+  const noVoidMethod = function (...tags) { return noVoid(this); };
+  Shape.prototype.noVoid = noVoidMethod;
+
   const opMethod = function (op, ...args) { return op(this, ...args); };
   const withOpMethod = function (op, ...args) { return assemble$1(this, op(this, ...args)); };
 
@@ -13638,8 +13670,23 @@ define("./maslowWorker.js",['require'], function (require) { 'use strict';
     return Shape.fromGeometry(rewritten);
   };
 
-  const keep = (shape, tags) => keepOrDrop(shape, tags, selectToKeep);
-  const drop$1 = (shape, tags) => keepOrDrop(shape, tags, selectToDrop);
+  const keep = (shape, tags) => {
+    if (tags === undefined) {
+      // Dropping no tags is an unconditional keep.
+      return keepOrDrop(shape, [], selectToDrop);
+    } else {
+      return keepOrDrop(shape, tags, selectToKeep);
+    }
+  };
+
+  const drop$1 = (shape, tags) => {
+    if (tags === undefined) {
+      // Keeping no tags is an unconditional drop.
+      return keepOrDrop(shape, [], selectToKeep);
+    } else {
+      return keepOrDrop(shape, tags, selectToDrop);
+    }
+  };
 
   const keepMethod = function (...tags) { return keep(this, tags); };
   Shape.prototype.keep = keepMethod;
@@ -104635,7 +104682,7 @@ return d[d.length-1];};return ", funcName].join("");
         case 'difference':
           return Shape.fromGeometry(values[0]).cut(Shape.fromGeometry(values[1])).kept().toKeptGeometry();
         case 'extractTag':
-          return Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
+          return Shape.fromGeometry(values[0]).keep(values[1]).noVoid().noPlan().toKeptGeometry();
         case 'extrude':
           return Shape.fromGeometry(values[0]).extrude(values[1]).toKeptGeometry();
         case 'hull':

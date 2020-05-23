@@ -392,13 +392,12 @@ export default class Atom {
      * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
      */ 
     clickDown(x,y, clickProcessed){
-
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
-        if(!clickProcessed &amp;&amp; GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) &lt; radiusInPixels){        
+        if(!clickProcessed &amp;&amp; GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) &lt; radiusInPixels){
             this.isMoving = true
             this.selected = true
             this.updateSidebar()
