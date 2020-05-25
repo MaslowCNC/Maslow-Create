@@ -312,14 +312,14 @@ export default class AttachmentPoint {
         var distFromClick =  Math.abs(GlobalVariables.distBetweenPoints(parentXInPixels, x, parentYInPixels, y))
         console.log(distFromClick)
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromClick < parentRadiusInPixels*3 && this.type == 'input'){
+        if (distFromClick < parentRadiusInPixels*2.7 && this.type == 'input'){
                  
                 this.expandOut(distFromClick)
                 this.showHoverText = true
                 
                 }
                 
-        else if( distFromClick < parentRadiusInPixels *2 && this.type == 'output'){
+        else if( distFromClick < parentRadiusInPixels *1.5 && this.type == 'output'){
                
                 this.showHoverText = true
             }
