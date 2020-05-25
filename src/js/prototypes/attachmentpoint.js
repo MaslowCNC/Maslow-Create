@@ -299,6 +299,7 @@ export default class AttachmentPoint {
      */ 
     clickMove(x,y){
 
+
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
@@ -307,26 +308,35 @@ export default class AttachmentPoint {
         let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
         let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)
         //expand if touched by mouse
-        var distFromCursorParent = Math.abs(GlobalVariables.distBetweenPoints (parentXInPixels -parentRadiusInPixels, x, parentYInPixels, y)) 
         
+        var distFromClick =  Math.abs(GlobalVariables.distBetweenPoints(parentXInPixels, x, parentYInPixels, y))
+        console.log(distFromClick)
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromCursorParent < parentRadiusInPixels*3){
-
-            if (this.type == 'input'){
-                this.expandOut(distFromCursorParent)
+        if (distFromClick < parentRadiusInPixels*3 && this.type == 'input'){
+                 
+                this.expandOut(distFromClick)
+                this.showHoverText = true
                 
+                }
+                
+        else if( distFromClick < parentRadiusInPixels *2 && this.type == 'output'){
+               
+                this.showHoverText = true
             }
-            this.showHoverText = true
-            if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels/2.1 ){
-                this.expandedRadius = true
-            }  
-            else{
-                this.expandedRadius = false
-            }
-        }
+
         else{
             this.reset()
+            this.expandedRadius = false
         }
+            
+        
+        if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels ){
+                this.expandedRadius = true
+            }  
+        else{
+                this.expandedRadius = false
+
+            }
         
         this.connectors.forEach(connector => {
             connector.clickMove(x, y)       
@@ -411,7 +421,7 @@ export default class AttachmentPoint {
         
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius/2.1)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         //this function returns itself if the coordinates passed in are within itself
         if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels && this.type == 'input'){  //If we have released the mouse here and this is an input...
