@@ -307,36 +307,28 @@ export default class AttachmentPoint {
         let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)
         let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
         let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)
-        //expand if touched by mouse
-        
+       
+        //expand if touched by mouse 
         var distFromClick =  Math.abs(GlobalVariables.distBetweenPoints(parentXInPixels, x, parentYInPixels, y))
-        console.log(distFromClick)
         //If we are close to the attachment point move it to it's hover location to make it accessible
-        if (distFromClick < parentRadiusInPixels*2.7 && this.type == 'input'){
-                 
-                this.expandOut(distFromClick)
-                this.showHoverText = true
-                
-                }
-                
-        else if( distFromClick < parentRadiusInPixels *1.5 && this.type == 'output'){
-               
-                this.showHoverText = true
-            }
-
+        if (distFromClick < parentRadiusInPixels*2.7 && this.type == 'input'){       
+            this.expandOut(distFromClick)
+            this.showHoverText = true     
+        }         
+        else if( distFromClick < parentRadiusInPixels *1.5 && this.type == 'output'){       
+            this.showHoverText = true
+        }
         else{
             this.reset()
             this.expandedRadius = false
         }
-            
-        
+        //Expand it if you are close enough to make connection
         if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels ){
-                this.expandedRadius = true
-            }  
+            this.expandedRadius = true
+        }  
         else{
-                this.expandedRadius = false
-
-            }
+            this.expandedRadius = false
+        }
         
         this.connectors.forEach(connector => {
             connector.clickMove(x, y)       
