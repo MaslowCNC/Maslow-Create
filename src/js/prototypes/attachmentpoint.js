@@ -229,9 +229,12 @@ export default class AttachmentPoint {
         }
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.lineWidth = 1
+
         GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
+        if(this.showHoverText == true){
         GlobalVariables.c.fill()
         GlobalVariables.c.stroke()
+        }
         GlobalVariables.c.closePath()  
 
         if (!this.expandedRadius){ 
