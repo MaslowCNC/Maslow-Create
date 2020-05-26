@@ -196,7 +196,7 @@ export default function GitHubModule(){
 
         searchBar.addEventListener('keydown', (e) => {
             
-            this.ProjectsBySearchload("yoursButton",e, searchBar.value, "updated")
+            this.loadProjectsBySearch("yoursButton",e, searchBar.value, "updated")
             this.loadProjectsBySearch("githubButton",e, searchBar.value, "stars") // updated just sorts content by most recently updated
         })
         
