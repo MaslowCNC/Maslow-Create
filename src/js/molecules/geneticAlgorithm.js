@@ -81,7 +81,6 @@ export default class GeneticAlgorithm extends Atom {
             }
             else{
                 this.generation++
-                console.log("Doing generation: " + this.generation)
                 if(this.generation < this.findIOValue('number of generations')){
                     // Generate a new generation from the existing generation and start the process over
                     this.breedAndCullPopulation()
@@ -147,7 +146,8 @@ export default class GeneticAlgorithm extends Atom {
      * Generate a random number between min and max
      */ 
     getRandomValue(min, max) {
-        return Math.random() * (max - min) + min;
+        const randomVal = Math.random() * (max - min) + min
+        return randomVal
     }
     
     /**
@@ -172,10 +172,14 @@ export default class GeneticAlgorithm extends Atom {
                 genome: genome,
                 fitness: null
             }
+            console.log(individual)
             this.population.push(individual)
             
             i++
         }
+        
+        console.log("Created population: ")
+        console.log(this.population)
     }
     
     mutate(gene){
@@ -212,7 +216,7 @@ export default class GeneticAlgorithm extends Atom {
         // Breed them to fill out the population to full size
         var i = keptPopulationNumber
         while(i < this.population.length){
-            // Breed two random individuals from the top of the list
+            // Breed two random individuals from the top 1/5th of the list
             this.population[i] = this.breedIndividuals(this.population[Math.round(Math.random()*keptPopulationNumber)], this.population[Math.round(Math.random()*keptPopulationNumber)])
             i++
         }
