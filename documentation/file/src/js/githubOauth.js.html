@@ -51,6 +51,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
@@ -274,7 +275,7 @@ export default function GitHubModule(){
         searchBar.addEventListener(&apos;keydown&apos;, (e) =&gt; {
             
             this.loadProjectsBySearch(&quot;yoursButton&quot;,e, searchBar.value, &quot;updated&quot;)
-            this.loadProjectsBySearch(&quot;githubButton&quot;,e, searchBar.value, &quot;updated&quot;) // updated just sorts content by most recently updated
+            this.loadProjectsBySearch(&quot;githubButton&quot;,e, searchBar.value, &quot;stars&quot;) // updated just sorts content by most recently updated
         })
         
 
@@ -543,7 +544,7 @@ export default function GitHubModule(){
         document.getElementById(&apos;menuInput&apos;).focus()
         
         this.loadProjectsBySearch(&quot;yoursButton&quot;, {key: &quot;Enter&quot;}, document.getElementById(&quot;project_search&quot;).value, &quot;updated&quot;, page)
-        this.loadProjectsBySearch(&quot;githubButton&quot;, {key: &quot;Enter&quot;}, document.getElementById(&quot;project_search&quot;).value, &quot;updated&quot;, page)
+        this.loadProjectsBySearch(&quot;githubButton&quot;, {key: &quot;Enter&quot;}, document.getElementById(&quot;project_search&quot;).value, &quot;stars&quot;, page)
     }
     
     /** 

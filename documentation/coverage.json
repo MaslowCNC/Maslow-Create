@@ -1,7 +1,7 @@
 {
-  "coverage": "98.31%",
-  "expectCount": 474,
-  "actualCount": 466,
+  "coverage": "98.19%",
+  "expectCount": 498,
+  "actualCount": 489,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -69,8 +69,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/constant.js": {
-      "expectCount": 16,
-      "actualCount": 16,
+      "expectCount": 17,
+      "actualCount": 17,
       "undocumentLines": []
     },
     "src/js/molecules/cutlayout.js": {
@@ -107,6 +107,13 @@
       "expectCount": 6,
       "actualCount": 6,
       "undocumentLines": []
+    },
+    "src/js/molecules/geneticAlgorithm.js": {
+      "expectCount": 21,
+      "actualCount": 20,
+      "undocumentLines": [
+        79
+      ]
     },
     "src/js/molecules/githubmolecule.js": {
       "expectCount": 10,
@@ -197,8 +204,8 @@
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 51,
-      "actualCount": 51,
+      "expectCount": 52,
+      "actualCount": 52,
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
@@ -210,8 +217,8 @@
       ]
     },
     "src/js/prototypes/connector.js": {
-      "expectCount": 22,
-      "actualCount": 22,
+      "expectCount": 23,
+      "actualCount": 23,
       "undocumentLines": []
     },
     "src/utils.js": {
