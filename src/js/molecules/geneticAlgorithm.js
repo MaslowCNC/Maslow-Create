@@ -69,9 +69,6 @@ export default class GeneticAlgorithm extends Atom {
      * Generate a layered outline of the part where the tool will cut
      */ 
     updateValue(){
-        console.log("GE input has updated")
-        console.log(this.findIOValue('fitness function'))
-        
         if(this.evolutionInProcess){
             //Store the result from this individual in it's fitness value
             this.population[this.individualIndex].fitness = this.findIOValue('fitness function')
@@ -83,20 +80,23 @@ export default class GeneticAlgorithm extends Atom {
                 this.beginEvaluatingIndividual()
             }
             else{
-                console.log("One generation evaluated")
-                console.log(this.population)
-                this.evolutionInProcess = false
                 this.generation++
+                console.log("Doing generation: " + this.generation)
                 if(this.generation < this.findIOValue('number of generations')){
                     // Generate a new generation from the existing generation and start the process over
                     this.breedAndCullPopulation()
-                    this.individual = 0
+                    this.individualIndex = 0
+                    this.beginEvaluatingIndividual()
                 }
                 else{
+                    this.evolutionInProcess = false
                     console.log("Finished with evolution")
-                    // Set the inputs to the prime candidate here
+                    // Set the inputs to the prime candidate
+                    this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
+                    this.individualIndex = 0
+                    this.generation = 0
+                    this.beginEvaluatingIndividual()
                 }
-                
             }
         }
     }
@@ -108,7 +108,6 @@ export default class GeneticAlgorithm extends Atom {
         var valueList =  super.updateSidebar() 
         
         this.createButton(valueList,this,'Evolve',() => {
-            console.log("Beginning GE")
             this.evolutionInProcess = true
             
             //Generate a list of all the constants to evolve
@@ -179,8 +178,44 @@ export default class GeneticAlgorithm extends Atom {
         }
     }
     
+    mutate(gene){
+        const maxVal = gene.constantAtom.max
+        const minVal = gene.constantAtom.min
+        
+        gene.newValue = Math.min(Math.max(gene.newValue+Math.random()-0.5, minVal), maxVal)
+        
+        return gene
+    }
+    
+    breedIndividuals(individualA, individualB){
+        var newIndividual = individualA
+        
+        newIndividual.genome.forEach((gene, index) =>{
+            if(Math.random() > .5){
+                //Use gene from individual A 
+                newIndividual.genome[index] = this.mutate(individualA.genome[index])
+            }
+            else{
+                //Use gene from individual B mutated
+                newIndividual.genome[index] = this.mutate(individualB.genome[index])
+            }
+        })
+        return newIndividual
+    }
+    
     breedAndCullPopulation(){
-        console.log("Would breed and cull here")
+        this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
+        
+        // Create a new population by taking the top 1/5th of the original population
+        const keptPopulationNumber = this.population.length / 5
+        
+        // Breed them to fill out the population to full size
+        var i = keptPopulationNumber
+        while(i < this.population.length){
+            // Breed two random individuals from the top of the list
+            this.population[i] = this.breedIndividuals(this.population[Math.round(Math.random()*keptPopulationNumber)], this.population[Math.round(Math.random()*keptPopulationNumber)])
+            i++
+        }
     }
     
     /**
