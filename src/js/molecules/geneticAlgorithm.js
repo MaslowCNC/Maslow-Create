@@ -69,6 +69,7 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     updateValue(){
         if(this.evolutionInProcess){
+            this.updateSidebar()
             this.processing = true
             //Store the result from this individual in it's fitness value
             this.population[this.individualIndex].fitness = this.findIOValue('fitness function')
@@ -95,6 +96,8 @@ export default class GeneticAlgorithm extends Atom {
                     this.individualIndex = 0
                     this.generation = 0
                     this.beginEvaluatingIndividual()
+                    
+                    //this.updateSidebar()
                 }
             }
         }
@@ -104,20 +107,49 @@ export default class GeneticAlgorithm extends Atom {
      * Add a button to trigger the evolution process
      */ 
     updateSidebar(){
-        var valueList =  super.updateSidebar() 
         
-        this.createButton(valueList,this,'Evolve',() => {
-            this.evolutionInProcess = true
+        
+        
+        if(this.evolutionInProcess){
             
-            //Generate a list of all the constants to evolve
-            this.updateConstantsList()
+            //Remove everything in the sidebar
+            let sideBar = document.querySelector('.sideBar')
+            while (sideBar.firstChild) {
+                sideBar.removeChild(sideBar.firstChild)
+            }
             
-            //Generate a population from those constants
-            this.initializePopulation()
+            //Generate the list
+            var valueList = document.createElement('ul')
+            sideBar.appendChild(valueList)
+            valueList.setAttribute('class', 'sidebar-list')
             
-            //Evaluate the first individual
-            this.beginEvaluatingIndividual()
-        })
+            //Add text to the list element
+            var listElement = document.createElement('LI')
+            valueList.appendChild(listElement)
+            
+            var labelDiv = document.createElement('div')
+            listElement.appendChild(labelDiv)
+            var labelText = document.createTextNode("Evolving...Generation: " + this.generation)
+            labelDiv.appendChild(labelText)
+            labelDiv.setAttribute('class', 'sidebar-subitem label-item')
+        }
+        else{
+            
+            var valueList =  super.updateSidebar() 
+            
+            this.createButton(valueList,this,'Evolve',() => {
+                this.evolutionInProcess = true
+                
+                //Generate a list of all the constants to evolve
+                this.updateConstantsList()
+                
+                //Generate a population from those constants
+                this.initializePopulation()
+                
+                //Evaluate the first individual
+                this.beginEvaluatingIndividual()
+            })
+        }
     }
     
     /**
