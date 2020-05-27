@@ -125,13 +125,13 @@ export default class GeneticAlgorithm extends Atom {
             }
             
             //Generate the list
-            var valueList = document.createElement('ul')
-            sideBar.appendChild(valueList)
-            valueList.setAttribute('class', 'sidebar-list')
+            var sbList = document.createElement('ul')
+            sideBar.appendChild(sbList)
+            sbList.setAttribute('class', 'sidebar-list')
             
             //Add text to the list element
             var listElement = document.createElement('LI')
-            valueList.appendChild(listElement)
+            sbList.appendChild(listElement)
             
             var labelDiv = document.createElement('div')
             listElement.appendChild(labelDiv)
