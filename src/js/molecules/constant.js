@@ -62,8 +62,6 @@ export default class Constant extends Atom{
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        console.log("Updating value with value: ")
-        console.log(this.value)
         this.displayAndPropogate()
     }
     

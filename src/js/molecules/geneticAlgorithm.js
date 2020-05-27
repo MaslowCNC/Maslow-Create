@@ -83,15 +83,20 @@ export default class GeneticAlgorithm extends Atom {
                 this.beginEvaluatingIndividual()
             }
             else{
-                console.log("Whole generation evaluated")
+                console.log("One generation evaluated")
                 console.log(this.population)
                 this.evolutionInProcess = false
-                // this.generation++
-                // if(this.generation < this.findIOValue('number of generations')){
-                    //Generate a new generation from the existing generation and start the process over
-                    // this.breedAndCullPopulation()
-                    // this.individual = 0
-                // }
+                this.generation++
+                if(this.generation < this.findIOValue('number of generations')){
+                    // Generate a new generation from the existing generation and start the process over
+                    this.breedAndCullPopulation()
+                    this.individual = 0
+                }
+                else{
+                    console.log("Finished with evolution")
+                    // Set the inputs to the prime candidate here
+                }
+                
             }
         }
     }
@@ -130,7 +135,7 @@ export default class GeneticAlgorithm extends Atom {
         
         //Set all of their values
         individualToEvaluate.genome.forEach(gene => {
-            gene.constantAtom.value = gene.newValue
+            gene.constantAtom.output.value = gene.newValue
         })
         
         //Trigger them to update
@@ -175,7 +180,7 @@ export default class GeneticAlgorithm extends Atom {
     }
     
     breedAndCullPopulation(){
-        
+        console.log("Would breed and cull here")
     }
     
     /**
