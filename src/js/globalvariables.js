@@ -20,7 +20,6 @@ import Constant         from './molecules/constant.js'
 import Equation         from './molecules/equation.js'
 import ExtractTag       from './molecules/extracttag.js'
 import Molecule         from './molecules/molecule.js'
-import OverCutCorners   from './molecules/OverCutCorners.js'
 import GeneticAlgorithm from './molecules/geneticAlgorithm.js'
 import Input            from './molecules/input.js'
 import Readme           from './molecules/readme.js'
@@ -79,7 +78,6 @@ class GlobalVariables{
             equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
             code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
             
-            overCutCorners:     {creator: OverCutCorners, atomType: 'OverCut-Corners', atomCategory: 'Actions'},
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},

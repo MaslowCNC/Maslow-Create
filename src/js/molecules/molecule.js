@@ -107,7 +107,8 @@ export default class Molecule extends Atom{
      * @param {number} x - The X cordinate of the click
      * @param {number} y - The Y cordinate of the click
      */ 
-    clickUp(){
+    clickUp(x,y){
+        super.clickUp(x,y)
         GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =>{
             atom.isMoving = false
         })
@@ -131,6 +132,7 @@ export default class Molecule extends Atom{
         if (distFromClick < this.radius*2){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
+            this.selected = false
             clickProcessed = true
         }
         
@@ -138,11 +140,11 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Handle a background click (a click which doesn't land on one of the contained molecules) by deselecting everything and displaying a 3D rendering of this molecules output.
+     * Handle a background click (a click which doesn't land on one of the contained molecules) by deselected everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
         /**
-         * Flag that the attom is now selected.
+         * Flag that the atom is now selected.
          */
         this.selected = true
         this.updateSidebar()
@@ -395,6 +397,9 @@ export default class Molecule extends Atom{
     goToParentMolecule(){
         //Go to the parent molecule if there is one
         if(!GlobalVariables.currentMolecule.topLevel){
+            this.nodesOnTheScreen.forEach(atom => {
+                atom.selected = false
+            })
             GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
         }
