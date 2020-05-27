@@ -197,7 +197,7 @@ export default function GitHubModule(){
         searchBar.addEventListener('keydown', (e) => {
             
             this.loadProjectsBySearch("yoursButton",e, searchBar.value, "updated")
-            this.loadProjectsBySearch("githubButton",e, searchBar.value, "updated") // updated just sorts content by most recently updated
+            this.loadProjectsBySearch("githubButton",e, searchBar.value, "stars") // updated just sorts content by most recently updated
         })
         
 
@@ -466,7 +466,7 @@ export default function GitHubModule(){
         document.getElementById('menuInput').focus()
         
         this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
-        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
+        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)
     }
     
     /** 

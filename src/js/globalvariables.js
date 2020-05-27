@@ -20,6 +20,7 @@ import Constant         from './molecules/constant.js'
 import Equation         from './molecules/equation.js'
 import ExtractTag       from './molecules/extracttag.js'
 import Molecule         from './molecules/molecule.js'
+import GeneticAlgorithm from './molecules/geneticAlgorithm.js'
 import Input            from './molecules/input.js'
 import Readme           from './molecules/readme.js'
 import AddBOMTag        from './molecules/BOM.js'
@@ -82,6 +83,7 @@ class GlobalVariables{
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             scale:              {creator: Scale, atomType: 'Scale', atomCategory: 'Actions'},
             stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
+            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'Genetic Algorithm', atomCategory: 'Actions'},
             
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
