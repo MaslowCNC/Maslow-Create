@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom.js'
-import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the Genetic Algorithm atom.
@@ -91,8 +90,6 @@ export default class GeneticAlgorithm extends Atom {
                 else{
                     this.evolutionInProcess = false
                     this.processing = false
-                    console.log("Finished with evolution")
-                    console.log(this.population)
                     // Set the inputs to the prime candidate
                     this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
                     this.individualIndex = 0
@@ -181,17 +178,23 @@ export default class GeneticAlgorithm extends Atom {
         }
     }
     
+    /**
+     * Mutate a gene 
+     */ 
     mutate(gene){
         const maxVal = gene.constantAtom.max
         const minVal = gene.constantAtom.min
         
         const amountToMutate = .05*(maxVal - minVal)
         
-        gene.newValue = Math.min(Math.max(gene.newValue + 5*(Math.random()-0.5), minVal), maxVal)
+        gene.newValue = Math.min(Math.max(gene.newValue + amountToMutate*(Math.random()-0.5), minVal), maxVal)
         
         return gene
     }
     
+    /**
+     * Breed two individuals to create a new individual
+     */ 
     breedIndividuals(individualA, individualB){
         var newIndividual = {
             genome: [],
@@ -211,13 +214,11 @@ export default class GeneticAlgorithm extends Atom {
         return newIndividual
     }
     
+    /**
+     * Breed the best performers in the population, cull the rest
+     */ 
     breedAndCullPopulation(){
         this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
-        
-        console.log("Sorted population")
-        this.population.forEach(individual => {
-            console.log(individual.genome[0].newValue)
-        })
         
         // Create a new population by taking the top 1/5th of the original population
         const keptPopulationNumber = Math.round(this.population.length / 5)
@@ -233,12 +234,6 @@ export default class GeneticAlgorithm extends Atom {
             newPopulation.push(this.breedIndividuals(this.population[individualOneIndex], this.population[individualTwoIndex]))
             i++
         }
-        
-        console.log("After breeding")
-        newPopulation.forEach(individual => {
-            console.log(individual.genome[0].newValue)
-        })
-        
     }
     
     /**
