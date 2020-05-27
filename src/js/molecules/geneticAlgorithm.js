@@ -70,6 +70,7 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     updateValue(){
         if(this.evolutionInProcess){
+            this.processing = true
             //Store the result from this individual in it's fitness value
             this.population[this.individualIndex].fitness = this.findIOValue('fitness function')
             
@@ -89,7 +90,9 @@ export default class GeneticAlgorithm extends Atom {
                 }
                 else{
                     this.evolutionInProcess = false
+                    this.processing = false
                     console.log("Finished with evolution")
+                    console.log(this.population)
                     // Set the inputs to the prime candidate
                     this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
                     this.individualIndex = 0
@@ -172,29 +175,29 @@ export default class GeneticAlgorithm extends Atom {
                 genome: genome,
                 fitness: null
             }
-            console.log(individual)
             this.population.push(individual)
             
             i++
         }
-        
-        console.log("Created population: ")
-        console.log(this.population)
     }
     
     mutate(gene){
         const maxVal = gene.constantAtom.max
         const minVal = gene.constantAtom.min
         
-        gene.newValue = Math.min(Math.max(gene.newValue+Math.random()-0.5, minVal), maxVal)
+        const amountToMutate = .05*(maxVal - minVal)
+        
+        gene.newValue = Math.min(Math.max(gene.newValue + 5*(Math.random()-0.5), minVal), maxVal)
         
         return gene
     }
     
     breedIndividuals(individualA, individualB){
-        var newIndividual = individualA
-        
-        newIndividual.genome.forEach((gene, index) =>{
+        var newIndividual = {
+            genome: [],
+            fitness: null
+        }
+        individualA.genome.forEach((gene, index) =>{
             if(Math.random() > .5){
                 //Use gene from individual A 
                 newIndividual.genome[index] = this.mutate(individualA.genome[index])
@@ -204,22 +207,38 @@ export default class GeneticAlgorithm extends Atom {
                 newIndividual.genome[index] = this.mutate(individualB.genome[index])
             }
         })
+        
         return newIndividual
     }
     
     breedAndCullPopulation(){
         this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
         
+        console.log("Sorted population")
+        this.population.forEach(individual => {
+            console.log(individual.genome[0].newValue)
+        })
+        
         // Create a new population by taking the top 1/5th of the original population
-        const keptPopulationNumber = this.population.length / 5
+        const keptPopulationNumber = Math.round(this.population.length / 5)
+        
+        var newPopulation = this.population.slice(0,keptPopulationNumber)
         
         // Breed them to fill out the population to full size
         var i = keptPopulationNumber
         while(i < this.population.length){
             // Breed two random individuals from the top 1/5th of the list
-            this.population[i] = this.breedIndividuals(this.population[Math.round(Math.random()*keptPopulationNumber)], this.population[Math.round(Math.random()*keptPopulationNumber)])
+            const individualOneIndex = Math.round(Math.random()*keptPopulationNumber)
+            const individualTwoIndex = Math.round(Math.random()*keptPopulationNumber)
+            newPopulation.push(this.breedIndividuals(this.population[individualOneIndex], this.population[individualTwoIndex]))
             i++
         }
+        
+        console.log("After breeding")
+        newPopulation.forEach(individual => {
+            console.log(individual.genome[0].newValue)
+        })
+        
     }
     
     /**
