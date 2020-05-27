@@ -55,6 +55,12 @@ export default class GeneticAlgorithm extends Atom {
          */
         this.evolutionInProcess = false
         
+        /**
+         * A list of all of the upstream constants
+         * @type {array}
+         */
+        this.constants = []
+        
         this.addIO('input', 'fitness function', this, 'number', 0)
         this.addIO('input', 'population size', this, 'number', 50)
         this.addIO('input', 'number of generations', this, 'number', 10)
@@ -97,7 +103,7 @@ export default class GeneticAlgorithm extends Atom {
                     this.generation = 0
                     this.beginEvaluatingIndividual()
                     
-                    //this.updateSidebar()
+                    this.updateSidebar()
                 }
             }
         }
