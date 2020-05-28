@@ -216,40 +216,32 @@ export default class GeneticAlgorithm extends Atom {
         }
     }
     
-    /**
-     * Mutate a gene 
-     */ 
-    mutate(gene){
-        const maxVal = gene.constantAtom.max
-        const minVal = gene.constantAtom.min
+    breedTwo(A, B){
+        const lengthOfGenome = A.genome.length
         
-        const amountToMutate = .05*(maxVal - minVal)
-        
-        gene.newValue = Math.min(Math.max(gene.newValue + amountToMutate*(Math.random()-0.5), minVal), maxVal)
-        
-        return gene
-    }
-    
-    /**
-     * Breed two individuals to create a new individual
-     */ 
-    breedIndividuals(individualA, individualB){
-        var newIndividual = {
-            genome: [],
-            fitness: null
+        var child = {
+            fitness: null,
+            genome: []
         }
-        individualA.genome.forEach((gene, index) =>{
-            if(Math.random() > .5){
-                //Use gene from individual A 
-                newIndividual.genome[index] = this.mutate(individualA.genome[index])
-            }
-            else{
-                //Use gene from individual B mutated
-                newIndividual.genome[index] = this.mutate(individualB.genome[index])
-            }
-        })
         
-        return newIndividual
+        var geneIndex = 0
+        while(geneIndex < lengthOfGenome){
+            var newGene = {
+                newValue: null,
+                constantAtom: A.genome[geneIndex].constantAtom
+            }
+            
+            if(Math.random() > 0.5){
+                newGene.newValue = A.genome[geneIndex].newValue
+            }else{
+                newGene.newValue = B.genome[geneIndex].newValue
+            }
+            
+            child.genome.push(newGene)
+            
+            geneIndex++
+        }
+        return child
     }
     
     /**
@@ -261,17 +253,26 @@ export default class GeneticAlgorithm extends Atom {
         // Create a new population by taking the top 1/5th of the original population
         const keptPopulationNumber = Math.round(this.population.length / 5)
         
-        var newPopulation = this.population.slice(0,keptPopulationNumber)
+        const breeders = this.population.slice(0,keptPopulationNumber)
         
-        // Breed them to fill out the population to full size
-        var i = keptPopulationNumber
-        while(i < this.population.length){
-            // Breed two random individuals from the top 1/5th of the list
-            const individualOneIndex = Math.round(Math.random()*keptPopulationNumber)
-            const individualTwoIndex = Math.round(Math.random()*keptPopulationNumber)
-            newPopulation.push(this.breedIndividuals(this.population[individualOneIndex], this.population[individualTwoIndex]))
-            i++
+        //Generate a new population of individuals by breading from the last generation
+        var newGeneration = []
+        var index = 0
+        while(index < this.population.length - keptPopulationNumber){
+            const individualOneIndex = Math.round(Math.random()*(breeders.length-1))
+            const individualTwoIndex = Math.round(Math.random()*(breeders.length-1))
+            const newIndividual = this.breedTwo(breeders[individualOneIndex], breeders[individualTwoIndex])
+            newGeneration.push(newIndividual)
+            index = index + 1
         }
+        
+        this.population = breeders.concat(newGeneration)
+        
+        console.log("Generation: " + this.generation)
+        console.log(this.population)
+        this.population.forEach(individual => {
+            console.log(individual.genome[0].newValue + " " + individual.genome[1].newValue)
+        })
     }
     
     /**
