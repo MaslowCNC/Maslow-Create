@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the rectangle atom.
@@ -28,6 +29,24 @@ export default class Rectangle extends Atom {
         this.atomType = 'Rectangle'
         
         this.setValues(values)
+    }
+
+     /**
+     * Draw the rectangle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.rect(GlobalVariables.widthToPixels(this.x- this.radius/2), 
+        GlobalVariables.heightToPixels(this.y- this.radius*2), 
+        GlobalVariables.widthToPixels(this.radius), 
+        GlobalVariables.widthToPixels(this.radius))       
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
     }
     
     /**

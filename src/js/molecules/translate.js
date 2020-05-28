@@ -44,7 +44,7 @@ export default class Translate extends Atom{
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x+this.radius/5), 
             GlobalVariables.heightToPixels(this.y), 
-            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)       
+            GlobalVariables.widthToPixels(this.radius/2.5), 0, Math.PI * 2, false)       
         //GlobalVariables.c.fill()
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()  
@@ -52,7 +52,7 @@ export default class Translate extends Atom{
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x-this.radius/5), 
             GlobalVariables.heightToPixels(this.y), 
-            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)       
+            GlobalVariables.widthToPixels(this.radius/2.5), 0, Math.PI * 2, false)       
         GlobalVariables.c.fill()
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()  

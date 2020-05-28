@@ -1,5 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the Assembly atom instance.
@@ -45,6 +46,38 @@ export default class Assembly extends Atom{
         }
     }
     
+
+     /**
+     * Draw the rectangle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        const xInPixels = GlobalVariables.widthToPixels(this.x)
+        const yInPixels = GlobalVariables.heightToPixels(this.y)
+        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels + radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels - radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
+        GlobalVariables.c.fillStyle = this.color
+        GlobalVariables.c.fill()
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.lineJoin = "round"
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+    }
+
     /**
     * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.
     */ 
