@@ -50,16 +50,16 @@ export default class GeneticAlgorithm extends Atom {
         this.generation = 0
         
         /**
+         * Top fitness value for the current generation
+         * @type {float}
+         */
+        this.topFitness = 0
+        
+        /**
          * A flag to indicate if evolution is in process
          * @type {boolean}
          */
         this.evolutionInProcess = false
-        
-        /**
-         * A list of all of the upstream constants
-         * @type {array}
-         */
-        this.constants = []
         
         this.addIO('input', 'fitness function', this, 'number', 0)
         this.addIO('input', 'population size', this, 'number', 50)
@@ -135,7 +135,7 @@ export default class GeneticAlgorithm extends Atom {
             
             var labelDiv = document.createElement('div')
             listElement.appendChild(labelDiv)
-            var labelText = document.createTextNode("Evolving...Generation: " + this.generation)
+            var labelText = document.createTextNode("Evolving...Generation: " + this.generation + "    Best Fitness Value: " + this.topFitness)
             labelDiv.appendChild(labelText)
             labelDiv.setAttribute('class', 'sidebar-subitem label-item')
         }
@@ -193,6 +193,9 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     initializePopulation(){
         this.population = []
+        this.individualIndex = 0
+        this.generation = 0
+        this.topFitness = 0
         
         var i = 0
         while(i < this.findIOValue('population size')){
@@ -217,39 +220,43 @@ export default class GeneticAlgorithm extends Atom {
     }
     
     /**
-     * Mutate a gene 
+     * Take two individuals and breed them to form a new individual with a mix of their genes and mutations
      */ 
-    mutate(gene){
-        const maxVal = gene.constantAtom.max
-        const minVal = gene.constantAtom.min
+    breedTwo(A, B){
+        const lengthOfGenome = A.genome.length
         
-        const amountToMutate = .05*(maxVal - minVal)
-        
-        gene.newValue = Math.min(Math.max(gene.newValue + amountToMutate*(Math.random()-0.5), minVal), maxVal)
-        
-        return gene
-    }
-    
-    /**
-     * Breed two individuals to create a new individual
-     */ 
-    breedIndividuals(individualA, individualB){
-        var newIndividual = {
-            genome: [],
-            fitness: null
+        var child = {
+            fitness: null,
+            genome: []
         }
-        individualA.genome.forEach((gene, index) =>{
-            if(Math.random() > .5){
-                //Use gene from individual A 
-                newIndividual.genome[index] = this.mutate(individualA.genome[index])
-            }
-            else{
-                //Use gene from individual B mutated
-                newIndividual.genome[index] = this.mutate(individualB.genome[index])
-            }
-        })
         
-        return newIndividual
+        var geneIndex = 0
+        while(geneIndex < lengthOfGenome){
+            var newGene = {
+                newValue: null,
+                constantAtom: A.genome[geneIndex].constantAtom
+            }
+            
+            
+            const maxVal         = A.genome[geneIndex].constantAtom.max
+            const minVal         = A.genome[geneIndex].constantAtom.min
+            const mutationAmount = 0.1*(maxVal-minVal)*(Math.random()-.5) //Mutate by at most +-.5%
+            
+            var newGeneVal = null
+            if(Math.random() > 0.5){
+                newGeneVal = A.genome[geneIndex].newValue+mutationAmount
+            }else{
+                newGeneVal = B.genome[geneIndex].newValue+mutationAmount
+            }
+            
+            //Constrain to within bounds
+            newGene.newValue = Math.min(Math.max(newGeneVal, minVal), maxVal)
+            
+            child.genome.push(newGene)
+            
+            geneIndex++
+        }
+        return child
     }
     
     /**
@@ -258,20 +265,25 @@ export default class GeneticAlgorithm extends Atom {
     breedAndCullPopulation(){
         this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
         
+        this.topFitness = this.population[0].fitness
+        
         // Create a new population by taking the top 1/5th of the original population
         const keptPopulationNumber = Math.round(this.population.length / 5)
         
-        var newPopulation = this.population.slice(0,keptPopulationNumber)
+        const breeders = this.population.slice(0,keptPopulationNumber)
         
-        // Breed them to fill out the population to full size
-        var i = keptPopulationNumber
-        while(i < this.population.length){
-            // Breed two random individuals from the top 1/5th of the list
-            const individualOneIndex = Math.round(Math.random()*keptPopulationNumber)
-            const individualTwoIndex = Math.round(Math.random()*keptPopulationNumber)
-            newPopulation.push(this.breedIndividuals(this.population[individualOneIndex], this.population[individualTwoIndex]))
-            i++
+        //Generate a new population of individuals by breading from the last generation
+        var newGeneration = []
+        var index = 0
+        while(index < this.population.length - keptPopulationNumber){
+            const individualOneIndex = Math.round(Math.random()*(breeders.length-1))
+            const individualTwoIndex = Math.round(Math.random()*(breeders.length-1))
+            const newIndividual = this.breedTwo(breeders[individualOneIndex], breeders[individualTwoIndex])
+            newGeneration.push(newIndividual)
+            index = index + 1
         }
+        
+        this.population = breeders.concat(newGeneration)
     }
     
     /**
@@ -279,7 +291,7 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     updateConstantsList(){
         //Create an array of the inputs by walking up stream
-        this.constants = []
+        this.constantsToEvolve = []
         this.inputs.forEach(input => {
             input.connectors.forEach(connector => {
                 connector.walkBackForConstants(constantObject => {this.addToConstantsList(constantObject)})
