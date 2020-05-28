@@ -227,11 +227,20 @@ export default class GeneticAlgorithm extends Atom {
                 constantAtom: A.genome[geneIndex].constantAtom
             }
             
+            
+            const maxVal         = A.genome[geneIndex].constantAtom.max
+            const minVal         = A.genome[geneIndex].constantAtom.min
+            const mutationAmount = 0.1*(maxVal-minVal)*(Math.random()-.5) //Mutate by at most +-.5%
+            
+            var newGeneVal = null
             if(Math.random() > 0.5){
-                newGene.newValue = A.genome[geneIndex].newValue
+                newGeneVal = A.genome[geneIndex].newValue+mutationAmount
             }else{
-                newGene.newValue = B.genome[geneIndex].newValue
+                newGeneVal = B.genome[geneIndex].newValue+mutationAmount
             }
+            
+            //Constrain to within bounds
+            newGene.newValue = Math.min(Math.max(newGeneVal, minVal), maxVal)
             
             child.genome.push(newGene)
             
@@ -263,12 +272,6 @@ export default class GeneticAlgorithm extends Atom {
         }
         
         this.population = breeders.concat(newGeneration)
-        
-        console.log("Generation: " + this.generation)
-        console.log(this.population)
-        this.population.forEach(individual => {
-            console.log(individual.genome[0].newValue + " " + individual.genome[1].newValue)
-        })
     }
     
     /**
