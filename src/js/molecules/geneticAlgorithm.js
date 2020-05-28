@@ -50,6 +50,12 @@ export default class GeneticAlgorithm extends Atom {
         this.generation = 0
         
         /**
+         * Top fitness value for the current generation
+         * @type {float}
+         */
+        this.topFitness = 0
+        
+        /**
          * A flag to indicate if evolution is in process
          * @type {boolean}
          */
@@ -129,7 +135,7 @@ export default class GeneticAlgorithm extends Atom {
             
             var labelDiv = document.createElement('div')
             listElement.appendChild(labelDiv)
-            var labelText = document.createTextNode("Evolving...Generation: " + this.generation)
+            var labelText = document.createTextNode("Evolving...Generation: " + this.generation + "    Best Fitness Value: " + this.topFitness)
             labelDiv.appendChild(labelText)
             labelDiv.setAttribute('class', 'sidebar-subitem label-item')
         }
@@ -189,6 +195,7 @@ export default class GeneticAlgorithm extends Atom {
         this.population = []
         this.individualIndex = 0
         this.generation = 0
+        this.topFitness = 0
         
         var i = 0
         while(i < this.findIOValue('population size')){
@@ -254,6 +261,8 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     breedAndCullPopulation(){
         this.population = this.population.sort((a, b) => parseFloat(b.fitness) - parseFloat(a.fitness))
+        
+        this.topFitness = this.population[0].fitness
         
         // Create a new population by taking the top 1/5th of the original population
         const keptPopulationNumber = Math.round(this.population.length / 5)
