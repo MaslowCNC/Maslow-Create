@@ -69,7 +69,7 @@ export default class AddBOMTag extends Atom{
     
  
     /**
-     * Draw the constant which is more rectangular than the regular shape.
+     * Draw the Bill of material atom which has a BOM icon.
      */ 
     draw() {
         
