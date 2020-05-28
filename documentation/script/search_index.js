@@ -1692,16 +1692,10 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#breedindividuals",
-    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-breedIndividuals",
-    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#breedIndividuals",
+    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#breedtwo",
+    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-breedTwo",
+    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#breedTwo",
     "method"
-  ],
-  [
-    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#constants",
-    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-constants",
-    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#constants",
-    "member"
   ],
   [
     "src/js/molecules/geneticalgorithm.js~geneticalgorithm#constantstoevolve",
@@ -1746,12 +1740,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#mutate",
-    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-mutate",
-    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#mutate",
-    "method"
-  ],
-  [
     "src/js/molecules/geneticalgorithm.js~geneticalgorithm#name",
     "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-name",
     "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#name",
@@ -1767,6 +1755,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/geneticalgorithm.js~geneticalgorithm#processing",
     "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-processing",
     "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#processing",
+    "member"
+  ],
+  [
+    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#topfitness",
+    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-topFitness",
+    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#topFitness",
     "member"
   ],
   [

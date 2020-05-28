@@ -200,35 +200,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-constants">constants</a></span></span><span class="code" data-ice="signature">: <span>array</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>A list of all of the upstream constants</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-constantsToEvolve">constantsToEvolve</a></span></span><span class="code" data-ice="signature">: <span>array</span></span>
         </p>
       </div>
@@ -417,6 +388,35 @@
       
     </td>
   </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-topFitness">topFitness</a></span></span><span class="code" data-ice="signature">: <span>float</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Top fitness value for the current generation</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 </div>
@@ -525,13 +525,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-breedIndividuals">breedIndividuals</a></span></span><span class="code" data-ice="signature">(individualA: <span>*</span>, individualB: <span>*</span>): <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-breedTwo">breedTwo</a></span></span><span class="code" data-ice="signature">(A: <span>*</span>, B: <span>*</span>): <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Breed two individuals to create a new individual</p>
+        <div data-ice="description"><p>Take two individuals and breed them to form a new individual with a mix of their genes and mutations</p>
 </div>
       </div>
     </td>
@@ -590,35 +590,6 @@
         
         
         <div data-ice="description"><p>Generate an initial population</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-mutate">mutate</a></span></span><span class="code" data-ice="signature">(gene: <span>*</span>): <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Mutate a gene </p>
 </div>
       </div>
     </td>
@@ -2289,50 +2260,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-constants">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">constants</span><span class="code" data-ice="signature">: <span>array</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber62">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>A list of all of the upstream constants</p>
-</div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-constantsToEvolve">
     <span class="access" data-ice="access">public</span>
     
@@ -2388,7 +2315,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber56">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber62">source</a></span></span>
     </span>
   </h3>
 
@@ -2640,6 +2567,50 @@
   
   
 </div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-topFitness">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">topFitness</span><span class="code" data-ice="signature">: <span>float</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber56">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Top fitness value for the current generation</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
 </div>
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
@@ -2655,7 +2626,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber293">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber305">source</a></span></span>
     </span>
   </h3>
 
@@ -2759,7 +2730,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber258">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber265">source</a></span></span>
     </span>
   </h3>
 
@@ -2792,25 +2763,25 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-breedIndividuals">
+  <h3 data-ice="anchor" id="instance-method-breedTwo">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">breedIndividuals</span><span class="code" data-ice="signature">(individualA: <span>*</span>, individualB: <span>*</span>): <span>*</span></span>
+    <span class="code" data-ice="name">breedTwo</span><span class="code" data-ice="signature">(A: <span>*</span>, B: <span>*</span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber236">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber225">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Breed two individuals to create a new individual</p>
+  <div data-ice="description"><p>Take two individuals and breed them to form a new individual with a mix of their genes and mutations</p>
 </div>
 
   
@@ -2824,13 +2795,13 @@
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">individualA</td>
+      <td data-ice="name" class="code" data-depth="0">A</td>
       <td data-ice="type" class="code"><span>*</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"></td>
     </tr>
 <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">individualB</td>
+      <td data-ice="name" class="code" data-depth="0">B</td>
       <td data-ice="type" class="code"><span>*</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"></td>
@@ -2992,78 +2963,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-mutate">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">mutate</span><span class="code" data-ice="signature">(gene: <span>*</span>): <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber222">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Mutate a gene </p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">gene</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span>*</span></td>
-          
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-updateConstantsList">
     <span class="access" data-ice="access">public</span>
     
@@ -3075,7 +2974,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber280">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/geneticAlgorithm.js.html#lineNumber292">source</a></span></span>
     </span>
   </h3>
 
