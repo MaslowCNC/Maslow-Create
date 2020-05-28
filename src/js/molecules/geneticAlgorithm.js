@@ -55,12 +55,6 @@ export default class GeneticAlgorithm extends Atom {
          */
         this.evolutionInProcess = false
         
-        /**
-         * A list of all of the upstream constants
-         * @type {array}
-         */
-        this.constants = []
-        
         this.addIO('input', 'fitness function', this, 'number', 0)
         this.addIO('input', 'population size', this, 'number', 50)
         this.addIO('input', 'number of generations', this, 'number', 10)
@@ -193,6 +187,8 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     initializePopulation(){
         this.population = []
+        this.individualIndex = 0
+        this.generation = 0
         
         var i = 0
         while(i < this.findIOValue('population size')){
@@ -280,7 +276,7 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     updateConstantsList(){
         //Create an array of the inputs by walking up stream
-        this.constants = []
+        this.constantsToEvolve = []
         this.inputs.forEach(input => {
             input.connectors.forEach(connector => {
                 connector.walkBackForConstants(constantObject => {this.addToConstantsList(constantObject)})
