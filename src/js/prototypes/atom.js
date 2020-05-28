@@ -388,6 +388,7 @@ export default class Atom {
      * @param {number} y - The Y cordinate of the click
      */ 
     clickMove(x,y){
+
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
@@ -577,6 +578,18 @@ export default class Atom {
      */ 
     updateValue(){
         
+    }
+    
+    /**
+     * Used to walk back out the tree generating a list of constants
+     */ 
+    walkBackForConstants(callback){
+        //Pass the call further up the chain
+        this.inputs.forEach(input => {
+            input.connectors.forEach(connector => {
+                connector.walkBackForConstants(callback)
+            })
+        })
     }
     
     /**

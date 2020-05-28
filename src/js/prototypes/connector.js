@@ -187,6 +187,13 @@ export default class Connector {
     }
     
     /**
+     * Used to walk back out the tree generating a list of constants
+     */ 
+    walkBackForConstants(callback){
+        this.attachmentPoint1.parentMolecule.walkBackForConstants(callback)
+    }
+    
+    /**
      * Commputes the connectors position and draw it to the screen.
      */ 
     update() {

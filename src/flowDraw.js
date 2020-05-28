@@ -127,7 +127,7 @@ window.addEventListener('keydown', e => {
     //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
     if((e.srcElement.tagName.toLowerCase() !== ("textarea" && "input"))
         &&(!e.srcElement.isContentEditable)
-        && ['c', 'v', 'Backspace'].includes(e.key)){
+        && ['c','v', 'Backspace'].includes(e.key)){
         e.preventDefault()
     }
     //Copy /paste listeners
@@ -144,6 +144,10 @@ window.addEventListener('keydown', e => {
             item.uniqueID = newAtomID
             GlobalVariables.currentMolecule.placeAtom(item, true)    
         })   
+    }
+    if (GlobalVariables.ctrlDown &&  e.key == "s" && document.activeElement.id == "mainBody") {
+        e.preventDefault()
+        GlobalVariables.gitHub.saveProject()
     }
     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {  
