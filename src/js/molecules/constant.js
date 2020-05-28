@@ -92,6 +92,16 @@ export default class Constant extends Atom{
     }
     
     /**
+     * Used to walk back out the tree generating a list of constants
+     */ 
+    walkBackForConstants(callback){
+        //If this constant can evolve then add it to the target list
+        if(this.evolve){
+            callback(this)
+        }
+    }
+    
+    /**
      * Add the value to be saved to the object saved for this molecule.
      */ 
     serialize(values){
