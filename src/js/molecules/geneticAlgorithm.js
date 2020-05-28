@@ -219,6 +219,9 @@ export default class GeneticAlgorithm extends Atom {
         }
     }
     
+    /**
+     * Take two individuals and breed them to form a new individual with a mix of their genes and mutations
+     */ 
     breedTwo(A, B){
         const lengthOfGenome = A.genome.length
         
