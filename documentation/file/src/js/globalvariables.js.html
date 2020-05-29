@@ -61,10 +61,8 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/scale.js~Scale.html">Scale</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stl.js~Stl.html">Stl</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stretch.js~Stretch.html">Stretch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
@@ -89,7 +87,6 @@ import Translate        from &apos;./molecules/translate.js&apos;
 import Tag              from &apos;./molecules/tag.js&apos;
 import RegularPolygon   from &apos;./molecules/regularpolygon.js&apos;
 import Extrude          from &apos;./molecules/extrude.js&apos;
-import Scale            from &apos;./molecules/scale.js&apos;
 import Stl              from &apos;./molecules/stl.js&apos;
 import Svg              from &apos;./molecules/svg.js&apos;
 import Intersection     from &apos;./molecules/intersection.js&apos;
@@ -105,7 +102,6 @@ import AddBOMTag        from &apos;./molecules/BOM.js&apos;
 import Rotate           from &apos;./molecules/rotate.js&apos;
 import GitHubMolecule   from &apos;./molecules/githubmolecule.js&apos;
 import Output           from &apos;./molecules/output.js&apos;
-import Stretch          from &apos;./molecules/stretch.js&apos;
 import Gcode            from &apos;./molecules/gcode.js&apos;
 import Code             from &apos;./molecules/code.js&apos;
 import GitHubModule     from &apos;./githubOauth&apos;
@@ -136,6 +132,7 @@ class GlobalVariables{
         this.availableTypes = {
         
             box:                {creator: Box, atomType: &apos;Box&apos;},
+            
             intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;, atomCategory: &apos;Interactions&apos;},
             difference:         {creator: Difference, atomType: &apos;Difference&apos;, atomCategory: &apos;Interactions&apos;},
             assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;, atomCategory: &apos;Interactions&apos;},
@@ -146,6 +143,8 @@ class GlobalVariables{
             color:              {creator: Color, atomType: &apos;Color&apos;, atomCategory: &apos;Properties&apos;},
             tag:                {creator: Tag, atomType: &apos;Tag&apos;, atomCategory: &apos;Properties&apos;},
             extracttag:         {creator: ExtractTag, atomType: &apos;ExtractTag&apos;, atomCategory: &apos;Properties&apos;},
+            cutLayout:          {creator: CutLayout, atomType: &apos;CutLayout&apos;, atomCategory: &apos;Properties&apos;},
+            CutList:            {creator: CutList, atomType: &apos;CutList&apos;, atomCategory: &apos;Properties&apos;},
             
             regularPolygon:     {creator: RegularPolygon, atomType: &apos;RegularPolygon&apos;, atomCategory: &apos;Shapes&apos;},
             costant:            {creator: Constant, atomType: &apos;Constant&apos;, atomCategory: &apos;Shapes&apos;},
@@ -159,16 +158,12 @@ class GlobalVariables{
             rotate:             {creator: Rotate, atomType: &apos;Rotate&apos;, atomCategory: &apos;Actions&apos;},
             extrude:            {creator: Extrude, atomType: &apos;Extrude&apos;, atomCategory: &apos;Actions&apos;},
             translate:          {creator: Translate, atomType: &apos;Translate&apos;, atomCategory: &apos;Actions&apos;},
-            scale:              {creator: Scale, atomType: &apos;Scale&apos;, atomCategory: &apos;Actions&apos;},
-            stretch:            {creator: Stretch, atomType: &apos;Stretch&apos;, atomCategory: &apos;Actions&apos;},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: &apos;Genetic Algorithm&apos;, atomCategory: &apos;Actions&apos;},
             
             stl:                {creator: Stl, atomType: &apos;Stl&apos;, atomCategory: &apos;Import/Export&apos;},
             svg:                {creator: Svg, atomType: &apos;Svg&apos;, atomCategory: &apos;Import/Export&apos;},
             gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;, atomCategory: &apos;Import/Export&apos;},
             githubmolecule:     {creator: GitHubMolecule, atomType: &apos;GitHubMolecule&apos;, atomCategory: &apos;Import/Export&apos;},
-            cutLayout:          {creator: CutLayout, atomType: &quot;CutLayout&quot;, atomCategory: &apos;Import/Export&apos;},
-            CutList:            {creator: CutList, atomType: &apos;CutList&apos;, atomCategory: &apos;Import/Export&apos;},
             output:             {creator: Output, atomType: &apos;Output&apos;}
         }
         /** 

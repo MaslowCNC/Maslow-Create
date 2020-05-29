@@ -186,12 +186,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/molecules/scale.js~scale",
-    "class/src/js/molecules/scale.js~Scale.html",
-    "<span>Scale</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/scale.js</span>",
-    "class"
-  ],
-  [
     "canvas-template/src/js/molecules/shrinkwrap.js~shrinkwrap",
     "class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html",
     "<span>ShrinkWrap</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/shrinkwrap.js</span>",
@@ -201,12 +195,6 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/molecules/stl.js~stl",
     "class/src/js/molecules/stl.js~Stl.html",
     "<span>Stl</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/stl.js</span>",
-    "class"
-  ],
-  [
-    "canvas-template/src/js/molecules/stretch.js~stretch",
-    "class/src/js/molecules/stretch.js~Stretch.html",
-    "<span>Stretch</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/stretch.js</span>",
     "class"
   ],
   [
@@ -2430,36 +2418,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/scale.js",
-    "file/src/js/molecules/scale.js.html",
-    "src/js/molecules/scale.js",
-    "file"
-  ],
-  [
-    "src/js/molecules/scale.js~scale#atomtype",
-    "class/src/js/molecules/scale.js~Scale.html#instance-member-atomType",
-    "src/js/molecules/scale.js~Scale#atomType",
-    "member"
-  ],
-  [
-    "src/js/molecules/scale.js~scale#constructor",
-    "class/src/js/molecules/scale.js~Scale.html#instance-constructor-constructor",
-    "src/js/molecules/scale.js~Scale#constructor",
-    "method"
-  ],
-  [
-    "src/js/molecules/scale.js~scale#name",
-    "class/src/js/molecules/scale.js~Scale.html#instance-member-name",
-    "src/js/molecules/scale.js~Scale#name",
-    "member"
-  ],
-  [
-    "src/js/molecules/scale.js~scale#updatevalue",
-    "class/src/js/molecules/scale.js~Scale.html#instance-method-updateValue",
-    "src/js/molecules/scale.js~Scale#updateValue",
-    "method"
-  ],
-  [
     "src/js/molecules/shrinkwrap.js",
     "file/src/js/molecules/shrinkwrap.js.html",
     "src/js/molecules/shrinkwrap.js",
@@ -2560,36 +2518,6 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/stl.js~Stl.html#instance-member-value",
     "src/js/molecules/stl.js~Stl#value",
     "member"
-  ],
-  [
-    "src/js/molecules/stretch.js",
-    "file/src/js/molecules/stretch.js.html",
-    "src/js/molecules/stretch.js",
-    "file"
-  ],
-  [
-    "src/js/molecules/stretch.js~stretch#atomtype",
-    "class/src/js/molecules/stretch.js~Stretch.html#instance-member-atomType",
-    "src/js/molecules/stretch.js~Stretch#atomType",
-    "member"
-  ],
-  [
-    "src/js/molecules/stretch.js~stretch#constructor",
-    "class/src/js/molecules/stretch.js~Stretch.html#instance-constructor-constructor",
-    "src/js/molecules/stretch.js~Stretch#constructor",
-    "method"
-  ],
-  [
-    "src/js/molecules/stretch.js~stretch#name",
-    "class/src/js/molecules/stretch.js~Stretch.html#instance-member-name",
-    "src/js/molecules/stretch.js~Stretch#name",
-    "member"
-  ],
-  [
-    "src/js/molecules/stretch.js~stretch#updatevalue",
-    "class/src/js/molecules/stretch.js~Stretch.html#instance-method-updateValue",
-    "src/js/molecules/stretch.js~Stretch#updateValue",
-    "method"
   ],
   [
     "src/js/molecules/svg.js",

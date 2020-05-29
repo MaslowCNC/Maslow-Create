@@ -65,23 +65,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 184,
+        "lineNumber": 181,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 185,
+        "lineNumber": 182,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 186,
+        "lineNumber": 183,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 187,
+        "lineNumber": 184,
         "line": "    */\r"
       },
       {
-        "lineNumber": 188,
+        "lineNumber": 185,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -97,23 +97,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 192,
+        "lineNumber": 189,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 193,
+        "lineNumber": 190,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 194,
+        "lineNumber": 191,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 195,
+        "lineNumber": 192,
         "line": "    */\r"
       },
       {
-        "lineNumber": 196,
+        "lineNumber": 193,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -129,23 +129,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 201,
+        "lineNumber": 198,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 202,
+        "lineNumber": 199,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 203,
+        "lineNumber": 200,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 204,
+        "lineNumber": 201,
         "line": "    */\r"
       },
       {
-        "lineNumber": 205,
+        "lineNumber": 202,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
