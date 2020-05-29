@@ -68,6 +68,8 @@ class GlobalVariables{
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Properties'},
+            cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Properties'},
+            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Properties'},
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
             costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
@@ -89,8 +91,6 @@ class GlobalVariables{
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Import/Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Import/Export'},
-            cutLayout:          {creator: CutLayout, atomType: "CutLayout", atomCategory: 'Import/Export'},
-            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Import/Export'},
             output:             {creator: Output, atomType: 'Output'}
         }
         /** 
