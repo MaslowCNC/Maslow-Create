@@ -11,7 +11,6 @@ import Translate        from './molecules/translate.js'
 import Tag              from './molecules/tag.js'
 import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
-import Scale            from './molecules/scale.js'
 import Stl              from './molecules/stl.js'
 import Svg              from './molecules/svg.js'
 import Intersection     from './molecules/intersection.js'
@@ -27,7 +26,6 @@ import AddBOMTag        from './molecules/BOM.js'
 import Rotate           from './molecules/rotate.js'
 import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
-import Stretch          from './molecules/stretch.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
 import GitHubModule     from './githubOauth'
@@ -58,6 +56,7 @@ class GlobalVariables{
         this.availableTypes = {
         
             box:                {creator: Box, atomType: 'Box'},
+            
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
@@ -81,8 +80,6 @@ class GlobalVariables{
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
-            scale:              {creator: Scale, atomType: 'Scale', atomCategory: 'Actions'},
-            stretch:            {creator: Stretch, atomType: 'Stretch', atomCategory: 'Actions'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'Genetic Algorithm', atomCategory: 'Actions'},
             
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
