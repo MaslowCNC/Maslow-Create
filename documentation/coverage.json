@@ -202,8 +202,8 @@
       "expectCount": 42,
       "actualCount": 40,
       "undocumentLines": [
-        518,
-        519
+        516,
+        517
       ]
     },
     "src/js/prototypes/connector.js": {

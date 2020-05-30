@@ -172,7 +172,7 @@ export default class Connector {
             var attachmentMade = false
             GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {                      //For every molecule on the screen  
                 molecule.inputs.forEach(attachmentPoint =&gt; {                                    //For each of their attachment points
-                    if(attachmentPoint.wasConnectionMade(x,y)){
+                    if(attachmentPoint.wasConnectionMade(x,y) &amp;&amp; !attachmentMade){    //Check to make sure we haven&apos;t already attached somewhere else
                         attachmentMade = true
                         this.attachmentPoint2 = attachmentPoint
                         attachmentPoint.attach(this)
