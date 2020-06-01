@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the stretch atom.
@@ -31,6 +32,30 @@ export default class Stretch extends Atom {
         this.atomType = 'Stretch'
         
         this.setValues(values)
+    }
+
+     /**
+     * Draw the circle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.ellipse(GlobalVariables.widthToPixels(this.x), 
+        GlobalVariables.heightToPixels(this.y), 
+        GlobalVariables.widthToPixels(this.radius/2.6), GlobalVariables.widthToPixels(this.radius/2.6), 0, Math.PI * 2, false)  
+        GlobalVariables.c.fill() 
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.ellipse(GlobalVariables.widthToPixels(this.x), 
+        GlobalVariables.heightToPixels(this.y), 
+        GlobalVariables.widthToPixels(this.radius/1.5), GlobalVariables.widthToPixels(this.radius/2.3), 0, Math.PI * 2, false)  
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()
     }
     
     /**

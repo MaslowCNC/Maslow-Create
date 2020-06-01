@@ -32,6 +32,10 @@ export default class Equation extends Atom {
          */ 
         this.value = 0
         
+         /**
+         * This atom's height as drawn on the screen
+         */
+        this.height = 18
         /**
          * The index number of the currently selected option
          * @type {number}
@@ -42,6 +46,65 @@ export default class Equation extends Atom {
         this.updateValue()
         this.setValues(values) //Set values again to load input values which were saved
         
+        
+    }
+ /**
+     * Draw the Bill of material atom which has a BOM icon.
+     */ 
+    draw() {
+        
+        //Set colors
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            /**
+             * This background color
+             * @type {string}
+             */
+            this.color = this.selectedColor
+            /**
+             * This atoms accent color
+             * @type {string}
+             */
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
+        
+        this.inputs.forEach(input => {
+            input.draw()       
+        })
+        if(this.output){
+            this.output.draw()
+        }
+        
+        let pixelsX = GlobalVariables.widthToPixels(this.x)
+        let pixelsY = GlobalVariables.heightToPixels(this.y)
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)
+        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.fillText(this.name, pixelsX + pixelsRadius, pixelsY-pixelsRadius)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+    
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.font = '12px Work Sans Bold'
+        
+        GlobalVariables.c.fillText('X + Y', GlobalVariables.widthToPixels(this.x)- GlobalVariables.c.measureText('X + Y').width/2, GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
         
     }
     
