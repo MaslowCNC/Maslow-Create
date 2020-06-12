@@ -290,7 +290,7 @@ export default class AttachmentPoint {
      */ 
     clickUp(x,y){
         this.connectors.forEach(connector => {
-            connector.clickUp(x, y)       
+            connector.clickUp(x, y)
         })
     }
     
@@ -300,8 +300,6 @@ export default class AttachmentPoint {
      * @param {number} y - The y cordinate of the click
      */ 
     clickMove(x,y){
-
-
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)

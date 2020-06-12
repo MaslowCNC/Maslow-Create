@@ -581,6 +581,18 @@ export default class Atom {
     }
     
     /**
+     * Used to walk back out the tree generating a list of constants
+     */ 
+    walkBackForConstants(callback){
+        //Pass the call further up the chain
+        this.inputs.forEach(input => {
+            input.connectors.forEach(connector => {
+                connector.walkBackForConstants(callback)
+            })
+        })
+    }
+    
+    /**
      * Displays the atom in 3D and sets the output.
      */ 
     displayAndPropogate(){
