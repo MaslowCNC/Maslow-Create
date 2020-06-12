@@ -56,6 +56,8 @@ export default class Stretch extends Atom {
         GlobalVariables.widthToPixels(this.radius/1.5), GlobalVariables.widthToPixels(this.radius/2.3), 0, Math.PI * 2, false)  
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()
+
+        
     }
     
     /**

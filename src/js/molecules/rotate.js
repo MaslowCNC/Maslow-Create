@@ -49,6 +49,8 @@ export default class Rotate extends Atom {
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()
 
+        
+
     }
   
     /**
