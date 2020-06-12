@@ -65,7 +65,6 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, false)
     }
-
     
     /**
      * Gives this molecule inputs with the same names as all of it's parent's inputs
