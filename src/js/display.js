@@ -588,21 +588,19 @@ export default class Display {
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     writeToDisplay(shape){
-        if(shape != null){
-            this.displayedGeometry = shape
-            const computeValue = async () => {
-                try {
-                    return await GlobalVariables.render({values: [shape, this.solidDisplay, this.wireDisplay], key: "render"})
-                } catch(err) {
-                    console.warn(err)
-                    return -1
-                }
+        this.displayedGeometry = shape
+        const computeValue = async () => {
+            try {
+                return await GlobalVariables.render({values: [shape, this.solidDisplay, this.wireDisplay], key: "render"})
+            } catch(err) {
+                console.warn(err)
+                return -1
             }
-
-            computeValue().then(result => {
-                this.updateDisplayData(result)
-            })
         }
+
+        computeValue().then(result => {
+            this.updateDisplayData(result)
+        })
     }
     
     /**
