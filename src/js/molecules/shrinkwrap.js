@@ -1,5 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
+import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the shrinkwrap atom. This behavior can also be called 'hull'
@@ -51,7 +52,40 @@ export default class ShrinkWrap extends Atom{
         
         this.updateValue()
     }
-    
+      /**
+     * Draw the translate icon.
+     */ 
+      draw(){
+
+        super.draw() //Super call to draw the rest
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x+this.radius/4), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2.5), 0, Math.PI * 2, false)       
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()  
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x-this.radius/4), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2.5), 0, Math.PI * 2, false)       
+        GlobalVariables.c.fill() 
+        GlobalVariables.c.closePath()  
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.rect(GlobalVariables.widthToPixels(this.x- this.radius/4), 
+            GlobalVariables.heightToPixels(this.y- this.radius), 
+            GlobalVariables.widthToPixels(this.radius/2), 
+            GlobalVariables.widthToPixels(this.radius/2))       
+        GlobalVariables.c.fill() 
+        GlobalVariables.c.closePath() 
+          
+
+    }
     /**
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 

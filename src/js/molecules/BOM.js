@@ -68,8 +68,9 @@ export default class AddBOMTag extends Atom{
     }
     
  
+    
     /**
-     * Draw the Bill of material atom which has a BOM icon.
+     * Draw the constant which is more rectangular than the regular shape.
      */ 
     draw() {
         
@@ -108,23 +109,23 @@ export default class AddBOMTag extends Atom{
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        this.height = pixelsRadius;
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)
+        GlobalVariables.c.rect(pixelsX - pixelsRadius*1.5, pixelsY - this.height/2, 2.5*pixelsRadius, this.height)
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, pixelsX + pixelsRadius, pixelsY-pixelsRadius)
         GlobalVariables.c.fill()
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
-    
+
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
-        GlobalVariables.c.font = '12px Work Sans Bold'
-        GlobalVariables.c.fillText('BOM', GlobalVariables.widthToPixels(this.x- this.radius/1.5), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
+        GlobalVariables.c.fillText('BOM', GlobalVariables.widthToPixels(this.x- this.radius*1.2), GlobalVariables.heightToPixels(this.y)+this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
-        
     }
     
     /**

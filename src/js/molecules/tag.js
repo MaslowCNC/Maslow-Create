@@ -85,6 +85,13 @@ export default class Tag extends Atom{
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = '16px Work Sans Bold'
+        GlobalVariables.c.fillText('#', GlobalVariables.widthToPixels(this.x- this.radius/2), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
     }
     /**
      * Add a tag to the input geometry. The substance is not changed.

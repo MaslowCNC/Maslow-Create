@@ -63,14 +63,19 @@ export default class Assembly extends Atom{
         GlobalVariables.c.moveTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels + radiusInPixels/2)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)
-        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+        GlobalVariables.c.beginPath()
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/2)
         GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels - radiusInPixels/2)
         GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels)
-        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)
-        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
-        GlobalVariables.c.fillStyle = this.color
-        GlobalVariables.c.fill()
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/2)
+
+        //GlobalVariables.c.fill()
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.lineJoin = "round"
         GlobalVariables.c.stroke()
