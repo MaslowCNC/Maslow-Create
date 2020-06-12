@@ -593,7 +593,6 @@ export default class Display {
             try {
                 return await GlobalVariables.render({values: [shape, this.solidDisplay, this.wireDisplay], key: "render"})
             } catch(err) {
-                console.log("Except error")
                 console.warn(err)
                 return -1
             }
