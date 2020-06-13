@@ -37,6 +37,12 @@ export default class Readme extends Atom{
          * @type {number}
          */
         this.radius = 1/72
+
+          /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
+        
         
         this.setValues(values)
     }
@@ -47,34 +53,65 @@ export default class Readme extends Atom{
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,'readmeText', 'Notes', false)
     }
-    
     /**
-     * Draw the two // marks on the readme atom
+     * Draw the readme atom with // icon.
      */ 
     draw() {
-
-        let xInPixels = GlobalVariables.widthToPixels(this.x)
-        let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
         
-        super.draw() //Super call to draw the rest
+        //Set colors
+        if(this.processing){
+            GlobalVariables.c.fillStyle = 'blue'
+        }
+        else if(this.selected){
+            GlobalVariables.c.fillStyle = this.selectedColor
+            GlobalVariables.c.strokeStyle = this.defaultColor
+            /**
+             * This background color
+             * @type {string}
+             */
+            this.color = this.selectedColor
+            /**
+             * This atoms accent color
+             * @type {string}
+             */
+            this.strokeColor = this.defaultColor
+        }
+        else{
+            GlobalVariables.c.fillStyle = this.defaultColor
+            GlobalVariables.c.strokeStyle = this.selectedColor
+            this.color = this.defaultColor
+            this.strokeColor = this.selectedColor
+        }
         
-        //draw the two slashes on the node//
-        GlobalVariables.c.strokeStyle = '#949294'
-        GlobalVariables.c.lineWidth = 4
-        GlobalVariables.c.lineCap = 'round'
+        this.inputs.forEach(input => {
+            input.draw()       
+        })
+        if(this.output){
+            this.output.draw()
+        }
+        
+        let pixelsX = GlobalVariables.widthToPixels(this.x)
+        let pixelsY = GlobalVariables.heightToPixels(this.y)
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        this.height = pixelsRadius * 1.5
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(xInPixels - radiusInPixels*.5, yInPixels + radiusInPixels/2)
-        GlobalVariables.c.lineTo(xInPixels, yInPixels - radiusInPixels*.8)
+        GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)
+        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.fillText(this.name, pixelsX + pixelsRadius/2, pixelsY-pixelsRadius)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
-        
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(xInPixels, yInPixels + radiusInPixels*.8)
-        GlobalVariables.c.lineTo(xInPixels + radiusInPixels*.5, yInPixels - radiusInPixels/2)
-        GlobalVariables.c.stroke()
-    }
+        GlobalVariables.c.closePath()
     
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius*1.5}px Work Sans Bold`
+        GlobalVariables.c.fillText('//', GlobalVariables.widthToPixels(this.x- this.radius/2), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        
+    }
     /**
      * Update the readme text. Called when the readme text has been edited.
      */ 

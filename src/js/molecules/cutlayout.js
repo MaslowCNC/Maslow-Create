@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables.js'
 //import GlobalVariables from '../globalvariables.js'
 
 /**
@@ -38,6 +39,43 @@ export default class CutLayout extends Atom{
         this.setValues(values)
     }
 
+    /**
+     * Draw the cutlayout icon
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        const xInPixels = GlobalVariables.widthToPixels(this.x)
+        const yInPixels = GlobalVariables.heightToPixels(this.y)
+        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels + radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.setLineDash([3, 3]);
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/1.7)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels - radiusInPixels/2)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/1.7)
+
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.lineJoin = "round"
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.setLineDash([]);
+        GlobalVariables.c.closePath()
+
+    }
     /**
     * Pass the input geometry to a worker function to compute the translation.
     */ 

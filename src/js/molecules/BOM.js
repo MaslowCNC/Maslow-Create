@@ -34,10 +34,15 @@ export default class AddBOMTag extends Atom{
          * @type {string}
          */
         this.BOMitem = new BOMEntry()
+         /** 
+         * This atom's radius as displayed on the screen is 1/65 width
+         * @type {number}
+         */
+        this.radius = 1/65
         /**
          * This atom's height as drawn on the screen
          */
-        this.height = 16
+        this.height;
         
         this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
@@ -109,10 +114,10 @@ export default class AddBOMTag extends Atom{
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
-        this.height = pixelsRadius
+        this.height = pixelsRadius/1.3
         
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.rect(pixelsX - pixelsRadius*1.5, pixelsY - this.height/2, 2.5*pixelsRadius, this.height)
+        GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fillText(this.name, pixelsX + pixelsRadius, pixelsY-pixelsRadius)
         GlobalVariables.c.fill()
@@ -122,8 +127,8 @@ export default class AddBOMTag extends Atom{
 
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
-        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
-        GlobalVariables.c.fillText('BOM', GlobalVariables.widthToPixels(this.x - this.radius*1.2), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`
+        GlobalVariables.c.fillText('BOM', pixelsX- pixelsRadius/1.6, pixelsY +this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }

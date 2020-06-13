@@ -88,7 +88,7 @@ export default class Equation extends Atom {
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
-        this.height = pixelsRadius*1.2
+        this.height = pixelsRadius
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.rect(pixelsX - pixelsRadius*1.5, pixelsY - this.height/2, 2.5*pixelsRadius, this.height)

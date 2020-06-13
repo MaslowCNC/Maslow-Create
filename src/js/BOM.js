@@ -33,6 +33,15 @@ export class BOMEntry {
          * @type {number}
          */
         this.totalNeeded  = this.numberNeeded //Scaled by the number of this instance
+        /** 
+         * This atom's radius as displayed on the screen is 1/72 width
+         * @type {number}
+         */
+        this.radius = 1/65
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height;
     }
 }
 
