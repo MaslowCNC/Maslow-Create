@@ -178,25 +178,18 @@ export default class Atom {
             this.strokeColor = this.selectedColor
         }
 
+        GlobalVariables.c.beginPath()
         if (drawType == "rect"){
-        
-            GlobalVariables.c.beginPath()
             GlobalVariables.c.rect(xInPixels - radiusInPixels, yInPixels - this.height/2, 2* radiusInPixels, this.height)
-            GlobalVariables.c.textAlign = 'start' 
-            GlobalVariables.c.fill()
-            GlobalVariables.c.strokeStyle = this.strokeColor
-            GlobalVariables.c.stroke()
-            GlobalVariables.c.closePath()
         }
-        
         else{
             GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
-            GlobalVariables.c.textAlign = 'start'
-            GlobalVariables.c.fill()
-            GlobalVariables.c.strokeStyle = this.strokeColor
-            GlobalVariables.c.stroke()
-            GlobalVariables.c.closePath()
         }
+        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.fill()
+        GlobalVariables.c.strokeStyle = this.strokeColor
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
 
         if (this.showHover){
             GlobalVariables.c.beginPath()
