@@ -31,7 +31,7 @@ export default class Input extends Atom {
          * This atom's height for drawing
          * @type {number}
          */
-        this.height;
+        this.height
         
         /** 
          * This atom's old name, used during name changes
@@ -67,7 +67,7 @@ export default class Input extends Atom {
     draw() {
 
         // //Snap the inputs to the far right side
-       this.x = this.radius
+        this.x = this.radius
 
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
@@ -112,8 +112,8 @@ export default class Input extends Atom {
             this.output.draw()
         }
         if(this.showHover){
-        GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)
+            GlobalVariables.c.textAlign = 'start' 
+            GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)
         }
         GlobalVariables.c.beginPath()
         GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels + this.height/2)
