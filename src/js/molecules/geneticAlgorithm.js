@@ -76,10 +76,6 @@ export default class GeneticAlgorithm extends Atom {
     updateValue(){
         if(this.evolutionInProcess){
             this.updateSidebar()
-            /**
-             * Atom is processing
-            * @type {boolean}
-             */
             this.processing = true
             //Store the result from this individual in it's fitness value
             this.population[this.individualIndex].fitness = this.findIOValue('fitness function')
