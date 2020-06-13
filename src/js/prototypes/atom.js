@@ -149,7 +149,8 @@ export default class Atom {
     /**
      * Draws the atom on the screen
      */ 
-    draw() {
+    draw(drawType) {
+
         let xInPixels = GlobalVariables.widthToPixels(this.x)
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
@@ -176,14 +177,20 @@ export default class Atom {
             this.color = this.defaultColor
             this.strokeColor = this.selectedColor
         }
-        
-        GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
-        GlobalVariables.c.textAlign = 'start'
+
+        GlobalVariables.c.beginPath()
+        if (drawType == "rect"){
+            GlobalVariables.c.rect(xInPixels - radiusInPixels, yInPixels - this.height/2, 2* radiusInPixels, this.height)
+        }
+        else{
+            GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
+        }
+        GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
-        GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
+
         if (this.showHover){
             GlobalVariables.c.beginPath()
             GlobalVariables.c.textAlign = 'start'
@@ -193,12 +200,9 @@ export default class Atom {
             GlobalVariables.c.lineWidth = 1
             GlobalVariables.c.stroke()
             GlobalVariables.c.closePath()
-        }
-
-      
-        if (this.alertMessage.length > 0){
-            this.color = "red"
-            if(this.showHover){
+           
+            if (this.alertMessage.length > 0){
+                this.color = "red"
 
                 //Draw Alert block  
                 GlobalVariables.c.beginPath()
@@ -219,8 +223,9 @@ export default class Atom {
                 GlobalVariables.c.fillStyle = 'black'
                 GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), xInPixels + radiusInPixels, yInPixels - radiusInPixels) 
                 GlobalVariables.c.closePath()
-            }
-        } 
+                
+            } 
+        }
     }
     
     /**
