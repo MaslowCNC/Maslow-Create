@@ -130,7 +130,7 @@ window.addEventListener('keydown', e => {
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
         && ['c','v', 'Backspace'].includes(e.key)){
-            e.preventDefault()
+        e.preventDefault()
     }
     //Copy /paste listeners
     if (e.key == "Control" || e.key == "Meta") {
