@@ -79,6 +79,10 @@ export default class ExtractTag extends Atom{
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
         this.height= pixelsRadius
         
         GlobalVariables.c.beginPath()
