@@ -109,7 +109,15 @@ flowCanvas.addEventListener('dblclick', event => {
     }
 })
 
+
+document.addEventListener('mouseup',event =>{
+    //puts focus back into mainbody after clicking button
+    document.activeElement.blur()
+    document.getElementById("mainBody").focus()
+})
+
 flowCanvas.addEventListener('mouseup', event => {
+
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY)      
