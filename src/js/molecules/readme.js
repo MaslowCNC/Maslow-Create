@@ -38,7 +38,7 @@ export default class Readme extends Atom{
          */
         this.radius = 1/72
 
-          /**
+        /**
          * This atom's height as drawn on the screen
          */
         this.height

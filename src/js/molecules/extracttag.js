@@ -22,7 +22,7 @@ export default class ExtractTag extends Atom{
          * @type {string}
          */
         this.type = 'extractTag'
-         /**
+        /**
          * This atom's height as drawn on the screen
          */
         this.height
@@ -39,7 +39,7 @@ export default class ExtractTag extends Atom{
         this.setValues(values)
     }
     
-     /**
+    /**
      * Draw the constant which is more rectangular than the regular shape.
      */ 
     draw() {
@@ -79,7 +79,7 @@ export default class ExtractTag extends Atom{
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
-        this.height= pixelsRadius;
+        this.height= pixelsRadius
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.rect(pixelsX - pixelsRadius*1.5, pixelsY - this.height/2, 2.5*pixelsRadius, this.height)

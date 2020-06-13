@@ -41,7 +41,7 @@ export class BOMEntry {
         /**
          * This atom's height as drawn on the screen
          */
-        this.height;
+        this.height
     }
 }
 

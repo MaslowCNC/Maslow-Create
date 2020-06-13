@@ -28,7 +28,7 @@ export default class CutList extends Atom{
         this.atomType = 'cutList'
         
         this.setValues(values)
-         /** 
+        /** 
          * This atom's radius as displayed on the screen is 1/65 width
          * @type {number}
          */
@@ -36,7 +36,7 @@ export default class CutList extends Atom{
         /**
          * This atom's height as drawn on the screen
          */
-        this.height;
+        this.height
     }
     /**
      * Draw the constant which is more rectangular than the regular shape.
@@ -78,7 +78,7 @@ export default class CutList extends Atom{
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
-         this.height = pixelsRadius/1.3
+        this.height = pixelsRadius/1.3
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)

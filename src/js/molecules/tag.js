@@ -30,7 +30,7 @@ export default class Tag extends Atom{
         /**
          * This atom's height as drawn on the screen
          */
-        this.height;
+        this.height
         
         this.setValues(values)
     }
@@ -76,7 +76,7 @@ export default class Tag extends Atom{
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
-        this.height= pixelsRadius;
+        this.height= pixelsRadius
         
         GlobalVariables.c.beginPath()
         GlobalVariables.c.rect(pixelsX - pixelsRadius*1.5, pixelsY - this.height/2, 2.5*pixelsRadius, this.height)

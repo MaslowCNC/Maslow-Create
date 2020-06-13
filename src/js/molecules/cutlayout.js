@@ -58,7 +58,7 @@ export default class CutLayout extends Atom{
         GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)
         GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)
         //GlobalVariables.c.fill()
-        GlobalVariables.c.setLineDash([3, 3]);
+        GlobalVariables.c.setLineDash([3, 3])
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
         GlobalVariables.c.beginPath()
@@ -72,7 +72,7 @@ export default class CutLayout extends Atom{
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.lineJoin = "round"
         GlobalVariables.c.stroke()
-        GlobalVariables.c.setLineDash([]);
+        GlobalVariables.c.setLineDash([])
         GlobalVariables.c.closePath()
 
     }

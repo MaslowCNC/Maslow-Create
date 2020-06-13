@@ -34,7 +34,7 @@ export default class AddBOMTag extends Atom{
          * @type {string}
          */
         this.BOMitem = new BOMEntry()
-         /** 
+        /** 
          * This atom's radius as displayed on the screen is 1/65 width
          * @type {number}
          */
@@ -42,7 +42,7 @@ export default class AddBOMTag extends Atom{
         /**
          * This atom's height as drawn on the screen
          */
-        this.height;
+        this.height
         
         this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
