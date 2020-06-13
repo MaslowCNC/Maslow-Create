@@ -33,14 +33,14 @@ export default class Difference extends Atom{
     }
 
 
-         /**
+    /**
      * Draw the code atom which has a code icon.
      */ 
-      draw(){
+    draw(){
 
         super.draw() //Super call to draw the rest
          
-         GlobalVariables.c.beginPath()
+        GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), 
             GlobalVariables.heightToPixels(this.y), 

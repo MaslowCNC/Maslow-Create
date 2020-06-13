@@ -31,14 +31,14 @@ export default class Circle extends Atom {
         this.setValues(values)
     }
 
-     /**
+    /**
      * Draw the circle atom & icon.
      */ 
     draw(){
 
         super.draw() //Super call to draw the rest
 
-         GlobalVariables.c.beginPath()
+        GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), 
             GlobalVariables.heightToPixels(this.y), 

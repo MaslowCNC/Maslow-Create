@@ -44,8 +44,8 @@ export default class Rotate extends Atom {
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.ellipse(GlobalVariables.widthToPixels(this.x), 
-        GlobalVariables.heightToPixels(this.y), 
-        GlobalVariables.widthToPixels(this.radius/1.5), GlobalVariables.widthToPixels(this.radius/2.3), Math.PI / 4,  0, Math.PI * 2)  
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/1.5), GlobalVariables.widthToPixels(this.radius/2.3), Math.PI / 4,  0, Math.PI * 2)  
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()
 

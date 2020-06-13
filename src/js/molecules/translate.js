@@ -33,10 +33,10 @@ export default class Translate extends Atom{
         this.setValues(values)
     }
     
-     /**
+    /**
      * Draw the translate icon.
      */ 
-      draw(){
+    draw(){
 
         super.draw() //Super call to draw the rest
         

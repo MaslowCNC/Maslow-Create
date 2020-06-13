@@ -47,7 +47,7 @@ export default class RegularPolygon extends Atom {
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
         // polygon in progress - replace numbers with variables
-        GlobalVariables.c.beginPath();
+        GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/1.7)
         GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels + radiusInPixels/1.7)
@@ -57,7 +57,7 @@ export default class RegularPolygon extends Atom {
         GlobalVariables.c.lineTo(xInPixels- radiusInPixels/1.5, yInPixels )
         GlobalVariables.c.lineTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/1.7)
         GlobalVariables.c.stroke()
-        GlobalVariables.c.closePath();
+        GlobalVariables.c.closePath()
 
     }
     

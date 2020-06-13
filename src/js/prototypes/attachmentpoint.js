@@ -231,8 +231,8 @@ export default class AttachmentPoint {
 
         GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
         if(this.showHoverText == true){
-        GlobalVariables.c.fill()
-        GlobalVariables.c.stroke()
+            GlobalVariables.c.fill()
+            GlobalVariables.c.stroke()
         }
         GlobalVariables.c.closePath()  
 

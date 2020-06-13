@@ -52,10 +52,10 @@ export default class ShrinkWrap extends Atom{
         
         this.updateValue()
     }
-      /**
+    /**
      * Draw the translate icon.
      */ 
-      draw(){
+    draw(){
 
         super.draw() //Super call to draw the rest
         

@@ -32,7 +32,7 @@ export default class Intersection extends Atom {
     }
 
 
-     /**
+    /**
      * Draw the rectangle atom & icon.
      */ 
     draw(){

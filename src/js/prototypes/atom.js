@@ -185,14 +185,14 @@ export default class Atom {
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
         if (this.showHover){
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.textAlign = 'start'
-        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
-        GlobalVariables.c.fill()
-        GlobalVariables.c.strokeStyle = this.strokeColor
-        GlobalVariables.c.lineWidth = 1
-        GlobalVariables.c.stroke()
-        GlobalVariables.c.closePath()
+            GlobalVariables.c.beginPath()
+            GlobalVariables.c.textAlign = 'start'
+            GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
+            GlobalVariables.c.fill()
+            GlobalVariables.c.strokeStyle = this.strokeColor
+            GlobalVariables.c.lineWidth = 1
+            GlobalVariables.c.stroke()
+            GlobalVariables.c.closePath()
         }
 
       

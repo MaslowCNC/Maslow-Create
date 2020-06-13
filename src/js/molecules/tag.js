@@ -27,7 +27,7 @@ export default class Tag extends Atom{
          * @type {string}
          */
         this.atomType = 'Tag'
-         /**
+        /**
          * This atom's height as drawn on the screen
          */
         this.height = 16

@@ -26,10 +26,10 @@ export default class Stl extends Atom {
          */
         this.atomType = 'Stl'
 
-         /**
+        /**
          * This atom's height as drawn on the screen
          */
-        this.height;
+        this.height
         
         /**
          * This atom's value. Contains the value of the input geometry, not the stl
@@ -43,7 +43,7 @@ export default class Stl extends Atom {
         this.setValues(values)
     }
     
-      /**
+    /**
      * Draw the svg atom which has a SVG icon.
      */ 
     draw() {

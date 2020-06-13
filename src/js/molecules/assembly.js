@@ -47,7 +47,7 @@ export default class Assembly extends Atom{
     }
     
 
-     /**
+    /**
      * Draw the rectangle atom & icon.
      */ 
     draw(){

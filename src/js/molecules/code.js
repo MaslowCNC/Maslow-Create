@@ -38,10 +38,10 @@ export default class Code extends Atom {
         this.parseInputs()
     }
 
-   /**
+    /**
      * Draw the code atom which has a code icon.
      */ 
-      draw(){
+    draw(){
 
         super.draw() //Super call to draw the rest
         

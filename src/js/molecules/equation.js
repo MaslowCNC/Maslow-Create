@@ -32,10 +32,10 @@ export default class Equation extends Atom {
          */ 
         this.value = 0
         
-         /**
+        /**
          * This atom's height as drawn on the screen
          */
-        this.height;
+        this.height
         /**
          * The index number of the currently selected option
          * @type {number}
@@ -48,7 +48,7 @@ export default class Equation extends Atom {
         
         
     }
- /**
+    /**
      * Draw the Bill of material atom which has a BOM icon.
      */ 
     draw() {

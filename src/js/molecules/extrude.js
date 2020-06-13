@@ -32,10 +32,10 @@ export default class Extrude extends Atom{
         this.setValues(values)
     }
 
-         /**
+    /**
      * Draw the code atom which has a code icon.
      */ 
-      draw(){
+    draw(){
 
         super.draw() //Super call to draw the rest
          
