@@ -103,7 +103,7 @@ export default class Equation extends Atom {
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
         
-        GlobalVariables.c.fillText('X + Y', pixelsX - pixelsRadius*1.2, pixelsY+this.height/3)
+        GlobalVariables.c.fillText('X + Y', pixelsX - pixelsRadius*1.3, pixelsY+this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
         

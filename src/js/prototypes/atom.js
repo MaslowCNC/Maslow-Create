@@ -179,16 +179,27 @@ export default class Atom {
         
         GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
         GlobalVariables.c.textAlign = 'start'
+        GlobalVariables.c.fill()
+        GlobalVariables.c.strokeStyle = this.strokeColor
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+        if (this.showHover){
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.textAlign = 'start'
         GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
         GlobalVariables.c.lineWidth = 1
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
+        }
+
       
         if (this.alertMessage.length > 0){
             this.color = "red"
             if(this.showHover){
+
                 //Draw Alert block  
                 GlobalVariables.c.beginPath()
                 const padding = 10
