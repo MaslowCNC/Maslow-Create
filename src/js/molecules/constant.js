@@ -1,5 +1,4 @@
 import Atom from '../prototypes/atom'
-import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the constant atom instance which can be used to define a numerical constant.
@@ -63,7 +62,7 @@ export default class Constant extends Atom{
      */ 
     draw() {
         
-       super.draw("rect")
+        super.draw("rect")
         
     }
     /**

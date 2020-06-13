@@ -54,8 +54,6 @@ export default class Svg extends Atom {
         
         super.draw("rect")
         
-        let pixelsX = GlobalVariables.widthToPixels(this.x)
-        let pixelsY = GlobalVariables.heightToPixels(this.y)
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
         this.height = pixelsRadius * 1.5
 

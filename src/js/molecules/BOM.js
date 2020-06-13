@@ -79,7 +79,7 @@ export default class AddBOMTag extends Atom{
      */ 
     draw() {
         
-        super.draw("rect"); 
+        super.draw("rect") 
 
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
@@ -94,7 +94,7 @@ export default class AddBOMTag extends Atom{
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`
-        GlobalVariables.c.fillText('BOM', pixelsX- pixelsRadius/1.6, pixelsY +this.height/3)
+        GlobalVariables.c.fillText('BOM', pixelsX- pixelsRadius/1.4, pixelsY +this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }

@@ -180,13 +180,13 @@ export default class Atom {
 
         if (drawType == "rect"){
         
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.rect(xInPixels - radiusInPixels, yInPixels - this.height/2, 2* radiusInPixels, this.height)
-        GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fill()
-        GlobalVariables.c.strokeStyle = this.strokeColor
-        GlobalVariables.c.stroke()
-        GlobalVariables.c.closePath()
+            GlobalVariables.c.beginPath()
+            GlobalVariables.c.rect(xInPixels - radiusInPixels, yInPixels - this.height/2, 2* radiusInPixels, this.height)
+            GlobalVariables.c.textAlign = 'start' 
+            GlobalVariables.c.fill()
+            GlobalVariables.c.strokeStyle = this.strokeColor
+            GlobalVariables.c.stroke()
+            GlobalVariables.c.closePath()
         }
         
         else{
@@ -199,21 +199,17 @@ export default class Atom {
         }
 
         if (this.showHover){
-                GlobalVariables.c.beginPath()
-                GlobalVariables.c.textAlign = 'start'
-                GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
-                GlobalVariables.c.fill()
-                GlobalVariables.c.strokeStyle = this.strokeColor
-                GlobalVariables.c.lineWidth = 1
-                GlobalVariables.c.stroke()
-                GlobalVariables.c.closePath()
-            }
+            GlobalVariables.c.beginPath()
+            GlobalVariables.c.textAlign = 'start'
+            GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
+            GlobalVariables.c.fill()
+            GlobalVariables.c.strokeStyle = this.strokeColor
+            GlobalVariables.c.lineWidth = 1
+            GlobalVariables.c.stroke()
+            GlobalVariables.c.closePath()
            
-
-      
-        if (this.alertMessage.length > 0){
-            this.color = "red"
-            if(this.showHover){
+            if (this.alertMessage.length > 0){
+                this.color = "red"
 
                 //Draw Alert block  
                 GlobalVariables.c.beginPath()
@@ -234,8 +230,9 @@ export default class Atom {
                 GlobalVariables.c.fillStyle = 'black'
                 GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), xInPixels + radiusInPixels, yInPixels - radiusInPixels) 
                 GlobalVariables.c.closePath()
-            }
-        } 
+                
+            } 
+        }
     }
     
     /**

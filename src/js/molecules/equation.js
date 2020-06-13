@@ -53,7 +53,7 @@ export default class Equation extends Atom {
      */ 
     draw() {
         
-       super.draw("rect")
+        super.draw("rect")
         
         let pixelsX = GlobalVariables.widthToPixels(this.x)
         let pixelsY = GlobalVariables.heightToPixels(this.y)
