@@ -25,6 +25,10 @@ export default class Gcode extends Atom {
          * @type {string}
          */
         this.atomType = 'Gcode'
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height = 16
         
         this.addIO('input', 'geometry', this, 'geometry', null)
         this.addIO('input', 'tool size', this, 'number', 6.35)
@@ -40,6 +44,22 @@ export default class Gcode extends Atom {
         this.updateValue()
     }
     
+    /**
+     * Draw the circle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${GlobalVariables.widthToPixels(this.radius)}px Work Sans Bold`
+        GlobalVariables.c.fillText('G', GlobalVariables.widthToPixels(this.x- this.radius/3), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+
+    }
+
     /**
      * Generate a layered outline of the part where the tool will cut
      */ 

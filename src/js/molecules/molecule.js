@@ -131,6 +131,10 @@ export default class Molecule extends Atom{
         if (distFromClick < this.radius*2){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
+            /**
+            * Deselects Atom
+            * @type {boolean}
+            */
             this.selected = false
             clickProcessed = true
         }

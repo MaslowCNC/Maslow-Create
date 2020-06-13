@@ -1,5 +1,6 @@
 import Atom from '../prototypes/atom'
 
+import GlobalVariables from '../globalvariables'
 /**
  * This class creates the Extrude atom.
  */
@@ -29,6 +30,35 @@ export default class Extrude extends Atom{
         this.addIO('output', 'geometry', this, 'geometry', '')
         
         this.setValues(values)
+    }
+
+    /**
+     * Draw the code atom which has a code icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+         
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.rect(GlobalVariables.widthToPixels(this.x- this.radius/2), 
+            GlobalVariables.heightToPixels(this.y + this.radius), 
+            GlobalVariables.widthToPixels(this.radius), 
+            GlobalVariables.widthToPixels(this.radius/3))       
+        GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath() 
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.rect(GlobalVariables.widthToPixels(this.x- this.radius/2), 
+            GlobalVariables.heightToPixels(this.y- this.radius*2), 
+            GlobalVariables.widthToPixels(this.radius), 
+            GlobalVariables.widthToPixels(this.radius))       
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
+
     }
     /**
      * Pass the input shape to the worker thread to compute the extruded shape.

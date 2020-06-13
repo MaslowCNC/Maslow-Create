@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the regular polygon atom.
@@ -31,6 +32,33 @@ export default class RegularPolygon extends Atom {
         this.updateValue()
         
         this.setValues(values)
+    }
+
+
+    /**
+     * Draw the circle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+
+        // polygon in progress - replace numbers with variables
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/1.7)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels + radiusInPixels/1.7)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/1.5, yInPixels)
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2.5, yInPixels - radiusInPixels/1.7)
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2.5, yInPixels - radiusInPixels/1.7)
+        GlobalVariables.c.lineTo(xInPixels- radiusInPixels/1.5, yInPixels )
+        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/1.7)
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
     }
     
     /**

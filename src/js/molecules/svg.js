@@ -31,6 +31,11 @@ export default class Svg extends Atom {
          * @type {string}
          */
         this.value = null
+
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
         
         this.addIO('input', 'geometry', this, 'geometry', null)
         
@@ -41,6 +46,27 @@ export default class Svg extends Atom {
         
         this.setValues(values)
     }
+
+    /**
+     * Draw the svg atom which has a SVG icon.
+     */ 
+    draw() {
+        
+        super.draw("rect")
+        
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        this.height = pixelsRadius * 1.5
+
+    
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
+        GlobalVariables.c.fillText('SVG', GlobalVariables.widthToPixels(this.x- this.radius/1.3), GlobalVariables.heightToPixels(this.y)+this.height/6)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        
+    }
+    
     
     /**
      * Set the value to be the input geometry, then call super updateValue()

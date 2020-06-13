@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the tag atom.
@@ -26,10 +27,36 @@ export default class Tag extends Atom{
          * @type {string}
          */
         this.atomType = 'Tag'
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
         
         this.setValues(values)
     }
     
+
+    /**
+     * Draw the constant which is more rectangular than the regular shape.
+     */ 
+    draw() {
+        
+        super.draw("rect")
+        
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height= pixelsRadius
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`
+        GlobalVariables.c.fillText('#', GlobalVariables.widthToPixels(this.x- this.radius/3), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+    }
     /**
      * Add a tag to the input geometry. The substance is not changed.
      */ 

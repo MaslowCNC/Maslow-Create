@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the Add To Cutlist atom.
@@ -27,6 +28,36 @@ export default class CutList extends Atom{
         this.atomType = 'cutList'
         
         this.setValues(values)
+        /** 
+         * This atom's radius as displayed on the screen is 1/65 width
+         * @type {number}
+         */
+        this.radius = 1/65
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
+    }
+    /**
+     * Draw the constant which is more rectangular than the regular shape.
+     */ 
+    draw() {
+        
+        super.draw("rect")
+        
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height = pixelsRadius/1.3
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`
+        GlobalVariables.c.fillText(' - - -', GlobalVariables.widthToPixels(this.x- this.radius), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
     }
     
     /**

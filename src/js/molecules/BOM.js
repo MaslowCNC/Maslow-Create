@@ -34,6 +34,15 @@ export default class AddBOMTag extends Atom{
          * @type {string}
          */
         this.BOMitem = new BOMEntry()
+        /** 
+         * This atom's radius as displayed on the screen is 1/65 width
+         * @type {number}
+         */
+        this.radius = 1/65
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
         
         this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
@@ -63,20 +72,31 @@ export default class AddBOMTag extends Atom{
         this.createBOM(valueList)
     }
     
+ 
+    
     /**
-     * Add a B to the molecule representation
+     * Draw the constant which is more rectangular than the regular shape.
      */ 
     draw() {
         
-        super.draw() //Super call to draw the rest
-        
+        super.draw("rect") 
+
+        let pixelsX = GlobalVariables.widthToPixels(this.x)
+        let pixelsY = GlobalVariables.heightToPixels(this.y)
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height = pixelsRadius/1.3
+
         GlobalVariables.c.beginPath()
-        GlobalVariables.c.fillStyle = '#949294'
-        GlobalVariables.c.font = '30px Work Sans Bold'
-        GlobalVariables.c.fillText('B', GlobalVariables.widthToPixels(this.x - (this.radius/2.7)), GlobalVariables.heightToPixels(this.y + (this.radius*2)))
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`
+        GlobalVariables.c.fillText('BOM', pixelsX- pixelsRadius/1.4, pixelsY +this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
-        
     }
     
     /**
