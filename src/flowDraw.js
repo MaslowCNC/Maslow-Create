@@ -132,8 +132,10 @@ flowCanvas.addEventListener('mouseup', (event) => {
 * @type {array}
 */
 window.addEventListener('keydown', e => {
+    //console.log(e.srcElement.tagName.toLowerCase())
     //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
-    if((e.srcElement.tagName.toLowerCase() !== ("textarea" && "input"))
+    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
+        && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
         && ['c','v', 'Backspace'].includes(e.key)){
         e.preventDefault()
