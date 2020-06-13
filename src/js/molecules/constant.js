@@ -59,6 +59,14 @@ export default class Constant extends Atom{
     }
     
     /**
+     * Draw the Bill of material atom which has a BOM icon.
+     */ 
+    draw() {
+        
+       super.draw("rect")
+        
+    }
+    /**
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
@@ -121,56 +129,7 @@ export default class Constant extends Atom{
         
     }
     
-    /**
-     * Draw the constant which is more rectangular than the regular shape.
-     */ 
-    draw() {
-        
-        //Set colors
-        if(this.processing){
-            GlobalVariables.c.fillStyle = 'blue'
-        }
-        else if(this.selected){
-            GlobalVariables.c.fillStyle = this.selectedColor
-            GlobalVariables.c.strokeStyle = this.defaultColor
-            /**
-             * This background color
-             * @type {string}
-             */
-            this.color = this.selectedColor
-            /**
-             * This atoms accent color
-             * @type {string}
-             */
-            this.strokeColor = this.defaultColor
-        }
-        else{
-            GlobalVariables.c.fillStyle = this.defaultColor
-            GlobalVariables.c.strokeStyle = this.selectedColor
-            this.color = this.defaultColor
-            this.strokeColor = this.selectedColor
-        }
-        
-        this.inputs.forEach(input => {
-            input.draw()       
-        })
-        if(this.output){
-            this.output.draw()
-        }
-        
-        let pixelsX = GlobalVariables.widthToPixels(this.x)
-        let pixelsY = GlobalVariables.heightToPixels(this.y)
-        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
-        
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.rect(pixelsX - pixelsRadius, pixelsY - this.height/2, 2*pixelsRadius, this.height)
-        GlobalVariables.c.textAlign = 'start' 
-        GlobalVariables.c.fillText(this.name, pixelsX + pixelsRadius, pixelsY-pixelsRadius)
-        GlobalVariables.c.fill()
-        GlobalVariables.c.lineWidth = 1
-        GlobalVariables.c.stroke()
-        GlobalVariables.c.closePath()
-    }
+
     
     /**
      * Overwrite the default displayAndPropogate()...why?
