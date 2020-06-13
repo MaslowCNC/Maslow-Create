@@ -26,7 +26,6 @@ export default class AttachmentPoint {
          * @type {number}
          */
         this.radius = 1/60
-        
         /** 
          * When the mouse is hovering where should the AP move in X
          * @type {number}
@@ -140,10 +139,10 @@ export default class AttachmentPoint {
         let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)
 
         this.defaultRadius = radiusInPixels
-        radiusInPixels = parentRadiusInPixels/2.3
+        radiusInPixels = parentRadiusInPixels/2.7
 
         if (this.expandedRadius){
-            radiusInPixels = parentRadiusInPixels/1.8
+            radiusInPixels = parentRadiusInPixels/2.4
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             /**
@@ -229,9 +228,12 @@ export default class AttachmentPoint {
         }
         GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor
         GlobalVariables.c.lineWidth = 1
+
         GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)
-        GlobalVariables.c.fill()
-        GlobalVariables.c.stroke()
+        if(this.showHoverText == true){
+            GlobalVariables.c.fill()
+            GlobalVariables.c.stroke()
+        }
         GlobalVariables.c.closePath()  
 
         if (!this.expandedRadius){ 

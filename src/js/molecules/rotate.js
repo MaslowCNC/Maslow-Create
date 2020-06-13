@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the rotate atom.
@@ -32,7 +33,26 @@ export default class Rotate extends Atom {
         
         this.setValues(values)
     }
-    
+
+    /**
+     * Draw the circle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.ellipse(GlobalVariables.widthToPixels(this.x), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/1.5), GlobalVariables.widthToPixels(this.radius/2.3), Math.PI / 4,  0, Math.PI * 2)  
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()
+
+        
+
+    }
+  
     /**
      * Pass the input shape to a worker thread to compute the rotation
      */ 

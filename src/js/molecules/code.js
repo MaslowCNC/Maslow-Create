@@ -1,5 +1,6 @@
 import Atom from '../prototypes/atom.js'
 import CodeMirror from 'codemirror'
+import GlobalVariables from '../globalvariables'
 
 /**
  * The Code molecule type adds support for executing arbirary jsxcad code.
@@ -35,6 +36,19 @@ export default class Code extends Atom {
         this.setValues(values)
         
         this.parseInputs()
+    }
+
+    /**
+     * Draw the code atom which has a code icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.font = `${GlobalVariables.widthToPixels(this.radius)}px Work Sans Bold`
+        GlobalVariables.c.fillText('</>', GlobalVariables.widthToPixels(this.x - (this.radius/1.5)), GlobalVariables.heightToPixels(this.y + (this.radius*1.5)))
     }
     
     /**
