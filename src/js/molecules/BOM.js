@@ -123,7 +123,7 @@ export default class AddBOMTag extends Atom{
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
-        GlobalVariables.c.fillText('BOM', GlobalVariables.widthToPixels(this.x- this.radius*1.2), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fillText('BOM', GlobalVariables.widthToPixels(this.x - this.radius*1.2), GlobalVariables.heightToPixels(this.y)+this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }
