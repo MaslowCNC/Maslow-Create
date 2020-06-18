@@ -773,7 +773,6 @@ export default class Atom {
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         
-
         
         document.getElementById(thisID).addEventListener('focusout', () => {
             var valueInBox = document.getElementById(thisID).textContent
