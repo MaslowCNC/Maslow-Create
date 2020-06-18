@@ -37,6 +37,12 @@ export default class Readme extends Atom{
          * @type {number}
          */
         this.radius = 1/72
+
+        /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
+        
         
         this.setValues(values)
     }
@@ -47,34 +53,24 @@ export default class Readme extends Atom{
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,'readmeText', 'Notes', false)
     }
-    
     /**
-     * Draw the two // marks on the readme atom
+     * Draw the readme atom with // icon.
      */ 
     draw() {
+        
+        super.draw("rect")
 
-        let xInPixels = GlobalVariables.widthToPixels(this.x)
-        let yInPixels = GlobalVariables.heightToPixels(this.y)
-        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
-        
-        super.draw() //Super call to draw the rest
-        
-        //draw the two slashes on the node//
-        GlobalVariables.c.strokeStyle = '#949294'
-        GlobalVariables.c.lineWidth = 4
-        GlobalVariables.c.lineCap = 'round'
-        
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(xInPixels - radiusInPixels*.5, yInPixels + radiusInPixels/2)
-        GlobalVariables.c.lineTo(xInPixels, yInPixels - radiusInPixels*.8)
-        GlobalVariables.c.stroke()
-        
-        GlobalVariables.c.beginPath()
-        GlobalVariables.c.moveTo(xInPixels, yInPixels + radiusInPixels*.8)
-        GlobalVariables.c.lineTo(xInPixels + radiusInPixels*.5, yInPixels - radiusInPixels/2)
-        GlobalVariables.c.stroke()
-    }
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        this.height = pixelsRadius * 1.5
     
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius*1.5}px Work Sans Bold`
+        GlobalVariables.c.fillText('//', GlobalVariables.widthToPixels(this.x- this.radius/2), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        
+    }
     /**
      * Update the readme text. Called when the readme text has been edited.
      */ 

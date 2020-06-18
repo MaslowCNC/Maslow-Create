@@ -65,7 +65,6 @@ export default class Molecule extends Atom{
             atomType: 'Output'
         }, false)
     }
-
     
     /**
      * Gives this molecule inputs with the same names as all of it's parent's inputs
@@ -132,6 +131,10 @@ export default class Molecule extends Atom{
         if (distFromClick < this.radius*2){
             GlobalVariables.currentMolecule = this //set this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
+            /**
+            * Deselects Atom
+            * @type {boolean}
+            */
             this.selected = false
             clickProcessed = true
         }
@@ -143,6 +146,7 @@ export default class Molecule extends Atom{
      * Handle a background click (a click which doesn't land on one of the contained molecules) by deselected everything and displaying a 3D rendering of this molecules output.
      */ 
     backgroundClick(){
+        document.activeElement.blur() 
         /**
          * Flag that the atom is now selected.
          */

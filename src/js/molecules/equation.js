@@ -33,6 +33,10 @@ export default class Equation extends Atom {
         this.value = 0
         
         /**
+         * This atom's height as drawn on the screen
+         */
+        this.height
+        /**
          * The index number of the currently selected option
          * @type {number}
          */
@@ -42,6 +46,31 @@ export default class Equation extends Atom {
         this.updateValue()
         this.setValues(values) //Set values again to load input values which were saved
         
+        
+    }
+    /**
+     * Draw the Bill of material atom which has a BOM icon.
+     */ 
+    draw() {
+        
+        super.draw("rect")
+        
+        let pixelsX = GlobalVariables.widthToPixels(this.x)
+        let pixelsY = GlobalVariables.heightToPixels(this.y)
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height = pixelsRadius
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#484848'
+        GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`
+        
+        GlobalVariables.c.fillText('X + Y', pixelsX - pixelsRadius/1.2, pixelsY+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
         
     }
     

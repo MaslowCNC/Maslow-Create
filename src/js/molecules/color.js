@@ -1,5 +1,7 @@
 import Atom from '../prototypes/atom'
 
+import GlobalVariables from '../globalvariables.js'
+
 /**
  * This class creates the color atom which can be used to give a part a color.
  */
@@ -40,6 +42,38 @@ export default class Color extends Atom {
         this.addIO('output', 'geometry', this, 'geometry', null)
         
         this.setValues(values)
+    }
+
+    /**
+     * Draw the circle atom & icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#0000FF'
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x - this.radius/4), 
+            GlobalVariables.heightToPixels(this.y + this.radius/2), 
+            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#FF0000'
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x + this.radius/4), 
+            GlobalVariables.heightToPixels(this.y + this.radius/2), 
+            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath() 
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#FFFF00'
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), 
+            GlobalVariables.heightToPixels(this.y - this.radius), 
+            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath() 
     }
     
     /**

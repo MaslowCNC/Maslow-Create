@@ -2,7 +2,7 @@ import CMenu from './lib/circularmenu.js'
 import GlobalVariables from './globalvariables'
 
 /**
- * Html element that cointains the circular menu
+ * Html element that contains the circular menu
  */    
 var ele = document.querySelector('#circle-menu1')
 /**
@@ -192,6 +192,7 @@ function searchMenu() {
     })
     
 }
+
 /**
      * Runs when a menu option is clicked to place a new atom from the local atoms list.
      * @param {object} ev - The event triggered by click event on a menu item.
@@ -208,6 +209,15 @@ function placeNewNode(e){
         uniqueID: GlobalVariables.generateUniqueID()
             
     }, true)
+    
+    //Simulate a click on the new atom
+    var clickHandledByAtom = false
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
+        if (atom.clickDown(containerX,containerY,clickHandledByAtom) == true){
+            clickHandledByAtom = true
+            atom.clickUp(containerX, containerY) //Click up to not drag the atom
+        }
+    })
 }
 
 /**
