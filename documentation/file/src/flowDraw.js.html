@@ -185,7 +185,15 @@ flowCanvas.addEventListener(&apos;dblclick&apos;, event =&gt; {
     }
 })
 
-flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
+
+document.addEventListener(&apos;mouseup&apos;,()=&gt;{
+    //puts focus back into mainbody after clicking button
+    document.activeElement.blur()
+    document.getElementById(&quot;mainBody&quot;).focus()
+})
+
+flowCanvas.addEventListener(&apos;mouseup&apos;, (event) =&gt; {
+
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule =&gt; {
         molecule.clickUp(event.clientX,event.clientY)      
@@ -200,8 +208,10 @@ flowCanvas.addEventListener(&apos;mouseup&apos;, event =&gt; {
 * @type {array}
 */
 window.addEventListener(&apos;keydown&apos;, e =&gt; {
+    //console.log(e.srcElement.tagName.toLowerCase())
     //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
-    if((e.srcElement.tagName.toLowerCase() !== (&quot;textarea&quot; &amp;&amp; &quot;input&quot;))
+    if(e.srcElement.tagName.toLowerCase() !== (&quot;textarea&quot;)
+        &amp;&amp; e.srcElement.tagName.toLowerCase() !== (&quot;input&quot;)
         &amp;&amp;(!e.srcElement.isContentEditable)
         &amp;&amp; [&apos;c&apos;,&apos;v&apos;, &apos;Backspace&apos;].includes(e.key)){
         e.preventDefault()

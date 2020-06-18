@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/rectangle.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * This class creates the rectangle atom.
@@ -104,6 +105,24 @@ export default class Rectangle extends Atom {
         this.atomType = &apos;Rectangle&apos;
         
         this.setValues(values)
+    }
+
+    /**
+     * Draw the rectangle atom &amp; icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.rect(GlobalVariables.widthToPixels(this.x- this.radius/2), 
+            GlobalVariables.heightToPixels(this.y- this.radius*2), 
+            GlobalVariables.widthToPixels(this.radius), 
+            GlobalVariables.widthToPixels(this.radius))       
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
     }
     
     /**

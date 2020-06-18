@@ -76,6 +76,7 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/code.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
 import CodeMirror from &apos;codemirror&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
 
 /**
  * The Code molecule type adds support for executing arbirary jsxcad code.
@@ -111,6 +112,19 @@ export default class Code extends Atom {
         this.setValues(values)
         
         this.parseInputs()
+    }
+
+    /**
+     * Draw the code atom which has a code icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.font = `${GlobalVariables.widthToPixels(this.radius)}px Work Sans Bold`
+        GlobalVariables.c.fillText(&apos;&lt;/&gt;&apos;, GlobalVariables.widthToPixels(this.x - (this.radius/1.5)), GlobalVariables.heightToPixels(this.y + (this.radius*1.5)))
     }
     
     /**

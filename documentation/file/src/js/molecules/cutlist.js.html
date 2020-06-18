@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/cutlist.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * This class creates the Add To Cutlist atom.
@@ -103,6 +104,36 @@ export default class CutList extends Atom{
         this.atomType = &apos;cutList&apos;
         
         this.setValues(values)
+        /** 
+         * This atom&apos;s radius as displayed on the screen is 1/65 width
+         * @type {number}
+         */
+        this.radius = 1/65
+        /**
+         * This atom&apos;s height as drawn on the screen
+         */
+        this.height
+    }
+    /**
+     * Draw the constant which is more rectangular than the regular shape.
+     */ 
+    draw() {
+        
+        super.draw(&quot;rect&quot;)
+        
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height = pixelsRadius/1.3
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#484848&apos;
+        GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`
+        GlobalVariables.c.fillText(&apos; - - -&apos;, GlobalVariables.widthToPixels(this.x- this.radius), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
     }
     
     /**

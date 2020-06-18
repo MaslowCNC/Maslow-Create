@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/translate.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
 
 /**
  * This class creates the translate atom.
@@ -108,6 +109,32 @@ export default class Translate extends Atom{
         this.setValues(values)
     }
     
+    /**
+     * Draw the translate icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+        
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x+this.radius/5), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2.5), 0, Math.PI * 2, false)       
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x-this.radius/5), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2.5), 0, Math.PI * 2, false)       
+        GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
+          
+
+    }
     /**
      * Pass the input geometry to a worker function to compute the translation.
      */ 

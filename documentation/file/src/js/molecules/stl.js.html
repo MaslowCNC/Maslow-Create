@@ -101,6 +101,11 @@ export default class Stl extends Atom {
          * @type {string}
          */
         this.atomType = &apos;Stl&apos;
+
+        /**
+         * This atom&apos;s height as drawn on the screen
+         */
+        this.height
         
         /**
          * This atom&apos;s value. Contains the value of the input geometry, not the stl
@@ -108,11 +113,34 @@ export default class Stl extends Atom {
          */
         this.value = null
         
+        
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
         
         this.setValues(values)
     }
     
+    /**
+     * Draw the svg atom which has a SVG icon.
+     */ 
+    draw() {
+        
+        super.draw(&quot;rect&quot;)
+        
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height = pixelsRadius * 1.5
+    
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#484848&apos;
+        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
+        GlobalVariables.c.fillText(&apos;STL&apos;, GlobalVariables.widthToPixels(this.x- this.radius/1.5), GlobalVariables.heightToPixels(this.y)+this.height/6)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        
+    }
     /**
      * Set the value to be the input geometry, then call super updateValue()
      */ 

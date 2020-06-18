@@ -106,6 +106,23 @@ export default class Circle extends Atom {
         
         this.setValues(values)
     }
+
+    /**
+     * Draw the circle atom &amp; icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)       
+        //GlobalVariables.c.fill()
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath() 
+    }
     
     /**
      * Super class the default update value function. This function computes the number of points to use for the circle and then calls the worker thread to create the circle.

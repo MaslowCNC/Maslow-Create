@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/rotate.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
 
 /**
  * This class creates the rotate atom.
@@ -108,7 +109,26 @@ export default class Rotate extends Atom {
         
         this.setValues(values)
     }
-    
+
+    /**
+     * Draw the circle atom &amp; icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.ellipse(GlobalVariables.widthToPixels(this.x), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/1.5), GlobalVariables.widthToPixels(this.radius/2.3), Math.PI / 4,  0, Math.PI * 2)  
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()
+
+        
+
+    }
+  
     /**
      * Pass the input shape to a worker thread to compute the rotation
      */ 

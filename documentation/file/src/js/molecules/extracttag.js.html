@@ -75,6 +75,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/extracttag.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * The cut away tag adds a tag to a part indicating that it should be cut away from the rest of the model in the next assembly. Essentially it creates a negitive version of itself.
@@ -98,6 +99,10 @@ export default class ExtractTag extends Atom{
          */
         this.type = &apos;extractTag&apos;
         /**
+         * This atom&apos;s height as drawn on the screen
+         */
+        this.height
+        /**
          * This atom&apos;s name
          * @type {string}
          */
@@ -110,6 +115,28 @@ export default class ExtractTag extends Atom{
         this.setValues(values)
     }
     
+    /**
+     * Draw the constant which is more rectangular than the regular shape.
+     */ 
+    draw() {
+        
+        super.draw(&quot;rect&quot;)
+        let pixelsX = GlobalVariables.widthToPixels(this.x)
+        let pixelsY = GlobalVariables.heightToPixels(this.y)
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        /**
+        * Relates height to radius
+        * @type {number}
+        */
+        this.height= pixelsRadius
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#484848&apos;
+        GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`
+        GlobalVariables.c.fillText(&apos;(#)&apos;, pixelsX- pixelsRadius/1.2, pixelsY+this.height/3)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+    }
     /**
      * Adds the cutAway tag to the part
      */ 
