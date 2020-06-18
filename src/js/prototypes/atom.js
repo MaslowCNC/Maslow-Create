@@ -773,8 +773,7 @@ export default class Atom {
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         
-        
-        document.getElementById(thisID).addEventListener('focusout', () => {
+        document.getElementById(thisID).addEventListener('keyup',() =>{
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
@@ -788,14 +787,14 @@ export default class Atom {
                 object[key] = valueInBox
                 callBack(valueInBox)
             }
-            
         })
         
+      
+       
         //prevent the return key from being used when editing a value
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
-                evt.preventDefault()
-                
+                evt.preventDefault() 
                 document.getElementById(thisID).blur() 
                 //shift focus away if someone presses enter
             }

@@ -29,6 +29,7 @@ flowCanvas.addEventListener('mousemove', event => {
 })
 
 flowCanvas.addEventListener('mousedown', event => {
+
     //every time the mouse button goes down
     
     var isRightMB
@@ -109,6 +110,17 @@ flowCanvas.addEventListener('dblclick', event => {
     }
 })
 
+
+document.addEventListener('mouseup',(e)=>{
+    if (!e.srcElement.isContentEditable){
+
+    //puts focus back into mainbody after clicking button
+    document.activeElement.blur()
+    document.getElementById("mainBody").focus()
+    }
+})
+
+
 flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
@@ -118,7 +130,7 @@ flowCanvas.addEventListener('mouseup', event => {
 })
 
 
-   
+
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
@@ -129,7 +141,7 @@ window.addEventListener('keydown', e => {
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
         && ['c','v', 'Backspace'].includes(e.key)){
-            e.preventDefault()
+        e.preventDefault()
     }
     //Copy /paste listeners
     if (e.key == "Control" || e.key == "Meta") {
