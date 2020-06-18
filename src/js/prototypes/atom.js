@@ -477,7 +477,12 @@ export default class Atom {
 
         //remove everything in the sideBar now
         let sideBar = document.querySelector('.sideBar')
-        while (sideBar.firstChild) {
+        var editables = document.querySelectorAll(".editing-item")
+        editables.forEach(function(value) {
+            value.blur()
+}        )
+
+        while (sideBar.firstChild) { 
             sideBar.removeChild(sideBar.firstChild)
         }
 
@@ -773,10 +778,8 @@ export default class Atom {
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         
-        if(document.activeElement.id == "mainBody"){
-            document.getElementById(thisID).blur() 
-        }
-        document.getElementById(thisID).addEventListener('blur',() =>{
+        
+        document.getElementById(thisID).addEventListener('focusout',() =>{
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
@@ -796,8 +799,7 @@ export default class Atom {
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
                 evt.preventDefault() 
-                document.getElementById(thisID).blur() 
-                //shift focus away if someone presses enter
+                document.getElementById(thisID).blur() //shift focus away if someone presses enter
             }
         })
 
