@@ -477,10 +477,11 @@ export default class Atom {
 
         //remove everything in the sideBar now
         let sideBar = document.querySelector('.sideBar')
+        //Updates sidebar values before erasing
         var editables = document.querySelectorAll(".editing-item")
         editables.forEach(function(value) {
             value.blur()
-        }        )
+        })
 
         while (sideBar.firstChild) { 
             sideBar.removeChild(sideBar.firstChild)
