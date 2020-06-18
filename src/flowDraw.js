@@ -114,9 +114,9 @@ flowCanvas.addEventListener('dblclick', event => {
 document.addEventListener('mouseup',(e)=>{
     if (!e.srcElement.isContentEditable){
 
-    //puts focus back into mainbody after clicking button
-    document.activeElement.blur()
-    document.getElementById("mainBody").focus()
+        //puts focus back into mainbody after clicking button
+        document.activeElement.blur()
+        document.getElementById("mainBody").focus()
     }
 })
 
