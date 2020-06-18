@@ -773,7 +773,10 @@ export default class Atom {
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         
-        document.getElementById(thisID).addEventListener('keyup',() =>{
+        if(document.activeElement.id == "mainBody"){
+            document.getElementById(thisID).blur() 
+        }
+        document.getElementById(thisID).addEventListener('blur',() =>{
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
@@ -789,8 +792,6 @@ export default class Atom {
             }
         })
         
-      
-       
         //prevent the return key from being used when editing a value
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
