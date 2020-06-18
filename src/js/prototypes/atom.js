@@ -480,7 +480,7 @@ export default class Atom {
         var editables = document.querySelectorAll(".editing-item")
         editables.forEach(function(value) {
             value.blur()
-}        )
+        }        )
 
         while (sideBar.firstChild) { 
             sideBar.removeChild(sideBar.firstChild)
