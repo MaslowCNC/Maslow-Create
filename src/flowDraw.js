@@ -29,6 +29,7 @@ flowCanvas.addEventListener('mousemove', event => {
 })
 
 flowCanvas.addEventListener('mousedown', event => {
+
     //every time the mouse button goes down
     
     var isRightMB
@@ -110,14 +111,17 @@ flowCanvas.addEventListener('dblclick', event => {
 })
 
 
-document.addEventListener('mouseup',()=>{
-    //puts focus back into mainbody after clicking button
-    document.activeElement.blur()
-    document.getElementById("mainBody").focus()
+document.addEventListener('mouseup',(e)=>{
+    if (!e.srcElement.isContentEditable){
+
+        //puts focus back into mainbody after clicking button
+        document.activeElement.blur()
+        document.getElementById("mainBody").focus()
+    }
 })
 
-flowCanvas.addEventListener('mouseup', (event) => {
 
+flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY)      
@@ -126,13 +130,12 @@ flowCanvas.addEventListener('mouseup', (event) => {
 })
 
 
-   
+
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
 */
 window.addEventListener('keydown', e => {
-    //console.log(e.srcElement.tagName.toLowerCase())
     //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
     if(e.srcElement.tagName.toLowerCase() !== ("textarea")
         && e.srcElement.tagName.toLowerCase() !== ("input")
