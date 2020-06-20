@@ -141,7 +141,7 @@ window.addEventListener('keydown', e => {
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
         && ['c','v', 'Backspace'].includes(e.key)){
-            e.preventDefault()
+        e.preventDefault()
     }
 
     if (document.activeElement.id == "mainBody"){
@@ -166,8 +166,8 @@ window.addEventListener('keydown', e => {
         }
         if (e.key == ("Backspace"||"Delete")) {
             GlobalVariables.atomsToCopy = []
+            //Adds items to the  array that we will use to delete
             GlobalVariables.currentMolecule.copy()
-            console.log(GlobalVariables.atomsToCopy)
             GlobalVariables.atomsToCopy.forEach(item => {
                 GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
                     if(nodeOnTheScreen.uniqueID == item.uniqueID){
