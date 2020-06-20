@@ -141,7 +141,7 @@ window.addEventListener('keydown', e => {
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
         && ['c','v', 'Backspace'].includes(e.key)){
-        e.preventDefault()
+            e.preventDefault()
     }
 
     if (document.activeElement.id == "mainBody"){
@@ -170,9 +170,7 @@ window.addEventListener('keydown', e => {
             console.log(GlobalVariables.atomsToCopy)
             GlobalVariables.atomsToCopy.forEach(item => {
                 GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
-                    console.log("delete")
                     if(nodeOnTheScreen.uniqueID == item.uniqueID){
-
                         nodeOnTheScreen.deleteNode()
                     }
                 })
@@ -192,12 +190,10 @@ window.addEventListener('keyup', e => {
     }
 })
 
-
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
     openTopMenu()
 }) 
-
 
 /**
  * Checks if menu is open and changes class to trigger hiding of individual buttons
