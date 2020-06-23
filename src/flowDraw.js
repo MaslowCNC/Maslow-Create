@@ -132,7 +132,13 @@ flowCanvas.addEventListener('mouseup', event => {
 })
 
 
-
+var shortCuts = {
+    g: "Githubmolecule",
+    t: "Translate",
+    r: "Rotate",
+    e: "Extrude",
+    f: "Code"
+}
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
@@ -142,7 +148,7 @@ window.addEventListener('keydown', e => {
     if(e.srcElement.tagName.toLowerCase() !== ("textarea")
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
-        && ['c','v', 'Backspace'].includes(e.key)){
+        && ['c','v','Backspace'].includes(e.key)){
         e.preventDefault()
     }
 
@@ -166,6 +172,24 @@ window.addEventListener('keydown', e => {
             e.preventDefault()
             GlobalVariables.gitHub.saveProject()
         }
+        console.log(shortCuts.hasOwnProperty("t"))
+         console.log(e.key)
+
+        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
+            e.preventDefault()
+            console.log(shortCuts[e.key])
+
+             GlobalVariables.currentMolecule.placeAtom({
+                parentMolecule: GlobalVariables.currentMolecule, 
+                x: GlobalVariables.pixelsToWidth(500),
+                y: GlobalVariables.pixelsToHeight(100),
+                parent: GlobalVariables.currentMolecule,
+                name: `${shortCuts[e.key]}`,
+                atomType: `${shortCuts[e.key]}`
+            }, null, GlobalVariables.availableTypes)
+            
+        }
+
         if (e.key == ("Backspace"||"Delete")) {
             GlobalVariables.atomsToCopy = []
             //Adds items to the  array that we will use to delete
