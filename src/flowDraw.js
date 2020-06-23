@@ -146,10 +146,20 @@ window.addEventListener('keydown', e => {
     }
 
     if (document.activeElement.id == "mainBody"){
-        //Copy /paste listeners
-        if (e.key == "Control" || e.key == "Meta") {
-            GlobalVariables.ctrlDown = true
-        }      
+
+        if (e.key == ("Backspace"||"Delete")) {
+            GlobalVariables.atomsToCopy = []
+            //Adds items to the  array that we will use to delete
+            GlobalVariables.currentMolecule.copy()
+            GlobalVariables.atomsToCopy.forEach(item => {
+                GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
+                    console.log(item.uniqueID)
+                    if(nodeOnTheScreen.uniqueID == item.uniqueID){
+                        nodeOnTheScreen.deleteNode()
+                    }
+                })
+            })
+        }    
 
         /** 
         * Object containing letters and values used for keyboard shortcuts
@@ -162,7 +172,6 @@ window.addEventListener('keydown', e => {
             i: "Input",
             m: "Molecule",
             y: "Translate", //can't seem to prevent command t new tab behavior
-            r: "Rotate",
             e: "Extrude",
             x: "Equation",
             z: "Undo", //saving this letter 
@@ -171,6 +180,11 @@ window.addEventListener('keydown', e => {
             j: "Code", //is there a more natural code letter?
             w: "Shrinkwrap"
         }
+
+         //Copy /paste listeners
+        if (e.key == "Control" || e.key == "Meta") {
+            GlobalVariables.ctrlDown = true
+        }  
 
         if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
             
@@ -194,6 +208,7 @@ window.addEventListener('keydown', e => {
             }
             
             else {
+
                 GlobalVariables.currentMolecule.placeAtom({
                     parentMolecule: GlobalVariables.currentMolecule, 
                     x: 0.5,
@@ -204,19 +219,6 @@ window.addEventListener('keydown', e => {
                 }, null, GlobalVariables.availableTypes)
             }
             
-        }
-
-        if (e.key == ("Backspace"||"Delete")) {
-            GlobalVariables.atomsToCopy = []
-            //Adds items to the  array that we will use to delete
-            GlobalVariables.currentMolecule.copy()
-            GlobalVariables.atomsToCopy.forEach(item => {
-                GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
-                    if(nodeOnTheScreen.uniqueID == item.uniqueID){
-                        nodeOnTheScreen.deleteNode()
-                    }
-                })
-            })
         }
     }
     //every time a key is pressed
