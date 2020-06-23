@@ -132,13 +132,6 @@ flowCanvas.addEventListener('mouseup', event => {
 })
 
 
-var shortCuts = {
-    g: "Githubmolecule",
-    t: "Translate",
-    r: "Rotate",
-    e: "Extrude",
-    f: "Code"
-}
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
@@ -157,36 +150,55 @@ window.addEventListener('keydown', e => {
         if (e.key == "Control" || e.key == "Meta") {
             GlobalVariables.ctrlDown = true
         }      
-        if (GlobalVariables.ctrlDown &&  e.key == "c") {
-            GlobalVariables.atomsToCopy = []
-            GlobalVariables.currentMolecule.copy()
+
+        //Letters taken up 
+        var shortCuts = {
+            a: "Assembly",
+            c: "Copy",
+            d: "Difference",
+            i: "Input",
+            m: "Molecule",
+            y: "Translate", //can't seem to prevent command t new tab behavior
+            r: "Rotate",
+            e: "Extrude",
+            x: "Equation",
+            z: "Undo", //saving this letter 
+            s: "Save",
+            v: "Paste",
+            j: "Code" //is there a more natural code letter?
         }
-        if (GlobalVariables.ctrlDown &&  e.key == "v") {
-            GlobalVariables.atomsToCopy.forEach(item => {
-                let newAtomID = GlobalVariables.generateUniqueID()
-                item.uniqueID = newAtomID
-                GlobalVariables.currentMolecule.placeAtom(item, true)    
-            })   
-        }
-        if (GlobalVariables.ctrlDown &&  e.key == "s") {
-            e.preventDefault()
-            GlobalVariables.gitHub.saveProject()
-        }
-        console.log(shortCuts.hasOwnProperty("t"))
-         console.log(e.key)
 
         if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
+            
             e.preventDefault()
-            console.log(shortCuts[e.key])
 
-             GlobalVariables.currentMolecule.placeAtom({
-                parentMolecule: GlobalVariables.currentMolecule, 
-                x: GlobalVariables.pixelsToWidth(500),
-                y: GlobalVariables.pixelsToHeight(100),
-                parent: GlobalVariables.currentMolecule,
-                name: `${shortCuts[e.key]}`,
-                atomType: `${shortCuts[e.key]}`
-            }, null, GlobalVariables.availableTypes)
+            if (e.key == "c") {
+            GlobalVariables.atomsToCopy = []
+            GlobalVariables.currentMolecule.copy()
+            }
+            if (e.key == "v") {
+                GlobalVariables.atomsToCopy.forEach(item => {
+                    let newAtomID = GlobalVariables.generateUniqueID()
+                    item.uniqueID = newAtomID
+                    GlobalVariables.currentMolecule.placeAtom(item, true)    
+                })   
+            }
+       
+            if (e.key == "s") {
+                e.preventDefault()
+                GlobalVariables.gitHub.saveProject()
+            }
+            
+            else {
+                GlobalVariables.currentMolecule.placeAtom({
+                    parentMolecule: GlobalVariables.currentMolecule, 
+                    x: 0.5,
+                    y: 0.5,
+                    parent: GlobalVariables.currentMolecule,
+                    name: `${shortCuts[e.key]}`,
+                    atomType: `${shortCuts[e.key]}`
+                }, null, GlobalVariables.availableTypes)
+            }
             
         }
 
