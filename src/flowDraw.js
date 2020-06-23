@@ -153,7 +153,6 @@ window.addEventListener('keydown', e => {
             GlobalVariables.currentMolecule.copy()
             GlobalVariables.atomsToCopy.forEach(item => {
                 GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
-                    console.log(item.uniqueID)
                     if(nodeOnTheScreen.uniqueID == item.uniqueID){
                         nodeOnTheScreen.deleteNode()
                     }
@@ -207,7 +206,7 @@ window.addEventListener('keydown', e => {
                 GlobalVariables.gitHub.saveProject()
             }
             
-            else {
+            else { 
 
                 GlobalVariables.currentMolecule.placeAtom({
                     parentMolecule: GlobalVariables.currentMolecule, 
@@ -215,8 +214,9 @@ window.addEventListener('keydown', e => {
                     y: 0.5,
                     parent: GlobalVariables.currentMolecule,
                     name: `${shortCuts[e.key]}`,
-                    atomType: `${shortCuts[e.key]}`
-                }, null, GlobalVariables.availableTypes)
+                    atomType: `${shortCuts[e.key]}`,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                }, true, GlobalVariables.availableTypes)
             }
             
         }
