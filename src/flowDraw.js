@@ -180,7 +180,7 @@ window.addEventListener('keydown', e => {
             w: "Shrinkwrap"
         }
 
-         //Copy /paste listeners
+        //Copy /paste listeners
         if (e.key == "Control" || e.key == "Meta") {
             GlobalVariables.ctrlDown = true
         }  
