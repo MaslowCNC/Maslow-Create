@@ -163,9 +163,10 @@ window.addEventListener('keydown', e => {
             e: "Extrude",
             x: "Equation",
             z: "Undo", //saving this letter 
-            s: "Save",
+            s: "Save", 
             v: "Paste",
-            j: "Code" //is there a more natural code letter?
+            j: "Code", //is there a more natural code letter?
+            w: "Shrinkwrap"
         }
 
         if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
@@ -173,8 +174,8 @@ window.addEventListener('keydown', e => {
             e.preventDefault()
 
             if (e.key == "c") {
-            GlobalVariables.atomsToCopy = []
-            GlobalVariables.currentMolecule.copy()
+                GlobalVariables.atomsToCopy = []
+                GlobalVariables.currentMolecule.copy()
             }
             if (e.key == "v") {
                 GlobalVariables.atomsToCopy.forEach(item => {
