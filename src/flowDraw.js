@@ -151,7 +151,10 @@ window.addEventListener('keydown', e => {
             GlobalVariables.ctrlDown = true
         }      
 
-        //Letters taken up 
+        /** 
+        * Object containing letters and values used for keyboard shortcuts
+        * @type {object?}
+        */ 
         var shortCuts = {
             a: "Assembly",
             c: "Copy",
