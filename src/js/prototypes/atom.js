@@ -435,13 +435,7 @@ export default class Atom {
      */ 
     keyPress(key){ 
 
-        //runs whenever a key is pressed
-        if (['Delete', 'Backspace'].includes(key)){  
-            if(this.selected == true && document.activeElement.id == "mainBody"){
-                //If this atom is selected AND the body is active (meaning we are not typing in a text box)
-                this.deleteNode()
-            }
-        }
+      
         this.inputs.forEach(child => {
             child.keyPress(key)
         })
@@ -477,7 +471,13 @@ export default class Atom {
 
         //remove everything in the sideBar now
         let sideBar = document.querySelector('.sideBar')
-        while (sideBar.firstChild) {
+        //Updates sidebar values before erasing
+        var editables = document.querySelectorAll(".editing-item")
+        editables.forEach(function(value) {
+            value.blur()
+        })
+
+        while (sideBar.firstChild) { 
             sideBar.removeChild(sideBar.firstChild)
         }
 
@@ -773,9 +773,8 @@ export default class Atom {
         var thisID = label+GlobalVariables.generateUniqueID()
         valueTextDiv.setAttribute('id', thisID)
         
-
         
-        document.getElementById(thisID).addEventListener('focusout', () => {
+        document.getElementById(thisID).addEventListener('focusout',() =>{
             var valueInBox = document.getElementById(thisID).textContent
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
@@ -789,16 +788,13 @@ export default class Atom {
                 object[key] = valueInBox
                 callBack(valueInBox)
             }
-            
         })
         
         //prevent the return key from being used when editing a value
         document.getElementById(thisID).addEventListener('keypress', function(evt) {
             if (evt.which === 13) {
-                evt.preventDefault()
-                
-                document.getElementById(thisID).blur() 
-                //shift focus away if someone presses enter
+                evt.preventDefault() 
+                document.getElementById(thisID).blur() //shift focus away if someone presses enter
             }
         })
 

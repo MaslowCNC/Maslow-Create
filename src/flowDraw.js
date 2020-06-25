@@ -29,6 +29,7 @@ flowCanvas.addEventListener('mousemove', event => {
 })
 
 flowCanvas.addEventListener('mousedown', event => {
+
     //every time the mouse button goes down
     
     var isRightMB
@@ -110,14 +111,19 @@ flowCanvas.addEventListener('dblclick', event => {
 })
 
 
-document.addEventListener('mouseup',()=>{
-    //puts focus back into mainbody after clicking button
-    document.activeElement.blur()
-    document.getElementById("mainBody").focus()
+document.addEventListener('mouseup',(e)=>{
+
+    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
+        && e.srcElement.tagName.toLowerCase() !== ("input")
+        &&(!e.srcElement.isContentEditable)){
+        //puts focus back into mainbody after clicking button
+        document.activeElement.blur()
+        document.getElementById("mainBody").focus()
+    }
 })
 
-flowCanvas.addEventListener('mouseup', (event) => {
 
+flowCanvas.addEventListener('mouseup', event => {
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickUp(event.clientX,event.clientY)      
@@ -126,38 +132,93 @@ flowCanvas.addEventListener('mouseup', (event) => {
 })
 
 
-   
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
 */
 window.addEventListener('keydown', e => {
-    //console.log(e.srcElement.tagName.toLowerCase())
     //Prevents default behavior of the browser on canvas to allow for copy/paste/delete
     if(e.srcElement.tagName.toLowerCase() !== ("textarea")
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
-        && ['c','v', 'Backspace'].includes(e.key)){
+        && ['c','v','Backspace'].includes(e.key)){
         e.preventDefault()
     }
-    //Copy /paste listeners
-    if (e.key == "Control" || e.key == "Meta") {
-        GlobalVariables.ctrlDown = true
-    }      
-    if (GlobalVariables.ctrlDown &&  e.key == "c" && document.activeElement.id == "mainBody") {
-        GlobalVariables.atomsToCopy = []
-        GlobalVariables.currentMolecule.copy()
-    }
-    if (GlobalVariables.ctrlDown &&  e.key == "v" && document.activeElement.id == "mainBody" ) {
-        GlobalVariables.atomsToCopy.forEach(item => {
-            let newAtomID = GlobalVariables.generateUniqueID()
-            item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, true)    
-        })   
-    }
-    if (GlobalVariables.ctrlDown &&  e.key == "s" && document.activeElement.id == "mainBody") {
-        e.preventDefault()
-        GlobalVariables.gitHub.saveProject()
+
+    if (document.activeElement.id == "mainBody"){
+        if (e.key == "Backspace" || e.key == "Delete") {
+            GlobalVariables.atomsToCopy = []
+            //Adds items to the  array that we will use to delete
+            GlobalVariables.currentMolecule.copy()
+            GlobalVariables.atomsToCopy.forEach(item => {
+                GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
+                    if(nodeOnTheScreen.uniqueID == item.uniqueID){
+                        nodeOnTheScreen.deleteNode()
+                    }
+                })
+            })
+        }    
+
+        /** 
+        * Object containing letters and values used for keyboard shortcuts
+        * @type {object?}
+        */ 
+        var shortCuts = {
+            a: "Assembly",
+            c: "Copy",
+            d: "Difference",
+            i: "Input",
+            m: "Molecule",
+            y: "Translate", //can't seem to prevent command t new tab behavior
+            e: "Extrude",
+            x: "Equation",
+            z: "Undo", //saving this letter 
+            s: "Save", 
+            v: "Paste",
+            j: "Code", //is there a more natural code letter?
+            w: "Shrinkwrap"
+        }
+
+        //Copy /paste listeners
+        if (e.key == "Control" || e.key == "Meta") {
+            GlobalVariables.ctrlDown = true
+        }  
+
+        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
+            
+            e.preventDefault()
+
+            if (e.key == "c") {
+                GlobalVariables.atomsToCopy = []
+                GlobalVariables.currentMolecule.copy()
+            }
+            if (e.key == "v") {
+                GlobalVariables.atomsToCopy.forEach(item => {
+                    let newAtomID = GlobalVariables.generateUniqueID()
+                    item.uniqueID = newAtomID
+                    GlobalVariables.currentMolecule.placeAtom(item, true)    
+                })   
+            }
+       
+            if (e.key == "s") {
+                e.preventDefault()
+                GlobalVariables.gitHub.saveProject()
+            }
+            
+            else { 
+
+                GlobalVariables.currentMolecule.placeAtom({
+                    parentMolecule: GlobalVariables.currentMolecule, 
+                    x: 0.5,
+                    y: 0.5,
+                    parent: GlobalVariables.currentMolecule,
+                    name: `${shortCuts[e.key]}`,
+                    atomType: `${shortCuts[e.key]}`,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                }, true, GlobalVariables.availableTypes)
+            }
+            
+        }
     }
     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {  
@@ -172,12 +233,10 @@ window.addEventListener('keyup', e => {
     }
 })
 
-
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
     openTopMenu()
 }) 
-
 
 /**
  * Checks if menu is open and changes class to trigger hiding of individual buttons
