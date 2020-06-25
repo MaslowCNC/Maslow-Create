@@ -112,8 +112,10 @@ flowCanvas.addEventListener('dblclick', event => {
 
 
 document.addEventListener('mouseup',(e)=>{
-    if (!e.srcElement.isContentEditable){
 
+    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
+        && e.srcElement.tagName.toLowerCase() !== ("input")
+        &&(!e.srcElement.isContentEditable)){
         //puts focus back into mainbody after clicking button
         document.activeElement.blur()
         document.getElementById("mainBody").focus()
@@ -143,24 +145,39 @@ window.addEventListener('keydown', e => {
         && ['c','v', 'Backspace'].includes(e.key)){
         e.preventDefault()
     }
-    //Copy /paste listeners
-    if (e.key == "Control" || e.key == "Meta") {
-        GlobalVariables.ctrlDown = true
-    }      
-    if (GlobalVariables.ctrlDown &&  e.key == "c" && document.activeElement.id == "mainBody") {
-        GlobalVariables.atomsToCopy = []
-        GlobalVariables.currentMolecule.copy()
-    }
-    if (GlobalVariables.ctrlDown &&  e.key == "v" && document.activeElement.id == "mainBody" ) {
-        GlobalVariables.atomsToCopy.forEach(item => {
-            let newAtomID = GlobalVariables.generateUniqueID()
-            item.uniqueID = newAtomID
-            GlobalVariables.currentMolecule.placeAtom(item, true)    
-        })   
-    }
-    if (GlobalVariables.ctrlDown &&  e.key == "s" && document.activeElement.id == "mainBody") {
-        e.preventDefault()
-        GlobalVariables.gitHub.saveProject()
+
+    if (document.activeElement.id == "mainBody"){
+        //Copy /paste listeners
+        if (e.key == "Control" || e.key == "Meta") {
+            GlobalVariables.ctrlDown = true
+        }      
+        if (GlobalVariables.ctrlDown &&  e.key == "c") {
+            GlobalVariables.atomsToCopy = []
+            GlobalVariables.currentMolecule.copy()
+        }
+        if (GlobalVariables.ctrlDown &&  e.key == "v") {
+            GlobalVariables.atomsToCopy.forEach(item => {
+                let newAtomID = GlobalVariables.generateUniqueID()
+                item.uniqueID = newAtomID
+                GlobalVariables.currentMolecule.placeAtom(item, true)    
+            })   
+        }
+        if (GlobalVariables.ctrlDown &&  e.key == "s") {
+            e.preventDefault()
+            GlobalVariables.gitHub.saveProject()
+        }
+        if (e.key == ("Backspace"||"Delete")) {
+            GlobalVariables.atomsToCopy = []
+            //Adds items to the  array that we will use to delete
+            GlobalVariables.currentMolecule.copy()
+            GlobalVariables.atomsToCopy.forEach(item => {
+                GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
+                    if(nodeOnTheScreen.uniqueID == item.uniqueID){
+                        nodeOnTheScreen.deleteNode()
+                    }
+                })
+            })
+        }
     }
     //every time a key is pressed
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {  
@@ -175,12 +192,10 @@ window.addEventListener('keyup', e => {
     }
 })
 
-
 /* Button to open top menu */
 document.getElementById('straight_menu').addEventListener('mousedown', () => {
     openTopMenu()
 }) 
-
 
 /**
  * Checks if menu is open and changes class to trigger hiding of individual buttons
