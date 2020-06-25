@@ -132,7 +132,6 @@ flowCanvas.addEventListener('mouseup', event => {
 })
 
 
-
 /** 
 * Array containing selected atoms to copy or delete
 * @type {array}
@@ -142,30 +141,12 @@ window.addEventListener('keydown', e => {
     if(e.srcElement.tagName.toLowerCase() !== ("textarea")
         && e.srcElement.tagName.toLowerCase() !== ("input")
         &&(!e.srcElement.isContentEditable)
-        && ['c','v', 'Backspace'].includes(e.key)){
+        && ['c','v','Backspace'].includes(e.key)){
         e.preventDefault()
     }
 
     if (document.activeElement.id == "mainBody"){
-        //Copy /paste listeners
-        if (e.key == "Control" || e.key == "Meta") {
-            GlobalVariables.ctrlDown = true
-        }      
-        if (GlobalVariables.ctrlDown &&  e.key == "c") {
-            GlobalVariables.atomsToCopy = []
-            GlobalVariables.currentMolecule.copy()
-        }
-        if (GlobalVariables.ctrlDown &&  e.key == "v") {
-            GlobalVariables.atomsToCopy.forEach(item => {
-                let newAtomID = GlobalVariables.generateUniqueID()
-                item.uniqueID = newAtomID
-                GlobalVariables.currentMolecule.placeAtom(item, true)    
-            })   
-        }
-        if (GlobalVariables.ctrlDown &&  e.key == "s") {
-            e.preventDefault()
-            GlobalVariables.gitHub.saveProject()
-        }
+
         if (e.key == ("Backspace"||"Delete")) {
             GlobalVariables.atomsToCopy = []
             //Adds items to the  array that we will use to delete
@@ -177,6 +158,67 @@ window.addEventListener('keydown', e => {
                     }
                 })
             })
+        }    
+
+        /** 
+        * Object containing letters and values used for keyboard shortcuts
+        * @type {object?}
+        */ 
+        var shortCuts = {
+            a: "Assembly",
+            c: "Copy",
+            d: "Difference",
+            i: "Input",
+            m: "Molecule",
+            y: "Translate", //can't seem to prevent command t new tab behavior
+            e: "Extrude",
+            x: "Equation",
+            z: "Undo", //saving this letter 
+            s: "Save", 
+            v: "Paste",
+            j: "Code", //is there a more natural code letter?
+            w: "Shrinkwrap"
+        }
+
+        //Copy /paste listeners
+        if (e.key == "Control" || e.key == "Meta") {
+            GlobalVariables.ctrlDown = true
+        }  
+
+        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
+            
+            e.preventDefault()
+
+            if (e.key == "c") {
+                GlobalVariables.atomsToCopy = []
+                GlobalVariables.currentMolecule.copy()
+            }
+            if (e.key == "v") {
+                GlobalVariables.atomsToCopy.forEach(item => {
+                    let newAtomID = GlobalVariables.generateUniqueID()
+                    item.uniqueID = newAtomID
+                    GlobalVariables.currentMolecule.placeAtom(item, true)    
+                })   
+            }
+       
+            if (e.key == "s") {
+                e.preventDefault()
+                GlobalVariables.gitHub.saveProject()
+            }
+            
+            else { 
+
+                GlobalVariables.currentMolecule.placeAtom({
+                    parentMolecule: GlobalVariables.currentMolecule, 
+                    x: 0.5,
+                    y: 0.5,
+                    parent: GlobalVariables.currentMolecule,
+                    name: `${shortCuts[e.key]}`,
+                    atomType: `${shortCuts[e.key]}`,
+                    uniqueID: GlobalVariables.generateUniqueID()
+                }, true, GlobalVariables.availableTypes)
+            }
+            
         }
     }
     //every time a key is pressed
