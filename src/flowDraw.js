@@ -146,8 +146,7 @@ window.addEventListener('keydown', e => {
     }
 
     if (document.activeElement.id == "mainBody"){
-
-        if (e.key == ("Backspace"||"Delete")) {
+        if (e.key == "Backspace" || e.key == "Delete") {
             GlobalVariables.atomsToCopy = []
             //Adds items to the  array that we will use to delete
             GlobalVariables.currentMolecule.copy()
