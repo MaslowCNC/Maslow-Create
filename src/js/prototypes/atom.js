@@ -776,7 +776,7 @@ export default class Atom {
         
         
         document.getElementById(thisID).addEventListener('focusout',() =>{
-            var valueInBox = document.getElementById(thisID).textContent
+            var valueInBox = document.getElementById(thisID).textContent.trim()
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
             }
