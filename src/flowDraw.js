@@ -186,11 +186,11 @@ window.addEventListener('keydown', e => {
         if (e.key == "Control" || e.key == "Meta") {
             GlobalVariables.ctrlDown = true
         }  
-        
+
         if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty([e.key])) {
             
             e.preventDefault()
-
+            //Copy & Paste
             if (e.key == "c") {
                 GlobalVariables.atomsToCopy = []
                 GlobalVariables.currentMolecule.copy()
@@ -202,14 +202,13 @@ window.addEventListener('keydown', e => {
                     GlobalVariables.currentMolecule.placeAtom(item, true)    
                 })   
             }
-       
+            //Save project
             if (e.key == "s") {
                 GlobalVariables.gitHub.saveProject()
             }
-
+            //Opens menu to search for github molecule
             if (e.key == "g") {
                 showGitHubSearch()
-
             }
             
             else { 
