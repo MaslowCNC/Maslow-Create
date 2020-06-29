@@ -82,7 +82,7 @@ class GlobalVariables{
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
-            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'Genetic Algorithm', atomCategory: 'Actions'},
+            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
             
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
