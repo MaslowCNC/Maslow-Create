@@ -160,7 +160,7 @@ export default class Molecule extends Atom{
     copy(){
         this.nodesOnTheScreen.forEach(atom => {
             if(atom.selected){
-                GlobalVariables.atomsToCopy.push(atom.serialize())
+                 GlobalVariables.atomsSelected.push(atom.serialize())
             }
         })
     }

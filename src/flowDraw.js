@@ -148,10 +148,10 @@ window.addEventListener('keydown', e => {
 
     if (document.activeElement.id == "mainBody"){
         if (e.key == "Backspace" || e.key == "Delete") {
-            GlobalVariables.atomsToCopy = []
+            GlobalVariables.atomsSelected = []
             //Adds items to the  array that we will use to delete
             GlobalVariables.currentMolecule.copy()
-            GlobalVariables.atomsToCopy.forEach(item => {
+            GlobalVariables.atomsSelected.forEach(item => {
                 GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen => {
                     if(nodeOnTheScreen.uniqueID == item.uniqueID){
                         nodeOnTheScreen.deleteNode()
@@ -190,11 +190,11 @@ window.addEventListener('keydown', e => {
             e.preventDefault()
 
             if (e.key == "c") {
-                GlobalVariables.atomsToCopy = []
+                GlobalVariables.atomsSelected = []
                 GlobalVariables.currentMolecule.copy()
             }
             if (e.key == "v") {
-                GlobalVariables.atomsToCopy.forEach(item => {
+                GlobalVariables.atomsSelected.forEach(item => {
                     let newAtomID = GlobalVariables.generateUniqueID()
                     item.uniqueID = newAtomID
                     GlobalVariables.currentMolecule.placeAtom(item, true)    
