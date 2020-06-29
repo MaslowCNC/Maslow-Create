@@ -2,7 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-import {cmenu, showGitHubSearch, placeGitHubMolecule} from './js/NewMenu.js'
+import {cmenu, showGitHubSearch} from './js/NewMenu.js'
 
 
 GlobalVariables.display = new Display()
@@ -186,7 +186,7 @@ window.addEventListener('keydown', e => {
         if (e.key == "Control" || e.key == "Meta") {
             GlobalVariables.ctrlDown = true
         }  
-        console.log(e.key)
+        
         if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty([e.key])) {
             
             e.preventDefault()
@@ -208,8 +208,7 @@ window.addEventListener('keydown', e => {
             }
 
             if (e.key == "g") {
-                console.log("is this?")
-              showGitHubSearch()
+                showGitHubSearch()
 
             }
             
