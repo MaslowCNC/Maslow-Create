@@ -166,26 +166,29 @@ window.addEventListener('keydown', e => {
         */ 
         var shortCuts = {
             a: "Assembly",
+            b: "ShrinkWrap",//>
             c: "Copy",
             d: "Difference",
-            i: "Input",
-            m: "Molecule",
-            y: "Translate", //can't seem to prevent command t new tab behavior
             e: "Extrude",
-            x: "Equation",
-            z: "Undo", //saving this letter 
+            g: "Github", // Not working yet
+            i: "Input",
+            j: "Translate", 
+            k: "Rectangle",
+            l: "Circle",
+            m: "Molecule",
             s: "Save", 
             v: "Paste",
-            j: "Code", //is there a more natural code letter?
-            w: "Shrinkwrap"
+            x: "Equation",
+            y: "Code", //is there a more natural code letter? can't seem to prevent command t new tab behavior
+            z: "Undo" //saving this letter 
         }
 
         //Copy /paste listeners
         if (e.key == "Control" || e.key == "Meta") {
             GlobalVariables.ctrlDown = true
         }  
-
-        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
+        console.log(e.key)
+        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty([e.key])) {
             
             e.preventDefault()
 
