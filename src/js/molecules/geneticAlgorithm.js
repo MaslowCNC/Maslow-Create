@@ -86,15 +86,15 @@ export default class GeneticAlgorithm extends Atom {
        
         GlobalVariables.c.beginPath()
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x - this.radius/5), 
-        GlobalVariables.heightToPixels(this.y), 
-        GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.4, Math.PI * 2.7, false) 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.4, Math.PI * 2.7, false) 
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()
 
         GlobalVariables.c.beginPath()
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x + this.radius/5), 
-        GlobalVariables.heightToPixels(this.y ), 
-        GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.6, Math.PI * 2.3, true) 
+            GlobalVariables.heightToPixels(this.y ), 
+            GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.6, Math.PI * 2.3, true) 
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath()  
 
