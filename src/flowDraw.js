@@ -115,6 +115,7 @@ document.addEventListener('mouseup',(e)=>{
 
     if(e.srcElement.tagName.toLowerCase() !== ("textarea")
         && e.srcElement.tagName.toLowerCase() !== ("input")
+        && e.srcElement.tagName.toLowerCase() !== ("select")
         &&(!e.srcElement.isContentEditable)){
         //puts focus back into mainbody after clicking button
         document.activeElement.blur()
