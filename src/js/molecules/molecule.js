@@ -417,8 +417,6 @@ export default class Molecule extends Atom{
      */
     requestReadme(){
         var generatedReadme = super.requestReadme()
-
-        //generatedReadme.push('## ' + this.name)
         
         var sortableAtomsList = this.nodesOnTheScreen
         sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)})
