@@ -148,6 +148,8 @@ function showGitHubSearch(){
         githubList.style.display = "none"
         menu.style.borderRadius = '50px'
     }
+    console.log(cmenu.container)
+    if(cmenu._container == undefined){}
 
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
@@ -246,5 +248,5 @@ function placeGitHubMolecule(ev){
     }, true)
 }
 
-export {cmenu}
+export {cmenu,showGitHubSearch,placeGitHubMolecule}
  

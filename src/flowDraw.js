@@ -2,8 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-//import LocalMenu from './js/localmenu.js'
-import {cmenu} from './js/NewMenu.js'
+import {cmenu, showGitHubSearch, placeGitHubMolecule} from './js/NewMenu.js'
 
 
 GlobalVariables.display = new Display()
@@ -170,7 +169,7 @@ window.addEventListener('keydown', e => {
             c: "Copy",
             d: "Difference",
             e: "Extrude",
-            g: "Github", // Not working yet
+            g: "GitHub", // Not working yet
             i: "Input",
             j: "Translate", 
             k: "Rectangle",
@@ -205,8 +204,13 @@ window.addEventListener('keydown', e => {
             }
        
             if (e.key == "s") {
-                e.preventDefault()
                 GlobalVariables.gitHub.saveProject()
+            }
+
+            if (e.key == "g") {
+                console.log("is this?")
+              showGitHubSearch()
+
             }
             
             else { 
