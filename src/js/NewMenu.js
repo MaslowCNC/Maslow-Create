@@ -146,7 +146,7 @@ function showGitHubSearch(){
     for (let i = 0; i < oldResults.length; i++) {
         githubList.removeChild(oldResults[i])
         githubList.style.display = "none"
-        menu.style.borderRadius = '50px'
+        //menu.style.borderRadius = '40px'
     }
 
     const containerX = parseInt(cmenu._container.style.left, 10)
@@ -169,28 +169,37 @@ function searchMenu() {
     let input = document.getElementById('menuInput').value
 
     var oldResults = githubList.getElementsByClassName('menu-item')
-    for (let i = 0; i < oldResults.length; i++) {
-        githubList.removeChild(oldResults[i])
-    }
-    GlobalVariables.gitHub.searchGithub(input).then(result => {
-        result.data.items.forEach(item => {
-            var newElement = document.createElement('LI')
-            var text = document.createTextNode(item.name)
-            const menu = document.querySelector('#canvas_menu')
-            menu.style.borderRadius = '30px 30px 20px 20px'
-            newElement.setAttribute('class', 'menu-item')
-            newElement.setAttribute('id', item.id)
-            newElement.appendChild(text) 
-            githubList.appendChild(newElement) 
-            githubList.setAttribute('style','display:block;')
+    oldResults.length = 0
+   
+    console.log(githubList.getElementsByClassName('menu-item').length)
 
- 
-            document.getElementById(item.id).addEventListener('click', (e) => {
-                placeGitHubMolecule(e)
-            })
+    GlobalVariables.gitHub.searchGithub(input,true).then(result => {     
+        result.data.items.forEach(item => {
+            addToList(item,true)
         })
     })
-    
+    GlobalVariables.gitHub.searchGithub(input,false).then(result => {
+        result.data.items.forEach(item => {  
+            addToList(item,false)  
+        })
+    })
+}
+
+function addToList(item,owned){
+    var newElement = document.createElement('LI')
+    var text = document.createTextNode(item.name)
+    if (owned){
+        newElement.classList.add('menu-item-mine')
+    }
+    newElement.classList.add('menu-item')
+    newElement.setAttribute('id', item.id)
+    newElement.appendChild(text) 
+    githubList.appendChild(newElement) 
+    githubList.setAttribute('style','display:block;')
+ 
+    document.getElementById(item.id).addEventListener('click', (e) => {
+        placeGitHubMolecule(e)
+    })
 }
 
 /**
