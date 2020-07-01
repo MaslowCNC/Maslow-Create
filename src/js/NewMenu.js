@@ -165,26 +165,34 @@ function showGitHubSearch(){
 * Runs when enter key is clicked and the input is focused to show results from search.
 */ 
 function searchMenu() {
+
     //We are searching on github
     let input = document.getElementById('menuInput').value
-
     var oldResults = githubList.getElementsByClassName('menu-item')
-    oldResults.length = 0
-   
-    console.log(githubList.getElementsByClassName('menu-item').length)
+    const old = oldResults.length
+    for (let i = 0; i < old; i++) {
+        githubList.removeChild(oldResults[i])
+        githubList.style.display = "none"
+    }
 
     GlobalVariables.gitHub.searchGithub(input,true).then(result => {     
         result.data.items.forEach(item => {
+            
             addToList(item,true)
         })
     })
     GlobalVariables.gitHub.searchGithub(input,false).then(result => {
-        result.data.items.forEach(item => {  
+        result.data.items.forEach(item => { 
+
             addToList(item,false)  
         })
     })
 }
-
+/**
+     * Runs when a search value is entered (after return)
+     * @param {object} item - What is being added to the list.
+     * @param {object} owned - Does the project belong to the currentUser.
+     */ 
 function addToList(item,owned){
     var newElement = document.createElement('LI')
     var text = document.createTextNode(item.name)
@@ -196,6 +204,7 @@ function addToList(item,owned){
     newElement.appendChild(text) 
     githubList.appendChild(newElement) 
     githubList.setAttribute('style','display:block;')
+
  
     document.getElementById(item.id).addEventListener('click', (e) => {
         placeGitHubMolecule(e)
