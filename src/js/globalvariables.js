@@ -124,7 +124,7 @@ class GlobalVariables{
          * A variable to save array to be copied
          * @type {array}
          */
-        this.atomsToCopy = []
+        this.atomsSelected = []
         /** 
          * The size (in mm) of segments to use for circles.
          * @type {number}
