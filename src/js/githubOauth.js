@@ -393,7 +393,7 @@ export default function GitHubModule(){
             project.appendChild(document.createElement("BR"))
             
             var shortProjectName
-            if(projectName.length > 15){
+            if(projectName.length > 13){
                 shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
             }
             else{
