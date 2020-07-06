@@ -732,7 +732,7 @@ export default function GitHubModule(){
      * Creates a new blank project.
      */
     this.createNewProject = function(){
-        
+
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn of auto saving
         }
@@ -913,6 +913,8 @@ export default function GitHubModule(){
                     })
                 })
             })
+
+            intervalTimer = setInterval(() => this.saveProject(), 120000)
         }
     }
     
@@ -1003,7 +1005,7 @@ export default function GitHubModule(){
      * Loads a project from github by name.
      */
     this.loadProject = async function(projectName){
-
+        
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
