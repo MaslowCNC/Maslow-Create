@@ -160,7 +160,7 @@ export default class Molecule extends Atom{
     copy(){
         this.nodesOnTheScreen.forEach(atom => {
             if(atom.selected){
-                GlobalVariables.atomsToCopy.push(atom.serialize())
+                GlobalVariables.atomsSelected.push(atom.serialize())
             }
         })
     }
@@ -372,7 +372,9 @@ export default class Molecule extends Atom{
         
         
         var readmeContent = ""
+        
         this.requestReadme().forEach(item => {
+            
             readmeContent = readmeContent + item + "\n\n\n"
         })
         
@@ -380,14 +382,16 @@ export default class Molecule extends Atom{
         
             list.appendChild(document.createElement('br'))
             list.appendChild(document.createElement('br'))
-            
-            var div = document.createElement('h2')
-            div.setAttribute('style','text-align:center;')
+
+            var div = document.createElement('h3')
+            div.setAttribute('style','float:right;')
+           
             list.appendChild(div)
-            var valueText = document.createTextNode('ReadMe')
+            var valueText = document.createTextNode(`- ReadMe`)
             div.appendChild(valueText)
             
             var x = document.createElement('HR')
+            x.setAttribute('style','width:100%;')
             list.appendChild(x)
             
             this.createMarkdownListItem(list,readmeContent)
@@ -413,7 +417,6 @@ export default class Molecule extends Atom{
      */
     requestReadme(){
         var generatedReadme = super.requestReadme()
-        generatedReadme.push('## ' + this.name)
         
         var sortableAtomsList = this.nodesOnTheScreen
         sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)})
