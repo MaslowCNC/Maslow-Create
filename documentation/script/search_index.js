@@ -240,6 +240,12 @@ window.esdocSearchIndex = [
     "variable"
   ],
   [
+    "canvas-template/src/js/newmenu.js~showgithubsearch",
+    "function/index.html#static-function-showGitHubSearch",
+    "<span>showGitHubSearch</span> <span class=\"search-result-import-path\">canvas-template/src/js/NewMenu.js</span>",
+    "function"
+  ],
+  [
     "src/.external-ecmascript.js~array",
     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
     "src/.external-ecmascript.js~Array",
@@ -828,9 +834,9 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/globalvariables.js~globalvariables#atomstocopy",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-atomsToCopy",
-    "src/js/globalvariables.js~GlobalVariables#atomsToCopy",
+    "src/js/globalvariables.js~globalvariables#atomsselected",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-atomsSelected",
+    "src/js/globalvariables.js~GlobalVariables#atomsSelected",
     "member"
   ],
   [
@@ -1797,6 +1803,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/geneticalgorithm.js~geneticalgorithm#constructor",
     "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-constructor-constructor",
     "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#draw",
+    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-method-draw",
+    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#draw",
     "method"
   ],
   [

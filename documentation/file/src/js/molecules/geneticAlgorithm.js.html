@@ -33,6 +33,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
@@ -75,6 +76,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/geneticAlgorithm.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom.js&apos;
+import GlobalVariables from &apos;../globalvariables&apos;
 
 /**
  * This class creates the Genetic Algorithm atom.
@@ -144,6 +146,58 @@ export default class GeneticAlgorithm extends Atom {
         this.setValues(values)
         
         this.updateValue()
+    }
+
+    /**
+     * Draw the code atom which has a code icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+         
+
+        const xInPixels = GlobalVariables.widthToPixels(this.x)
+        const yInPixels = GlobalVariables.heightToPixels(this.y)
+        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+      
+       
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x - this.radius/5), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.4, Math.PI * 2.7, false) 
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x + this.radius/5), 
+            GlobalVariables.heightToPixels(this.y ), 
+            GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.6, Math.PI * 2.3, true) 
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels )
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels )
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels - radiusInPixels/5 )
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels - radiusInPixels/5)
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#949294&apos;
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/5 )
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels + radiusInPixels/5)
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+
+
     }
     
     /**

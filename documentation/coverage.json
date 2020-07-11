@@ -1,7 +1,7 @@
 {
   "coverage": "98.06%",
-  "expectCount": 517,
-  "actualCount": 507,
+  "expectCount": 518,
+  "actualCount": 508,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -109,8 +109,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/geneticAlgorithm.js": {
-      "expectCount": 20,
-      "actualCount": 20,
+      "expectCount": 21,
+      "actualCount": 21,
       "undocumentLines": []
     },
     "src/js/molecules/githubmolecule.js": {

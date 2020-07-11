@@ -33,6 +33,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
@@ -267,15 +268,16 @@ export default class Atom {
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
 
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.textAlign = &apos;start&apos;
+        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.strokeStyle = this.strokeColor
+        GlobalVariables.c.lineWidth = 1
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
         if (this.showHover){
-            GlobalVariables.c.beginPath()
-            GlobalVariables.c.textAlign = &apos;start&apos;
-            GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)
-            GlobalVariables.c.fill()
-            GlobalVariables.c.strokeStyle = this.strokeColor
-            GlobalVariables.c.lineWidth = 1
-            GlobalVariables.c.stroke()
-            GlobalVariables.c.closePath()
            
             if (this.alertMessage.length &gt; 0){
                 this.color = &quot;red&quot;
@@ -562,11 +564,10 @@ export default class Atom {
         name2.textContent = this.name
         sideBar.appendChild(name2)
         name2.setAttribute(&apos;class&apos;,&apos;molecule_title&apos;)
-
+        
 
         //add the name as of project title 
         if (this.atomType == &apos;Molecule&apos; ){
-            
             let headerBar_title = document.querySelector(&apos;#headerBar_title&apos;)
             if(headerBar_title){
                 while (headerBar_title.firstChild) {
@@ -586,7 +587,6 @@ export default class Atom {
 
         
         return valueList
-
 
     }
 
@@ -851,7 +851,7 @@ export default class Atom {
         
         
         document.getElementById(thisID).addEventListener(&apos;focusout&apos;,() =&gt;{
-            var valueInBox = document.getElementById(thisID).textContent
+            var valueInBox = document.getElementById(thisID).textContent.trim()
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
             }

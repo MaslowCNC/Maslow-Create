@@ -33,6 +33,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
@@ -158,7 +159,7 @@ class GlobalVariables{
             rotate:             {creator: Rotate, atomType: &apos;Rotate&apos;, atomCategory: &apos;Actions&apos;},
             extrude:            {creator: Extrude, atomType: &apos;Extrude&apos;, atomCategory: &apos;Actions&apos;},
             translate:          {creator: Translate, atomType: &apos;Translate&apos;, atomCategory: &apos;Actions&apos;},
-            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: &apos;Genetic Algorithm&apos;, atomCategory: &apos;Actions&apos;},
+            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: &apos;GeneticAlgorithm&apos;, atomCategory: &apos;Actions&apos;},
             
             stl:                {creator: Stl, atomType: &apos;Stl&apos;, atomCategory: &apos;Import/Export&apos;},
             svg:                {creator: Svg, atomType: &apos;Svg&apos;, atomCategory: &apos;Import/Export&apos;},
@@ -200,7 +201,7 @@ class GlobalVariables{
          * A variable to save array to be copied
          * @type {array}
          */
-        this.atomsToCopy = []
+        this.atomsSelected = []
         /** 
          * The size (in mm) of segments to use for circles.
          * @type {number}

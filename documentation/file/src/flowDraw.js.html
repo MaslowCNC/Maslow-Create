@@ -33,6 +33,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
@@ -78,8 +79,7 @@
 import Molecule from &apos;./js/molecules/molecule.js&apos;
 import GitHubMolecule from &apos;./js/molecules/githubmolecule.js&apos;
 import Display from &apos;./js/display.js&apos;
-//import LocalMenu from &apos;./js/localmenu.js&apos;
-import {cmenu} from &apos;./js/NewMenu.js&apos;
+import {cmenu, showGitHubSearch} from &apos;./js/NewMenu.js&apos;
 
 
 GlobalVariables.display = new Display()
@@ -191,6 +191,7 @@ document.addEventListener(&apos;mouseup&apos;,(e)=&gt;{
 
     if(e.srcElement.tagName.toLowerCase() !== (&quot;textarea&quot;)
         &amp;&amp; e.srcElement.tagName.toLowerCase() !== (&quot;input&quot;)
+        &amp;&amp; e.srcElement.tagName.toLowerCase() !== (&quot;select&quot;)
         &amp;&amp;(!e.srcElement.isContentEditable)){
         //puts focus back into mainbody after clicking button
         document.activeElement.blur()
@@ -223,10 +224,10 @@ window.addEventListener(&apos;keydown&apos;, e =&gt; {
 
     if (document.activeElement.id == &quot;mainBody&quot;){
         if (e.key == &quot;Backspace&quot; || e.key == &quot;Delete&quot;) {
-            GlobalVariables.atomsToCopy = []
+            GlobalVariables.atomsSelected = []
             //Adds items to the  array that we will use to delete
             GlobalVariables.currentMolecule.copy()
-            GlobalVariables.atomsToCopy.forEach(item =&gt; {
+            GlobalVariables.atomsSelected.forEach(item =&gt; {
                 GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(nodeOnTheScreen =&gt; {
                     if(nodeOnTheScreen.uniqueID == item.uniqueID){
                         nodeOnTheScreen.deleteNode()
@@ -241,18 +242,21 @@ window.addEventListener(&apos;keydown&apos;, e =&gt; {
         */ 
         var shortCuts = {
             a: &quot;Assembly&quot;,
+            b: &quot;ShrinkWrap&quot;,//&gt;
             c: &quot;Copy&quot;,
             d: &quot;Difference&quot;,
-            i: &quot;Input&quot;,
-            m: &quot;Molecule&quot;,
-            y: &quot;Translate&quot;, //can&apos;t seem to prevent command t new tab behavior
             e: &quot;Extrude&quot;,
-            x: &quot;Equation&quot;,
-            z: &quot;Undo&quot;, //saving this letter 
+            g: &quot;GitHub&quot;, // Not working yet
+            i: &quot;Input&quot;,
+            j: &quot;Translate&quot;, 
+            k: &quot;Rectangle&quot;,
+            l: &quot;Circle&quot;,
+            m: &quot;Molecule&quot;,
             s: &quot;Save&quot;, 
             v: &quot;Paste&quot;,
-            j: &quot;Code&quot;, //is there a more natural code letter?
-            w: &quot;Shrinkwrap&quot;
+            x: &quot;Equation&quot;,
+            y: &quot;Code&quot;, //is there a more natural code letter? can&apos;t seem to prevent command t new tab behavior
+            z: &quot;Undo&quot; //saving this letter 
         }
 
         //Copy /paste listeners
@@ -260,25 +264,28 @@ window.addEventListener(&apos;keydown&apos;, e =&gt; {
             GlobalVariables.ctrlDown = true
         }  
 
-        if (GlobalVariables.ctrlDown &amp;&amp; shortCuts.hasOwnProperty(e.key)) {
+        if (GlobalVariables.ctrlDown &amp;&amp; shortCuts.hasOwnProperty([e.key])) {
             
             e.preventDefault()
-
+            //Copy &amp; Paste
             if (e.key == &quot;c&quot;) {
-                GlobalVariables.atomsToCopy = []
+                GlobalVariables.atomsSelected = []
                 GlobalVariables.currentMolecule.copy()
             }
             if (e.key == &quot;v&quot;) {
-                GlobalVariables.atomsToCopy.forEach(item =&gt; {
+                GlobalVariables.atomsSelected.forEach(item =&gt; {
                     let newAtomID = GlobalVariables.generateUniqueID()
                     item.uniqueID = newAtomID
                     GlobalVariables.currentMolecule.placeAtom(item, true)    
                 })   
             }
-       
+            //Save project
             if (e.key == &quot;s&quot;) {
-                e.preventDefault()
                 GlobalVariables.gitHub.saveProject()
+            }
+            //Opens menu to search for github molecule
+            if (e.key == &quot;g&quot;) {
+                showGitHubSearch()
             }
             
             else { 

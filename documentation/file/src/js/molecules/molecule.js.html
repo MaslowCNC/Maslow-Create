@@ -33,6 +33,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
@@ -236,7 +237,7 @@ export default class Molecule extends Atom{
     copy(){
         this.nodesOnTheScreen.forEach(atom =&gt; {
             if(atom.selected){
-                GlobalVariables.atomsToCopy.push(atom.serialize())
+                GlobalVariables.atomsSelected.push(atom.serialize())
             }
         })
     }
@@ -448,7 +449,9 @@ export default class Molecule extends Atom{
         
         
         var readmeContent = &quot;&quot;
+        
         this.requestReadme().forEach(item =&gt; {
+            
             readmeContent = readmeContent + item + &quot;\n\n\n&quot;
         })
         
@@ -456,14 +459,16 @@ export default class Molecule extends Atom{
         
             list.appendChild(document.createElement(&apos;br&apos;))
             list.appendChild(document.createElement(&apos;br&apos;))
-            
-            var div = document.createElement(&apos;h2&apos;)
-            div.setAttribute(&apos;style&apos;,&apos;text-align:center;&apos;)
+
+            var div = document.createElement(&apos;h3&apos;)
+            div.setAttribute(&apos;style&apos;,&apos;float:right;&apos;)
+           
             list.appendChild(div)
-            var valueText = document.createTextNode(&apos;ReadMe&apos;)
+            var valueText = document.createTextNode(`- ReadMe`)
             div.appendChild(valueText)
             
             var x = document.createElement(&apos;HR&apos;)
+            x.setAttribute(&apos;style&apos;,&apos;width:100%;&apos;)
             list.appendChild(x)
             
             this.createMarkdownListItem(list,readmeContent)
@@ -489,7 +494,6 @@ export default class Molecule extends Atom{
      */
     requestReadme(){
         var generatedReadme = super.requestReadme()
-        generatedReadme.push(&apos;## &apos; + this.name)
         
         var sortableAtomsList = this.nodesOnTheScreen
         sortableAtomsList.sort(function(a, b){return GlobalVariables.distBetweenPoints(a.x, 0, a.y, 0)-GlobalVariables.distBetweenPoints(b.x, 0, b.y, 0)})

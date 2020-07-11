@@ -33,6 +33,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
@@ -469,7 +470,7 @@ export default function GitHubModule(){
             project.appendChild(document.createElement(&quot;BR&quot;))
             
             var shortProjectName
-            if(projectName.length &gt; 15){
+            if(projectName.length &gt; 13){
                 shortProjectName = document.createTextNode(projectName.substr(0,9)+&quot;..&quot;)
             }
             else{
@@ -808,7 +809,7 @@ export default function GitHubModule(){
      * Creates a new blank project.
      */
     this.createNewProject = function(){
-        
+
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn of auto saving
         }
@@ -989,6 +990,8 @@ export default function GitHubModule(){
                     })
                 })
             })
+
+            intervalTimer = setInterval(() =&gt; this.saveProject(), 120000)
         }
     }
     
@@ -1079,7 +1082,7 @@ export default function GitHubModule(){
      * Loads a project from github by name.
      */
     this.loadProject = async function(projectName){
-
+        
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
