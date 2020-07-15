@@ -140,14 +140,9 @@ let githubList = document.getElementById('githubList')
  */ 
 function showGitHubSearch(){
     //remove old results everytime           
-    var oldResults = githubList.getElementsByClassName('menu-item')
     const menu = document.querySelector('#canvas_menu')
 
-    for (let i = 0; i < oldResults.length; i++) {
-        githubList.removeChild(oldResults[i])
-        githubList.style.display = "none"
-        //menu.style.borderRadius = '40px'
-    }
+    githubList.querySelectorAll('*').forEach(n => n.remove())
 
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
@@ -168,12 +163,8 @@ function searchMenu() {
 
     //We are searching on github
     let input = document.getElementById('menuInput').value
-    var oldResults = githubList.getElementsByClassName('menu-item')
-    const old = oldResults.length
-    for (let i = 0; i < old; i++) {
-        githubList.removeChild(oldResults[i])
-        githubList.style.display = "none"
-    }
+   
+    githubList.querySelectorAll('*').forEach(n => n.remove())
 
     GlobalVariables.gitHub.searchGithub(input,true).then(result => {     
         result.data.items.forEach(item => {
