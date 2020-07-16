@@ -255,5 +255,5 @@ function placeGitHubMolecule(ev){
     }, true)
 }
 
-export {cmenu}
+export {cmenu,showGitHubSearch}
  

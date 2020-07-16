@@ -433,7 +433,6 @@ animation-delay: 0s;
 }
 
 .newProject{
-    border: 2px solid white;
     position:relative;
     left:10px;
     width: 90%;
@@ -441,21 +440,20 @@ animation-delay: 0s;
   }
 
 .newProjectdiv{
-    position: relative;
-    padding: 5px;
+
     width: 100%;
     height: 100%;
-    box-sizing: border-box;
     display: flex;
     align-content: center;
     justify-content: space-around;
     background-color: white;
     flex-wrap: wrap;
+    border: 1px solid #efe7e7;
 
   }
   .newProjectdiv:hover, .browseDisplay:hover{
-    background-color: white;
-    border: 2px solid #444;
+    background-color: #e6e6ff;
+   
   }
 
 
@@ -494,20 +492,22 @@ animation-delay: 0s;
 }
 
 .project{
-    margin: 2px;
+    margin: 3px;
+    margin-bottom: 10px;
     width: 100px;
     height: 100px;
     display: inline-block;
     padding: 10px;
     font-size:13px;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 .browseDiv{
+
+    padding: 10px 0px;
     width: 400px;
     height: 100px;
     display: inline-flex;
-    padding: 10px;
     font-size: 13px;
     justify-content: flex-start;
 }

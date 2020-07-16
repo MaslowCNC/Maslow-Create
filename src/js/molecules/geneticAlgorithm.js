@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom.js'
+import GlobalVariables from '../globalvariables'
 
 /**
  * This class creates the Genetic Algorithm atom.
@@ -68,6 +69,58 @@ export default class GeneticAlgorithm extends Atom {
         this.setValues(values)
         
         this.updateValue()
+    }
+
+    /**
+     * Draw the code atom which has a code icon.
+     */ 
+    draw(){
+
+        super.draw() //Super call to draw the rest
+         
+
+        const xInPixels = GlobalVariables.widthToPixels(this.x)
+        const yInPixels = GlobalVariables.heightToPixels(this.y)
+        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)
+      
+       
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x - this.radius/5), 
+            GlobalVariables.heightToPixels(this.y), 
+            GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.4, Math.PI * 2.7, false) 
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x + this.radius/5), 
+            GlobalVariables.heightToPixels(this.y ), 
+            GlobalVariables.widthToPixels(this.radius/2), Math.PI *3.6, Math.PI * 2.3, true) 
+        GlobalVariables.c.stroke() 
+        GlobalVariables.c.closePath()  
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels )
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels )
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels - radiusInPixels/5 )
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels - radiusInPixels/5)
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = '#949294'
+        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/3, yInPixels + radiusInPixels/5 )
+        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/3, yInPixels + radiusInPixels/5)
+        GlobalVariables.c.stroke()
+        GlobalVariables.c.closePath()
+
+
+
     }
     
     /**
