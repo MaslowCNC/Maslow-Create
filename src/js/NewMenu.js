@@ -159,14 +159,14 @@ function showGitHubSearch(){
 /**
 * Runs when enter key is clicked and the input is focused to show results from search.
 */ 
-function searchMenu() {
+async function searchMenu() {
 
     //We are searching on github
     let input = document.getElementById('menuInput').value
    
     githubList.querySelectorAll('*').forEach(n => n.remove())
 
-    GlobalVariables.gitHub.searchGithub(input,true).then(result => {     
+    await GlobalVariables.gitHub.searchGithub(input,true).then(result => {     
         result.data.items.forEach(item => {
             
             addToList(item,true)
