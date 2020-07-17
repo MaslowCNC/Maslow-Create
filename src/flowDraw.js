@@ -2,8 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import Display from './js/display.js'
-//import LocalMenu from './js/localmenu.js'
-import {cmenu} from './js/NewMenu.js'
+import {cmenu, showGitHubSearch} from './js/NewMenu.js'
 
 
 GlobalVariables.display = new Display()
@@ -166,18 +165,21 @@ window.addEventListener('keydown', e => {
         */ 
         var shortCuts = {
             a: "Assembly",
+            b: "ShrinkWrap",//>
             c: "Copy",
             d: "Difference",
-            i: "Input",
-            m: "Molecule",
-            y: "Translate", //can't seem to prevent command t new tab behavior
             e: "Extrude",
-            x: "Equation",
-            z: "Undo", //saving this letter 
+            g: "GitHub", // Not working yet
+            i: "Input",
+            j: "Translate", 
+            k: "Rectangle",
+            l: "Circle",
+            m: "Molecule",
             s: "Save", 
             v: "Paste",
-            j: "Code", //is there a more natural code letter?
-            w: "Shrinkwrap"
+            x: "Equation",
+            y: "Code", //is there a more natural code letter? can't seem to prevent command t new tab behavior
+            z: "Undo" //saving this letter 
         }
 
         //Copy /paste listeners
@@ -185,10 +187,10 @@ window.addEventListener('keydown', e => {
             GlobalVariables.ctrlDown = true
         }  
 
-        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty(e.key)) {
+        if (GlobalVariables.ctrlDown && shortCuts.hasOwnProperty([e.key])) {
             
             e.preventDefault()
-
+            //Copy & Paste
             if (e.key == "c") {
                 GlobalVariables.atomsSelected = []
                 GlobalVariables.currentMolecule.copy()
@@ -200,10 +202,13 @@ window.addEventListener('keydown', e => {
                     GlobalVariables.currentMolecule.placeAtom(item, true)    
                 })   
             }
-       
+            //Save project
             if (e.key == "s") {
-                e.preventDefault()
                 GlobalVariables.gitHub.saveProject()
+            }
+            //Opens menu to search for github molecule
+            if (e.key == "g") {
+                showGitHubSearch()
             }
             
             else { 

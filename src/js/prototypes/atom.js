@@ -487,11 +487,10 @@ export default class Atom {
         name2.textContent = this.name
         sideBar.appendChild(name2)
         name2.setAttribute('class','molecule_title')
-
+        
 
         //add the name as of project title 
         if (this.atomType == 'Molecule' ){
-            
             let headerBar_title = document.querySelector('#headerBar_title')
             if(headerBar_title){
                 while (headerBar_title.firstChild) {
@@ -511,7 +510,6 @@ export default class Atom {
 
         
         return valueList
-
 
     }
 
@@ -776,7 +774,7 @@ export default class Atom {
         
         
         document.getElementById(thisID).addEventListener('focusout',() =>{
-            var valueInBox = document.getElementById(thisID).textContent
+            var valueInBox = document.getElementById(thisID).textContent.trim()
             if(resultShouldBeNumber){
                 valueInBox = GlobalVariables.limitedEvaluate(valueInBox)
             }

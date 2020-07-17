@@ -112,6 +112,11 @@
             width:150%;
             height:150%;
         } 
+    .GeneticAlgorithm{
+            background: url("./imgs/genetic.svg");
+            width:150%;
+            height:150%;
+        } 
 
     .Color{
             background: url("./imgs/Color.png");
