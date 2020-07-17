@@ -391,7 +391,9 @@ export default function GitHubModule(){
             
             projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(document.createElement("BR"))
-            
+            var textNode = document.createElement("div")
+            textNode.classList.add("project_text")
+
             var shortProjectName
             if(projectName.length > 13){
                 shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
@@ -399,7 +401,9 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
-            project.appendChild(shortProjectName) 
+            textNode.setAttribute("title",projectName)
+            textNode.appendChild(shortProjectName) 
+            project.appendChild(textNode) 
         }
         else{
             project.setAttribute("style", "display:flex; flex-direction:row; flex-wrap:wrap; width: 100%; border-bottom: 1px solid darkgrey;")
