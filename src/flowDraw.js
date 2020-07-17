@@ -213,10 +213,9 @@ window.addEventListener('keydown', e => {
                     x: 0.5,
                     y: 0.5,
                     parent: GlobalVariables.currentMolecule,
-                    name: `${shortCuts[e.key]}`,
                     atomType: `${shortCuts[e.key]}`,
                     uniqueID: GlobalVariables.generateUniqueID()
-                }, true, GlobalVariables.availableTypes)
+                }, true)
             }
             
         }
