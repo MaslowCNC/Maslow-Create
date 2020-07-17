@@ -460,11 +460,10 @@ body {
     display: none;
     max-height: 8rem;
     overflow-x: hidden;
-    background-color: #323232;
+    background-color: whitesmoke;
     color: #333;
     border: 1px solid #aaa;
     box-shadow: 2px 2px 2px #999;
-    border-radius: 50px;
     list-style: none;
     position: fixed;
     -webkit-touch-callout: none;
@@ -475,20 +474,21 @@ body {
     user-select: none;
     padding: 8px;
     transform: translate(-50%, -50%);
-    transition: opacity .5s ease, transform .3s ease;
+    transition: opacity .5s ease, transform .3s
 }
 
 .menu_search_canvas{
-    background-color: #323232E8;
+    background-color: #e0dcdce8;
+    border: none;
     margin: auto;
     text-align: center;
-    border-radius: 15px;
+    border-radius: 2px;
     height: 1.6rem;
 }
 
 .menu_search_canvas:focus{
-  background-color: white;
-  outline: none;
+    color: white;
+    outline: none;
 }
 
 .doc-title{
@@ -504,7 +504,8 @@ body {
 }
 
 .menu-item{
-    color: whitesmoke;
+    border-bottom:1px solid #e0dcdce8;
+    color: black;
     height: 1.5rem;
     line-height: 1rem;
     font-size: .8rem;
@@ -512,11 +513,16 @@ body {
     padding: 0 1rem;
     cursor: pointer;
 }
+.menu-item-mine{
+  background-color:#e6e6ff
+}
 
 .menu-item:hover,
-.menu-item:active{
+.menu-item:active,
+.menu-item-mine:hover{
     color: #000;
     font-weight: 500;
+    background-color: #e8e6e6e8;
 }
 
 .menu_list{

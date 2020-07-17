@@ -140,14 +140,10 @@ let githubList = document.getElementById('githubList')
  */ 
 function showGitHubSearch(){
     //remove old results everytime           
-    var oldResults = githubList.getElementsByClassName('menu-item')
     const menu = document.querySelector('#canvas_menu')
 
-    for (let i = 0; i < oldResults.length; i++) {
-        githubList.removeChild(oldResults[i])
-        githubList.style.display = "none"
-        menu.style.borderRadius = '50px'
-    }
+    githubList.querySelectorAll('*').forEach(n => n.remove())
+
     const containerX = parseInt(cmenu._container.style.left, 10)
     const containerY = parseInt(cmenu._container.style.top, 10)
     menu.style.display = 'block'
@@ -163,33 +159,47 @@ function showGitHubSearch(){
 /**
 * Runs when enter key is clicked and the input is focused to show results from search.
 */ 
-function searchMenu() {
+async function searchMenu() {
+
     //We are searching on github
     let input = document.getElementById('menuInput').value
+   
+    githubList.querySelectorAll('*').forEach(n => n.remove())
 
-    var oldResults = githubList.getElementsByClassName('menu-item')
-    for (let i = 0; i < oldResults.length; i++) {
-        githubList.removeChild(oldResults[i])
-    }
-    GlobalVariables.gitHub.searchGithub(input).then(result => {
+    await GlobalVariables.gitHub.searchGithub(input,true).then(result => {     
         result.data.items.forEach(item => {
-            var newElement = document.createElement('LI')
-            var text = document.createTextNode(item.name)
-            const menu = document.querySelector('#canvas_menu')
-            menu.style.borderRadius = '30px 30px 20px 20px'
-            newElement.setAttribute('class', 'menu-item')
-            newElement.setAttribute('id', item.id)
-            newElement.appendChild(text) 
-            githubList.appendChild(newElement) 
-            githubList.setAttribute('style','display:block;')
-
- 
-            document.getElementById(item.id).addEventListener('click', (e) => {
-                placeGitHubMolecule(e)
-            })
+            
+            addToList(item,true)
         })
     })
-    
+    GlobalVariables.gitHub.searchGithub(input,false).then(result => {
+        result.data.items.forEach(item => { 
+
+            addToList(item,false)  
+        })
+    })
+}
+/**
+     * Runs when a search value is entered (after return)
+     * @param {object} item - What is being added to the list.
+     * @param {object} owned - Does the project belong to the currentUser.
+     */ 
+function addToList(item,owned){
+    var newElement = document.createElement('LI')
+    var text = document.createTextNode(item.name)
+    if (owned){
+        newElement.classList.add('menu-item-mine')
+    }
+    newElement.classList.add('menu-item')
+    newElement.setAttribute('id', item.id)
+    newElement.appendChild(text) 
+    githubList.appendChild(newElement) 
+    githubList.setAttribute('style','display:block;')
+
+ 
+    document.getElementById(item.id).addEventListener('click', (e) => {
+        placeGitHubMolecule(e)
+    })
 }
 
 /**
