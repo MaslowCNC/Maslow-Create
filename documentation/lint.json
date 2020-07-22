@@ -161,35 +161,35 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 512,
+        "lineNumber": 513,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 513,
+        "lineNumber": 514,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 514,
+        "lineNumber": 515,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 515,
+        "lineNumber": 516,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 516,
+        "lineNumber": 517,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 517,
+        "lineNumber": 518,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 518,
+        "lineNumber": 519,
         "line": "     */\r"
       },
       {
-        "lineNumber": 519,
+        "lineNumber": 520,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],
@@ -209,23 +209,23 @@
     "filePath": "src/js/NewMenu.js",
     "lines": [
       {
-        "lineNumber": 194,
+        "lineNumber": 204,
         "line": "/**\r"
       },
       {
-        "lineNumber": 195,
+        "lineNumber": 205,
         "line": "     * Runs when a menu option is clicked to place a new atom from the local atoms list.\r"
       },
       {
-        "lineNumber": 196,
+        "lineNumber": 206,
         "line": "     * @param {object} ev - The event triggered by click event on a menu item.\r"
       },
       {
-        "lineNumber": 197,
+        "lineNumber": 207,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 198,
+        "lineNumber": 208,
         "line": "function placeNewNode(e){\r"
       }
     ],

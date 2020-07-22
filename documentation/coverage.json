@@ -1,7 +1,7 @@
 {
-  "coverage": "98.06%",
-  "expectCount": 518,
-  "actualCount": 508,
+  "coverage": "98.07%",
+  "expectCount": 519,
+  "actualCount": 509,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -192,8 +192,8 @@
       "undocumentLines": []
     },
     "src/js/NewMenu.js": {
-      "expectCount": 8,
-      "actualCount": 8,
+      "expectCount": 9,
+      "actualCount": 9,
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
