@@ -391,7 +391,7 @@ export default function GitHubModule(){
             
             projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(document.createElement("BR"))
-            
+
             var shortProjectName
             if(projectName.length > 13){
                 shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
@@ -399,6 +399,7 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
+            project.setAttribute("title",projectName)
             project.appendChild(shortProjectName) 
         }
         else{
@@ -530,7 +531,8 @@ export default function GitHubModule(){
      */
     this.shareOpenedProject = function(){
         alert("A page with a shareable url to this project will open in a new window. Share the link to that page with anyone you would like to share the project with.")
-            
+         
+
         octokit.repos.get({
             owner: currentUser,
             repo: currentRepoName
@@ -585,9 +587,19 @@ export default function GitHubModule(){
     /** 
      * Search github for projects which match a string.
      */
-    this.searchGithub = async (searchString) => {
+    this.searchGithub = async (searchString,owned) => {
+        //Load projects
+        var query
+
+        if(owned){
+            query = searchString + ' ' + 'user:' + currentUser + ' topic:maslowcreate'
+        }
+        else{
+            query = searchString + ' topic:maslowcreate -user:' + currentUser
+        }
+
         return await octokit.search.repos({
-            q: searchString + ' topic:maslowcreate',
+            q: query,
             sort: 'stars',
             per_page: 10,
             page: 1,
