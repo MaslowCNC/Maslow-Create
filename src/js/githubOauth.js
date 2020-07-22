@@ -391,7 +391,7 @@ export default function GitHubModule(){
             
             projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(document.createElement("BR"))
-            
+
             var shortProjectName
             if(projectName.length > 13){
                 shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
@@ -399,6 +399,7 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
+            project.setAttribute("title",projectName)
             project.appendChild(shortProjectName) 
         }
         else{
