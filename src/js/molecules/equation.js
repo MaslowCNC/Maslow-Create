@@ -104,7 +104,7 @@ export default class Equation extends Atom {
             if(this.inputs.every(x => x.ready)){
             //Substitute numbers into the string
                 var substitutedEquation = this.currentEquation
-                for (var variable in variables){
+                for (variable in variables){
                     for (var i= 0; i<this.inputs.length; i++){
                         if (this.inputs[i].name == variables[variable]) {
                             substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))
