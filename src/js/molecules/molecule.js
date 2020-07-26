@@ -238,13 +238,13 @@ export default class Molecule extends Atom{
         //Update the side bar to make it possible to change the molecule name
         
         var valueList = super.initializeSideBar() 
-        
-        this.createEditableValueListItem(valueList,this,'name','Name', false)
 
-        if(this.topLevel){
+        if(!this.topLevel){
+            this.createEditableValueListItem(valueList,this,'name','Name', false)
+        }
+        else if(this.topLevel){
             //If we are the top level molecule 
             this.createSegmentSlider(valueList)
-
         }
         
         //removes 3d view menu on background click
