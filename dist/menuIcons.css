@@ -7,6 +7,12 @@
             width:400%;
             height:400%;
         }
+
+    .Inputs{
+            background: url("./imgs/Input.png");
+            width:400%;
+            height:400%;
+        }
     .Shapes{
             background: url("./imgs/Shapes.png");
             width:150%;
@@ -27,7 +33,7 @@
             width:150%;
             height:150%;
         }
-    .Properties{
+    .Tags{
             background: url("./imgs/tag.png");
             width:150%;
             height:150%;
@@ -39,7 +45,7 @@
             height:150%;
         }
 
-     .Import-export{
+     .Export{
             background: url("./imgs/import.png");
             width:150%;
             height:150%;
