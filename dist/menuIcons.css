@@ -192,15 +192,15 @@
         } 
         
     .Add-BOM-Tag{
-            background: url("./imgs/Bom.png");
+            background: url("./imgs/bom.png");
             width:150%;
             height:150%;
         } 
         
     .Readme{
             background: url("./imgs/readme.png");
-            width:150%;
-            height:150%;
+            width:50%;
+            height:50%;
         } 
         
     .CutLayout{
