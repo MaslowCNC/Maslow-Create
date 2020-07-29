@@ -59,8 +59,8 @@ export default class Stl extends Atom {
     
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
-        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
-        GlobalVariables.c.fillText('STL', GlobalVariables.widthToPixels(this.x- this.radius/1.5), GlobalVariables.heightToPixels(this.y)+this.height/6)
+        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans`
+        GlobalVariables.c.fillText('Stl', GlobalVariables.widthToPixels(this.x- this.radius/1.5), GlobalVariables.heightToPixels(this.y)+this.height/6)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
         
