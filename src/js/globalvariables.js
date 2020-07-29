@@ -62,32 +62,33 @@ class GlobalVariables{
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shrinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
             
-            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Properties'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Properties'},
-            color:              {creator: Color, atomType: 'Color', atomCategory: 'Properties'},
-            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Properties'},
-            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Properties'},
-            cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Properties'},
-            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Properties'},
+            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Tags'},
+            color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},
+            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Tags'},
+            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Tags'},
+            cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Tags'},
+            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Tags'},
+
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
-            costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Shapes'},
+            costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Inputs'},
             circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},
             rectangle:          {creator: Rectangle, atomType: 'Rectangle', atomCategory: 'Shapes'},
             molecule:           {creator: Molecule, atomType: 'Molecule', atomCategory: 'Shapes'},
-            input:              {creator: Input, atomType: 'Input', atomCategory: 'Shapes'},
-            equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Shapes'},
-            code:               {creator: Code, atomType: 'Code', atomCategory: 'Shapes'},
+            input:              {creator: Input, atomType: 'Input', atomCategory: 'Inputs'},
+            equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Inputs'},
+            code:               {creator: Code, atomType: 'Code', atomCategory: 'Inputs'},
             
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
             
-            stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
-            svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
-            gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Import/Export'},
-            githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Import/Export'},
+            stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
+            svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
+            gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
+            githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
             output:             {creator: Output, atomType: 'Output'}
         }
         /** 
