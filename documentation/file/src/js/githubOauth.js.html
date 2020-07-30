@@ -410,6 +410,7 @@ export default function GitHubModule(){
             }).then(result =&gt; {
                 result.data.items.forEach(repo =&gt; {
                     const thumbnailPath = &quot;https://raw.githubusercontent.com/&quot;+repo.full_name+&quot;/master/project.svg?sanitize=true&quot;
+                    
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
                 
@@ -876,7 +877,16 @@ export default function GitHubModule(){
                         message: &quot;initialize README&quot;, 
                         content: content
                     }).then(() =&gt; {
-                        intervalTimer = setInterval(() =&gt; { this.saveProject() }, 1200000) //Save the project regularly
+                        octokit.repos.createFile({ // Create empty file for SVG string
+                            owner: currentUser,
+                            repo: currentRepoName,
+                            path: &quot;project.svg&quot;,
+                            message: &quot;SVG Picture&quot;, 
+                            content: &quot;&quot;
+                        }).then(()=&gt;{
+                            intervalTimer = setInterval(() =&gt; { this.saveProject() }, 1200000) //Save the project regularly
+                    
+                        })
                     })
                 })
             })
@@ -919,6 +929,7 @@ export default function GitHubModule(){
             }
             this.progressSave(0)
             var shape = null
+
             if(GlobalVariables.topLevelMolecule.value != null &amp;&amp; typeof GlobalVariables.topLevelMolecule.value != &apos;number&apos;){
                 shape = GlobalVariables.topLevelMolecule.value
             }else{
@@ -958,8 +969,6 @@ export default function GitHubModule(){
             threadCompute([shape], &quot;SVG Picture&quot;).then(contentSvg =&gt; {
                 this.progressSave(10)
                 
-                console.warn(&quot;Saving svg thumbnail is broken. Discarding: &quot; + contentSvg)
-                
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
                     
@@ -985,16 +994,19 @@ export default function GitHubModule(){
                     jsonRepOfProject.filetypeVersion = 1
                     jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
                     const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
-                    
+                   
+                    var decoder = new TextDecoder(&apos;utf8&apos;)
+                    var finalSVG = decoder.decode(contentSvg)
+
                     this.createCommit(octokit,{
                         owner: saveUser,
                         repo: saveRepoName,
                         base: &apos;master&apos;, /* optional: defaults to default branch */
                         changes: {
                             files: {
-                                //&apos;project.svg&apos;: contentSvg,
                                 &apos;BillOfMaterials.md&apos;: bomContent,
                                 &apos;README.md&apos;: readmeContent,
+                                &apos;project.svg&apos;: finalSVG,
                                 &apos;project.maslowcreate&apos;: projectContent
                             },
                             commit: &apos;Autosave&apos;

@@ -65,23 +65,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 181,
+        "lineNumber": 182,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 182,
+        "lineNumber": 183,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 183,
+        "lineNumber": 184,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 184,
+        "lineNumber": 185,
         "line": "    */\r"
       },
       {
-        "lineNumber": 185,
+        "lineNumber": 186,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -97,23 +97,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 189,
+        "lineNumber": 190,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 190,
+        "lineNumber": 191,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 191,
+        "lineNumber": 192,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 192,
+        "lineNumber": 193,
         "line": "    */\r"
       },
       {
-        "lineNumber": 193,
+        "lineNumber": 194,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -129,23 +129,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 198,
+        "lineNumber": 199,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 199,
+        "lineNumber": 200,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 200,
+        "lineNumber": 201,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 201,
+        "lineNumber": 202,
         "line": "    */\r"
       },
       {
-        "lineNumber": 202,
+        "lineNumber": 203,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
@@ -209,23 +209,23 @@
     "filePath": "src/js/NewMenu.js",
     "lines": [
       {
-        "lineNumber": 204,
+        "lineNumber": 209,
         "line": "/**\r"
       },
       {
-        "lineNumber": 205,
+        "lineNumber": 210,
         "line": "     * Runs when a menu option is clicked to place a new atom from the local atoms list.\r"
       },
       {
-        "lineNumber": 206,
+        "lineNumber": 211,
         "line": "     * @param {object} ev - The event triggered by click event on a menu item.\r"
       },
       {
-        "lineNumber": 207,
+        "lineNumber": 212,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 208,
+        "lineNumber": 213,
         "line": "function placeNewNode(e){\r"
       }
     ],
