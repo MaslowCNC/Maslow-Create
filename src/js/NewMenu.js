@@ -28,13 +28,18 @@ var cmenu = CMenu(ele)
             },
             {
                 title: '',
-                icon: 'Properties',
-                menus: makeArray('Properties')
+                icon: 'Inputs',
+                menus: makeArray('Inputs')        
             },
             {
                 title: '',
-                icon: 'Import-export',
-                menus: makeArray('Import/Export')
+                icon: 'Tags',
+                menus: makeArray('Tags')
+            },
+            {
+                title: '',
+                icon: 'Export',
+                menus: makeArray('Export')
                                 
             },
             {

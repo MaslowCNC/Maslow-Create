@@ -53,7 +53,7 @@ export default class Tag extends Atom{
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`
-        GlobalVariables.c.fillText('#', GlobalVariables.widthToPixels(this.x- this.radius/3), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fillText(String.fromCharCode(0x0023), GlobalVariables.widthToPixels(this.x- this.radius/3), GlobalVariables.heightToPixels(this.y)+this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }
