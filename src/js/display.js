@@ -728,7 +728,12 @@ export default class Display {
      * @param {object} threejsGeometry - A threejs geometry to write to the display. Generated from the worker thread.
      */ 
     updateDisplayData(threejsGeometry){
-        // Delete any previous dataset in the window.
+        
+        console.log("Update display data called")
+        console.log(threejsGeometry)
+        
+        
+        //Delete everything currently displayed
         for (const { mesh } of this.datasets) {
             this.scene.remove(mesh)
         }
@@ -736,47 +741,145 @@ export default class Display {
         // Build new datasets from the written data, and display them.
         this.datasets = []
 
-        //This walks through the geometry building a threejs geometry out of it
-        const walk = (geometry) => {
-            const { tags } = geometry
-            if (geometry.assembly) {
-                geometry.assembly.forEach(walk)
-            } else if (geometry.item) {
-                walk(geometry.item)
-            } else if (geometry.threejsSegments) {
-                const segments = geometry.threejsSegments
-                const dataset = {}
-                const threejsGeometry = new THREE.Geometry()
-                for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
-                    threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ))
+        //Walk the tree adding things to the display as they are found
+        const buildMeshes = ({threejsGeometry}) => {
+            if (threejsGeometry === undefined) {
+                return
+            }
+            const { tags } = threejsGeometry
+            switch (threejsGeometry.type) {
+            case 'assembly':
+            case 'item':
+            case 'plan':
+                break
+            case 'sketch':
+                break
+            case 'paths': {
+                let transparent = false
+                let opacity = 1
+                if (tags && tags.includes('path/Toolpath')) {
+                // Put toolpaths in the sketch layer.
+                    opacity = 0.5
+                    transparent = true
                 }
-                dataset.mesh = new THREE.LineSegments(threejsGeometry, this.buildMeshMaterial(tags))
-                this.scene.add(dataset.mesh)
-                this.datasets.push(dataset)
-            } else if (geometry.threejsSolid) {
-                const { positions, normals } = geometry.threejsSolid
+                const paths = threejsGeometry.threejsPaths
                 const dataset = {}
-                const threejsGeometry = new THREE.BufferGeometry()
-                threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-                threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-                dataset.mesh = new THREE.Mesh(threejsGeometry, this.buildMeshMaterial(tags))
+                const geometry = new THREE.BufferGeometry()
+                const material = new THREE.LineBasicMaterial({
+                    color: 0xffffff,
+                    vertexColors: THREE.VertexColors,
+                    transparent,
+                    opacity,
+                })
+                const color = new THREE.Color(this.setColor(tags, {}, [0, 0, 0]).color)
+                const colors = []
+                const positions = []
+                const index = []
+                for (const path of paths) {
+                    const entry = { start: Math.floor(positions.length / 3), length: 0 }
+                    let last = path.length - 1
+                    for (let nth = 0; nth < path.length; last = nth, nth += 1) {
+                        const start = path[last]
+                        const end = path[nth]
+                        if (start === null || end === null) continue
+                        const [aX = 0, aY = 0, aZ = 0] = start
+                        const [bX = 0, bY = 0, bZ = 0] = end
+                        colors.push(
+                            color.r,
+                            color.g,
+                            color.b,
+                            opacity,
+                            color.r,
+                            color.g,
+                            color.b,
+                            opacity
+                        )
+                        positions.push(aX, aY, aZ, bX, bY, bZ)
+                        entry.length += 2
+                    }
+                    if (entry.length > 0) {
+                        index.push(entry)
+                    }
+                }
+                geometry.setAttribute(
+                    'position',
+                    new THREE.Float32BufferAttribute(positions, 3)
+                )
+                // geometry.setAttribute('color', new Float32BufferAttribute(colors, 4));
+                dataset.mesh = new THREE.LineSegments(geometry, material)
+                // dataset.mesh.layers.set(layer)
+                // dataset.name = toName(threejsGeometry)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
-            } else if (geometry.threejsSurface) {
-                const { positions, normals } = geometry.threejsSurface
+                break
+            }
+            case 'points': {
+                const points = threejsGeometry.threejsPoints
                 const dataset = {}
-                const threejsGeometry = new THREE.BufferGeometry()
-                threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-                threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-                dataset.mesh = new THREE.Mesh(threejsGeometry, this.buildMeshMaterial(tags))
+                const geometry = new THREE.Geometry()
+                const material = new THREE.PointsMaterial({
+                    color: this.setColor(tags, {}, [0, 0, 0]).color,
+                    size: 0.5,
+                })
+                for (const [aX = 0, aY = 0, aZ = 0] of points) {
+                // geometry.colors.push(color, color);
+                    geometry.vertices.push(new THREE.Vector3(aX, aY, aZ))
+                }
+                dataset.mesh = new THREE.Points(geometry, material)
+                // dataset.mesh.layers.set(layer)
+                // dataset.name = toName(threejsGeometry)
                 this.scene.add(dataset.mesh)
                 this.datasets.push(dataset)
-            } else if (geometry.threejsPlan){
-                walk(geometry.threejsVisualization)
-                walk(geometry.threejsContent)
+                break
+            }
+            case 'solid': {
+                const { positions, normals } = threejsGeometry.threejsSolid
+                const dataset = {}
+                const geometry = new THREE.BufferGeometry()
+                geometry.addAttribute(
+                    'position',
+                    new THREE.Float32BufferAttribute(positions, 3)
+                )
+                geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
+                // applyBoxUV(geometry)
+                const material = this.buildMeshMaterial(tags)
+                dataset.mesh = new THREE.Mesh(geometry, material)
+                // dataset.mesh.layers.set(layer)
+                // dataset.name = toName(threejsGeometry)
+                this.scene.add(dataset.mesh)
+                this.datasets.push(dataset)
+                break
+            }
+            case 'z0Surface':
+            case 'surface': {
+                const { positions, normals } = threejsGeometry.threejsSurface
+                const dataset = {}
+                const geometry = new THREE.BufferGeometry()
+                geometry.addAttribute(
+                    'position',
+                    new THREE.Float32BufferAttribute(positions, 3)
+                )
+                geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
+                // applyBoxUV(geometry)
+                const material = this.buildMeshMaterial(tags)
+                dataset.mesh = new THREE.Mesh(geometry, material)
+                // dataset.mesh.layers.set(layer)
+                //dataset.name = toName(threejsGeometry)
+                this.scene.add(dataset.mesh)
+                this.datasets.push(dataset)
+                break
+            }
+            default:
+                throw Error(`Unexpected geometry: ${threejsGeometry.type}`)
             }
         }
-        walk(threejsGeometry)
+        
+        //Call the walk function
+        if (threejsGeometry.content) {
+            for (const content of threejsGeometry.content) {
+                buildMeshes({threejsGeometry: content})
+            }
+        }
     }
     
     /**
@@ -792,7 +895,7 @@ export default class Display {
     /**
      * Runs regularly to update the display.
      */ 
-    render() {  
+    render() {
 
         this.renderer.render( this.scene, this.camera )
     }
