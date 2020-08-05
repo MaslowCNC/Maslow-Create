@@ -729,8 +729,7 @@ export default class Display {
      */ 
     updateDisplayData(threejsGeometry){
         
-        console.log("Update display data called")
-        console.log(threejsGeometry)
+        console.log("Update display data called\n\n\n\nn")
         
         
         //Delete everything currently displayed
@@ -742,7 +741,8 @@ export default class Display {
         this.datasets = []
 
         //Walk the tree adding things to the display as they are found
-        const buildMeshes = ({threejsGeometry}) => {
+        const buildMeshes = (threejsGeometry) => {
+            
             if (threejsGeometry === undefined) {
                 return
             }
@@ -872,12 +872,20 @@ export default class Display {
             default:
                 throw Error(`Unexpected geometry: ${threejsGeometry.type}`)
             }
+        
+            //Call the walk function recursively as needed
+            if (threejsGeometry.content) {
+                for (const content of threejsGeometry.content) {
+                    buildMeshes(content)
+                }
+            }
+        
         }
         
-        //Call the walk function
+        //Call a first time
         if (threejsGeometry.content) {
             for (const content of threejsGeometry.content) {
-                buildMeshes({threejsGeometry: content})
+                buildMeshes(content)
             }
         }
     }

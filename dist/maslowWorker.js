@@ -29442,9 +29442,14 @@ return d[d.length-1];};return ", funcName].join("");
             const Arc = (...args) => ofRadius(...args);
             Arc.ofRadius = ofRadius;
 
+            const isDefined = (value) => value !== undefined;
+
             const Assembly = (...shapes) =>
               Shape.fromGeometry(
-                taggedAssembly({}, ...shapes.map((shape) => shape.toGeometry()))
+                taggedAssembly(
+                  {},
+                  ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+                )
               );
 
             const unitPolygon = (sides = 16) =>
@@ -29939,13 +29944,13 @@ return d[d.length-1];};return ", funcName].join("");
 
             const Intersection = (first, ...rest) => first.clip(...rest);
 
-            const isDefined = (value) => value;
+            const isDefined$1 = (value) => value;
 
             const Layers = (...shapes) =>
               Shape.fromGeometry(
                 taggedLayers(
                   {},
-                  ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+                  ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
                 )
               );
 
@@ -50980,7 +50985,10 @@ return d[d.length-1];};return ", funcName].join("");
               const size = [pageWidth, pageLength];
               const r = (v) => Math.floor(v * 100) / 100;
               const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
-              const visualization = Square(pageWidth, pageLength)
+              const visualization = Square(
+                Math.max(pageWidth, margin),
+                Math.max(pageLength, margin)
+              )
                 .outline()
                 .with(
                   Hershey(max$1(pageWidth, pageLength) * labelScale)(title).move(
@@ -54886,6 +54894,9 @@ return d[d.length-1];};return ", funcName].join("");
             /** Checks for equality, ignoring z. */
             const equalsXY = ([aX, aY], [bX, bY]) => equals([aX, aY, 0], [bX, bY, 0]);
 
+            /** Checks for equality, ignoring x and y */
+            const equalsZ = ([, , aZ], [, , bZ]) => equals([0, 0, aZ], [0, 0, bZ]);
+
             // https://shapeokoenthusiasts.gitbook.io/shapeoko-cnc-a-to-z/feeds-and-speeds-basics
             // For a 3.175 mm tool
             // soft plastic 0.05 ~ 0.13, soft wood 0.025 ~ 0.065, hard wood 0.013 ~ 0.025.
@@ -54977,8 +54988,12 @@ return d[d.length-1];};return ", funcName].join("");
               const toolOn = () => (rpm > 0 ? emit(`M3 S${rpm.toFixed(3)}`) : emit(`M5`));
               const toolOff = () => emit('M5');
 
-              const jump = (x, y) => {
+              const raise = () => {
                 rapid(_, _, jumpZ); // up
+              };
+
+              const jump = (x, y) => {
+                raise();
                 rapid(x, y, jumpZ); // across
                 rapid(x, y, topZ); // down
               };
@@ -54993,9 +55008,9 @@ return d[d.length-1];};return ", funcName].join("");
               const useMetric = () => emit('G21');
 
               useMetric();
+              raise();
               toolOn();
 
-              // FIX: This is incorrect -- it should move the geometry down so that the top of the geometry is at the initial cutDepth.
               for (const { paths } of getNonVoidPaths(toKeptGeometry(geometry))) {
                 for (const path of paths) {
                   for (const [start, end] of getEdges(path)) {
@@ -55007,6 +55022,8 @@ return d[d.length-1];};return ", funcName].join("");
                       // This avoids raising before plunging.
                       // FIX: This whole approach is essentially wrong, and needs to consider if the tool can plunge or not.
                       jump(...start);
+                    }
+                    if (!equalsZ(start, position)) {
                       cut(...start); // cut down
                     }
                     cut(...end); // cut across
@@ -57502,6 +57519,36 @@ return d[d.length-1];};return ", funcName].join("");
                 if (sweep !== 'no') {
                   sweeps.push(
                     paths
+                      .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
+                      .op((s) => (sweep === 'show' ? s : s.Void()))
+                  );
+                }
+              }
+              return Assembly(...design, ...sweeps);
+            };
+
+            const LineRouter = (
+              depth = 10,
+              { toolDiameter = 3.175, cutDepth = 0.3, toolLength = 17, sweep = 'no' } = {}
+            ) => (shape, x = 0, y = 0, z = 0) => {
+              const cuts = Math.ceil(depth / Math.min(cutDepth, depth));
+              const actualCutDepth = depth / cuts;
+              const design = [];
+              const sweeps = [];
+              for (const { paths } of getNonVoidPaths(
+                shape.bench(-x, -y, -z).toDisjointGeometry()
+              )) {
+                // FIX: This assumes a plunging tool.
+                const toolpaths = Shape.fromGeometry(
+                  taggedPaths({ tags: ['path/Toolpath'] }, paths)
+                );
+                for (let cut = 0; cut < cuts; cut++) {
+                  design.push(toolpaths.moveZ((cut + 1) * -actualCutDepth));
+                }
+                if (sweep !== 'no') {
+                  // Generally a v bit.
+                  sweeps.push(
+                    Shape.fromGeometry(taggedPaths({}, paths))
                       .sweep(Cylinder.ofDiameter(toolDiameter, depth).moveZ(depth / -2))
                       .op((s) => (sweep === 'show' ? s : s.Void()))
                   );
@@ -64337,12 +64384,21 @@ return d[d.length-1];};return ", funcName].join("");
                           );
                           break;
                         case 'ImportSpecifier':
-                          out.push(
-                            parse$2(
-                              `const { ${imported.name} } = await importModule('${source.value}');`,
-                              parseOptions
-                            )
-                          );
+                          if (local.name !== imported.name) {
+                            out.push(
+                              parse$2(
+                                `const { ${imported.name}: ${local.name} } = await importModule('${source.value}');`,
+                                parseOptions
+                              )
+                            );
+                          } else {
+                            out.push(
+                              parse$2(
+                                `const { ${imported.name} } = await importModule('${source.value}');`,
+                                parseOptions
+                              )
+                            );
+                          }
                           break;
                       }
                     }
@@ -64375,9 +64431,9 @@ return d[d.length-1];};return ", funcName].join("");
                 if (path) {
                   const nthPath = `${path}_${nth++}`;
                   addPending(write(nthPath, entry));
-                  emit$1({ geometry: { width, height, position, path: nthPath } });
+                  emit$1({ view: { width, height, position, path: nthPath } });
                 } else {
-                  emit$1({ geometry: { width, height, position, geometry: entry } });
+                  emit$1({ view: { width, height, position, geometry: entry } });
                 }
               }
               return shape;
@@ -64537,6 +64593,7 @@ return d[d.length-1];};return ", funcName].join("");
               BenchSaw: BenchSaw,
               DrillPress: DrillPress,
               HoleRouter: HoleRouter,
+              LineRouter: LineRouter,
               ProfileRouter: ProfileRouter,
               Arc: Arc,
               Assembly: Assembly,
@@ -64685,6 +64742,7 @@ return d[d.length-1];};return ", funcName].join("");
                         BenchSaw: BenchSaw,
                         DrillPress: DrillPress,
                         HoleRouter: HoleRouter,
+                        LineRouter: LineRouter,
                         ProfileRouter: ProfileRouter,
                         Arc: Arc,
                         Assembly: Assembly,
@@ -64994,14 +65052,10 @@ return d[d.length-1];};return ", funcName].join("");
                 switch (key) {
                   case 'assemble':
                     var inputs = values[0].map(Shape.fromGeometry);
-                    return Assembly(...inputs).toKeptGeometry();
+                    return Assembly(...inputs).toDisjointGeometry();
                   case 'bounding box':
                     return Shape.fromGeometry(values[0]).measureBoundingBox();
                   case 'circle':
-                    console.log("Called circle" );
-                    console.log(api$1);
-                    console.log(Circle.ofDiameter(values[0], {sides: values[1],}));
-                    console.log(Circle.ofDiameter(values[0], {sides: values[1],}).toKeptGeometry());
                     return Circle.ofDiameter(values[0], {
                       sides: values[1],
                     }).toKeptGeometry(); // {center: true, sides: values[1] }).toKeptGeometry();
@@ -65071,7 +65125,7 @@ return d[d.length-1];};return ", funcName].join("");
                     values = values.map(Shape.fromGeometry);
                     return Hull(...values).toKeptGeometry();
                   case 'intersection':
-                    return shape(0).cut(shape(1)).toDisjointGeometry();
+                    return Shape.fromGeometry(values[0]).cut(shape(1)).toDisjointGeometry();
                   case 'rectangle':
                     return Square(values[0], values[1]).toKeptGeometry();
                   case 'Over Cut Inside Corners':
@@ -65205,19 +65259,19 @@ return d[d.length-1];};return ", funcName].join("");
                     );
             */
                   case 'size':
-                    return shape(0).size();
+                    return Shape.fromGeometry(values[0]).size();
                   case 'tag':
-                    return shape(0).as(values[1]).toDisjointGeometry();
+                    return Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
                   case 'specify':
-                    return shape(0).Item(values[1]).DisjointGeometry();
+                    return Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
                   case 'translate':
-                    return shape(0)
+                    return Shape.fromGeometry(values[0])
                       .move(values[1], values[2], values[3])
-                      .DisjointGeometry();
+                      .toDisjointGeometry();
                   case 'getBOM':
                     return Shape.fromGeometry(values[0]).bom();
                   case 'union':
-                    return shape(0).add(shape(1)).toDisjointGeometry();
+                    return Shape.fromGeometry(values[0]).add(shape(1)).toDisjointGeometry();
                   default:
                     return -1;
                 }
