@@ -729,9 +729,6 @@ export default class Display {
      */ 
     updateDisplayData(threejsGeometry){
         
-        console.log("Update display data called\n\n\n\nn")
-        
-        
         //Delete everything currently displayed
         for (const { mesh } of this.datasets) {
             this.scene.remove(mesh)
