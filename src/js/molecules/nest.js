@@ -5,7 +5,7 @@ import saveAs from '../lib/FileSaver.js'
 /**
  * This class creates the svg atom which lets you download a .svg file.
  */
-export default class Svg extends Atom {
+export default class Nest extends Atom {
     
     /**
      * The constructor function.
@@ -19,12 +19,12 @@ export default class Svg extends Atom {
          * This atom's name
          * @type {string}
          */
-        this.name = 'Svg'
+        this.name = 'Nest'
         /**
          * This atom's type
          * @type {string}
          */
-        this.atomType = 'Svg'
+        this.atomType = 'Nest'
         
         /**
          * This atom's value. Contains the value of the input geometry, not the stl
@@ -41,7 +41,7 @@ export default class Svg extends Atom {
         
         //Add a download svg button to the top level atoms side bar in run mode
         GlobalVariables.topLevelMolecule.runModeSidebarAdditions.push(list => {
-            this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
+            this.createButton(list, this, "Download Nested SVG", ()=>{this.downloadSvg()})
         })
         
         this.setValues(values)
@@ -83,9 +83,43 @@ export default class Svg extends Atom {
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
+        this.createButton(list, this, "Start Nest", ()=>{this.startNest()})
+
+        //remember to disable until svg is nested 
         this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
     }
     
+    startNest(){
+
+        //turn into svg
+        const values = [this.findIOValue('geometry')]
+        
+        const computeValue = async (values, key) => {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
+        }
+        var unestedSVG;
+
+        var weNeed = computeValue(values, "svg").then(result => {
+            if (result != -1 ){
+                const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
+                //saveAs(blob, GlobalVariables.topLevelMolecule.name+'.svg')
+                var decoder = new TextDecoder('utf8')
+                unestedSVG = decoder.decode(result)
+                
+                return unestedSVG
+            }else{
+                this.setAlert("Unable to compute")
+            }
+        }).then(result =>{ 
+
+            console.log(result)
+        })
+    }
     /**
      * The function which is called when you press the download button.
      */ 
