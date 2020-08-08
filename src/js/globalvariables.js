@@ -13,6 +13,7 @@ import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
 import Stl              from './molecules/stl.js'
 import Svg              from './molecules/svg.js'
+import Nest              from './molecules/nest.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
@@ -86,6 +87,7 @@ class GlobalVariables{
             
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Import/Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Import/Export'},
+            nest:                {creator: Nest, atomType: 'Nest', atomCategory: 'Import/Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Import/Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Import/Export'},
             output:             {creator: Output, atomType: 'Output'}
