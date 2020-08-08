@@ -238,13 +238,13 @@ export default class Molecule extends Atom{
         //Update the side bar to make it possible to change the molecule name
         
         var valueList = super.initializeSideBar() 
-        
-        this.createEditableValueListItem(valueList,this,'name','Name', false)
 
-        if(this.topLevel){
+        if(!this.topLevel){
+            this.createEditableValueListItem(valueList,this,'name','Name', false)
+        }
+        else if(this.topLevel){
             //If we are the top level molecule 
             this.createSegmentSlider(valueList)
-
         }
         
         //removes 3d view menu on background click
@@ -475,6 +475,7 @@ export default class Molecule extends Atom{
             json.allAtoms.forEach(atom => { //Place the atoms
                 const promise = this.placeAtom(atom, false)
                 promiseArray.push(promise)
+                this.setValues([]) //Call set values again with an empty list to trigger loading of IO values from memory
             })
         }
         
@@ -594,6 +595,7 @@ export default class Molecule extends Atom{
             console.warn(err)
             return Promise.resolve()
         }
+
     }
     
     /**

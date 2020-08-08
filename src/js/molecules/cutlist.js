@@ -55,7 +55,7 @@ export default class CutList extends Atom{
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`
-        GlobalVariables.c.fillText(' - - -', GlobalVariables.widthToPixels(this.x- this.radius), GlobalVariables.heightToPixels(this.y)+this.height/3)
+        GlobalVariables.c.fillText(String.fromCharCode(0x2702)+' -', GlobalVariables.widthToPixels(this.x- this.radius/1.5), GlobalVariables.heightToPixels(this.y)+this.height/2)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }
