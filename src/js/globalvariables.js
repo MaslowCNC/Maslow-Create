@@ -61,14 +61,14 @@ class GlobalVariables{
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shrinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
-            
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Tags'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Tags'},
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Tags'},
             cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Tags'},
             CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Tags'},
+
 
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
