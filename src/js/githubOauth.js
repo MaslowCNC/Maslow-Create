@@ -333,6 +333,7 @@ export default function GitHubModule(){
             }).then(result => {
                 result.data.items.forEach(repo => {
                     const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
+                    
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
                 
@@ -391,7 +392,7 @@ export default function GitHubModule(){
             
             projectPicture.setAttribute("style", "width: 100%; height: 80%;")
             project.appendChild(document.createElement("BR"))
-            
+
             var shortProjectName
             if(projectName.length > 13){
                 shortProjectName = document.createTextNode(projectName.substr(0,9)+"..")
@@ -399,6 +400,7 @@ export default function GitHubModule(){
             else{
                 shortProjectName = document.createTextNode(projectName)
             }
+            project.setAttribute("title",projectName)
             project.appendChild(shortProjectName) 
         }
         else{
@@ -798,7 +800,16 @@ export default function GitHubModule(){
                         message: "initialize README", 
                         content: content
                     }).then(() => {
-                        intervalTimer = setInterval(() => { this.saveProject() }, 1200000) //Save the project regularly
+                        octokit.repos.createFile({ // Create empty file for SVG string
+                            owner: currentUser,
+                            repo: currentRepoName,
+                            path: "project.svg",
+                            message: "SVG Picture", 
+                            content: ""
+                        }).then(()=>{
+                            intervalTimer = setInterval(() => { this.saveProject() }, 1200000) //Save the project regularly
+                    
+                        })
                     })
                 })
             })
@@ -841,6 +852,7 @@ export default function GitHubModule(){
             }
             this.progressSave(0)
             var shape = null
+
             if(GlobalVariables.topLevelMolecule.value != null && typeof GlobalVariables.topLevelMolecule.value != 'number'){
                 shape = GlobalVariables.topLevelMolecule.value
             }else{
@@ -880,8 +892,6 @@ export default function GitHubModule(){
             threadCompute([shape], "SVG Picture").then(contentSvg => {
                 this.progressSave(10)
                 
-                console.warn("Saving svg thumbnail is broken. Discarding: " + contentSvg)
-                
                 var bomContent = bomHeader
                 extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
                     
@@ -907,16 +917,19 @@ export default function GitHubModule(){
                     jsonRepOfProject.filetypeVersion = 1
                     jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
                     const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
-                    
+                   
+                    var decoder = new TextDecoder('utf8')
+                    var finalSVG = decoder.decode(contentSvg)
+
                     this.createCommit(octokit,{
                         owner: saveUser,
                         repo: saveRepoName,
                         base: 'master', /* optional: defaults to default branch */
                         changes: {
                             files: {
-                                //'project.svg': contentSvg,
                                 'BillOfMaterials.md': bomContent,
                                 'README.md': readmeContent,
+                                'project.svg': finalSVG,
                                 'project.maslowcreate': projectContent
                             },
                             commit: 'Autosave'
