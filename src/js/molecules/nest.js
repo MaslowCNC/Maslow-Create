@@ -299,6 +299,7 @@ export default class Nest extends Atom {
      */ 
     downloadSvg(){
         var bins = document.getElementById('bins');
+        console.log(bins)
                 
                 if(bins.children.length == 0){
                     message.innerHTML = 'No SVG to export';
@@ -326,12 +327,15 @@ export default class Nest extends Atom {
                 
                 for(var i=0; i<bins.children.length; i++){
                     var b = bins.children[i];
+                    console.log(b)
                     var group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    group.setAttribute('fill', 'none');
+                    group.setAttribute('stroke-width', '.1');
+                    group.setAttribute('fill', 'none');
                     group.setAttribute('transform', 'translate(0 '+binHeight*1.1*i+')');
                     for(var j=0; j<b.children.length; j++){
                         group.appendChild(b.children[j].cloneNode(true));
                     }
-                    
                     svg.appendChild(group);
                 }
                 
