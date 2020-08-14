@@ -176,24 +176,20 @@ export default class Molecule extends Atom{
     /**
      * Grab values from the inputs and push them out to the input atoms.
      */ 
-    updateValue(){
+    updateValue(targetName){
+        
         this.output.waitOnComingInformation()
         if(this.inputs.every(x => x.ready)){
-            super.updateValue()
             
             this.clearAlert()
             
-            //Grab values from the inputs and push them out to the input objects
-            this.inputs.forEach(moleculeInput => {
-                this.nodesOnTheScreen.forEach(atom => {
-                    if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){//Don't update the input if it hasn't changed
-                            //Sets to true processing variable??
-                            this.processing = true
-                            atom.updateValue()
-                        }
-                    }
-                })
+            //Tell the correct input to update
+            this.nodesOnTheScreen.forEach(atom => { //Scan all the input atoms
+                if(atom.atomType == 'Input' && atom.name == targetName){  //When there is a match
+                    console.log("Match found")
+                    this.processing = true  //Sets to true processing variable??
+                    atom.updateValue() //Tell that input to update it's value
+                }
             })
         }
     }
@@ -223,6 +219,13 @@ export default class Molecule extends Atom{
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
+        }
+        else{
+            this.inputs.forEach(attachmentPoint => {
+                if(attachmentPoint.connectors.length = 0){
+                    attachmentPoint.setValue(attachmentPoint.getValue) //Trigger attachment points with nothing connected to them to begin propogation
+                }
+            })
         }
         
         // Run for every atom in this molecule
@@ -566,7 +569,7 @@ export default class Molecule extends Atom{
                             atom.copyInputsFromParent()
                         }
                         
-                        //Make begin propogation from an atom when it is placed
+                        //Make begin propagation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
                                 atom.beginPropogation()

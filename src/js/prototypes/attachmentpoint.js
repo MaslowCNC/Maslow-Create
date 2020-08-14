@@ -146,11 +146,11 @@ export default class AttachmentPoint {
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             /**
-             * The x cordinate of the attachment point.
+             * The x coordinate of the attachment point.
              */
             xInPixels = parentXInPixels - parentRadiusInPixels
             /**
-             * The y cordinate of the attachment point.
+             * The y coordinate of the attachment point.
              */
             yInPixels = parentYInPixels
         }    
@@ -500,7 +500,7 @@ export default class AttachmentPoint {
         }
         //if this is an input
         else{   //update the code block to reflect the new values
-            this.parentMolecule.updateValue()
+            this.parentMolecule.updateValue(this.name)
         }
     }
     
