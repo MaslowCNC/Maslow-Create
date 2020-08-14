@@ -47,6 +47,9 @@ export default class Nest extends Atom {
         this.height
         
         this.addIO('input', 'geometry', this, 'geometry', null)
+        this.addIO('input', 'Distance', this, 'number', 0.3)
+        this.addIO('input', 'Curve Tolerance', this, 'number', 0.3)
+        
         
         //Add a download svg button to the top level atoms side bar in run mode
         GlobalVariables.topLevelMolecule.runModeSidebarAdditions.push(list => {
@@ -61,7 +64,13 @@ export default class Nest extends Atom {
         this.iterations = 0
         this.isworking = false
     }
-
+     /**
+     * Add a place to edit the readme text to the sidebar*/ 
+    updateSidebar(){
+        console.log("this is totally running")
+        var valueList = super.updateSidebar() //call the super function
+        this.createEditableValueListItem(valueList,this,'readmeText', 'Notes', false)
+    }
     /**
      * Draw the svg atom which has a SVG icon.
      */ 
@@ -81,7 +90,6 @@ export default class Nest extends Atom {
         GlobalVariables.c.closePath()
         
     }
-    
     
     /**
      * Set the value to be the input geometry, then call super updateValue()

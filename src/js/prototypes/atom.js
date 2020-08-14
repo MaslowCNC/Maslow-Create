@@ -447,7 +447,7 @@ export default class Atom {
      */ 
     updateSidebar(){
         //updates the sidebar to display information about this node
-        
+        console.log("super update")
         var valueList = this.initializeSideBar()
         
         //Add options to set all of the inputs
