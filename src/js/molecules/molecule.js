@@ -178,20 +178,16 @@ export default class Molecule extends Atom{
      */ 
     updateValue(targetName){
         
-        this.output.waitOnComingInformation()
-        if(this.inputs.every(x => x.ready)){
-            
-            this.clearAlert()
-            
-            //Tell the correct input to update
-            this.nodesOnTheScreen.forEach(atom => { //Scan all the input atoms
-                if(atom.atomType == 'Input' && atom.name == targetName){  //When there is a match
-                    console.log("Match found")
-                    this.processing = true  //Sets to true processing variable??
-                    atom.updateValue() //Tell that input to update it's value
-                }
-            })
-        }
+        //Molecules are fully transparent so we don't wait for all of the inputs to begin processing the things inside
+        
+        //Tell the correct input to update
+        this.nodesOnTheScreen.forEach(atom => { //Scan all the input atoms
+            if(atom.atomType == 'Input' && atom.name == targetName){  //When there is a match
+                console.log("Passing information to: " + targetName)
+                this.processing = true  //Sets to true processing variable??
+                atom.updateValue() //Tell that input to update it's value
+            }
+        })
     }
     
     /**
@@ -222,8 +218,8 @@ export default class Molecule extends Atom{
         }
         else{
             this.inputs.forEach(attachmentPoint => {
-                if(attachmentPoint.connectors.length = 0){
-                    attachmentPoint.setValue(attachmentPoint.getValue) //Trigger attachment points with nothing connected to them to begin propogation
+                if(attachmentPoint.connectors.length == 0){
+                    attachmentPoint.setValue(attachmentPoint.getValue()) //Trigger attachment points with nothing connected to them to begin propagation
                 }
             })
         }

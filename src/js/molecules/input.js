@@ -155,16 +155,10 @@ export default class Input extends Atom {
     }
     
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
+     * Propagation does not begin from inputs. They will be called by the attachment point of the parent molecule if it has no connectors
      */ 
     beginPropogation(){
-        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
-            if(input.name == this.name){        //If we have found the matching input
-               if(input.connectors.length == 0){
-                   this.updateValue()
-               }
-            }
-        })
+        
     }
     
     /**
