@@ -55,6 +55,7 @@ export default class AddBOMTag extends Atom{
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
+            super.updateValue()
             try{
                 const values = [this.findIOValue('geometry'), JSON.stringify(this.BOMitem)]
                 this.basicThreadValueProcessing(values, "specify")

@@ -179,6 +179,7 @@ export default class Molecule extends Atom{
     updateValue(){
         this.output.waitOnComingInformation()
         if(this.inputs.every(x => x.ready)){
+            super.updateValue()
             
             this.clearAlert()
             
@@ -476,6 +477,7 @@ export default class Molecule extends Atom{
                 const promise = this.placeAtom(atom, false)
                 promiseArray.push(promise)
                 this.setValues([]) //Call set values again with an empty list to trigger loading of IO values from memory
+                GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad + 1 //Indicate that one more atom needs to be loaded
             })
         }
         

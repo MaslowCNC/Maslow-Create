@@ -52,6 +52,7 @@ export default class Circle extends Atom {
      * Super class the default update value function. This function computes the number of points to use for the circle and then calls the worker thread to create the circle.
      */ 
     updateValue(){
+        super.updateValue()
         try{
             const circumference  = 3.14*this.findIOValue('diameter')
             const numberOfSegments = Math.min(Math.max(parseInt( circumference / GlobalVariables.circleSegmentSize ),5), 100)

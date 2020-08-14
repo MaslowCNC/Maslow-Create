@@ -66,6 +66,7 @@ export default class ExtractTag extends Atom{
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
+            super.updateValue()
             try{
                 const values = [this.findIOValue('geometry'), this.findIOValue('tag')]
                 this.basicThreadValueProcessing(values, "extractTag")

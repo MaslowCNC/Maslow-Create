@@ -53,6 +53,7 @@ export default class Rectangle extends Atom {
      * Create a new rectangle in a worker thread.
      */ 
     updateValue(){
+        super.updateValue()
         try{
             const values = [this.findIOValue('x length'),this.findIOValue('y length')]
             this.basicThreadValueProcessing(values, "rectangle")

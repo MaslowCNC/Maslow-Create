@@ -64,6 +64,7 @@ export default class Gcode extends Atom {
      * Generate a layered outline of the part where the tool will cut
      */ 
     updateValue(){
+        super.updateValue()
         try{
             const values = [this.findIOValue('geometry'), this.findIOValue('tool size'), this.findIOValue('passes'), this.findIOValue('speed'), this.findIOValue('tabs'), this.findIOValue('safe height')]
             this.basicThreadValueProcessing(values, "stackedOutline")

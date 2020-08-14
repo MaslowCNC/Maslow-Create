@@ -158,6 +158,7 @@ export default class Input extends Atom {
      * Grabs the new value from the parent molecule's input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. 
      */ 
     updateValue(){
+        super.updateValue()
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
                 this.value = input.getValue()

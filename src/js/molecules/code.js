@@ -55,6 +55,7 @@ export default class Code extends Atom {
      * Grab the code as a text string and execute it. 
      */ 
     updateValue(){
+        super.updateValue()
         try{
             this.parseInputs()
             

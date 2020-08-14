@@ -66,7 +66,7 @@ export default class Intersection extends Atom {
      * Grab the input geometries and pass them to a worker thread for computation.
      */ 
     updateValue(){
-        
+        super.updateValue()
         try{
             const values = [this.findIOValue('geometry1'), this.findIOValue('geometry2')]
             

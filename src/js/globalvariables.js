@@ -112,6 +112,11 @@ class GlobalVariables{
          */
         this.gitHub = new GitHubModule()
         /** 
+         * A counter used during the loading process to keep track of how many atoms are still to be loaded.
+         * @type {integer}
+         */
+        this.numberOfAtomsToLoad = 0
+        /** 
          * A flag to indicate if the project is a fork.
          * @type {boolean}
          */

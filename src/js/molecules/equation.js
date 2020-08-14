@@ -43,8 +43,8 @@ export default class Equation extends Atom {
         this.currentEquation = "x + y"
         
         this.setValues(values)
-        this.updateValue()
-        this.setValues(values) //Set values again to load input values which were saved
+        // this.updateValue()
+        // this.setValues(values) //Set values again to load input values which were saved
         
         
     }
@@ -102,7 +102,9 @@ export default class Equation extends Atom {
             }
             
             if(this.inputs.every(x => x.ready)){
-            //Substitute numbers into the string
+                
+                super.updateValue()
+                //Substitute numbers into the string
                 var substitutedEquation = this.currentEquation
                 for (variable in variables){
                     for (var i= 0; i<this.inputs.length; i++){

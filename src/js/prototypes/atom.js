@@ -592,7 +592,10 @@ export default class Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        
+        GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
+        console.log("Still to load: " + GlobalVariables.numberOfAtomsToLoad)
+        console.log(this.uniqueID)
+        console.log(this.atomType)
     }
     
     /**
