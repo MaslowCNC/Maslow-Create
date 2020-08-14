@@ -255,7 +255,6 @@ export default class AttachmentPoint {
         let yInPixels = GlobalVariables.heightToPixels(this.y)
 
         if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){
-            console.log(this.value)
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
                 var connector = new Connector({
                     parentMolecule: this.parentMolecule, 

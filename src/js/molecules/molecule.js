@@ -204,6 +204,14 @@ export default class Molecule extends Atom{
         }
     }
     
+    unlockFreeInputs(){
+        super.unlockFreeInputs()
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            atom.unlockFreeInputs()
+        })
+    }
+    
     /**
      * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
      */ 
@@ -489,6 +497,7 @@ export default class Molecule extends Atom{
             
             if(this.topLevel){
                 this.backgroundClick()
+                this.unlockFreeInputs()
                 this.beginPropogation()
             }
         })

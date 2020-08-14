@@ -102,7 +102,6 @@ export default class Equation extends Atom {
      * Evaluate the equation adding and removing inputs as needed
      */ 
     updateValue(name){
-        console.log("Equation called by name: " + name)
         try{
             
             this.addAndRemoveInputs()
@@ -128,7 +127,6 @@ export default class Equation extends Atom {
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
-                console.log("which seems to have worked to generate " + this.value)
             }
         }catch(err){
             console.warn(err)

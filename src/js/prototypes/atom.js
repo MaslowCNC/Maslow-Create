@@ -676,17 +676,19 @@ export default class Atom {
         }
     }
     
-    /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
-     */ 
-    beginPropogation(){
+    unlockFreeInputs(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){
                 input.ready = true
             }
         })
-        
+    }
+    
+    /**
+     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
+     */ 
+    beginPropogation(){
         //If anything is connected to this it shouldn't be a starting point
         var go = true
         this.inputs.forEach(input => {
@@ -696,6 +698,7 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.updateValue()
+            console.log("begining propogation from " + this.atomType)
         }
     }
     
