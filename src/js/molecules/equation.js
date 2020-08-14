@@ -43,8 +43,8 @@ export default class Equation extends Atom {
         this.currentEquation = "x + y"
         
         this.setValues(values)
-        // this.updateValue()
-        // this.setValues(values) //Set values again to load input values which were saved
+        this.updateValue()
+        this.setValues(values) //Set values again to load input values which were saved
         
         
     }

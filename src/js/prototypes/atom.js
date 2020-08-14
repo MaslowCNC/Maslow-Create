@@ -593,9 +593,8 @@ export default class Atom {
      */ 
     updateValue(){
         GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
-        console.log("Still to load: " + GlobalVariables.numberOfAtomsToLoad)
-        console.log(this.uniqueID)
-        console.log(this.atomType)
+        // console.log("Still to load: " + GlobalVariables.numberOfAtomsToLoad)
+        console.log(this.uniqueID + " " + this.atomType + " " + GlobalVariables.numberOfAtomsToLoad)
     }
     
     /**
