@@ -263,7 +263,6 @@ export default class AttachmentPoint {
                     atomType: 'Connector',
                     isMoving: true
                 })
-                this.connectors.push(connector)
             }
             
             if(this.type == 'input'){ //connectors can only be selected by clicking on an input

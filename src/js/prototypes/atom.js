@@ -695,7 +695,6 @@ export default class Atom {
             }
         })
         if(go){     //Then we update the value
-            console.log("Beginning propagation from: " + this.atomType)
             this.updateValue()
         }
     }

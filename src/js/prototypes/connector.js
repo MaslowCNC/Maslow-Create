@@ -62,7 +62,9 @@ export default class Connector {
         
         
         this.attachmentPoint1.connectors.push(this)   //Give input and output references to the connector
-        this.attachmentPoint2.connectors.push(this)
+        if(this.attachmentPoint2 != null){
+            this.attachmentPoint2.connectors.push(this)
+        }
     }
     
     /**
@@ -150,11 +152,13 @@ export default class Connector {
      */ 
     deleteSelf(){
         //Remove this connector from the output it is attached to
-        this.attachmentPoint1.deleteConnector(this) 
+        this.attachmentPoint1.deleteConnector(this)
         
         //Free up the input to which this was attached
-        this.attachmentPoint2.deleteConnector(this)
-        this.attachmentPoint2.setDefault()
+        if(this.attachmentPoint2 != null){
+            this.attachmentPoint2.deleteConnector(this)
+            this.attachmentPoint2.setDefault()
+        }
     }
     
     /**
