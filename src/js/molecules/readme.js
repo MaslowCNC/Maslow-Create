@@ -50,7 +50,6 @@ export default class Readme extends Atom{
     /**
      * Add a place to edit the readme text to the sidebar*/ 
     updateSidebar(){
-        console.log("this is totally running")
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,'readmeText', 'Notes', false)
     }
