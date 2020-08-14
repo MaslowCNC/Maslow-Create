@@ -1083,7 +1083,6 @@ export default function GitHubModule(){
             }
         })
         
-        intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
     }
     
     this.convertFromOldFormat = function(json){
@@ -1119,6 +1118,13 @@ export default function GitHubModule(){
         }
         
         return projectObject
+    }
+    
+    /** 
+     * Begins the automatic process of saving the project
+     */
+    this.beginAutosave = function(){
+        intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
     }
     
     /** 
