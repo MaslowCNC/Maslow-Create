@@ -64,11 +64,10 @@ export default class CutList extends Atom{
      * Add a tag to the input geometry. The substance is not changed.
      */ 
     updateValue(){
-        super.updateValue()
+        this.decreaseToProcessCountByOne()
         try{
             const values = [this.findIOValue('geometry'), "cutList"]
             this.basicThreadValueProcessing(values, "specify")
         }catch(err){this.setAlert(err)}
-        super.updateValue()
     }
 }

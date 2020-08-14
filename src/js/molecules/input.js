@@ -168,7 +168,7 @@ export default class Input extends Atom {
         
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
-                super.updateValue()
+                this.decreaseToProcessCountByOne()
                 
                 this.value = input.getValue()
                 

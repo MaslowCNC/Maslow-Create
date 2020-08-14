@@ -496,6 +496,9 @@ export default class Molecule extends Atom{
             }
             
             if(this.topLevel){
+                
+                GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
+                
                 this.backgroundClick()
                 this.unlockFreeInputs()
                 this.beginPropogation()

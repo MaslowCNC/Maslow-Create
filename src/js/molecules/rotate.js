@@ -57,7 +57,7 @@ export default class Rotate extends Atom {
      * Pass the input shape to a worker thread to compute the rotation
      */ 
     updateValue(){
-        super.updateValue()
+        this.decreaseToProcessCountByOne()
         try{
             const values = [this.findIOValue('geometry'), this.findIOValue('x-axis degrees'), this.findIOValue('y-axis degrees'), this.findIOValue('z-axis degrees')]
             this.basicThreadValueProcessing(values, "rotate")

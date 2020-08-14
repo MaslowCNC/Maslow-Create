@@ -64,7 +64,7 @@ export default class Translate extends Atom{
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
-            super.updateValue()
+            this.decreaseToProcessCountByOne()
             try{
                 const values = [this.findIOValue('geometry'), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
                 

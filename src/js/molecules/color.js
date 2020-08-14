@@ -80,7 +80,7 @@ export default class Color extends Atom {
      * Applies a color tag to the object in a worker thread.
      */ 
     updateValue(){
-        super.updateValue()
+        this.decreaseToProcessCountByOne()
         try{
             const values = [this.findIOValue('geometry'), this.colorOptions[this.selectedColorIndex]]
             this.basicThreadValueProcessing(values, "color")

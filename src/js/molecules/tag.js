@@ -61,11 +61,10 @@ export default class Tag extends Atom{
      * Add a tag to the input geometry. The substance is not changed.
      */ 
     updateValue(){
-        super.updateValue()
+        this.decreaseToProcessCountByOne()
         try{
             const values = [this.findIOValue('geometry'), this.findIOValue('tag')]
             this.basicThreadValueProcessing(values, "tag")
         }catch(err){this.setAlert(err)}
-        super.updateValue()
     }
 }

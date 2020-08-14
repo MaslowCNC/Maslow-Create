@@ -127,7 +127,7 @@ export default class GeneticAlgorithm extends Atom {
      * Generate a layered outline of the part where the tool will cut
      */ 
     updateValue(){
-        super.updateValue()
+        this.decreaseToProcessCountByOne()
         if(this.evolutionInProcess){
             this.updateSidebar()
             /**

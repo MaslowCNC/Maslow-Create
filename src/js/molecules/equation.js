@@ -108,7 +108,7 @@ export default class Equation extends Atom {
             
             if(this.inputs.every(x => x.ready)){
                 
-                super.updateValue()
+                this.decreaseToProcessCountByOne()
                 //Substitute numbers into the string
                 var substitutedEquation = this.currentEquation
                 

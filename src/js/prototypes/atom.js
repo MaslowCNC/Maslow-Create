@@ -114,8 +114,6 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
-        
-        this.timesCalled = 0
 
         for(var key in values) {
             /** 
@@ -593,16 +591,12 @@ export default class Atom {
     /**
      * Set's the output value and shows the atom output on the 3D view.
      */ 
-    updateValue(){
+    decreaseToProcessCountByOne(){
         GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
         
-        this.timesCalled = this.timesCalled +1 
+        const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
         
-        // console.log("Called " + this.timesCalled + " times")
-        
-        // if(this.timesCalled > 1){
-            // console.log(this.uniqueID + " " + this.atomType + " " + GlobalVariables.numberOfAtomsToLoad)
-        // }
+        console.log("Percent loaded: " + percentLoaded)
     }
     
     /**
