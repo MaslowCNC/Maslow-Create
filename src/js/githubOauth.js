@@ -1030,6 +1030,8 @@ export default function GitHubModule(){
      */
     this.loadProject = async function(projectName){
         
+        GlobalVariables.startTime = new Date().getTime();
+        
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
@@ -1064,8 +1066,6 @@ export default function GitHubModule(){
                 GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
             }
             
-            intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
-            
             if(rawFile.filetypeVersion == 1){
                 GlobalVariables.topLevelMolecule.deserialize(rawFile)
             }
@@ -1082,6 +1082,8 @@ export default function GitHubModule(){
                 document.getElementById("pull_top").style.display = "none"
             }
         })
+        
+        intervalTimer = setInterval(() => this.saveProject(), 120000) //Save the project regularly
     }
     
     this.convertFromOldFormat = function(json){
