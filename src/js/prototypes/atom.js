@@ -596,7 +596,7 @@ export default class Atom {
         
         const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
         
-        console.log("Percent loaded: " + percentLoaded)
+        GlobalVariables.gitHub.progressSave(percentLoaded, false)
     }
     
     /**
@@ -692,7 +692,6 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.updateValue()
-            console.log("begining propogation from " + this.atomType)
         }
     }
     
