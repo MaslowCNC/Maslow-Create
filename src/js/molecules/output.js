@@ -65,10 +65,10 @@ export default class Output extends Atom {
             this.parent.processing = false
             
             if(this.parent.topLevel){
-                const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000;
+                const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000
                 console.warn("Loading finished in " + timeToLoad + " seconds")
                 
-                GlobalVariables.gitHub.beginAutosave();
+                GlobalVariables.gitHub.beginAutosave()
             }
             
             //Remove all the information stored in github molecules with no inputs after they have been computed to save ram

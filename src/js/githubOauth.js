@@ -1030,7 +1030,7 @@ export default function GitHubModule(){
      */
     this.loadProject = async function(projectName){
         
-        GlobalVariables.startTime = new Date().getTime();
+        GlobalVariables.startTime = new Date().getTime()
         
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
