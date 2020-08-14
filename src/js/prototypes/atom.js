@@ -114,6 +114,8 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
+        
+        this.timesCalled = 0
 
         for(var key in values) {
             /** 
@@ -593,8 +595,14 @@ export default class Atom {
      */ 
     updateValue(){
         GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
-        // console.log("Still to load: " + GlobalVariables.numberOfAtomsToLoad)
-        console.log(this.uniqueID + " " + this.atomType + " " + GlobalVariables.numberOfAtomsToLoad)
+        
+        this.timesCalled = this.timesCalled +1 
+        
+        // console.log("Called " + this.timesCalled + " times")
+        
+        // if(this.timesCalled > 1){
+            // console.log(this.uniqueID + " " + this.atomType + " " + GlobalVariables.numberOfAtomsToLoad)
+        // }
     }
     
     /**
@@ -668,7 +676,6 @@ export default class Atom {
         }
     }
     
-    
     /**
      * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
      */ 
@@ -680,14 +687,15 @@ export default class Atom {
             }
         })
         
-        //If the inputs are all ready
+        //If anything is connected to this it shouldn't be a starting point
         var go = true
         this.inputs.forEach(input => {
-            if(!input.ready){
+            if(input.connectors.length > 0){
                 go = false
             }
         })
         if(go){     //Then we update the value
+            console.log("Beginning propagation from: " + this.atomType)
             this.updateValue()
         }
     }

@@ -208,14 +208,12 @@ export default class Molecule extends Atom{
      * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
      */ 
     beginPropogation(){
-        //Run for this molecule
-        super.beginPropogation()
         
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
         }
-        else{
+        else{  //Otherwise trigger inputs with nothing attached
             this.inputs.forEach(attachmentPoint => {
                 if(attachmentPoint.connectors.length == 0){
                     attachmentPoint.setValue(attachmentPoint.getValue()) //Trigger attachment points with nothing connected to them to begin propagation
@@ -475,11 +473,12 @@ export default class Molecule extends Atom{
                 const promise = this.placeAtom(atom, false)
                 promiseArray.push(promise)
                 this.setValues([]) //Call set values again with an empty list to trigger loading of IO values from memory
-                GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad + 1 //Indicate that one more atom needs to be loaded
             })
         }
         
         return Promise.all(promiseArray).then( ()=> { //Once all the atoms are placed we can finish
+            
+            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
             
             //Place the connectors
             if(json.allConnectors){
@@ -488,7 +487,6 @@ export default class Molecule extends Atom{
                 })
             }
             
-            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
             if(this.topLevel){
                 this.backgroundClick()
                 this.beginPropogation()
@@ -520,6 +518,8 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, unlock){
         
+        GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad + 1 //Indicate that one more atom needs to be loaded
+        
         try{
             var promise = null
             
@@ -539,6 +539,11 @@ export default class Molecule extends Atom{
                         promise = atom.deserialize(newAtomObj)
                     }
                     
+                    //If this is a github molecule load it from the web
+                    if(atom.atomType == 'GitHubMolecule'){
+                        promise = atom.loadProjectByID(atom.projectID)
+                    }
+                    
                     //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
                     if(atom.atomType == 'Output'){
                         //Check for existing outputs
@@ -547,11 +552,6 @@ export default class Molecule extends Atom{
                                 atom.deleteOutputAtom() //Remove them
                             }
                         })
-                    }
-                    
-                    //If this is a github molecule load it from the web
-                    if(atom.atomType == 'GitHubMolecule'){
-                        promise = atom.loadProjectByID(atom.projectID)
                     }
                     
                     //Add the atom to the list to display
@@ -626,8 +626,6 @@ export default class Molecule extends Atom{
                 attachmentPoint1: outputAttachmentPoint,
                 attachmentPoint2: inputAttachmentPoint,
             })
-            connector.attachmentPoint1.connectors.push(connector)   //Give input and output references to the connector (this should probably happen in the connector constructor)
-            connector.attachmentPoint2.connectors.push(connector)
         }
         else{
             console.warn("Unable to place connector")

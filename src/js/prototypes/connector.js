@@ -59,6 +59,10 @@ export default class Connector {
          * @type {number}
          */
         this.startY = this.attachmentPoint1.parentMolecule.y
+        
+        
+        this.attachmentPoint1.connectors.push(this)   //Give input and output references to the connector
+        this.attachmentPoint2.connectors.push(this)
     }
     
     /**
