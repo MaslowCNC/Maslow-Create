@@ -101,7 +101,7 @@ export default class Equation extends Atom {
     /**
      * Evaluate the equation adding and removing inputs as needed
      */ 
-    updateValue(name){
+    updateValue(){
         try{
             
             this.addAndRemoveInputs()

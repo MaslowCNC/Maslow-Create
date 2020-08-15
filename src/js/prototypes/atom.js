@@ -596,9 +596,14 @@ export default class Atom {
         
         const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
         
-        console.log(this.atomType + " " + GlobalVariables.numberOfAtomsToLoad)
-        
         GlobalVariables.gitHub.progressSave(percentLoaded, false)
+    }
+    
+    /**
+     * Token update value function to give each atom one by default
+     */ 
+    updateValue(){
+        
     }
     
     /**

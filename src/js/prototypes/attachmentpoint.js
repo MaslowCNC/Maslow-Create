@@ -256,7 +256,7 @@ export default class AttachmentPoint {
 
         if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
-                var connector = new Connector({
+                new Connector({
                     parentMolecule: this.parentMolecule, 
                     attachmentPoint1: this,
                     atomType: 'Connector',

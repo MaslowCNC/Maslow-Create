@@ -530,7 +530,6 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, unlock){
         
-        console.log("Placing: " + newAtomObj.atomType)
         GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad + 1 //Indicate that one more atom needs to be loaded
         
         try{
@@ -635,7 +634,7 @@ export default class Molecule extends Atom{
         })
         
         if(outputAttachmentPoint && inputAttachmentPoint){             //If we have found the output and input
-            var connector = new Connector({
+            new Connector({
                 atomType: 'Connector',
                 attachmentPoint1: outputAttachmentPoint,
                 attachmentPoint2: inputAttachmentPoint,
