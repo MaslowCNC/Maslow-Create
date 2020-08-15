@@ -929,7 +929,7 @@ export default class Atom {
         var button = document.createElement('button')
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute('class', ' browseButton')
-        button.setAttribute('id', buttonText + "-button")
+        button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)
         valueTextDiv.setAttribute('class', 'sidebar-subitem')

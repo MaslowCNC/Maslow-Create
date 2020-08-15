@@ -80,6 +80,10 @@
   padding: 1px;
 }
 
+.disabled{
+  opacity: 0.2;
+}
+
 #top_button_wrap{
   position: fixed;
   right: 0;

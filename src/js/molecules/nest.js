@@ -88,7 +88,7 @@ export default class Nest extends Atom {
             const values = [this.findIOValue('geometry')]
             this.basicThreadValueProcessing(values, "outline")
         }catch(err){this.setAlert(err)}
-        //Saves new config values for nesting
+        //Saves new config values for nesting (Stops any nesting in progress)
         this.setConfig()
 
     } 
@@ -103,7 +103,10 @@ export default class Nest extends Atom {
         this.createButton(list, this, "Start Nest", ()=>{this.svgToNest()})
         //remember to disable until svg is nested 
         this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
-        
+
+        var svgButton = document.getElementById("DownloadSVG-button")
+        svgButton.disabled = true
+        svgButton.classList.add("disabled")        
     }
 
     /**
@@ -260,6 +263,10 @@ export default class Nest extends Atom {
             svg.removeAttribute('style')
         }
         this.isworking = true
+
+        var svgButton = document.getElementById("DownloadSVG-button")
+        svgButton.disabled = false
+        svgButton.classList.remove("disabled") 
     }
      
     /**
