@@ -94,33 +94,34 @@ export default class Nest extends Atom {
         try{
             const values = [this.findIOValue('geometry')]
             this.basicThreadValueProcessing(values, "outline")
-            this.setConfig()
         }catch(err){this.setAlert(err)}
+        //Saves new config values for nesting
+        this.setConfig()
 
     } 
 
     /**
      * Update values for config text. Called when the readme text has been edited.
      */ 
-    setConfig(list) {
+    setConfig() {
                 // config = [distance, curve tolerance,rotations, population size, mutation rate, use holes, concave]
-                console.log(list)
                 const configKeys = ["spacing","curveTolerance"]
                 var c = {"useholes":false,"exploreConcave":false,"rotations":4,"mutationRate":10,"populationSize":10}; 
                 for(var i=0; i<configKeys.length; i++){
                     var key = configKeys[i]
                         c[key] = this.findIOValue(key)
                     }
-
-                if (list !== undefined){
-                        for(var i=0; i<list.length; i++){
-                       if(list[i].getAttribute('type') == 'checkbox'){
-                           var key = list[i]
-                           c[key] = inputs[i].checked;
-                       }
+                var check1 = document.getElementById("Part in Part")
+                if(check1 !== null){
+                    if (check1.checked){
+                        c[check1] = true
+                        console.log(c[check1])
+                    }
+                    else{
+                        c[check1] = false
+                         console.log(c[check1])
                     }
                 }
-                console.log(c)
                 
                 
                 window.SvgNest.config(c);
@@ -141,13 +142,11 @@ export default class Nest extends Atom {
     updateSidebar(){
         const list = super.updateSidebar()
 
-        this.createCheckbox(list,"Part in Part", false, ()=>{this.setConfig(list)})
+        this.createCheckbox(list,"Part in Part", false, ()=>{this.setConfig()})
         this.createButton(list, this, "Start Nest", ()=>{this.svgToNest()})
         //remember to disable until svg is nested 
         this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
-        
-
-        
+        console.log(list)
     }
     
     svgToNest(){

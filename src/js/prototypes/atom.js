@@ -955,7 +955,7 @@ export default class Atom {
         var gridCheck = document.createElement('input')
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
-        gridCheck.setAttribute('id', 'gridCheck')
+        gridCheck.setAttribute('id', text)
         
         if (isChecked){
             gridCheck.setAttribute('checked', 'true')
