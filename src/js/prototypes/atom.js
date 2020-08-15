@@ -678,6 +678,9 @@ export default class Atom {
         }
     }
     
+    /**
+     * Unlocks any inputs which have nothing connected
+     */ 
     unlockFreeInputs(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
@@ -688,7 +691,7 @@ export default class Atom {
     }
     
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
+     * Starts proagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropogation(){
         //If anything is connected to this it shouldn't be a starting point

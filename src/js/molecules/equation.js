@@ -74,6 +74,9 @@ export default class Equation extends Atom {
         
     }
     
+    /**
+     * Add and remove inputs as needed from the atom
+     */ 
     addAndRemoveInputs(){
         //Find all the letters in this equation
         var re = /[a-zA-Z]/g

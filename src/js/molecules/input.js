@@ -67,6 +67,10 @@ export default class Input extends Atom {
     draw() {
 
         // //Snap the inputs to the far right side
+        /**
+        * The x position of the atom
+        * @type {number}
+        */
         this.x = this.radius
 
         let xInPixels = GlobalVariables.widthToPixels(this.x)

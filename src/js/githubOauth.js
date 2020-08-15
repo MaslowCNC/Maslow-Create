@@ -1041,6 +1041,9 @@ export default function GitHubModule(){
      */
     this.loadProject = async function(projectName){
         
+        this.totalAtomCount = 0
+        this.numberOfAtomsToLoad = 0
+        
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
