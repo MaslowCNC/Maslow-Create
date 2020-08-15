@@ -1,18 +1,12 @@
 import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables.js'
 import saveAs from '../lib/FileSaver.js'
-
-import * as pathseg from '../SVGnest/util/pathsegpolyfill.js'
-import * as matrix from '../SVGnest/util/matrix.js'
 import * as domparser from '../SVGnest/util/domparser.js'
-import * as ClipperLib from '../SVGnest/util/clipper.js'
-import * as parallel from '../SVGnest/util/parallel.js'
-import * as placementworker from '../SVGnest/util/placementworker.js'
 import * as Svgparser from '../SVGnest/svgparser.js'
-import * as Svgnest from '../SVGnest/svgnest.js'
-import * as geometryutil from '../SVGnest/util/geometryutil.js'
+import * as svgNest from '../SVGnest/svgnest.js'
+
 /**
- * This class creates the svg atom which lets you download a .svg file.
+ * This class creates the nest atom which lets you download a nested .svg file.
  */
 export default class Nest extends Atom {
     
@@ -50,18 +44,17 @@ export default class Nest extends Atom {
         this.addIO('input', 'spacing', this, 'number', 0.3)
         this.addIO('input', 'curveTolerance', this, 'number', 0.3)
         
-        /*
-        //Add a download svg button to the top level atoms side bar in run mode
-        GlobalVariables.topLevelMolecule.runModeSidebarAdditions.push(list => {
-            this.createButton(list, this, "Download Nested SVG", ()=>{this.downloadSvg()})
-        })*/  
-        
         this.setValues(values)
 
         this.prevpercent = 0
         this.startTime = null
-
+        /**
+         * Number of times nesting has been tried
+         */
         this.iterations = 0
+        /**
+         * Boolean to determine wether nesting process is ongoing
+         */
         this.isworking = false
     }
    
@@ -99,45 +92,9 @@ export default class Nest extends Atom {
         this.setConfig()
 
     } 
-
-    /**
-     * Update values for config text. Called when the readme text has been edited.
-     */ 
-    setConfig() {
-                // config = [distance, curve tolerance,rotations, population size, mutation rate, use holes, concave]
-                const configKeys = ["spacing","curveTolerance"]
-                var c = {"useholes":false,"exploreConcave":false,"rotations":4,"mutationRate":10,"populationSize":10}; 
-                for(var i=0; i<configKeys.length; i++){
-                    var key = configKeys[i]
-                        c[key] = this.findIOValue(key)
-                    }
-                var check1 = document.getElementById("Part in Part")
-                if(check1 !== null){
-                    if (check1.checked){
-                        c[check1] = true
-                        console.log(c[check1])
-                    }
-                    else{
-                        c[check1] = false
-                         console.log(c[check1])
-                    }
-                }
-                
-                
-                window.SvgNest.config(c);
-                
-                // new configs will invalidate current nest
-                if(this.isworking){
-                  this.stopnest();
-                }
-                //configvisible = false;
-                //config.className = '';
-                return false;
-            
-    }
     
     /**
-     * Create a button to download the .svg file.
+     * Create buttons to start nest, to download the .svg file and checkbox "Part in Part".
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
@@ -146,9 +103,42 @@ export default class Nest extends Atom {
         this.createButton(list, this, "Start Nest", ()=>{this.svgToNest()})
         //remember to disable until svg is nested 
         this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
-        console.log(list)
+        
     }
-    
+
+    /**
+     * Update values for config(). Called when the values on sidebar have been edited.
+     */ 
+    setConfig() {
+        // config = [distance, curve tolerance,rotations, population size, mutation rate, use holes, concave]
+        const configKeys = ["spacing","curveTolerance"]
+        var c = {"useholes":false,"exploreConcave":false,"rotations":4,"mutationRate":10,"populationSize":10} 
+        for(var i=0; i<configKeys.length; i++){
+            var key = configKeys[i]
+            c[key] = this.findIOValue(key)
+        }
+        var check1 = document.getElementById("Part in Part")
+        if(check1 !== null){
+            if (check1.checked){
+                c[check1] = true
+            }
+            else{
+                c[check1] = false
+               
+            }
+        }
+                               
+        window.SvgNest.config(c)
+                
+        // new configs will invalidate current nest
+        if(this.isworking){
+            this.stopnest()
+        }
+        return false
+    }
+    /**
+     * Turns geometry values into svg then starts nest and returns nested SVG
+     */ 
     svgToNest(){
 
         //turn into svg
@@ -166,8 +156,6 @@ export default class Nest extends Atom {
 
         computeValue(values, "svg").then(result => {
             if (result != -1 ){
-                const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
-                //saveAs(blob, GlobalVariables.topLevelMolecule.name+'.svg')
                 var decoder = new TextDecoder('utf8')
                 unestedSVG = decoder.decode(result)
                 
@@ -198,7 +186,7 @@ export default class Nest extends Atom {
                 display.appendChild(svg)
             }
             catch(e){
-                console.log(e)
+                console.warn(e)
                 //message.innerHTML = e;
                 //message.className = 'error animated bounce';
                 return
@@ -216,7 +204,9 @@ export default class Nest extends Atom {
                      
         })
     }
-
+    /**
+     * Defines bin which will be used to place parts for nested svg
+     */ 
     attachSvgListeners(svg){
         // auto set bin to be whole svg
         for(var i=0; i<svg.childNodes.length; i++){
@@ -247,7 +237,9 @@ export default class Nest extends Atom {
             }
         }
     }
-
+    /**
+     * Starts nesting, replaces html svg for nested svg
+     */ 
     async startnest(){
         // Once started, don't allow this anymore
         //document.removeEventListener('dragover', FileDragHover, false);
@@ -269,18 +261,23 @@ export default class Nest extends Atom {
         }
         this.isworking = true
     }
-            
+     
+    /**
+     * Stops nest and changes flag to not working
+     */        
     stopnest(){
         SvgNest.stop()
-        startlabel.innerHTML = 'Start Nest'
-        start.className = 'button start'
-        configbutton.className = 'button config'
+        //startlabel.innerHTML = 'Start Nest'
+        //start.className = 'button start'
+        //configbutton.className = 'button config'
                 
         this.isworking = false
     }
 
             
-            
+    /**
+     * NOT WORKING Defines percentage of nesting and estimates time and iterations
+     */         
     progress(percent){
         var transition = percent > this.prevpercent ? '; transition: width 0.1s' : ''
         document.getElementById('info_progress').setAttribute('style','width: '+Math.round(percent*100)+'% ' + transition)
@@ -307,7 +304,10 @@ export default class Nest extends Atom {
             startTime = new Date().getTime()
         }
     }
-            
+
+    /**
+     * NOT WORKING Defines HTML bit and defines svg list
+     */ 
     renderSvg(svglist, efficiency, placed, total){
                 
         //this.iterations++;
@@ -341,14 +341,15 @@ export default class Nest extends Atom {
             
     /**
      * The function which is called when you press the download button.
+     * Stops nest in progress and downloads file to computer. Only enabled if svg has been nested at least once
      */ 
     downloadSvg(){
+        //if it is still trying iterations stop nest 
+        this.stopnest()
         var bins = document.getElementById('bins')
-        console.log(bins)
-                
+            
         if(bins.children.length == 0){
-            message.innerHTML = 'No SVG to export'
-            message.className = 'error animated bounce'
+            console.warn('No SVG to export')
             return
         }
                 
@@ -372,7 +373,7 @@ export default class Nest extends Atom {
                 
         for(var i=0; i<bins.children.length; i++){
             var b = bins.children[i]
-            console.log(b)
+            
             var group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
             group.setAttribute('fill', 'none')
             group.setAttribute('stroke-width', '.1')
@@ -391,7 +392,6 @@ export default class Nest extends Atom {
         else{
             output = svg.outerHTML
         }
-        console.log(output)
         var blob = new Blob([output], {type: "image/svg+xml;charset=utf-8"})
         saveAs(blob, "SVGnest-output.svg")
     }

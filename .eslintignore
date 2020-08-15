@@ -11,3 +11,4 @@ dist/js/vec2.js
 src/js/JSxCAD.js
 src/js/FileSaver.js
 src/js/lib/*
+src/js/SvgNest/*

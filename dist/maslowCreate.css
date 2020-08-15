@@ -310,6 +310,10 @@ input:checked + .sliderAtom:before {
   cursor: pointer;
 }
 
+.sidebar-checkbox{
+  margin:15px;
+}
+
 /* Labels below slider */
 .range-labels {
   padding: 0;

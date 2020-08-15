@@ -447,7 +447,7 @@ export default class Atom {
      */ 
     updateSidebar(){
         //updates the sidebar to display information about this node
-        console.log("super update")
+        
         var valueList = this.initializeSideBar()
         
         //Add options to set all of the inputs
@@ -951,7 +951,8 @@ export default class Atom {
     createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement('div')
         sideBar.appendChild(gridDiv)
-        gridDiv.setAttribute('id', 'gridDiv')
+        gridDiv.setAttribute('id', text + "-parent")
+        gridDiv.setAttribute('class', "sidebar-checkbox")
         var gridCheck = document.createElement('input')
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
