@@ -957,9 +957,9 @@ export default function GitHubModule(){
             if(saving){
                 popUp.textContent = "Project Saved"
                 setTimeout(function() {
-                popUp.setAttribute("style","display:none")
-                popUpBox.setAttribute("style","display:none")
-            }, 4000)
+                    popUp.setAttribute("style","display:none")
+                    popUpBox.setAttribute("style","display:none")
+                }, 4000)
             }
             else{
                 popUp.setAttribute("style","display:none")
