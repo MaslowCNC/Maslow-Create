@@ -106,7 +106,7 @@ export default class Input extends Atom {
         }
         
         this.inputs.forEach(input => {
-            input.draw()       
+            input.draw()
         })
         if(this.output){
             this.output.draw()

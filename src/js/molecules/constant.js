@@ -51,6 +51,8 @@ export default class Constant extends Atom{
         
         this.addIO('output', 'number', this, 'number', 10)
         
+        this.decreaseToProcessCountByOne()  //Since there is nothing upstream this needs to be removed from the list here
+        
         if (typeof this.ioValues == 'object') {
             this.output.setValue(this.ioValues[0].ioValue)
         }
@@ -69,7 +71,6 @@ export default class Constant extends Atom{
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        this.decreaseToProcessCountByOne()
         this.displayAndPropogate()
     }
     

@@ -43,12 +43,12 @@ export default class GitHubMolecule extends Molecule {
      * @param {number} y - The y coordinate of the click
      // */ 
     // doubleClick(x,y){
-        // var clickProcessed = false
-        // var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
-        // if (distFromClick < this.radius){
-            // clickProcessed = true
-        // }
-        // return clickProcessed 
+    // var clickProcessed = false
+    // var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+    // if (distFromClick < this.radius){
+    // clickProcessed = true
+    // }
+    // return clickProcessed 
     // }
     
     /**

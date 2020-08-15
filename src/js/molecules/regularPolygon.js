@@ -65,7 +65,6 @@ export default class RegularPolygon extends Atom {
      * Create a new regular polygon in a worker thread.
      */ 
     updateValue(){
-        this.decreaseToProcessCountByOne()
         try{
             
             const values = [this.findIOValue('diameter'), this.findIOValue('number of sides')]

@@ -64,7 +64,6 @@ export default class Extrude extends Atom{
      * Pass the input shape to the worker thread to compute the extruded shape.
      */ 
     updateValue(){
-        this.decreaseToProcessCountByOne()
         try{
             const values = [this.findIOValue('geometry'), this.findIOValue('height')]
             

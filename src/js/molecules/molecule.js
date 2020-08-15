@@ -183,7 +183,7 @@ export default class Molecule extends Atom{
         //Tell the correct input to update
         this.nodesOnTheScreen.forEach(atom => { //Scan all the input atoms
             if(atom.atomType == 'Input' && atom.name == targetName){  //When there is a match
-                this.processing = true  //Sets to true processing variable??
+                this.processing = true  //Sets to true processing variable
                 atom.updateValue() //Tell that input to update it's value
             }
         })
@@ -530,6 +530,7 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, unlock){
         
+        console.log("Placing: " + newAtomObj.atomType)
         GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad + 1 //Indicate that one more atom needs to be loaded
         
         try{
@@ -562,6 +563,7 @@ export default class Molecule extends Atom{
                         this.nodesOnTheScreen.forEach(atom => {
                             if(atom.atomType == 'Output'){
                                 atom.deleteOutputAtom() //Remove them
+                                this.decreaseToProcessCountByOne() //Don't count removed outputs
                             }
                         })
                     }

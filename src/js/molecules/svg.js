@@ -72,7 +72,6 @@ export default class Svg extends Atom {
      * Set the value to be the input geometry, then call super updateValue()
      */ 
     updateValue(){
-        this.decreaseToProcessCountByOne()
         try{
             const values = [this.findIOValue('geometry')]
             this.basicThreadValueProcessing(values, "outline")

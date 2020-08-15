@@ -91,7 +91,6 @@ export default class ShrinkWrap extends Atom{
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
-            this.decreaseToProcessCountByOne()
             try{
                 var inputsList = []
                 this.inputs.forEach( io => {

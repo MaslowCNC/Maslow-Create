@@ -596,6 +596,8 @@ export default class Atom {
         
         const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
         
+        console.log(this.atomType + " " + GlobalVariables.numberOfAtomsToLoad)
+        
         GlobalVariables.gitHub.progressSave(percentLoaded, false)
     }
     
@@ -641,6 +643,7 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.processing = true
+            this.decreaseToProcessCountByOne()
             
             if(this.output){  //If this atom has an ouput
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.

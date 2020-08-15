@@ -88,7 +88,6 @@ export default class Assembly extends Atom{
     */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
-            this.decreaseToProcessCountByOne()
             try{
                 var inputValues = []
                 this.inputs.forEach( io => {

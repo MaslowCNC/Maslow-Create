@@ -55,7 +55,6 @@ export default class Code extends Atom {
      * Grab the code as a text string and execute it. 
      */ 
     updateValue(){
-        this.decreaseToProcessCountByOne()
         try{
             this.parseInputs()
             
