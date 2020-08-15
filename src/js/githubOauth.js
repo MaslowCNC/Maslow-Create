@@ -945,7 +945,7 @@ export default function GitHubModule(){
     /** 
      * Creates saving/saved pop up
      */
-    this.progressSave = function (progress, saving = true) { 
+    this.progressSave = function (progress, saving = true) {
         var popUp = document.getElementById("popUp")   
         let popUpBox = document.querySelector('#Progress_Status') 
         //var width = 1; 
@@ -956,14 +956,15 @@ export default function GitHubModule(){
             popUp.style.width = progress + '%' 
             if(saving){
                 popUp.textContent = "Project Saved"
-            }
-            else{
-                popUp.textContent = "Project Loaded"
-            }
-            setTimeout(function() {
+                setTimeout(function() {
                 popUp.setAttribute("style","display:none")
                 popUpBox.setAttribute("style","display:none")
             }, 4000)
+            }
+            else{
+                popUp.setAttribute("style","display:none")
+                popUpBox.setAttribute("style","display:none")
+            }
         } else { 
             if(saving){
                 popUp.textContent = "Saving..."
