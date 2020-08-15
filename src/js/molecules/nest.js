@@ -56,6 +56,8 @@ export default class Nest extends Atom {
          * Boolean to determine wether nesting process is ongoing
          */
         this.isworking = false
+
+        this.material = {"width": 121,"length":243}
     }
    
     /**
@@ -98,7 +100,10 @@ export default class Nest extends Atom {
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
+        this.createEditableValueListItem(list,this.material,'width', 'Width of Material', true, () => this.setConfig())
+        this.createEditableValueListItem(list,this.material,'length','Length of Material', true, () => this.setConfig())
 
+        //this.createEditableValueListItem(list,this.BOMitem,'costUSD', 'Price', true, () => this.updateValue())
         this.createCheckbox(list,"Part in Part", false, ()=>{this.setConfig()})
         this.createButton(list, this, "Start Nest", ()=>{this.svgToNest()})
         //remember to disable until svg is nested 
@@ -173,16 +178,20 @@ export default class Nest extends Atom {
                 {
                     var wholeSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg")
                     // Copy relevant scaling info
-                    wholeSVG.setAttribute('width',svg.getAttribute('width'))
-                    wholeSVG.setAttribute('height',svg.getAttribute('height'))
+                    wholeSVG.setAttribute('width',"100%")
+                    wholeSVG.setAttribute('height',"100%")
                     wholeSVG.setAttribute('viewBox',svg.getAttribute('viewBox'))
                     var rect = document.createElementNS(wholeSVG.namespaceURI,'rect')
                     rect.setAttribute('x', wholeSVG.viewBox.baseVal.x)
                     rect.setAttribute('y', wholeSVG.viewBox.baseVal.x)
-                    rect.setAttribute('width', wholeSVG.viewBox.baseVal.width)
-                    rect.setAttribute('height', wholeSVG.viewBox.baseVal.height)
+                    rect.setAttribute('width', this.material["width"])
+                    rect.setAttribute('height', this.material["length"])
                     rect.setAttribute('class', 'fullRect')
+                    console.log(wholeSVG)
+                    
+
                     wholeSVG.appendChild(rect)
+                    console.log(wholeSVG.viewBox)
                 }
                 display.innerHTML = ''
                 display.appendChild(wholeSVG) // As a default bin in background
@@ -244,19 +253,13 @@ export default class Nest extends Atom {
      * Starts nesting, replaces html svg for nested svg
      */ 
     async startnest(){
-        // Once started, don't allow this anymore
-        //document.removeEventListener('dragover', FileDragHover, false);
-        //document.removeEventListener('dragleave', FileDragHover, false);
-        //document.removeEventListener('drop', FileDrop, false);
-                
+        // Once started, don't allow this anymore       
         SvgNest.start(this.progress,this.renderSvg)
         //remember to change label so nest can stop
         //startlabel.innerHTML = 'Stop Nest';
         //start.className = 'button spinner';
         //configbutton.className = 'button config disabled';
         //config.className = '';
-        //zoomin.className = 'button zoomin disabled';
-        //zoomout.className = 'button zoomout disabled';
 
         var svg = document.querySelector('#select svg')
         if(svg){
