@@ -178,8 +178,8 @@ export default class Nest extends Atom {
                 {
                     var wholeSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg")
                     // Copy relevant scaling info
-                    wholeSVG.setAttribute('width',"100%")
-                    wholeSVG.setAttribute('height',"100%")
+                    wholeSVG.setAttribute('width',svg.getAttribute('width'))
+                    wholeSVG.setAttribute('height',svg.getAttribute('height'))
                     wholeSVG.setAttribute('viewBox',svg.getAttribute('viewBox'))
                     var rect = document.createElementNS(wholeSVG.namespaceURI,'rect')
                     rect.setAttribute('x', wholeSVG.viewBox.baseVal.x)
