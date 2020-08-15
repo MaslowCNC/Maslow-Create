@@ -47,14 +47,14 @@ export default class Nest extends Atom {
         this.height
         
         this.addIO('input', 'geometry', this, 'geometry', null)
-        this.addIO('input', 'Distance', this, 'number', 0.3)
-        this.addIO('input', 'Curve Tolerance', this, 'number', 0.3)
+        this.addIO('input', 'spacing', this, 'number', 0.3)
+        this.addIO('input', 'curveTolerance', this, 'number', 0.3)
         
-        
+        /*
         //Add a download svg button to the top level atoms side bar in run mode
         GlobalVariables.topLevelMolecule.runModeSidebarAdditions.push(list => {
             this.createButton(list, this, "Download Nested SVG", ()=>{this.downloadSvg()})
-        })
+        })*/  
         
         this.setValues(values)
 
@@ -84,6 +84,9 @@ export default class Nest extends Atom {
         
     }
     
+    setValue(){
+        this.setConfig()
+    }
     /**
      * Set the value to be the input geometry, then call super updateValue()
      */ 
@@ -91,7 +94,45 @@ export default class Nest extends Atom {
         try{
             const values = [this.findIOValue('geometry')]
             this.basicThreadValueProcessing(values, "outline")
+            this.setConfig()
         }catch(err){this.setAlert(err)}
+
+    } 
+
+    /**
+     * Update values for config text. Called when the readme text has been edited.
+     */ 
+    setConfig(list) {
+                // config = [distance, curve tolerance,rotations, population size, mutation rate, use holes, concave]
+                console.log(list)
+                const configKeys = ["spacing","curveTolerance"]
+                var c = {"useholes":false,"exploreConcave":false,"rotations":4,"mutationRate":10,"populationSize":10}; 
+                for(var i=0; i<configKeys.length; i++){
+                    var key = configKeys[i]
+                        c[key] = this.findIOValue(key)
+                    }
+
+                if (list !== undefined){
+                        for(var i=0; i<list.length; i++){
+                       if(list[i].getAttribute('type') == 'checkbox'){
+                           var key = list[i]
+                           c[key] = inputs[i].checked;
+                       }
+                    }
+                }
+                console.log(c)
+                
+                
+                window.SvgNest.config(c);
+                
+                // new configs will invalidate current nest
+                if(this.isworking){
+                  this.stopnest();
+                }
+                //configvisible = false;
+                //config.className = '';
+                return false;
+            
     }
     
     /**
@@ -99,11 +140,14 @@ export default class Nest extends Atom {
      */ 
     updateSidebar(){
         const list = super.updateSidebar()
-        this.createCheckbox(list,"Part in Part", false, ()=>{console.log("checked")})
+
+        this.createCheckbox(list,"Part in Part", false, ()=>{this.setConfig(list)})
         this.createButton(list, this, "Start Nest", ()=>{this.svgToNest()})
         //remember to disable until svg is nested 
         this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
-    
+        
+
+        
     }
     
     svgToNest(){
