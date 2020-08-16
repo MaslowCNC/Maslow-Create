@@ -946,6 +946,9 @@ export default function GitHubModule(){
      * Creates saving/saved pop up
      */
     this.progressSave = function (progress, saving = true) {
+        
+        progress = Math.max(0, progress) //Make it so the progress can't be displayed negitive
+        
         var popUp = document.getElementById("popUp")   
         let popUpBox = document.querySelector('#Progress_Status') 
         //var width = 1; 
