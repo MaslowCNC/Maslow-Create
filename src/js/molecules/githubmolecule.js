@@ -42,14 +42,14 @@ export default class GitHubMolecule extends Molecule {
      * @param {number} x - The x coordinate of the click
      * @param {number} y - The y coordinate of the click
      // */ 
-    doubleClick(x,y){
-        var clickProcessed = false
-        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
-        if (distFromClick < this.radius){
-            clickProcessed = true
-        }
-        return clickProcessed 
-    }
+    // doubleClick(x,y){
+    // var clickProcessed = false
+    // var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+    // if (distFromClick < this.radius){
+    // clickProcessed = true
+    // }
+    // return clickProcessed 
+    // }
     
     /**
      * Loads a project into this GitHub molecule from github based on the passed github ID. This function is async and execution time depends on project complexity, and network speed.
@@ -66,20 +66,16 @@ export default class GitHubMolecule extends Molecule {
             preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
         }
         else{
-            preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}     
+            preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
         }
         const promsie =  this.deserialize(result)
-
         this.setValues(preservedValues)
-        
-        return promsie 
-        
+        return promsie
     }
 
     /**
      * Updates sidebar with buttons for user in runMode
      */
-    
     updateSidebar(){
         const list = super.updateSidebar()
         

@@ -63,10 +63,12 @@ export default class Translate extends Atom{
      * Pass the input geometry to a worker function to compute the translation.
      */ 
     updateValue(){
-        try{
-            const values = [this.findIOValue('geometry'), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
-            
-            this.basicThreadValueProcessing(values, "translate")
-        }catch(err){this.setAlert(err)}
+        if(this.inputs.every(x => x.ready)){
+            try{
+                const values = [this.findIOValue('geometry'), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
+                
+                this.basicThreadValueProcessing(values, "translate")
+            }catch(err){this.setAlert(err)}
+        }
     }
 }

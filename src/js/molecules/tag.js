@@ -65,6 +65,5 @@ export default class Tag extends Atom{
             const values = [this.findIOValue('geometry'), this.findIOValue('tag')]
             this.basicThreadValueProcessing(values, "tag")
         }catch(err){this.setAlert(err)}
-        super.updateValue()
     }
 }

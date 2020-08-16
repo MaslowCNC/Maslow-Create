@@ -59,6 +59,9 @@ export default class Output extends Atom {
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
+            this.decreaseToProcessCountByOne()
+            this.decreaseToProcessCountByOne()//Called twice to count for the molecule it is in
+            
             this.value = this.findIOValue('number or geometry')
             this.parent.value = this.value
             this.parent.propogate()
