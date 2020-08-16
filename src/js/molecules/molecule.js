@@ -580,10 +580,12 @@ export default class Molecule extends Atom{
                         //Make begin propagation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
+                                atom.unlockFreeInputs()
                                 atom.beginPropogation()
                             })
                         }
                         else{
+                            atom.unlockFreeInputs()
                             atom.beginPropogation()
                         }
                         
