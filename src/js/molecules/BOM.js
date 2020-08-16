@@ -60,7 +60,6 @@ export default class AddBOMTag extends Atom{
                 this.basicThreadValueProcessing(values, "specify")
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
-            super.updateValue()
         }
     }
         

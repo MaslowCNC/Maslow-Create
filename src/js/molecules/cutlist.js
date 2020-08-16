@@ -68,6 +68,5 @@ export default class CutList extends Atom{
             const values = [this.findIOValue('geometry'), "cutList"]
             this.basicThreadValueProcessing(values, "specify")
         }catch(err){this.setAlert(err)}
-        super.updateValue()
     }
 }

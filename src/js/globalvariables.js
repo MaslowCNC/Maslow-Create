@@ -61,14 +61,14 @@ class GlobalVariables{
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shrinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
-            
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Tags'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Tags'},
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Tags'},
             cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Tags'},
             CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Tags'},
+
 
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
@@ -111,6 +111,16 @@ class GlobalVariables{
          * @type {object}
          */
         this.gitHub = new GitHubModule()
+        /** 
+         * A total of the number of atoms in this project
+         * @type {integer}
+         */
+        this.totalAtomCount = 0
+        /** 
+         * A counter used during the loading process to keep track of how many atoms are still to be loaded.
+         * @type {integer}
+         */
+        this.numberOfAtomsToLoad = 0
         /** 
          * A flag to indicate if the project is a fork.
          * @type {boolean}

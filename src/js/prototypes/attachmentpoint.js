@@ -146,11 +146,11 @@ export default class AttachmentPoint {
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
             /**
-             * The x cordinate of the attachment point.
+             * The x coordinate of the attachment point.
              */
             xInPixels = parentXInPixels - parentRadiusInPixels
             /**
-             * The y cordinate of the attachment point.
+             * The y coordinate of the attachment point.
              */
             yInPixels = parentYInPixels
         }    
@@ -256,13 +256,12 @@ export default class AttachmentPoint {
 
         if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){
             if(this.type == 'output'){                  //begin to extend a connector from this if it is an output
-                var connector = new Connector({
+                new Connector({
                     parentMolecule: this.parentMolecule, 
                     attachmentPoint1: this,
                     atomType: 'Connector',
                     isMoving: true
                 })
-                this.connectors.push(connector)
             }
             
             if(this.type == 'input'){ //connectors can only be selected by clicking on an input
@@ -500,7 +499,7 @@ export default class AttachmentPoint {
         }
         //if this is an input
         else{   //update the code block to reflect the new values
-            this.parentMolecule.updateValue()
+            this.parentMolecule.updateValue(this.name)
         }
     }
     
