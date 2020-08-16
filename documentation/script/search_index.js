@@ -912,6 +912,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#numberofatomstoload",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-numberOfAtomsToLoad",
+    "src/js/globalvariables.js~GlobalVariables#numberOfAtomsToLoad",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#pixelstoheight",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-pixelsToHeight",
     "src/js/globalvariables.js~GlobalVariables#pixelsToHeight",
@@ -939,6 +945,12 @@ window.esdocSearchIndex = [
     "src/js/globalvariables.js~globalvariables#saveworker",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-saveWorker",
     "src/js/globalvariables.js~GlobalVariables#saveWorker",
+    "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#totalatomcount",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-totalAtomCount",
+    "src/js/globalvariables.js~GlobalVariables#totalAtomCount",
     "member"
   ],
   [
@@ -1560,6 +1572,12 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/js/molecules/equation.js~equation#addandremoveinputs",
+    "class/src/js/molecules/equation.js~Equation.html#instance-method-addAndRemoveInputs",
+    "src/js/molecules/equation.js~Equation#addAndRemoveInputs",
+    "method"
+  ],
+  [
     "src/js/molecules/equation.js~equation#atomtype",
     "class/src/js/molecules/equation.js~Equation.html#instance-member-atomType",
     "src/js/molecules/equation.js~Equation#atomType",
@@ -1908,12 +1926,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/githubmolecule.js~githubmolecule#doubleclick",
-    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-doubleClick",
-    "src/js/molecules/githubmolecule.js~GitHubMolecule#doubleClick",
-    "method"
-  ],
-  [
     "src/js/molecules/githubmolecule.js~githubmolecule#loadprojectbyid",
     "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-loadProjectByID",
     "src/js/molecules/githubmolecule.js~GitHubMolecule#loadProjectByID",
@@ -1954,6 +1966,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/input.js~Input.html#instance-member-atomType",
     "src/js/molecules/input.js~Input#atomType",
     "member"
+  ],
+  [
+    "src/js/molecules/input.js~input#beginpropogation",
+    "class/src/js/molecules/input.js~Input.html#instance-method-beginPropogation",
+    "src/js/molecules/input.js~Input#beginPropogation",
+    "method"
   ],
   [
     "src/js/molecules/input.js~input#color",
@@ -2266,6 +2284,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-topLevel",
     "src/js/molecules/molecule.js~Molecule#topLevel",
     "member"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#unlockfreeinputs",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-unlockFreeInputs",
+    "src/js/molecules/molecule.js~Molecule#unlockFreeInputs",
+    "method"
   ],
   [
     "src/js/molecules/molecule.js~molecule#updatesidebar",
@@ -2928,6 +2952,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#decreasetoprocesscountbyone",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-decreaseToProcessCountByOne",
+    "src/js/prototypes/atom.js~Atom#decreaseToProcessCountByOne",
+    "method"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#defaultcolor",
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-defaultColor",
     "src/js/prototypes/atom.js~Atom#defaultColor",
@@ -3088,6 +3118,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/atom.js~Atom.html#instance-member-strokeColor",
     "src/js/prototypes/atom.js~Atom#strokeColor",
     "member"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#unlockfreeinputs",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-unlockFreeInputs",
+    "src/js/prototypes/atom.js~Atom#unlockFreeInputs",
+    "method"
   ],
   [
     "src/js/prototypes/atom.js~atom#update",

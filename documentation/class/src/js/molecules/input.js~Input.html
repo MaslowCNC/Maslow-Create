@@ -373,13 +373,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-member-x">x</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-member-x">x</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>The x position of the atom</p>
+</div>
       </div>
     </td>
     <td>
@@ -395,6 +396,35 @@
   <tbody>
   
   <tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Propagation does not begin from inputs.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
@@ -559,7 +589,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Grabs the new value from the parent molecule&apos;s input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. </p>
+        <div data-ice="description"><p>Grabs the new value from the parent molecule&apos;s input, sets this atoms value, then propagates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. </p>
 </div>
       </div>
     </td>
@@ -1176,7 +1206,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.</p>
+        <div data-ice="description"><p>Starts proagation from this atom if it is not waiting for anything up stream.</p>
 </div>
       </div>
     </td>
@@ -1467,6 +1497,35 @@
         
         
         <div data-ice="description"><p>Creates an non-editable HTML item to set the value of an object element.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-decreaseToProcessCountByOne">decreaseToProcessCountByOne</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Set&apos;s the output value and shows the atom output on the 3D view.</p>
 </div>
       </div>
     </td>
@@ -1924,6 +1983,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-unlockFreeInputs">unlockFreeInputs</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Unlocks any inputs which have nothing connected</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-update">update</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
@@ -1988,7 +2076,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Set&apos;s the output value and shows the atom output on the 3D view.</p>
+        <div data-ice="description"><p>Token update value function to give each atom one by default</p>
 </div>
       </div>
     </td>
@@ -2154,7 +2242,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber94">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber98">source</a></span></span>
     </span>
   </h3>
 
@@ -2198,7 +2286,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber79">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber83">source</a></span></span>
     </span>
   </h3>
 
@@ -2330,7 +2418,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber99">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber103">source</a></span></span>
     </span>
   </h3>
 
@@ -2414,18 +2502,18 @@
     
     
     
-    <span class="code" data-ice="name">x</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">x</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber70">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber74">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>The X cordinate of this atom</p>
+  <div data-ice="description"><p>The x position of the atom</p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-member-x">Atom#x</a></span></div>
@@ -2454,6 +2542,50 @@
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-beginPropogation">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">beginPropogation</span><span class="code" data-ice="signature">()</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber164">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Propagation does not begin from inputs. They will be called by the attachment point of the parent molecule if it has no connectors</p>
+</div>
+
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">Atom#beginPropogation</a></span></div>
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-deleteNode">
     <span class="access" data-ice="access">public</span>
     
@@ -2465,7 +2597,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber135">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber139">source</a></span></span>
     </span>
   </h3>
 
@@ -2553,7 +2685,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber174">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber188">source</a></span></span>
     </span>
   </h3>
 
@@ -2609,7 +2741,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber147">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber151">source</a></span></span>
     </span>
   </h3>
 
@@ -2697,14 +2829,14 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber160">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/input.js.html#lineNumber171">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Grabs the new value from the parent molecule&apos;s input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. </p>
+  <div data-ice="description"><p>Grabs the new value from the parent molecule&apos;s input, sets this atoms value, then propagates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. </p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-updateValue">Atom#updateValue</a></span></div>

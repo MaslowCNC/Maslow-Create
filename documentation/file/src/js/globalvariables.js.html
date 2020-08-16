@@ -138,14 +138,14 @@ class GlobalVariables{
             difference:         {creator: Difference, atomType: &apos;Difference&apos;, atomCategory: &apos;Interactions&apos;},
             assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;, atomCategory: &apos;Interactions&apos;},
             shrinkwrap:        {creator: ShrinkWrap, atomType: &apos;ShrinkWrap&apos;, atomCategory: &apos;Interactions&apos;},
-            
             readme:             {creator: Readme, atomType: &apos;Readme&apos;, atomCategory: &apos;Tags&apos;},
-            addBOMTag:          {creator: AddBOMTag, atomType: &apos;Add BOM Tag&apos;, atomCategory: &apos;Tags&apos;},
+            addBOMTag:          {creator: AddBOMTag, atomType: &apos;Add-BOM-Tag&apos;, atomCategory: &apos;Tags&apos;},
             color:              {creator: Color, atomType: &apos;Color&apos;, atomCategory: &apos;Tags&apos;},
             tag:                {creator: Tag, atomType: &apos;Tag&apos;, atomCategory: &apos;Tags&apos;},
             extracttag:         {creator: ExtractTag, atomType: &apos;ExtractTag&apos;, atomCategory: &apos;Tags&apos;},
             cutLayout:          {creator: CutLayout, atomType: &apos;CutLayout&apos;, atomCategory: &apos;Tags&apos;},
             CutList:            {creator: CutList, atomType: &apos;CutList&apos;, atomCategory: &apos;Tags&apos;},
+
 
             
             regularPolygon:     {creator: RegularPolygon, atomType: &apos;RegularPolygon&apos;, atomCategory: &apos;Shapes&apos;},
@@ -188,6 +188,16 @@ class GlobalVariables{
          * @type {object}
          */
         this.gitHub = new GitHubModule()
+        /** 
+         * A total of the number of atoms in this project
+         * @type {integer}
+         */
+        this.totalAtomCount = 0
+        /** 
+         * A counter used during the loading process to keep track of how many atoms are still to be loaded.
+         * @type {integer}
+         */
+        this.numberOfAtomsToLoad = 0
         /** 
          * A flag to indicate if the project is a fork.
          * @type {boolean}

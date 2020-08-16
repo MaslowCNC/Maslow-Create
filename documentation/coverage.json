@@ -1,7 +1,7 @@
 {
-  "coverage": "98.07%",
-  "expectCount": 519,
-  "actualCount": 509,
+  "coverage": "98.09%",
+  "expectCount": 525,
+  "actualCount": 515,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -34,8 +34,8 @@
       "undocumentLines": []
     },
     "src/js/globalvariables.js": {
-      "expectCount": 22,
-      "actualCount": 22,
+      "expectCount": 24,
+      "actualCount": 24,
       "undocumentLines": []
     },
     "src/js/molecules/assembly.js": {
@@ -89,8 +89,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/equation.js": {
-      "expectCount": 12,
-      "actualCount": 12,
+      "expectCount": 13,
+      "actualCount": 13,
       "undocumentLines": []
     },
     "src/js/molecules/extracttag.js": {
@@ -114,16 +114,14 @@
       "undocumentLines": []
     },
     "src/js/molecules/githubmolecule.js": {
-      "expectCount": 10,
-      "actualCount": 10,
+      "expectCount": 9,
+      "actualCount": 9,
       "undocumentLines": []
     },
     "src/js/molecules/input.js": {
-      "expectCount": 16,
-      "actualCount": 15,
-      "undocumentLines": [
-        70
-      ]
+      "expectCount": 17,
+      "actualCount": 17,
+      "undocumentLines": []
     },
     "src/js/molecules/intersection.js": {
       "expectCount": 6,
@@ -131,10 +129,11 @@
       "undocumentLines": []
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 34,
+      "expectCount": 35,
       "actualCount": 33,
       "undocumentLines": [
-        191
+        186,
+        207
       ]
     },
     "src/js/molecules/output.js": {
@@ -197,16 +196,16 @@
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 52,
-      "actualCount": 52,
+      "expectCount": 54,
+      "actualCount": 54,
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
       "expectCount": 42,
       "actualCount": 40,
       "undocumentLines": [
-        518,
-        519
+        517,
+        518
       ]
     },
     "src/js/prototypes/connector.js": {

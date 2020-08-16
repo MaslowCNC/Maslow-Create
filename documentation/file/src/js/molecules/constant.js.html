@@ -128,6 +128,8 @@ export default class Constant extends Atom{
         
         this.addIO(&apos;output&apos;, &apos;number&apos;, this, &apos;number&apos;, 10)
         
+        this.decreaseToProcessCountByOne()  //Since there is nothing upstream this needs to be removed from the list here
+        
         if (typeof this.ioValues == &apos;object&apos;) {
             this.output.setValue(this.ioValues[0].ioValue)
         }

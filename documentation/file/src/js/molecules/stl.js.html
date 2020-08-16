@@ -147,10 +147,10 @@ export default class Stl extends Atom {
      */ 
     updateValue(){
         if(this.inputs.every(x =&gt; x.ready)){
+            this.decreaseToProcessCountByOne()
             try{
                 this.value = this.findIOValue(&apos;geometry&apos;)
             }catch(err){this.setAlert(err)}
-            super.updateValue()
         }
     }
     

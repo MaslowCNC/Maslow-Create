@@ -1022,7 +1022,10 @@ export default function GitHubModule(){
     /** 
      * Creates saving/saved pop up
      */
-    this.progressSave = function (progress) { 
+    this.progressSave = function (progress, saving = true) {
+        
+        progress = Math.max(0, progress) //Make it so the progress can&apos;t be displayed negitive
+        
         var popUp = document.getElementById(&quot;popUp&quot;)   
         let popUpBox = document.querySelector(&apos;#Progress_Status&apos;) 
         //var width = 1; 
@@ -1031,13 +1034,24 @@ export default function GitHubModule(){
         
         if (progress &gt;= 100) { 
             popUp.style.width = progress + &apos;%&apos; 
-            popUp.textContent = &quot;Project Saved&quot;
-            setTimeout(function() {
+            if(saving){
+                popUp.textContent = &quot;Project Saved&quot;
+                setTimeout(function() {
+                    popUp.setAttribute(&quot;style&quot;,&quot;display:none&quot;)
+                    popUpBox.setAttribute(&quot;style&quot;,&quot;display:none&quot;)
+                }, 4000)
+            }
+            else{
                 popUp.setAttribute(&quot;style&quot;,&quot;display:none&quot;)
                 popUpBox.setAttribute(&quot;style&quot;,&quot;display:none&quot;)
-            }, 4000)
+            }
         } else { 
-            popUp.textContent = &quot;Saving...&quot;
+            if(saving){
+                popUp.textContent = &quot;Saving...&quot;
+            }
+            else{
+                popUp.textContent = &quot;Loading...&quot;+progress.toFixed(1)+&quot;%&quot;
+            }
             popUp.style.width = progress + &apos;%&apos;  
         } 
     } 
@@ -1107,6 +1121,11 @@ export default function GitHubModule(){
      */
     this.loadProject = async function(projectName){
         
+        this.totalAtomCount = 0
+        this.numberOfAtomsToLoad = 0
+
+        GlobalVariables.startTime = new Date().getTime()
+        
         if(typeof intervalTimer != undefined){
             clearInterval(intervalTimer) //Turn off auto saving
         }
@@ -1141,8 +1160,6 @@ export default function GitHubModule(){
                 GlobalVariables.circleSegmentSize = rawFile.circleSegmentSize
             }
             
-            intervalTimer = setInterval(() =&gt; this.saveProject(), 120000) //Save the project regularly
-            
             if(rawFile.filetypeVersion == 1){
                 GlobalVariables.topLevelMolecule.deserialize(rawFile)
             }
@@ -1159,6 +1176,7 @@ export default function GitHubModule(){
                 document.getElementById(&quot;pull_top&quot;).style.display = &quot;none&quot;
             }
         })
+        
     }
     
     this.convertFromOldFormat = function(json){
@@ -1194,6 +1212,13 @@ export default function GitHubModule(){
         }
         
         return projectObject
+    }
+    
+    /** 
+     * Begins the automatic process of saving the project
+     */
+    this.beginAutosave = function(){
+        intervalTimer = setInterval(() =&gt; this.saveProject(), 120000) //Save the project regularly
     }
     
     /** 
