@@ -109,11 +109,11 @@ export default class Nest extends Atom {
         this.createCheckbox(list,"Part in Part", false, ()=>{this.setConfig()})
         this.createButton(list, this, "Start Nest", ()=>{this.svgToNest()})
         //remember to disable until svg is nested 
-        this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})
+        this.createButton(list, this, "Download SVG", ()=>{this.downloadSvg()})   
 
         var svgButton = document.getElementById("DownloadSVG-button")
         svgButton.disabled = true
-        svgButton.classList.add("disabled")        
+        svgButton.classList.add("disabled")      
     }
 
     /**
@@ -135,19 +135,21 @@ export default class Nest extends Atom {
             else{
                 c[check1] = false
                
-            }
+            }   
         }                  
-        
+
         window.SvgNest.config(c)
+        
+        var svgButton = document.getElementById("DownloadSVG-button")  
+        if (svgButton !== null){
+            svgButton.disabled = true
+            svgButton.classList.add("disabled")  
+        }
                 
         // new configs will invalidate current nest
         if(this.isworking){
             this.stopnest()
-            //Disable download if values are updated until new nest is started 
-            var svgButton = document.getElementById("DownloadSVG-button")
-            svgButton.disabled = true
-            svgButton.classList.add("disabled")   
-              
+        
         }
         return false
     }
@@ -197,7 +199,6 @@ export default class Nest extends Atom {
                     rect.setAttribute('class', 'fullRect')
 
                     wholeSVG.appendChild(rect)
-                    console.log(wholeSVG)
                 }
                 display.innerHTML = ''
                 display.appendChild(wholeSVG) // As a default bin in background
@@ -351,8 +352,7 @@ export default class Nest extends Atom {
             // document.getElementById('info_efficiency').innerHTML = Math.round(efficiency*100);
         }
 
-        //document.getElementById('info_placed').innerHTML = placed+'/'+total;
-                
+        //document.getElementById('info_placed').innerHTML = placed+'/'+total;      
         //document.getElementById('info_placement').setAttribute('style','display: block');
         //display.setAttribute('style','display: none');
         //download.className = 'button download animated bounce';
