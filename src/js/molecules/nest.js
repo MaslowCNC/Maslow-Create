@@ -57,6 +57,8 @@ export default class Nest extends Atom {
          */
         this.isworking = false
 
+        this.prevpercent = 0
+
         this.material = {"width": 121,"length":243}
     }
    
@@ -134,13 +136,18 @@ export default class Nest extends Atom {
                 c[check1] = false
                
             }
-        }
-                               
+        }                  
+        
         window.SvgNest.config(c)
                 
         // new configs will invalidate current nest
         if(this.isworking){
             this.stopnest()
+            //Disable download if values are updated until new nest is started 
+            var svgButton = document.getElementById("DownloadSVG-button")
+            svgButton.disabled = true
+            svgButton.classList.add("disabled")   
+              
         }
         return false
     }
@@ -176,22 +183,21 @@ export default class Nest extends Atom {
                 var svg = SvgNest.parsesvg(result)
                 var display = document.getElementById('select')
                 {
+                    console.log(svg)
                     var wholeSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg")
                     // Copy relevant scaling info
-                    wholeSVG.setAttribute('width',svg.getAttribute('width'))
-                    wholeSVG.setAttribute('height',svg.getAttribute('height'))
-                    wholeSVG.setAttribute('viewBox',svg.getAttribute('viewBox'))
+                    wholeSVG.setAttribute('width',this.material["width"])
+                    wholeSVG.setAttribute('height',this.material["length"])
+                    wholeSVG.setAttribute('viewBox',svg.getAttribute('viewBox'));
                     var rect = document.createElementNS(wholeSVG.namespaceURI,'rect')
                     rect.setAttribute('x', wholeSVG.viewBox.baseVal.x)
                     rect.setAttribute('y', wholeSVG.viewBox.baseVal.x)
-                    rect.setAttribute('width', this.material["width"])
-                    rect.setAttribute('height', this.material["length"])
+                    rect.setAttribute('width', "100%")
+                    rect.setAttribute('height', "100%")
                     rect.setAttribute('class', 'fullRect')
-                    console.log(wholeSVG)
-                    
 
                     wholeSVG.appendChild(rect)
-                    console.log(wholeSVG.viewBox)
+                    console.log(wholeSVG)
                 }
                 display.innerHTML = ''
                 display.appendChild(wholeSVG) // As a default bin in background
@@ -262,14 +268,11 @@ export default class Nest extends Atom {
         //config.className = '';
 
         var svg = document.querySelector('#select svg')
+        console.log(svg)
         if(svg){
             svg.removeAttribute('style')
         }
         this.isworking = true
-
-        var svgButton = document.getElementById("DownloadSVG-button")
-        svgButton.disabled = false
-        svgButton.classList.remove("disabled") 
     }
      
     /**
@@ -288,20 +291,22 @@ export default class Nest extends Atom {
     /**
      * NOT WORKING Defines percentage of nesting and estimates time and iterations
      */         
-    progress(percent){
-        var transition = percent > this.prevpercent ? '; transition: width 0.1s' : ''
-        document.getElementById('info_progress').setAttribute('style','width: '+Math.round(percent*100)+'% ' + transition)
-        document.getElementById('info').setAttribute('style','display: block')
+    progress(percent, prevpercent = 0){
+        console.log(percent)
+        var transition = percent > prevpercent //? '; transition: width 0.1s' : ''
+        //document.getElementById('info_progress').setAttribute('style','width: '+Math.round(percent*100)+'% ' + transition)
+        //document.getElementById('info').setAttribute('style','display: block')
                 
-        this.prevpercent = percent
+        prevpercent = percent
                 
         var now = new Date().getTime()
         if(startTime && now){
             var diff = now-startTime
             // show a time estimate for long-running placements
+
             var estimate = (diff/percent)*(1-percent)
             document.getElementById('info_time').innerHTML = millisecondsToStr(estimate)+' remaining'
-                    
+            console.log(estimate)        
             if(diff > 5000 && percent < 0.3 && percent > 0.02 && estimate > 10000){
                 document.getElementById('info_time').setAttribute('style','display: block')
             }
@@ -319,11 +324,16 @@ export default class Nest extends Atom {
      * NOT WORKING Defines HTML bit and defines svg list
      */ 
     renderSvg(svglist, efficiency, placed, total){
-                
         //this.iterations++;
                 
-        //document.getElementById('info_iterations').innerHTML = iterations;
-                
+        //document.getElementById('info_iterations').innerHTML = iterations;     
+        //Enable download button if all parts have been placed
+
+        if (placed == total){
+            var svgButton = document.getElementById("DownloadSVG-button")
+            svgButton.disabled = false
+            svgButton.classList.remove("disabled")  
+        } 
         if(!svglist || svglist.length == 0){
             return
         }
