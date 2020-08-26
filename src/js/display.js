@@ -343,7 +343,7 @@ export default class Display {
          * The three js Axes that appears on the grid
          * @type {object}
          */
-        this.axesHelper = new THREE.AxesHelper( 10 )
+        this.axesHelper = new THREE.AxesHelper(100)
         this.scene.add(this.axesHelper)
         this.gridLevel
         
