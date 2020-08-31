@@ -37,7 +37,7 @@ export default class Nest extends Atom {
         /**
          * This atom's height as drawn on the screen
          */
-        this.height
+        this.height = 0
         
         this.addIO('input', 'geometry', this, 'geometry', null)
         this.addIO('input', 'spacing', this, 'number', 0.3)
