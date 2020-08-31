@@ -45,8 +45,6 @@ export default class Nest extends Atom {
         
         this.setValues(values)
 
-        this.prevpercent = 0
-        this.startTime = null
         /**
          * Number of times nesting has been tried
          */
@@ -55,9 +53,9 @@ export default class Nest extends Atom {
          * Boolean to determine wether nesting process is ongoing
          */
         this.isworking = false
-
-        this.prevpercent = 0
-
+        /**
+         * Length and width inputs for svg placement
+         */
         this.material = {"width": 121,"length":243}
     }
    
@@ -70,7 +68,6 @@ export default class Nest extends Atom {
         let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
         this.height = pixelsRadius * 1.5
 
-    
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
@@ -79,10 +76,13 @@ export default class Nest extends Atom {
         GlobalVariables.c.closePath()
         
     }
-    
+    /**
+     * Re excecutes configure function for nesting if values are updated by user
+     */ 
     setValue(){
         this.setConfig()
     }
+
     /**
      * Set the value to be the input geometry, then call super updateValue()
      */ 
@@ -152,6 +152,7 @@ export default class Nest extends Atom {
         }
         return false
     }
+
     /**
      * Turns geometry values into svg then starts nest and returns nested SVG
      */ 
