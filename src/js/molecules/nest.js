@@ -2,7 +2,7 @@ import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables.js'
 import saveAs from '../lib/FileSaver.js'
 
-import * as svgNest from '../SVGnest/svgnest.js'
+import * as svgNest from '../lib/svgnest.js'
 
 /**
  * This class creates the nest atom which lets you download a nested .svg file.
