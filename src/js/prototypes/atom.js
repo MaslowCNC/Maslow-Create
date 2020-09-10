@@ -945,7 +945,7 @@ export default class Atom {
         var button = document.createElement('button')
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute('class', ' browseButton')
-        button.setAttribute('id', buttonText + "-button")
+        button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)
         valueTextDiv.setAttribute('class', 'sidebar-subitem')
@@ -967,11 +967,12 @@ export default class Atom {
     createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement('div')
         sideBar.appendChild(gridDiv)
-        gridDiv.setAttribute('id', 'gridDiv')
+        gridDiv.setAttribute('id', text + "-parent")
+        gridDiv.setAttribute('class', "sidebar-checkbox")
         var gridCheck = document.createElement('input')
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
-        gridCheck.setAttribute('id', 'gridCheck')
+        gridCheck.setAttribute('id', text)
         
         if (isChecked){
             gridCheck.setAttribute('checked', 'true')

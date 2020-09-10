@@ -80,6 +80,10 @@
   padding: 1px;
 }
 
+.disabled{
+  opacity: 0.2;
+}
+
 #top_button_wrap{
   position: fixed;
   right: 0;
@@ -308,6 +312,10 @@ input:checked + .sliderAtom:before {
   border-radius: 50%;
   background: #4CAF50;
   cursor: pointer;
+}
+
+.sidebar-checkbox{
+  margin:15px;
 }
 
 /* Labels below slider */
