@@ -59,10 +59,20 @@ export default class Output extends Atom {
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
+            this.decreaseToProcessCountByOne()
+            this.decreaseToProcessCountByOne()//Called twice to count for the molecule it is in
+            
             this.value = this.findIOValue('number or geometry')
             this.parent.value = this.value
             this.parent.propogate()
             this.parent.processing = false
+            
+            if(this.parent.topLevel){
+                const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000
+                console.warn("Loading finished in " + timeToLoad + " seconds")
+                
+                GlobalVariables.gitHub.beginAutosave()
+            }
             
             //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
             // if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule" && !this.parent.topLevel){

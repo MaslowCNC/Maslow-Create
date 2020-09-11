@@ -43,7 +43,7 @@ export default class Equation extends Atom {
         this.currentEquation = "x + y"
         
         this.setValues(values)
-        this.updateValue()
+        this.addAndRemoveInputs()
         this.setValues(values) //Set values again to load input values which were saved
         
         
@@ -75,41 +75,55 @@ export default class Equation extends Atom {
     }
     
     /**
+     * Add and remove inputs as needed from the atom
+     */ 
+    addAndRemoveInputs(){
+        //Find all the letters in this equation
+        var re = /[a-zA-Z]/g
+        const variables = this.currentEquation.match(re)
+        
+        //Remove any inputs which are not needed
+        const deleteExtraInputs = () => {
+            this.inputs.forEach( input => {
+                if( !variables.includes(input.name) ){
+                    this.removeIO('input', input.name, this)
+                    deleteExtraInputs() //This needs to be called recursively to make sure all the inputs are deleted
+                }
+            })
+        }
+        deleteExtraInputs()
+        
+        //Add any inputs which are needed
+        for (var variable in variables){
+            if(!this.inputs.some(input => input.Name === variables[variable])){
+                this.addIO('input', variables[variable], this, 'number', 1)
+            }
+        }
+    }
+    
+    /**
      * Evaluate the equation adding and removing inputs as needed
      */ 
     updateValue(){
         try{
-            //Find all the letters in this equation
-            var re = /[a-zA-Z]/g
-            const variables = this.currentEquation.match(re)
             
-            //Remove any inputs which are not needed
-            const deleteExtraInputs = () => {
-                this.inputs.forEach( input => {
-                    if( !variables.includes(input.name) ){
-                        this.removeIO('input', input.name, this)
-                        deleteExtraInputs() //This needs to be called recursively to make sure all the inputs are deleted
-                    }
-                })
-            }
-            deleteExtraInputs()
-            
-            //Add any inputs which are needed
-            for (var variable in variables){
-                if(!this.inputs.some(input => input.Name === variables[variable])){
-                    this.addIO('input', variables[variable], this, 'number', 1)
-                }
-            }
+            this.addAndRemoveInputs()
             
             if(this.inputs.every(x => x.ready)){
-            //Substitute numbers into the string
+                
+                this.decreaseToProcessCountByOne()
+                //Substitute numbers into the string
                 var substitutedEquation = this.currentEquation
-                for (variable in variables){
+                
+                //Find all the letters in this equation
+                var re = /[a-zA-Z]/g
+                const variables = this.currentEquation.match(re)
+                for (var variable in variables){
                     for (var i= 0; i<this.inputs.length; i++){
                         if (this.inputs[i].name == variables[variable]) {
                             substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))
-                        } 
-                    }      
+                        }
+                    }
                 }
                 //Evaluate the equation
                 this.value = GlobalVariables.limitedEvaluate(substitutedEquation)

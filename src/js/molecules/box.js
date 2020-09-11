@@ -68,6 +68,8 @@ export default class Box extends Atom {
 
         this.setValues(values)
         
+        this.decreaseToProcessCountByOne() //Since this isn't really a molecule to process remove it from the list
+        
     }
     
     /**

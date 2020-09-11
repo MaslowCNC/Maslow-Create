@@ -71,7 +71,6 @@ export default class ExtractTag extends Atom{
                 this.basicThreadValueProcessing(values, "extractTag")
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
-            super.updateValue()
         }
     }
     

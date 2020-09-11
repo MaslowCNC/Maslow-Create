@@ -35,7 +35,7 @@ export default class Svg extends Atom {
         /**
          * This atom's height as drawn on the screen
          */
-        this.height
+        this.height = 0
         
         this.addIO('input', 'geometry', this, 'geometry', null)
         

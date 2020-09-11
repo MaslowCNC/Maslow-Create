@@ -13,6 +13,7 @@ import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
 import Stl              from './molecules/stl.js'
 import Svg              from './molecules/svg.js'
+import Nest              from './molecules/nest.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
@@ -61,14 +62,14 @@ class GlobalVariables{
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             shrinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
-            
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},
-            addBOMTag:          {creator: AddBOMTag, atomType: 'Add BOM Tag', atomCategory: 'Tags'},
+            addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},
             tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Tags'},
             extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Tags'},
             cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Tags'},
             CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Tags'},
+
 
             
             regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},
@@ -84,11 +85,13 @@ class GlobalVariables{
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
-            
+
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
+            nest:                {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
+
             output:             {creator: Output, atomType: 'Output'}
         }
         /** 
@@ -111,6 +114,16 @@ class GlobalVariables{
          * @type {object}
          */
         this.gitHub = new GitHubModule()
+        /** 
+         * A total of the number of atoms in this project
+         * @type {integer}
+         */
+        this.totalAtomCount = 0
+        /** 
+         * A counter used during the loading process to keep track of how many atoms are still to be loaded.
+         * @type {integer}
+         */
+        this.numberOfAtomsToLoad = 0
         /** 
          * A flag to indicate if the project is a fork.
          * @type {boolean}
