@@ -176,25 +176,17 @@ export default class Molecule extends Atom{
     /**
      * Grab values from the inputs and push them out to the input atoms.
      */ 
-    updateValue(){
-        this.output.waitOnComingInformation()
-        if(this.inputs.every(x => x.ready)){
-            
-            this.clearAlert()
-            
-            //Grab values from the inputs and push them out to the input objects
-            this.inputs.forEach(moleculeInput => {
-                this.nodesOnTheScreen.forEach(atom => {
-                    if(atom.atomType == 'Input' && moleculeInput.name == atom.name){
-                        if(atom.getOutput() != moleculeInput.getValue() && atom.output.connectors.length > 0){//Don't update the input if it hasn't changed
-                            //Sets to true processing variable??
-                            this.processing = true
-                            atom.updateValue()
-                        }
-                    }
-                })
-            })
-        }
+    updateValue(targetName){
+        
+        //Molecules are fully transparent so we don't wait for all of the inputs to begin processing the things inside
+        
+        //Tell the correct input to update
+        this.nodesOnTheScreen.forEach(atom => { //Scan all the input atoms
+            if(atom.atomType == 'Input' && atom.name == targetName){  //When there is a match
+                this.processing = true  //Sets to true processing variable
+                atom.updateValue() //Tell that input to update it's value
+            }
+        })
     }
     
     /**
@@ -212,16 +204,29 @@ export default class Molecule extends Atom{
         }
     }
     
+    unlockFreeInputs(){
+        super.unlockFreeInputs()
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            atom.unlockFreeInputs()
+        })
+    }
+    
     /**
      * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
      */ 
     beginPropogation(){
-        //Run for this molecule
-        super.beginPropogation()
         
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
+        }
+        else{  //Otherwise trigger inputs with nothing attached
+            this.inputs.forEach(attachmentPoint => {
+                if(attachmentPoint.connectors.length == 0){
+                    attachmentPoint.setValue(attachmentPoint.getValue()) //Trigger attachment points with nothing connected to them to begin propagation
+                }
+            })
         }
         
         // Run for every atom in this molecule
@@ -481,6 +486,8 @@ export default class Molecule extends Atom{
         
         return Promise.all(promiseArray).then( ()=> { //Once all the atoms are placed we can finish
             
+            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
+            
             //Place the connectors
             if(json.allConnectors){
                 json.allConnectors.forEach(connector => {
@@ -488,9 +495,12 @@ export default class Molecule extends Atom{
                 })
             }
             
-            this.setValues([])//Call set values again with an empty list to trigger loading of IO values from memory
             if(this.topLevel){
+                
+                GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
+                
                 this.backgroundClick()
+                this.unlockFreeInputs()
                 this.beginPropogation()
             }
         })
@@ -520,6 +530,8 @@ export default class Molecule extends Atom{
      */
     async placeAtom(newAtomObj, unlock){
         
+        GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad + 1 //Indicate that one more atom needs to be loaded
+        
         try{
             var promise = null
             
@@ -539,19 +551,20 @@ export default class Molecule extends Atom{
                         promise = atom.deserialize(newAtomObj)
                     }
                     
+                    //If this is a github molecule load it from the web
+                    if(atom.atomType == 'GitHubMolecule'){
+                        promise = atom.loadProjectByID(atom.projectID)
+                    }
+                    
                     //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
                     if(atom.atomType == 'Output'){
                         //Check for existing outputs
                         this.nodesOnTheScreen.forEach(atom => {
                             if(atom.atomType == 'Output'){
                                 atom.deleteOutputAtom() //Remove them
+                                this.decreaseToProcessCountByOne() //Don't count removed outputs
                             }
                         })
-                    }
-                    
-                    //If this is a github molecule load it from the web
-                    if(atom.atomType == 'GitHubMolecule'){
-                        promise = atom.loadProjectByID(atom.projectID)
                     }
                     
                     //Add the atom to the list to display
@@ -564,13 +577,15 @@ export default class Molecule extends Atom{
                             atom.copyInputsFromParent()
                         }
                         
-                        //Make begin propogation from an atom when it is placed
+                        //Make begin propagation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
+                                atom.unlockFreeInputs()
                                 atom.beginPropogation()
                             })
                         }
                         else{
+                            atom.unlockFreeInputs()
                             atom.beginPropogation()
                         }
                         
@@ -621,13 +636,11 @@ export default class Molecule extends Atom{
         })
         
         if(outputAttachmentPoint && inputAttachmentPoint){             //If we have found the output and input
-            var connector = new Connector({
+            new Connector({
                 atomType: 'Connector',
                 attachmentPoint1: outputAttachmentPoint,
                 attachmentPoint2: inputAttachmentPoint,
             })
-            connector.attachmentPoint1.connectors.push(connector)   //Give input and output references to the connector (this should probably happen in the connector constructor)
-            connector.attachmentPoint2.connectors.push(connector)
         }
         else{
             console.warn("Unable to place connector")

@@ -591,6 +591,17 @@ export default class Atom {
     /**
      * Set's the output value and shows the atom output on the 3D view.
      */ 
+    decreaseToProcessCountByOne(){
+        GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
+        
+        const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
+        
+        GlobalVariables.gitHub.progressSave(percentLoaded, false)
+    }
+    
+    /**
+     * Token update value function to give each atom one by default
+     */ 
     updateValue(){
         
     }
@@ -637,6 +648,7 @@ export default class Atom {
         })
         if(go){     //Then we update the value
             this.processing = true
+            this.decreaseToProcessCountByOne()
             
             if(this.output){  //If this atom has an ouput
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
@@ -666,22 +678,26 @@ export default class Atom {
         }
     }
     
-    
     /**
-     * Unlocks the atom by checking to see if it has any upstream components that it should wait for before beginning to process.
+     * Unlocks any inputs which have nothing connected
      */ 
-    beginPropogation(){
+    unlockFreeInputs(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
         this.inputs.forEach(input => {
             if(input.connectors.length == 0){
                 input.ready = true
             }
         })
-        
-        //If the inputs are all ready
+    }
+    
+    /**
+     * Starts proagation from this atom if it is not waiting for anything up stream.
+     */ 
+    beginPropogation(){
+        //If anything is connected to this it shouldn't be a starting point
         var go = true
         this.inputs.forEach(input => {
-            if(!input.ready){
+            if(input.connectors.length > 0){
                 go = false
             }
         })
@@ -929,7 +945,7 @@ export default class Atom {
         var button = document.createElement('button')
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute('class', ' browseButton')
-        button.setAttribute('id', buttonText + "-button")
+        button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)
         valueTextDiv.setAttribute('class', 'sidebar-subitem')
@@ -951,11 +967,12 @@ export default class Atom {
     createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement('div')
         sideBar.appendChild(gridDiv)
-        gridDiv.setAttribute('id', 'gridDiv')
+        gridDiv.setAttribute('id', text + "-parent")
+        gridDiv.setAttribute('class', "sidebar-checkbox")
         var gridCheck = document.createElement('input')
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
-        gridCheck.setAttribute('id', 'gridCheck')
+        gridCheck.setAttribute('id', text)
         
         if (isChecked){
             gridCheck.setAttribute('checked', 'true')

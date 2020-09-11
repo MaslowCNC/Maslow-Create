@@ -67,6 +67,10 @@ export default class Input extends Atom {
     draw() {
 
         // //Snap the inputs to the far right side
+        /**
+        * The x position of the atom
+        * @type {number}
+        */
         this.x = this.radius
 
         let xInPixels = GlobalVariables.widthToPixels(this.x)
@@ -106,7 +110,7 @@ export default class Input extends Atom {
         }
         
         this.inputs.forEach(input => {
-            input.draw()       
+            input.draw()
         })
         if(this.output){
             this.output.draw()
@@ -155,11 +159,21 @@ export default class Input extends Atom {
     }
     
     /**
-     * Grabs the new value from the parent molecule's input, sets this atoms value, then propogates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. 
+     * Propagation does not begin from inputs. They will be called by the attachment point of the parent molecule if it has no connectors
+     */ 
+    beginPropogation(){
+        
+    }
+    
+    /**
+     * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. 
      */ 
     updateValue(){
+        
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
+                this.decreaseToProcessCountByOne()
+                
                 this.value = input.getValue()
                 
                 this.output.waitOnComingInformation()              //Lock all of the dependents
