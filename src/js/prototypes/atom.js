@@ -661,16 +661,16 @@ export default class Atom {
             this.clearAlert()
 
             const computeValue = async (values, key) => {
-                    console.log(values)
+                    console.log(key, values)
                     let promise = new Promise((resolve,reject)=>{
-                    pool.exec(key, values).then((result) => {
+                    pool.exec(key, [values]).then((result) => {
                             resolve(result)
                         })
                     })
                     let result1 = await promise
-                    const me = jsonDeSerializer.deserialize({output: 'geometry'}, result1)
-                    let final = me  
-                    console.log(me)
+                     let final = jsonDeSerializer.deserialize({output: 'geometry'}, result1)
+                    
+                    console.log(final)
                     return [final];          
  
                
