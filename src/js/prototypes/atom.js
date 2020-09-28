@@ -3,6 +3,7 @@ import GlobalVariables from '../globalvariables'
 import showdown  from 'showdown'
 
 const workerpool = require('workerpool');
+const jsonDeSerializer = require('@jscad/io/json-deserializer')
 // create a worker pool using an external worker script
 const pool = workerpool.pool('./JSCADworker.js');
 /**
@@ -659,29 +660,23 @@ export default class Atom {
             
             this.clearAlert()
 
-            console.log(values , key)
-            
             const computeValue = async (values, key) => {
-                try{
-                    console.log(values)
-                    return await pool.exec(key, values)
-                        .then(function (result) {
-                            console.log("result")
-                            console.log(result)
-                            
+                
+                    let promise = new Promise((resolve,reject)=>{
+                    pool.exec(key, values).then((result) => {
+                            resolve(result)
                         })
-                        .catch(function (err) {
-                          console.error(err);
-                        })
+                    })
+                    let result1 = await promise
+                    const me = jsonDeSerializer.deserialize({output: 'geometry'}, result1)
+                    let final = me  
+                    return [final];          
  
-                }
-                catch(err){
-                    this.setAlert(err)
-                }
+               
             }
             
-            computeValue(values, key).then(result => {
-                console.log(result)
+            computeValue(values, key).then((result) => {
+                console.log(values,key,result)
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()
@@ -727,9 +722,11 @@ export default class Atom {
     sendToRender(){
         //Send code to JSxCAD to render
         try{
+            console.log(this.value)
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){
+            console.log(err)
             this.setAlert(err)    
         }
 
