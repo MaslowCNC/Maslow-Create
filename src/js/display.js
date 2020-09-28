@@ -169,7 +169,7 @@ export default class Display {
         this.perspectiveCamera.update(this.camera, this.camera)
         
         this.options = {
-              glOptions: { container: document.getElementById('viewerContext') },
+              glOptions: { container: this.targetDiv },
               camera: this.camera,
               drawCommands: {
                 // draw commands bootstrap themselves the first time they are run
@@ -189,7 +189,7 @@ export default class Display {
                     fadeOut: false,
                     transparent: true
                   },
-                  size: [this.width, this.height],
+                  size: [500, 500],
                   ticks: [10, 1]
                 },
                 {
