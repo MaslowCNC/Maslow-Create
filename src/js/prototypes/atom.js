@@ -3,7 +3,7 @@ import GlobalVariables from '../globalvariables'
 import showdown  from 'showdown'
 
 const workerpool = require('workerpool');
-const jsonDeSerializer = require('@jscad/io/json-deserializer')
+const jsonDeSerializer = require('@jscad/json-deserializer')
 // create a worker pool using an external worker script
 const pool = workerpool.pool('./JSCADworker.js');
 /**

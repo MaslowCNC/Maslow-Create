@@ -3,8 +3,8 @@ import GlobalVariables from './globalvariables'
 const workerpool = require('workerpool');
 // create a worker pool using an external worker script
 const pool = workerpool.pool('./JSCADworker.js');
-const jsonDeSerializer = require('@jscad/io/json-deserializer')
-const jsonSerializer = require('@jscad/io/json-serializer')
+const jsonDeSerializer = require('@jscad/json-deserializer')
+const jsonSerializer = require('@jscad/json-serializer')
 
 const { colorize } = require('@jscad/modeling').colors
   const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
