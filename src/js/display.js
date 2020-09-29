@@ -7,11 +7,11 @@ const jsonDeSerializer = require('@jscad/io/json-deserializer')
 const jsonSerializer = require('@jscad/io/json-serializer')
 
 const { colorize } = require('@jscad/modeling').colors
-  const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
-  const { intersect, subtract } = require('@jscad/modeling').booleans
+const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
+const { intersect, subtract } = require('@jscad/modeling').booleans
 
 
-const { prepareRender, drawCommands, cameras, entitiesFromSolids } = require('@jscad/utils/regl-renderer') 
+const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/utils/regl-renderer') 
 /**
  * This class handles writing to the 3D preview display. Large parts of this class are copied directly from JSxCAD.
  */
@@ -148,6 +148,25 @@ export default class Display {
        
         //this.targetDiv.appendChild(this.renderer.domElement)
         
+        //
+        /** 
+         * The controls which let the user pan and zoom with the mouse.
+         * @type {object}
+         */
+        
+        this.controls = Object.assign({}, controls.orbit.defaults)
+        console.log(this.controls.userControl)
+        this.controls.rotate = 5
+        this.controls.rotateSpeed = 4.0
+        this.controls.zoomSpeed = 4.0
+        this.controls.panSpeed = 2.0
+        this.controls.noZoom = false
+        this.controls.noPan = false
+        this.controls.staticMoving = true
+        this.controls.dynamicDampingFactor = 0.1
+        this.controls.keys = [65, 83, 68]
+        
+
     }
 
     init(){
@@ -163,6 +182,7 @@ export default class Display {
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     writeToDisplay(shape){
+        console.log(controls)
         this.displayedGeometry = shape
         this.solids= entitiesFromSolids({}, colorize([1, 0, 0, 0.75], this.displayedGeometry))      
         this.perspectiveCamera.setProjection(this.camera, this.camera, { width:this.width, height:this.height })
