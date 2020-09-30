@@ -668,12 +668,8 @@ export default class Atom {
                         })
                     })
                     let result1 = await promise
-                     let final = jsonDeSerializer.deserialize({output: 'geometry'}, result1)
                     
-                    console.log(final)
-                    return [final];          
- 
-               
+                    return [result1];          
             }
             
             computeValue(values, key).then((result) => {

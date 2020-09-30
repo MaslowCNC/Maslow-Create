@@ -148,7 +148,7 @@ export default class Display {
          */
          
 
-          console.log(controls.orbit)
+          //console.log(controls.orbit)
         this.controls = controls.orbit
        // state.controls =  controls.orbit.defaults
         this.state.controls = Object.assign({}, this.controls.defaults)
@@ -177,7 +177,7 @@ export default class Display {
     }
 
     update(){
-        console.log(this.state.camera.position)
+        //console.log(this.state.camera.position)
         const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera }, this.state.camera)
         this.state.controls = { ...this.state.controls, ...updates.controls }
         this.state.camera.position = updates.camera.position
@@ -189,7 +189,7 @@ export default class Display {
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     writeToDisplay(shape){
-        this.displayedGeometry = shape
+        this.displayedGeometry = jsonDeSerializer.deserialize({output: 'geometry'}, shape)
         this.solids= entitiesFromSolids({}, colorize([1, 0, 0, 0.75], this.displayedGeometry))      
         this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
         this.perspectiveCamera.update(this.state.camera, this.state.camera)
