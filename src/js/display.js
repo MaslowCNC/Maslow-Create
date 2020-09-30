@@ -97,8 +97,11 @@ export default class Display {
          * The camera which controls how the scene is rendered.
          * @type {object}
          */
+
+       this.state = {}
+
        this.perspectiveCamera = cameras.perspective
-       this.camera = Object.assign({}, this.perspectiveCamera.defaults)
+       this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
         
         //[this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, -30, 50]
         //
@@ -107,7 +110,7 @@ export default class Display {
 
         this.options = {
               glOptions: { container: this.targetDiv },
-              camera: this.camera,
+              camera: this.state.camera,
               drawCommands: {
                 // draw commands bootstrap themselves the first time they are run
                 drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
@@ -139,16 +142,18 @@ export default class Display {
               ]
             }
 
-        //
-
         /** 
          * The controls which let the user pan and zoom with the mouse.
          * @type {object}
          */
-        const state = {}
-        state.controls =  controls.orbit.defaults
-    
-        controls.pan({controls: state.controls, camera: this.camera})
+         
+
+          console.log(controls.orbit)
+        this.controls = controls.orbit
+       // state.controls =  controls.orbit.defaults
+        this.state.controls = Object.assign({}, this.controls.defaults)
+       
+        this.controls.pan({controls: this.state.controls, camera: this.state.camera}, 1)
 
         /** 
          * The three js webGLRendere object which does the actual rendering to the screen.
@@ -171,6 +176,15 @@ export default class Display {
 
     }
 
+    update(){
+
+        //this.controls.update({ controls:this.controlObj, camera:this.camera }, this.camera)
+        this.perspectiveCamera.update(this.state.camera, this.state.camera)
+        const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera }, this.state.camera)
+        this.state.controls = { ...this.state.controls, ...updates.controls }
+        this.state.camera.position = updates.camera.position
+    }
+
     /**
      * Writes a shape to the 3D display. Expecting a threejs geometry.
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
@@ -178,12 +192,12 @@ export default class Display {
     writeToDisplay(shape){
         this.displayedGeometry = shape
         this.solids= entitiesFromSolids({}, colorize([1, 0, 0, 0.75], this.displayedGeometry))      
-        this.perspectiveCamera.setProjection(this.camera, this.camera, { width:this.width, height:this.height })
-        this.perspectiveCamera.update(this.camera, this.camera)
+        this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
+        this.perspectiveCamera.update(this.state.camera, this.state.camera)
         
         this.options = {
               glOptions: { container: this.targetDiv },
-              camera: this.camera,
+              camera: this.state.camera,
               drawCommands: {
                 // draw commands bootstrap themselves the first time they are run
                 drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
@@ -224,7 +238,7 @@ export default class Display {
      */ 
     rendering(){
         this.renderer(this.options)
-        
+        this.update()
 
     }
 }
