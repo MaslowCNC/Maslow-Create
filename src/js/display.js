@@ -153,7 +153,7 @@ export default class Display {
        // state.controls =  controls.orbit.defaults
         this.state.controls = Object.assign({}, this.controls.defaults)
        
-        this.controls.pan({controls: this.state.controls, camera: this.state.camera}, 1)
+        this.controls.pan({controls: this.state.controls, camera: this.state.camera}, 30)
 
         /** 
          * The three js webGLRendere object which does the actual rendering to the screen.
@@ -177,12 +177,11 @@ export default class Display {
     }
 
     update(){
-
-        //this.controls.update({ controls:this.controlObj, camera:this.camera }, this.camera)
-        this.perspectiveCamera.update(this.state.camera, this.state.camera)
+        console.log(this.state.camera.position)
         const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera }, this.state.camera)
         this.state.controls = { ...this.state.controls, ...updates.controls }
         this.state.camera.position = updates.camera.position
+        this.perspectiveCamera.update(this.state.camera, this.state.camera)
     }
 
     /**
@@ -237,8 +236,8 @@ export default class Display {
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     rendering(){
-        this.renderer(this.options)
         this.update()
+        this.renderer(this.options)
 
     }
 }
