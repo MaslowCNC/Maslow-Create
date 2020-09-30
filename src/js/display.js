@@ -7,11 +7,13 @@ const jsonDeSerializer = require('@jscad/json-deserializer')
 const jsonSerializer = require('@jscad/json-serializer')
 
 const { colorize } = require('@jscad/modeling').colors
-  const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
-  const { intersect, subtract } = require('@jscad/modeling').booleans
+const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
+const { intersect, subtract } = require('@jscad/modeling').booleans
 
 
-const { prepareRender, drawCommands, cameras, entitiesFromSolids } = require('@jscad/utils/regl-renderer') 
+const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/utils/regl-renderer') 
+
+
 /**
  * This class handles writing to the 3D preview display. Large parts of this class are copied directly from JSxCAD.
  */
@@ -103,7 +105,7 @@ export default class Display {
         this.width = window.innerWidth
         this.height = window.innerHeight
 
-       this.options = {
+        this.options = {
               glOptions: { container: this.targetDiv },
               camera: this.camera,
               drawCommands: {
@@ -138,6 +140,16 @@ export default class Display {
             }
 
         //
+
+        /** 
+         * The controls which let the user pan and zoom with the mouse.
+         * @type {object}
+         */
+        const state = {}
+        state.controls =  controls.orbit.defaults
+    
+        controls.pan({controls: state.controls, camera: this.camera})
+
         /** 
          * The three js webGLRendere object which does the actual rendering to the screen.
          * @type {object}
@@ -152,7 +164,8 @@ export default class Display {
 
     init(){
         let shape = colorize([1, 0, 0, 0.75], circle({radius:10}))
-        console.log(shape)
+        //console.log(shape)
+        
         this.displayedGeometry = shape
         
 
@@ -211,6 +224,7 @@ export default class Display {
      */ 
     rendering(){
         this.renderer(this.options)
+        
 
     }
 }
