@@ -363,7 +363,7 @@ function init() {
     
     //GlobalVariables.display.render()
 
-   //GlobalVariables.display.init()
+    //GlobalVariables.display.init()
 
 }
 
