@@ -103,10 +103,10 @@ export default class Display {
          * @type {object}
          */
 
-       this.state = {}
+        this.state = {}
 
-       this.perspectiveCamera = cameras.perspective
-       this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
+        this.perspectiveCamera = cameras.perspective
+        this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
         
         this.state.camera.position = [300,300,300]
         
@@ -114,38 +114,38 @@ export default class Display {
         this.height = window.innerHeight
 
         this.options = {
-              glOptions: { container: this.targetDiv },
-              camera: this.state.camera,
-              drawCommands: {
+            glOptions: { container: this.targetDiv },
+            camera: this.state.camera,
+            drawCommands: {
                 // draw commands bootstrap themselves the first time they are run
                 drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
                 drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
                 drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
-              },
-              // data
-              entities: [
+            },
+            // data
+            entities: [
                 { // grid data
-                  // the choice of what draw command to use is also data based
-                  visuals: {
-                    drawCmd: 'drawGrid',
-                    show: true,
-                    color: [0, 0, 0, 1],
-                    subColor: [0, 0, 1, 0.5],
-                    fadeOut: false,
-                    transparent: true
-                  },
-                  size: [500, 500],
-                  ticks: [10, 1]
+                    // the choice of what draw command to use is also data based
+                    visuals: {
+                        drawCmd: 'drawGrid',
+                        show: true,
+                        color: [0, 0, 0, 1],
+                        subColor: [0, 0, 1, 0.5],
+                        fadeOut: false,
+                        transparent: true
+                    },
+                    size: [500, 500],
+                    ticks: [10, 1]
                 },
                 {
-                  visuals: {
-                    drawCmd: 'drawAxis',
-                    show: true
-                  }
+                    visuals: {
+                        drawCmd: 'drawAxis',
+                        show: true
+                    }
                 },
                 ...this.solids
-              ]
-            }
+            ]
+        }
 
         /** 
          * The controls which let the user pan and zoom with the mouse.
@@ -153,7 +153,7 @@ export default class Display {
          */
          
         this.controls = controls.orbit
-       // state.controls =  controls.orbit.defaults
+        // state.controls =  controls.orbit.defaults
         this.state.controls = Object.assign({}, this.controls.defaults)
         
         //Bind events to mouse input
@@ -185,7 +185,7 @@ export default class Display {
             
         document.getElementById('viewerContext').addEventListener('wheel', event => {
            
-           this.sphericalMoveCamera(event.deltaY*5, 0, 0)
+            this.sphericalMoveCamera(event.deltaY*5, 0, 0)
            
         })
         
@@ -195,7 +195,7 @@ export default class Display {
          */
 
         this.renderer = prepareRender(this.options)
-       // this.renderer.setPixelRatio(window.devicePixelRatio)
+        // this.renderer.setPixelRatio(window.devicePixelRatio)
        
         //this.targetDiv.appendChild(this.renderer.domElement)
         
@@ -224,7 +224,7 @@ export default class Display {
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     sphericalMoveCamera(deltaRho, deltaPhi, deltaTheta){
-         //Initial positions
+        //Initial positions
         var x = this.state.camera.position[0]
         var y = this.state.camera.position[1]
         var z = this.state.camera.position[2]
@@ -265,38 +265,38 @@ export default class Display {
             this.perspectiveCamera.update(this.state.camera, this.state.camera)
             
             this.options = {
-                  glOptions: { container: this.targetDiv },
-                  camera: this.state.camera,
-                  drawCommands: {
+                glOptions: { container: this.targetDiv },
+                camera: this.state.camera,
+                drawCommands: {
                     // draw commands bootstrap themselves the first time they are run
                     drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
                     drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
                     drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
-                  },
-                  // data
-                  entities: [
+                },
+                // data
+                entities: [
                     { // grid data
-                      // the choice of what draw command to use is also data based
-                      visuals: {
-                        drawCmd: 'drawGrid',
-                        show: true,
-                        color: [0, 0, 0, 1],
-                        subColor: [0, 0, 0, 0.5],
-                        fadeOut: false,
-                        transparent: true
-                      },
-                      size: [500, 500],
-                      ticks: [10, 1]
+                        // the choice of what draw command to use is also data based
+                        visuals: {
+                            drawCmd: 'drawGrid',
+                            show: true,
+                            color: [0, 0, 0, 1],
+                            subColor: [0, 0, 0, 0.5],
+                            fadeOut: false,
+                            transparent: true
+                        },
+                        size: [500, 500],
+                        ticks: [10, 1]
                     },
                     {
-                      visuals: {
-                        drawCmd: 'drawAxis',
-                        show: true
-                      }
+                        visuals: {
+                            drawCmd: 'drawAxis',
+                            show: true
+                        }
                     },
                     ...this.solids
-                  ]
-                }
+                ]
+            }
             this.renderer(this.options)
         }
     }
