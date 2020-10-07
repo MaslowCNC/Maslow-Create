@@ -669,7 +669,7 @@ export default class Atom {
                     })
                     let result1 = await promise
                     
-                    return [result1];          
+                    return result1
             }
             
             computeValue(values, key).then((result) => {

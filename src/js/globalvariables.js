@@ -29,6 +29,7 @@ import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
+import Union             from './molecules/union.js'
 import GitHubModule     from './githubOauth'
 import { createService } from './lib/service.js'
 
@@ -61,7 +62,10 @@ class GlobalVariables{
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
-            shrinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
+            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
+            shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
+            
+            
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},
             addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},
