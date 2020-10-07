@@ -2,6 +2,10 @@ import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
 import showdown  from 'showdown'
 
+const workerpool = require('workerpool')
+const jsonDeSerializer = require('@jscad/json-deserializer')
+// create a worker pool using an external worker script
+const pool = workerpool.pool('./JSCADworker.js')
 /**
  * This class is the prototype for all atoms.
  */
@@ -655,18 +659,19 @@ export default class Atom {
             }
             
             this.clearAlert()
-            
+
             const computeValue = async (values, key) => {
-                try{
-                    return await GlobalVariables.ask({values: values, key: key})
-                }
-                catch(err){
-                    this.setAlert(err)
-                }
+                let promise = new Promise((resolve,reject)=>{
+                    pool.exec(key, [values]).then((result) => {
+                        resolve(result)
+                    })
+                })
+                let result1 = await promise
+                    
+                return result1
             }
             
-            computeValue(values, key).then(result => {
-                
+            computeValue(values, key).then((result) => {
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()
@@ -715,7 +720,7 @@ export default class Atom {
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){
-            this.setAlert(err)    
+            this.setAlert(err)
         }
 
     }
