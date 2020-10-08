@@ -659,7 +659,8 @@ export default class Atom {
             }
             
             this.clearAlert()
-
+            console.log("About to process: ")
+            console.log(key)
             const computeValue = async (values, key) => {
                 let promise = new Promise((resolve,reject)=>{
                     pool.exec(key, [values]).then((result) => {
