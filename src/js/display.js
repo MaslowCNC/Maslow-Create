@@ -2,8 +2,6 @@
 // create a worker pool using an external worker script
 // const pool = workerpool.pool('./JSCADworker.js');
 
-const jsonDeSerializer = require('@jscad/json-deserializer')
-
 const { colorize } = require('@jscad/modeling').colors
 const { circle } = require('@jscad/modeling').primitives
 const { union } = require('@jscad/modeling').booleans
@@ -245,7 +243,7 @@ export default class Display {
      */ 
     writeToDisplay(shape){
         if(shape != null){
-            this.displayedGeometry = shape.map(x => jsonDeSerializer.deserialize({output: 'geometry'}, x.geometry))
+            this.displayedGeometry = shape.map(x => x.geometry)
             const unionized = union(this.displayedGeometry)  //Union to compress it all into one
             this.solids = entitiesFromSolids({}, unionized)  //This should be able to handle an array but right now it can't
             this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
