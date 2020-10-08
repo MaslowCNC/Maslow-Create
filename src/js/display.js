@@ -1,14 +1,12 @@
-import GlobalVariables from './globalvariables'
-
 // const workerpool = require('workerpool');
 // create a worker pool using an external worker script
 // const pool = workerpool.pool('./JSCADworker.js');
+
 const jsonDeSerializer = require('@jscad/json-deserializer')
-const jsonSerializer = require('@jscad/json-serializer')
 
 const { colorize } = require('@jscad/modeling').colors
-const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
-const { intersect, subtract , union} = require('@jscad/modeling').booleans
+const { circle } = require('@jscad/modeling').primitives
+const { union } = require('@jscad/modeling').booleans
 
 
 const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/regl-renderer') 
@@ -158,11 +156,11 @@ export default class Display {
         
         //Bind events to mouse input
         
-        document.getElementById('viewerContext').addEventListener('mousedown', event => {
+        document.getElementById('viewerContext').addEventListener('mousedown', () => {
             this.panning = true
         })
         
-        window.addEventListener('mouseup', event => {
+        window.addEventListener('mouseup', () => {
             this.panning = false
         })
         
