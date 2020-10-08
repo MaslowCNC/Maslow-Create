@@ -2,10 +2,6 @@ import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
 import showdown  from 'showdown'
 
-const workerpool = require('workerpool')
-
-// create a worker pool using an external worker script
-const pool = workerpool.pool('./JSCADworker.js')
 /**
  * This class is the prototype for all atoms.
  */
@@ -653,6 +649,7 @@ export default class Atom {
         if(go){     //Then we update the value
             this.processing = true
             this.decreaseToProcessCountByOne()
+            console.log("Processing: " + key)
             
             if(this.output){  //If this atom has an ouput
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
@@ -660,8 +657,8 @@ export default class Atom {
             
             this.clearAlert()
             const computeValue = async (values, key) => {
-                let promise = new Promise((resolve)=>{
-                    pool.exec(key, [values]).then((result) => {
+                let promise = new Promise( resolve =>{
+                    GlobalVariables.pool.exec(key, [values]).then((result) => {
                         resolve(result)
                     })
                 })
@@ -719,6 +716,8 @@ export default class Atom {
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){
+            console.log(err)
+            console.log(this.value)
             this.setAlert(err)
         }
 
