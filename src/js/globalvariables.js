@@ -31,7 +31,6 @@ import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
 import Union             from './molecules/union.js'
 import GitHubModule     from './githubOauth'
-import { createService } from './lib/service.js'
 
 /**
  * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.
@@ -148,29 +147,6 @@ class GlobalVariables{
          * @type {number}
          */
         this.circleSegmentSize = 2
-        
-        const agent = async ({ question }) => `Secret ${question}`
-        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
-            /** 
-             * A worker thread which can do computation.
-             * @type {object}
-             */
-            this.ask = result.ask
-        })
-        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
-            /** 
-             * The threejs renderer which displays things on the screen.
-             * @type {object}
-             */
-            this.render = result.ask
-        })
-        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
-            /** 
-             * The worker which is used during the saving process.
-             * @type {object}
-             */
-            this.saveWorker = result.ask
-        })
         
         const math = create(all)
         /** 
