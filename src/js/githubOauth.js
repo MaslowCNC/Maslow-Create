@@ -855,41 +855,9 @@ export default function GitHubModule(){
 
             if(GlobalVariables.topLevelMolecule.value != null && typeof GlobalVariables.topLevelMolecule.value != 'number'){
                 shape = GlobalVariables.topLevelMolecule.value
-            }else{
-                shape = {
-                    "solid": [
-                        [ [ [ 5.000000000000001, 5, 10 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ] ] ],
-                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
-                            [ -5.000000000000002, -4.999999999999999, 0 ],
-                            [ -5, 5.000000000000001, 0 ],
-                            [ 5.000000000000001, 5, 0 ] ] ],
-                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 0 ] ] ],
-                        [ [ [ -5.000000000000002, -4.999999999999999, 0 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ -5, 5.000000000000001, 0 ] ] ],
-                        [ [ [ -5, 5.000000000000001, 0 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ 5.000000000000001, 5, 10 ],
-                            [ 5.000000000000001, 5, 0 ] ] ],
-                        [ [ [ 5.000000000000001, 5, 0 ],
-                            [ 5.000000000000001, 5, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 0 ] ] ]
-                    ]
-                }
             }
             
-            const threadCompute = async (values, key) => {
-                return await GlobalVariables.saveWorker({values: values, key: key})
-            } 
-            threadCompute([shape], "SVG Picture").then(contentSvg => {
+            var contentSvg = "" //Would compute the svg picture here
                 this.progressSave(10)
                 
                 var bomContent = bomHeader
@@ -919,7 +887,7 @@ export default function GitHubModule(){
                     const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
                    
                     var decoder = new TextDecoder('utf8')
-                    var finalSVG = decoder.decode(contentSvg)
+                    //var finalSVG = decoder.decode(contentSvg)
 
                     this.createCommit(octokit,{
                         owner: saveUser,
@@ -929,14 +897,13 @@ export default function GitHubModule(){
                             files: {
                                 'BillOfMaterials.md': bomContent,
                                 'README.md': readmeContent,
-                                'project.svg': finalSVG,
+                                //'project.svg': finalSVG,
                                 'project.maslowcreate': projectContent
                             },
                             commit: 'Autosave'
                         }
                     })
                 })
-            })
 
             intervalTimer = setInterval(() => this.saveProject(), 1200000)
         }

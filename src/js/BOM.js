@@ -51,6 +51,8 @@ export class BOMEntry {
  */ 
 export const extractBomTags = async(geometry) => {
     
+    return [] //This is all broken right now
+    
     var bomItems = []
     
     var result = await GlobalVariables.ask({values: [geometry], key: "getBOM"})
