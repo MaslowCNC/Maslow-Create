@@ -851,59 +851,59 @@ export default function GitHubModule(){
                 clearInterval(intervalTimer) //Turn off auto saving to prevent it from saving again during this save
             }
             this.progressSave(0)
-            var shape = null
+            // var shape = null
 
-            if(GlobalVariables.topLevelMolecule.value != null && typeof GlobalVariables.topLevelMolecule.value != 'number'){
-                shape = GlobalVariables.topLevelMolecule.value
-            }
+            // if(GlobalVariables.topLevelMolecule.value != null && typeof GlobalVariables.topLevelMolecule.value != 'number'){
+            // shape = GlobalVariables.topLevelMolecule.value
+            // }
             
-            var contentSvg = "" //Would compute the svg picture here
-                this.progressSave(10)
+            // var contentSvg = "" //Would compute the svg picture here
+            this.progressSave(10)
                 
-                var bomContent = bomHeader
-                extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
+            var bomContent = bomHeader
+            extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
                     
-                    var totalParts = 0
-                    var totalCost  = 0
-                    if(bomItems != undefined){
-                        bomItems.forEach(item => {
-                            totalParts += item.numberNeeded
-                            totalCost  += item.costUSD
-                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
-                        })
-                    }
-                    bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
-                    bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
-                    
-                    
-                    var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
-                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
-                        readmeContent = readmeContent + item + "\n\n\n"
+                var totalParts = 0
+                var totalCost  = 0
+                if(bomItems != undefined){
+                    bomItems.forEach(item => {
+                        totalParts += item.numberNeeded
+                        totalCost  += item.costUSD
+                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
                     })
+                }
+                bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                     
-                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
-                    jsonRepOfProject.filetypeVersion = 1
-                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
-                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
-                   
-                    var decoder = new TextDecoder('utf8')
-                    //var finalSVG = decoder.decode(contentSvg)
-
-                    this.createCommit(octokit,{
-                        owner: saveUser,
-                        repo: saveRepoName,
-                        base: 'master', /* optional: defaults to default branch */
-                        changes: {
-                            files: {
-                                'BillOfMaterials.md': bomContent,
-                                'README.md': readmeContent,
-                                //'project.svg': finalSVG,
-                                'project.maslowcreate': projectContent
-                            },
-                            commit: 'Autosave'
-                        }
-                    })
+                    
+                var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
+                GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
+                    readmeContent = readmeContent + item + "\n\n\n"
                 })
+                    
+                var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                jsonRepOfProject.filetypeVersion = 1
+                jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+                   
+                // var decoder = new TextDecoder('utf8')
+                //var finalSVG = decoder.decode(contentSvg)
+
+                this.createCommit(octokit,{
+                    owner: saveUser,
+                    repo: saveRepoName,
+                    base: 'master', /* optional: defaults to default branch */
+                    changes: {
+                        files: {
+                            'BillOfMaterials.md': bomContent,
+                            'README.md': readmeContent,
+                            //'project.svg': finalSVG,
+                            'project.maslowcreate': projectContent
+                        },
+                        commit: 'Autosave'
+                    }
+                })
+            })
 
             intervalTimer = setInterval(() => this.saveProject(), 1200000)
         }

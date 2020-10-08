@@ -31,7 +31,6 @@ import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
 import Union             from './molecules/union.js'
 import GitHubModule     from './githubOauth'
-import { createService } from './lib/service.js'
 
 /**
  * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.
