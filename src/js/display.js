@@ -2,8 +2,6 @@
 // create a worker pool using an external worker script
 // const pool = workerpool.pool('./JSCADworker.js');
 
-const jsonDeSerializer = require('@jscad/json-deserializer')
-
 const { colorize } = require('@jscad/modeling').colors
 const { circle } = require('@jscad/modeling').primitives
 const { union } = require('@jscad/modeling').booleans
