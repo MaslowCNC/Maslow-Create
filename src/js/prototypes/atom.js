@@ -2,10 +2,6 @@ import AttachmentPoint from './attachmentpoint'
 import GlobalVariables from '../globalvariables'
 import showdown  from 'showdown'
 
-const workerpool = require('workerpool')
-
-// create a worker pool using an external worker script
-const pool = workerpool.pool('./JSCADworker.js')
 /**
  * This class is the prototype for all atoms.
  */
@@ -660,8 +656,8 @@ export default class Atom {
             
             this.clearAlert()
             const computeValue = async (values, key) => {
-                let promise = new Promise((resolve)=>{
-                    pool.exec(key, [values]).then((result) => {
+                let promise = new Promise( resolve =>{
+                    GlobalVariables.pool.exec(key, [values]).then((result) => {
                         resolve(result)
                     })
                 })
