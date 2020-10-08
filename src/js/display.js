@@ -1,14 +1,12 @@
-import GlobalVariables from './globalvariables'
-
 // const workerpool = require('workerpool');
 // create a worker pool using an external worker script
 // const pool = workerpool.pool('./JSCADworker.js');
+
 const jsonDeSerializer = require('@jscad/json-deserializer')
-const jsonSerializer = require('@jscad/json-serializer')
 
 const { colorize } = require('@jscad/modeling').colors
-const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
-const { intersect, subtract , union} = require('@jscad/modeling').booleans
+const { circle } = require('@jscad/modeling').primitives
+const { union } = require('@jscad/modeling').booleans
 
 
 const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/regl-renderer') 
@@ -158,11 +156,11 @@ export default class Display {
         
         //Bind events to mouse input
         
-        document.getElementById('viewerContext').addEventListener('mousedown', event => {
+        document.getElementById('viewerContext').addEventListener('mousedown', () => {
             this.panning = true
         })
         
-        window.addEventListener('mouseup', event => {
+        window.addEventListener('mouseup', () => {
             this.panning = false
         })
         
@@ -170,14 +168,6 @@ export default class Display {
             
             //If the mouse has been clicked down do pan
             if(this.panning){
-                var x = this.state.camera.position[0]
-                var y = this.state.camera.position[1]
-                var z = this.state.camera.position[2]
-                
-                //Convert to spherical cordinates 
-                var rho = Math.sqrt((x*x) + (y*y) + (z*z))
-                
-                
                 this.sphericalMoveCamera(0, -.01*event.movementX, -.01*event.movementY)
             }
         })
@@ -244,7 +234,6 @@ export default class Display {
         y = rho * Math.sin(theta) * Math.sin(phi)
         z = rho * Math.cos(theta)
         
-        
         //Asssign the new camera positions
         this.state.camera.position[0] = x
         this.state.camera.position[1] = y
@@ -255,8 +244,6 @@ export default class Display {
      * @param {object} shape - A jscad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     writeToDisplay(shape){
-        console.log("Shape: ")
-        console.log(shape)
         if(shape != null){
             this.displayedGeometry = shape.map(x => jsonDeSerializer.deserialize({output: 'geometry'}, x.geometry))
             const unionized = union(this.displayedGeometry)  //Union to compress it all into one
