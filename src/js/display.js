@@ -1,6 +1,5 @@
 const { colorize } = require('@jscad/modeling').colors
 const { circle } = require('@jscad/modeling').primitives
-const { union } = require('@jscad/modeling').booleans
 
 import GlobalVariables from './globalvariables'
 
@@ -244,48 +243,48 @@ export default class Display {
         if(shape != null){
             
             GlobalVariables.pool.exec("render", [shape])
-            .then(solids => {
+                .then(solids => {
                 
-                this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
-                this.perspectiveCamera.update(this.state.camera, this.state.camera)
+                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
+                    this.perspectiveCamera.update(this.state.camera, this.state.camera)
                 
-                this.options = {
-                    glOptions: { container: this.targetDiv },
-                    camera: this.state.camera,
-                    drawCommands: {
+                    this.options = {
+                        glOptions: { container: this.targetDiv },
+                        camera: this.state.camera,
+                        drawCommands: {
                         // draw commands bootstrap themselves the first time they are run
-                        drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
-                        drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
-                        drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
-                    },
-                    // data
-                    entities: [
-                        { // grid data
+                            drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
+                            drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
+                            drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
+                        },
+                        // data
+                        entities: [
+                            { // grid data
                             // the choice of what draw command to use is also data based
-                            visuals: {
-                                drawCmd: 'drawGrid',
-                                show: true,
-                                color: [0, 0, 0, 1],
-                                subColor: [0, 0, 0, 0.5],
-                                fadeOut: false,
-                                transparent: true
+                                visuals: {
+                                    drawCmd: 'drawGrid',
+                                    show: true,
+                                    color: [0, 0, 0, 1],
+                                    subColor: [0, 0, 0, 0.5],
+                                    fadeOut: false,
+                                    transparent: true
+                                },
+                                size: [500, 500],
+                                ticks: [10, 1]
                             },
-                            size: [500, 500],
-                            ticks: [10, 1]
-                        },
-                        {
-                            visuals: {
-                                drawCmd: 'drawAxis',
-                                show: true
-                            }
-                        },
-                        ...solids
-                    ]
-                }
+                            {
+                                visuals: {
+                                    drawCmd: 'drawAxis',
+                                    show: true
+                                }
+                            },
+                            ...solids
+                        ]
+                    }
                 
-                this.renderer(this.options)
-            })
-            .timeout(6000)  //timeout if the rendering takes more than six seconds
+                    this.renderer(this.options)
+                })
+                .timeout(6000)  //timeout if the rendering takes more than six seconds
         }
     }
     
