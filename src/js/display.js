@@ -242,13 +242,9 @@ export default class Display {
      */ 
     writeToDisplay(shape){
         if(shape != null){
-            console.log("Beginning write to display")
             
-            GlobalVariables.pool.exec("render", [shape]).then(solids => {
-                
-                console.log("Returned from worker to display")
-                console.log(solids)
-                
+            GlobalVariables.pool.exec("render", [shape])
+            .then(solids => {
                 
                 this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
                 this.perspectiveCamera.update(this.state.camera, this.state.camera)
@@ -289,6 +285,7 @@ export default class Display {
                 
                 this.renderer(this.options)
             })
+            .timeout(6000)  //timeout if the rendering takes more than six seconds
         }
     }
     
