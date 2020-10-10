@@ -650,6 +650,9 @@ export default class Atom {
             this.processing = true
             this.decreaseToProcessCountByOne()
             
+            //console.log("Processing: " + key)
+            //console.log(GlobalVariables.pool.stats())
+            
             if(this.output){  //If this atom has an ouput
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             }

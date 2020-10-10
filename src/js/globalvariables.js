@@ -151,7 +151,7 @@ class GlobalVariables{
         this.circleSegmentSize = 2
         
         // create a worker pool using an external worker script
-        this.pool = workerpool.pool('./JSCADworker.js')
+        this.pool = workerpool.pool('./JSCADworker.js', {minWorkers: 4})
         
         const math = create(all)  //What does this do?
         /** 
