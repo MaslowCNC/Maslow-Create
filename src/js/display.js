@@ -224,6 +224,15 @@ export default class Display {
         phi = phi + deltaPhi
         theta = theta + deltaTheta
         
+        //Restrict theta to valid values
+        if(theta < 0){
+            theta = 0.01
+        }
+        
+        if(theta > 3.14){
+            theta = 3.14
+        }
+        
         //Convert back to cartesian cordinates
         x = rho * Math.sin(theta) * Math.cos(phi)
         y = rho * Math.sin(theta) * Math.sin(phi)
