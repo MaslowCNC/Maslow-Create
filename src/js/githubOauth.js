@@ -786,7 +786,7 @@ export default function GitHubModule(){
                 content: projectContent
             }).then(() => {
                 //Then create the BOM file
-                content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
+                var content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
                 octokit.repos.createFile({
                     owner: currentUser,
                     repo: currentRepoName,
