@@ -650,23 +650,26 @@ export default class Atom {
             this.processing = true
             this.decreaseToProcessCountByOne()
             
+            //console.log("Processing: " + key)
+            //console.log(GlobalVariables.pool.stats())
+            
             if(this.output){  //If this atom has an ouput
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             }
             
             this.clearAlert()
-            
             const computeValue = async (values, key) => {
-                try{
-                    return await GlobalVariables.ask({values: values, key: key})
-                }
-                catch(err){
-                    this.setAlert(err)
-                }
+                let promise = new Promise( resolve =>{
+                    GlobalVariables.pool.exec(key, [values]).then((result) => {
+                        resolve(result)
+                    })
+                })
+                let result1 = await promise
+                    
+                return result1
             }
             
-            computeValue(values, key).then(result => {
-                
+            computeValue(values, key).then((result) => {
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()
@@ -715,7 +718,7 @@ export default class Atom {
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){
-            this.setAlert(err)    
+            this.setAlert(err)
         }
 
     }
@@ -945,7 +948,7 @@ export default class Atom {
         var button = document.createElement('button')
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute('class', ' browseButton')
-        button.setAttribute('id', buttonText + "-button")
+        button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)
         valueTextDiv.setAttribute('class', 'sidebar-subitem')
@@ -967,11 +970,12 @@ export default class Atom {
     createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement('div')
         sideBar.appendChild(gridDiv)
-        gridDiv.setAttribute('id', 'gridDiv')
+        gridDiv.setAttribute('id', text + "-parent")
+        gridDiv.setAttribute('class', "sidebar-checkbox")
         var gridCheck = document.createElement('input')
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute('type', 'checkbox')
-        gridCheck.setAttribute('id', 'gridCheck')
+        gridCheck.setAttribute('id', text)
         
         if (isChecked){
             gridCheck.setAttribute('checked', 'true')

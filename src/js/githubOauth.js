@@ -773,17 +773,20 @@ export default function GitHubModule(){
         }).then(result => {
             //Once we have created the new repo we need to create a file within it to store the project in
             currentRepoName = result.data.name
-            var path = "project.maslowcreate"
-            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)) // create a file with the new molecule in it and base64 encode it
+            var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+            jsonRepOfProject.filetypeVersion = 1
+            jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+            const projectContent = window.btoa(JSON.stringify(jsonRepOfProject, null, 4))
+            
             octokit.repos.createFile({
                 owner: currentUser,
                 repo: currentRepoName,
-                path: path,
+                path: "project.maslowcreate",
                 message: "initialize repo", 
-                content: content
+                content: projectContent
             }).then(() => {
                 //Then create the BOM file
-                content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
+                var content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
                 octokit.repos.createFile({
                     owner: currentUser,
                     repo: currentRepoName,
@@ -840,6 +843,7 @@ export default function GitHubModule(){
      * Save the current project to github.
      */
     this.saveProject = function(){
+        
         //Save the current project into the github repo
         if(currentRepoName != null){
             
@@ -851,90 +855,56 @@ export default function GitHubModule(){
                 clearInterval(intervalTimer) //Turn off auto saving to prevent it from saving again during this save
             }
             this.progressSave(0)
-            var shape = null
+            // var shape = null
 
-            if(GlobalVariables.topLevelMolecule.value != null && typeof GlobalVariables.topLevelMolecule.value != 'number'){
-                shape = GlobalVariables.topLevelMolecule.value
-            }else{
-                shape = {
-                    "solid": [
-                        [ [ [ 5.000000000000001, 5, 10 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ] ] ],
-                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
-                            [ -5.000000000000002, -4.999999999999999, 0 ],
-                            [ -5, 5.000000000000001, 0 ],
-                            [ 5.000000000000001, 5, 0 ] ] ],
-                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 0 ] ] ],
-                        [ [ [ -5.000000000000002, -4.999999999999999, 0 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ -5, 5.000000000000001, 0 ] ] ],
-                        [ [ [ -5, 5.000000000000001, 0 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ 5.000000000000001, 5, 10 ],
-                            [ 5.000000000000001, 5, 0 ] ] ],
-                        [ [ [ 5.000000000000001, 5, 0 ],
-                            [ 5.000000000000001, 5, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 0 ] ] ]
-                    ]
-                }
-            }
+            // if(GlobalVariables.topLevelMolecule.value != null && typeof GlobalVariables.topLevelMolecule.value != 'number'){
+            // shape = GlobalVariables.topLevelMolecule.value
+            // }
             
-            const threadCompute = async (values, key) => {
-                return await GlobalVariables.saveWorker({values: values, key: key})
-            } 
-            threadCompute([shape], "SVG Picture").then(contentSvg => {
-                this.progressSave(10)
+            // var contentSvg = "" //Would compute the svg picture here
+            this.progressSave(10)
                 
-                var bomContent = bomHeader
-                extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
-                    
-                    var totalParts = 0
-                    var totalCost  = 0
-                    if(bomItems != undefined){
-                        bomItems.forEach(item => {
-                            totalParts += item.numberNeeded
-                            totalCost  += item.costUSD
-                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
-                        })
-                    }
-                    bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
-                    bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
-                    
-                    
-                    var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
-                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
-                        readmeContent = readmeContent + item + "\n\n\n"
+            var bomContent = bomHeader
+            extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems => {
+                
+                var totalParts = 0
+                var totalCost  = 0
+                if(bomItems != undefined){
+                    bomItems.forEach(item => {
+                        totalParts += item.numberNeeded
+                        totalCost  += item.costUSD
+                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
                     })
+                }
+                bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
                     
-                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
-                    jsonRepOfProject.filetypeVersion = 1
-                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
-                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+                    
+                var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
+                GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
+                    readmeContent = readmeContent + item + "\n\n\n"
+                })
+                
+                var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                jsonRepOfProject.filetypeVersion = 1
+                jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
                    
-                    var decoder = new TextDecoder('utf8')
-                    var finalSVG = decoder.decode(contentSvg)
-
-                    this.createCommit(octokit,{
-                        owner: saveUser,
-                        repo: saveRepoName,
-                        base: 'master', /* optional: defaults to default branch */
-                        changes: {
-                            files: {
-                                'BillOfMaterials.md': bomContent,
-                                'README.md': readmeContent,
-                                'project.svg': finalSVG,
-                                'project.maslowcreate': projectContent
-                            },
-                            commit: 'Autosave'
-                        }
-                    })
+                // var decoder = new TextDecoder('utf8')
+                //var finalSVG = decoder.decode(contentSvg)
+                
+                this.createCommit(octokit,{
+                    owner: saveUser,
+                    repo: saveRepoName,
+                    changes: {
+                        files: {
+                            'BillOfMaterials.md': bomContent,
+                            'README.md': readmeContent,
+                            //'project.svg': finalSVG,
+                            'project.maslowcreate': projectContent
+                        },
+                        commit: 'Autosave'
+                    }
                 })
             })
 
@@ -985,18 +955,20 @@ export default function GitHubModule(){
     this.createCommit = async function(octokit, { owner, repo, base, changes }) {
         this.progressSave(30)
         let response
-
+        
         if (!base) {
             response = await octokit.repos.get({ owner, repo })
             base = response.data.default_branch
         }
         this.progressSave(40)
+        
         response = await octokit.repos.listCommits({
             owner,
             repo,
             sha: base,
             per_page: 1
         })
+        
         let latestCommitSha = response.data[0].sha
         const treeSha = response.data[0].commit.tree.sha
         this.progressSave(60)
@@ -1031,7 +1003,7 @@ export default function GitHubModule(){
             owner,
             repo,
             sha: latestCommitSha,
-            ref: `heads/master`,
+            ref: "heads/" + base,
             force: true
         })
         this.progressSave(100)

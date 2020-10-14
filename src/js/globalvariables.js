@@ -13,6 +13,7 @@ import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
 import Stl              from './molecules/stl.js'
 import Svg              from './molecules/svg.js'
+import Nest              from './molecules/nest.js'
 import Intersection     from './molecules/intersection.js'
 import Difference       from './molecules/difference.js'
 import Constant         from './molecules/constant.js'
@@ -28,8 +29,10 @@ import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
+import Union             from './molecules/union.js'
 import GitHubModule     from './githubOauth'
-import { createService } from './lib/service.js'
+
+const workerpool = require('workerpool')
 
 /**
  * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.
@@ -60,7 +63,10 @@ class GlobalVariables{
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
-            shrinkwrap:        {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
+            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
+            shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
+            
+            
             readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},
             addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},
             color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},
@@ -84,11 +90,13 @@ class GlobalVariables{
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
-            
+
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
+            nest:                {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
+
             output:             {creator: Output, atomType: 'Output'}
         }
         /** 
@@ -142,30 +150,10 @@ class GlobalVariables{
          */
         this.circleSegmentSize = 2
         
-        const agent = async ({ question }) => `Secret ${question}`
-        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
-            /** 
-             * A worker thread which can do computation.
-             * @type {object}
-             */
-            this.ask = result.ask
-        })
-        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
-            /** 
-             * The threejs renderer which displays things on the screen.
-             * @type {object}
-             */
-            this.render = result.ask
-        })
-        createService({ webWorker: '../maslowWorker.js', agent }).then(result => {
-            /** 
-             * The worker which is used during the saving process.
-             * @type {object}
-             */
-            this.saveWorker = result.ask
-        })
+        // create a worker pool using an external worker script
+        this.pool = workerpool.pool('./JSCADworker.js', {minWorkers: 4})
         
-        const math = create(all)
+        const math = create(all)  //What does this do?
         /** 
          * An evaluator for strings as mathmatical equations which is sandboxed and secure.
          * @type {function}

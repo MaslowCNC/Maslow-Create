@@ -360,6 +360,10 @@ function init() {
 
     onWindowResize()
     animate()
+    
+    //GlobalVariables.display.render()
+
+    //GlobalVariables.display.init()
 
 }
 
@@ -377,7 +381,7 @@ function onWindowResize() {
         document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
-    GlobalVariables.display.onWindowResize()
+    //GlobalVariables.display.onWindowResize()
 
 }
 
@@ -393,8 +397,8 @@ function animate() {
         atom.update()
     })
 
-    GlobalVariables.display.render()
-    GlobalVariables.display.controls.update()
+    GlobalVariables.display.rendering()
+    //GlobalVariables.display.controls.update()
 }
 
 init()
