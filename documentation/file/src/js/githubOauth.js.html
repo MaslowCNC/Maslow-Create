@@ -30,7 +30,6 @@
   <ul>
     
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
@@ -57,6 +56,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/nest.js~Nest.html">Nest</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
@@ -67,6 +67,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -850,17 +851,20 @@ export default function GitHubModule(){
         }).then(result =&gt; {
             //Once we have created the new repo we need to create a file within it to store the project in
             currentRepoName = result.data.name
-            var path = &quot;project.maslowcreate&quot;
-            var content = window.btoa(JSON.stringify(GlobalVariables.topLevelMolecule.serialize({molecules: []}), null, 4)) // create a file with the new molecule in it and base64 encode it
+            var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+            jsonRepOfProject.filetypeVersion = 1
+            jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+            const projectContent = window.btoa(JSON.stringify(jsonRepOfProject, null, 4))
+            
             octokit.repos.createFile({
                 owner: currentUser,
                 repo: currentRepoName,
-                path: path,
+                path: &quot;project.maslowcreate&quot;,
                 message: &quot;initialize repo&quot;, 
-                content: content
+                content: projectContent
             }).then(() =&gt; {
                 //Then create the BOM file
-                content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
+                var content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
                 octokit.repos.createFile({
                     owner: currentUser,
                     repo: currentRepoName,
@@ -917,6 +921,7 @@ export default function GitHubModule(){
      * Save the current project to github.
      */
     this.saveProject = function(){
+        
         //Save the current project into the github repo
         if(currentRepoName != null){
             
@@ -928,90 +933,56 @@ export default function GitHubModule(){
                 clearInterval(intervalTimer) //Turn off auto saving to prevent it from saving again during this save
             }
             this.progressSave(0)
-            var shape = null
+            // var shape = null
 
-            if(GlobalVariables.topLevelMolecule.value != null &amp;&amp; typeof GlobalVariables.topLevelMolecule.value != &apos;number&apos;){
-                shape = GlobalVariables.topLevelMolecule.value
-            }else{
-                shape = {
-                    &quot;solid&quot;: [
-                        [ [ [ 5.000000000000001, 5, 10 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ] ] ],
-                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
-                            [ -5.000000000000002, -4.999999999999999, 0 ],
-                            [ -5, 5.000000000000001, 0 ],
-                            [ 5.000000000000001, 5, 0 ] ] ],
-                        [ [ [ 4.999999999999999, -5.000000000000002, 0 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ -5.000000000000002, -4.999999999999999, 0 ] ] ],
-                        [ [ [ -5.000000000000002, -4.999999999999999, 0 ],
-                            [ -5.000000000000002, -4.999999999999999, 10 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ -5, 5.000000000000001, 0 ] ] ],
-                        [ [ [ -5, 5.000000000000001, 0 ],
-                            [ -5, 5.000000000000001, 10 ],
-                            [ 5.000000000000001, 5, 10 ],
-                            [ 5.000000000000001, 5, 0 ] ] ],
-                        [ [ [ 5.000000000000001, 5, 0 ],
-                            [ 5.000000000000001, 5, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 10 ],
-                            [ 4.999999999999999, -5.000000000000002, 0 ] ] ]
-                    ]
-                }
-            }
+            // if(GlobalVariables.topLevelMolecule.value != null &amp;&amp; typeof GlobalVariables.topLevelMolecule.value != &apos;number&apos;){
+            // shape = GlobalVariables.topLevelMolecule.value
+            // }
             
-            const threadCompute = async (values, key) =&gt; {
-                return await GlobalVariables.saveWorker({values: values, key: key})
-            } 
-            threadCompute([shape], &quot;SVG Picture&quot;).then(contentSvg =&gt; {
-                this.progressSave(10)
+            // var contentSvg = &quot;&quot; //Would compute the svg picture here
+            this.progressSave(10)
                 
-                var bomContent = bomHeader
-                extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
-                    
-                    var totalParts = 0
-                    var totalCost  = 0
-                    if(bomItems != undefined){
-                        bomItems.forEach(item =&gt; {
-                            totalParts += item.numberNeeded
-                            totalCost  += item.costUSD
-                            bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
-                        })
-                    }
-                    bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
-                    bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
-                    
-                    
-                    var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + saveRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
-                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
-                        readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+            var bomContent = bomHeader
+            extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
+                
+                var totalParts = 0
+                var totalCost  = 0
+                if(bomItems != undefined){
+                    bomItems.forEach(item =&gt; {
+                        totalParts += item.numberNeeded
+                        totalCost  += item.costUSD
+                        bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
                     })
+                }
+                bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
+                bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
                     
-                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
-                    jsonRepOfProject.filetypeVersion = 1
-                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
-                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+                    
+                var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + saveRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
+                GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
+                    readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+                })
+                
+                var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                jsonRepOfProject.filetypeVersion = 1
+                jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
                    
-                    var decoder = new TextDecoder(&apos;utf8&apos;)
-                    var finalSVG = decoder.decode(contentSvg)
-
-                    this.createCommit(octokit,{
-                        owner: saveUser,
-                        repo: saveRepoName,
-                        base: &apos;master&apos;, /* optional: defaults to default branch */
-                        changes: {
-                            files: {
-                                &apos;BillOfMaterials.md&apos;: bomContent,
-                                &apos;README.md&apos;: readmeContent,
-                                &apos;project.svg&apos;: finalSVG,
-                                &apos;project.maslowcreate&apos;: projectContent
-                            },
-                            commit: &apos;Autosave&apos;
-                        }
-                    })
+                // var decoder = new TextDecoder(&apos;utf8&apos;)
+                //var finalSVG = decoder.decode(contentSvg)
+                
+                this.createCommit(octokit,{
+                    owner: saveUser,
+                    repo: saveRepoName,
+                    changes: {
+                        files: {
+                            &apos;BillOfMaterials.md&apos;: bomContent,
+                            &apos;README.md&apos;: readmeContent,
+                            //&apos;project.svg&apos;: finalSVG,
+                            &apos;project.maslowcreate&apos;: projectContent
+                        },
+                        commit: &apos;Autosave&apos;
+                    }
                 })
             })
 
@@ -1062,18 +1033,20 @@ export default function GitHubModule(){
     this.createCommit = async function(octokit, { owner, repo, base, changes }) {
         this.progressSave(30)
         let response
-
+        
         if (!base) {
             response = await octokit.repos.get({ owner, repo })
             base = response.data.default_branch
         }
         this.progressSave(40)
+        
         response = await octokit.repos.listCommits({
             owner,
             repo,
             sha: base,
             per_page: 1
         })
+        
         let latestCommitSha = response.data[0].sha
         const treeSha = response.data[0].commit.tree.sha
         this.progressSave(60)
@@ -1108,7 +1081,7 @@ export default function GitHubModule(){
             owner,
             repo,
             sha: latestCommitSha,
-            ref: `heads/master`,
+            ref: &quot;heads/&quot; + base,
             force: true
         })
         this.progressSave(100)

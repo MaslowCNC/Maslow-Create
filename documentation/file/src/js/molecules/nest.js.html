@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/js/molecules/nest.js | canvas-template</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/circle.js~Circle.html">Circle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/code.js~Code.html">Code</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/color.js~Color.html">Color</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/constant.js~Constant.html">Constant</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlayout.js~CutLayout.html">CutLayout</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/cutlist.js~CutList.html">CutList</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/difference.js~Difference.html">Difference</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/equation.js~Equation.html">Equation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extracttag.js~ExtractTag.html">ExtractTag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/extrude.js~Extrude.html">Extrude</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/nest.js~Nest.html">Nest</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/regularPolygon.js~RegularPolygon.html">RegularPolygon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rotate.js~Rotate.html">Rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html">ShrinkWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stl.js~Stl.html">Stl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/nest.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
+import saveAs from &apos;../lib/FileSaver.js&apos;
+
+import * as svgNest from &apos;../lib/svgnest.js&apos;
+
+/**
+ * This class creates the nest atom which lets you download a nested .svg file.
+ */
+export default class Nest extends Atom {
+    
+    /**
+     * The constructor function.
+     * @param {object} values An array of values passed in which will be assigned to the class as this.x
+     */ 
+    constructor(values){
+        
+        super(values)
+        
+        /**
+         * This atom&apos;s name
+         * @type {string}
+         */
+        this.name = &apos;Nest&apos;
+        /**
+         * This atom&apos;s type
+         * @type {string}
+         */
+        this.atomType = &apos;Nest&apos;
+        
+        /**
+         * This atom&apos;s value. Contains the value of the input geometry, not the stl
+         * @type {string}
+         */
+        this.value = null
+
+        /**
+         * This atom&apos;s height as drawn on the screen
+         */
+        this.height = 0
+        
+        this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
+        this.addIO(&apos;input&apos;, &apos;spacing&apos;, this, &apos;number&apos;, 0.3)
+        this.addIO(&apos;input&apos;, &apos;curveTolerance&apos;, this, &apos;number&apos;, 0.3)
+        
+        this.setValues(values)
+
+        /**
+         * Number of times nesting has been tried
+         */
+        this.iterations = 0
+        /**
+         * Boolean to determine wether nesting process is ongoing
+         */
+        this.isworking = false
+        /**
+         * Length and width inputs for svg placement
+         */
+        this.material = {&quot;width&quot;: 121,&quot;length&quot;:243}
+    }
+   
+    /**
+     * Draw the svg atom which has a SVG icon.
+     */ 
+    draw() {
+        super.draw(&quot;rect&quot;)
+        
+        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)
+        this.height = pixelsRadius * 1.5
+
+        GlobalVariables.c.beginPath()
+        GlobalVariables.c.fillStyle = &apos;#484848&apos;
+        GlobalVariables.c.font = `${pixelsRadius/1.2}px Work Sans Bold`
+        GlobalVariables.c.fillText(&apos;SVG&apos;, GlobalVariables.widthToPixels(this.x- this.radius/1.3), GlobalVariables.heightToPixels(this.y)+this.height/6)
+        GlobalVariables.c.fill()
+        GlobalVariables.c.closePath()
+        
+    }
+    /**
+     * Re excecutes configure function for nesting if values are updated by user
+     */ 
+    setValue(){
+        this.setConfig()
+    }
+
+    /**
+     * Set the value to be the input geometry, then call super updateValue()
+     */ 
+    updateValue(){
+        try{
+            const values = [this.findIOValue(&apos;geometry&apos;)]
+            this.basicThreadValueProcessing(values, &quot;outline&quot;)
+        }catch(err){this.setAlert(err)}
+        //Saves new config values for nesting (Stops any nesting in progress)
+        this.setConfig()
+
+    } 
+    
+    /**
+     * Create buttons to start nest, to download the .svg file and checkbox &quot;Part in Part&quot;.
+     */ 
+    updateSidebar(){
+        const list = super.updateSidebar()
+        this.createEditableValueListItem(list,this.material,&apos;width&apos;, &apos;Width of Material&apos;, true, () =&gt; this.setConfig())
+        this.createEditableValueListItem(list,this.material,&apos;length&apos;,&apos;Length of Material&apos;, true, () =&gt; this.setConfig())
+
+        //this.createEditableValueListItem(list,this.BOMitem,&apos;costUSD&apos;, &apos;Price&apos;, true, () =&gt; this.updateValue())
+        this.createCheckbox(list,&quot;Part in Part&quot;, false, ()=&gt;{this.setConfig()})
+        this.createButton(list, this, &quot;Start Nest&quot;, ()=&gt;{this.svgToNest()})
+        //remember to disable until svg is nested 
+        this.createButton(list, this, &quot;Download SVG&quot;, ()=&gt;{this.downloadSvg()})   
+
+        var svgButton = document.getElementById(&quot;DownloadSVG-button&quot;)
+        svgButton.disabled = true
+        svgButton.classList.add(&quot;disabled&quot;)      
+    }
+
+    /**
+     * Update values for config(). Called when the values on sidebar have been edited.
+     */ 
+    setConfig() {
+        // config = [distance, curve tolerance,rotations, population size, mutation rate, use holes, concave]
+        const configKeys = [&quot;spacing&quot;,&quot;curveTolerance&quot;]
+        var c = {&quot;useholes&quot;:false,&quot;exploreConcave&quot;:false,&quot;rotations&quot;:4,&quot;mutationRate&quot;:10,&quot;populationSize&quot;:10} 
+        for(var i=0; i&lt;configKeys.length; i++){
+            var key = configKeys[i]
+            c[key] = this.findIOValue(key)
+        }
+        var check1 = document.getElementById(&quot;Part in Part&quot;)
+        if(check1 !== null){
+            if (check1.checked){
+                c[check1] = true
+            }
+            else{
+                c[check1] = false
+               
+            }   
+        }                  
+
+        window.SvgNest.config(c)
+        
+        var svgButton = document.getElementById(&quot;DownloadSVG-button&quot;)  
+        if (svgButton !== null){
+            svgButton.disabled = true
+            svgButton.classList.add(&quot;disabled&quot;)  
+        }
+                
+        // new configs will invalidate current nest
+        if(this.isworking){
+            this.stopnest()
+        
+        }
+        return false
+    }
+
+    /**
+     * Turns geometry values into svg then starts nest and returns nested SVG
+     */ 
+    svgToNest(){
+
+        //turn into svg
+        const values = [this.findIOValue(&apos;geometry&apos;)]
+        
+        const computeValue = async (values, key) =&gt; {
+            try{
+                return await GlobalVariables.ask({values: values, key: key})
+            }
+            catch(err){
+                this.setAlert(err)
+            }
+        }
+        var unestedSVG
+
+        computeValue(values, &quot;svg&quot;).then(result =&gt; {
+            if (result != -1 ){
+                var decoder = new TextDecoder(&apos;utf8&apos;)
+                unestedSVG = decoder.decode(result)
+                
+                return unestedSVG
+            }else{
+                this.setAlert(&quot;Unable to compute&quot;)
+            }
+        }).then(result =&gt;{ 
+            try{
+                var svg = SvgNest.parsesvg(result)
+                var display = document.getElementById(&apos;select&apos;)
+                {
+                    var wholeSVG = document.createElementNS(&quot;http://www.w3.org/2000/svg&quot;, &quot;svg&quot;)
+                    // Copy relevant scaling info
+                    wholeSVG.setAttribute(&apos;width&apos;,this.material[&quot;width&quot;])
+                    wholeSVG.setAttribute(&apos;height&apos;,this.material[&quot;length&quot;])
+                    wholeSVG.setAttribute(&apos;viewBox&apos;,svg.getAttribute(&apos;viewBox&apos;))
+                    var rect = document.createElementNS(wholeSVG.namespaceURI,&apos;rect&apos;)
+                    rect.setAttribute(&apos;x&apos;, wholeSVG.viewBox.baseVal.x)
+                    rect.setAttribute(&apos;y&apos;, wholeSVG.viewBox.baseVal.x)
+                    rect.setAttribute(&apos;width&apos;, &quot;100%&quot;)
+                    rect.setAttribute(&apos;height&apos;, &quot;100%&quot;)
+                    rect.setAttribute(&apos;class&apos;, &apos;fullRect&apos;)
+
+                    wholeSVG.appendChild(rect)
+                }
+                display.innerHTML = &apos;&apos;
+                display.appendChild(wholeSVG) // As a default bin in background
+                display.appendChild(svg)
+            }
+            catch(e){
+                console.warn(e)
+                //message.innerHTML = e;
+                //message.className = &apos;error animated bounce&apos;;
+                return
+            }                   
+                        
+            //hideSplash();
+            //message.className = &apos;active animated bounce&apos;;
+            //start.className = &apos;button start disabled&apos;;
+                        
+            //attachSvgListeners(svg);
+
+            //set the bin to wholeSVG
+            this.attachSvgListeners(wholeSVG)
+                        
+                     
+        })
+    }
+    /**
+     * Defines bin which will be used to place parts for nested svg
+     */ 
+    attachSvgListeners(svg){
+        // auto set bin to be whole svg
+        for(var i=0; i&lt;svg.childNodes.length; i++){
+            var node = svg.childNodes[i]
+                    
+            if(node.nodeType == 1){
+                node.setAttribute(&quot;class&quot;, &quot;active&quot;)
+                        
+                //if(display.className == &apos;disabled&apos;){
+                //    return;
+                //}
+                            
+                var currentbin = document.querySelector(&apos;#select .active&apos;)
+                if(currentbin){
+                    var className = currentbin.getAttribute(&apos;class&apos;).replace(&apos;active&apos;, &apos;&apos;).trim()
+                    if(!className)
+                        currentbin.removeAttribute(&apos;class&apos;)
+                    else
+                        currentbin.setAttribute(&apos;class&apos;, className)
+                }
+                SvgNest.setbin(node) 
+                node.setAttribute(&apos;class&apos;,(node.getAttribute(&apos;class&apos;) ? node.getAttribute(&apos;class&apos;)+&apos; &apos; : &apos;&apos;) + &apos;active&apos;)
+                            
+                //start.className = &apos;button start animated bounce&apos;;
+                //message.className = &apos;&apos;;
+                this.startnest()
+                        
+            }
+        }
+    }
+    /**
+     * Starts nesting, replaces html svg for nested svg
+     */ 
+    async startnest(){
+        // Once started, don&apos;t allow this anymore       
+        SvgNest.start(this.progress,this.renderSvg)
+        //remember to change label so nest can stop
+        //startlabel.innerHTML = &apos;Stop Nest&apos;;
+        //start.className = &apos;button spinner&apos;;
+        //configbutton.className = &apos;button config disabled&apos;;
+        //config.className = &apos;&apos;;
+
+        var svg = document.querySelector(&apos;#select svg&apos;)
+        if(svg){
+            svg.removeAttribute(&apos;style&apos;)
+        }
+        this.isworking = true
+    }
+     
+    /**
+     * Stops nest and changes flag to not working
+     */        
+    stopnest(){
+        SvgNest.stop()
+        //startlabel.innerHTML = &apos;Start Nest&apos;
+        //start.className = &apos;button start&apos;
+        //configbutton.className = &apos;button config&apos;
+                
+        this.isworking = false
+    }
+
+            
+    /**
+     * NOT WORKING Defines percentage of nesting and estimates time and iterations
+              
+    progress(percent, prevpercent = 0){
+        
+        var transition = percent &gt; prevpercent //? &apos;; transition: width 0.1s&apos; : &apos;&apos;
+        //document.getElementById(&apos;info_progress&apos;).setAttribute(&apos;style&apos;,&apos;width: &apos;+Math.round(percent*100)+&apos;% &apos; + transition)
+        //document.getElementById(&apos;info&apos;).setAttribute(&apos;style&apos;,&apos;display: block&apos;)
+                
+        prevpercent = percent
+                
+        var now = new Date().getTime()
+        if(startTime &amp;&amp; now){
+            var diff = now-startTime
+            // show a time estimate for long-running placements
+
+            var estimate = (diff/percent)*(1-percent)
+            //document.getElementById(&apos;info_time&apos;).innerHTML = millisecondsToStr(estimate)+&apos; remaining&apos;
+            console.log(estimate)        
+            if(diff &gt; 5000 &amp;&amp; percent &lt; 0.3 &amp;&amp; percent &gt; 0.02 &amp;&amp; estimate &gt; 10000){
+                document.getElementById(&apos;info_time&apos;).setAttribute(&apos;style&apos;,&apos;display: block&apos;)
+            }
+        }
+                
+        if(percent &gt; 0.95 || percent &lt; 0.02){
+            document.getElementById(&apos;info_time&apos;).setAttribute(&apos;style&apos;,&apos;display: none&apos;)
+        }
+        if(percent &lt; 0.02){
+            startTime = new Date().getTime()
+        }
+    }
+    */
+
+    /**
+     * NOT WORKING Defines HTML bit and defines svg list
+     */ 
+    renderSvg(svglist, efficiency, placed, total){
+        //this.iterations++;
+                
+        //document.getElementById(&apos;info_iterations&apos;).innerHTML = iterations;     
+        //Enable download button if all parts have been placed
+
+        if (placed == total){
+            var svgButton = document.getElementById(&quot;DownloadSVG-button&quot;)
+            svgButton.disabled = false
+            svgButton.classList.remove(&quot;disabled&quot;)  
+        } 
+        if(!svglist || svglist.length == 0){
+            return
+        }
+        var bins = document.getElementById(&apos;bins&apos;)
+        bins.innerHTML = &apos;&apos;
+                
+        for(var i=0; i&lt;svglist.length; i++){
+            if(svglist.length &gt; 2){
+                svglist[i].setAttribute(&apos;class&apos;,&apos;grid&apos;)
+            }
+            bins.appendChild(svglist[i])
+        }
+                
+        if(efficiency || efficiency === 0){
+            // document.getElementById(&apos;info_efficiency&apos;).innerHTML = Math.round(efficiency*100);
+        }
+
+        //document.getElementById(&apos;info_placed&apos;).innerHTML = placed+&apos;/&apos;+total;      
+        //document.getElementById(&apos;info_placement&apos;).setAttribute(&apos;style&apos;,&apos;display: block&apos;);
+        //display.setAttribute(&apos;style&apos;,&apos;display: none&apos;);
+        //download.className = &apos;button download animated bounce&apos;;
+                
+    }
+            
+    /**
+     * The function which is called when you press the download button.
+     * Stops nest in progress and downloads file to computer. Only enabled if svg has been nested at least once
+     */ 
+    downloadSvg(){
+        //if it is still trying iterations stop nest 
+        this.stopnest()
+        var bins = document.getElementById(&apos;bins&apos;)
+            
+        if(bins.children.length == 0){
+            console.warn(&apos;No SVG to export&apos;)
+            return
+        }
+                
+        var svg
+
+        var display = document.getElementById(&apos;select&apos;)
+        svg = display.querySelector(&apos;svg&apos;)
+                
+        if(!svg){
+            svg = document.createElementNS(&apos;http://www.w3.org/2000/svg&apos;, &apos;svg&apos;)
+        }
+                
+        svg = svg.cloneNode(false)
+                
+        // maintain stroke, fill etc of input
+        if(SvgNest.style){
+            svg.appendChild(SvgNest.style)
+        }
+                
+        var binHeight = parseInt(bins.children[0].getAttribute(&apos;height&apos;))
+                
+        for(var i=0; i&lt;bins.children.length; i++){
+            var b = bins.children[i]
+            
+            var group = document.createElementNS(&apos;http://www.w3.org/2000/svg&apos;, &apos;g&apos;)
+            group.setAttribute(&apos;fill&apos;, &apos;none&apos;)
+            group.setAttribute(&apos;stroke-width&apos;, &apos;.1&apos;)
+            group.setAttribute(&apos;fill&apos;, &apos;none&apos;)
+            group.setAttribute(&apos;transform&apos;, &apos;translate(0 &apos;+binHeight*1.1*i+&apos;)&apos;)
+            for(var j=0; j&lt;b.children.length; j++){
+                group.appendChild(b.children[j].cloneNode(true))
+            }
+            svg.appendChild(group)
+        }
+                
+        var output
+        if(typeof XMLSerializer != &apos;undefined&apos;){
+            output = (new XMLSerializer()).serializeToString(svg)
+        }
+        else{
+            output = svg.outerHTML
+        }
+        var blob = new Blob([output], {type: &quot;image/svg+xml;charset=utf-8&quot;})
+        saveAs(blob, &quot;SVGnest-output.svg&quot;)
+    }
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

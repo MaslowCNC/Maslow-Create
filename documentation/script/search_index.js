@@ -84,12 +84,6 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/display.js~display",
-    "class/src/js/display.js~Display.html",
-    "<span>Display</span> <span class=\"search-result-import-path\">canvas-template/src/js/display.js</span>",
-    "class"
-  ],
-  [
     "canvas-template/src/js/molecules/equation.js~equation",
     "class/src/js/molecules/equation.js~Equation.html",
     "<span>Equation</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/equation.js</span>",
@@ -156,6 +150,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/nest.js~nest",
+    "class/src/js/molecules/nest.js~Nest.html",
+    "<span>Nest</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/nest.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/output.js~output",
     "class/src/js/molecules/output.js~Output.html",
     "<span>Output</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/output.js</span>",
@@ -213,6 +213,12 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/molecules/translate.js~translate",
     "class/src/js/molecules/translate.js~Translate.html",
     "<span>Translate</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/translate.js</span>",
+    "class"
+  ],
+  [
+    "canvas-template/src/js/molecules/union.js~union",
+    "class/src/js/molecules/union.js~Union.html",
+    "<span>Union</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/union.js</span>",
     "class"
   ],
   [
@@ -594,228 +600,6 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/js/display.js",
-    "file/src/js/display.js.html",
-    "src/js/display.js",
-    "file"
-  ],
-  [
-    "src/js/display.js~display#axescheck",
-    "class/src/js/display.js~Display.html#instance-member-axesCheck",
-    "src/js/display.js~Display#axesCheck",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#axeshelper",
-    "class/src/js/display.js~Display.html#instance-member-axesHelper",
-    "src/js/display.js~Display#axesHelper",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#baselog",
-    "class/src/js/display.js~Display.html#instance-method-baseLog",
-    "src/js/display.js~Display#baseLog",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#buildmeshmaterial",
-    "class/src/js/display.js~Display.html#instance-method-buildMeshMaterial",
-    "src/js/display.js~Display#buildMeshMaterial",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#camera",
-    "class/src/js/display.js~Display.html#instance-member-camera",
-    "src/js/display.js~Display#camera",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#checkboxes",
-    "class/src/js/display.js~Display.html#instance-method-checkBoxes",
-    "src/js/display.js~Display#checkBoxes",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#colortorgbmapping",
-    "class/src/js/display.js~Display.html#instance-member-colorToRgbMapping",
-    "src/js/display.js~Display#colorToRgbMapping",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#constructor",
-    "class/src/js/display.js~Display.html#instance-constructor-constructor",
-    "src/js/display.js~Display#constructor",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#controls",
-    "class/src/js/display.js~Display.html#instance-member-controls",
-    "src/js/display.js~Display#controls",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#datasets",
-    "class/src/js/display.js~Display.html#instance-member-datasets",
-    "src/js/display.js~Display#datasets",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#displaygrid",
-    "class/src/js/display.js~Display.html#instance-member-displayGrid",
-    "src/js/display.js~Display#displayGrid",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#displayedgeometry",
-    "class/src/js/display.js~Display.html#instance-member-displayedGeometry",
-    "src/js/display.js~Display#displayedGeometry",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#dist3d",
-    "class/src/js/display.js~Display.html#instance-method-dist3D",
-    "src/js/display.js~Display#dist3D",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#grid1",
-    "class/src/js/display.js~Display.html#instance-member-grid1",
-    "src/js/display.js~Display#grid1",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#gridlevel",
-    "class/src/js/display.js~Display.html#instance-member-gridLevel",
-    "src/js/display.js~Display#gridLevel",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#gridscale",
-    "class/src/js/display.js~Display.html#instance-member-gridScale",
-    "src/js/display.js~Display#gridScale",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#makegrid",
-    "class/src/js/display.js~Display.html#instance-method-makeGrid",
-    "src/js/display.js~Display#makeGrid",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#makematerial",
-    "class/src/js/display.js~Display.html#instance-method-makeMaterial",
-    "src/js/display.js~Display#makeMaterial",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#materialproperties",
-    "class/src/js/display.js~Display.html#instance-member-materialProperties",
-    "src/js/display.js~Display#materialProperties",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#merge",
-    "class/src/js/display.js~Display.html#instance-method-merge",
-    "src/js/display.js~Display#merge",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#onwindowresize",
-    "class/src/js/display.js~Display.html#instance-method-onWindowResize",
-    "src/js/display.js~Display#onWindowResize",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#removegrid",
-    "class/src/js/display.js~Display.html#instance-method-removeGrid",
-    "src/js/display.js~Display#removeGrid",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#render",
-    "class/src/js/display.js~Display.html#instance-method-render",
-    "src/js/display.js~Display#render",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#renderer",
-    "class/src/js/display.js~Display.html#instance-member-renderer",
-    "src/js/display.js~Display#renderer",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#scene",
-    "class/src/js/display.js~Display.html#instance-member-scene",
-    "src/js/display.js~Display#scene",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#setcolor",
-    "class/src/js/display.js~Display.html#instance-method-setColor",
-    "src/js/display.js~Display#setColor",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#setgrid",
-    "class/src/js/display.js~Display.html#instance-method-setGrid",
-    "src/js/display.js~Display#setGrid",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#setmaterial",
-    "class/src/js/display.js~Display.html#instance-method-setMaterial",
-    "src/js/display.js~Display#setMaterial",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#soliddisplay",
-    "class/src/js/display.js~Display.html#instance-member-solidDisplay",
-    "src/js/display.js~Display#solidDisplay",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#targetdiv",
-    "class/src/js/display.js~Display.html#instance-member-targetDiv",
-    "src/js/display.js~Display#targetDiv",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#threematerial",
-    "class/src/js/display.js~Display.html#instance-member-threeMaterial",
-    "src/js/display.js~Display#threeMaterial",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#torgb",
-    "class/src/js/display.js~Display.html#instance-method-toRgb",
-    "src/js/display.js~Display#toRgb",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#updatedisplaydata",
-    "class/src/js/display.js~Display.html#instance-method-updateDisplayData",
-    "src/js/display.js~Display#updateDisplayData",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#wiredisplay",
-    "class/src/js/display.js~Display.html#instance-member-wireDisplay",
-    "src/js/display.js~Display#wireDisplay",
-    "member"
-  ],
-  [
-    "src/js/display.js~display#writetodisplay",
-    "class/src/js/display.js~Display.html#instance-method-writeToDisplay",
-    "src/js/display.js~Display#writeToDisplay",
-    "method"
-  ],
-  [
-    "src/js/display.js~display#zoomcameratofit",
-    "class/src/js/display.js~Display.html#instance-method-zoomCameraToFit",
-    "src/js/display.js~Display#zoomCameraToFit",
-    "method"
-  ],
-  [
     "src/js/githuboauth.js",
     "file/src/js/githubOauth.js.html",
     "src/js/githubOauth.js",
@@ -826,12 +610,6 @@ window.esdocSearchIndex = [
     "file/src/js/globalvariables.js.html",
     "src/js/globalvariables.js",
     "file"
-  ],
-  [
-    "src/js/globalvariables.js~globalvariables#ask",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-ask",
-    "src/js/globalvariables.js~GlobalVariables#ask",
-    "member"
   ],
   [
     "src/js/globalvariables.js~globalvariables#atomsselected",
@@ -930,21 +708,15 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/globalvariables.js~globalvariables#render",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-render",
-    "src/js/globalvariables.js~GlobalVariables#render",
+    "src/js/globalvariables.js~globalvariables#pool",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-pool",
+    "src/js/globalvariables.js~GlobalVariables#pool",
     "member"
   ],
   [
     "src/js/globalvariables.js~globalvariables#runmode",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-runMode",
     "src/js/globalvariables.js~GlobalVariables#runMode",
-    "member"
-  ],
-  [
-    "src/js/globalvariables.js~globalvariables#saveworker",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-saveWorker",
-    "src/js/globalvariables.js~GlobalVariables#saveWorker",
     "member"
   ],
   [
@@ -1926,6 +1698,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/githubmolecule.js~githubmolecule#doubleclick",
+    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-doubleClick",
+    "src/js/molecules/githubmolecule.js~GitHubMolecule#doubleClick",
+    "method"
+  ],
+  [
     "src/js/molecules/githubmolecule.js~githubmolecule#loadprojectbyid",
     "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-loadProjectByID",
     "src/js/molecules/githubmolecule.js~GitHubMolecule#loadProjectByID",
@@ -2302,6 +2080,126 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-updateValue",
     "src/js/molecules/molecule.js~Molecule#updateValue",
     "method"
+  ],
+  [
+    "src/js/molecules/nest.js",
+    "file/src/js/molecules/nest.js.html",
+    "src/js/molecules/nest.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#atomtype",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-atomType",
+    "src/js/molecules/nest.js~Nest#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#attachsvglisteners",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-attachSvgListeners",
+    "src/js/molecules/nest.js~Nest#attachSvgListeners",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#constructor",
+    "class/src/js/molecules/nest.js~Nest.html#instance-constructor-constructor",
+    "src/js/molecules/nest.js~Nest#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#downloadsvg",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-downloadSvg",
+    "src/js/molecules/nest.js~Nest#downloadSvg",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#draw",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-draw",
+    "src/js/molecules/nest.js~Nest#draw",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#height",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-height",
+    "src/js/molecules/nest.js~Nest#height",
+    "member"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#isworking",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-isworking",
+    "src/js/molecules/nest.js~Nest#isworking",
+    "member"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#iterations",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-iterations",
+    "src/js/molecules/nest.js~Nest#iterations",
+    "member"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#material",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-material",
+    "src/js/molecules/nest.js~Nest#material",
+    "member"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#name",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-name",
+    "src/js/molecules/nest.js~Nest#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#rendersvg",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-renderSvg",
+    "src/js/molecules/nest.js~Nest#renderSvg",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#setconfig",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-setConfig",
+    "src/js/molecules/nest.js~Nest#setConfig",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#setvalue",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-setValue",
+    "src/js/molecules/nest.js~Nest#setValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#startnest",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-startnest",
+    "src/js/molecules/nest.js~Nest#startnest",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#stopnest",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-stopnest",
+    "src/js/molecules/nest.js~Nest#stopnest",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#svgtonest",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-svgToNest",
+    "src/js/molecules/nest.js~Nest#svgToNest",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#updatesidebar",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-updateSidebar",
+    "src/js/molecules/nest.js~Nest#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#updatevalue",
+    "class/src/js/molecules/nest.js~Nest.html#instance-method-updateValue",
+    "src/js/molecules/nest.js~Nest#updateValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/nest.js~nest#value",
+    "class/src/js/molecules/nest.js~Nest.html#instance-member-value",
+    "src/js/molecules/nest.js~Nest#value",
+    "member"
   ],
   [
     "src/js/molecules/output.js",
@@ -2841,6 +2739,60 @@ window.esdocSearchIndex = [
     "src/js/molecules/translate.js~translate#updatevalue",
     "class/src/js/molecules/translate.js~Translate.html#instance-method-updateValue",
     "src/js/molecules/translate.js~Translate#updateValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/union.js",
+    "file/src/js/molecules/union.js.html",
+    "src/js/molecules/union.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/union.js~union#atomtype",
+    "class/src/js/molecules/union.js~Union.html#instance-member-atomType",
+    "src/js/molecules/union.js~Union#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/union.js~union#constructor",
+    "class/src/js/molecules/union.js~Union.html#instance-constructor-constructor",
+    "src/js/molecules/union.js~Union#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/union.js~union#draw",
+    "class/src/js/molecules/union.js~Union.html#instance-method-draw",
+    "src/js/molecules/union.js~Union#draw",
+    "method"
+  ],
+  [
+    "src/js/molecules/union.js~union#iovalues",
+    "class/src/js/molecules/union.js~Union.html#instance-member-ioValues",
+    "src/js/molecules/union.js~Union#ioValues",
+    "member"
+  ],
+  [
+    "src/js/molecules/union.js~union#name",
+    "class/src/js/molecules/union.js~Union.html#instance-member-name",
+    "src/js/molecules/union.js~Union#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/union.js~union#removecutawaygeometry",
+    "class/src/js/molecules/union.js~Union.html#instance-member-removeCutawayGeometry",
+    "src/js/molecules/union.js~Union#removeCutawayGeometry",
+    "member"
+  ],
+  [
+    "src/js/molecules/union.js~union#serialize",
+    "class/src/js/molecules/union.js~Union.html#instance-method-serialize",
+    "src/js/molecules/union.js~Union#serialize",
+    "method"
+  ],
+  [
+    "src/js/molecules/union.js~union#updatevalue",
+    "class/src/js/molecules/union.js~Union.html#instance-method-updateValue",
+    "src/js/molecules/union.js~Union#updateValue",
     "method"
   ],
   [

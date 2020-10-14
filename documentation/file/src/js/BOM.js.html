@@ -30,7 +30,6 @@
   <ul>
     
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
@@ -57,6 +56,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/nest.js~Nest.html">Nest</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
@@ -67,6 +67,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -75,8 +76,7 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/BOM.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./globalvariables.js&apos;
-
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">
 /**
  * This class defines a BOMEntry object which is used to define one entry in a bill of materials.
  */ 
@@ -126,39 +126,41 @@ export class BOMEntry {
  * Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.
  * @param {object} geometry - The geometry which should be scanned for tags.
  */ 
-export const extractBomTags = async(geometry) =&gt; {
+export const extractBomTags = async() =&gt; {
     
-    var bomItems = []
+    return [] //This is all broken right now
     
-    var result = await GlobalVariables.ask({values: [geometry], key: &quot;getBOM&quot;})
+    // var bomItems = []
     
-    if (result != -1 ){
-        //Filter for only bomItems
-        bomItems = result.filter(item =&gt; {
-            return item[0].substring(2, 13) == &quot;BOMitemName&quot;
-        })
+    // var result = await GlobalVariables.ask({values: [geometry], key: &quot;getBOM&quot;})
+    
+    // if (result != -1 ){
+    // Filter for only bomItems
+    // bomItems = result.filter(item =&gt; {
+    // return item[0].substring(2, 13) == &quot;BOMitemName&quot;
+    // })
         
-        bomItems = bomItems.map(JSON.parse)
+    // bomItems = bomItems.map(JSON.parse)
         
-        //Consolidate similar items into a single item
-        var compiledArray = []
-        bomItems.forEach(function (bomElement) {
-            if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn&apos;t already have one of these
-                this[bomElement.BOMitemName] = new BOMEntry             //Create one
-                this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
-                this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
-                this[bomElement.BOMitemName].source = bomElement.source
-                compiledArray.push(this[bomElement.BOMitemName])
-            }
-            this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
-            this[bomElement.BOMitemName].costUSD += bomElement.costUSD
-        }, Object.create(null))
+    // Consolidate similar items into a single item
+    // var compiledArray = []
+    // bomItems.forEach(function (bomElement) {
+    // if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn&apos;t already have one of these
+    // this[bomElement.BOMitemName] = new BOMEntry             //Create one
+    // this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
+    // this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
+    // this[bomElement.BOMitemName].source = bomElement.source
+    // compiledArray.push(this[bomElement.BOMitemName])
+    // }
+    // this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
+    // this[bomElement.BOMitemName].costUSD += bomElement.costUSD
+    // }, Object.create(null))
         
-        //Alphabetize by source
-        compiledArray = compiledArray.sort((a,b) =&gt; (a.source &gt; b.source) ? 1 : ((b.source &gt; a.source) ? -1 : 0)) 
+    // Alphabetize by source
+    // compiledArray = compiledArray.sort((a,b) =&gt; (a.source &gt; b.source) ? 1 : ((b.source &gt; a.source) ? -1 : 0)) 
         
-        return compiledArray
-    }
+    // return compiledArray
+    // }
 }
 </code></pre>
 

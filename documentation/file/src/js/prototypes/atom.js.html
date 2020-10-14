@@ -30,7 +30,6 @@
   <ul>
     
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/display.js~Display.html">Display</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
@@ -57,6 +56,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/nest.js~Nest.html">Nest</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/rectangle.js~Rectangle.html">Rectangle</a></span></span></li>
@@ -67,6 +67,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -727,23 +728,26 @@ export default class Atom {
             this.processing = true
             this.decreaseToProcessCountByOne()
             
+            //console.log(&quot;Processing: &quot; + key)
+            //console.log(GlobalVariables.pool.stats())
+            
             if(this.output){  //If this atom has an ouput
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             }
             
             this.clearAlert()
-            
             const computeValue = async (values, key) =&gt; {
-                try{
-                    return await GlobalVariables.ask({values: values, key: key})
-                }
-                catch(err){
-                    this.setAlert(err)
-                }
+                let promise = new Promise( resolve =&gt;{
+                    GlobalVariables.pool.exec(key, [values]).then((result) =&gt; {
+                        resolve(result)
+                    })
+                })
+                let result1 = await promise
+                    
+                return result1
             }
             
-            computeValue(values, key).then(result =&gt; {
-                
+            computeValue(values, key).then((result) =&gt; {
                 if (result != -1 ){
                     this.value = result
                     this.displayAndPropogate()
@@ -792,7 +796,7 @@ export default class Atom {
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){
-            this.setAlert(err)    
+            this.setAlert(err)
         }
 
     }
@@ -1022,7 +1026,7 @@ export default class Atom {
         var button = document.createElement(&apos;button&apos;)
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute(&apos;class&apos;, &apos; browseButton&apos;)
-        button.setAttribute(&apos;id&apos;, buttonText + &quot;-button&quot;)
+        button.setAttribute(&apos;id&apos;, buttonText.replace(/\s+/g, &quot;&quot;) + &quot;-button&quot;)
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)
         valueTextDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem&apos;)
@@ -1044,11 +1048,12 @@ export default class Atom {
     createCheckbox(sideBar,text,isChecked,callback){
         var gridDiv = document.createElement(&apos;div&apos;)
         sideBar.appendChild(gridDiv)
-        gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)
+        gridDiv.setAttribute(&apos;id&apos;, text + &quot;-parent&quot;)
+        gridDiv.setAttribute(&apos;class&apos;, &quot;sidebar-checkbox&quot;)
         var gridCheck = document.createElement(&apos;input&apos;)
         gridDiv.appendChild(gridCheck)
         gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
-        gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+        gridCheck.setAttribute(&apos;id&apos;, text)
         
         if (isChecked){
             gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
