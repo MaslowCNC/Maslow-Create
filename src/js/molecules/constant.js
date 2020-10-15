@@ -56,6 +56,8 @@ export default class Constant extends Atom{
         //This is done wrong. We should not be saving the value in the io values
         if (typeof this.ioValues == 'object') {
            this.value = this.ioValues[0].ioValue
+           this.output.value = this.value
+           console.log("Value set to: " + this.value)
         }
         
     }
