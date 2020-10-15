@@ -159,13 +159,6 @@ export default class Input extends Atom {
     }
     
     /**
-     * Propagation does not begin from inputs. They will be called by the attachment point of the parent molecule if it has no connectors
-     */ 
-    // beginPropogation(){
-    
-    // }
-    
-    /**
      * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates.
      */ 
     updateValue(){
