@@ -488,8 +488,8 @@ export default class AttachmentPoint {
     /**
      * Sets the current value of the ap. Force forces an update even if the value hasn't changed.
      */ 
-    setValue(newValue, force = false){
-        if(newValue != this.value || force){ //Don't update if nothing has changed
+    setValue(newValue){
+        if(newValue != this.value || this.ready == false){ //Don't update if nothing has changed unless it's the first time
             this.value = newValue
             this.ready = true
             //propagate the change to linked elements if this is an output
