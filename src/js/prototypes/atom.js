@@ -632,8 +632,8 @@ export default class Atom {
         
         //Set the output nodes with name 'geometry' to be the generated code
         if(this.output){
-            this.output.ready = true
             this.output.setValue(this.value)
+            this.output.ready = true
         }
     }
     
