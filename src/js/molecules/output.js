@@ -64,7 +64,12 @@ export default class Output extends Atom {
             
             this.value = this.findIOValue('number or geometry')
             this.parent.value = this.value
-            this.parent.propogate()
+            
+            //If this molecule is the top level or if it is not open, propogate up. Basically prevents propagation for opened molecules
+            if(this.parent.topLevel || this.parent != GlobalVariables.currentMolecule){
+                this.parent.propogate()
+            }
+            
             this.parent.processing = false
             
             if(this.parent.topLevel){

@@ -216,20 +216,12 @@ export default class Molecule extends Atom{
      * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
      */ 
     beginPropogation(){
-        
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
         }
-        else{  //Otherwise trigger inputs with nothing attached
-            this.inputs.forEach(attachmentPoint => {
-                if(attachmentPoint.connectors.length == 0){
-                    attachmentPoint.setValue(attachmentPoint.getValue()) //Trigger attachment points with nothing connected to them to begin propagation
-                }
-            })
-        }
         
-        // Run for every atom in this molecule
+        //Tell every atom inside this molecule to begin propogation
         this.nodesOnTheScreen.forEach(node => {
             node.beginPropogation()
         })
@@ -408,11 +400,15 @@ export default class Molecule extends Atom{
      */
     goToParentMolecule(){
         //Go to the parent molecule if there is one
-        if(!GlobalVariables.currentMolecule.topLevel){
+        if(!this.topLevel){
             this.nodesOnTheScreen.forEach(atom => {
                 atom.selected = false
             })
-            GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
+            
+            //Push any changes up to the next level
+            this.propogate()
+            
+            GlobalVariables.currentMolecule = this.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
         }
     }

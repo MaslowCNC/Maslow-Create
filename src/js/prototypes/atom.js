@@ -559,11 +559,14 @@ export default class Atom {
         var ioValues = []
         this.inputs.forEach(io => {
             if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){
-                var saveIO = {
-                    name: io.name,
-                    ioValue: io.getValue()
+                //We only want to save inputs values with nothing connected to them
+                if(io.connectors.length == 0){
+                    var saveIO = {
+                        name: io.name,
+                        ioValue: io.getValue()
+                    }
+                    ioValues.push(saveIO)
                 }
-                ioValues.push(saveIO)
             }
         })
         
@@ -603,7 +606,7 @@ export default class Atom {
      * Token update value function to give each atom one by default
      */ 
     updateValue(){
-        
+    
     }
     
     /**
