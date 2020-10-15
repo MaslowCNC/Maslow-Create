@@ -254,7 +254,7 @@ function openTopMenu(){
     Array.prototype.forEach.call(options, a => {
         if (a.classList.contains("openMenu")){
             closeTopMenu() 
-            a.classList.remove("openMenu")        
+            a.classList.remove("openMenu")
         }
         else{
             a.classList.add("openMenu")

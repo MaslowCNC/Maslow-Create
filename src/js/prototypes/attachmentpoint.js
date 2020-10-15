@@ -486,20 +486,22 @@ export default class AttachmentPoint {
     }
     
     /**
-     * Sets the current value of the ap.
+     * Sets the current value of the ap. Force forces an update even if the value hasn't changed.
      */ 
-    setValue(newValue){
-        this.value = newValue
-        this.ready = true
-        //propagate the change to linked elements if this is an output
-        if (this.type == 'output'){
-            this.connectors.forEach(connector => {     //select any connectors attached to this node
-                connector.propogate()
-            })
-        }
-        //if this is an input
-        else{   //update the code block to reflect the new values
-            this.parentMolecule.updateValue(this.name)
+    setValue(newValue, force = false){
+        if(newValue != this.value || force){ //Don't update if nothing has changed
+            this.value = newValue
+            this.ready = true
+            //propagate the change to linked elements if this is an output
+            if (this.type == 'output'){
+                this.connectors.forEach(connector => {     //select any connectors attached to this node
+                    connector.propogate()
+                })
+            }
+            //if this is an input attachment point
+            else{
+                this.parentMolecule.updateValue(this.name)
+            }
         }
     }
     

@@ -161,15 +161,15 @@ export default class Input extends Atom {
     /**
      * Propagation does not begin from inputs. They will be called by the attachment point of the parent molecule if it has no connectors
      */ 
-    beginPropogation(){
-        
-    }
+    // beginPropogation(){
+    
+    // }
     
     /**
-     * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates. TODO: If the parent has nothing connected, check to see if something is tied to the default input. 
+     * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates.
      */ 
     updateValue(){
-        
+        console.log("Input update value called")
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
                 this.decreaseToProcessCountByOne()
@@ -177,7 +177,8 @@ export default class Input extends Atom {
                 this.value = input.getValue()
                 
                 this.output.waitOnComingInformation()              //Lock all of the dependents
-                this.output.setValue(this.value)
+                this.output.setValue(this.value, true)
+                console.log("And passed to output")
             }
         })
     }
