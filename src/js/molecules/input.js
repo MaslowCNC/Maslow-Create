@@ -169,7 +169,6 @@ export default class Input extends Atom {
      * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates.
      */ 
     updateValue(){
-        console.log("Input update value called")
         this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
             if(input.name == this.name){        //If we have found the matching input
                 this.decreaseToProcessCountByOne()
@@ -178,7 +177,6 @@ export default class Input extends Atom {
                 
                 this.output.waitOnComingInformation()              //Lock all of the dependents
                 this.output.setValue(this.value)
-                console.log("And passed to output")
             }
         })
     }
