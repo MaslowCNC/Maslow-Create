@@ -685,18 +685,6 @@ export default class Atom {
     }
     
     /**
-     * Unlocks any inputs which have nothing connected
-     */ 
-    unlockFreeInputs(){
-        //Runs right after the loading process to unlock attachment points which have no connectors attached
-        // this.inputs.forEach(input => {
-            // if(input.connectors.length == 0){
-                // input.ready = true
-            // }
-        // })
-    }
-    
-    /**
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(){
