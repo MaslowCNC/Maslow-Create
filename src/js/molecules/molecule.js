@@ -204,28 +204,22 @@ export default class Molecule extends Atom{
         }
     }
     
-    unlockFreeInputs(){
-        super.unlockFreeInputs()
-        
-        this.nodesOnTheScreen.forEach(atom => {
-            atom.unlockFreeInputs()
-        })
-    }
-    
     /**
-     * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
+     * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
-    beginPropogation(){
+    beginPropagation(){
+        //Begin propagation from this molecules inputs
+        super.beginPropagation()
+        
+        //Tell every atom inside this molecule to begin Propagation
+        this.nodesOnTheScreen.forEach(node => {
+            node.beginPropagation()
+        })
+        
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
         }
-        
-        //Tell every atom inside this molecule to begin propogation
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropogation()
-        })
-        
     }
     
     /**
@@ -496,8 +490,7 @@ export default class Molecule extends Atom{
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
                 this.backgroundClick()
-                this.unlockFreeInputs()
-                this.beginPropogation()
+                this.beginPropagation()
             }
         })
     }
@@ -576,13 +569,11 @@ export default class Molecule extends Atom{
                         //Make begin propagation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
-                                atom.unlockFreeInputs()
-                                atom.beginPropogation()
+                                atom.beginPropagation()
                             })
                         }
                         else{
-                            atom.unlockFreeInputs()
-                            atom.beginPropogation()
+                            atom.beginPropagation()
                         }
                         
                         //Fake a click on the newly placed atom

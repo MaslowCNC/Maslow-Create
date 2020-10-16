@@ -438,6 +438,17 @@ export default class AttachmentPoint {
     }
     
     /**
+     * Starts propagation from this attachmentPoint if it is not waiting for anything up stream.
+     */ 
+    beginPropagation(){
+        
+        //If anything is connected to this it shouldn't be a starting point
+        if(this.connectors.length == 0){
+            this.setValue(this.value)
+        }
+    }
+    
+    /**
      * Passes a lock command to the parent molecule, or to the attached connector depending on input/output.
      */ 
     waitOnComingInformation(){
