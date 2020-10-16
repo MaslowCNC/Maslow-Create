@@ -625,15 +625,15 @@ export default class Atom {
      * Displays the atom in 3D and sets the output.
      */ 
     displayAndPropogate(){
-        //If this atom is selected, send the updated value to the renderer
-        if (this.selected){
-            this.sendToRender()
-        }
-        
-        //Set the output nodes with name 'geometry' to be the generated code
+        //If this has an output write to it
         if(this.output){
             this.output.setValue(this.value)
             this.output.ready = true
+        }
+        
+        //If this atom is selected, send the updated value to the renderer
+        if (this.selected){
+            this.sendToRender()
         }
     }
     
@@ -689,27 +689,21 @@ export default class Atom {
      */ 
     unlockFreeInputs(){
         //Runs right after the loading process to unlock attachment points which have no connectors attached
-        this.inputs.forEach(input => {
-            if(input.connectors.length == 0){
-                input.ready = true
-            }
-        })
+        // this.inputs.forEach(input => {
+            // if(input.connectors.length == 0){
+                // input.ready = true
+            // }
+        // })
     }
     
     /**
-     * Starts proagation from this atom if it is not waiting for anything up stream.
+     * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    beginPropogation(){
+    beginPropagation(){
         //If anything is connected to this it shouldn't be a starting point
-        var go = true
         this.inputs.forEach(input => {
-            if(input.connectors.length > 0){
-                go = false
-            }
+            input.beginPropagation()
         })
-        if(go){     //Then we update the value
-            this.updateValue()
-        }
     }
     
     /**

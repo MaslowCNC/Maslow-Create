@@ -57,7 +57,6 @@ export default class Constant extends Atom{
         if (typeof this.ioValues == 'object') {
            this.value = this.ioValues[0].ioValue
            this.output.value = this.value
-           console.log("Value set to: " + this.value)
         }
         
     }
@@ -75,11 +74,17 @@ export default class Constant extends Atom{
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        console.log("Constant updateValue()")
         this.value = this.output.getValue()  //We read from the output because it is set by the sidebar for confusing reasons
-        console.log("This.value set to " + this.value)
-        console.log("Output ready? : " + this.output.ready)
         this.displayAndPropogate()
+    }
+    
+    /**
+     * Starts propagation from this constant.
+     */ 
+    beginPropagation(){
+        console.log("Constant")
+        console.log(this.output.ready)
+        this.output.setValue(this.value)
     }
     
     /**
