@@ -121,6 +121,10 @@ export default class Display {
          * @type {boolean}
          */
         this.showGrid = true
+        /** 
+         * Flag for axes visibility
+         * @type {boolean}
+         */
         this.axesCheck = true
 
         this.options = {
@@ -200,7 +204,7 @@ export default class Display {
         // this.renderer.setPixelRatio(window.devicePixelRatio)
        
         //this.targetDiv.appendChild(this.renderer.domElement)
-         let viewerBar = document.querySelector('#viewer_bar')
+        let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
         this.targetDiv.addEventListener('mouseenter', () => {
@@ -210,7 +214,7 @@ export default class Display {
         })
 
         this.onWindowResize()
-        
+
         var evtFired = false
         var g_timer
 
@@ -241,6 +245,7 @@ export default class Display {
         arrowUpMenu.addEventListener('mouseleave', () =>{
             startTimer()
         })
+
     }
 
     /**
@@ -275,12 +280,12 @@ export default class Display {
         gridCheck.addEventListener('change', event => {
             if(event.target.checked){
                 this.showGrid = true
-                this.update()
+                this.writeToDisplay(this.displayedGeometry)
 
             }
             else{
                 this.showGrid = false
-                this.update()
+                this.writeToDisplay(this.displayedGeometry)
             }
         })
 
@@ -307,12 +312,14 @@ export default class Display {
 
         axesCheck.addEventListener('change', event => {
             if(event.target.checked){
+                console.log(this.displayedGeometry)
                 this.axesCheck = true
-                this.update()
+
+                this.writeToDisplay(this.displayedGeometry)
             }
             else{
                 this.axesCheck = false
-                this.update()
+                this.writeToDisplay(this.displayedGeometry)
             }
         })
         /*
@@ -468,9 +475,11 @@ export default class Display {
      */ 
     writeToDisplay(shape){
         if(shape != null){
-            
+            this.displayedGeometry = shape
             GlobalVariables.pool.exec("render", [shape])
                 .then(solids => {
+                    
+                    this.zoomCameraToFit(solids[0].bounds)
                 
                     this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight })
                     this.perspectiveCamera.update(this.state.camera, this.state.camera)
@@ -510,7 +519,7 @@ export default class Display {
 
                     }
                     
-                    this.zoomCameraToFit(solids[0].bounds)
+                    
                     this.renderer(this.options)
                 })
                 .timeout(6000)  //timeout if the rendering takes more than six seconds
