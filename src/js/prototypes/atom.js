@@ -3,7 +3,7 @@ import GlobalVariables from '../globalvariables'
 import showdown  from 'showdown'
 
 const workerpool = require('workerpool')
-
+const jsonDeSerializer = require('@jscad/json-deserializer')
 // create a worker pool using an external worker script
 const pool = workerpool.pool('./JSCADworker.js')
 /**
@@ -659,8 +659,9 @@ export default class Atom {
             }
             
             this.clearAlert()
+
             const computeValue = async (values, key) => {
-                let promise = new Promise((resolve)=>{
+                let promise = new Promise((resolve,reject)=>{
                     pool.exec(key, [values]).then((result) => {
                         resolve(result)
                     })
