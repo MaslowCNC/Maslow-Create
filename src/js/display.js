@@ -87,7 +87,7 @@ export default class Display {
          */
         this.targetDiv = document.getElementById('viewerContext')
         
-        this.solids= entitiesFromSolids({}, [circle({radius:10})])
+        this.solids= entitiesFromSolids({}, [colorize([1,1,1,0],circle({radius:1}))])
          
         //Add the JSXCAD window
         
@@ -106,6 +106,9 @@ export default class Display {
         this.width = window.innerWidth
         this.height = window.innerHeight
 
+        this.gridSizeX = 300
+        this.gridSizeY = 300
+
         this.options = {
             glOptions: { container: this.targetDiv },
             camera: this.state.camera,
@@ -122,12 +125,12 @@ export default class Display {
                     visuals: {
                         drawCmd: 'drawGrid',
                         show: true,
-                        color: [0, 0, 0, 1],
-                        subColor: [0, 0, 1, 0.5],
+                        color: [0, 0, 0, 0.5],
+                        subColor: [0, 0, 0, 0.5],
                         fadeOut: false,
                         transparent: true
                     },
-                    size: [500, 500],
+                    size: [this.gridSizeX, this.gridSizeY],
                     ticks: [10, 1]
                 },
                 {
@@ -208,6 +211,21 @@ export default class Display {
         this.update()
     }
     
+    /**
+     * Zooms the camera to fit target bounds on the screen.
+     * @param {array} bounds - An array of some sort...this comment should be updated.
+     */ 
+    zoomCameraToFit(bounds){
+        
+        this.state.camera.position[0] = 0
+        this.state.camera.position[1] = -5*Math.max(...bounds.max)
+        this.state.camera.position[2] = 5*Math.max(...bounds.max)
+
+        this.gridSizeX = 10*Math.max(...bounds.max)
+        this.gridSizeY = 10*Math.max(...bounds.max)
+        
+        this.update()
+    }
     
     /**
      * Moves the camera in a spherical cordinate system
@@ -276,15 +294,15 @@ export default class Display {
                             { // grid data
                             // the choice of what draw command to use is also data based
                                 visuals: {
-                                    drawCmd: 'drawGrid',
-                                    show: true,
-                                    color: [0, 0, 0, 1],
-                                    subColor: [0, 0, 0, 0.5],
-                                    fadeOut: false,
-                                    transparent: true
-                                },
-                                size: [500, 500],
-                                ticks: [10, 1]
+                                drawCmd: 'drawGrid',
+                                show: true,
+                                color: [0, 0, 0, .8],
+                                subColor: [0, 0, 0, 0.1],
+                                fadeOut: false,
+                                transparent: true
+                            },
+                            size: [this.gridSizeX, this.gridSizeY],
+                            ticks: [10, 1]
                             },
                             {
                                 visuals: {
@@ -294,8 +312,10 @@ export default class Display {
                             },
                             ...solids
                         ]
+
                     }
-                
+                    
+                    this.zoomCameraToFit(solids[0].bounds)
                     this.renderer(this.options)
                 })
                 .timeout(6000)  //timeout if the rendering takes more than six seconds
