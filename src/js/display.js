@@ -186,14 +186,9 @@ export default class Display {
         
     }
 
-    init(){
-        let shape = colorize([1, 0, 0, 0.75], circle({radius:10}))
-        
-        this.displayedGeometry = shape
-        
-
-    }
-
+     /**
+     * Updates the camera position
+     */
     update(){
         
         const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera })
@@ -203,6 +198,16 @@ export default class Display {
         
         this.renderer(this.options)
     }
+
+     /**
+     * Handles resizing the 3D viewer when the window resizes.
+     */ 
+    onWindowResize() {
+        this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight})
+        this.perspectiveCamera.update(this.state.camera, this.state.camera)
+        this.update()
+    }
+    
     
     /**
      * Moves the camera in a spherical cordinate system
@@ -254,7 +259,7 @@ export default class Display {
             GlobalVariables.pool.exec("render", [shape])
                 .then(solids => {
                 
-                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
+                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight })
                     this.perspectiveCamera.update(this.state.camera, this.state.camera)
                 
                     this.options = {
