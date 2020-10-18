@@ -69,12 +69,10 @@ export default class Stl extends Atom {
      * Set the value to be the input geometry, then call super updateValue()
      */ 
     updateValue(){
-        if(this.inputs.every(x => x.ready)){
-            this.decreaseToProcessCountByOne()
-            try{
-                this.value = this.findIOValue('geometry')
-            }catch(err){this.setAlert(err)}
-        }
+        try{
+            const values = [this.findIOValue('geometry')]
+            this.basicThreadValueProcessing(values, "stl")
+        }catch(err){this.setAlert(err)}
     }
     
     /**
@@ -89,24 +87,7 @@ export default class Stl extends Atom {
      * The function which is called when you press the download button.
      */ 
     downloadStl(){
-        const values = [this.value]
-        
-        const computeValue = async (values, key) => {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
-            }
-            catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        computeValue(values, "stl").then(result => {
-            if (result != -1 ){
-                const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
-                saveAs(blob, GlobalVariables.topLevelMolecule.name+'.stl')
-            }else{
-                this.setAlert("Unable to compute")
-            }
-        })
+        const blob = new Blob(this.value, {type: 'text/plain;charset=utf-8'})
+        saveAs(blob, GlobalVariables.topLevelMolecule.name+'.stl')
     }
 }

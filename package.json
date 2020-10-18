@@ -14,6 +14,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@jscad/io": "^2.0.0-alpha.6",
+    "@jscad/io-utils": "^2.0.0-alpha.5",
+    "@jscad/modeling": "^2.0.0-alpha.5",
+    "@jscad/regl-renderer": "^2.0.0-alpha.7",
     "@octokit/rest": "16.25.0",
     "codemirror": "^5.46.0",
     "coveralls": "^3.0.4",
@@ -25,10 +29,7 @@
     "oauthio-web": "^0.6.2",
     "showdown": "^1.9.1",
     "three": "^0.104.0",
-    "workerpool": "^6.0.0",
-    "@jscad/utils": "2.0.0-alpha.1",
-    "@jscad/io": "2.0.0-alpha.1",
-    "@jscad/modeling": "2.0.0-alpha.1"
+    "workerpool": "^6.0.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-regenerator": "^7.4.3",

@@ -1,17 +1,10 @@
+const { colorize } = require('@jscad/modeling').colors
+const { circle } = require('@jscad/modeling').primitives
+
 import GlobalVariables from './globalvariables'
 
-const workerpool = require('workerpool');
-// create a worker pool using an external worker script
-const pool = workerpool.pool('./JSCADworker.js');
-const jsonDeSerializer = require('@jscad/json-deserializer')
-const jsonSerializer = require('@jscad/json-serializer')
 
-const { colorize } = require('@jscad/modeling').colors
-const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
-const { intersect, subtract } = require('@jscad/modeling').booleans
-
-
-const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/utils/regl-renderer') 
+const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/regl-renderer') 
 
 
 /**
@@ -69,6 +62,11 @@ export default class Display {
          */
         this.controls
         /** 
+         * A flag to indicate if the mouse has clicked down in the aproprate to initiate a pan.
+         * @type {boolean}
+         */
+        this.panning = false
+        /** 
          * A threejs scene instance.
          * @type {object}
          */
@@ -89,7 +87,7 @@ export default class Display {
          */
         this.targetDiv = document.getElementById('viewerContext')
         
-        this.solids= entitiesFromSolids({}, [circle({radius:10})])     
+        this.solids= entitiesFromSolids({}, [circle({radius:10})])
          
         //Add the JSXCAD window
         
@@ -98,70 +96,91 @@ export default class Display {
          * @type {object}
          */
 
-       this.state = {}
+        this.state = {}
 
-       this.perspectiveCamera = cameras.perspective
-       this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
+        this.perspectiveCamera = cameras.perspective
+        this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
         
-        //[this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, -30, 50]
-        //
+        this.state.camera.position = [300,300,300]
+        
         this.width = window.innerWidth
         this.height = window.innerHeight
 
         this.options = {
-              glOptions: { container: this.targetDiv },
-              camera: this.state.camera,
-              drawCommands: {
+            glOptions: { container: this.targetDiv },
+            camera: this.state.camera,
+            drawCommands: {
                 // draw commands bootstrap themselves the first time they are run
                 drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
                 drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
                 drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
-              },
-              // data
-              entities: [
+            },
+            // data
+            entities: [
                 { // grid data
-                  // the choice of what draw command to use is also data based
-                  visuals: {
-                    drawCmd: 'drawGrid',
-                    show: true,
-                    color: [0, 0, 0, 1],
-                    subColor: [0, 0, 1, 0.5],
-                    fadeOut: false,
-                    transparent: true
-                  },
-                  size: [500, 500],
-                  ticks: [10, 1]
+                    // the choice of what draw command to use is also data based
+                    visuals: {
+                        drawCmd: 'drawGrid',
+                        show: true,
+                        color: [0, 0, 0, 1],
+                        subColor: [0, 0, 1, 0.5],
+                        fadeOut: false,
+                        transparent: true
+                    },
+                    size: [500, 500],
+                    ticks: [10, 1]
                 },
                 {
-                  visuals: {
-                    drawCmd: 'drawAxis',
-                    show: true
-                  }
+                    visuals: {
+                        drawCmd: 'drawAxis',
+                        show: true
+                    }
                 },
                 ...this.solids
-              ]
-            }
+            ]
+        }
 
         /** 
          * The controls which let the user pan and zoom with the mouse.
          * @type {object}
          */
          
-
-          //console.log(controls.orbit)
         this.controls = controls.orbit
-       // state.controls =  controls.orbit.defaults
+        // state.controls =  controls.orbit.defaults
         this.state.controls = Object.assign({}, this.controls.defaults)
-       
-        this.controls.pan({controls: this.state.controls, camera: this.state.camera}, 30)
-
+        
+        //Bind events to mouse input
+        
+        document.getElementById('viewerContext').addEventListener('mousedown', () => {
+            this.panning = true
+        })
+        
+        window.addEventListener('mouseup', () => {
+            this.panning = false
+        })
+        
+        document.getElementById('viewerContext').addEventListener('mousemove', event => {
+            
+            //If the mouse has been clicked down do pan
+            if(this.panning){
+                this.sphericalMoveCamera(0, -.01*event.movementX, -.01*event.movementY)
+            }
+        })
+            
+            
+        document.getElementById('viewerContext').addEventListener('wheel', event => {
+           
+            this.sphericalMoveCamera(event.deltaY*5, 0, 0)
+           
+        })
+        
         /** 
          * The three js webGLRendere object which does the actual rendering to the screen.
          * @type {object}
          */
 
         this.renderer = prepareRender(this.options)
-       // this.renderer.setPixelRatio(window.devicePixelRatio)
+        // this.renderer.setPixelRatio(window.devicePixelRatio)
        
         //this.targetDiv.appendChild(this.renderer.domElement)
         
@@ -169,7 +188,6 @@ export default class Display {
 
     init(){
         let shape = colorize([1, 0, 0, 0.75], circle({radius:10}))
-        //console.log(shape)
         
         this.displayedGeometry = shape
         
@@ -177,58 +195,107 @@ export default class Display {
     }
 
     update(){
-        //console.log(this.state.camera.position)
-        const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera }, this.state.camera)
+        
+        const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera })
         this.state.controls = { ...this.state.controls, ...updates.controls }
         this.state.camera.position = updates.camera.position
-        this.perspectiveCamera.update(this.state.camera, this.state.camera)
+        this.perspectiveCamera.update(this.state.camera)
+        
+        this.renderer(this.options)
     }
-
+    
     /**
-     * Writes a shape to the 3D display. Expecting a threejs geometry.
+     * Moves the camera in a spherical cordinate system
      * @param {object} shape - A jsxcad geometry data set to write to the display. Computation is done in a worker thread
      */ 
-    writeToDisplay(shape){
-        this.displayedGeometry = jsonDeSerializer.deserialize({output: 'geometry'}, shape)
-        this.solids= entitiesFromSolids({}, colorize([1, 0, 0, 0.75], this.displayedGeometry))      
-        this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
-        this.perspectiveCamera.update(this.state.camera, this.state.camera)
+    sphericalMoveCamera(deltaRho, deltaPhi, deltaTheta){
+        //Initial positions
+        var x = this.state.camera.position[0]
+        var y = this.state.camera.position[1]
+        var z = this.state.camera.position[2]
         
-        this.options = {
-              glOptions: { container: this.targetDiv },
-              camera: this.state.camera,
-              drawCommands: {
-                // draw commands bootstrap themselves the first time they are run
-                drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
-                drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
-                drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
-              },
-              // data
-              entities: [
-                { // grid data
-                  // the choice of what draw command to use is also data based
-                  visuals: {
-                    drawCmd: 'drawGrid',
-                    show: true,
-                    color: [0, 0, 0, 1],
-                    subColor: [0, 0, 1, 0.5],
-                    fadeOut: false,
-                    transparent: true
-                  },
-                  size: [500, 500],
-                  ticks: [10, 1]
-                },
-                {
-                  visuals: {
-                    drawCmd: 'drawAxis',
-                    show: true
-                  }
-                },
-                ...this.solids
-              ]
-            }
-        this.renderer(this.options)
+        //Convert to spherical cordinates 
+        var rho = Math.sqrt((x*x) + (y*y) + (z*z))
+        var phi = Math.atan2(y, x)
+        var theta = Math.acos(z / rho)
+        
+        //Apply our transformation
+        rho = rho + deltaRho
+        phi = phi + deltaPhi
+        theta = theta + deltaTheta
+        
+        //Restrict theta to valid values
+        if(theta < 0){
+            theta = 0.01
         }
+        
+        if(theta > 3.14){
+            theta = 3.14
+        }
+        
+        //Convert back to cartesian cordinates
+        x = rho * Math.sin(theta) * Math.cos(phi)
+        y = rho * Math.sin(theta) * Math.sin(phi)
+        z = rho * Math.cos(theta)
+        
+        //Asssign the new camera positions
+        this.state.camera.position[0] = x
+        this.state.camera.position[1] = y
+        this.state.camera.position[2] = z
+    }
+    
+    /**
+     * Writes a shape to the 3D display. .
+     * @param {object} shape - A jscad geometry data set to write to the display. Computation is done in a worker thread
+     */ 
+    writeToDisplay(shape){
+        if(shape != null){
+            
+            GlobalVariables.pool.exec("render", [shape])
+                .then(solids => {
+                
+                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
+                    this.perspectiveCamera.update(this.state.camera, this.state.camera)
+                
+                    this.options = {
+                        glOptions: { container: this.targetDiv },
+                        camera: this.state.camera,
+                        drawCommands: {
+                        // draw commands bootstrap themselves the first time they are run
+                            drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
+                            drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
+                            drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
+                        },
+                        // data
+                        entities: [
+                            { // grid data
+                            // the choice of what draw command to use is also data based
+                                visuals: {
+                                    drawCmd: 'drawGrid',
+                                    show: true,
+                                    color: [0, 0, 0, 1],
+                                    subColor: [0, 0, 0, 0.5],
+                                    fadeOut: false,
+                                    transparent: true
+                                },
+                                size: [500, 500],
+                                ticks: [10, 1]
+                            },
+                            {
+                                visuals: {
+                                    drawCmd: 'drawAxis',
+                                    show: true
+                                }
+                            },
+                            ...solids
+                        ]
+                    }
+                
+                    this.renderer(this.options)
+                })
+                .timeout(6000)  //timeout if the rendering takes more than six seconds
+        }
+    }
     
   
     /**
@@ -237,7 +304,5 @@ export default class Display {
      */ 
     rendering(){
         this.update()
-        this.renderer(this.options)
-
     }
 }
