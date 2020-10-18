@@ -106,8 +106,22 @@ export default class Display {
         this.width = window.innerWidth
         this.height = window.innerHeight
 
+        /** 
+         * The x size of the grid to be rendered
+         * @type {number}
+         */
         this.gridSizeX = 300
+        /** 
+         * The y size of the grid to be rendered
+         * @type {number}
+         */
         this.gridSizeY = 300
+        /** 
+         * Flag for grid visibility
+         * @type {boolean}
+         */
+        this.showGrid = true
+        this.axesCheck = true
 
         this.options = {
             glOptions: { container: this.targetDiv },
@@ -124,7 +138,7 @@ export default class Display {
                     // the choice of what draw command to use is also data based
                     visuals: {
                         drawCmd: 'drawGrid',
-                        show: true,
+                        show: this.showGrid,
                         color: [0, 0, 0, 0.5],
                         subColor: [0, 0, 0, 0.5],
                         fadeOut: false,
@@ -136,7 +150,7 @@ export default class Display {
                 {
                     visuals: {
                         drawCmd: 'drawAxis',
-                        show: true
+                        show: this.axesCheck
                     }
                 },
                 ...this.solids
@@ -186,7 +200,188 @@ export default class Display {
         // this.renderer.setPixelRatio(window.devicePixelRatio)
        
         //this.targetDiv.appendChild(this.renderer.domElement)
+         let viewerBar = document.querySelector('#viewer_bar')
+        let arrowUpMenu = document.querySelector('#arrow-up-menu')
+
+        this.targetDiv.addEventListener('mouseenter', () => {
+            if(viewerBar.innerHTML.trim().length == 0){
+                this.checkBoxes()   
+            }
+        })
+
+        this.onWindowResize()
         
+        var evtFired = false
+        var g_timer
+
+         function startTimer(){
+            g_timer = setTimeout(function() {
+                if (!evtFired) {
+                    viewerBar.classList.remove("slideup")
+                    viewerBar.classList.add('slidedown')  
+                }
+            }, 2000)
+        }
+
+        arrowUpMenu.addEventListener('mouseenter', () =>{
+            clearTimeout(g_timer)
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        viewerBar.addEventListener('mouseleave', () =>{
+            evtFired = false
+            viewerBar.classList.remove("slideup")
+            viewerBar.classList.add('slidedown')   
+        })
+        viewerBar.addEventListener('mouseenter', () =>{
+            evtFired = true
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        arrowUpMenu.addEventListener('mouseleave', () =>{
+            startTimer()
+        })
+    }
+
+    /**
+     * Creates the checkbox hidden menu when viewer is active
+     */ 
+    checkBoxes(){
+        let viewerBar = document.querySelector('#viewer_bar')   
+        viewerBar.classList.add('slidedown')
+
+        //Grid display html element
+        var gridDiv = document.createElement('div')
+        viewerBar.appendChild(gridDiv)
+        gridDiv.setAttribute('id', 'gridDiv')
+        var gridCheck = document.createElement('input')
+        gridDiv.appendChild(gridCheck)
+        gridCheck.setAttribute('type', 'checkbox')
+        gridCheck.setAttribute('id', 'gridCheck')
+        gridDiv.setAttribute('style', 'float:right;')
+               
+        if (this.displayGrid){
+            gridCheck.setAttribute('checked', 'true')
+        }
+
+        var gridCheckLabel = document.createElement('label')
+        gridDiv.appendChild(gridCheckLabel)
+        gridCheckLabel.setAttribute('for', 'gridCheck')
+        gridCheckLabel.setAttribute('style', 'margin-right:1em;')
+        gridCheckLabel.textContent= "Grid"
+        gridCheckLabel.setAttribute('style', 'user-select: none;')
+
+
+        gridCheck.addEventListener('change', event => {
+            if(event.target.checked){
+                this.showGrid = true
+                this.update()
+
+            }
+            else{
+                this.showGrid = false
+                this.update()
+            }
+        })
+
+        //Axes Html
+
+        var axesDiv = document.createElement('div')
+        viewerBar.appendChild(axesDiv)
+        var axesCheck = document.createElement('input')
+        axesDiv.appendChild(axesCheck)
+        axesCheck.setAttribute('type', 'checkbox')
+        axesCheck.setAttribute('id', 'axesCheck')
+                
+        if (this.axesCheck){
+            axesCheck.setAttribute('checked', 'true')
+        }
+
+        var axesCheckLabel = document.createElement('label')
+        axesDiv.appendChild(axesCheckLabel)
+        axesCheckLabel.setAttribute('for', 'axesCheck')
+        axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+        axesDiv.setAttribute('style', 'float:right;')
+        axesCheckLabel.textContent= "Axes"
+        axesCheckLabel.setAttribute('style', 'user-select: none;')
+
+        axesCheck.addEventListener('change', event => {
+            if(event.target.checked){
+                this.axesCheck = true
+                this.update()
+            }
+            else{
+                this.axesCheck = false
+                this.update()
+            }
+        })
+        /*
+        //Solid HTML element
+
+        var solidDiv = document.createElement('div')
+        viewerBar.appendChild(solidDiv)
+        solidDiv.setAttribute('id', 'solidDiv')
+        var solidCheck = document.createElement('input')
+        solidDiv.appendChild(solidCheck)
+        solidCheck.setAttribute('type', 'checkbox')
+        solidCheck.setAttribute('id', 'solidCheck')
+               
+        if (this.solidDisplay){
+            solidCheck.setAttribute('checked', 'true')
+            this.threeMaterial.solid = true
+        }
+        //solidCheck.setAttribute('checked', false)
+        var solidCheckLabel = document.createElement('label')
+        solidDiv.appendChild(solidCheckLabel)
+        solidCheckLabel.setAttribute('for', 'solidCheck')
+        //solidCheckLabel.setAttribute('style', 'margin-right:10em;')
+        solidDiv.setAttribute('style', 'float:right;')
+        solidCheckLabel.textContent= "Solid"
+        solidCheckLabel.setAttribute('style', 'user-select: none;')
+
+        solidCheck.addEventListener('change', event => {
+            if( event.target.checked){
+                this.solidDisplay = true
+            }
+            else{
+                this.solidDisplay = false
+            }
+            this.writeToDisplay(this.displayedGeometry)
+        })
+
+    
+        //Wireframe HTML element
+
+        var wireDiv = document.createElement('div')
+        viewerBar.appendChild(wireDiv)
+        wireDiv.setAttribute('id', 'wireDiv')
+        var wireCheck = document.createElement('input')
+        wireDiv.appendChild(wireCheck)
+        wireCheck.setAttribute('type', 'checkbox')
+        wireCheck.setAttribute('id', 'wireCheck')
+               
+        if (this.wireDisplay){
+            wireCheck.setAttribute('checked', 'true')
+        }
+        //wireCheck.setAttribute('checked', false)
+        var wireCheckLabel = document.createElement('label')
+        wireDiv.appendChild(wireCheckLabel)
+        wireCheckLabel.setAttribute('for', 'wireCheck')
+        //wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+        wireDiv.setAttribute('style', 'float:right;')
+        wireCheckLabel.textContent= "Wireframe"
+        wireCheckLabel.setAttribute('style', 'user-select: none;')
+
+        wireCheck.addEventListener('change', event => {
+            if( event.target.checked){
+                this.wireDisplay = true
+            }
+            else{
+                this.wireDisplay = false
+            }
+            this.writeToDisplay(this.displayedGeometry)
+        })*/
+
     }
 
     /**
@@ -295,7 +490,7 @@ export default class Display {
                             // the choice of what draw command to use is also data based
                                 visuals: {
                                     drawCmd: 'drawGrid',
-                                    show: true,
+                                    show: this.showGrid,
                                     color: [0, 0, 0, .8],
                                     subColor: [0, 0, 0, 0.1],
                                     fadeOut: false,
@@ -307,7 +502,7 @@ export default class Display {
                             {
                                 visuals: {
                                     drawCmd: 'drawAxis',
-                                    show: true
+                                    show: this.axesCheck
                                 }
                             },
                             ...solids
