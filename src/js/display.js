@@ -189,7 +189,7 @@ export default class Display {
         
     }
 
-     /**
+    /**
      * Updates the camera position
      */
     update(){
@@ -202,7 +202,7 @@ export default class Display {
         this.renderer(this.options)
     }
 
-     /**
+    /**
      * Handles resizing the 3D viewer when the window resizes.
      */ 
     onWindowResize() {
@@ -213,17 +213,17 @@ export default class Display {
     
     /**
      * Zooms the camera to fit target bounds on the screen.
-     * @param {array} bounds - An array of some sort...this comment should be updated.
+     * @param {object} bounds -bounds from a solid
      */ 
     zoomCameraToFit(bounds){
-        
+        // reset camera position
         this.state.camera.position[0] = 0
         this.state.camera.position[1] = -5*Math.max(...bounds.max)
         this.state.camera.position[2] = 5*Math.max(...bounds.max)
-
+        // re set grid to fit solid
         this.gridSizeX = 10*Math.max(...bounds.max)
         this.gridSizeY = 10*Math.max(...bounds.max)
-        
+        //update camera & render
         this.update()
     }
     
@@ -294,15 +294,15 @@ export default class Display {
                             { // grid data
                             // the choice of what draw command to use is also data based
                                 visuals: {
-                                drawCmd: 'drawGrid',
-                                show: true,
-                                color: [0, 0, 0, .8],
-                                subColor: [0, 0, 0, 0.1],
-                                fadeOut: false,
-                                transparent: true
-                            },
-                            size: [this.gridSizeX, this.gridSizeY],
-                            ticks: [10, 1]
+                                    drawCmd: 'drawGrid',
+                                    show: true,
+                                    color: [0, 0, 0, .8],
+                                    subColor: [0, 0, 0, 0.1],
+                                    fadeOut: false,
+                                    transparent: true
+                                },
+                                size: [this.gridSizeX, this.gridSizeY],
+                                ticks: [10, 1]
                             },
                             {
                                 visuals: {
