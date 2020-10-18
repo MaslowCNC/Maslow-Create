@@ -53,8 +53,10 @@ export default class Constant extends Atom{
         
         this.decreaseToProcessCountByOne()  //Since there is nothing upstream this needs to be removed from the list here
         
+        //This is done wrong. We should not be saving the value in the io values
         if (typeof this.ioValues == 'object') {
-            this.output.setValue(this.ioValues[0].ioValue)
+            this.value = this.ioValues[0].ioValue
+            this.output.value = this.value
         }
         
     }
@@ -67,11 +69,20 @@ export default class Constant extends Atom{
         super.draw("rect")
         
     }
+    
     /**
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
+        this.value = this.output.getValue()  //We read from the output because it is set by the sidebar for confusing reasons
         this.displayAndPropogate()
+    }
+    
+    /**
+     * Starts propagation from this constant.
+     */ 
+    beginPropagation(){
+        this.output.setValue(this.value)
     }
     
     /**
@@ -130,12 +141,4 @@ export default class Constant extends Atom{
         
     }
     
-
-    
-    /**
-     * Overwrite the default displayAndPropogate()...why?
-     */ 
-    displayAndPropogate(){
-        this.output.setValue(this.output.getValue())
-    }
 }

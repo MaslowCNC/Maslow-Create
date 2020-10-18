@@ -1,14 +1,7 @@
-import GlobalVariables from './globalvariables'
-
-// const workerpool = require('workerpool');
-// create a worker pool using an external worker script
-// const pool = workerpool.pool('./JSCADworker.js');
-const jsonDeSerializer = require('@jscad/json-deserializer')
-const jsonSerializer = require('@jscad/json-serializer')
-
 const { colorize } = require('@jscad/modeling').colors
-const { cube, cuboid, circle, line, sphere, star } = require('@jscad/modeling').primitives
-const { intersect, subtract , union} = require('@jscad/modeling').booleans
+const { circle } = require('@jscad/modeling').primitives
+
+import GlobalVariables from './globalvariables'
 
 
 const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/regl-renderer') 
@@ -158,11 +151,11 @@ export default class Display {
         
         //Bind events to mouse input
         
-        document.getElementById('viewerContext').addEventListener('mousedown', event => {
+        document.getElementById('viewerContext').addEventListener('mousedown', () => {
             this.panning = true
         })
         
-        window.addEventListener('mouseup', event => {
+        window.addEventListener('mouseup', () => {
             this.panning = false
         })
         
@@ -170,14 +163,6 @@ export default class Display {
             
             //If the mouse has been clicked down do pan
             if(this.panning){
-                var x = this.state.camera.position[0]
-                var y = this.state.camera.position[1]
-                var z = this.state.camera.position[2]
-                
-                //Convert to spherical cordinates 
-                var rho = Math.sqrt((x*x) + (y*y) + (z*z))
-                
-                
                 this.sphericalMoveCamera(0, -.01*event.movementX, -.01*event.movementY)
             }
         })
@@ -239,65 +224,76 @@ export default class Display {
         phi = phi + deltaPhi
         theta = theta + deltaTheta
         
+        //Restrict theta to valid values
+        if(theta < 0){
+            theta = 0.01
+        }
+        
+        if(theta > 3.14){
+            theta = 3.14
+        }
+        
         //Convert back to cartesian cordinates
         x = rho * Math.sin(theta) * Math.cos(phi)
         y = rho * Math.sin(theta) * Math.sin(phi)
         z = rho * Math.cos(theta)
-        
         
         //Asssign the new camera positions
         this.state.camera.position[0] = x
         this.state.camera.position[1] = y
         this.state.camera.position[2] = z
     }
+    
     /**
      * Writes a shape to the 3D display. .
      * @param {object} shape - A jscad geometry data set to write to the display. Computation is done in a worker thread
      */ 
     writeToDisplay(shape){
-        console.log("Shape: ")
-        console.log(shape)
         if(shape != null){
-            this.displayedGeometry = shape.map(x => jsonDeSerializer.deserialize({output: 'geometry'}, x.geometry))
-            const unionized = union(this.displayedGeometry)  //Union to compress it all into one
-            this.solids = entitiesFromSolids({}, unionized)  //This should be able to handle an array but right now it can't
-            this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
-            this.perspectiveCamera.update(this.state.camera, this.state.camera)
             
-            this.options = {
-                glOptions: { container: this.targetDiv },
-                camera: this.state.camera,
-                drawCommands: {
-                    // draw commands bootstrap themselves the first time they are run
-                    drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
-                    drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
-                    drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
-                },
-                // data
-                entities: [
-                    { // grid data
-                        // the choice of what draw command to use is also data based
-                        visuals: {
-                            drawCmd: 'drawGrid',
-                            show: true,
-                            color: [0, 0, 0, 1],
-                            subColor: [0, 0, 0, 0.5],
-                            fadeOut: false,
-                            transparent: true
+            GlobalVariables.pool.exec("render", [shape])
+                .then(solids => {
+                
+                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
+                    this.perspectiveCamera.update(this.state.camera, this.state.camera)
+                
+                    this.options = {
+                        glOptions: { container: this.targetDiv },
+                        camera: this.state.camera,
+                        drawCommands: {
+                        // draw commands bootstrap themselves the first time they are run
+                            drawGrid: drawCommands.drawGrid, // require('./src/rendering/drawGrid/index.js'),
+                            drawAxis: drawCommands.drawAxis, // require('./src/rendering/drawAxis'),
+                            drawMesh: drawCommands.drawMesh // require('./src/rendering/drawMesh/index.js')
                         },
-                        size: [500, 500],
-                        ticks: [10, 1]
-                    },
-                    {
-                        visuals: {
-                            drawCmd: 'drawAxis',
-                            show: true
-                        }
-                    },
-                    ...this.solids
-                ]
-            }
-            this.renderer(this.options)
+                        // data
+                        entities: [
+                            { // grid data
+                            // the choice of what draw command to use is also data based
+                                visuals: {
+                                    drawCmd: 'drawGrid',
+                                    show: true,
+                                    color: [0, 0, 0, 1],
+                                    subColor: [0, 0, 0, 0.5],
+                                    fadeOut: false,
+                                    transparent: true
+                                },
+                                size: [500, 500],
+                                ticks: [10, 1]
+                            },
+                            {
+                                visuals: {
+                                    drawCmd: 'drawAxis',
+                                    show: true
+                                }
+                            },
+                            ...solids
+                        ]
+                    }
+                
+                    this.renderer(this.options)
+                })
+                .timeout(6000)  //timeout if the rendering takes more than six seconds
         }
     }
     

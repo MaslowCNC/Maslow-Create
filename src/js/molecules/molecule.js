@@ -204,36 +204,22 @@ export default class Molecule extends Atom{
         }
     }
     
-    unlockFreeInputs(){
-        super.unlockFreeInputs()
-        
-        this.nodesOnTheScreen.forEach(atom => {
-            atom.unlockFreeInputs()
-        })
-    }
-    
     /**
-     * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
+     * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
-    beginPropogation(){
+    beginPropagation(){
+        //Begin propagation from this molecules inputs
+        super.beginPropagation()
+        
+        //Tell every atom inside this molecule to begin Propagation
+        this.nodesOnTheScreen.forEach(node => {
+            node.beginPropagation()
+        })
         
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
         }
-        else{  //Otherwise trigger inputs with nothing attached
-            this.inputs.forEach(attachmentPoint => {
-                if(attachmentPoint.connectors.length == 0){
-                    attachmentPoint.setValue(attachmentPoint.getValue()) //Trigger attachment points with nothing connected to them to begin propagation
-                }
-            })
-        }
-        
-        // Run for every atom in this molecule
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropogation()
-        })
-        
     }
     
     /**
@@ -408,11 +394,15 @@ export default class Molecule extends Atom{
      */
     goToParentMolecule(){
         //Go to the parent molecule if there is one
-        if(!GlobalVariables.currentMolecule.topLevel){
+        if(!this.topLevel){
             this.nodesOnTheScreen.forEach(atom => {
                 atom.selected = false
             })
-            GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
+            
+            //Push any changes up to the next level
+            this.propogate()
+            
+            GlobalVariables.currentMolecule = this.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
         }
     }
@@ -500,8 +490,7 @@ export default class Molecule extends Atom{
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
                 this.backgroundClick()
-                this.unlockFreeInputs()
-                this.beginPropogation()
+                this.beginPropagation()
             }
         })
     }
@@ -580,13 +569,11 @@ export default class Molecule extends Atom{
                         //Make begin propagation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
-                                atom.unlockFreeInputs()
-                                atom.beginPropogation()
+                                atom.beginPropagation()
                             })
                         }
                         else{
-                            atom.unlockFreeInputs()
-                            atom.beginPropogation()
+                            atom.beginPropagation()
                         }
                         
                         //Fake a click on the newly placed atom
@@ -652,16 +639,16 @@ export default class Molecule extends Atom{
      */
     sendToRender(){
         super.sendToRender()
-        if(this.value != null){
-            if(this.topLevel){
-                GlobalVariables.ask({values: [this.value], key: "bounding box"}).then(result => {
-                    if (result != -1 ){
-                        GlobalVariables.display.zoomCameraToFit(result)
-                    }else{
-                        console.warn("Unable to compute bounding box")
-                    }
-                })
-            }
-        }
+        // if(this.value != null){
+        // if(this.topLevel){
+        // GlobalVariables.ask({values: [this.value], key: "bounding box"}).then(result => {
+        // if (result != -1 ){
+        // GlobalVariables.display.zoomCameraToFit(result)
+        // }else{
+        // console.warn("Unable to compute bounding box")
+        // }
+        // })
+        // }
+        // }
     }
 }
