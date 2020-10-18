@@ -189,6 +189,14 @@ export default class Display {
         
     }
 
+    init(){
+        let shape = colorize([1, 0, 0, 0.75], circle({radius:10}))
+        
+        this.displayedGeometry = shape
+        
+
+    }
+
     update(){
         
         const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera })

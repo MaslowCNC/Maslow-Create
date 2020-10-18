@@ -666,7 +666,7 @@ export default class Atom {
                     })
                 })
                 let result1 = await promise
-                console.log(result1)
+                    
                 return result1
             }
             
