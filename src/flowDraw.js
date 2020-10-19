@@ -381,7 +381,7 @@ function onWindowResize() {
         document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
-    //GlobalVariables.display.onWindowResize()
+    GlobalVariables.display.onWindowResize()
 
 }
 
