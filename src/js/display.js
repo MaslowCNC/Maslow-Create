@@ -87,6 +87,10 @@ export default class Display {
          */
         this.targetDiv = document.getElementById('viewerContext')
         
+        /** 
+         * Initial geometry passed to the renderer (Won't render without an initial solid)
+         * @type {object}
+         */
         this.solids= entitiesFromSolids({}, [colorize([1,1,1,0],circle({radius:1}))])
          
         //Add the JSXCAD window
@@ -95,15 +99,32 @@ export default class Display {
          * The camera which controls how the scene is rendered.
          * @type {object}
          */
-
         this.state = {}
-
+        /** 
+         * Set perspective camera
+         * @type {object}
+         */
         this.perspectiveCamera = cameras.perspective
+        /** 
+         * Assign camera defaults to camera? 
+         * @type {object}
+         */
         this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
-        
+        /** 
+         * Assign default camera position
+         * @type {array(x,y,z)}
+         */
         this.state.camera.position = [300,300,300]
         
+        /** 
+         * The browser window width
+         * @type {number}
+         */
         this.width = window.innerWidth
+        /** 
+         * The browser window height
+         * @type {number}
+         */
         this.height = window.innerHeight
 
         /** 
@@ -126,7 +147,10 @@ export default class Display {
          * @type {boolean}
          */
         this.axesCheck = true
-
+        /** 
+         * Initial options for rendered
+         * @type {object}
+         */
         this.options = {
             glOptions: { container: this.targetDiv },
             camera: this.state.camera,
@@ -165,13 +189,14 @@ export default class Display {
          * The controls which let the user pan and zoom with the mouse.
          * @type {object}
          */
-         
         this.controls = controls.orbit
-        // state.controls =  controls.orbit.defaults
+        /** 
+         * Assigns defaults to controls??
+         * @type {object}
+         */
         this.state.controls = Object.assign({}, this.controls.defaults)
         
         //Bind events to mouse input
-        
         document.getElementById('viewerContext').addEventListener('mousedown', () => {
             this.panning = true
         })
@@ -199,10 +224,8 @@ export default class Display {
          * The three js webGLRendere object which does the actual rendering to the screen.
          * @type {object}
          */
-
         this.renderer = prepareRender(this.options)
-        // this.renderer.setPixelRatio(window.devicePixelRatio)
-       
+         
         //this.targetDiv.appendChild(this.renderer.domElement)
         let viewerBar = document.querySelector('#viewer_bar')
         let arrowUpMenu = document.querySelector('#arrow-up-menu')
@@ -218,7 +241,7 @@ export default class Display {
         var evtFired = false
         var g_timer
 
-         function startTimer(){
+        function startTimer(){
             g_timer = setTimeout(function() {
                 if (!evtFired) {
                     viewerBar.classList.remove("slideup")
@@ -312,7 +335,6 @@ export default class Display {
 
         axesCheck.addEventListener('change', event => {
             if(event.target.checked){
-                console.log(this.displayedGeometry)
                 this.axesCheck = true
 
                 this.writeToDisplay(this.displayedGeometry)
@@ -518,7 +540,6 @@ export default class Display {
                         ]
 
                     }
-                    
                     
                     this.renderer(this.options)
                 })
