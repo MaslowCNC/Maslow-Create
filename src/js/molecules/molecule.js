@@ -90,12 +90,17 @@ export default class Molecule extends Atom{
      * Add the center dot to the molecule
      */ 
     draw(){
+        
+        
+        const percentLoaded = 1-this.toProcess/this.totalAtomCount
+        
         super.draw() //Super call to draw the rest
+        
         
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.centerColor
-        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
 
@@ -223,6 +228,22 @@ export default class Molecule extends Atom{
     }
     
     /**
+     * Walks through each of the atoms in this molecule and takes a census of how many there are and how many are currently waiting to be processed.
+     */ 
+    census(){
+        this.totalAtomCount = 1  //Starts at 1 for this molecule
+        this.toProcess = 0
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            const newInformation = atom.census()
+            this.totalAtomCount = this.totalAtomCount + newInformation[0]
+            this.toProcess      = this.toProcess + newInformation[1]
+        })
+        
+        return [this.totalAtomCount, this.toProcess]
+    }
+    
+    /**
      * Updates the side bar to display options like 'go to parent' and 'load a different project'. What is displayed depends on if this atom is the top level, and if we are using run mode.
      */ 
     updateSidebar(){
@@ -327,27 +348,26 @@ export default class Molecule extends Atom{
         
         if(this.value != null){
             try{
-                extractBomTags(this.value).then(bomList => {
+                var bomList = extractBomTags(this.value)
+                
+                if(bomList.length > 0){
+                
+                    list.appendChild(document.createElement('br'))
+                    list.appendChild(document.createElement('br'))
                     
-                    if(bomList.length > 0){
+                    var div = document.createElement('h3')
+                    div.setAttribute('style','text-align:center;')
+                    list.appendChild(div)
+                    var valueText = document.createTextNode('Bill Of Materials')
+                    div.appendChild(valueText)
                     
-                        list.appendChild(document.createElement('br'))
-                        list.appendChild(document.createElement('br'))
-                        
-                        var div = document.createElement('h3')
-                        div.setAttribute('style','text-align:center;')
-                        list.appendChild(div)
-                        var valueText = document.createTextNode('Bill Of Materials')
-                        div.appendChild(valueText)
-                        
-                        var x = document.createElement('HR')
-                        list.appendChild(x)
-                        
-                        bomList.forEach(bomEntry => {
-                            this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
-                        })
-                    }
-                })
+                    var x = document.createElement('HR')
+                    list.appendChild(x)
+                    
+                    bomList.forEach(bomEntry => {
+                        this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
+                    })
+                }
             }catch(err){
                 this.setAlert("Unable to read BOM")
             }
@@ -490,6 +510,7 @@ export default class Molecule extends Atom{
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
                 this.backgroundClick()
+                this.census()
                 this.beginPropagation()
             }
         })
