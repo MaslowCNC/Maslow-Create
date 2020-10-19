@@ -87,7 +87,11 @@ export default class Display {
          */
         this.targetDiv = document.getElementById('viewerContext')
         
-        this.solids= entitiesFromSolids({}, [circle({radius:10})])
+        /** 
+         * Initial geometry passed to the renderer (Won't render without an initial solid)
+         * @type {object}
+         */
+        this.solids= entitiesFromSolids({}, [colorize([1,1,1,0],circle({radius:1}))])
          
         //Add the JSXCAD window
         
@@ -95,17 +99,58 @@ export default class Display {
          * The camera which controls how the scene is rendered.
          * @type {object}
          */
-
         this.state = {}
-
+        /** 
+         * Set perspective camera
+         * @type {object}
+         */
         this.perspectiveCamera = cameras.perspective
+        /** 
+         * Assign camera defaults to camera? 
+         * @type {object}
+         */
         this.state.camera = Object.assign({}, this.perspectiveCamera.defaults)
-        
+        /** 
+         * Assign default camera position
+         * @type {array(x,y,z)}
+         */
         this.state.camera.position = [300,300,300]
         
+        /** 
+         * The browser window width
+         * @type {number}
+         */
         this.width = window.innerWidth
+        /** 
+         * The browser window height
+         * @type {number}
+         */
         this.height = window.innerHeight
 
+        /** 
+         * The x size of the grid to be rendered
+         * @type {number}
+         */
+        this.gridSizeX = 300
+        /** 
+         * The y size of the grid to be rendered
+         * @type {number}
+         */
+        this.gridSizeY = 300
+        /** 
+         * Flag for grid visibility
+         * @type {boolean}
+         */
+        this.showGrid = true
+        /** 
+         * Flag for axes visibility
+         * @type {boolean}
+         */
+        this.axesCheck = true
+        /** 
+         * Initial options for rendered
+         * @type {object}
+         */
         this.options = {
             glOptions: { container: this.targetDiv },
             camera: this.state.camera,
@@ -121,19 +166,19 @@ export default class Display {
                     // the choice of what draw command to use is also data based
                     visuals: {
                         drawCmd: 'drawGrid',
-                        show: true,
-                        color: [0, 0, 0, 1],
-                        subColor: [0, 0, 1, 0.5],
+                        show: this.showGrid,
+                        color: [0, 0, 0, 0.5],
+                        subColor: [0, 0, 0, 0.5],
                         fadeOut: false,
                         transparent: true
                     },
-                    size: [500, 500],
+                    size: [this.gridSizeX, this.gridSizeY],
                     ticks: [10, 1]
                 },
                 {
                     visuals: {
                         drawCmd: 'drawAxis',
-                        show: true
+                        show: this.axesCheck
                     }
                 },
                 ...this.solids
@@ -144,13 +189,14 @@ export default class Display {
          * The controls which let the user pan and zoom with the mouse.
          * @type {object}
          */
-         
         this.controls = controls.orbit
-        // state.controls =  controls.orbit.defaults
+        /** 
+         * Assigns defaults to controls??
+         * @type {object}
+         */
         this.state.controls = Object.assign({}, this.controls.defaults)
         
         //Bind events to mouse input
-        
         document.getElementById('viewerContext').addEventListener('mousedown', () => {
             this.panning = true
         })
@@ -178,22 +224,198 @@ export default class Display {
          * The three js webGLRendere object which does the actual rendering to the screen.
          * @type {object}
          */
-
         this.renderer = prepareRender(this.options)
-        // this.renderer.setPixelRatio(window.devicePixelRatio)
-       
+         
         //this.targetDiv.appendChild(this.renderer.domElement)
-        
+        let viewerBar = document.querySelector('#viewer_bar')
+        let arrowUpMenu = document.querySelector('#arrow-up-menu')
+
+        this.targetDiv.addEventListener('mouseenter', () => {
+            if(viewerBar.innerHTML.trim().length == 0){
+                this.checkBoxes()   
+            }
+        })
+
+        this.onWindowResize()
+
+        var evtFired = false
+        var g_timer
+
+        function startTimer(){
+            g_timer = setTimeout(function() {
+                if (!evtFired) {
+                    viewerBar.classList.remove("slideup")
+                    viewerBar.classList.add('slidedown')  
+                }
+            }, 2000)
+        }
+
+        arrowUpMenu.addEventListener('mouseenter', () =>{
+            clearTimeout(g_timer)
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        viewerBar.addEventListener('mouseleave', () =>{
+            evtFired = false
+            viewerBar.classList.remove("slideup")
+            viewerBar.classList.add('slidedown')   
+        })
+        viewerBar.addEventListener('mouseenter', () =>{
+            evtFired = true
+            viewerBar.classList.remove("slidedown")
+            viewerBar.classList.add('slideup')   
+        })
+        arrowUpMenu.addEventListener('mouseleave', () =>{
+            startTimer()
+        })
+
     }
 
-    init(){
-        let shape = colorize([1, 0, 0, 0.75], circle({radius:10}))
-        
-        this.displayedGeometry = shape
-        
+    /**
+     * Creates the checkbox hidden menu when viewer is active
+     */ 
+    checkBoxes(){
+        let viewerBar = document.querySelector('#viewer_bar')   
+        viewerBar.classList.add('slidedown')
+
+        //Grid display html element
+        var gridDiv = document.createElement('div')
+        viewerBar.appendChild(gridDiv)
+        gridDiv.setAttribute('id', 'gridDiv')
+        var gridCheck = document.createElement('input')
+        gridDiv.appendChild(gridCheck)
+        gridCheck.setAttribute('type', 'checkbox')
+        gridCheck.setAttribute('id', 'gridCheck')
+        gridDiv.setAttribute('style', 'float:right;')
+               
+        if (this.displayGrid){
+            gridCheck.setAttribute('checked', 'true')
+        }
+
+        var gridCheckLabel = document.createElement('label')
+        gridDiv.appendChild(gridCheckLabel)
+        gridCheckLabel.setAttribute('for', 'gridCheck')
+        gridCheckLabel.setAttribute('style', 'margin-right:1em;')
+        gridCheckLabel.textContent= "Grid"
+        gridCheckLabel.setAttribute('style', 'user-select: none;')
+
+
+        gridCheck.addEventListener('change', event => {
+            if(event.target.checked){
+                this.showGrid = true
+                this.writeToDisplay(this.displayedGeometry)
+
+            }
+            else{
+                this.showGrid = false
+                this.writeToDisplay(this.displayedGeometry)
+            }
+        })
+
+        //Axes Html
+
+        var axesDiv = document.createElement('div')
+        viewerBar.appendChild(axesDiv)
+        var axesCheck = document.createElement('input')
+        axesDiv.appendChild(axesCheck)
+        axesCheck.setAttribute('type', 'checkbox')
+        axesCheck.setAttribute('id', 'axesCheck')
+                
+        if (this.axesCheck){
+            axesCheck.setAttribute('checked', 'true')
+        }
+
+        var axesCheckLabel = document.createElement('label')
+        axesDiv.appendChild(axesCheckLabel)
+        axesCheckLabel.setAttribute('for', 'axesCheck')
+        axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+        axesDiv.setAttribute('style', 'float:right;')
+        axesCheckLabel.textContent= "Axes"
+        axesCheckLabel.setAttribute('style', 'user-select: none;')
+
+        axesCheck.addEventListener('change', event => {
+            if(event.target.checked){
+                this.axesCheck = true
+
+                this.writeToDisplay(this.displayedGeometry)
+            }
+            else{
+                this.axesCheck = false
+                this.writeToDisplay(this.displayedGeometry)
+            }
+        })
+        /*
+        //Solid HTML element
+
+        var solidDiv = document.createElement('div')
+        viewerBar.appendChild(solidDiv)
+        solidDiv.setAttribute('id', 'solidDiv')
+        var solidCheck = document.createElement('input')
+        solidDiv.appendChild(solidCheck)
+        solidCheck.setAttribute('type', 'checkbox')
+        solidCheck.setAttribute('id', 'solidCheck')
+               
+        if (this.solidDisplay){
+            solidCheck.setAttribute('checked', 'true')
+            this.threeMaterial.solid = true
+        }
+        //solidCheck.setAttribute('checked', false)
+        var solidCheckLabel = document.createElement('label')
+        solidDiv.appendChild(solidCheckLabel)
+        solidCheckLabel.setAttribute('for', 'solidCheck')
+        //solidCheckLabel.setAttribute('style', 'margin-right:10em;')
+        solidDiv.setAttribute('style', 'float:right;')
+        solidCheckLabel.textContent= "Solid"
+        solidCheckLabel.setAttribute('style', 'user-select: none;')
+
+        solidCheck.addEventListener('change', event => {
+            if( event.target.checked){
+                this.solidDisplay = true
+            }
+            else{
+                this.solidDisplay = false
+            }
+            this.writeToDisplay(this.displayedGeometry)
+        })
+
+    
+        //Wireframe HTML element
+
+        var wireDiv = document.createElement('div')
+        viewerBar.appendChild(wireDiv)
+        wireDiv.setAttribute('id', 'wireDiv')
+        var wireCheck = document.createElement('input')
+        wireDiv.appendChild(wireCheck)
+        wireCheck.setAttribute('type', 'checkbox')
+        wireCheck.setAttribute('id', 'wireCheck')
+               
+        if (this.wireDisplay){
+            wireCheck.setAttribute('checked', 'true')
+        }
+        //wireCheck.setAttribute('checked', false)
+        var wireCheckLabel = document.createElement('label')
+        wireDiv.appendChild(wireCheckLabel)
+        wireCheckLabel.setAttribute('for', 'wireCheck')
+        //wireCheckLabel.setAttribute('style', 'margin-right:10em;')
+        wireDiv.setAttribute('style', 'float:right;')
+        wireCheckLabel.textContent= "Wireframe"
+        wireCheckLabel.setAttribute('style', 'user-select: none;')
+
+        wireCheck.addEventListener('change', event => {
+            if( event.target.checked){
+                this.wireDisplay = true
+            }
+            else{
+                this.wireDisplay = false
+            }
+            this.writeToDisplay(this.displayedGeometry)
+        })*/
 
     }
 
+    /**
+     * Updates the camera position
+     */
     update(){
         
         const updates = controls.orbit.update({ controls:this.state.controls, camera:this.state.camera })
@@ -202,6 +424,31 @@ export default class Display {
         this.perspectiveCamera.update(this.state.camera)
         
         this.renderer(this.options)
+    }
+
+    /**
+     * Handles resizing the 3D viewer when the window resizes.
+     */ 
+    onWindowResize() {
+        this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight})
+        this.perspectiveCamera.update(this.state.camera, this.state.camera)
+        this.update()
+    }
+    
+    /**
+     * Zooms the camera to fit target bounds on the screen.
+     * @param {object} bounds -bounds from a solid
+     */ 
+    zoomCameraToFit(bounds){
+        // reset camera position
+        this.state.camera.position[0] = 0
+        this.state.camera.position[1] = -5*Math.max(...bounds.max)
+        this.state.camera.position[2] = 5*Math.max(...bounds.max)
+        // re set grid to fit solid
+        this.gridSizeX = 10*Math.max(...bounds.max)
+        this.gridSizeY = 10*Math.max(...bounds.max)
+        //update camera & render
+        this.update()
     }
     
     /**
@@ -250,11 +497,13 @@ export default class Display {
      */ 
     writeToDisplay(shape){
         if(shape != null){
-            
+            this.displayedGeometry = shape
             GlobalVariables.pool.exec("render", [shape])
                 .then(solids => {
+                    
+                    this.zoomCameraToFit(solids[0].bounds)
                 
-                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.width, height:this.height })
+                    this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight })
                     this.perspectiveCamera.update(this.state.camera, this.state.camera)
                 
                     this.options = {
@@ -272,25 +521,26 @@ export default class Display {
                             // the choice of what draw command to use is also data based
                                 visuals: {
                                     drawCmd: 'drawGrid',
-                                    show: true,
-                                    color: [0, 0, 0, 1],
-                                    subColor: [0, 0, 0, 0.5],
+                                    show: this.showGrid,
+                                    color: [0, 0, 0, .8],
+                                    subColor: [0, 0, 0, 0.1],
                                     fadeOut: false,
                                     transparent: true
                                 },
-                                size: [500, 500],
+                                size: [this.gridSizeX, this.gridSizeY],
                                 ticks: [10, 1]
                             },
                             {
                                 visuals: {
                                     drawCmd: 'drawAxis',
-                                    show: true
+                                    show: this.axesCheck
                                 }
                             },
                             ...solids
                         ]
+
                     }
-                
+                    
                     this.renderer(this.options)
                 })
                 .timeout(6000)  //timeout if the rendering takes more than six seconds
