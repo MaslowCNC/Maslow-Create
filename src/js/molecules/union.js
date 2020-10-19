@@ -44,6 +44,8 @@ export default class Union extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
+        
+        addOrDeletePorts(this)
     }
     
 
