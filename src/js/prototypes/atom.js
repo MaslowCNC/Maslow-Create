@@ -596,7 +596,7 @@ export default class Atom {
      */ 
     decreaseToProcessCountByOne(){
         
-        var computed = GlobalVariables.topLevelMolecule.census()
+        GlobalVariables.topLevelMolecule.census()
         
     }
     
