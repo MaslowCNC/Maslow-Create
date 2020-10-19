@@ -348,27 +348,26 @@ export default class Molecule extends Atom{
         
         if(this.value != null){
             try{
-                extractBomTags(this.value).then(bomList => {
+                var bomList = extractBomTags(this.value)
+                
+                if(bomList.length > 0){
+                
+                    list.appendChild(document.createElement('br'))
+                    list.appendChild(document.createElement('br'))
                     
-                    if(bomList.length > 0){
+                    var div = document.createElement('h3')
+                    div.setAttribute('style','text-align:center;')
+                    list.appendChild(div)
+                    var valueText = document.createTextNode('Bill Of Materials')
+                    div.appendChild(valueText)
                     
-                        list.appendChild(document.createElement('br'))
-                        list.appendChild(document.createElement('br'))
-                        
-                        var div = document.createElement('h3')
-                        div.setAttribute('style','text-align:center;')
-                        list.appendChild(div)
-                        var valueText = document.createTextNode('Bill Of Materials')
-                        div.appendChild(valueText)
-                        
-                        var x = document.createElement('HR')
-                        list.appendChild(x)
-                        
-                        bomList.forEach(bomEntry => {
-                            this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
-                        })
-                    }
-                })
+                    var x = document.createElement('HR')
+                    list.appendChild(x)
+                    
+                    bomList.forEach(bomEntry => {
+                        this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
+                    })
+                }
             }catch(err){
                 this.setAlert("Unable to read BOM")
             }
