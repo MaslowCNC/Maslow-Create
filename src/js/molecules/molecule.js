@@ -90,12 +90,17 @@ export default class Molecule extends Atom{
      * Add the center dot to the molecule
      */ 
     draw(){
+        
+        
+        const percentLoaded = 1-this.toProcess/this.totalAtomCount
+        
         super.draw() //Super call to draw the rest
+        
         
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.centerColor
-        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
 
@@ -220,6 +225,22 @@ export default class Molecule extends Atom{
         if(this.inputs.length == 0){
             this.processing = true
         }
+    }
+    
+    /**
+     * Walks through each of the atoms in this molecule and takes a census of how many there are and how many are currently waiting to be processed.
+     */ 
+    census(){
+        this.totalAtomCount = 1  //Starts at 1 for this molecule
+        this.toProcess = 0
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            const newInformation = atom.census()
+            this.totalAtomCount = this.totalAtomCount + newInformation[0]
+            this.toProcess      = this.toProcess + newInformation[1]
+        })
+        
+        return [this.totalAtomCount, this.toProcess]
     }
     
     /**
@@ -490,6 +511,7 @@ export default class Molecule extends Atom{
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
                 this.backgroundClick()
+                this.census()
                 this.beginPropagation()
             }
         })

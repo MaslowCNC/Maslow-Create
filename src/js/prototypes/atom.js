@@ -595,11 +595,9 @@ export default class Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     decreaseToProcessCountByOne(){
-        GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
         
-        const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
+        var computed = GlobalVariables.topLevelMolecule.census()
         
-        GlobalVariables.gitHub.progressSave(percentLoaded, false)
     }
     
     /**
@@ -692,6 +690,19 @@ export default class Atom {
         this.inputs.forEach(input => {
             input.beginPropagation()
         })
+    }
+    
+    /**
+     * Returns an array of length two indicating that this is one atom and if it is waiting to be computed
+     */ 
+    census(){
+        var waiting = 0
+        this.inputs.forEach(input => {
+            if(input.ready != true){
+                waiting = 1
+            }
+        })
+        return [1,waiting]
     }
     
     /**
