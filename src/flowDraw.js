@@ -254,7 +254,7 @@ function openTopMenu(){
     Array.prototype.forEach.call(options, a => {
         if (a.classList.contains("openMenu")){
             closeTopMenu() 
-            a.classList.remove("openMenu")        
+            a.classList.remove("openMenu")
         }
         else{
             a.classList.add("openMenu")
@@ -381,7 +381,7 @@ function onWindowResize() {
         document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
-    //GlobalVariables.display.onWindowResize()
+    GlobalVariables.display.onWindowResize()
 
 }
 

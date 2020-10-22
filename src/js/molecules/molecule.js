@@ -90,12 +90,17 @@ export default class Molecule extends Atom{
      * Add the center dot to the molecule
      */ 
     draw(){
+        
+        
+        const percentLoaded = 1-this.toProcess/this.totalAtomCount
+        
         super.draw() //Super call to draw the rest
+        
         
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.centerColor
-        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, Math.PI * 2, false)
+        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
 
@@ -204,36 +209,38 @@ export default class Molecule extends Atom{
         }
     }
     
-    unlockFreeInputs(){
-        super.unlockFreeInputs()
-        
-        this.nodesOnTheScreen.forEach(atom => {
-            atom.unlockFreeInputs()
-        })
-    }
-    
     /**
-     * Walks through each of the atoms in this molecule and begins propogation from them if they have no inputs to wait for
+     * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
-    beginPropogation(){
+    beginPropagation(){
+        //Begin propagation from this molecules inputs
+        super.beginPropagation()
+        
+        //Tell every atom inside this molecule to begin Propagation
+        this.nodesOnTheScreen.forEach(node => {
+            node.beginPropagation()
+        })
         
         //Catch the corner case where this has no inputs which means it won't be marked as processing by super
         if(this.inputs.length == 0){
             this.processing = true
         }
-        else{  //Otherwise trigger inputs with nothing attached
-            this.inputs.forEach(attachmentPoint => {
-                if(attachmentPoint.connectors.length == 0){
-                    attachmentPoint.setValue(attachmentPoint.getValue()) //Trigger attachment points with nothing connected to them to begin propagation
-                }
-            })
-        }
+    }
+    
+    /**
+     * Walks through each of the atoms in this molecule and takes a census of how many there are and how many are currently waiting to be processed.
+     */ 
+    census(){
+        this.totalAtomCount = 1  //Starts at 1 for this molecule
+        this.toProcess = 0
         
-        // Run for every atom in this molecule
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropogation()
+        this.nodesOnTheScreen.forEach(atom => {
+            const newInformation = atom.census()
+            this.totalAtomCount = this.totalAtomCount + newInformation[0]
+            this.toProcess      = this.toProcess + newInformation[1]
         })
         
+        return [this.totalAtomCount, this.toProcess]
     }
     
     /**
@@ -341,27 +348,26 @@ export default class Molecule extends Atom{
         
         if(this.value != null){
             try{
-                extractBomTags(this.value).then(bomList => {
+                var bomList = extractBomTags(this.value)
+                
+                if(bomList.length > 0){
+                
+                    list.appendChild(document.createElement('br'))
+                    list.appendChild(document.createElement('br'))
                     
-                    if(bomList.length > 0){
+                    var div = document.createElement('h3')
+                    div.setAttribute('style','text-align:center;')
+                    list.appendChild(div)
+                    var valueText = document.createTextNode('Bill Of Materials')
+                    div.appendChild(valueText)
                     
-                        list.appendChild(document.createElement('br'))
-                        list.appendChild(document.createElement('br'))
-                        
-                        var div = document.createElement('h3')
-                        div.setAttribute('style','text-align:center;')
-                        list.appendChild(div)
-                        var valueText = document.createTextNode('Bill Of Materials')
-                        div.appendChild(valueText)
-                        
-                        var x = document.createElement('HR')
-                        list.appendChild(x)
-                        
-                        bomList.forEach(bomEntry => {
-                            this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
-                        })
-                    }
-                })
+                    var x = document.createElement('HR')
+                    list.appendChild(x)
+                    
+                    bomList.forEach(bomEntry => {
+                        this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
+                    })
+                }
             }catch(err){
                 this.setAlert("Unable to read BOM")
             }
@@ -408,11 +414,15 @@ export default class Molecule extends Atom{
      */
     goToParentMolecule(){
         //Go to the parent molecule if there is one
-        if(!GlobalVariables.currentMolecule.topLevel){
+        if(!this.topLevel){
             this.nodesOnTheScreen.forEach(atom => {
                 atom.selected = false
             })
-            GlobalVariables.currentMolecule = GlobalVariables.currentMolecule.parent //set parent this to be the currently displayed molecule
+            
+            //Push any changes up to the next level
+            this.propogate()
+            
+            GlobalVariables.currentMolecule = this.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
         }
     }
@@ -500,8 +510,8 @@ export default class Molecule extends Atom{
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
                 this.backgroundClick()
-                this.unlockFreeInputs()
-                this.beginPropogation()
+                this.census()
+                this.beginPropagation()
             }
         })
     }
@@ -580,13 +590,11 @@ export default class Molecule extends Atom{
                         //Make begin propagation from an atom when it is placed
                         if(promise != null){
                             promise.then( ()=> {
-                                atom.unlockFreeInputs()
-                                atom.beginPropogation()
+                                atom.beginPropagation()
                             })
                         }
                         else{
-                            atom.unlockFreeInputs()
-                            atom.beginPropogation()
+                            atom.beginPropagation()
                         }
                         
                         //Fake a click on the newly placed atom

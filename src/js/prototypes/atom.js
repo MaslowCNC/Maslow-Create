@@ -559,11 +559,14 @@ export default class Atom {
         var ioValues = []
         this.inputs.forEach(io => {
             if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){
-                var saveIO = {
-                    name: io.name,
-                    ioValue: io.getValue()
+                //We only want to save inputs values with nothing connected to them
+                if(io.connectors.length == 0){
+                    var saveIO = {
+                        name: io.name,
+                        ioValue: io.getValue()
+                    }
+                    ioValues.push(saveIO)
                 }
-                ioValues.push(saveIO)
             }
         })
         
@@ -592,18 +595,16 @@ export default class Atom {
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     decreaseToProcessCountByOne(){
-        GlobalVariables.numberOfAtomsToLoad = GlobalVariables.numberOfAtomsToLoad - 1 //Indicate that this atom has been loaded
         
-        const percentLoaded = 100*(1-GlobalVariables.numberOfAtomsToLoad/GlobalVariables.totalAtomCount)
+        GlobalVariables.topLevelMolecule.census()
         
-        GlobalVariables.gitHub.progressSave(percentLoaded, false)
     }
     
     /**
      * Token update value function to give each atom one by default
      */ 
     updateValue(){
-        
+    
     }
     
     /**
@@ -622,15 +623,15 @@ export default class Atom {
      * Displays the atom in 3D and sets the output.
      */ 
     displayAndPropogate(){
+        //If this has an output write to it
+        if(this.output){
+            this.output.setValue(this.value)
+            this.output.ready = true
+        }
+        
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
-        }
-        
-        //Set the output nodes with name 'geometry' to be the generated code
-        if(this.output){
-            this.output.ready = true
-            this.output.setValue(this.value)
         }
     }
     
@@ -682,31 +683,26 @@ export default class Atom {
     }
     
     /**
-     * Unlocks any inputs which have nothing connected
+     * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    unlockFreeInputs(){
-        //Runs right after the loading process to unlock attachment points which have no connectors attached
+    beginPropagation(){
+        //If anything is connected to this it shouldn't be a starting point
         this.inputs.forEach(input => {
-            if(input.connectors.length == 0){
-                input.ready = true
-            }
+            input.beginPropagation()
         })
     }
     
     /**
-     * Starts proagation from this atom if it is not waiting for anything up stream.
+     * Returns an array of length two indicating that this is one atom and if it is waiting to be computed
      */ 
-    beginPropogation(){
-        //If anything is connected to this it shouldn't be a starting point
-        var go = true
+    census(){
+        var waiting = 0
         this.inputs.forEach(input => {
-            if(input.connectors.length > 0){
-                go = false
+            if(input.ready != true){
+                waiting = 1
             }
         })
-        if(go){     //Then we update the value
-            this.updateValue()
-        }
+        return [1,waiting]
     }
     
     /**
