@@ -758,13 +758,42 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation">beginPropogation</a></span></span><span class="code" data-ice="signature">()</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropagation">beginPropagation</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Starts proagation from this atom if it is not waiting for anything up stream.</p>
+        <div data-ice="description"><p>Starts propagation from this atom if it is not waiting for anything up stream.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-census">census</a></span></span><span class="code" data-ice="signature">(): <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Returns an array of length two indicating that this is one atom and if it is waiting to be computed</p>
 </div>
       </div>
     </td>
@@ -1519,35 +1548,6 @@
         
         
         <div data-ice="description"><p>Applies each of the passed values to this as this.x</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-unlockFreeInputs">unlockFreeInputs</a></span></span><span class="code" data-ice="signature">()</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Unlocks any inputs which have nothing connected</p>
 </div>
       </div>
     </td>
@@ -2642,7 +2642,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber640">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber641">source</a></span></span>
     </span>
   </h3>
 
@@ -2697,25 +2697,25 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-beginPropogation">
+  <h3 data-ice="anchor" id="instance-method-beginPropagation">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">beginPropogation</span><span class="code" data-ice="signature">()</span>
+    <span class="code" data-ice="name">beginPropagation</span><span class="code" data-ice="signature">()</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber699">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber688">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Starts proagation from this atom if it is not waiting for anything up stream.</p>
+  <div data-ice="description"><p>Starts propagation from this atom if it is not waiting for anything up stream.</p>
 </div>
 
   
@@ -2724,6 +2724,62 @@
 </div>
 
   
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-census">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">census</span><span class="code" data-ice="signature">(): <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber698">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Returns an array of length two indicating that this is one atom and if it is waiting to be computed</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span><span>[]</span></span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
 
   
 
@@ -3019,7 +3075,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber934">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber930">source</a></span></span>
     </span>
   </h3>
 
@@ -3101,7 +3157,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber970">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber966">source</a></span></span>
     </span>
   </h3>
 
@@ -3183,7 +3239,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber887">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber883">source</a></span></span>
     </span>
   </h3>
 
@@ -3279,7 +3335,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber765">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber761">source</a></span></span>
     </span>
   </h3>
 
@@ -3375,7 +3431,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber864">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber860">source</a></span></span>
     </span>
   </h3>
 
@@ -3443,7 +3499,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber828">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber824">source</a></span></span>
     </span>
   </h3>
 
@@ -3525,7 +3581,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber594">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber597">source</a></span></span>
     </span>
   </h3>
 
@@ -3613,7 +3669,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber624">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber625">source</a></span></span>
     </span>
   </h3>
 
@@ -3797,7 +3853,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber746">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber742">source</a></span></span>
     </span>
   </h3>
 
@@ -3841,7 +3897,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber730">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber726">source</a></span></span>
     </span>
   </h3>
 
@@ -4106,7 +4162,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber585">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber588">source</a></span></span>
     </span>
   </h3>
 
@@ -4240,7 +4296,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber715">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber711">source</a></span></span>
     </span>
   </h3>
 
@@ -4451,50 +4507,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-unlockFreeInputs">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">unlockFreeInputs</span><span class="code" data-ice="signature">()</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber687">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Unlocks any inputs which have nothing connected</p>
-</div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-update">
     <span class="access" data-ice="access">public</span>
     
@@ -4606,7 +4618,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber605">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber606">source</a></span></span>
     </span>
   </h3>
 
@@ -4650,7 +4662,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber612">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/prototypes/atom.js.html#lineNumber613">source</a></span></span>
     </span>
   </h3>
 

@@ -871,10 +871,10 @@
                                 }
                               },
                               "extra": {
-                                "rawValue": "Steel blue",
-                                "raw": "'Steel blue'"
+                                "rawValue": "Steel Blue",
+                                "raw": "'Steel Blue'"
                               },
-                              "value": "Steel blue"
+                              "value": "Steel Blue"
                             },
                             {
                               "type": "StringLiteral",
@@ -9496,7 +9496,7 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "Steel blue",
+      "value": "Steel Blue",
       "start": 853,
       "end": 865,
       "loc": {

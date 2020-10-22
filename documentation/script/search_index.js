@@ -828,6 +828,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/assembly.js~assembly#beginpropagation",
+    "class/src/js/molecules/assembly.js~Assembly.html#instance-method-beginPropagation",
+    "src/js/molecules/assembly.js~Assembly#beginPropagation",
+    "method"
+  ],
+  [
     "src/js/molecules/assembly.js~assembly#constructor",
     "class/src/js/molecules/assembly.js~Assembly.html#instance-constructor-constructor",
     "src/js/molecules/assembly.js~Assembly#constructor",
@@ -1134,15 +1140,15 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/constant.js~constant#constructor",
-    "class/src/js/molecules/constant.js~Constant.html#instance-constructor-constructor",
-    "src/js/molecules/constant.js~Constant#constructor",
+    "src/js/molecules/constant.js~constant#beginpropagation",
+    "class/src/js/molecules/constant.js~Constant.html#instance-method-beginPropagation",
+    "src/js/molecules/constant.js~Constant#beginPropagation",
     "method"
   ],
   [
-    "src/js/molecules/constant.js~constant#displayandpropogate",
-    "class/src/js/molecules/constant.js~Constant.html#instance-method-displayAndPropogate",
-    "src/js/molecules/constant.js~Constant#displayAndPropogate",
+    "src/js/molecules/constant.js~constant#constructor",
+    "class/src/js/molecules/constant.js~Constant.html#instance-constructor-constructor",
+    "src/js/molecules/constant.js~Constant#constructor",
     "method"
   ],
   [
@@ -1204,6 +1210,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/constant.js~Constant.html#instance-method-updateValue",
     "src/js/molecules/constant.js~Constant#updateValue",
     "method"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#value",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-value",
+    "src/js/molecules/constant.js~Constant#value",
+    "member"
   ],
   [
     "src/js/molecules/constant.js~constant#walkbackforconstants",
@@ -1746,12 +1758,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/input.js~input#beginpropogation",
-    "class/src/js/molecules/input.js~Input.html#instance-method-beginPropogation",
-    "src/js/molecules/input.js~Input#beginPropogation",
-    "method"
-  ],
-  [
     "src/js/molecules/input.js~input#color",
     "class/src/js/molecules/input.js~Input.html#instance-member-color",
     "src/js/molecules/input.js~Input#color",
@@ -1890,9 +1896,15 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#beginpropogation",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropogation",
-    "src/js/molecules/molecule.js~Molecule#beginPropogation",
+    "src/js/molecules/molecule.js~molecule#beginpropagation",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-beginPropagation",
+    "src/js/molecules/molecule.js~Molecule#beginPropagation",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#census",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-census",
+    "src/js/molecules/molecule.js~Molecule#census",
     "method"
   ],
   [
@@ -2058,16 +2070,22 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#toprocess",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-toProcess",
+    "src/js/molecules/molecule.js~Molecule#toProcess",
+    "member"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#toplevel",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-topLevel",
     "src/js/molecules/molecule.js~Molecule#topLevel",
     "member"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#unlockfreeinputs",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-unlockFreeInputs",
-    "src/js/molecules/molecule.js~Molecule#unlockFreeInputs",
-    "method"
+    "src/js/molecules/molecule.js~molecule#totalatomcount",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-totalAtomCount",
+    "src/js/molecules/molecule.js~Molecule#totalAtomCount",
+    "member"
   ],
   [
     "src/js/molecules/molecule.js~molecule#updatesidebar",
@@ -2754,6 +2772,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/union.js~union#beginpropagation",
+    "class/src/js/molecules/union.js~Union.html#instance-method-beginPropagation",
+    "src/js/molecules/union.js~Union#beginPropagation",
+    "method"
+  ],
+  [
     "src/js/molecules/union.js~union#constructor",
     "class/src/js/molecules/union.js~Union.html#instance-constructor-constructor",
     "src/js/molecules/union.js~Union#constructor",
@@ -2826,9 +2850,15 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/prototypes/atom.js~atom#beginpropogation",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropogation",
-    "src/js/prototypes/atom.js~Atom#beginPropogation",
+    "src/js/prototypes/atom.js~atom#beginpropagation",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-beginPropagation",
+    "src/js/prototypes/atom.js~Atom#beginPropagation",
+    "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#census",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-census",
+    "src/js/prototypes/atom.js~Atom#census",
     "method"
   ],
   [
@@ -3072,12 +3102,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/prototypes/atom.js~atom#unlockfreeinputs",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-unlockFreeInputs",
-    "src/js/prototypes/atom.js~Atom#unlockFreeInputs",
-    "method"
-  ],
-  [
     "src/js/prototypes/atom.js~atom#update",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-update",
     "src/js/prototypes/atom.js~Atom#update",
@@ -3141,6 +3165,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/attachmentpoint.js~attachmentpoint#attach",
     "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-attach",
     "src/js/prototypes/attachmentpoint.js~AttachmentPoint#attach",
+    "method"
+  ],
+  [
+    "src/js/prototypes/attachmentpoint.js~attachmentpoint#beginpropagation",
+    "class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html#instance-method-beginPropagation",
+    "src/js/prototypes/attachmentpoint.js~AttachmentPoint#beginPropagation",
     "method"
   ],
   [

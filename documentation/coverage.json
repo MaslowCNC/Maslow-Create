@@ -1,7 +1,7 @@
 {
-  "coverage": "98.64%",
-  "expectCount": 517,
-  "actualCount": 510,
+  "coverage": "98.27%",
+  "expectCount": 522,
+  "actualCount": 513,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 6,
@@ -32,8 +32,8 @@
       ]
     },
     "src/js/molecules/assembly.js": {
-      "expectCount": 9,
-      "actualCount": 9,
+      "expectCount": 10,
+      "actualCount": 10,
       "undocumentLines": []
     },
     "src/js/molecules/BOM.js": {
@@ -62,9 +62,11 @@
       "undocumentLines": []
     },
     "src/js/molecules/constant.js": {
-      "expectCount": 15,
+      "expectCount": 16,
       "actualCount": 15,
-      "undocumentLines": []
+      "undocumentLines": [
+        58
+      ]
     },
     "src/js/molecules/cutlayout.js": {
       "expectCount": 7,
@@ -112,8 +114,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/input.js": {
-      "expectCount": 17,
-      "actualCount": 17,
+      "expectCount": 16,
+      "actualCount": 16,
       "undocumentLines": []
     },
     "src/js/molecules/intersection.js": {
@@ -122,11 +124,12 @@
       "undocumentLines": []
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 35,
-      "actualCount": 33,
+      "expectCount": 37,
+      "actualCount": 34,
       "undocumentLines": [
-        186,
-        207
+        191,
+        234,
+        235
       ]
     },
     "src/js/molecules/nest.js": {
@@ -187,8 +190,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/union.js": {
-      "expectCount": 9,
-      "actualCount": 9,
+      "expectCount": 10,
+      "actualCount": 10,
       "undocumentLines": []
     },
     "src/js/NewMenu.js": {
@@ -202,11 +205,11 @@
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
-      "expectCount": 42,
-      "actualCount": 40,
+      "expectCount": 43,
+      "actualCount": 41,
       "undocumentLines": [
-        517,
-        518
+        530,
+        531
       ]
     },
     "src/js/prototypes/connector.js": {

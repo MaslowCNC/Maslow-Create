@@ -943,47 +943,46 @@ export default function GitHubModule(){
             this.progressSave(10)
                 
             var bomContent = bomHeader
-            extractBomTags(GlobalVariables.topLevelMolecule.value).then(bomItems =&gt; {
+            var bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
                 
-                var totalParts = 0
-                var totalCost  = 0
-                if(bomItems != undefined){
-                    bomItems.forEach(item =&gt; {
-                        totalParts += item.numberNeeded
-                        totalCost  += item.costUSD
-                        bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
-                    })
-                }
-                bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
-                bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
-                    
-                    
-                var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + saveRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
-                GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
-                    readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+            var totalParts = 0
+            var totalCost  = 0
+            if(bomItems != undefined){
+                bomItems.forEach(item =&gt; {
+                    totalParts += item.numberNeeded
+                    totalCost  += item.costUSD
+                    bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
                 })
+            }
+            bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
+            bomContent = bomContent+&quot;\n\n 3xCOG MSRP: $&quot; + (3*totalCost).toFixed(2)
+                    
+                    
+            var readmeContent = readmeHeader + &quot;\n\n&quot; + &quot;# &quot; + saveRepoName + &quot;\n\n![](/project.svg)\n\n&quot;
+            GlobalVariables.topLevelMolecule.requestReadme().forEach(item =&gt; {
+                readmeContent = readmeContent + item + &quot;\n\n\n&quot;
+            })
                 
-                var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
-                jsonRepOfProject.filetypeVersion = 1
-                jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
-                const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+            var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+            jsonRepOfProject.filetypeVersion = 1
+            jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+            const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
                    
-                // var decoder = new TextDecoder(&apos;utf8&apos;)
-                //var finalSVG = decoder.decode(contentSvg)
+            // var decoder = new TextDecoder(&apos;utf8&apos;)
+            //var finalSVG = decoder.decode(contentSvg)
                 
-                this.createCommit(octokit,{
-                    owner: saveUser,
-                    repo: saveRepoName,
-                    changes: {
-                        files: {
-                            &apos;BillOfMaterials.md&apos;: bomContent,
-                            &apos;README.md&apos;: readmeContent,
-                            //&apos;project.svg&apos;: finalSVG,
-                            &apos;project.maslowcreate&apos;: projectContent
-                        },
-                        commit: &apos;Autosave&apos;
-                    }
-                })
+            this.createCommit(octokit,{
+                owner: saveUser,
+                repo: saveRepoName,
+                changes: {
+                    files: {
+                        &apos;BillOfMaterials.md&apos;: bomContent,
+                        &apos;README.md&apos;: readmeContent,
+                        //&apos;project.svg&apos;: finalSVG,
+                        &apos;project.maslowcreate&apos;: projectContent
+                    },
+                    commit: &apos;Autosave&apos;
+                }
             })
 
             intervalTimer = setInterval(() =&gt; this.saveProject(), 1200000)

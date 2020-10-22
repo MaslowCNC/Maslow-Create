@@ -332,7 +332,7 @@ function openTopMenu(){
     Array.prototype.forEach.call(options, a =&gt; {
         if (a.classList.contains(&quot;openMenu&quot;)){
             closeTopMenu() 
-            a.classList.remove(&quot;openMenu&quot;)        
+            a.classList.remove(&quot;openMenu&quot;)
         }
         else{
             a.classList.add(&quot;openMenu&quot;)
@@ -459,7 +459,7 @@ function onWindowResize() {
         document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
     }
     document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/1.7+&apos;px&apos;)
-    //GlobalVariables.display.onWindowResize()
+    GlobalVariables.display.onWindowResize()
 
 }
 

@@ -166,7 +166,7 @@ export default class Stl extends Atom {
      */ 
     downloadStl(){
         const blob = new Blob(this.value, {type: &apos;text/plain;charset=utf-8&apos;})
-        saveAs(blob, GlobalVariables.topLevelMolecule.name+&apos;.stl&apos;)
+        saveAs(blob, GlobalVariables.currentMolecule.name+&apos;.stl&apos;)
     }
 }</code></pre>
 
