@@ -104,7 +104,7 @@ export default class Svg extends Atom {
         computeValue(values, "svg").then(result => {
             if (result != -1 ){
                 const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
-                saveAs(blob, GlobalVariables.topLevelMolecule.name+'.svg')
+                saveAs(blob, GlobalVariables.currentMolecule.name+'.svg')
             }else{
                 this.setAlert("Unable to compute")
             }
