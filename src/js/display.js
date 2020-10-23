@@ -501,7 +501,7 @@ export default class Display {
             GlobalVariables.pool.exec("render", [shape])
                 .then(solids => {
                     
-                    this.zoomCameraToFit(solids[0].bounds)
+                    //this.zoomCameraToFit(solids[0].bounds)
                 
                     this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight })
                     this.perspectiveCamera.update(this.state.camera, this.state.camera)
