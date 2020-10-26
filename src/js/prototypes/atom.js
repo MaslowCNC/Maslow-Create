@@ -712,7 +712,6 @@ export default class Atom {
     sendToRender(){
         //Send code to JSxCAD to render
         try{
-            console.log(this.key)
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){

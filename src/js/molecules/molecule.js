@@ -660,10 +660,10 @@ export default class Molecule extends Atom{
      */
     sendToRender(){
         super.sendToRender()
-         if(this.value != null){
-          if(this.topLevel){
-             this.basicThreadValueProcessing(this.value, "bounding box")
+        if(this.value != null){
+            if(this.topLevel){
+                this.basicThreadValueProcessing(this.value, "bounding box")
             }
-         }
+        }
     }
 }
