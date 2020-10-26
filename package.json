@@ -16,8 +16,9 @@
   "dependencies": {
     "@jscad/io": "^2.0.0-alpha.6",
     "@jscad/io-utils": "^2.0.0-alpha.5",
-    "@jscad/modeling": "^2.0.0-alpha.5",
+    "@jscad/modeling": "^2.0.0-alpha.6",
     "@jscad/regl-renderer": "^2.0.0-alpha.7",
+    "@jscad/stl-serializer": "^2.0.0-alpha.6",
     "@octokit/rest": "16.25.0",
     "codemirror": "^5.46.0",
     "coveralls": "^3.0.4",

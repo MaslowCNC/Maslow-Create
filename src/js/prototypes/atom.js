@@ -639,7 +639,7 @@ export default class Atom {
      * Calls a worker thread to compute the atom's value.
      */ 
     basicThreadValueProcessing(values, key){
-        
+        this.key = key
         //If the inputs are all ready
         var go = true
         this.inputs.forEach(input => {
@@ -673,6 +673,7 @@ export default class Atom {
             computeValue(values, key).then((result) => {
                 if (result != -1 ){
                     this.value = result
+
                     this.displayAndPropogate()
                 }else{
                     this.setAlert("Unable to compute")
@@ -711,6 +712,7 @@ export default class Atom {
     sendToRender(){
         //Send code to JSxCAD to render
         try{
+            console.log(this.key)
             GlobalVariables.display.writeToDisplay(this.value)
         }
         catch(err){
