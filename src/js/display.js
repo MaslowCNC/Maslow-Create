@@ -503,6 +503,7 @@ export default class Display {
                     if(GlobalVariables.topLevelMolecule.selected){
                         this.zoomCameraToFit(solids[0].bounds)
                     }
+
                 
                     this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight })
                     this.perspectiveCamera.update(this.state.camera, this.state.camera)
