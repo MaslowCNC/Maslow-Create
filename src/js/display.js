@@ -440,12 +440,14 @@ export default class Display {
      */ 
     zoomCameraToFit(bounds){
         // reset camera position
+        console.log(bounds)
         this.state.camera.position[0] = 0
-        this.state.camera.position[1] = -5*Math.max(...bounds.max)
-        this.state.camera.position[2] = 5*Math.max(...bounds.max)
+        this.state.camera.position[1] = -2.5*Math.max(...bounds.size)
+        console.log(this.state.camera.position[1] )
+        this.state.camera.position[2] = 2.5*Math.max(...bounds.size)
         // re set grid to fit solid
-        this.gridSizeX = 10*Math.max(...bounds.max)
-        this.gridSizeY = 10*Math.max(...bounds.max)
+        this.gridSizeX = 10*Math.max(...bounds.size)
+        this.gridSizeY = 10*Math.max(...bounds.size)
         //update camera & render
         this.update()
     }
