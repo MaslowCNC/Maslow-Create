@@ -3,7 +3,6 @@ const { circle } = require('@jscad/modeling').primitives
 
 import GlobalVariables from './globalvariables'
 
-
 const { prepareRender, drawCommands, cameras, entitiesFromSolids, controls } = require('@jscad/regl-renderer') 
 
 
@@ -500,8 +499,11 @@ export default class Display {
             this.displayedGeometry = shape
             GlobalVariables.pool.exec("render", [shape])
                 .then(solids => {
-                    
-                    //this.zoomCameraToFit(solids[0].bounds)
+
+                    if(GlobalVariables.topLevelMolecule.selected){
+                        this.zoomCameraToFit(solids[0].bounds)
+                    }
+
                 
                     this.perspectiveCamera.setProjection(this.state.camera, this.state.camera, { width:this.targetDiv.clientWidth, height:this.targetDiv.clientHeight })
                     this.perspectiveCamera.update(this.state.camera, this.state.camera)
