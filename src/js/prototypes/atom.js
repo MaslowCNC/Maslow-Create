@@ -639,7 +639,6 @@ export default class Atom {
      * Calls a worker thread to compute the atom's value.
      */ 
     basicThreadValueProcessing(values, key){
-        this.key = key
         //If the inputs are all ready
         var go = true
         this.inputs.forEach(input => {
