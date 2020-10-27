@@ -50,6 +50,11 @@ export class BOMEntry {
  */ 
 export const extractBomTags = function(assembly){
     
+    //Catch empty input
+    if(assembly == null){
+        return []
+    }
+    
     //Extract all of the tags
     var tags = []
     assembly.forEach(item => {
