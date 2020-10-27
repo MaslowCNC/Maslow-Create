@@ -738,17 +738,11 @@ export default class Molecule extends Atom{
      */
     sendToRender(){
         super.sendToRender()
-        // if(this.value != null){
-        // if(this.topLevel){
-        // GlobalVariables.ask({values: [this.value], key: &quot;bounding box&quot;}).then(result =&gt; {
-        // if (result != -1 ){
-        // GlobalVariables.display.zoomCameraToFit(result)
-        // }else{
-        // console.warn(&quot;Unable to compute bounding box&quot;)
-        // }
-        // })
-        // }
-        // }
+        if(this.value != null){
+            if(this.topLevel){
+                this.basicThreadValueProcessing(this.value, &quot;bounding box&quot;)
+            }
+        }
     }
 }</code></pre>
 

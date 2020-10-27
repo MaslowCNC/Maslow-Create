@@ -717,7 +717,6 @@ export default class Atom {
      * Calls a worker thread to compute the atom&apos;s value.
      */ 
     basicThreadValueProcessing(values, key){
-        
         //If the inputs are all ready
         var go = true
         this.inputs.forEach(input =&gt; {
@@ -751,6 +750,7 @@ export default class Atom {
             computeValue(values, key).then((result) =&gt; {
                 if (result != -1 ){
                     this.value = result
+
                     this.displayAndPropogate()
                 }else{
                     this.setAlert(&quot;Unable to compute&quot;)
