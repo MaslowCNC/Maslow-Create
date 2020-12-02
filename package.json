@@ -14,11 +14,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@jscad/io": "^2.0.0-alpha.6",
-    "@jscad/io-utils": "^2.0.0-alpha.5",
-    "@jscad/modeling": "^2.0.0-alpha.6",
-    "@jscad/regl-renderer": "^2.0.0-alpha.7",
-    "@jscad/stl-serializer": "^2.0.0-alpha.6",
     "@octokit/rest": "16.25.0",
     "codemirror": "^5.46.0",
     "coveralls": "^3.0.4",
@@ -28,9 +23,7 @@
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "oauthio-web": "^0.6.2",
-    "showdown": "^1.9.1",
-    "three": "^0.104.0",
-    "workerpool": "^6.0.0"
+    "showdown": "^1.9.1"
   },
   "devDependencies": {
     "@babel/plugin-transform-regenerator": "^7.4.3",

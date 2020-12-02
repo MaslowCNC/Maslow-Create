@@ -32,8 +32,6 @@ import Code             from './molecules/code.js'
 import Union             from './molecules/union.js'
 import GitHubModule     from './githubOauth'
 
-const workerpool = require('workerpool')
-
 /**
  * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.
  */
@@ -150,10 +148,7 @@ class GlobalVariables{
          */
         this.circleSegmentSize = 2
         
-        // create a worker pool using an external worker script
-        this.pool = workerpool.pool('./JSCADworker.js', {minWorkers: 'max'})
-        
-        const math = create(all)  //What does this do?
+        const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
          * An evaluator for strings as mathmatical equations which is sandboxed and secure.
          * @type {function}

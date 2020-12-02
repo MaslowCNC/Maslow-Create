@@ -1,11 +1,9 @@
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import Display from './js/display.js'
 import {cmenu, showGitHubSearch} from './js/NewMenu.js'
 
 
-GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
@@ -360,11 +358,6 @@ function init() {
 
     onWindowResize()
     animate()
-    
-    //GlobalVariables.display.render()
-
-    //GlobalVariables.display.init()
-
 }
 
 /**
@@ -381,8 +374,6 @@ function onWindowResize() {
         document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
-    GlobalVariables.display.onWindowResize()
-
 }
 
 
@@ -396,9 +387,6 @@ function animate() {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
         atom.update()
     })
-
-    GlobalVariables.display.rendering()
-    //GlobalVariables.display.controls.update()
 }
 
 init()

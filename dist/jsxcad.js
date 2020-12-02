@@ -21,7 +21,7 @@ const ask = async (question, context) =>
 
 
 //Add 3d view
-orbitDisplay({}, document.getElementById("threeJSDisplay")).then(result=>{
+orbitDisplay({}, document.getElementById('viewerContext')).then(result=>{
     window.updateDisplay = result.updateGeometry
 });
 
