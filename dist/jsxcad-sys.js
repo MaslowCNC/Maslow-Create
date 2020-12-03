@@ -391,7 +391,6 @@ const webService = async ({
   workerType,
 }) => {
   try {
-    console.log(webWorker);
     //var promise = import(webWorker); //For testing path
     
     return await acquireService(

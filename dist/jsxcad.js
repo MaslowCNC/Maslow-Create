@@ -16,7 +16,7 @@ const serviceSpec = {
   workerType: 'module',
 };
 
-const ask = async (question, context) =>
+window.ask = async (question, context) =>
     askService(serviceSpec, question, context);
 
 
@@ -27,9 +27,9 @@ orbitDisplay({}, document.getElementById('viewerContext')).then(result=>{
 
 
 //Test some things
-ask({ evaluate: "md`hello`", key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }).then( status => {
-    ask({ evaluate: "md`hello`", key: "extrude", distance:5, readPath: "atomGeometry/test", writePath: "atomGeometry/test2", }).then( status => {
-        var thingReturned = ask({ evaluate: "md`hello`", key: "display", readPath: "atomGeometry/test2" }).then( thingReturned => {
+window.ask({ evaluate: "md`hello`", key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }).then( status => {
+    window.ask({ evaluate: "md`hello`", key: "extrude", distance:5, readPath: "atomGeometry/test", writePath: "atomGeometry/test2", }).then( status => {
+        var thingReturned = window.ask({ evaluate: "md`hello`", key: "display", readPath: "atomGeometry/test2" }).then( thingReturned => {
             console.log("Returned: ")
             console.log(thingReturned)
             

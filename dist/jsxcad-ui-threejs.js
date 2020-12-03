@@ -53760,7 +53760,7 @@ const orbitDisplay = async (
     view,
     geometryLayers,
     planLayers,
-    withAxes: false,
+    withAxes: true,
   });
 
   const render = () => {

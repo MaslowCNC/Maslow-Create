@@ -191,6 +191,20 @@ class GlobalVariables{
         return pixels
     }
     /** 
+    * A function which reads from a path and displays the geometry it contains
+    * @param {string} The path to read from
+    */
+    writeToDisplay(path){
+        console.log("Displaying path: ")
+        console.log(path)
+        var thingReturned = window.ask({ evaluate: "md`hello`", key: "display", readPath: path }).then( thingReturned => {
+            console.log("Returned: ")
+            console.log(thingReturned)
+            
+            window.updateDisplay(thingReturned);
+        })
+    }
+    /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height
     * @param {number} width 0-1 
     */

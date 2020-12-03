@@ -122,6 +122,7 @@ export default class Atom {
             this[key] = values[key]
         }
         
+        this.path = "atoms/" + this.uniqueID
     }
     
     /**
@@ -638,7 +639,7 @@ export default class Atom {
     /**
      * Calls a worker thread to compute the atom's value.
      */ 
-    basicThreadValueProcessing(values, key){
+    basicThreadValueProcessing(toAsk){
         //If the inputs are all ready
         var go = true
         this.inputs.forEach(input => {
@@ -650,30 +651,18 @@ export default class Atom {
             this.processing = true
             this.decreaseToProcessCountByOne()
             
-            //console.log("Processing: " + key)
-            //console.log(GlobalVariables.pool.stats())
-            
-            if(this.output){  //If this atom has an ouput
+            if(this.output){  //If this atom has an output
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             }
             
             this.clearAlert()
-            const computeValue = async (values, key) => {
-                let promise = new Promise( resolve =>{
-                    GlobalVariables.pool.exec(key, [values]).then((result) => {
-                        resolve(result)
-                    })
-                })
-                let result1 = await promise
-                    
-                return result1
-            }
             
-            computeValue(values, key).then((result) => {
+            toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
+            
+            window.ask(toAsk).then(result => {
                 if (result != -1 ){
-                    this.value = result
-
                     this.displayAndPropogate()
+                    console.log("Writing to path: " + this.path)
                 }else{
                     this.setAlert("Unable to compute")
                 }
@@ -711,7 +700,7 @@ export default class Atom {
     sendToRender(){
         //Send code to JSxCAD to render
         try{
-            GlobalVariables.display.writeToDisplay(this.value)
+            GlobalVariables.writeToDisplay(this.path)
         }
         catch(err){
             this.setAlert(err)
