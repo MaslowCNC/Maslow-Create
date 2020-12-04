@@ -105,7 +105,7 @@ export default class Union extends Atom{
                     }
                 })
                 
-                const values = [inputValues]
+                const values = { key: "union",paths: inputValues, writePath: this.path }
                 
                 this.basicThreadValueProcessing(values, "union")
                 this.clearAlert()

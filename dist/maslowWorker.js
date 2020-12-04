@@ -151,6 +151,33 @@ const agent = async ({
         const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
         await api.saveGeometry(question.writePath, intersectionShape);
         return 1;
+    case "union":
+        var geometries = [];
+        for (const path of question.paths) {
+            const unionGeometry = await api.loadGeometry(path);
+            geometries.push(unionGeometry);
+        }
+        const unionShape = api.Union(...geometries);
+        await api.saveGeometry(question.writePath, unionShape);
+        return 1;
+    case "hull":
+        var hullGeometries = [];
+        for (const path of question.paths) {
+            const hullGeometry = await api.loadGeometry(path);
+            hullGeometries.push(hullGeometry);
+        }
+        const hullShape = api.Hull(...hullGeometries);
+        await api.saveGeometry(question.writePath, hullShape);
+        return 1;
+    case "assembly":
+        var assemblyGeometries = [];
+        for (const path of question.paths) {
+            const assemblyGeometry = await api.loadGeometry(path);
+            assemblyGeometries.push(assemblyGeometry);
+        }
+        const assemblyShape = api.Assembly(...assemblyGeometries);
+        await api.saveGeometry(question.writePath, assemblyShape);
+        return 1;
       case "display":
         const anotherCube = await api.loadGeometry(question.readPath);
         const threejsGeometry = toThreejsGeometry(anotherCube.toKeptGeometry());

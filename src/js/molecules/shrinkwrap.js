@@ -98,11 +98,9 @@ export default class ShrinkWrap extends Atom{
                         inputsList.push(io.getValue())
                     }
                 })
-                const values = inputsList.map(x => {
-                    return x
-                })
                 
-                this.basicThreadValueProcessing(values, "hull")
+                const values = { key: "hull", paths: inputsList, writePath: this.path }
+                this.basicThreadValueProcessing(values)
             }catch(err){this.setAlert(err)}
             
             //Delete or add ports as needed
