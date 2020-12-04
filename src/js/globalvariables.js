@@ -195,11 +195,7 @@ class GlobalVariables{
     * @param {string} The path to read from
     */
     writeToDisplay(path){
-        console.log("Displaying path: ")
-        console.log(path)
         var thingReturned = window.ask({ evaluate: "md`hello`", key: "display", readPath: path }).then( thingReturned => {
-            console.log("Returned: ")
-            console.log(thingReturned)
             
             window.updateDisplay(thingReturned);
         })

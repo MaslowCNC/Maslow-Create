@@ -58,8 +58,12 @@ export default class Rotate extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry'), this.findIOValue('x-axis degrees'), this.findIOValue('y-axis degrees'), this.findIOValue('z-axis degrees')]
-            this.basicThreadValueProcessing(values, "rotate")
+            var inputPath = this.findIOValue('geometry')
+            var x = this.findIOValue('x-axis degrees')
+            var y = this.findIOValue('y-axis degrees')
+            var z = this.findIOValue('z-axis degrees')
+            const values = { key: "rotate", x:x, y:y, z:z, readPath: inputPath, writePath: this.path }
+            this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
 }

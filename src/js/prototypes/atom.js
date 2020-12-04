@@ -626,7 +626,7 @@ export default class Atom {
     displayAndPropogate(){
         //If this has an output write to it
         if(this.output){
-            this.output.setValue(this.value)
+            this.output.setValue(this.path)
             this.output.ready = true
         }
         
@@ -657,12 +657,11 @@ export default class Atom {
             
             this.clearAlert()
             
-            toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
+            //toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
             
             window.ask(toAsk).then(result => {
                 if (result != -1 ){
                     this.displayAndPropogate()
-                    console.log("Writing to path: " + this.path)
                 }else{
                     this.setAlert("Unable to compute")
                 }

@@ -111,24 +111,47 @@ const agent = async ({
   ask,
   question
 }) => {
-    console.log(question.key);
     
     switch(question.key) {
       case "rectangle":
-        console.log("Case rectangle recognized");
-        console.log(question.writePath);
         const aSquare = api.Square(question.x,question.y);
         await api.saveGeometry(question.writePath, aSquare);
         return 1;
         break;
+      case "circle":
+        const aCircle = api.Circle(question.diameter/2);
+        await api.saveGeometry(question.writePath, aCircle);
+        return 1;
+        break;
       case "extrude":
-        console.log("Case extrude recognized");
         const aShape = await api.loadGeometry(question.readPath);
         const extrudedShape = aShape.pull(question.distance);
         await api.saveGeometry(question.writePath, extrudedShape);
         return 1;
+        break;
+     case "translate":
+        const aShape2Translate = await api.loadGeometry(question.readPath);
+        const translatedShape = aShape2Translate.translate(question.x, question.y, question.z);
+        await api.saveGeometry(question.writePath, translatedShape);
+        return 1;
+        break;
+    case "rotate":
+        const aShape2Rotate = await api.loadGeometry(question.readPath);
+        const rotatedShape = aShape2Rotate.rotateX(question.x).rotateY(question.y).rotateZ(question.z);
+        await api.saveGeometry(question.writePath, rotatedShape);
+        return 1;
+    case "difference":
+        const aShape2Difference1 = await api.loadGeometry(question.readPath1);
+        const aShape2Difference2 = await api.loadGeometry(question.readPath2);
+        const cutShape = aShape2Difference2.cut(aShape2Difference1);
+        await api.saveGeometry(question.writePath, cutShape);
+    case "intersection":
+        const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
+        const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
+        const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
+        await api.saveGeometry(question.writePath, intersectionShape);
+        return 1;
       case "display":
-        console.log("Case display recognized");
         const anotherCube = await api.loadGeometry(question.readPath);
         const threejsGeometry = toThreejsGeometry(anotherCube.toKeptGeometry());
         return threejsGeometry;

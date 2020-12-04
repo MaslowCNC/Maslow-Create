@@ -42,7 +42,7 @@ export default class Circle extends Atom {
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), 
             GlobalVariables.heightToPixels(this.y), 
-            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)       
+            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)
         //GlobalVariables.c.fill()
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath() 
@@ -56,7 +56,8 @@ export default class Circle extends Atom {
             const circumference  = 3.14*this.findIOValue('diameter')
             const numberOfSegments = Math.min(Math.max(parseInt( circumference / GlobalVariables.circleSegmentSize ),5), 100)
             
-            const values = [this.findIOValue('diameter'), numberOfSegments]
+            var diameter = this.findIOValue('diameter')
+            const values = {key: "circle", diameter: diameter, numSegments:numberOfSegments, writePath: this.path }
             this.basicThreadValueProcessing(values, "circle")
         }catch(err){this.setAlert(err)}
     }

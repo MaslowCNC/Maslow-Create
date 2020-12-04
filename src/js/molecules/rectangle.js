@@ -54,7 +54,9 @@ export default class Rectangle extends Atom {
      */ 
     updateValue(){
         try{
-            const values = {key: "rectangle", x:5, y:5, writePath: this.path }//[this.findIOValue('x length'),this.findIOValue('y length')]
+            var xVal = this.findIOValue('x length')
+            var yVal = this.findIOValue('y length')
+            const values = {key: "rectangle", x: xVal, y:yVal, writePath: this.path }
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
