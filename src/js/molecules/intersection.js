@@ -69,9 +69,9 @@ export default class Intersection extends Atom {
         try{
             const path1 = this.findIOValue('geometry1')
             const path2 = this.findIOValue('geometry2')
-            const values = { key: "difference",readPath1: path1, readPath2: path2, writePath: this.path }
+            const values = { key: "intersection",readPath1: path1, readPath2: path2, writePath: this.path }
             
-            this.basicThreadValueProcessing(values, "intersection")
+            this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
 }

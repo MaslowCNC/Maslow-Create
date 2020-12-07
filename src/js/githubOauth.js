@@ -332,7 +332,7 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
+                    const thumbnailPath = "/defaultThumbnail.svg" //"https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })

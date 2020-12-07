@@ -140,26 +140,30 @@ const agent = async ({
         const rotatedShape = aShape2Rotate.rotateX(question.x).rotateY(question.y).rotateZ(question.z);
         await api.saveGeometry(question.writePath, rotatedShape);
         return 1;
+        break;
     case "difference":
         const aShape2Difference1 = await api.loadGeometry(question.readPath1);
         const aShape2Difference2 = await api.loadGeometry(question.readPath2);
-        const cutShape = aShape2Difference2.cut(aShape2Difference1);
+        const cutShape = api.Difference(aShape2Difference2, aShape2Difference1);
         await api.saveGeometry(question.writePath, cutShape);
+        break;
     case "intersection":
         const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
         const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
         const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
         await api.saveGeometry(question.writePath, intersectionShape);
         return 1;
+        break;
     case "union":
         var geometries = [];
         for (const path of question.paths) {
             const unionGeometry = await api.loadGeometry(path);
             geometries.push(unionGeometry);
         }
-        const unionShape = api.Union(...geometries);
+        const unionShape = api.Group(...geometries);
         await api.saveGeometry(question.writePath, unionShape);
         return 1;
+        break;
     case "hull":
         var hullGeometries = [];
         for (const path of question.paths) {
@@ -169,6 +173,7 @@ const agent = async ({
         const hullShape = api.Hull(...hullGeometries);
         await api.saveGeometry(question.writePath, hullShape);
         return 1;
+        break;
     case "assembly":
         var assemblyGeometries = [];
         for (const path of question.paths) {
@@ -178,6 +183,7 @@ const agent = async ({
         const assemblyShape = api.Assembly(...assemblyGeometries);
         await api.saveGeometry(question.writePath, assemblyShape);
         return 1;
+        break;
       case "display":
         const anotherCube = await api.loadGeometry(question.readPath);
         const threejsGeometry = toThreejsGeometry(anotherCube.toKeptGeometry());
