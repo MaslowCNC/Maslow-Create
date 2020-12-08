@@ -114,7 +114,7 @@ const agent = async ({
     
     switch(question.key) {
       case "rectangle":
-        const aSquare = api.Square(question.x,question.y);
+        const aSquare = api.Box(api.corners(question.x, question.y));
         await api.saveGeometry(question.writePath, aSquare);
         return 1;
         break;
@@ -146,6 +146,7 @@ const agent = async ({
         const aShape2Difference2 = await api.loadGeometry(question.readPath2);
         const cutShape = api.Difference(aShape2Difference2, aShape2Difference1);
         await api.saveGeometry(question.writePath, cutShape);
+        return 1;
         break;
     case "intersection":
         const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
