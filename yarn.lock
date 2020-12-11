@@ -86,6 +86,131 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@jscad/amf-deserializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/amf-deserializer/-/amf-deserializer-2.0.0-alpha.8.tgz#2507c582ea36bd4589d880d5862d85dd4061247b"
+  dependencies:
+    "@jscad/modeling" "2.0.0-alpha.8"
+    sax "1.2.4"
+
+"@jscad/amf-serializer@2.0.0-alpha.9":
+  version "2.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@jscad/amf-serializer/-/amf-serializer-2.0.0-alpha.9.tgz#12407c8a31ad41e7a80b5867f12bfed193b8ca87"
+  dependencies:
+    "@jscad/io-utils" "2.0.0-alpha.8"
+    "@jscad/modeling" "2.0.0-alpha.8"
+    onml "1.2.0"
+
+"@jscad/array-utils@2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@jscad/array-utils/-/array-utils-2.0.0-alpha.4.tgz#33d3eab605554413a32a654e77f63649a9c2bb20"
+
+"@jscad/dxf-deserializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/dxf-deserializer/-/dxf-deserializer-2.0.0-alpha.8.tgz#3ae528939032e8a2caf0b8da18da0e29a7e24479"
+  dependencies:
+    "@jscad/modeling" "2.0.0-alpha.8"
+
+"@jscad/dxf-serializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/dxf-serializer/-/dxf-serializer-2.0.0-alpha.8.tgz#811ad09c6b0a2e2724c064b4658055f594107c73"
+  dependencies:
+    "@jscad/io-utils" "2.0.0-alpha.8"
+    "@jscad/modeling" "2.0.0-alpha.8"
+
+"@jscad/io-utils@2.0.0-alpha.8", "@jscad/io-utils@^2.0.0-alpha.5":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/io-utils/-/io-utils-2.0.0-alpha.8.tgz#68270518e6e76512aeac63a1f16c5d7047d68772"
+
+"@jscad/io@^2.0.0-alpha.6":
+  version "2.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@jscad/io/-/io-2.0.0-alpha.10.tgz#98db2a4ee432cd94a8fa5645705786f22b84b641"
+  dependencies:
+    "@jscad/amf-deserializer" "2.0.0-alpha.8"
+    "@jscad/amf-serializer" "2.0.0-alpha.9"
+    "@jscad/array-utils" "2.0.0-alpha.4"
+    "@jscad/dxf-deserializer" "2.0.0-alpha.8"
+    "@jscad/dxf-serializer" "2.0.0-alpha.8"
+    "@jscad/io-utils" "2.0.0-alpha.8"
+    "@jscad/json-deserializer" "2.0.0-alpha.8"
+    "@jscad/json-serializer" "2.0.0-alpha.8"
+    "@jscad/modeling" "2.0.0-alpha.8"
+    "@jscad/obj-deserializer" "2.0.0-alpha.8"
+    "@jscad/stl-deserializer" "2.0.0-alpha.9"
+    "@jscad/stl-serializer" "2.0.0-alpha.8"
+    "@jscad/svg-deserializer" "2.0.0-alpha.8"
+    "@jscad/svg-serializer" "2.0.0-alpha.9"
+    "@jscad/x3d-serializer" "2.0.0-alpha.9"
+
+"@jscad/json-deserializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/json-deserializer/-/json-deserializer-2.0.0-alpha.8.tgz#387d4c065abe53433e407059e6184c8aaeb508cc"
+  dependencies:
+    "@jscad/array-utils" "2.0.0-alpha.4"
+
+"@jscad/json-serializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/json-serializer/-/json-serializer-2.0.0-alpha.8.tgz#5a28c9ebcc1edf57484517534b6f719b26f7bfb2"
+  dependencies:
+    "@jscad/modeling" "2.0.0-alpha.8"
+
+"@jscad/modeling@2.0.0-alpha.8", "@jscad/modeling@^2.0.0-alpha.6":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/modeling/-/modeling-2.0.0-alpha.8.tgz#7d2ce624e5e19025cde6b7cc8826352aa5819cf5"
+
+"@jscad/obj-deserializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/obj-deserializer/-/obj-deserializer-2.0.0-alpha.8.tgz#f4abc81cb92b55da2f40cb4ad6aa9219fc8c6063"
+  dependencies:
+    "@jscad/modeling" "2.0.0-alpha.8"
+
+"@jscad/regl-renderer@^2.0.0-alpha.7":
+  version "2.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@jscad/regl-renderer/-/regl-renderer-2.0.0-alpha.10.tgz#e74589f4dce2403e72197a5751787358d6daddc1"
+  dependencies:
+    "@jscad/array-utils" "2.0.0-alpha.4"
+    camera-unproject "1.0.1"
+    gl-mat4 "1.2.0"
+    gl-vec3 "1.1.3"
+    regl "1.6.1"
+
+"@jscad/stl-deserializer@2.0.0-alpha.9":
+  version "2.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@jscad/stl-deserializer/-/stl-deserializer-2.0.0-alpha.9.tgz#1ffc5bccac356954b94768e142310d4460a37b76"
+  dependencies:
+    "@jscad/io-utils" "2.0.0-alpha.8"
+    "@jscad/modeling" "2.0.0-alpha.8"
+
+"@jscad/stl-serializer@2.0.0-alpha.8", "@jscad/stl-serializer@^2.0.0-alpha.6":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/stl-serializer/-/stl-serializer-2.0.0-alpha.8.tgz#7218f50fc618ed05f4379a5c292d469e434fbcd1"
+  dependencies:
+    "@jscad/modeling" "2.0.0-alpha.8"
+
+"@jscad/svg-deserializer@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@jscad/svg-deserializer/-/svg-deserializer-2.0.0-alpha.8.tgz#301b8c73a0de821f9c2f849e5b053f23f8da8091"
+  dependencies:
+    "@jscad/array-utils" "2.0.0-alpha.4"
+    "@jscad/modeling" "2.0.0-alpha.8"
+    sax "1.2.4"
+
+"@jscad/svg-serializer@2.0.0-alpha.9":
+  version "2.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@jscad/svg-serializer/-/svg-serializer-2.0.0-alpha.9.tgz#bdf034050c0fa0d97b4ec4c1b576ac60f819064b"
+  dependencies:
+    "@jscad/io-utils" "2.0.0-alpha.8"
+    "@jscad/modeling" "2.0.0-alpha.8"
+    onml "1.2.0"
+
+"@jscad/x3d-serializer@2.0.0-alpha.9":
+  version "2.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@jscad/x3d-serializer/-/x3d-serializer-2.0.0-alpha.9.tgz#e4ad65d2d2dc75d62aefeacde2bc075fcd2e5184"
+  dependencies:
+    "@jscad/io-utils" "2.0.0-alpha.8"
+    "@jscad/modeling" "2.0.0-alpha.8"
+    onml "1.2.0"
+
 "@octokit/endpoint@^4.0.0":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@octokit/endpoint/-/endpoint-4.2.2.tgz#4ff11382bad89c7e01030a1e62d5e9d13c2402b0"
@@ -1678,6 +1803,10 @@ camelcase@^4.1.0:
 camelcase@^5.0.0:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
+
+camera-unproject@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/camera-unproject/-/camera-unproject-1.0.1.tgz#86927a9d6d5340a8c9e36da840f7ccb6d6da12cf"
 
 caniuse-lite@^1.0.30000844:
   version "1.0.30000856"
@@ -3294,6 +3423,14 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
+gl-mat4@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/gl-mat4/-/gl-mat4-1.2.0.tgz#49d8a7636b70aa00819216635f4a3fd3f4669b26"
+
+gl-vec3@1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/gl-vec3/-/gl-vec3-1.1.3.tgz#a47c62f918774a06cbed1b65bcd0288ecbb03826"
+
 glob-base@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-base/-/glob-base-0.3.0.tgz#dbb164f6221b1c0b1ccf82aea328b497df0ea3c4"
@@ -3725,8 +3862,8 @@ inherits@2.0.3:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
 ini@~1.3.0:
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.4.tgz#0537cb79daf59b59a1a517dff706c86ec039162e"
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.7.tgz#a09363e1911972ea16d7a8851005d84cf09a9a84"
 
 inquirer@^6.0.0:
   version "6.0.0"
@@ -5128,6 +5265,12 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
+onml@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/onml/-/onml-1.2.0.tgz#35b90924660d3699f8dbe56154308e8fa1327b38"
+  dependencies:
+    sax "^1.2.1"
+
 openurl@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/openurl/-/openurl-1.1.1.tgz#3875b4b0ef7a52c156f0db41d4609dbb0f94b387"
@@ -5766,6 +5909,10 @@ regjsparser@^0.1.4:
   dependencies:
     jsesc "~0.5.0"
 
+regl@1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/regl/-/regl-1.6.1.tgz#6930172cda9b8fb65724abc0d4930d79333f5460"
+
 relateurl@0.2.x:
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/relateurl/-/relateurl-0.2.7.tgz#54dbf377e51440aca90a4cd274600d3ff2d888a9"
@@ -5993,7 +6140,7 @@ safe-regex@^1.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
 
-sax@^1.1.4, sax@^1.2.4:
+sax@1.2.4, sax@^1.1.4, sax@^1.2.1, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
@@ -7080,6 +7227,10 @@ worker-farm@^1.5.2:
   resolved "https://registry.yarnpkg.com/worker-farm/-/worker-farm-1.6.0.tgz#aecc405976fab5a95526180846f0dba288f3a4a0"
   dependencies:
     errno "~0.1.7"
+
+workerpool@^6.0.0:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.0.3.tgz#3f80ba4d914fe7bb8d933628c26e5d7ff820c703"
 
 wrap-ansi@^2.0.0:
   version "2.1.0"
