@@ -111,7 +111,7 @@ const agent = async ({
   ask,
   question
 }) => {
-    console.log(question.key);
+    
     switch(question.key) {
       case "rectangle":
         const aSquare = api.Box(api.corners(question.x, question.y));
@@ -119,8 +119,6 @@ const agent = async ({
         return 1;
         break;
       case "circle":
-        console.log("Circle path: ");
-        console.log(question.writePath);
         const aCircle = api.Circle(question.diameter/2);
         await api.saveGeometry(question.writePath, aCircle);
         return 1;
@@ -188,10 +186,8 @@ const agent = async ({
         return 1;
         break;
       case "display":
-        console.log("Displaying path: ");
-        console.log(question.readPath);
-        const geometryToDisplay = await api.loadGeometry(question.readPath);
-        const threejsGeometry = toThreejsGeometry(geometryToDisplay.toKeptGeometry());
+        const anotherCube = await api.loadGeometry(question.readPath);
+        const threejsGeometry = toThreejsGeometry(anotherCube.toKeptGeometry());
         return threejsGeometry;
         break;
       default:
