@@ -391,8 +391,6 @@ const webService = async ({
   workerType,
 }) => {
   try {
-    //var promise = import(webWorker); //For testing path
-    
     return await acquireService(
       { webWorker, type: workerType },
       ({ webWorker, type }) => {
@@ -402,7 +400,6 @@ const webService = async ({
         const terminate = async () => worker.terminate();
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
-          console.log(error);
           console.log(`QQ/webWorker/error: ${error}`);
         };
         const service = { ask, terminate };

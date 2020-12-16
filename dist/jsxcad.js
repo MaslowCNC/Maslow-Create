@@ -20,8 +20,8 @@ window.ask = async (question, context) =>
     askService(serviceSpec, question, context);
 
 
-//Add 3d view
-orbitDisplay({}, document.getElementById('viewerContext')).then(result=>{
+//Add 3d view //With axis does not work right now. Needs to be changed in jsxcad-ui-threejs
+orbitDisplay({withAxes: true}, document.getElementById('viewerContext')).then(result=>{
     window.updateDisplay = result.updateGeometry
 });
 

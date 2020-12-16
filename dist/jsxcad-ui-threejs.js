@@ -53664,6 +53664,8 @@ const buildMeshes = async ({
       geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
       const material = await buildMeshMaterial(tags);
+      material.transparent = true;
+      material.opacity = 0.1;
       material.side = DoubleSide;
       dataset.mesh = new Mesh(geometry, material);
       dataset.mesh.layers.set(layer);
@@ -53740,7 +53742,7 @@ const moveToFit = ({
 /* global ResizeObserver, requestAnimationFrame */
 
 const orbitDisplay = async (
-  { view = {}, geometry, canvas } = {},
+  { view = {}, geometry, canvas, withAxes = false } = {},
   page
 ) => {
   let datasets = [];
@@ -53760,7 +53762,7 @@ const orbitDisplay = async (
     view,
     geometryLayers,
     planLayers,
-    withAxes: true,
+    withAxes,
   });
 
   const render = () => {

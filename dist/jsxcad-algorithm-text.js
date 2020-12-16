@@ -1,5 +1,4 @@
-import { scale, taggedGraph, taggedGroup } from './jsxcad-geometry-tagged.js';
-import { fromPaths } from './jsxcad-geometry-graph.js';
+import { scale, taggedPaths, taggedGroup } from './jsxcad-geometry-tagged.js';
 import { fromSvgPath } from './jsxcad-convert-svg.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
@@ -15882,12 +15881,7 @@ const toFont = (options = {}, data) => {
         curveSegments: curveSegments,
       })
     )) {
-      group.push(
-        scale(
-          [factor, factor, factor],
-          taggedGraph({}, fromPaths(paths))
-        )
-      );
+      group.push(scale([factor, factor, factor], taggedPaths({}, paths)));
     }
     return taggedGroup({}, ...group);
   };

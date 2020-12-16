@@ -91,7 +91,7 @@ const getBack = (plan) => {
     case 'corners':
       return plan.back;
     case 'box':
-      return plan.length / -2;
+      return plan.width / -2;
     default:
       return -getRadius(plan);
   }
@@ -122,7 +122,7 @@ const getFront = (plan) => {
     case 'corners':
       return plan.front;
     case 'box':
-      return plan.length / 2;
+      return plan.width / 2;
     default:
       return getRadius(plan);
   }

@@ -1,7 +1,9 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
+import { canonicalize } from './jsxcad-geometry-paths.js';
+import { canonicalize as canonicalize$1 } from './jsxcad-math-plane.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
@@ -1139,19 +1141,43 @@ const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip$1(path) : path;
 
-const fromPaths = (paths) => {
-  // FIX: Discover the plane for planar graphs.
-  const plane = [0, 0, 1, 0];
-  const arrangement = arrangePaths(...plane, paths.map(deduplicate$1));
+const Z$2 = 2;
+const W = 3;
+
+const fromPaths = (inputPaths) => {
+  const paths = canonicalize(inputPaths);
   const graph = create();
-  for (const { points, holes } of arrangement) {
-    const face = addFace(graph, { plane });
-    const exterior = orientCounterClockwise(points);
-    addLoopFromPoints(graph, deduplicate$1(exterior), { face });
-    for (const hole of holes) {
-      const interior = orientClockwise(hole);
-      addHoleFromPoints(graph, deduplicate$1(interior), { face });
+  let plane = [0, 0, 1, 0];
+  let updated = false;
+  // FIX: Figure out a better way to get a principle plane.
+  // Pick some point elevation.
+  for (const path of paths) {
+    for (const point of path) {
+      if (point === null) {
+        continue;
+      }
+      plane[W] = point[Z$2];
+      updated = true;
+      break;
     }
+    if (updated) {
+      break;
+    }
+  }
+  if (plane) {
+    const arrangement = arrangePaths(...plane, paths);
+    for (const { points, holes } of arrangement) {
+      const face = addFace(graph, { plane });
+      const exterior = orientCounterClockwise(points);
+      addLoopFromPoints(graph, deduplicate$1(exterior), { face });
+      for (const hole of holes) {
+        const interior = orientClockwise(hole);
+        addHoleFromPoints(graph, deduplicate$1(interior), { face });
+      }
+    }
+  }
+  if (graph.edges.length === 0) {
+    graph.isEmpty = true;
   }
   graph.isClosed = false;
   graph.isOutline = true;
@@ -1291,7 +1317,7 @@ const inset = (graph, initial, step, limit) => {
       initial,
       step,
       limit,
-      plane,
+      canonicalize$1(plane), // FIX: Use exact transforms to avoid drift.
       polygon,
       polygonHoles
     )) {
@@ -1336,16 +1362,54 @@ const intersection = (a, b) => {
   );
 };
 
-const offset = (outlineGraph, amount) => {
-  if (amount >= 0) {
-    return outlineGraph;
-  } else {
-    return inset(outlineGraph, 0 - amount, 0, 0);
+const offset = (graph, initial, step, limit) => {
+  const outlineGraph = outline(graph);
+  const offsetGraph = create();
+  eachFace(realizeGraph(outlineGraph), (face, { plane, loop, holes }) => {
+    const polygon = [];
+    eachLoopEdge(outlineGraph, loop, (edge, { point }) => {
+      polygon.push(getPointNode(outlineGraph, point));
+    });
+    const polygonHoles = [];
+    if (holes) {
+      for (const hole of holes) {
+        const polygon = [];
+        eachLoopEdge(outlineGraph, hole, (edge, { point }) => {
+          polygon.push(getPointNode(outlineGraph, point));
+        });
+        polygonHoles.push(polygon);
+      }
+    }
+    for (const { boundary, holes } of offsetOfPolygon(
+      initial,
+      step,
+      limit,
+      plane,
+      polygon,
+      polygonHoles
+    )) {
+      let offsetFace = addFace(offsetGraph, { plane });
+      addLoopFromPoints(offsetGraph, boundary, { face: offsetFace });
+      for (const hole of holes) {
+        addHoleFromPoints(offsetGraph, hole, { face: offsetFace });
+      }
+    }
+  });
+  offsetGraph.isClosed = false;
+  offsetGraph.isOutline = true;
+  if (offsetGraph.points.length === 0) {
+    offsetGraph.isEmpty = true;
   }
+  return offsetGraph;
 };
 
-const smooth = (graph) =>
-  fromSurfaceMeshLazy(smoothSurfaceMesh(toSurfaceMesh(graph)));
+const smooth = (graph, options) => {
+  const smoothedGraph = fromSurfaceMeshLazy(
+    smoothSurfaceMesh(toSurfaceMesh(graph), options)
+  );
+  smoothedGraph.isWireframe = true;
+  return smoothedGraph;
+};
 
 const toPaths = (graph) => {
   const paths = [];

@@ -1,8 +1,8 @@
-import Shape$1, { Shape, shapeMethod } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { radius, getSides, getRadius, getLeft, getRight, getFront, getBack, getCenter } from './jsxcad-geometry-plan.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
-import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, taggedSolid, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
 import { buildRingSphere, toRadiusFromApothem as toRadiusFromApothem$1, buildRegularIcosahedron, buildRegularPolygon, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints } from './jsxcad-algorithm-shape.js';
 import { convexHull } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
@@ -17,7 +17,7 @@ const Spiral = (
     by = 1;
   }
   if (to === undefined && upto === undefined) {
-    upto = 360;
+    to = 360;
   }
   let path = [null];
   for (const angle of numbers((angle) => angle, {
@@ -46,11 +46,16 @@ const orRadius = (value) => {
 
 const Arc = (value = 1, angle = 360, start = 0) => {
   const plan = orRadius(value);
-  return Spiral((a) => [[getRadius(plan)]], {
+  const spiral = Spiral((a) => [[getRadius(plan)]], {
     from: start - 90,
     upto: start + angle - 90,
     by: 360 / getSides(plan),
   }).at(plan.at);
+  if (angle - start === 360) {
+    return spiral.close();
+  } else {
+    return spiral;
+  }
 };
 
 Shape.prototype.Arc = shapeMethod(Arc);
@@ -74,9 +79,9 @@ const unitBall = (resolution = 16) => {
   return shape.toGraph();
 };
 
-const Ball = (value = 1) => {
+const Ball = (value = 1, { resolution = 16 } = {}) => {
   const plan = orRadius(value);
-  return unitBall().scale(getRadius(plan)).at(plan.at);
+  return unitBall(resolution).scale(getRadius(plan)).at(plan.at);
 };
 
 Shape.prototype.Ball = shapeMethod(Ball);
@@ -148,7 +153,7 @@ const chainHullMethod = function (...shapes) {
 Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
 
-const Circle = (plan = 1) => Arc(plan).close();
+const Circle = (plan = 1) => Arc(plan).fill();
 
 Shape.prototype.Circle = shapeMethod(Circle);
 
@@ -1601,9 +1606,9 @@ const toPaths = (letters) => {
     mergedPaths.push(...translate([xOffset, 0, 0], paths));
     xOffset += hersheyWidth[code] || 0;
   }
-  return Shape$1.fromGeometry({ type: 'paths', paths: mergedPaths }).scale(
-    1 / 28
-  );
+  return Shape$1.fromGeometry(taggedPaths({}, mergedPaths))
+    .scale(1 / 28)
+    .wire();
 };
 
 const ofSize = (size) => (text) => toPaths(text).scale(size);
@@ -1652,9 +1657,33 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = shapeMethod(Point);
 
-const Line = (length) => Path(Point(0), Point(length));
+const Line = (forward, backward = 0) => {
+  if (backward > forward) {
+    return Path(Point(forward), Point(backward));
+  } else {
+    return Path(Point(backward), Point(forward));
+  }
+};
 
 Shape.prototype.Line = shapeMethod(Line);
+
+const LoopedHull = (...shapes) => {
+  const pointsets = shapes.map((shape) => shape.toPoints());
+  const loop = [];
+  for (let nth = 1; nth < pointsets.length; nth++) {
+    const points = [...pointsets[nth - 1], ...pointsets[nth]];
+    loop.push(Hull(Points(...points)));
+  }
+  loop.push(Hull(Points(...pointsets[pointsets.length - 1], ...pointsets[0])));
+  return Group(...loop);
+};
+
+const loopHullMethod = function (...shapes) {
+  return LoopedHull(this, ...shapes);
+};
+
+Shape.prototype.loopHull = loopHullMethod;
+Shape.prototype.LoopedHull = shapeMethod(LoopedHull);
 
 const Octagon = (plan = 1) => Arc({ ...orRadius(plan), sides: 8 });
 
@@ -1841,6 +1870,10 @@ const Wave = (
 
 Shape.prototype.Wave = shapeMethod(Wave);
 
+const Weld = (...shapes) => weld(...shapes);
+
+Shape.prototype.Weld = shapeMethod(Weld);
+
 const api = {
   Arc,
   Assembly,
@@ -1858,6 +1891,7 @@ const api = {
   Icosahedron,
   Intersection,
   Line,
+  LoopedHull,
   Octagon,
   Path,
   Peg,
@@ -1878,7 +1912,8 @@ const api = {
   Triangle,
   Union,
   Wave,
+  Weld,
 };
 
 export default api;
-export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave };
+export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };

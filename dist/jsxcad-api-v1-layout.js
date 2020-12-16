@@ -99,7 +99,7 @@ const buildLayoutGeometry = ({
     Math.max(pageLength, margin)
   )
     .outline()
-    .with(
+    .and(
       Hershey(max(pageWidth, pageLength) * labelScale)(title).move(
         pageWidth / -2,
         (pageLength * (1 + labelScale)) / 2

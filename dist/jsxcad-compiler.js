@@ -6653,7 +6653,7 @@ const toEcmascript = async (
       };
       out.push(cacheLoadCode);
       const replayRecordedNotes = parse(
-        `replayRecordedNotes('data/note/${path}/${id}')`,
+        `await replayRecordedNotes('data/note/${path}/${id}')`,
         parseOptions
       );
       out.push(replayRecordedNotes);
@@ -6674,7 +6674,10 @@ const toEcmascript = async (
         )
       );
       out.push(
-        parse(`saveRecordedNotes('data/note/${path}/${id}')`, parseOptions)
+        parse(
+          `await saveRecordedNotes('data/note/${path}/${id}')`,
+          parseOptions
+        )
       );
     }
     out.push(parse(`Object.freeze(${id});`, parseOptions));

@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
@@ -3565,7 +3565,7 @@ const applyTransforms = ({ matrix }, transformText) => {
 
 const fromSvg = async (input, options = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
-  const geometry = { type: 'assembly', content: [] };
+  const geometry = taggedGroup({});
   const svg = new domParser.DOMParser().parseFromString(
     await svgString,
     'image/svg+xml'

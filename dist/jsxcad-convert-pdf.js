@@ -1,5 +1,5 @@
 import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { toKeptGeometry, transform, outline, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { toKeptGeometry, transform, getNonVoidSurfaces, getNonVoidGraphs, outline, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const toFillColor = (rgb) =>
@@ -75,23 +75,28 @@ const toPdf = async (
     fromScaling([scale, scale, scale])
   );
   const keptGeometry = toKeptGeometry(transform(matrix, await geometry));
-  for (const { tags, paths } of outline(keptGeometry)) {
-    lines.push(toFillColor(toRgbFromTags(tags, black)));
-    lines.push(toStrokeColor(toRgbFromTags(tags, black)));
-    for (const path of paths) {
-      let nth = path[0] === null ? 1 : 0;
-      if (nth >= path.length) {
-        continue;
+  for (const surface of [
+    ...getNonVoidSurfaces(keptGeometry),
+    ...getNonVoidGraphs(keptGeometry),
+  ]) {
+    for (const { tags, paths } of outline(surface)) {
+      lines.push(toFillColor(toRgbFromTags(tags, black)));
+      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      for (const path of paths) {
+        let nth = path[0] === null ? 1 : 0;
+        if (nth >= path.length) {
+          continue;
+        }
+        const [x1, y1] = path[nth];
+        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+        for (nth++; nth < path.length; nth++) {
+          const [x2, y2] = path[nth];
+          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+        }
+        lines.push(`h`); // Surface paths are always closed.
       }
-      const [x1, y1] = path[nth];
-      lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-      for (nth++; nth < path.length; nth++) {
-        const [x2, y2] = path[nth];
-        lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-      }
-      lines.push(`h`); // Surface paths are always closed.
+      lines.push(`f`); // Surface paths are always filled.
     }
-    lines.push(`f`); // Surface paths are always filled.
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));

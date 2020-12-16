@@ -1,6 +1,6 @@
 import { Hull, Ball } from './jsxcad-api-v1-shapes.js';
 import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
-import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, inset as inset$1 } from './jsxcad-geometry-tagged.js';
+import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, offset as offset$1, inset as inset$1 } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { fromRotation } from './jsxcad-math-mat4.js';
@@ -162,60 +162,30 @@ const growMethod = function (...args) {
 };
 Shape.prototype.grow = growMethod;
 
-/*
-import {
-  offset as offsetGraph,
-  outline as outlineGraph,
-} from './jsxcad-geometry-graph.js';
-*/
+const offset = (shape, initial = 1, step, limit) =>
+  Shape.fromGeometry(offset$1(shape.toGeometry(), initial, step, limit));
 
-const offset = (shape, amount = -1) => {
-  if (amount < 0) {
-    return inset(shape, -amount);
-  } else {
-    return shape;
-  }
-};
-
-const offsetMethod = function (amount) {
-  return offset(this, amount);
+const offsetMethod = function (initial, step, limit) {
+  return offset(this, initial, step, limit);
 };
 
 Shape.prototype.offset = offsetMethod;
 
-// FIX: Support minimal radius requirements.
-const inset = (shape, initial = 1, step, limit) => {
-  /*
-  const group = [];
-  for (const { tags, graph } of getNonVoidGraphs(shape.toDisjointGeometry())) {
-    const outlinedGraph = outlineGraph(graph);
-    let amount = initial;
-    for (;;) {
-      const offsettedGraph = offsetGraph(outlinedGraph, -amount);
-      if (offsettedGraph.isEmpty) {
-        break;
-      }
-      group.push(taggedGraph({ tags }, offsettedGraph));
-      if (step === undefined) {
-        break;
-      }
-      amount += step;
-      if (amount >= limit) {
-        break;
-      }
-    }
-  }
-*/
-  return Shape.fromGeometry(
-    inset$1(shape.toGeometry(), initial, step, limit)
-  );
-};
+const inset = (shape, initial = 1, step, limit) =>
+  Shape.fromGeometry(inset$1(shape.toGeometry(), initial, step, limit));
 
 const insetMethod = function (initial, step, limit) {
   return inset(this, initial, step, limit);
 };
 
 Shape.prototype.inset = insetMethod;
+
+// CHECK: Using 'with' for may be confusing, but andInset looks odd.
+const withInsetMethod = function (initial, step, limit) {
+  return this.group(inset(this, initial, step, limit));
+};
+
+Shape.prototype.withInset = withInsetMethod;
 
 const shrink = (shape, amount, { resolution = 3 } = {}) => {
   if (amount === 0) {
