@@ -107,13 +107,15 @@ const reportError = error => {
 
 setPendingErrorHandler(reportError);
 
+setupFilesystem({ fileBase: 'maslow' });
+
 const agent = async ({
   ask,
   question
 }) => {
     switch(question.key) {
       case "rectangle":
-        const aSquare = api.Box(api.corners(question.x, question.y));
+        const aSquare = api.Square(question.x, question.y);
         await api.saveGeometry(question.writePath, aSquare);
         return 1;
         break;
@@ -143,7 +145,7 @@ const agent = async ({
     case "difference":
         const aShape2Difference1 = await api.loadGeometry(question.readPath1);
         const aShape2Difference2 = await api.loadGeometry(question.readPath2);
-        const cutShape = api.Difference(aShape2Difference2, aShape2Difference1);
+        const cutShape = api.Difference(aShape2Difference1, aShape2Difference2);
         await api.saveGeometry(question.writePath, cutShape);
         return 1;
         break;
@@ -184,10 +186,21 @@ const agent = async ({
         await api.saveGeometry(question.writePath, assemblyShape);
         return 1;
         break;
-      case "display":
-        const geometryToDisplay = await api.loadGeometry(question.readPath);
-        const threejsGeometry = toThreejsGeometry(geometryToDisplay.toKeptGeometry());
-        return threejsGeometry;
+    case "color":
+        const shape2Color = await api.loadGeometry(question.readPath);
+        const coloredShape = shape2Color.color(question.color);
+        await api.saveGeometry(question.writePath, coloredShape);
+        return 1;
+        break;
+    case "display":
+        if(question.readPath != null){
+            const geometryToDisplay = await api.loadGeometry(question.readPath);
+            const threejsGeometry = toThreejsGeometry(geometryToDisplay.toKeptGeometry());
+            return threejsGeometry;
+        }
+        else{
+            return -1;
+        }
         break;
       default:
         console.log("Unable to process command: " + question.key);

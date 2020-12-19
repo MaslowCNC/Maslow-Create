@@ -1,4 +1,4 @@
-import { askService } from './jsxcad-sys.js';
+import { askService, setupFilesystem } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
 
@@ -25,6 +25,7 @@ orbitDisplay({withAxes: true}, document.getElementById('viewerContext')).then(re
     window.updateDisplay = result.updateGeometry
 });
 
+setupFilesystem({ fileBase: 'maslow' });
 
 //Test some things
 // window.ask({ evaluate: "md`hello`", key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }).then( status => {

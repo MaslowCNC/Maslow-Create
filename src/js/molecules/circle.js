@@ -58,7 +58,7 @@ export default class Circle extends Atom {
             
             var diameter = this.findIOValue('diameter')
             const values = {key: "circle", diameter: diameter, numSegments:numberOfSegments, writePath: this.path }
-            this.basicThreadValueProcessing(values, "circle")
+            this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
 }
