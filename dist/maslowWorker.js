@@ -120,7 +120,7 @@ const agent = async ({
         return 1;
         break;
       case "circle":
-        const aCircle = api.Circle(question.diameter/2);
+        const aCircle = api.Circle(api.d(question.diameter, { sides: question.numSegments }));
         await api.saveGeometry(question.writePath, aCircle);
         return 1;
         break;
