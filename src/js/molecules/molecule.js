@@ -200,7 +200,8 @@ export default class Molecule extends Atom{
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
         if(this.output){
-            this.output.setValue(this.value)
+            this.output.setValue(this.path)
+            this.output.ready = true
         }
         
         //If this molecule is selected, send the updated value to the renderer

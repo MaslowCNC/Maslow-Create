@@ -192,6 +192,12 @@ const agent = async ({
         await api.saveGeometry(question.writePath, coloredShape);
         return 1;
         break;
+    case "tag":
+        const shape2tag = await api.loadGeometry(question.readPath);
+        const taggedShape = shape2tag;//.as(question.tag);
+        await api.saveGeometry(question.writePath, taggedShape);
+        return 1;
+        break;
     case "display":
         if(question.readPath != null){
             const geometryToDisplay = await api.loadGeometry(question.readPath);
