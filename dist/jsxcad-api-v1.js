@@ -127,14 +127,20 @@ const view = (
   shape,
   inline,
   op = (x) => x,
-  { width = 1024, height = 512, position = [100, -100, 100] } = {}
+  {
+    width = 1024,
+    height = 512,
+    position = [100, -100, 100],
+    withAxes = false,
+    withGrid = false,
+  } = {}
 ) => {
   const viewShape = op(shape);
   const geometryHash = hash(viewShape.toGeometry());
   for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
     const path = `view/${getModule()}/${nanoid()}`;
     addPending(write(path, entry));
-    const view = { width, height, position, inline };
+    const view = { width, height, position, inline, withAxes, withGrid };
     const hash = hashSum({ geometryHash, view });
     emit({ hash, path, view });
   }
@@ -144,33 +150,111 @@ const view = (
 Shape.prototype.view = function (
   inline,
   op,
-  { path, width = 1024, height = 512, position = [100, -100, 100] } = {}
+  {
+    path,
+    width = 1024,
+    height = 512,
+    position = [100, -100, 100],
+    withAxes,
+    withGrid,
+  } = {}
 ) {
-  return view(this, inline, op, { path, width, height, position });
+  return view(this, inline, op, {
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
 };
 
 Shape.prototype.topView = function (
   inline,
   op,
-  { path, width = 1024, height = 512, position = [0, 0, 100] } = {}
+  {
+    path,
+    width = 1024,
+    height = 512,
+    position = [0, 0, 100],
+    withAxes,
+    withGrid,
+  } = {}
 ) {
-  return view(this, inline, op, { path, width, height, position });
+  return view(this, inline, op, {
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
+};
+
+Shape.prototype.gridView = function (
+  inline,
+  op,
+  {
+    path,
+    width = 1024,
+    height = 512,
+    position = [0, 0, 100],
+    withAxes,
+    withGrid = true,
+  } = {}
+) {
+  return view(this, inline, op, {
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
 };
 
 Shape.prototype.frontView = function (
   inline,
   op,
-  { path, width = 1024, height = 512, position = [0, -100, 0] } = {}
+  {
+    path,
+    width = 1024,
+    height = 512,
+    position = [0, -100, 0],
+    withAxes,
+    withGrid,
+  } = {}
 ) {
-  return view(this, inline, op, { path, width, height, position });
+  return view(this, inline, op, {
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
 };
 
 Shape.prototype.sideView = function (
   inline,
   op,
-  { path, width = 1024, height = 512, position = [100, 0, 0] } = {}
+  {
+    path,
+    width = 1024,
+    height = 512,
+    position = [100, 0, 0],
+    withAxes,
+    withGrid,
+  } = {}
 ) {
-  return view(this, inline, op, { path, width, height, position });
+  return view(this, inline, op, {
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
 };
 
 const md = (strings, ...placeholders) => {

@@ -1,14 +1,15 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { fromSolid, fromSurface, fromPaths, toSolid as toSolid$1, toPaths } from './jsxcad-geometry-graph.js';
-import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
+import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
 class Shape {
@@ -85,9 +86,6 @@ class Shape {
   }
 
   transform(matrix) {
-    if (matrix.some((item) => typeof item !== 'number' || isNaN(item))) {
-      throw Error('die: matrix is malformed');
-    }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
 
@@ -378,6 +376,12 @@ const assemble = (...shapes) => {
     }
   }
 };
+
+const assembleMethod = function (op) {
+  return assemble(...this.each(op));
+};
+
+Shape.prototype.assemble = assembleMethod;
 
 const X$1 = 0;
 const Y$1 = 1;
@@ -697,6 +701,17 @@ Shape.prototype.cutFrom = cutFromMethod;
 
 cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
 
+const each = (shape, op = (x) => x) =>
+  getLeafs(shape.toDisjointGeometry()).map((leaf) =>
+    op(Shape.fromGeometry(leaf))
+  );
+
+const eachMethod = function (op) {
+  return each(this, op);
+};
+
+Shape.prototype.each = eachMethod;
+
 const faces = (shape, op = (x) => x) => {
   const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
@@ -844,25 +859,36 @@ const keepOrDrop = (shape, tags, select) => {
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.
-    if (
-      geometry.solid ||
-      geometry.surface ||
-      geometry.z0Surface ||
-      geometry.points ||
-      geometry.paths ||
-      geometry.item
-    ) {
-      if (select(matchTags, geometry.tags)) {
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout': {
         return descend();
-      } else {
-        // Operate on the shape.
-        const shape = Shape.fromGeometry(geometry);
-        // Note that this transform does not violate geometry disjunction.
-        const dropped = shape.hole().toGeometry();
-        return dropped;
       }
-    } else {
-      return descend();
+      case 'item':
+      /* {
+        if (
+          geometry.tags === undefined ||
+          !geometry.tags.some((tag) => matchTags.includes(tag))
+        ) {
+          // If the item isn't involved with these tags; treat it as a branch.
+          return descend();
+        }
+      }
+*/
+      // falls through to deal with item as a leaf.
+      default: {
+        if (select(matchTags, geometry.tags)) {
+          return descend();
+        } else {
+          // Operate on the shape.
+          const shape = Shape.fromGeometry(geometry);
+          // Note that this transform does not violate geometry disjunction.
+          const dropped = shape.hole().toGeometry();
+          return dropped;
+        }
+      }
     }
   };
 
@@ -1033,14 +1059,6 @@ const method = function (...args) {
 };
 Shape.prototype.translate = method;
 
-/**
- *
- * # Move
- *
- * A shorter way to write translate.
- *
- */
-
 const move = (...args) => translate(...args);
 
 const moveMethod = function (...params) {
@@ -1105,14 +1123,16 @@ const noHoles = (shape, tags, select) => {
     }
   };
 
-  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  const rewritten = rewrite(shape.toDisjointGeometry(), op);
   return Shape.fromGeometry(rewritten);
 };
 
 const noHolesMethod = function (...tags) {
   return noHoles(this);
 };
+
 Shape.prototype.noHoles = noHolesMethod;
+Shape.prototype.noVoid = noHolesMethod;
 
 const opMethod = function (op, ...args) {
   return op(this, ...args);
@@ -1315,78 +1335,24 @@ const rotateMethod = function (...args) {
 };
 Shape.prototype.rotate = rotateMethod;
 
-/**
- *
- * # Rotate X
- *
- * Rotates the shape around the X axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateX(90)
- * ```
- * :::
- **/
-
 const rotateX = (shape, angle) =>
-  shape.transform(fromXRotation(angle * 0.017453292519943295));
+  shape.transform(fromRotateXToTransform(angle));
 
 const rotateXMethod = function (angle) {
   return rotateX(this, angle);
 };
 Shape.prototype.rotateX = rotateXMethod;
 
-/**
- *
- * # Rotate Y
- *
- * Rotates the shape around the Y axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateY(90)
- * ```
- * :::
- **/
-
 const rotateY = (shape, angle) =>
-  shape.transform(fromYRotation(angle * 0.017453292519943295));
+  shape.transform(fromRotateYToTransform(angle));
 
 const rotateYMethod = function (angle) {
   return rotateY(this, angle);
 };
 Shape.prototype.rotateY = rotateYMethod;
 
-/**
- *
- * # Rotate Z
- *
- * Rotates the shape around the Z axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateZ(45)
- * ```
- * :::
- **/
-
 const rotateZ = (shape, angle) =>
-  shape.transform(fromZRotation(angle * 0.017453292519943295));
+  shape.transform(fromRotateZToTransform(angle));
 
 const rotateZMethod = function (angle) {
   return rotateZ(this, angle);

@@ -53124,7 +53124,6 @@ const buildScene = ({
   width,
   height,
   view,
-  withGrid = false,
   withAxes = true,
   renderer,
 }) => {
@@ -53144,13 +53143,6 @@ const buildScene = ({
     const axes = new AxesHelper(5);
     axes.layers.set(1);
     scene.add(axes);
-  }
-
-  if (withGrid) {
-    const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
-    grid.rotation.x = -Math.PI / 2;
-    grid.layers.set(1);
-    scene.add(grid);
   }
 
   var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
@@ -53697,6 +53689,7 @@ const moveToFit = ({
   controls,
   scene,
   fitOffset = 1.2,
+  withGrid = false,
 } = {}) => {
   const { fit = true } = view;
 
@@ -53704,9 +53697,50 @@ const moveToFit = ({
     return;
   }
 
-  const box = new Box3();
-  box.setFromObject(scene);
-  // for( const object of selection ) box.expandByObject( object );
+  let box;
+
+  scene.traverse((object) => {
+    if (object instanceof GridHelper) {
+      return;
+    }
+    if (object instanceof LineSegments || object instanceof Mesh) {
+      const objectBox = new Box3();
+      objectBox.setFromObject(object);
+      if (box) {
+        box = box.union(objectBox);
+      } else {
+        box = objectBox;
+      }
+    }
+  });
+
+  if (!box) {
+    box = new Box3();
+    box.setFromObject(scene);
+  }
+
+  if (withGrid) {
+    const x = Math.max(Math.abs(box.min.x), Math.abs(box.max.x));
+    const y = Math.max(Math.abs(box.min.y), Math.abs(box.max.y));
+    const length = Math.max(x, y);
+    // This is how large we want the smallest grid to be.
+    const scale = Math.pow(10, Math.ceil(Math.log10(length)));
+    const size = scale;
+    {
+      const grid = new GridHelper(size * 2, 200, 0x000080, 0xc0f0c0);
+      grid.rotation.x = -Math.PI / 2;
+      grid.position.set(0, 0, -0.002);
+      grid.layers.set(1);
+      scene.add(grid);
+    }
+    {
+      const grid = new GridHelper(size * 2, 20, 0x000080, 0xc0c0f0);
+      grid.rotation.x = -Math.PI / 2;
+      grid.position.set(0, 0, -0.001);
+      grid.layers.set(1);
+      scene.add(grid);
+    }
+  }
 
   const center = box.getCenter(new Vector3());
   const size = box.getSize(new Vector3());
@@ -53763,7 +53797,6 @@ const orbitDisplay = async (
     geometryLayers,
     planLayers,
     withAxes,
-    withGrid,
   });
 
   const render = () => {
@@ -53813,7 +53846,7 @@ const orbitDisplay = async (
 
     await buildMeshes({ datasets, threejsGeometry, scene, render });
 
-    moveToFit({ view, camera, controls: trackball, scene });
+    moveToFit({ view, camera, controls: trackball, scene, withGrid });
 
     render();
   };
@@ -53855,7 +53888,7 @@ const release = async () => {
 };
 
 const staticDisplay = async (
-  { view = {}, threejsGeometry } = {},
+  { view = {}, threejsGeometry, withAxes = false, withGrid = false } = {},
   page
 ) => {
   if (locked === true) await acquire();
@@ -53877,7 +53910,7 @@ const staticDisplay = async (
     view,
     geometryLayers,
     planLayers,
-    withAxes: false,
+    withAxes,
   });
 
   const render = () => {
@@ -53893,7 +53926,7 @@ const staticDisplay = async (
 
   await buildMeshes({ datasets, threejsGeometry, scene });
 
-  moveToFit({ view, camera, scene });
+  moveToFit({ view, camera, scene, withGrid });
 
   render();
 
@@ -53922,11 +53955,13 @@ const staticView = async (
     up = UP,
     width = 256,
     height = 128,
+    withAxes = false,
+    withGrid = false,
   } = {}
 ) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
-    { view: { target, position, up }, threejsGeometry },
+    { view: { target, position, up }, threejsGeometry, withAxes, withGrid },
     { offsetWidth: width, offsetHeight: height }
   );
   const canvas = toCanvasFromWebglContext(renderer.getContext());

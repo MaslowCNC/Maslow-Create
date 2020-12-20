@@ -2711,13 +2711,13 @@ const toDomElement = async (notebook = []) => {
 
   const showOrbitView = async (event, note) => {
     const { data } = note;
-    const { target, up, position } = note.view;
+    const { target, up, position, withAxes, withGrid } = note.view;
     const view = { target, up, position };
     const div = document.createElement('div');
     div.classList.add('note', 'orbitView');
     const body = window.document.body;
     body.insertBefore(div, body.firstChild);
-    await orbitDisplay({ view, geometry: data }, div);
+    await orbitDisplay({ view, geometry: data, withAxes, withGrid }, div);
     const onKeyDown = (event) => {
       if (
         event.key === 'Escape' ||
@@ -2735,13 +2735,15 @@ const toDomElement = async (notebook = []) => {
     if (note.view) {
       const div = document.createElement('div');
       const { data, view } = note;
-      const { width, height, target, up, position } = view;
+      const { width, height, target, up, position, withAxes, withGrid } = view;
       const url = await dataUrl(Shape.fromGeometry(data), {
         width,
         height,
         target,
         up,
         position,
+        withAxes,
+        withGrid,
       });
       const image = document.createElement('img');
       image.classList.add('note', 'view');

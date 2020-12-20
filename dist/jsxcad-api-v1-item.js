@@ -3,7 +3,7 @@ import Shape from './jsxcad-api-v1-shape.js';
 import { emit } from './jsxcad-sys.js';
 
 // Constructs an item from the designator.
-const Item = (id, ...shapes) =>
+const Item = (id = '', ...shapes) =>
   Shape.fromGeometry(
     taggedItem(
       { tags: [`item/${id}`] },
