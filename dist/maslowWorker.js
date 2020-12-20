@@ -204,6 +204,10 @@ const agent = async ({
         await api.saveGeometry(question.writePath, extractedShape);
         return 1;
         break;
+    case "getHash":
+        const shape2getHash = await api.loadGeometry(question.readPath);
+        return shape2getHash.geometry.hash;
+        break;
     case "display":
         if(question.readPath != null){
             const geometryToDisplay = await api.loadGeometry(question.readPath);
