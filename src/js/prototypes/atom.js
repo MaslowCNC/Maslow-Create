@@ -122,7 +122,21 @@ export default class Atom {
             this[key] = values[key]
         }
         
-        this.path = "atoms/" + this.uniqueID
+        this.generatePath();
+    }
+    
+    /**
+     * Generates the path for this atom from it's location in the graph
+     */ 
+    generatePath(){
+        let levelToInspect = this
+        let topPath = ""
+        while(!levelToInspect.topLevel){
+            topPath = "/" + levelToInspect.uniqueID + topPath
+            levelToInspect = levelToInspect.parent
+        }
+        
+        this.path ="atoms/" + levelToInspect.uniqueID + topPath + this.atomType
     }
     
     /**
@@ -135,6 +149,8 @@ export default class Atom {
         for(var key in values) {
             this[key] = values[key]
         }
+        
+        this.generatePath()
         
         if (typeof this.ioValues !== 'undefined') {
             this.ioValues.forEach(ioValue => { //for each saved value

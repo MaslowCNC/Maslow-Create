@@ -480,12 +480,14 @@ export default class Molecule extends Atom{
     /**
      * Load the children of this from a JSON representation
      * @param {object} json - A json representation of the molecule
+     * @param {object} values - An array of values to apply to this molecule before deserializing it's contents. Used by githubmolecules to set top level correctly
      */
-    deserialize(json){
+    deserialize(json, values = {}){
         //Find the target molecule in the list
         let promiseArray = []
         
         this.setValues(json) //Grab the values of everything from the passed object
+        this.setValues(values) //Over write those values with the passed ones where needed
         
         if(json.allAtoms){
             json.allAtoms.forEach(atom => { //Place the atoms

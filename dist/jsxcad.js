@@ -28,7 +28,10 @@ orbitDisplay({withAxes: true}, document.getElementById('viewerContext')).then(re
 setupFilesystem({ fileBase: 'maslow' });
 
 //Test some things
-// window.ask({ evaluate: "md`hello`", key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }).then( status => {
+window.ask({key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }) //This just establishes the worker
+
+
+// .then( status => {
     // window.ask({ evaluate: "md`hello`", key: "extrude", distance:5, readPath: "atomGeometry/test", writePath: "atomGeometry/test2" }).then( status => {
         // var thingReturned = window.ask({ evaluate: "md`hello`", key: "display", readPath: "atomGeometry/test2" }).then( thingReturned => {
             // window.updateDisplay(thingReturned);

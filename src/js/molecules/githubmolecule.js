@@ -68,7 +68,7 @@ export default class GitHubMolecule extends Molecule {
         else{
             preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
         }
-        const promsie =  this.deserialize(result)
+        const promsie =  this.deserialize(result, preservedValues)
         this.setValues(preservedValues)
         return promsie
     }
