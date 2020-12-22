@@ -84,9 +84,9 @@ export default class Constant extends Atom{
     /**
      * Starts propagation from this constant.
      */ 
-    beginPropagation(){
-        this.output.setValue(this.value)
-    }
+    // beginPropagation(){
+        // this.output.setValue(this.value)
+    // }
     
     /**
      * Add entries for name and value to the side bar. Note: I think that should happen automatically and this function can be deleted. Please test that future self.

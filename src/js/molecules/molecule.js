@@ -514,7 +514,7 @@ export default class Molecule extends Atom{
                 
                 this.backgroundClick()
                 this.census()
-                this.beginPropagation()
+                //this.beginPropagation()
             }
         })
     }

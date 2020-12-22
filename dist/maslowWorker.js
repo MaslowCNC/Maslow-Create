@@ -132,7 +132,7 @@ const agent = async ({
         break;
      case "translate":
         const aShape2Translate = await api.loadGeometry(question.readPath);
-        const translatedShape = aShape2Translate.translate(question.x, question.y, question.z);
+        const translatedShape = aShape2Translate.translate(question.x, question.y, -1*question.z);
         await api.saveGeometry(question.writePath, translatedShape);
         return 1;
         break;
