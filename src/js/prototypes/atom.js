@@ -254,7 +254,7 @@ export default class Atom {
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 
-    addIO(type, name, target, valueType, defaultValue, ready = false, primary = false){
+    addIO(type, name, target, valueType, defaultValue, ready = true, primary = false){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
@@ -277,7 +277,7 @@ export default class Atom {
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint',
-                ready: ready
+                ready: true
             })
             
             if(type == 'input'){
@@ -576,14 +576,11 @@ export default class Atom {
         var ioValues = []
         this.inputs.forEach(io => {
             if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){
-                //We only want to save inputs values with nothing connected to them
-                if(io.connectors.length == 0){
-                    var saveIO = {
-                        name: io.name,
-                        ioValue: io.getValue()
-                    }
-                    ioValues.push(saveIO)
+                var saveIO = {
+                    name: io.name,
+                    ioValue: io.getValue()
                 }
+                ioValues.push(saveIO)
             }
         })
         
@@ -692,15 +689,15 @@ export default class Atom {
     beginPropagation(){
         
         //Check to see if a value already exists. Generate it if it doesn't
-        const values = {key: "getHash", readPath: this.path }
-        window.ask(values).then(result => {
-            if(result != undefined){
+        // const values = {key: "getHash", readPath: this.path }
+        // window.ask(values).then(result => {
+            // if(result != undefined){
                 //Triggers inputs with nothing connected to begin propagation
-                this.inputs.forEach(input => {
-                    input.beginPropagation()
-                })
-            }
-        })
+                // this.inputs.forEach(input => {
+                    // input.beginPropagation()
+                // })
+            // }
+        // })
     }
     
     /**
