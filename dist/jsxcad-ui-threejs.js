@@ -53727,14 +53727,18 @@ const moveToFit = ({
     const scale = Math.pow(10, Math.ceil(Math.log10(length)));
     const size = scale;
     {
-      const grid = new GridHelper(size * 2, 200, 0x000080, 0xc0f0c0);
+      const grid = new GridHelper(size * 2, 20, 0x000040, 0x40f040);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
       grid.layers.set(1);
       scene.add(grid);
     }
     {
-      const grid = new GridHelper(size * 2, 20, 0x000080, 0xc0c0f0);
+      const grid = new GridHelper(size * 2, 4, 0x000040, 0x4040f0);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
       grid.layers.set(1);

@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, smoothSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, subdivideSurfaceMesh, remeshSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1403,12 +1403,18 @@ const offset = (graph, initial, step, limit) => {
   return offsetGraph;
 };
 
-const smooth = (graph, options) => {
-  const smoothedGraph = fromSurfaceMeshLazy(
-    smoothSurfaceMesh(toSurfaceMesh(graph), options)
-  );
-  smoothedGraph.isWireframe = true;
-  return smoothedGraph;
+const smooth = (graph, options = {}) => {
+  const { method = 'Remesh' } = options;
+  switch (method) {
+    case 'Remesh':
+      return fromSurfaceMeshLazy(
+        remeshSurfaceMesh(toSurfaceMesh(graph), options)
+      );
+    default:
+      return fromSurfaceMeshLazy(
+        subdivideSurfaceMesh(toSurfaceMesh(graph), options)
+      );
+  }
 };
 
 const toPaths = (graph) => {

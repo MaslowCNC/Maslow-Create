@@ -253,7 +253,7 @@ const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
       const edges = getEdges(path);
       // const up = [0, 0, 1, 0]; // fromPolygon(path);
       const length = edges.length;
-      for (let nth = 0; nth < length; nth++) {
+      for (let nth = 0; nth < length - 1; nth++) {
         const prev = edges[nth];
         const curr = edges[(nth + 1) % length];
         const next = edges[(nth + 2) % length];
