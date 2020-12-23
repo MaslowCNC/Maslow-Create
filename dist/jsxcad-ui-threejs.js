@@ -53693,10 +53693,6 @@ const moveToFit = ({
 } = {}) => {
   const { fit = true } = view;
 
-  if (!fit) {
-    return;
-  }
-
   let box;
 
   scene.traverse((object) => {
@@ -53744,6 +53740,10 @@ const moveToFit = ({
       grid.layers.set(1);
       scene.add(grid);
     }
+  }
+
+  if (!fit) {
+    return;
   }
 
   const center = box.getCenter(new Vector3());
