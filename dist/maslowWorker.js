@@ -1,6 +1,7 @@
 import * as api from './jsxcad-api-v1.js';
 import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile } from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
+import { soup } from './jsxcad-geometry-tagged.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -211,7 +212,7 @@ const agent = async ({
     case "display":
         if(question.readPath != null){
             const geometryToDisplay = await api.loadGeometry(question.readPath);
-            const threejsGeometry = toThreejsGeometry(geometryToDisplay.toKeptGeometry());
+            const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
             return threejsGeometry;
         }
         else{
