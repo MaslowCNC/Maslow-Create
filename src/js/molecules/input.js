@@ -168,7 +168,7 @@ export default class Input extends Atom {
                 
                 this.value = input.getValue()
                 
-                this.output.waitOnComingInformation()              //Lock all of the dependents
+                this.output.waitOnComingInformation()         //Lock all of the dependents
                 
                 this.output.setValue(this.value)
             }

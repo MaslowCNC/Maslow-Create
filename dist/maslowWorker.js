@@ -139,7 +139,7 @@ const agent = async ({
         break;
     case "rotate":
         const aShape2Rotate = await api.loadGeometry(question.readPath);
-        const rotatedShape = aShape2Rotate.rotateX(question.x).rotateY(question.y).rotateZ(question.z);
+        const rotatedShape = aShape2Rotate.rotateX(-1*question.x).rotateY(-1*question.y).rotateZ(-1*question.z);
         await api.saveGeometry(question.writePath, rotatedShape);
         return 1;
         break;

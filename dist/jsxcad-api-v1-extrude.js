@@ -1,12 +1,12 @@
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
-import { Assembly, Group } from './jsxcad-api-v1-shapes.js';
+import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { Assembly, Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
 import { Y as Y$1 } from './jsxcad-api-v1-connector.js';
 import { loop } from './jsxcad-algorithm-shape.js';
 import { isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { scale, add, normalize, subtract, transform } from './jsxcad-math-vec3.js';
+import { normalize, subtract, transform, add } from './jsxcad-math-vec3.js';
 import { fromNormalAndPoint } from './jsxcad-math-plane.js';
 import { fromRotation } from './jsxcad-math-mat4.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
@@ -105,15 +105,16 @@ Shape$1.prototype.pull = extrudeMethod;
 const extrudeToPlane = (
   shape,
   highPlane = [0, 0, 1, 1],
-  lowPlane = [0, 0, 1, -1]
+  lowPlane = [0, 0, 1, -1],
+  direction = [0, 0, 1, 0]
 ) => {
   return Shape$1.fromGeometry(
-    extrudeToPlane$1(shape.toGeometry(), highPlane, lowPlane)
+    extrudeToPlane$1(shape.toGeometry(), highPlane, lowPlane, direction)
   );
 };
 
-const extrudeToPlaneMethod = function (highPlane, lowPlane) {
-  return extrudeToPlane(this, highPlane, lowPlane);
+const extrudeToPlaneMethod = function (highPlane, lowPlane, direction) {
+  return extrudeToPlane(this, highPlane, lowPlane, direction);
 };
 Shape$1.prototype.extrudeToPlane = extrudeToPlaneMethod;
 
@@ -165,6 +166,21 @@ const withInlineMethod = function (options) {
 
 Shape$1.prototype.inline = inlineMethod;
 Shape$1.prototype.withInline = withInlineMethod;
+
+const projectToPlane = (
+  shape,
+  plane = [0, 0, 1, 1],
+  direction = [0, 0, 1, 0]
+) => {
+  return Shape$1.fromGeometry(
+    projectToPlane$1(shape.toGeometry(), plane, direction)
+  );
+};
+
+const projectToPlaneMethod = function (plane, direction) {
+  return projectToPlane(this, plane, direction);
+};
+Shape$1.prototype.projectToPlane = projectToPlaneMethod;
 
 const section = (shape, ...pegs) => {
   const planes = [];
@@ -242,35 +258,32 @@ const planeOfBisection = (aStart, bStart, intersection) => {
   return fromNormalAndPoint(bis2, intersection);
 };
 
-const neg = ([x, y, z, w]) => [x, y, z, -w];
-
 // FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
 const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
       // FIX: Handle open paths and bent polygons.
+      const tools = [];
       const edges = getEdges(path);
       // const up = [0, 0, 1, 0]; // fromPolygon(path);
       const length = edges.length;
       for (let nth = 0; nth < length - 1; nth++) {
         const prev = edges[nth];
         const curr = edges[(nth + 1) % length];
-        const next = edges[(nth + 2) % length];
         const a = planeOfBisection(prev[START], curr[END], curr[START]);
-        const b = planeOfBisection(curr[START], next[END], curr[END]);
-        const middle = scale(0.5, add(curr[START], curr[END]));
         const rotate90 = fromRotation(Math.PI / -2, up);
         const direction = normalize(subtract(curr[START], curr[END]));
-        const rightDirection = transform(rotate90, direction);
-        const right = add(middle, rightDirection);
-        chains.push(
-          orient(middle, add(middle, up), right, tool).extrudeToPlane(
-            neg(b),
-            neg(a)
+        const right = transform(rotate90, direction);
+        const p = curr[START];
+        tools.push(
+          orient(p, add(p, up), add(p, right), tool).projectToPlane(
+            a,
+            direction
           )
         );
       }
+      chains.push(ChainedHull(...tools));
     }
   }
   return Group(...chains);
@@ -519,6 +532,7 @@ const api = {
   fill,
   inline,
   outline,
+  projectToPlane,
   section,
   squash,
   sweep,
@@ -527,4 +541,4 @@ const api = {
 };
 
 export default api;
-export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, section, squash, sweep, toolpath, voxels };
+export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, projectToPlane, section, squash, sweep, toolpath, voxels };

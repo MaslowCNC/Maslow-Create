@@ -62,7 +62,8 @@ export default class Molecule extends Atom{
             y: GlobalVariables.pixelsToHeight(GlobalVariables.canvas.height/2),
             parent: this,
             name: 'Output',
-            atomType: 'Output'
+            atomType: 'Output',
+            uniqueID: GlobalVariables.generateUniqueID()
         }, false)
     }
     
@@ -514,7 +515,7 @@ export default class Molecule extends Atom{
                 
                 this.backgroundClick()
                 this.census()
-                //this.beginPropagation()
+                this.beginPropagation()
             }
         })
     }

@@ -91,6 +91,14 @@ export default class Output extends Atom {
         
     }
     
+    beginPropagation(){
+        console.log("output beginning propagation")
+        if(this.inputs[0].connectors.length > 0){
+            this.path = this.inputs[0].connectors[0].attachmentPoint1.parentMolecule.path
+            this.parent.path = this.path
+        }
+    }
+    
     /**
      * A function to allow you to still call the delete function if needed.
      */

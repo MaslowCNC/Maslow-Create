@@ -23,7 +23,11 @@ export default class Atom {
          * @type {object}
          */
         this.output = null
-        
+        /** 
+         * This atom's unique ID. Often overwritten later when loading
+         * @type {number}
+         */
+        this.uniqueID = GlobalVariables.generateUniqueID()
         /** 
          * The X cordinate of this atom
          * @type {number}
@@ -360,6 +364,8 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
+            console.log(this.path)
+            console.log(this.uniqueID)
         }
         //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
         else if (!GlobalVariables.ctrlDown){
@@ -654,6 +660,7 @@ export default class Atom {
      */ 
     basicThreadValueProcessing(toAsk){
         //If the inputs are all ready
+        console.log(toAsk.key)
         var go = true
         this.inputs.forEach(input => {
             if(!input.ready){
@@ -661,6 +668,7 @@ export default class Atom {
             }
         })
         if(go){     //Then we update the value
+            console.log(go)
             this.processing = true
             this.decreaseToProcessCountByOne()
             
@@ -692,7 +700,7 @@ export default class Atom {
         // const values = {key: "getHash", readPath: this.path }
         // window.ask(values).then(result => {
             // if(result != undefined){
-                //Triggers inputs with nothing connected to begin propagation
+                // Triggers inputs with nothing connected to begin propagation
                 // this.inputs.forEach(input => {
                     // input.beginPropagation()
                 // })
@@ -718,6 +726,7 @@ export default class Atom {
      */ 
     sendToRender(){
         //Send code to JSxCAD to render
+        console.log("sending to render: " + this.path)
         try{
             GlobalVariables.writeToDisplay(this.path)
         }

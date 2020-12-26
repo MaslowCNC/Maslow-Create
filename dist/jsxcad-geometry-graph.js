@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, subdivideSurfaceMesh, remeshSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1228,22 +1228,23 @@ const eachPoint = (graph, op) => {
   }
 };
 
-const extrudeToPlane = (graph, highPlane, lowPlane) => {
+const extrudeToPlane = (graph, highPlane, lowPlane, direction) => {
   if (realizeGraph(graph).faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
-    let normal;
-    for (const face of graph.faces) {
-      if (face && face.plane) {
-        normal = face.plane;
-        break;
+    if (direction === undefined) {
+      for (const face of graph.faces) {
+        if (face && face.plane) {
+          direction = face.plane;
+          break;
+        }
       }
     }
     return fromSurfaceMeshLazy(
       extrudeToPlaneOfSurfaceMesh(
         toSurfaceMesh(graph),
-        ...scale(1, normal),
+        ...scale(1, direction),
         ...highPlane,
-        ...scale(-1, normal),
+        ...scale(-1, direction),
         ...lowPlane
       )
     );
@@ -1403,6 +1404,29 @@ const offset = (graph, initial, step, limit) => {
   return offsetGraph;
 };
 
+const projectToPlane = (graph, plane, direction) => {
+  if (realizeGraph(graph).faces.length > 0) {
+    // Arbitrarily pick the plane of the first graph to project along.
+    if (direction === undefined) {
+      for (const face of graph.faces) {
+        if (face && face.plane) {
+          direction = face.plane;
+          break;
+        }
+      }
+    }
+    return fromSurfaceMeshLazy(
+      projectToPlaneOfSurfaceMesh(
+        toSurfaceMesh(graph),
+        ...scale(1, direction),
+        ...plane
+      )
+    );
+  } else {
+    return graph;
+  }
+};
+
 const smooth = (graph, options = {}) => {
   const { method = 'Remesh' } = options;
   switch (method) {
@@ -1474,10 +1498,9 @@ const union = (a, b) => {
     // Otherwise we'd end up with a union with the far extrusion.
     return a;
   }
-  // return fromNefPolyhedron(unionOfNefPolyhedrons(toNefPolyhedron(b), toNefPolyhedron(a)));
   return fromSurfaceMeshLazy(
     unionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
