@@ -74,7 +74,7 @@ export default class Output extends Atom {
             
             if(this.parent.topLevel){
                 const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000
-                console.warn("Loading finished in " + timeToLoad + " seconds")
+                // console.warn("Loading finished in " + timeToLoad + " seconds")
             }
             
             //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
@@ -92,7 +92,6 @@ export default class Output extends Atom {
     }
     
     beginPropagation(){
-        console.log("output beginning propagation")
         if(this.inputs[0].connectors.length > 0){
             this.path = this.inputs[0].connectors[0].attachmentPoint1.parentMolecule.path
             this.parent.path = this.path
