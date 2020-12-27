@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, touch } from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 
@@ -114,6 +114,12 @@ const agent = async ({
   ask,
   question
 }) => {
+    
+    if (question.touchFile) {
+        const { path, workspace } = question.touchFile;
+        await touch(path, { workspace });
+    }
+    
     switch(question.key) {
       case "rectangle":
         const aSquare = api.Square(question.x, question.y);

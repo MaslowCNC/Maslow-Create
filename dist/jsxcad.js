@@ -1,4 +1,4 @@
-import { askService, setupFilesystem } from './jsxcad-sys.js';
+import { askService, askServices, touch, setupFilesystem } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
 
@@ -7,6 +7,11 @@ const agent = async ({ ask, question }) => {
   if (question.ask) {
     const { identifier, options } = question.ask;
     return askSys(identifier, options);
+  }else if (question.touchFile) {
+    const { path, workspace } = question.touchFile;
+    await touch(path, { workspace });
+    // Invalidate the path in all workers.
+    await askServices({ touchFile: { path, workspace } });
   }
 };
         
