@@ -135,8 +135,10 @@ const Page = (
   if (!pack$1) {
     const layer = taggedLayers({}, ...layers);
     const packSize = measureBoundingBox(layer);
-    const pageWidth = Math.max(1, packSize[MAX][X] - packSize[MIN][X]);
-    const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
+    const pageWidth =
+      Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
+    const pageLength =
+      Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
     return Shape.fromGeometry(
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );

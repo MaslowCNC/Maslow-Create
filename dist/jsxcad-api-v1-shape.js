@@ -748,6 +748,7 @@ const holeMethod = function () {
   return hole(this);
 };
 Shape.prototype.hole = holeMethod;
+Shape.prototype.void = holeMethod;
 
 const inSolids = (shape, op = (_) => _) => {
   let nth = 0;

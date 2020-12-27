@@ -326,6 +326,12 @@ const terminateActiveServices = async () => {
   }
 };
 
+const askServices = async (question) => {
+  for (const { ask } of [...idleServices, ...activeServices]) {
+    await ask(question);
+  }
+};
+
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
@@ -3418,6 +3424,28 @@ function dirname(path) {
   return root + dir;
 }
 
+const touch = async (path, { workspace, doClear = true } = {}) => {
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    // Switch to the source filesystem, if necessary.
+    setupFilesystem({ fileBase: workspace });
+  }
+  const file = await getFile({}, path);
+  if (file !== undefined) {
+    if (doClear) {
+      file.data = undefined;
+    }
+
+    for (const watcher of file.watchers) {
+      await watcher({}, file);
+    }
+  }
+  if (workspace !== originalWorkspace) {
+    // Switch back to the original filesystem, if necessary.
+    setupFilesystem({ fileBase: originalWorkspace });
+  }
+};
+
 /* global self */
 
 const { promises } = fs;
@@ -3430,10 +3458,6 @@ const writeFile = async (options, path, data) => {
     throw Error('source/source');
   }
   data = await data;
-  // FIX: Should be checking for a proxy fs, not webworker.
-  // if (false && isWebWorker) {
-  //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
-  // }
 
   const {
     doSerialize = true,
@@ -3467,6 +3491,7 @@ const writeFile = async (options, path, data) => {
           data = serialize(data);
         }
         await promises.writeFile(persistentPath, data);
+        await touch(persistentPath, { workspace, doClear: false });
       } catch (error) {}
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
@@ -3872,24 +3897,4 @@ const deleteFile$1 = async (options, path) => {
 
 const getCurrentPath = () => '.';
 
-const touch = async (path, { workspace } = {}) => {
-  let originalWorkspace = getFilesystem();
-  if (workspace !== originalWorkspace) {
-    // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: workspace });
-  }
-  const file = await getFile({}, path);
-  if (file !== undefined) {
-    file.data = undefined;
-
-    for (const watcher of file.watchers) {
-      await watcher({}, file);
-    }
-  }
-  if (workspace !== originalWorkspace) {
-    // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalWorkspace });
-  }
-};
-
-export { addOnEmitHandler, addPending, addSource, ask, askService, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

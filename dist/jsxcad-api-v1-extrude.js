@@ -101,6 +101,7 @@ const extrudeMethod = function (height = 1, depth = 0) {
 };
 Shape$1.prototype.extrude = extrudeMethod;
 Shape$1.prototype.pull = extrudeMethod;
+Shape$1.prototype.ex = extrudeMethod;
 
 const extrudeToPlane = (
   shape,
@@ -145,11 +146,14 @@ const outlineMethod = function () {
 };
 
 const withOutlineMethod = function (op = (x) => x) {
-  return this.with(op(outline(this)));
+  return this.and(op(outline(this)));
 };
 
 Shape.prototype.outline = outlineMethod;
 Shape.prototype.wire = outlineMethod;
+
+Shape.prototype.andOutline = withOutlineMethod;
+Shape.prototype.andWire = withOutlineMethod;
 
 Shape.prototype.withOutline = withOutlineMethod;
 Shape.prototype.withWire = withOutlineMethod;

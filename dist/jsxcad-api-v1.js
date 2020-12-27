@@ -11,8 +11,8 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
 export { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
-import { Peg, Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Ball, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { Loop } from './jsxcad-api-v1-extrude.js';
@@ -277,7 +277,9 @@ const getControlValues = async () =>
 
 const stringBox = async (label, otherwise) => {
   const { [label]: value = otherwise } = await getControlValues();
-  emit({ control: { type: 'stringBox', label, value } });
+  const control = { type: 'stringBox', label, value };
+  const hash = hashSum(control);
+  emit({ control, hash });
   return value;
 };
 
@@ -290,9 +292,7 @@ const sliderBox = async (
   { min = 0, max = 100, step = 1 } = {}
 ) => {
   const { [label]: value = otherwise } = await getControlValues();
-  const control = {
-    control: { type: 'sliderBox', label, value, min, max, step },
-  };
+  const control = { type: 'sliderBox', label, value, min, max, step };
   const hash = hashSum(control);
   emit({ control, hash });
   return Number(value);
@@ -424,6 +424,7 @@ var api = /*#__PURE__*/Object.freeze({
   Arc: Arc,
   Assembly: Assembly,
   Ball: Ball,
+  Block: Block,
   Box: Box,
   ChainedHull: ChainedHull,
   Circle: Circle,
@@ -435,6 +436,7 @@ var api = /*#__PURE__*/Object.freeze({
   Hexagon: Hexagon,
   Hull: Hull,
   Icosahedron: Icosahedron,
+  Implicit: Implicit,
   Intersection: Intersection,
   Line: Line,
   LoopedHull: LoopedHull,

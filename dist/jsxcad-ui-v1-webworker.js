@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, touch, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -120,7 +120,15 @@ const agent = async ({
   });
   let onEmitHandler;
 
-  if (question.evaluate) {
+  if (question.touchFile) {
+    const {
+      path,
+      workspace
+    } = question.touchFile;
+    await touch(path, {
+      workspace
+    });
+  } else if (question.evaluate) {
     setupFilesystem({
       fileBase: question.workspace
     });

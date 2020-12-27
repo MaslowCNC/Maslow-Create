@@ -7,8 +7,8 @@ import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as 
 import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
+import { realizeGraph, transform as transform$2, toPaths, fromPaths, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, union as union$3 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
-import { transform as transform$2, toPaths, fromPaths, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, realizeGraph, section as section$1, smooth as smooth$1, union as union$3 } from './jsxcad-geometry-graph.js';
 import { transform as transform$6 } from './jsxcad-geometry-plan.js';
 import { intersectSurface, fromSolid as fromSolid$1, intersection as intersection$1, unifyBspTrees, fromSurface as fromSurface$2, removeExteriorPaths, union as union$2 } from './jsxcad-geometry-bsp.js';
 import { min, max } from './jsxcad-math-vec3.js';
@@ -214,6 +214,41 @@ const assembleImpl = (...taggedGeometries) =>
 
 const assemble = cache(assembleImpl);
 
+const taggedGraph = ({ tags }, graph) => ({
+  type: 'graph',
+  tags,
+  graph,
+});
+
+const realize = (geometry) => {
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph':
+        return taggedGraph({ tags }, realizeGraph(geometry.graph));
+      case 'solid':
+      case 'z0Surface':
+      case 'surface':
+      case 'points':
+      case 'paths':
+        // No lazy representation to realize.
+        return geometry;
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout':
+      case 'sketch':
+        return descend();
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(geometry, op);
+};
+
 const taggedSurface = ({ tags }, surface) => {
   return { type: 'surface', tags, surface };
 };
@@ -293,13 +328,15 @@ const canonicalize = (geometry) => {
           marks: canonicalize$3(geometry.marks),
           planes: geometry.planes.map(canonicalize$4),
         });
-      case 'graph':
+      case 'graph': {
+        const realizedGeometry = realize(geometry);
         return descend({
           graph: {
-            ...geometry.graph,
-            points: canonicalize$3(geometry.graph.points),
+            ...realizedGeometry.graph,
+            points: canonicalize$3(realizedGeometry.graph.points),
           },
         });
+      }
       case 'surface':
         return descend({ surface: canonicalize$2(geometry.surface) });
       case 'z0Surface':
@@ -379,12 +416,6 @@ const getSurfaces = (geometry) => {
   });
   return surfaces;
 };
-
-const taggedGraph = ({ tags }, graph) => ({
-  type: 'graph',
-  tags,
-  graph,
-});
 
 const taggedPaths = ({ tags }, paths) => {
   return { type: 'paths', tags, paths };
@@ -1642,35 +1673,6 @@ const projectToPlane = (geometry, plane, direction) => {
 
 const read = async (path) => read$1(path);
 
-const realize = (geometry) => {
-  const op = (geometry, descend) => {
-    const { tags } = geometry;
-    switch (geometry.type) {
-      case 'graph':
-        return taggedGraph({ tags }, realizeGraph(geometry.graph));
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
-      case 'points':
-      case 'paths':
-        // No lazy representation to realize.
-        return geometry;
-      case 'plan':
-      case 'assembly':
-      case 'item':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'layout':
-      case 'sketch':
-        return descend();
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(geometry, op);
-};
-
 const sectionImpl = (geometry, planes) => {
   const transformedGeometry = toTransformedGeometry(geometry);
   const sections = [];
@@ -1717,19 +1719,6 @@ const smooth = (geometry, options) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const taggedItem = ({ tags }, ...content) => {
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags: ${tags}`);
-  }
-  if (content.some((value) => value === undefined)) {
-    throw Error(`Undefined Item content`);
-  }
-  if (content.length !== 1) {
-    throw Error(`Item expects a single content geometry`);
-  }
-  return { type: 'item', tags, content };
-};
-
 const soup = (geometry) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -1739,16 +1728,17 @@ const soup = (geometry) => {
         if (graph.isWireframe) {
           return taggedPaths({ tags }, toPaths(graph));
         } else if (graph.isClosed) {
-          return taggedSolid({ tags }, toSolid(graph));
+          return taggedGroup(
+            {},
+            taggedSolid({ tags }, toSolid(graph)),
+            ...outline(geometry)
+          );
         } else {
           // FIX: Simplify this arrangement.
-          return taggedItem(
+          return taggedGroup(
             {},
-            taggedGroup(
-              {},
-              taggedSurface({ tags }, toSurface(graph)),
-              ...outline(geometry)
-            )
+            taggedSurface({ tags }, toSurface(graph)),
+            ...outline(geometry)
           );
         }
       }
@@ -1774,6 +1764,19 @@ const soup = (geometry) => {
   };
 
   return rewrite(toTransformedGeometry(geometry), op);
+};
+
+const taggedItem = ({ tags }, ...content) => {
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags: ${tags}`);
+  }
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined Item content`);
+  }
+  if (content.length !== 1) {
+    throw Error(`Item expects a single content geometry`);
+  }
+  return { type: 'item', tags, content };
 };
 
 const taggedLayers = ({ tags }, ...content) => {
