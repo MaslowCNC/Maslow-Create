@@ -225,8 +225,6 @@ const agent = async ({
             return -1;
         }
         break;
-      default:
-        console.log("Unable to process command: " + question.key);
     }
 }; 
 

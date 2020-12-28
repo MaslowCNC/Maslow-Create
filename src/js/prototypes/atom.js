@@ -364,10 +364,7 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            const values = {key: "getHash", readPath: this.path }
-            window.ask(values).then(result => {
-                console.log(result);
-            })
+            console.log(this.path);
         }
         //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
         else if (!GlobalVariables.ctrlDown){
