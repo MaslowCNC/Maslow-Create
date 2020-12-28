@@ -214,20 +214,20 @@ export default class Molecule extends Atom{
     /**
      * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
-    beginPropagation(){
-        //Begin propagation from this molecules inputs
-        super.beginPropagation()
+    // beginPropagation(){
+        // Begin propagation from this molecules inputs
+        // super.beginPropagation()
         
-        //Tell every atom inside this molecule to begin Propagation
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropagation()
-        })
+        // Tell every atom inside this molecule to begin Propagation
+        // this.nodesOnTheScreen.forEach(node => {
+            // node.beginPropagation()
+        // })
         
-        //Catch the corner case where this has no inputs which means it won't be marked as processing by super
-        if(this.inputs.length == 0){
-            this.processing = true
-        }
-    }
+        // Catch the corner case where this has no inputs which means it won't be marked as processing by super
+        // if(this.inputs.length == 0){
+            // this.processing = true
+        // }
+    // }
     
     /**
      * Walks through each of the atoms in this molecule and takes a census of how many there are and how many are currently waiting to be processed.
@@ -515,7 +515,7 @@ export default class Molecule extends Atom{
                 
                 this.backgroundClick()
                 this.census()
-                this.beginPropagation()
+                // this.beginPropagation()
             }
         })
     }
@@ -592,14 +592,14 @@ export default class Molecule extends Atom{
                         }
                         
                         //Make begin propagation from an atom when it is placed
-                        if(promise != null){
-                            promise.then( ()=> {
-                                atom.beginPropagation()
-                            })
-                        }
-                        else{
-                            atom.beginPropagation()
-                        }
+                        // if(promise != null){
+                            // promise.then( ()=> {
+                                // atom.beginPropagation()
+                            // })
+                        // }
+                        // else{
+                            // atom.beginPropagation()
+                        // }
                         
                         //Fake a click on the newly placed atom
                         const downEvt = new MouseEvent('mousedown', {

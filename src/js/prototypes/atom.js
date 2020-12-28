@@ -364,7 +364,6 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            console.log(this.path);
         }
         //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
         else if (!GlobalVariables.ctrlDown){
@@ -691,7 +690,7 @@ export default class Atom {
     /**
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    beginPropagation(){
+    // beginPropagation(){
         
         //Check to see if a value already exists. Generate it if it doesn't
         // const values = {key: "getHash", readPath: this.path }
@@ -703,7 +702,7 @@ export default class Atom {
                 // })
             // }
         // })
-    }
+    // }
     
     /**
      * Returns an array of length two indicating that this is one atom and if it is waiting to be computed
