@@ -526,6 +526,7 @@ export default class AttachmentPoint {
         this.connectors.forEach(connector => {
             this.value = connector.loadTree()
         })
+        return this.value
     }
     
     /**

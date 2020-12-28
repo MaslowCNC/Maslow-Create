@@ -724,6 +724,7 @@ export default class Atom {
             input.loadTree()
         })
         console.log("Returning: " + this.path)
+        this.output.value = this.path
         return this.path
     }
     

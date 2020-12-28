@@ -525,10 +525,18 @@ export default class Molecule extends Atom{
      * Triggers the loadTree process from this molecules output
      */ 
     loadTree(){
+        console.log("Running loadTree() on Molecule")
         this.nodesOnTheScreen.forEach(node => {
             if(node.atomType == "Output"){
                 node.loadTree()
             }
+            
+            if(node.output){
+                if(node.output.connectors.length == 0){
+                    node.loadTree()
+                }
+            }
+            
         })
     }
     
@@ -607,6 +615,8 @@ export default class Molecule extends Atom{
                             clientX: atom.x,
                             clientY: atom.y
                         })
+                        
+                        atom.updateValue()
                         
                         document.getElementById('flow-canvas').dispatchEvent(downEvt)
                         document.getElementById('flow-canvas').dispatchEvent(upEvt)
