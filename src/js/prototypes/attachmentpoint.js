@@ -522,11 +522,10 @@ export default class AttachmentPoint {
         }
     }
     
-    /**
-     * Clears any references to geometry this ap is holding onto to free up ram.
-     */
-    dumpBuffer(){
-        this.value = null
+    loadTree(){
+        this.connectors.forEach(connector => {
+            this.value = connector.loadTree()
+        })
     }
     
     /**

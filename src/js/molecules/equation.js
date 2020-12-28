@@ -48,6 +48,7 @@ export default class Equation extends Atom {
         
         
     }
+    
     /**
      * Draw the Bill of material atom which has a BOM icon.
      */ 
@@ -101,6 +102,23 @@ export default class Equation extends Atom {
         }
     }
     
+    evaluateEquation(){
+        //Substitute numbers into the string
+        var substitutedEquation = this.currentEquation
+        
+        //Find all the letters in this equation
+        var re = /[a-zA-Z]/g
+        const variables = this.currentEquation.match(re)
+        for (var variable in variables){
+            for (var i= 0; i<this.inputs.length; i++){
+                if (this.inputs[i].name == variables[variable]) {
+                    substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))
+                }
+            }
+        }
+        return GlobalVariables.limitedEvaluate(substitutedEquation)
+    }
+    
     /**
      * Evaluate the equation adding and removing inputs as needed
      */ 
@@ -112,21 +130,9 @@ export default class Equation extends Atom {
             if(this.inputs.every(x => x.ready)){
                 
                 this.decreaseToProcessCountByOne()
-                //Substitute numbers into the string
-                var substitutedEquation = this.currentEquation
                 
-                //Find all the letters in this equation
-                var re = /[a-zA-Z]/g
-                const variables = this.currentEquation.match(re)
-                for (var variable in variables){
-                    for (var i= 0; i<this.inputs.length; i++){
-                        if (this.inputs[i].name == variables[variable]) {
-                            substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))
-                        }
-                    }
-                }
                 //Evaluate the equation
-                this.value = GlobalVariables.limitedEvaluate(substitutedEquation)
+                this.value = this.evaluateEquation()
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
@@ -135,6 +141,18 @@ export default class Equation extends Atom {
             console.warn(err)
             this.setAlert(err)
         }
+    }
+    
+    loadTree(){
+        console.log("Loading tree on: " + this.atomType)
+        this.inputs.forEach(input => {
+            input.loadTree()
+        })
+        
+        this.value = this.evaluateEquation()
+        
+        console.log("Returning: " + this.value)
+        return this.value
     }
     
     /**

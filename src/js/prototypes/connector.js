@@ -195,10 +195,14 @@ export default class Connector {
     }
     
     /**
-     * Used to walk back out the tree generating a list of constants
+     * Used to walk back out the tree generating a list of constants...used for evolve
      */ 
     walkBackForConstants(callback){
         this.attachmentPoint1.parentMolecule.walkBackForConstants(callback)
+    }
+    
+    loadTree(){
+        return this.attachmentPoint1.parentMolecule.loadTree()
     }
     
     /**

@@ -88,6 +88,12 @@ export default class Constant extends Atom{
         // this.output.setValue(this.value)
     // }
     
+    loadTree(){
+        console.log("Loading tree on: " + this.atomType)
+        console.log("Returning: " + this.value)
+        return this.value
+    }
+    
     /**
      * Add entries for name and value to the side bar. Note: I think that should happen automatically and this function can be deleted. Please test that future self.
      */ 
@@ -115,7 +121,7 @@ export default class Constant extends Atom{
     }
     
     /**
-     * Used to walk back out the tree generating a list of constants
+     * Used to walk back out the tree generating a list of constants...used for evolving
      */ 
     walkBackForConstants(callback){
         //If this constant can evolve then add it to the target list

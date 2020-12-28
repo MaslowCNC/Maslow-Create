@@ -175,6 +175,19 @@ export default class Input extends Atom {
         })
     }
     
+    loadTree(){
+        console.log("Loading tree on: " + this.atomType)
+        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
+            if(input.name == this.name){
+                input.loadTree()
+                this.value = input.value
+                this.output.value = input.value
+            }
+        })
+        console.log("Returning: " + this.value)
+        return this.value
+    }
+    
     /**
      * Returns the current value being output
      */ 

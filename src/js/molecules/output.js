@@ -19,7 +19,7 @@ export default class Output extends Atom {
         }
         
         /**
-         * This atom's type
+         * This atom's type...not used?
          * @type {string}
          */
         this.type = 'output'

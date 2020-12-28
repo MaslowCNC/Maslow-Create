@@ -515,23 +515,20 @@ export default class Molecule extends Atom{
                 
                 this.backgroundClick()
                 this.census()
+                this.loadTree()  //Walks back up the tree from this molecule loading input values from any connected atoms
                 // this.beginPropagation()
             }
         })
     }
     
     /**
-     * Dump the stored copies of any geometry in this molecule to free up ram.
+     * Triggers the loadTree process from this molecules output
      */ 
-    dumpBuffer(keepThisValue){
-        
-        //Preserve the output of this molecule if we need to keep using it
-        if(!keepThisValue){
-            super.dumpBuffer()
-        }
-        
-        this.nodesOnTheScreen.forEach(atom => {
-            atom.dumpBuffer()
+    loadTree(){
+        this.nodesOnTheScreen.forEach(node => {
+            if(node.atomType == "Output"){
+                node.loadTree()
+            }
         })
     }
     
