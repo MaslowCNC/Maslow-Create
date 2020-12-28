@@ -53692,7 +53692,7 @@ const moveToFit = ({
   fitOffset = 1.2,
   withGrid = false,
 } = {}) => {
-  const { fit = true } = view;
+  const { fit = false } = view;
 
   let box;
 
