@@ -64,11 +64,9 @@ export default class GitHubMolecule extends Molecule {
         var valuesToOverwriteInLoadedVersion
         if(this.topLevel){
             valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
-            console.log("Loading a top level molecule by ID")
         }
         else{
             valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
-            console.log("Loading a not top level molecule by ID")
         }
         const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)

@@ -364,7 +364,6 @@ export default class Atom {
             this.updateSidebar()
             this.sendToRender()
             clickProcessed = true
-            console.log(this.value)
         }
         //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
         else if (!GlobalVariables.ctrlDown){
@@ -719,11 +718,9 @@ export default class Atom {
     }
     
     loadTree(){
-        console.log("Loading tree on: " + this.atomType)
         this.inputs.forEach(input => {
             input.loadTree()
         })
-        console.log("Returning: " + this.path)
         this.output.value = this.path
         return this.path
     }

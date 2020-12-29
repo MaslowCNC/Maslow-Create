@@ -85,11 +85,9 @@ export default class Output extends Atom {
     }
     
     loadTree(){
-        console.log("Loading tree on: " + this.atomType)
         this.path = this.inputs[0].loadTree()
         this.parent.path = this.path
         this.value = this.path
-        console.log("Returning: " + this.path)
         return this.path
     }
     

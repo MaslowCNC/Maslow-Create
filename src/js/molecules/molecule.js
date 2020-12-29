@@ -525,7 +525,6 @@ export default class Molecule extends Atom{
      * Triggers the loadTree process from this molecules output
      */ 
     loadTree(){
-        console.log("Running loadTree() on Molecule")
         this.nodesOnTheScreen.forEach(node => {
             if(node.atomType == "Output"){
                 node.loadTree()

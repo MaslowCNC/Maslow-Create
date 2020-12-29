@@ -264,8 +264,6 @@ export default class AttachmentPoint {
                 })
             }
             
-            console.log(this.value)
-            
             if(this.type == 'input'){ //connectors can only be selected by clicking on an input
                 this.connectors.forEach(connector => {     //select any connectors attached to this node
                     connector.selected = true

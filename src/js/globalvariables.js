@@ -196,8 +196,9 @@ class GlobalVariables{
     */
     writeToDisplay(path){
         var thingReturned = window.ask({ evaluate: "md`hello`", key: "display", readPath: path }).then( thingReturned => {
-            
-            window.updateDisplay(thingReturned);
+            if(thingReturned && thingReturned != -1){
+                window.updateDisplay(thingReturned);
+            }
         })
     }
     /** 

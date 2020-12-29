@@ -139,7 +139,7 @@ const agent = async ({
         break;
      case "translate":
         const aShape2Translate = await api.loadGeometry(question.readPath);
-        const translatedShape = aShape2Translate.translate(question.x, question.y, -1*question.z);
+        const translatedShape = aShape2Translate.translate(question.x, question.y, question.z);
         await api.saveGeometry(question.writePath, translatedShape);
         return 1;
         break;
@@ -218,8 +218,10 @@ const agent = async ({
     case "display":
         if(question.readPath != null){
             const geometryToDisplay = await api.loadGeometry(question.readPath);
-            const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
-            return threejsGeometry;
+            if(geometryToDisplay.geometry.hash){//Verify that something was read
+                const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
+                return threejsGeometry;
+            }
         }
         else{
             return -1;

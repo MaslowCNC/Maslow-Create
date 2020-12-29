@@ -31,7 +31,7 @@ export default class Assembly extends Atom{
          */
         this.ioValues = []
         /**
-         * A flag to determine if cutaway geometry is removed.
+         * A flag to determine if cutaway geometry is removed....not used anymore?
          * @type {boolean}
          */
         this.removeCutawayGeometry = true

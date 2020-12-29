@@ -50,8 +50,8 @@ export default class ShrinkWrap extends Atom{
             })
         }
         
-        this.updateValue()
     }
+    
     /**
      * Draw the translate icon.
      */ 
@@ -86,6 +86,7 @@ export default class ShrinkWrap extends Atom{
           
 
     }
+    
     /**
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 

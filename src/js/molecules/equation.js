@@ -144,7 +144,6 @@ export default class Equation extends Atom {
     }
     
     loadTree(){
-        console.log("Loading tree on: " + this.atomType)
         this.inputs.forEach(input => {
             input.loadTree()
         })
@@ -152,7 +151,6 @@ export default class Equation extends Atom {
         this.value = this.evaluateEquation()
         this.output.value = this.value
         
-        console.log("Returning: " + this.value)
         return this.value
     }
     
