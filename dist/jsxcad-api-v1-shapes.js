@@ -85,6 +85,7 @@ const Ball = (value = 1, { resolution = 16 } = {}) => {
 };
 
 Shape.prototype.Ball = shapeMethod(Ball);
+Shape.prototype.Orb = shapeMethod(Ball);
 
 const Box = (value = 1) => {
   const plan = orRadius(value);
@@ -1883,6 +1884,8 @@ const Weld = (...shapes) => weld(...shapes);
 
 Shape.prototype.Weld = shapeMethod(Weld);
 
+const Orb = Ball;
+
 const api = {
   Arc,
   Assembly,
@@ -1904,6 +1907,7 @@ const api = {
   Line,
   LoopedHull,
   Octagon,
+  Orb,
   Path,
   Peg,
   Pentagon,
@@ -1927,4 +1931,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };
+export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Sketch, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld };

@@ -835,8 +835,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2386,
-      maximum: 2386,
+      initial: 2263,
+      maximum: 2263,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1104,9 +1104,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5592400,
-      STACK_MAX = 349520,
-      DYNAMIC_BASE = 5592400;
+    var STACK_BASE = 5563584,
+      STACK_MAX = 320704,
+      DYNAMIC_BASE = 5563584;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9753,13 +9753,20 @@ const extrudeToPlaneOfSurfaceMesh = (
 
 const fromFunctionToSurfaceMesh = (
   op,
-  { radius = 1, angularBound = 30, radiusBound = 0.1, distanceBound = 0.1 } = {}
+  {
+    radius = 1,
+    angularBound = 30,
+    radiusBound = 0.1,
+    distanceBound = 0.1,
+    errorBound = 0.001,
+  } = {}
 ) =>
   getCgal().FromFunctionToSurfaceMesh(
     radius,
     angularBound,
     radiusBound,
     distanceBound,
+    errorBound,
     op
   );
 

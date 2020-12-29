@@ -1,7 +1,35 @@
-import { Point, Assembly, Toolpath, Square, Rod } from './jsxcad-api-v1-shapes.js';
-import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
+import { Peg, Point, Assembly, Toolpath, Square, Rod } from './jsxcad-api-v1-shapes.js';
+import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import { each } from './jsxcad-api-v1-math.js';
 import { taggedPaths, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toolpath } from './jsxcad-algorithm-toolpath.js';
+
+const Z = 2;
+const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+
+const carve = (block, { toolDiameter = 1, cutDepth = 1 } = {}, ...shapes) => {
+  const negative = block.cut(...shapes);
+  const { max, min } = block.size();
+  const depth = max[Z] - min[Z];
+  const cuts = Math.ceil(depth / cutDepth);
+  const effectiveCutDepth = depth / cuts;
+  return negative
+    .section(
+      ...each((l) => z.z(l), {
+        from: min[Z],
+        upto: max[Z],
+        by: effectiveCutDepth,
+      })
+    )
+    .inset(toolDiameter / 2, toolDiameter / 2)
+    .z(-max[Z]);
+};
+
+function carveMethod(tool, ...shapes) {
+  return carve(this, tool, ...shapes);
+}
+
+Shape.prototype.carve = carveMethod;
 
 const BenchPlane = (
   width = 50,
@@ -155,7 +183,7 @@ const HoleRouter = (
   const sweeps = [];
   for (const surface of shape.surfaces()) {
     // FIX: This assumes a plunging tool.
-    const paths = Shape.fromGeometry(
+    const paths = Shape$1.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
@@ -196,7 +224,7 @@ const LineRouter = (
     shape.bench(-x, -y, -z).toDisjointGeometry()
   )) {
     // FIX: This assumes a plunging tool.
-    const toolpaths = Shape$1.fromGeometry(
+    const toolpaths = Shape.fromGeometry(
       taggedPaths({ tags: ['path/Toolpath'] }, paths)
     );
     for (let cut = 0; cut < cuts; cut++) {
@@ -205,7 +233,7 @@ const LineRouter = (
     if (sweep !== 'no') {
       // Generally a v bit.
       sweeps.push(
-        Shape$1.fromGeometry(taggedPaths({}, paths))
+        Shape.fromGeometry(taggedPaths({}, paths))
           .sweep(Rod(toolDiameter / 2, depth).moveZ(depth / -2))
           .op((s) => (sweep === 'show' ? s : s.hole()))
       );
@@ -235,7 +263,7 @@ const ProfileRouter = (
   }
   for (const shape of shapes) {
     // FIX: This assumes a plunging tool.
-    const paths = Shape.fromGeometry(
+    const paths = Shape$1.fromGeometry(
       taggedPaths(
         { tags: ['path/Toolpath'] },
         toolpath(
