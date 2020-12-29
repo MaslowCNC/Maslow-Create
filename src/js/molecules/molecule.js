@@ -421,8 +421,15 @@ export default class Molecule extends Atom{
                 atom.selected = false
             })
             
-            //Push any changes up to the next level
-            this.propogate()
+            //Push any changes up to the next level if there are any changes waiting in the output
+            this.nodesOnTheScreen.forEach(atom => {
+                if(atom.atomType == "Output"){
+                    if(atom.awaitingPropagationFlag == true){
+                        this.propogate()
+                        atom.awaitingPropagationFlag = false
+                    }
+                }
+            })
             
             GlobalVariables.currentMolecule = this.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()

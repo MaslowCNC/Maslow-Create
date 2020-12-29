@@ -48,6 +48,12 @@ export default class Output extends Atom {
          * @type {number}
          */
         this.radius = 1/75
+        /**
+         * A flag to indicate if this molecule was waiting propagation. If it is it will take place
+         *the next time we go up one level.
+         * @type {number}
+         */
+        this.awaitingPropagationFlag = false
         
         this.setValues(values)
         
@@ -68,6 +74,9 @@ export default class Output extends Atom {
             //If this molecule is the top level or if it is not open, propagate up. Basically prevents propagation for opened molecules
             if(this.parent.topLevel || this.parent != GlobalVariables.currentMolecule){
                 this.parent.propogate()
+            }
+            else{
+                this.awaitingPropagationFlag = true
             }
             
             this.parent.processing = false
