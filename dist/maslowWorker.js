@@ -211,6 +211,29 @@ const agent = async ({
         await api.saveGeometry(question.writePath, extractedShape);
         return 1;
         break;
+    case "code":
+        
+        let inputs = {};
+        for (const key in question.paths) {
+            if ( !isNaN(Number(question.paths[key]))) { //Check to see if input can be parsed as a number
+                inputs[key] = question.paths[key];
+            } else {
+                inputs[key] = await api.loadGeometry(question.paths[key]);
+            }
+        }
+        
+        const signature =
+          '{ ' +
+          Object.keys(api).join(', ') + ', ' +
+          Object.keys(inputs).join(', ') +
+          ' }';
+        const foo = new Function(signature, question.code);
+        
+        const returnedGeometry = foo({...inputs, ...api });
+        
+        await api.saveGeometry(question.writePath, returnedGeometry);
+        return 1;
+        break;
     case "getHash":
         const shape2getHash = await api.loadGeometry(question.readPath);
         return shape2getHash.geometry.hash;
