@@ -119,7 +119,7 @@ const agent = async ({
         const { path, workspace } = question.touchFile;
         await touch(path, { workspace });
     }
-    
+    console.log(question.key);
     switch(question.key) {
       case "rectangle":
         const aSquare = api.Square(question.x, question.y);
@@ -229,10 +229,15 @@ const agent = async ({
           ' }';
         const foo = new Function(signature, question.code);
         
-        const returnedGeometry = foo({...inputs, ...api });
-        
-        await api.saveGeometry(question.writePath, returnedGeometry);
-        return 1;
+        try{
+            const returnedGeometry = foo({...inputs, ...api });
+            await api.saveGeometry(question.writePath, returnedGeometry);
+            return 1;
+        }
+        catch(err){
+            console.warn(err);
+            return -1;
+        }
         break;
     case "getHash":
         const shape2getHash = await api.loadGeometry(question.readPath);
