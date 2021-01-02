@@ -89,8 +89,6 @@ export default class Constant extends Atom{
     // }
     
     loadTree(){
-        console.log("Loading tree on: " + this.atomType)
-        console.log("Returning: " + this.value)
         return this.value
     }
     

@@ -96,6 +96,7 @@ export default class Output extends Atom {
     loadTree(){
         this.path = this.inputs[0].loadTree()
         this.parent.path = this.path
+        this.parent.output.value = this.path
         this.value = this.path
         return this.path
     }
