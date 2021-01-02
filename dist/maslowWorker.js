@@ -120,141 +120,147 @@ const agent = async ({
         await touch(path, { workspace });
     }
     console.log(question.key);
-    switch(question.key) {
-      case "rectangle":
-        const aSquare = api.Square(question.x, question.y);
-        await api.saveGeometry(question.writePath, aSquare);
-        return 1;
-        break;
-      case "circle":
-        const aCircle = api.Circle(api.d(question.diameter, { sides: question.numSegments }));
-        await api.saveGeometry(question.writePath, aCircle);
-        return 1;
-        break;
-      case "extrude":
-        const aShape = await api.loadGeometry(question.readPath);
-        const extrudedShape = aShape.pull(question.distance);
-        await api.saveGeometry(question.writePath, extrudedShape);
-        return 1;
-        break;
-     case "translate":
-        const aShape2Translate = await api.loadGeometry(question.readPath);
-        const translatedShape = aShape2Translate.translate(question.x, question.y, question.z);
-        await api.saveGeometry(question.writePath, translatedShape);
-        return 1;
-        break;
-    case "rotate":
-        const aShape2Rotate = await api.loadGeometry(question.readPath);
-        const rotatedShape = aShape2Rotate.rotateX(-1*question.x).rotateY(-1*question.y).rotateZ(-1*question.z);
-        await api.saveGeometry(question.writePath, rotatedShape);
-        return 1;
-        break;
-    case "difference":
-        const aShape2Difference1 = await api.loadGeometry(question.readPath1);
-        const aShape2Difference2 = await api.loadGeometry(question.readPath2);
-        const cutShape = api.Difference(aShape2Difference1, aShape2Difference2);
-        await api.saveGeometry(question.writePath, cutShape);
-        return 1;
-        break;
-    case "intersection":
-        const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
-        const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
-        const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
-        await api.saveGeometry(question.writePath, intersectionShape);
-        return 1;
-        break;
-    case "union":
-        var geometries = [];
-        for (const path of question.paths) {
-            const unionGeometry = await api.loadGeometry(path);
-            geometries.push(unionGeometry);
-        }
-        const unionShape = api.Group(...geometries);
-        await api.saveGeometry(question.writePath, unionShape);
-        return 1;
-        break;
-    case "hull":
-        var hullGeometries = [];
-        for (const path of question.paths) {
-            const hullGeometry = await api.loadGeometry(path);
-            hullGeometries.push(hullGeometry);
-        }
-        const hullShape = api.Hull(...hullGeometries);
-        await api.saveGeometry(question.writePath, hullShape);
-        return 1;
-        break;
-    case "assembly":
-        var assemblyGeometries = [];
-        for (const path of question.paths) {
-            const assemblyGeometry = await api.loadGeometry(path);
-            assemblyGeometries.push(assemblyGeometry);
-        }
-        const assemblyShape = api.Assembly(...assemblyGeometries);
-        await api.saveGeometry(question.writePath, assemblyShape);
-        return 1;
-        break;
-    case "color":
-        const shape2Color = await api.loadGeometry(question.readPath);
-        const coloredShape = shape2Color.color(question.color);
-        await api.saveGeometry(question.writePath, coloredShape);
-        return 1;
-        break;
-    case "tag":
-        const shape2tag = await api.loadGeometry(question.readPath);
-        const taggedShape = shape2tag.as(question.tag);
-        await api.saveGeometry(question.writePath, taggedShape);
-        return 1;
-        break;
-    case "extractTag":
-        const shape2extractFrom = await api.loadGeometry(question.readPath);
-        const extractedShape = shape2extractFrom.keep(question.tag);
-        await api.saveGeometry(question.writePath, extractedShape);
-        return 1;
-        break;
-    case "code":
-        
-        let inputs = {};
-        for (const key in question.paths) {
-            if ( !isNaN(Number(question.paths[key]))) { //Check to see if input can be parsed as a number
-                inputs[key] = question.paths[key];
-            } else {
-                inputs[key] = await api.loadGeometry(question.paths[key]);
-            }
-        }
-        
-        const signature =
-          '{ ' +
-          Object.keys(api).join(', ') + ', ' +
-          Object.keys(inputs).join(', ') +
-          ' }';
-        const foo = new Function(signature, question.code);
-        
-        try{
-            const returnedGeometry = foo({...inputs, ...api });
-            await api.saveGeometry(question.writePath, returnedGeometry);
+    try{
+        switch(question.key) {
+          case "rectangle":
+            const aSquare = api.Square(question.x, question.y);
+            await api.saveGeometry(question.writePath, aSquare);
             return 1;
-        }
-        catch(err){
-            console.warn(err);
-            return -1;
-        }
-        break;
-    case "getHash":
-        const shape2getHash = await api.loadGeometry(question.readPath);
-        return shape2getHash.geometry.hash;
-        break;
-    case "display":
-        if(question.readPath != null){
-            const geometryToDisplay = await api.loadGeometry(question.readPath);
-            if(geometryToDisplay.geometry.hash){//Verify that something was read
-                const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
-                return threejsGeometry;
+            break;
+          case "circle":
+            const aCircle = api.Circle(api.d(question.diameter, { sides: question.numSegments }));
+            await api.saveGeometry(question.writePath, aCircle);
+            return 1;
+            break;
+          case "extrude":
+            const aShape = await api.loadGeometry(question.readPath);
+            const extrudedShape = aShape.pull(question.distance);
+            await api.saveGeometry(question.writePath, extrudedShape);
+            return 1;
+            break;
+         case "translate":
+            const aShape2Translate = await api.loadGeometry(question.readPath);
+            const translatedShape = aShape2Translate.translate(question.x, question.y, question.z);
+            await api.saveGeometry(question.writePath, translatedShape);
+            return 1;
+            break;
+        case "rotate":
+            const aShape2Rotate = await api.loadGeometry(question.readPath);
+            const rotatedShape = aShape2Rotate.rotateX(-1*question.x).rotateY(-1*question.y).rotateZ(-1*question.z);
+            await api.saveGeometry(question.writePath, rotatedShape);
+            return 1;
+            break;
+        case "difference":
+            const aShape2Difference1 = await api.loadGeometry(question.readPath1);
+            const aShape2Difference2 = await api.loadGeometry(question.readPath2);
+            const cutShape = api.Difference(aShape2Difference1, aShape2Difference2);
+            await api.saveGeometry(question.writePath, cutShape);
+            return 1;
+            break;
+        case "intersection":
+            const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
+            const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
+            const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
+            await api.saveGeometry(question.writePath, intersectionShape);
+            return 1;
+            break;
+        case "union":
+            var geometries = [];
+            for (const path of question.paths) {
+                const unionGeometry = await api.loadGeometry(path);
+                geometries.push(unionGeometry);
             }
+            const unionShape = api.Group(...geometries);
+            await api.saveGeometry(question.writePath, unionShape);
+            return 1;
+            break;
+        case "hull":
+            var hullGeometries = [];
+            for (const path of question.paths) {
+                const hullGeometry = await api.loadGeometry(path);
+                hullGeometries.push(hullGeometry);
+            }
+            const hullShape = api.Hull(...hullGeometries);
+            await api.saveGeometry(question.writePath, hullShape);
+            return 1;
+            break;
+        case "assembly":
+            var assemblyGeometries = [];
+            for (const path of question.paths) {
+                const assemblyGeometry = await api.loadGeometry(path);
+                assemblyGeometries.push(assemblyGeometry);
+            }
+            const assemblyShape = api.Assembly(...assemblyGeometries);
+            await api.saveGeometry(question.writePath, assemblyShape);
+            return 1;
+            break;
+        case "color":
+            const shape2Color = await api.loadGeometry(question.readPath);
+            const coloredShape = shape2Color.color(question.color);
+            await api.saveGeometry(question.writePath, coloredShape);
+            return 1;
+            break;
+        case "tag":
+            const shape2tag = await api.loadGeometry(question.readPath);
+            const taggedShape = shape2tag.as(question.tag);
+            await api.saveGeometry(question.writePath, taggedShape);
+            return 1;
+            break;
+        case "extractTag":
+            const shape2extractFrom = await api.loadGeometry(question.readPath);
+            const extractedShape = shape2extractFrom.keep(question.tag);
+            await api.saveGeometry(question.writePath, extractedShape);
+            return 1;
+            break;
+        case "code":
+            
+            let inputs = {};
+            for (const key in question.paths) {
+                if ( !isNaN(Number(question.paths[key]))) { //Check to see if input can be parsed as a number
+                    inputs[key] = question.paths[key];
+                } else {
+                    console.log(key);
+                    inputs[key] = await api.loadGeometry(question.paths[key]);
+                }
+            }
+            
+            const signature =
+              '{ ' +
+              Object.keys(api).join(', ') + ', ' +
+              Object.keys(inputs).join(', ') +
+              ' }';
+            const foo = new Function(signature, question.code);
+            
+            try{
+                const returnedGeometry = foo({...inputs, ...api });
+                await api.saveGeometry(question.writePath, returnedGeometry);
+                return 1;
+            }
+            catch(err){
+                console.warn(err);
+                return -1;
+            }
+            break;
+        case "getHash":
+            const shape2getHash = await api.loadGeometry(question.readPath);
+            return shape2getHash.geometry.hash;
+            break;
+        case "display":
+            if(question.readPath != null){
+                const geometryToDisplay = await api.loadGeometry(question.readPath);
+                if(geometryToDisplay.geometry.hash){//Verify that something was read
+                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
+                    return threejsGeometry;
+                }
+            }
+            else{
+                return -1;
+            }
+            break;
         }
-        else{
-            return -1;
-        }
-        break;
+    }
+    catch(err){
+        console.warn(err)
     }
 }; 
 

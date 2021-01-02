@@ -690,19 +690,9 @@ export default class Atom {
     /**
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    // beginPropagation(){
+    beginPropagation(){
         
-        //Check to see if a value already exists. Generate it if it doesn't
-        // const values = {key: "getHash", readPath: this.path }
-        // window.ask(values).then(result => {
-            // if(result != undefined){
-                // Triggers inputs with nothing connected to begin propagation
-                // this.inputs.forEach(input => {
-                    // input.beginPropagation()
-                // })
-            // }
-        // })
-    // }
+    }
     
     /**
      * Returns an array of length two indicating that this is one atom and if it is waiting to be computed
