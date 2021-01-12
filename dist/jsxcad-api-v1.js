@@ -6,17 +6,14 @@ import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
 export { Page, pack } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-deform.js';
+import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
-import { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
-export { apothem, box, corners, diameter, radius } from './jsxcad-geometry-plan.js';
-import { Peg, Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Ball, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-import { X, Y, Z } from './jsxcad-api-v1-connector.js';
-export { X, Y, Z } from './jsxcad-api-v1-connector.js';
-import { Loop } from './jsxcad-api-v1-extrude.js';
-export { Loop } from './jsxcad-api-v1-extrude.js';
+import { apothem, box, corners, diameter, edge, radius } from './jsxcad-geometry-plan.js';
+export { apothem, box, corners, diameter, edge, radius } from './jsxcad-geometry-plan.js';
+import { Peg, Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
@@ -368,6 +365,7 @@ const a = apothem;
 const b = box;
 const c = corners;
 const d = diameter;
+const e = edge;
 const r = radius;
 
 const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
@@ -380,11 +378,13 @@ var api = /*#__PURE__*/Object.freeze({
   box: box,
   corners: corners,
   diameter: diameter,
+  edge: edge,
   radius: radius,
   a: a,
   b: b,
   c: c,
   d: d,
+  e: e,
   r: r,
   x: x,
   y: y,
@@ -404,10 +404,6 @@ var api = /*#__PURE__*/Object.freeze({
   beginRecordingNotes: beginRecordingNotes,
   replayRecordedNotes: replayRecordedNotes,
   saveRecordedNotes: saveRecordedNotes,
-  X: X,
-  Y: Y,
-  Z: Z,
-  Loop: Loop,
   Shape: Shape$1,
   loadGeometry: loadGeometry,
   log: log,
@@ -423,7 +419,6 @@ var api = /*#__PURE__*/Object.freeze({
   ProfileRouter: ProfileRouter,
   Arc: Arc,
   Assembly: Assembly,
-  Ball: Ball,
   Block: Block,
   Box: Box,
   ChainedHull: ChainedHull,
@@ -450,6 +445,7 @@ var api = /*#__PURE__*/Object.freeze({
   Points: Points,
   Polygon: Polygon,
   Polyhedron: Polyhedron,
+  RegularPolygon: RegularPolygon,
   Rod: Rod,
   Septagon: Septagon,
   Spiral: Spiral,
@@ -537,7 +533,7 @@ extendedApi.importModule = importModule;
 const module = (name) => `@jsxcad/api-v1-${name}`;
 
 registerDynamicModule(module('armature'), './jsxcad-api-v1-armature.js');
-registerDynamicModule(module('connector'), './jsxcad-api-v1-connector.js');
+// registerDynamicModule(module('connector'), './jsxcad-api-v1-connector.js');
 registerDynamicModule(module('cursor'), './jsxcad-api-v1-cursor.js');
 registerDynamicModule(module('deform'), './jsxcad-api-v1-deform.js');
 registerDynamicModule(module('dst'), './jsxcad-api-v1-dst.js');
@@ -561,4 +557,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { a, b, beginRecordingNotes, c, checkBox, d, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { a, b, beginRecordingNotes, c, checkBox, d, e, importModule, md, numberBox, r, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

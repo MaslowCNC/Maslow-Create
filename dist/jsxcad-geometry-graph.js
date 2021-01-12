@@ -1141,6 +1141,8 @@ const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip$1(path) : path;
 
+const Z$2 = 2;
+
 // This imposes a planar arrangement.
 const fromPaths = (inputPaths) => {
   const paths = canonicalize(inputPaths);
@@ -1155,6 +1157,11 @@ const fromPaths = (inputPaths) => {
   }
   let plane = fitPlaneToPoints(points);
   if (plane) {
+    // Orient planes up by default.
+    // FIX: Remove this hack.
+    if (dot(plane, [0, 0, 1, 0]) < -0.1) {
+      plane[Z$2] *= -1;
+    }
     const arrangement = arrangePaths(...plane, paths);
     for (const { points, holes } of arrangement) {
       const face = addFace(graph, { plane });

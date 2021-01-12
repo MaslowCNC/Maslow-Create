@@ -1,12 +1,12 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, rewriteTags, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
+import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { fromSolid, fromSurface, fromPaths, toSolid as toSolid$1 } from './jsxcad-geometry-graph.js';
-import { fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
@@ -53,10 +53,6 @@ class Shape {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
   }
 
-  setTags(tags) {
-    return fromGeometry({ ...toGeometry(this), tags }, this.context);
-  }
-
   toKeptGeometry(options = {}) {
     return this.toDisjointGeometry();
   }
@@ -86,7 +82,11 @@ class Shape {
   }
 
   transform(matrix) {
-    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+    if (matrix === identityMatrix) {
+      return this;
+    } else {
+      return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+    }
   }
 
   reconcile() {
@@ -108,6 +108,11 @@ class Shape {
     return fromGeometry(
       makeWatertight(this.toDisjointGeometry(), undefined, undefined, threshold)
     );
+  }
+
+  // Low level setter for reifiers.
+  setTags(tags = []) {
+    return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
 }
 
@@ -358,9 +363,6 @@ const notAsMethod = function (...tags) {
 
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;
-
-asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 
 const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
@@ -1305,6 +1307,118 @@ const shapeMethod = (build) => {
   };
 };
 
+const updatePlan = (shape, update) => {
+  const geometry = shape.toTransformedGeometry();
+  if (geometry.type !== 'plan') {
+    throw Error(`Shape is not a plan`);
+  }
+  const updated = Object.assign({}, geometry.plan, update);
+  return Shape.fromGeometry(taggedPlan({ tags: geometry.tags }, updated));
+};
+
+const updatePlanMethod = function (update) {
+  return updatePlan(this, update);
+};
+
+Shape.prototype.updatePlan = updatePlanMethod;
+
+const apothem = (shape, x = 1, y = x, z = 0) =>
+  shape.updatePlan({
+    apothem: [x, y, z],
+    diameter: undefined,
+    radius: undefined,
+    corner1: undefined,
+    corner2: undefined,
+  });
+const angle = (shape, end = 360, start = 0) =>
+  shape.updatePlan({ angle: { start, end } });
+const base = (shape, base) =>
+  shape.updatePlan({ base, from: undefined });
+const corner1 = (shape, x = 1, y = x, z = 0) =>
+  shape.updatePlan({
+    corner1: [x, y, z],
+    apothem: undefined,
+    diameter: undefined,
+    radius: undefined,
+  });
+const corner2 = (shape, x = 1, y = x, z = 0) =>
+  shape.updatePlan({
+    corner2: [x, y, z],
+    apothem: undefined,
+    diameter: undefined,
+    radius: undefined,
+  });
+const diameter = (shape, x = 1, y = x, z = 0) =>
+  shape.updatePlan({
+    diameter: [x, y, z],
+    apothem: undefined,
+    radius: undefined,
+    corner1: undefined,
+    corner2: undefined,
+  });
+const radius = (shape, x = 1, y = x, z = 0) =>
+  shape.updatePlan({
+    radius: [x, y, z],
+    apothem: undefined,
+    diameter: undefined,
+    corner1: undefined,
+    corner2: undefined,
+  });
+const from = (shape, x = 0, y = 0, z = 0) =>
+  shape.updatePlan({ from: [x, y, z] });
+const sides = (shape, sides = 1) => shape.updatePlan({ sides });
+const to = (shape, x = 0, y = 0, z = 0) =>
+  shape.updatePlan({ to: [x, y, z], top: undefined });
+const top = (shape, top) => shape.updatePlan({ top, to: undefined });
+
+const apothemMethod = function (x, y, z) {
+  return apothem(this, x, y, z);
+};
+const angleMethod = function (end, start) {
+  return angle(this, end, start);
+};
+const baseMethod = function (height) {
+  return base(this, height);
+};
+const corner1Method = function (x, y, z) {
+  return corner1(this, x, y, z);
+};
+const corner2Method = function (x, y, z) {
+  return corner2(this, x, y, z);
+};
+const diameterMethod = function (x, y, z) {
+  return diameter(this, x, y, z);
+};
+const fromMethod = function (x, y, z) {
+  return from(this, x, y, z);
+};
+const radiusMethod = function (x, y, z) {
+  return radius(this, x, y, z);
+};
+const sidesMethod = function (value) {
+  return sides(this, value);
+};
+const toMethod = function (x, y, z) {
+  return to(this, x, y, z);
+};
+const topMethod = function (height) {
+  return top(this, height);
+};
+
+Shape.prototype.apothem = apothemMethod;
+Shape.prototype.angle = angleMethod;
+Shape.prototype.base = baseMethod;
+Shape.prototype.corner1 = corner1Method;
+Shape.prototype.c1 = corner1Method;
+Shape.prototype.corner2 = corner2Method;
+Shape.prototype.c2 = corner2Method;
+Shape.prototype.diameter = diameterMethod;
+Shape.prototype.from = fromMethod;
+Shape.prototype.radius = radiusMethod;
+Shape.prototype.sides = sidesMethod;
+Shape.prototype.to = toMethod;
+Shape.prototype.top = topMethod;
+
 /**
  *
  * # Rotate
@@ -1391,9 +1505,6 @@ const sizeMethod = function () {
   return size(this);
 };
 Shape.prototype.size = sizeMethod;
-
-size.signature = 'size(shape:Shape) -> Size';
-sizeMethod.signature = 'Shape -> size() -> Size';
 
 const sketch = (shape) =>
   Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));
@@ -1829,9 +1940,7 @@ const logOp = (shape, op) => {
   return log$1({ op: 'text', text });
 };
 
-const logMethod = function (
-  op = (shape) => JSON.stringify(shape.toKeptGeometry())
-) {
+const logMethod = function (op = (shape) => JSON.stringify(shape)) {
   logOp(this, op);
   return this;
 };

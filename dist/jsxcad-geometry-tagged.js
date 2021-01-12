@@ -9,7 +9,6 @@ import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as 
 import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
 import { realizeGraph, transform as transform$2, toPaths, fromPaths, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, union as union$3 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
-import { transform as transform$6 } from './jsxcad-geometry-plan.js';
 import { intersectSurface, fromSolid as fromSolid$1, intersection as intersection$1, unifyBspTrees, fromSurface as fromSurface$2, removeExteriorPaths, union as union$2 } from './jsxcad-geometry-bsp.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
@@ -233,7 +232,13 @@ const realize = (geometry) => {
       case 'paths':
         // No lazy representation to realize.
         return geometry;
-      case 'plan':
+      case 'plan': {
+        const realizer = realize[geometry.plan.realize];
+        if (realizer === undefined) {
+          throw Error(`Do not know how to realize plan: ${geometry.plan}`);
+        }
+        return realizer(geometry.plan);
+      }
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -281,7 +286,15 @@ const toTransformedGeometry = (geometry) => {
             return descend(undefined, matrix);
           }
         case 'plan':
-          return transform$6(matrix, geometry.plan);
+          return descend({
+            plan: {
+              ...geometry.plan,
+              matrix: composeTransforms(
+                matrix,
+                geometry.plan.matrix || identityMatrix
+              ),
+            },
+          });
         case 'paths':
           return descend({ paths: transform$5(matrix, geometry.paths) });
         case 'points':
@@ -741,6 +754,47 @@ const taggedGroup = ({ tags }, ...content) => {
   return { type: 'layers', tags, content };
 };
 
+const reifiedGeometry = Symbol('reifiedGeometry');
+
+const reify = (geometry) => {
+  if (geometry[reifiedGeometry] === undefined) {
+    const op = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'graph':
+        case 'solid':
+        case 'z0Surface':
+        case 'surface':
+        case 'points':
+        case 'paths':
+          // No plan to realize.
+          return geometry;
+        case 'plan': {
+          const reifier = reify[geometry.plan.type];
+          if (reifier === undefined) {
+            throw Error(
+              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
+            );
+          }
+          return reify(reifier(geometry));
+        }
+        case 'assembly':
+        case 'item':
+        case 'disjointAssembly':
+        case 'layers':
+        case 'layout':
+        case 'sketch':
+        case 'transform':
+          return descend();
+        default:
+          throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+      }
+    };
+
+    geometry[reifiedGeometry] = rewrite(geometry, op);
+  }
+  return geometry[reifiedGeometry];
+};
+
 const taggedDisjointAssembly = ({ tags }, ...content) => {
   if (content.some((value) => !value)) {
     throw Error(`Undefined DisjointAssembly content`);
@@ -776,6 +830,8 @@ const toDisjointGeometry = (geometry) => {
     } else if (geometry.type === 'disjointAssembly') {
       // Everything below this point is disjoint.
       return geometry;
+    } else if (geometry.type === 'plan') {
+      return walk(reify(geometry), op);
     } else if (geometry.type === 'transform') {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
@@ -851,6 +907,7 @@ const extrude = (geometry, height, depth) => {
       case 'paths':
         return extrude(fill(geometry), height, depth);
       case 'plan':
+        return extrude(reify(geometry), height, depth);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1811,6 +1868,12 @@ const taggedLayout = (
   };
 };
 
+const taggedPlan = ({ tags }, plan) => ({
+  type: 'plan',
+  tags,
+  plan,
+});
+
 const taggedPoints = ({ tags }, points) => {
   return { type: 'points', tags, points };
 };
@@ -2001,4 +2064,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };

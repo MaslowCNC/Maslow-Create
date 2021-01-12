@@ -310,14 +310,6 @@ const releaseService = async (spec, service) => {
   }
 };
 
-const getServicePoolInfo = async () => ({
-  activeServiceCount: activeServices.size,
-  serviceLimit,
-  idleServiceLimit,
-  idleServiceCount: idleServices.length,
-  pendingCount: pending$1.length,
-});
-
 const getServiceCount = () => activeServices.size + idleServices.length;
 
 const terminateActiveServices = async () => {
@@ -3905,4 +3897,4 @@ const deleteFile$1 = async (options, path) => {
 
 const getCurrentPath = () => '.';
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getCurrentPath, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

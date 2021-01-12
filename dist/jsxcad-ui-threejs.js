@@ -53637,6 +53637,10 @@ const buildMeshes = async ({
       geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
       applyBoxUV(geometry);
       const material = await buildMeshMaterial(tags);
+      if (tags.includes('compose/non-positive')) {
+        material.transparent = true;
+        material.opacity *= 0.2;
+      }
       dataset.mesh = new Mesh(geometry, material);
       dataset.mesh.layers.set(layer);
       dataset.name = toName(threejsGeometry);

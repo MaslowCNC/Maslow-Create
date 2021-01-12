@@ -43,9 +43,9 @@ const surfaceToThreejsSurface = (surface) => {
 
 const toThreejsGeometry = (geometry, supertags) => {
   const tags = [...(supertags || []), ...(geometry.tags || [])];
-  if (tags.includes('compose/non-positive')) {
-    return;
-  }
+  // if (tags.includes('compose/non-positive')) {
+  //   return;
+  // }
   if (geometry.isThreejsGeometry) {
     return geometry;
   }

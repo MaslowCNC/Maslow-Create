@@ -1,4 +1,4 @@
-import { Hull, Ball } from './jsxcad-api-v1-shapes.js';
+import { Hull, Orb } from './jsxcad-api-v1-shapes.js';
 import { add, subtract, normalize, dot, transform, scale } from './jsxcad-math-vec3.js';
 import { getNonVoidSolids, getAnyNonVoidSurfaces, taggedSurface, union, taggedAssembly, getSolids, taggedLayers, offset as offset$1, inset as inset$1 } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
@@ -40,7 +40,7 @@ const Shell = (radius = 1, resolution = 3, ...shapes) => {
           pieces.push(
             Hull(
               ...polygon.map((point) =>
-                Ball(radius, { resolution }).move(...point)
+                Orb(radius, { resolution }).move(...point)
               )
             )
               .setTags(tags)
@@ -148,7 +148,7 @@ const grow = (shape, amount = 1, { resolution = 3 } = {}) => {
       normalize
     )) {
       pieces.push(
-        Hull(...cloud.map((point) => Ball(amount, resolution).move(...point)))
+        Hull(...cloud.map((point) => Orb(amount, resolution).move(...point)))
           .setTags(tags)
           .toGeometry()
       );

@@ -1,9 +1,7 @@
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, getPaths, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
-import { Assembly, Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
-import { Y as Y$1 } from './jsxcad-api-v1-connector.js';
-import { loop } from './jsxcad-algorithm-shape.js';
+import { taggedGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, getPaths, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
 import { isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { normalize, subtract, transform, add } from './jsxcad-math-vec3.js';
@@ -27,53 +25,6 @@ const alphaMethod = function (componentLimit = 1) {
 };
 Shape.prototype.alpha = alphaMethod;
 
-/**
- *
- * # Lathe
- *
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * ```
- * :::
- *
- **/
-
-const Loop = (
-  shape,
-  endDegrees = 360,
-  { sides = 32, pitch = 0 } = {}
-) => {
-  const profile = shape.chop(Y$1(0));
-  const outline = profile.outline();
-  const solids = [];
-  for (const geometry of getPaths(outline.toKeptGeometry())) {
-    for (const path of geometry.paths) {
-      for (
-        let startDegrees = 0;
-        startDegrees < endDegrees;
-        startDegrees += 360
-      ) {
-        solids.push(
-          Shape.fromGeometry(
-            loop(
-              path,
-              (Math.min(360, endDegrees - startDegrees) * Math.PI) / 180,
-              sides,
-              pitch
-            )
-          ).moveX((pitch * startDegrees) / 360)
-        );
-      }
-    }
-  }
-  return Assembly(...solids);
-};
-
-const LoopMethod = function (...args) {
-  return Loop(this, ...args);
-};
-Shape.prototype.Loop = LoopMethod;
-
 const cloudSolid = (shape) => {
   const points = shape.toPoints();
   return Shape.fromGeometry(taggedGraph({}, fromPoints(points)));
@@ -90,6 +41,10 @@ const withCloudSolidMethod = function () {
 Shape.prototype.withCloudSolid = withCloudSolidMethod;
 
 const extrude = (shape, height = 1, depth = 0) => {
+  if (height === depth) {
+    // Return unextruded geometry at this height, instead.
+    return shape.z(height);
+  }
   if (height < depth) {
     [height, depth] = [depth, height];
   }
@@ -265,7 +220,7 @@ const planeOfBisection = (aStart, bStart, intersection) => {
 // FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
 const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
-  for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
+  for (const { paths } of outline$1(toolpath.toKeptGeometry())) {
     for (const path of paths) {
       // FIX: Handle open paths and bent polygons.
       const tools = [];
@@ -530,7 +485,7 @@ Shape.prototype.heightCloud = heightCloudMethod;
 
 const api = {
   Alpha,
-  Loop,
+  // Loop,
   extrude,
   extrudeToPlane,
   fill,
@@ -545,4 +500,4 @@ const api = {
 };
 
 export default api;
-export { Alpha, Loop, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, projectToPlane, section, squash, sweep, toolpath, voxels };
+export { Alpha, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, projectToPlane, section, squash, sweep, toolpath, voxels };
