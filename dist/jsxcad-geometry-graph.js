@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1141,29 +1141,19 @@ const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip$1(path) : path;
 
-const Z$2 = 2;
-const W = 3;
-
+// This imposes a planar arrangement.
 const fromPaths = (inputPaths) => {
   const paths = canonicalize(inputPaths);
   const graph = create();
-  let plane = [0, 0, 1, 0];
-  let updated = false;
-  // FIX: Figure out a better way to get a principle plane.
-  // Pick some point elevation.
+  const points = [];
   for (const path of paths) {
     for (const point of path) {
-      if (point === null) {
-        continue;
+      if (point !== null) {
+        points.push(point);
       }
-      plane[W] = point[Z$2];
-      updated = true;
-      break;
-    }
-    if (updated) {
-      break;
     }
   }
+  let plane = fitPlaneToPoints(points);
   if (plane) {
     const arrangement = arrangePaths(...plane, paths);
     for (const { points, holes } of arrangement) {

@@ -1343,6 +1343,7 @@ const rotateXMethod = function (angle) {
   return rotateX(this, angle);
 };
 Shape.prototype.rotateX = rotateXMethod;
+Shape.prototype.rx = rotateXMethod;
 
 const rotateY = (shape, angle) =>
   shape.transform(fromRotateYToTransform(angle));
@@ -1351,6 +1352,7 @@ const rotateYMethod = function (angle) {
   return rotateY(this, angle);
 };
 Shape.prototype.rotateY = rotateYMethod;
+Shape.prototype.ry = rotateYMethod;
 
 const rotateZ = (shape, angle) =>
   shape.transform(fromRotateZToTransform(angle));
@@ -1359,6 +1361,7 @@ const rotateZMethod = function (angle) {
   return rotateZ(this, angle);
 };
 Shape.prototype.rotateZ = rotateZMethod;
+Shape.prototype.rz = rotateZMethod;
 
 const scale = (shape, x = 1, y = x, z = y) =>
   shape.transform(fromScaling([x, y, z]));

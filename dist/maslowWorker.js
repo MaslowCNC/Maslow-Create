@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, touch } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, getServicePoolInfo, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, touch } from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 
@@ -128,6 +128,9 @@ const agent = async ({
             return 1;
             break;
           case "circle":
+            console.log("Circle stats: ");
+            console.log(question.diameter);
+            console.log(question.numSegments);
             const aCircle = api.Circle(api.d(question.diameter, { sides: question.numSegments }));
             await api.saveGeometry(question.writePath, aCircle);
             return 1;
