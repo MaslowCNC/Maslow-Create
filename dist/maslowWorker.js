@@ -120,7 +120,7 @@ const agent = async ({
         const { path, workspace } = question.touchFile;
         await touch(path, { workspace });
     }
-    console.log(question.key);
+    
     try{
         switch(question.key) {
           case "rectangle":
@@ -129,10 +129,7 @@ const agent = async ({
             return 1;
             break;
           case "circle":
-            console.log("Circle stats: ");
-            console.log(question.diameter);
-            console.log(question.numSegments);
-            const aCircle = api.Circle(api.d(question.diameter, { sides: question.numSegments }));
+            const aCircle = api.Circle(question.diameter).sides(question.numSegments);
             await api.saveGeometry(question.writePath, aCircle);
             return 1;
             break;

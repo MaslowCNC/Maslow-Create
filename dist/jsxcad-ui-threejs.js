@@ -53733,7 +53733,7 @@ const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
-      grid.layers.set(1);
+      grid.layers.set(0);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
@@ -53743,7 +53743,7 @@ const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
-      grid.layers.set(1);
+      grid.layers.set(0);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
