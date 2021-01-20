@@ -1,4 +1,4 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, fitPlaneToPoints, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, outlineOfSurfaceMesh, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals as equals$1, dot, min, max, scale } from './jsxcad-math-vec3.js';
 import { deduplicate as deduplicate$1, isClockwise, flip as flip$1 } from './jsxcad-geometry-path.js';
 import { toPlane, flip } from './jsxcad-math-poly3.js';
@@ -1137,6 +1137,8 @@ const extrude = (graph, height, depth) => {
   }
 };
 
+const clean = (path) => deduplicate$1(path);
+
 const orientClockwise = (path) => (isClockwise(path) ? path : flip$1(path));
 const orientCounterClockwise = (path) =>
   isClockwise(path) ? flip$1(path) : path;
@@ -1164,12 +1166,20 @@ const fromPaths = (inputPaths) => {
     }
     const arrangement = arrangePaths(...plane, paths);
     for (const { points, holes } of arrangement) {
-      const face = addFace(graph, { plane });
       const exterior = orientCounterClockwise(points);
-      addLoopFromPoints(graph, deduplicate$1(exterior), { face });
+      const cleaned = clean(exterior);
+      if (cleaned.length < 3) {
+        continue;
+      }
+      const face = addFace(graph, { plane });
+      addLoopFromPoints(graph, cleaned, { face });
       for (const hole of holes) {
         const interior = orientClockwise(hole);
-        addHoleFromPoints(graph, deduplicate$1(interior), { face });
+        const cleaned = clean(interior);
+        if (cleaned.length < 3) {
+          continue;
+        }
+        addHoleFromPoints(graph, cleaned, { face });
       }
     }
   }
@@ -1443,6 +1453,13 @@ const smooth = (graph, options = {}) => {
   }
 };
 
+const test = (graph) => {
+  if (doesSelfIntersectOfSurfaceMesh(toSurfaceMesh(graph))) {
+    throw Error('Self-intersection detected');
+  }
+  return graph;
+};
+
 const toPaths = (graph) => {
   const paths = [];
   eachFace(realizeGraph(graph), (face) => {
@@ -1505,4 +1522,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };

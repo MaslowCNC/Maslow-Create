@@ -4,9 +4,8 @@ import { taggedGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, 
 import { Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
 import { isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { normalize, subtract, transform, add } from './jsxcad-math-vec3.js';
+import { add, normalize, subtract } from './jsxcad-math-vec3.js';
 import { fromNormalAndPoint } from './jsxcad-math-plane.js';
-import { fromRotation } from './jsxcad-math-mat4.js';
 import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 import { fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
@@ -213,11 +212,13 @@ const END = 1;
 const planeOfBisection = (aStart, bStart, intersection) => {
   const dA = normalize(subtract(aStart, intersection));
   const dB = normalize(subtract(bStart, intersection));
-  const bis2 = subtract(dA, dB);
-  return fromNormalAndPoint(bis2, intersection);
+  const bis1 = add(dA, dB);
+  // const bis2 = subtract(dA, dB);
+  // return fromNormalAndPoint(bis2, intersection);
+  return fromNormalAndPoint(bis1, intersection);
 };
 
-// FIX: There is something very wrong with this -- rotating the profile around z can produce inversion.
+// FIX: segments can produce overlapping tools.
 const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
   const chains = [];
   for (const { paths } of outline$1(toolpath.toKeptGeometry())) {
@@ -225,21 +226,19 @@ const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
       // FIX: Handle open paths and bent polygons.
       const tools = [];
       const edges = getEdges(path);
-      // const up = [0, 0, 1, 0]; // fromPolygon(path);
+      const up = [0, 0, 1, 0];
       const length = edges.length;
-      for (let nth = 0; nth < length - 1; nth++) {
-        const prev = edges[nth];
+      for (let nth = 0; nth < length + 1; nth++) {
+        const prev = edges[nth % length];
         const curr = edges[(nth + 1) % length];
-        const a = planeOfBisection(prev[START], curr[END], curr[START]);
-        const rotate90 = fromRotation(Math.PI / -2, up);
-        const direction = normalize(subtract(curr[START], curr[END]));
-        const right = transform(rotate90, direction);
-        const p = curr[START];
+        const next = edges[(nth + 2) % length];
+        // We are going to sweep from a to b.
+        const a = planeOfBisection(prev[START], curr[END], prev[END]);
+        const b = planeOfBisection(curr[START], next[END], curr[END]);
+        const right = a;
+        const p = prev[END];
         tools.push(
-          orient(p, add(p, up), add(p, right), tool).projectToPlane(
-            a,
-            direction
-          )
+          orient(p, add(p, up), add(p, right), tool).projectToPlane(b, a)
         );
       }
       chains.push(ChainedHull(...tools));

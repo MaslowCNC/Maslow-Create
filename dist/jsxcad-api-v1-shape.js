@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
@@ -1273,6 +1273,9 @@ const getPegCoords = (shape) => {
   return { coords, origin, forward, right, plane };
 };
 
+// See also:
+// https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
+
 const orient$1 = (origin, forward, right, shapeToPeg) => {
   const plane = fromPoints(right, forward, origin);
   const d = Math.abs(dot(plane, [0, 0, 1, 0]));
@@ -1568,6 +1571,20 @@ const method$1 = function () {
 
 Shape.prototype.tags = method$1;
 
+const test = (shape, md) => {
+  if (md) {
+    shape.md(md);
+  }
+  test$1(shape.toGeometry());
+  return shape;
+};
+
+const testMethod = function (md) {
+  return test(this, md);
+};
+
+Shape.prototype.test = testMethod;
+
 const toolpaths = (shape, xform = (_) => _) => {
   const toolpaths = [];
   for (const geometry of getNonVoidPaths(shape.toDisjointGeometry())) {
@@ -1707,7 +1724,7 @@ Shape.prototype.wall = wallMethod;
 const weld = (...shapes) => {
   const weld = [];
   for (const shape of shapes) {
-    for (const { paths } of getNonVoidPaths(shape.toTransformedGeometry())) {
+    for (const { paths } of outline(shape.toTransformedGeometry())) {
       weld.push(...paths);
     }
   }
