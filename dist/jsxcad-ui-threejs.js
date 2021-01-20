@@ -53695,6 +53695,7 @@ const moveToFit = ({
   scene,
   fitOffset = 1.2,
   withGrid = false,
+  gridLayer = SKETCH_LAYER,
 } = {}) => {
   const { fit = true } = view;
 
@@ -53733,7 +53734,7 @@ const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.002);
-      grid.layers.set(0);
+      grid.layers.set(gridLayer);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
@@ -53743,7 +53744,7 @@ const moveToFit = ({
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
       grid.position.set(0, 0, -0.001);
-      grid.layers.set(0);
+      grid.layers.set(gridLayer);
       scene.add(grid);
       datasets.push({ mesh: grid });
     }
@@ -53787,7 +53788,7 @@ const moveToFit = ({
 /* global ResizeObserver, requestAnimationFrame */
 
 const orbitDisplay = async (
-  { view = {}, geometry, canvas, withAxes = false, withGrid = false } = {},
+  { view = {}, geometry, canvas, withAxes = false, withGrid = false, gridLayer = SKETCH_LAYER} = {},
   page
 ) => {
   let datasets = [];
@@ -53857,7 +53858,7 @@ const orbitDisplay = async (
 
     await buildMeshes({ datasets, threejsGeometry, scene, render });
 
-    moveToFit({ datasets, view, camera, controls: trackball, scene, withGrid });
+    moveToFit({ datasets, view, camera, controls: trackball, scene, withGrid, gridLayer });
 
     render();
   };
