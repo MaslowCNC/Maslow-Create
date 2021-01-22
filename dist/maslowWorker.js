@@ -2,6 +2,8 @@ import * as api from './jsxcad-api-v1.js';
 import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, touch } from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
+import { toSvg } from './jsxcad-convert-svg.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 
 function pad (hash, len) {
@@ -246,6 +248,16 @@ const agent = async ({
             const geometryToStl = await api.loadGeometry(question.readPath);
             const stlString = await toStl(geometryToStl.toGeometry());
             return stlString;
+            break;
+        case "svg":
+            const geometryToSvg = await api.loadGeometry(question.readPath);
+            
+            for (const entry of ensurePages(geometryToSvg.toKeptGeometry())) {
+                const op = await toSvg(entry);
+                console.log(op);
+            }
+            const svgString = await toSvg(geometryToSvg.toKeptGeometry());
+            return svgString;
             break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
