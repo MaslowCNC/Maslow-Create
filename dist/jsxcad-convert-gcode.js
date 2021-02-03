@@ -1,230 +1,177 @@
-import { negate, equals } from './jsxcad-math-vec3.js';
-import { getNonVoidPaths, toDisjointGeometry, translate } from './jsxcad-geometry-tagged.js';
+import { outline, toDisjointGeometry } from './jsxcad-geometry-tagged.js';
 import { getEdges } from './jsxcad-geometry-path.js';
+import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-/** Checks for equality, ignoring z. */
-const equalsXY = ([aX, aY], [bX, bY]) => equals([aX, aY, 0], [bX, bY, 0]);
-
-/** Checks for equality, ignoring x and y */
-const equalsZ = ([, , aZ], [, , bZ]) => equals([0, 0, aZ], [0, 0, bZ]);
-
-const toGcode = async (
-  geometry,
-  {
-    origin = [0, 0, 0],
-    topZ = 0,
-    maxFeedRate = 800,
-    minCutZ = -1,
-    jumpHeight = 1,
-    spindleRpm = 0,
-    laserPower = 0,
-    feedRate = 300,
-    toolType,
-  } = {}
-) => {
-  const tool = {};
-
-  const jumpZ = topZ + jumpHeight;
-
+// FIX: This is actually GRBL.
+const toGcode = async (geometry, { definitions } = {}) => {
+  const topZ = 0;
   const codes = [];
   const _ = undefined;
-  let position = [0, 0, 0];
+
+  // CHECK: Perhaps this should be a more direct modeling of the GRBL state?
+  const state = {
+    // Where is the tool
+    position: [0, 0, 0],
+    // How 'fast' the tool is running (rpm or power).
+    speed: undefined,
+    laserMode: false,
+    jumped: false,
+  };
 
   const emit = (code) => codes.push(code);
 
   // Runs each axis at maximum velocity until matches, so may make dog-legs.
   const rapid = (
-    x = position[X],
-    y = position[Y],
-    z = position[Z],
-    f = tool.feedRate
+    x = state.position[X],
+    y = state.position[Y],
+    z = state.position[Z],
+    f = state.tool.feedRate
   ) => {
+    if (
+      x === state.position[X] &&
+      y === state.position[Y] &&
+      z === state.position[Z]
+    ) {
+      return;
+    }
     emit(`G0 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)}`);
-    position = [x, y, z];
+    state.position = [x, y, z];
   };
 
   // Straight motion at set speed.
   const cut = (
-    x = position[X],
-    y = position[Y],
-    z = position[Z],
-    f = tool.feedRate
+    x = state.position[X],
+    y = state.position[Y],
+    z = state.position[Z],
+    f = state.tool.feedRate,
+    s = state.tool.cutSpeed
   ) => {
-    setSpeed(tool.cutSpeed);
+    if (state.jumped && state.tool.warmupDuration) {
+      // CHECK: Will we need this on every jump?
+      setSpeed(state.tool.warmupSpeed);
+      emit(`G1 F1`);
+      emit(`G4 P${state.tool.warmupDuration.toFixed(3)}`);
+    }
+    state.jumped = false;
+    setSpeed(s);
+    if (
+      x === state.position[X] &&
+      y === state.position[Y] &&
+      z === state.position[Z]
+    ) {
+      return;
+    }
     emit(
       `G1 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
     );
-    position = [x, y, z];
+    state.position = [x, y, z];
   };
 
   const setSpeed = (value) => {
-    if (value !== undefined && tool.speed !== value) {
-      emit(`S${value.toFixed(3)}`);
-      tool.speed = value;
-    }
-  };
-
-  const enableLaserMode = () => {
-    if (tool.laserMode !== true) {
-      emit('$32=1');
-      tool.laserMode = true;
-    }
-  };
-
-  const disableLaserMode = () => {
-    if (tool.laserMode !== true) {
-      emit('$32=0');
-      tool.laserMode = false;
-    }
-  };
-
-  const toolReconfigure = ({ feedRate, laserPower, spindleRpm } = {}) => {
-    if (feedRate) {
-      tool.feedRate = feedRate;
-    }
-    switch (toolType) {
-      case 'spindle':
-        if (spindleRpm) {
-          tool.jumpSpeed = spindleRpm;
-          tool.cutSpeed = spindleRpm;
+    if (state.speed !== value) {
+      if (Math.sign(state.speed || 0) !== Math.sign(value)) {
+        if (value === 0) {
+          emit('M5');
+        } else if (value < 0) {
+          // Reverse
+          emit('M4');
+        } else {
+          // Forward
+          emit('M3');
         }
-        break;
-      case 'laser':
-        if (laserPower) {
-          tool.jumpSpeed = laserPower;
-          tool.cutSpeed = laserPower;
-        }
-        break;
+      }
+      emit(`S${Math.abs(value).toFixed(3)}`);
+      state.speed = value;
     }
   };
 
-  const toolWarmup = () => {
-    toolReconfigure({ feedRate, laserPower, spindleRpm });
-    switch (toolType) {
+  const toolChange = (tool) => {
+    if (state.tool && state.tool.type !== tool.type) {
+      throw Error(
+        `Unsupported tool type change: ${state.tool.type} to ${tool.type}`
+      );
+    }
+    if (state.tool && state.tool.diameter !== tool.diameter) {
+      throw Error(
+        `Unsupported tool diameter change: ${state.tool.diameter} to ${tool.diameter}`
+      );
+    }
+    // Accept tool change.
+    state.tool = tool;
+    switch (state.tool.type) {
+      case 'dynamicLaser':
+      case 'constantLaser':
       case 'spindle':
-        tool.isSpindle = true;
-        disableLaserMode();
-        raise();
-        emit('M3');
-        break;
-      case 'laser':
-        tool.isLaser = true;
-        enableLaserMode();
-        emit('M4');
         break;
       default:
-        throw Error('No toolType set.');
+        throw Error(`Unknown tool: ${state.tool.type}`);
     }
   };
 
-  const toolShutdown = () => {
+  const stop = () => {
     emit('M5');
   };
 
-  const toolPause = () => {
+  /*
+  const pause = () => {
     emit('M0');
   };
 
-  const raise = () => {
-    rapid(_, _, jumpZ); // up
+  const dwell = (seconds) => {
+    emit(`G4 P${seconds * 1000}`);
   };
+  */
 
   const jump = (x, y) => {
-    setSpeed(tool.jumpSpeed);
-    raise();
-    rapid(x, y, jumpZ); // across
-    rapid(x, y, topZ); // down
+    if (x === state.position[X] && y === state.position[Y]) {
+      // Already there.
+      return;
+    }
+    const speed = state.tool.jumpSpeed || 0;
+    const jumpRate = state.tool.jumpRate || state.tool.feedRate;
+    if (speed !== 0) {
+      // For some tools (some lasers) it is better to keep the beam on (at reduced power)
+      // while jumping.
+      setSpeed(speed);
+      cut(_, _, state.tool.jumpZ, jumpRate, speed); // up
+      cut(x, y, _, jumpRate, speed); // across
+      cut(_, _, topZ, jumpRate, speed); // down
+    } else {
+      rapid(_, _, state.tool.jumpZ); // up
+      rapid(x, y, _); // across
+      rapid(_, _, topZ); // down
+      state.jumped = true;
+    }
   };
 
   const park = () => {
     jump(0, 0);
+    stop();
   };
 
   const useMetric = () => emit('G21');
 
   useMetric();
-  toolWarmup();
 
-  for (const { tags = [], paths } of getNonVoidPaths(
-    toDisjointGeometry(translate(negate(origin), geometry))
-  )) {
-    let pathPauseAfter = false;
-    let pathPauseBefore = false;
-    let pathConstantLaser = false;
-    {
-      let pathFeedRate = feedRate;
-      let pathLaserPower = laserPower;
-      let pathSpindleRpm = spindleRpm;
-      for (const tag of tags) {
-        if (tag.startsWith('toolpath/')) {
-          const [, attribute, value] = tag.split('/');
-          switch (attribute) {
-            case 'feed_rate':
-              pathFeedRate = Number(value);
-              break;
-            case 'laser_power':
-              pathLaserPower = Number(value);
-              break;
-            case 'constant_laser':
-              pathConstantLaser = true;
-              break;
-            case 'spindle_rpm':
-              pathSpindleRpm = Number(value);
-              break;
-            case 'pause_after':
-              pathPauseAfter = true;
-              break;
-            case 'pause_before':
-              pathPauseBefore = true;
-              break;
-          }
-        }
-      }
-      toolReconfigure({
-        feedRate: pathFeedRate,
-        laserPower: pathLaserPower,
-        spindleRpm: pathSpindleRpm,
-      });
-    }
-    if (pathConstantLaser) {
-      disableLaserMode();
-    }
-    if (pathPauseBefore) {
-      toolPause();
-    }
+  // FIX: Should handle points as well as paths.
+  for (const { tags, paths } of outline(toDisjointGeometry(geometry))) {
+    toolChange(toToolFromTags('grbl', tags, definitions));
     for (const path of paths) {
-      for (const [start, end] of getEdges(path)) {
-        if (start[Z] < minCutZ) {
-          throw Error(`Attempting to cut below minCutZ`);
-        }
-        if (!equalsXY(start, position)) {
-          // We assume that we can plunge or raise vertically without issue.
-          // This avoids raising before plunging.
-          // FIX: This whole approach is essentially wrong, and needs to consider if the tool can plunge or not.
-          jump(...start);
-        }
-        if (!equalsZ(start, position)) {
-          cut(...start); // cut down
-        }
+      for (let [start, end] of getEdges(path)) {
+        jump(...start); // jump to the start x, y
+        cut(...start); // may need to drill down to the start z
         cut(...end); // cut across
       }
     }
-    if (pathPauseAfter) {
-      toolPause();
-    }
-    if (pathConstantLaser) {
-      enableLaserMode();
-    }
   }
 
-  toolShutdown();
   park();
 
-  codes.push(``);
+  codes.push('');
   return new TextEncoder('utf8').encode(codes.join('\n'));
 };
 

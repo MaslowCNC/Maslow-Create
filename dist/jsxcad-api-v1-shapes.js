@@ -1,6 +1,6 @@
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { getSides, getRadius, getTop, getBottom, getCenter, getFrom, getTo, getMatrix, getLeft, getRight, getFront, getBack, getDiameter, getBase, radius } from './jsxcad-geometry-plan.js';
-import { reify, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedSolid, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
+import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedSolid, taggedPoints, taggedZ0Surface } from './jsxcad-geometry-tagged.js';
 import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
@@ -36,7 +36,7 @@ const Spiral = (
 
 Shape.prototype.Spiral = shapeMethod(Spiral);
 
-reify.Arc = ({ tags, plan }) => {
+registerReifier('Arc', ({ tags, plan }) => {
   const { start = 0, end = 360 } = plan.angle || {};
   const spiral = Spiral((a) => [[1]], {
     from: start - 90,
@@ -60,7 +60,7 @@ reify.Arc = ({ tags, plan }) => {
       .setTags(tags)
       .toGeometry();
   }
-};
+});
 
 const Arc = (x = 1, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Arc' }));
@@ -79,7 +79,7 @@ const Assembly = (...shapes) =>
 
 Shape.prototype.Assembly = shapeMethod(Assembly);
 
-reify.Box = ({ tags, plan }) => {
+registerReifier('Box', ({ tags, plan }) => {
   const left = getLeft(plan);
   const right = getRight(plan);
   const front = getFront(plan);
@@ -99,7 +99,7 @@ reify.Box = ({ tags, plan }) => {
     .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
-};
+});
 
 const Box = (x, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Box' }));
@@ -171,7 +171,7 @@ Point.fromPoint = fromPoint;
 
 Shape.prototype.Point = shapeMethod(Point);
 
-reify.Cone = ({ tags, plan }) => {
+registerReifier('Cone', ({ tags, plan }) => {
   const [length, width] = getDiameter(plan);
   return Hull(
     Arc(length, width).sides(getSides(plan)).z(getBase(plan)),
@@ -181,7 +181,7 @@ reify.Cone = ({ tags, plan }) => {
     .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
-};
+});
 
 const Cone = (diameter = 1, top = 1, base = 0) =>
   Shape.fromGeometry(
@@ -1642,14 +1642,15 @@ Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
 const Z = 2;
 
-reify.Icosahedron = ({ tags, plan }) =>
+registerReifier('Icosahedron', ({ tags, plan }) =>
   Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry();
+    .toGeometry()
+);
 
 const Icosahedron = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(
@@ -1717,14 +1718,15 @@ Shape.prototype.Octagon = shapeMethod(Octagon);
 
 const Z$1 = 2;
 
-reify.Orb = ({ tags, plan }) =>
+registerReifier('Orb', ({ tags, plan }) =>
   Shape.fromGeometry(taggedSolid({}, buildRingSphere(getSides(plan, 16))))
     .toGraph()
     .scale(...getRadius(plan))
     .z(getRadius(plan)[Z$1] + getBase(plan))
     .orient({ center: getCenter(plan), from: getFrom(plan), at: getTo(plan) })
     .setTags(tags)
-    .toGeometry();
+    .toGeometry()
+);
 
 const Orb = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(taggedPlan({}, { diameter: [x, y, z], type: 'Orb' }));

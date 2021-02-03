@@ -1,15 +1,15 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
 import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, findOpenEdges, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
+import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { junctionSelector } from './jsxcad-geometry-halfedge.js';
+import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { fromSolid, fromSurface, fromPaths, toSolid as toSolid$1 } from './jsxcad-geometry-graph.js';
+import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { fromPoints, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { emit, addPending, writeFile, log as log$1 } from './jsxcad-sys.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
+import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 import { segment } from './jsxcad-geometry-paths.js';
 
 class Shape {
@@ -593,9 +593,7 @@ clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
  **/
 
 const fromName = (shape, name) =>
-  Shape.fromGeometry(
-    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
-  );
+  Shape.fromGeometry(rewriteTags(toTagsFromName(name), [], shape.toGeometry()));
 
 const color = (...args) => fromName(...args);
 
@@ -771,40 +769,6 @@ const inSolidsMethod = function (...args) {
   return inSolids(this, ...args);
 };
 Shape.prototype.inSolids = inSolidsMethod;
-
-const junctions = (shape, mode = (n) => n) => {
-  const junctions = [];
-  const points = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    const normalize = createNormalize3();
-    const select = junctionSelector(solid, normalize);
-    for (const surface of solid) {
-      for (const path of surface) {
-        for (const point of path) {
-          points.push(normalize(point));
-        }
-      }
-    }
-    for (const point of points) {
-      if (mode(select(point))) {
-        junctions.push(point);
-      }
-    }
-  }
-  return Shape.fromGeometry(taggedPoints({}, junctions));
-};
-
-const nonJunctions = (shape) => junctions(shape, (n) => !n);
-
-const junctionsMethod = function () {
-  return junctions(this);
-};
-Shape.prototype.junctions = junctionsMethod;
-
-const nonJunctionsMethod = function () {
-  return nonJunctions(this);
-};
-Shape.prototype.nonJunctions = nonJunctionsMethod;
 
 /**
  *
@@ -1001,22 +965,13 @@ Shape.prototype.laserPower = laserPowerMethod;
  *
  **/
 
-const material = (shape, ...tags) =>
-  Shape.fromGeometry(
-    rewriteTags(
-      tags.map((tag) => `material/${tag}`),
-      [],
-      shape.toGeometry()
-    )
-  );
+const material = (shape, name) =>
+  Shape.fromGeometry(rewriteTags(toTagsFromName$1(name), [], shape.toGeometry()));
 
-const materialMethod = function (...tags) {
-  return material(this, ...tags);
+const materialMethod = function (name) {
+  return material(this, name);
 };
 Shape.prototype.material = materialMethod;
-
-material.signature = 'material(shape:Shape) -> Shape';
-materialMethod.signature = 'Shape -> material() -> Shape';
 
 /**
  *
@@ -1585,6 +1540,14 @@ const testMethod = function (md) {
 
 Shape.prototype.test = testMethod;
 
+const tool = (shape, name) =>
+  Shape.fromGeometry(rewriteTags(toTagsFromName$2(name), [], shape.toGeometry()));
+
+const toolMethod = function (name) {
+  return tool(this, name);
+};
+Shape.prototype.tool = toolMethod;
+
 const toolpaths = (shape, xform = (_) => _) => {
   const toolpaths = [];
   for (const geometry of getNonVoidPaths(shape.toDisjointGeometry())) {
@@ -1701,25 +1664,6 @@ const turnZMethod = function (angle) {
   return turnZ(this, angle);
 };
 Shape.prototype.turnZ = turnZMethod;
-
-// FIX: Debugging only -- remove this method.
-const wall = (shape) => {
-  const normalize = createNormalize3();
-  const solids = [];
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
-    shape.toDisjointGeometry()
-  )) {
-    solids.push(
-      taggedSolid({ tags }, fromSurface$1(surface || z0Surface, normalize))
-    );
-  }
-  return Shape.fromGeometry(taggedAssembly({}, ...solids));
-};
-
-const wallMethod = function () {
-  return wall(this);
-};
-Shape.prototype.wall = wallMethod;
 
 const weld = (...shapes) => {
   const weld = [];

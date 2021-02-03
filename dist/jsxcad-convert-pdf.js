@@ -63,7 +63,7 @@ const footer = [
 
 const toPdf = async (
   geometry,
-  { lineWidth = 0.096, size = [210, 297] } = {}
+  { lineWidth = 0.096, size = [210, 297], definitions } = {}
 ) => {
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
@@ -80,8 +80,8 @@ const toPdf = async (
     ...getNonVoidGraphs(keptGeometry),
   ]) {
     for (const { tags, paths } of outline(surface)) {
-      lines.push(toFillColor(toRgbFromTags(tags, black)));
-      lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+      lines.push(toFillColor(toRgbFromTags(tags, definitions, black)));
+      lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
       for (const path of paths) {
         let nth = path[0] === null ? 1 : 0;
         if (nth >= path.length) {
@@ -99,7 +99,7 @@ const toPdf = async (
     }
   }
   for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
-    lines.push(toStrokeColor(toRgbFromTags(tags, black)));
+    lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     for (const path of paths) {
       let nth = path[0] === null ? 1 : 0;
       if (nth >= path.length) {

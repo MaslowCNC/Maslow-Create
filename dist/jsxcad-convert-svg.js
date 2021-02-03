@@ -1,12 +1,11 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, getAnyNonVoidSurfaces, outline, taggedSurface, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, canonicalize as canonicalize$2, toTransformedGeometry, outline } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
-import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
   directive,
@@ -3563,7 +3562,7 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-const fromSvg = async (input, options = {}) => {
+const fromSvg = async (input, { definitions } = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
   const geometry = taggedGroup({});
   const svg = new domParser.DOMParser().parseFromString(
@@ -3648,7 +3647,7 @@ const fromSvg = async (input, options = {}) => {
           const fill$1 = attributes.fill;
           if (fill$1 !== undefined && fill$1 !== 'none' && fill$1 !== '') {
             // Does fill, etc, inherit?
-            const tags = toTagsFromName(fill$1);
+            const tags = toTagsFromName(fill$1, definitions);
             geometry.content.push(
               transform$1(
                 scale(matrix),
@@ -3676,7 +3675,7 @@ const fromSvg = async (input, options = {}) => {
             if (scaledMatrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
-            const tags = toTagsFromName(stroke);
+            const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
               transform$1(scaledMatrix, {
                 type: 'paths',
@@ -3747,19 +3746,10 @@ const fromSvg = async (input, options = {}) => {
 const X = 0;
 const Y = 1;
 
-const toColorFromTags = (tags, otherwise = 'black') => {
-  if (tags !== undefined) {
-    for (const tag of tags) {
-      if (tag.startsWith('color/')) {
-        return tag.substring(6);
-      }
-    }
-  }
-  return otherwise;
-};
-
-const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
-  const normalize = createNormalize3();
+const toSvg = async (
+  baseGeometry,
+  { padding = 0, definitions } = {}
+) => {
   const flippedGeometry = scale([1, -1, 1], await baseGeometry);
   const [min, max] = measureBoundingBox(flippedGeometry);
   const width = max[X] - min[X];
@@ -3778,48 +3768,30 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(geometry)) {
-    const anySurface = surface || z0Surface;
-    if (anySurface === undefined) throw Error('die');
-    const color = toColorFromTags(tags);
-    const svgPaths = [];
-    const outlined = outline(taggedSurface({}, anySurface), normalize);
-    for (const { paths } of outlined) {
-      for (const polygon of paths) {
-        svgPaths.push(
-          `${polygon
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')} z`
-        );
-      }
-    }
-    svg.push(`<path fill="${color}" stroke="none" d="${svgPaths.join(' ')}"/>`);
-  }
-  for (const { paths, tags } of getNonVoidPaths(geometry)) {
-    const color = toColorFromTags(tags);
+  for (const { tags, paths } of outline(geometry)) {
+    const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
-      if (path[0] === null) {
-        svg.push(
-          `<path stroke="${color}" fill="none" d="${path
-            .slice(1)
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')}"/>`
+      if (isClosed(path)) {
+        const d = path.map(
+          (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
         );
+        if (tags && tags.includes('path/Wire')) {
+          svg.push(
+            `<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`
+          );
+        } else {
+          svg.push(
+            `<path fill="${color}" stroke="${color}" d="${d.join(' ')} z"/>`
+          );
+        }
       } else {
-        svg.push(
-          `<path stroke="${color}" fill="none" d="${path
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')} z"/>`
-        );
+        const d = path
+          .slice(1)
+          .map(
+            (point, index) =>
+              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+          );
+        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')}"/>`);
       }
     }
   }

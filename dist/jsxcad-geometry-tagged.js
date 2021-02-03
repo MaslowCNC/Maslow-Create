@@ -285,16 +285,22 @@ const toTransformedGeometry = (geometry) => {
           } else {
             return descend(undefined, matrix);
           }
-        case 'plan':
-          return descend({
-            plan: {
-              ...geometry.plan,
-              matrix: composeTransforms(
-                matrix,
-                geometry.plan.matrix || identityMatrix
-              ),
+        case 'plan': {
+          const composedMatrix = composeTransforms(
+            matrix,
+            geometry.plan.matrix || identityMatrix
+          );
+          return descend(
+            {
+              ...geometry,
+              plan: {
+                ...geometry.plan,
+                matrix: composedMatrix,
+              },
             },
-          });
+            composedMatrix
+          );
+        }
         case 'paths':
           return descend({ paths: transform$5(matrix, geometry.paths) });
         case 'points':
@@ -754,61 +760,57 @@ const taggedGroup = ({ tags }, ...content) => {
   return { type: 'layers', tags, content };
 };
 
-const reifiedGeometry = Symbol('reifiedGeometry');
+const registry = new Map();
 
-// FIX: The reified geometry should be the content of the plan.
+// The plan is destructively updated with the reification as its content.
+// This should be safe as reification is idempotent.
 const reify = (geometry) => {
   if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
   }
-  if (geometry[reifiedGeometry] === undefined) {
-    const op = (geometry, descend) => {
-      switch (geometry.type) {
-        case 'graph':
-        case 'solid':
-        case 'z0Surface':
-        case 'surface':
-        case 'points':
-        case 'paths':
-          // No plan to realize.
-          return geometry;
-        case 'plan': {
-          if (geometry.content.length > 0) {
-            // Already reified, keep going.
-            return descend();
-          } else {
-            const reifier = reify[geometry.plan.type];
-            if (reifier === undefined) {
-              throw Error(
-                `Do not know how to reify plan: ${JSON.stringify(
-                  geometry.plan
-                )}`
-              );
-            }
-            const reification = {
-              ...geometry,
-              content: [reify(reifier(geometry))],
-            };
-            return reification;
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph':
+      case 'solid':
+      case 'z0Surface':
+      case 'surface':
+      case 'points':
+      case 'paths':
+        // No plan to realize.
+        return geometry;
+      case 'plan': {
+        if (geometry.content.length === 0) {
+          // This plan is not reified, generate content.
+          const reifier = registry.get(geometry.plan.type);
+          if (reifier === undefined) {
+            throw Error(
+              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
+            );
           }
+          geometry.content = [reifier(geometry)];
         }
-        case 'assembly':
-        case 'item':
-        case 'disjointAssembly':
-        case 'layers':
-        case 'layout':
-        case 'sketch':
-        case 'transform':
-          return descend();
-        default:
-          throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+        return descend();
       }
-    };
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout':
+      case 'sketch':
+      case 'transform':
+        return descend();
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
 
-    geometry[reifiedGeometry] = rewrite(geometry, op);
-  }
-  return geometry[reifiedGeometry];
+  visit(geometry, op);
+
+  return geometry;
 };
+
+// We expect the type to be uniquely qualified.
+const registerReifier = (type, reifier) => registry.set(type, reifier);
 
 const taggedDisjointAssembly = ({ tags }, ...content) => {
   if (content.some((value) => !value)) {
@@ -922,7 +924,7 @@ const extrude = (geometry, height, depth) => {
       case 'paths':
         return extrude(fill(geometry), height, depth);
       case 'plan':
-        return extrude(reify(geometry), height, depth);
+        return extrude(reify(geometry).content[0], height, depth);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1449,6 +1451,7 @@ const inset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
+        return inset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1648,7 +1651,7 @@ const offset = (geometry, initial = 1, step, limit) => {
           )
         );
       case 'plan':
-        return offset(reify(geometry), initial, step, limit);
+        return offset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1747,7 +1750,7 @@ const projectToPlane = (geometry, plane, direction) => {
 const read = async (path) => read$1(path);
 
 const sectionImpl = (geometry, planes) => {
-  const transformedGeometry = toTransformedGeometry(geometry);
+  const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
     for (const paths of section$1(graph, planes)) {
@@ -1921,7 +1924,7 @@ const test = (geometry) => {
       case 'paths':
         return;
       case 'plan':
-        return test(reify(geometry));
+        return test(reify(geometry).content[0]);
       case 'transform':
       case 'layout':
       case 'assembly':
@@ -2111,4 +2114,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
