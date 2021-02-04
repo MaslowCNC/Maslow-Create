@@ -1,16 +1,16 @@
 import { identityMatrix, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, fromSurface as fromSurface$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
+import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, measureBoundingBox as measureBoundingBox$3, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, flip as flip$3 } from './jsxcad-geometry-paths.js';
 import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, makeWatertight as makeWatertight$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane } from './jsxcad-geometry-surface.js';
-import { realizeGraph, transform as transform$2, toPaths, fromPaths, toSurface, fromSurface, toSolid, fromSolid, difference as difference$1, eachPoint as eachPoint$1, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$2, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, test as test$1, union as union$3 } from './jsxcad-geometry-graph.js';
+import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane, makeWatertight as makeWatertight$2 } from './jsxcad-geometry-surface.js';
+import { realizeGraph, transform as transform$2, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, toSolid, toSurface, test as test$1, union as union$3, fromSolid as fromSolid$1 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
-import { intersectSurface, fromSolid as fromSolid$1, intersection as intersection$1, unifyBspTrees, fromSurface as fromSurface$2, removeExteriorPaths, union as union$2 } from './jsxcad-geometry-bsp.js';
 import { min, max } from './jsxcad-math-vec3.js';
+import { fromSolid, unifyBspTrees, fromSurface, removeExteriorPaths, union as union$2, intersectSurface } from './jsxcad-geometry-bsp.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
 
@@ -416,348 +416,8 @@ const getGraphs = (geometry) => {
   return graphs;
 };
 
-const getSolids = (geometry) => {
-  const solids = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'solid') {
-      solids.push(item);
-    }
-  });
-  return solids;
-};
-
-const getSurfaces = (geometry) => {
-  const surfaces = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'surface') {
-      surfaces.push(item);
-    }
-  });
-  return surfaces;
-};
-
 const taggedPaths = ({ tags }, paths) => {
   return { type: 'paths', tags, paths };
-};
-
-const taggedSolid = ({ tags }, solid) => {
-  return { type: 'solid', tags, solid };
-};
-
-const differenceImpl = (geometry, ...geometries) => {
-  const op = (geometry, descend) => {
-    const { tags } = geometry;
-    switch (geometry.type) {
-      case 'graph': {
-        let differenced = geometry.graph;
-        for (const geometry of geometries) {
-          for (const { graph } of getGraphs(geometry)) {
-            differenced = difference$1(differenced, graph);
-          }
-          for (const { solid } of getSolids(geometry)) {
-            differenced = difference$1(differenced, fromSolid(solid));
-          }
-          for (const { surface } of getSurfaces(geometry)) {
-            differenced = difference$1(
-              differenced,
-              fromSurface(surface)
-            );
-          }
-          for (const { paths } of getFaceablePaths(geometry)) {
-            differenced = difference$1(differenced, fromPaths(paths));
-          }
-        }
-        return taggedGraph({ tags }, differenced);
-      }
-      case 'solid':
-        return taggedSolid(
-          { tags },
-          toSolid(
-            difference(
-              taggedGraph({ tags }, fromSolid(geometry.solid)),
-              ...geometries
-            ).graph
-          )
-        );
-      case 'surface':
-        return taggedSurface(
-          { tags },
-          toSurface(
-            difference(
-              taggedGraph({ tags }, fromSurface(geometry.surface)),
-              ...geometries
-            ).graph
-          )
-        );
-      case 'paths':
-        if (tags && tags.includes('paths/Wire')) {
-          return geometry;
-        }
-        return taggedPaths(
-          { tags },
-          toPaths(
-            difference(
-              taggedGraph({ tags }, fromPaths(geometry.paths)),
-              ...geometries
-            ).graph
-          )
-        );
-      case 'points': {
-        // Not implemented yet.
-        return geometry;
-      }
-      case 'layout':
-      case 'plan':
-      case 'assembly':
-      case 'item':
-      case 'disjointAssembly':
-      case 'layers': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for intersection.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(geometry, op);
-};
-
-/*
-const differenceImpl = (geometry, ...geometries) => {
-  const op = (geometry, descend) => {
-    const { tags } = geometry;
-    switch (geometry.type) {
-      case 'solid': {
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { solid } of getSolids(geometry)) {
-            todo.push(solid);
-          }
-        }
-        return taggedSolid({ tags }, solidDifference(geometry.solid, ...todo));
-      }
-      case 'surface': {
-        // FIX: Solids should cut surfaces
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { surface } of getSurfaces(geometry)) {
-            todo.push(surface);
-          }
-          for (const { z0Surface } of getZ0Surfaces(geometry)) {
-            todo.push(z0Surface);
-          }
-        }
-        return taggedSurface(
-          { tags },
-          surfaceDifference(geometry.surface, ...todo)
-        );
-      }
-      case 'z0Surface': {
-        // FIX: Solids should cut surfaces
-        const todoSurfaces = [];
-        const todoZ0Surfaces = [];
-        for (const geometry of geometries) {
-          for (const { surface } of getSurfaces(geometry)) {
-            todoSurfaces.push(surface);
-          }
-          for (const { z0Surface } of getZ0Surfaces(geometry)) {
-            todoZ0Surfaces.push(z0Surface);
-          }
-        }
-        if (todoSurfaces.length > 0) {
-          return taggedSurface(
-            { tags },
-            surfaceDifference(
-              geometry.z0Surface,
-              ...todoSurfaces,
-              ...todoZ0Surfaces
-            )
-          );
-        } else {
-          return taggedZ0Surface(
-            { tags },
-            z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces)
-          );
-        }
-      }
-      case 'paths': {
-        const todo = [];
-        for (const geometry of geometries) {
-          for (const { paths } of getPaths(geometry)) {
-            todo.push(paths);
-          }
-        }
-        return taggedPaths({ tags }, pathsDifference(geometry.paths, ...todo));
-      }
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'plan':
-      case 'item':
-      case 'layout':
-      case 'points': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for difference.
-        return geometry;
-      }
-      default: {
-        throw Error(`Unknown geometry type ${JSON.stringify(geometry)}`);
-      }
-    }
-  };
-
-  return rewrite(geometry, op);
-};
-*/
-
-const difference = cache(differenceImpl);
-
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const rewriteTagsImpl = (
-  add,
-  remove,
-  geometry,
-  conditionTags,
-  conditionSpec
-) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return add.filter((tag) => !remove.includes(tag));
-      } else {
-        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
-        return descend();
-      default:
-        const composedTags = composeTags(geometry.tags);
-        if (composedTags === undefined) {
-          const copy = { ...geometry };
-          delete copy.tags;
-          return copy;
-        }
-        if (composedTags === geometry.tags) {
-          return geometry;
-        } else {
-          return descend({ tags: composedTags });
-        }
-    }
-  };
-  return rewrite(geometry, op);
-};
-
-const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
-
-// Dropped elements displace as usual, but are not included in positive output.
-
-const drop = (tags, geometry) =>
-  rewriteTags(['compose/non-positive'], [], geometry, tags, 'has');
-
-const eachPoint = (emit, geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'item':
-      case 'layout':
-        return descend();
-      case 'points':
-        return eachPoint$5(emit, geometry.points);
-      case 'paths':
-        return eachPoint$4(emit, geometry.paths);
-      case 'solid':
-        return eachPoint$3(emit, geometry.solid);
-      case 'surface':
-        return eachPoint$2(emit, geometry.surface);
-      case 'z0Surface':
-        return eachPoint$2(emit, geometry.z0Surface);
-      case 'graph':
-        return eachPoint$1(geometry.graph, emit);
-      default:
-        throw Error(
-          `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
-        );
-    }
-  };
-  visit(geometry, op);
-};
-
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
-
-const getNonVoidGraphs = (geometry) => {
-  const graphs = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'graph') {
-      graphs.push(item);
-    }
-  });
-  return graphs;
-};
-
-const getNonVoidPaths = (geometry) => {
-  const pathsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
-};
-
-const taggedGroup = ({ tags }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined Group content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Group content is an array`);
-  }
-  // FIX: Deprecate layers.
-  return { type: 'layers', tags, content };
 };
 
 const registry = new Map();
@@ -878,6 +538,209 @@ const toDisjointGeometry = (geometry) => {
       return wrapper;
     }
   }
+};
+
+const differenceImpl = (geometry, ...geometries) => {
+  geometries = geometries.map(toDisjointGeometry);
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph': {
+        let differenced = geometry.graph;
+        for (const geometry of geometries) {
+          for (const { graph } of getGraphs(geometry)) {
+            differenced = difference$1(differenced, graph);
+          }
+          for (const { paths } of getFaceablePaths(geometry)) {
+            differenced = difference$1(differenced, fromPaths(paths));
+          }
+        }
+        return taggedGraph({ tags }, differenced);
+      }
+      case 'paths':
+        if (tags && tags.includes('paths/Wire')) {
+          return geometry;
+        }
+        return taggedPaths(
+          { tags },
+          toPaths(
+            difference(
+              taggedGraph({ tags }, fromPaths(geometry.paths)),
+              ...geometries
+            ).graph
+          )
+        );
+      case 'points': {
+        // Not implemented yet.
+        return geometry;
+      }
+      case 'layout':
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for intersection.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toDisjointGeometry(geometry), op);
+};
+
+const difference = cache(differenceImpl);
+
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTagsImpl = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter((tag) => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+        return descend();
+      default:
+        const composedTags = composeTags(geometry.tags);
+        if (composedTags === undefined) {
+          const copy = { ...geometry };
+          delete copy.tags;
+          return copy;
+        }
+        if (composedTags === geometry.tags) {
+          return geometry;
+        } else {
+          return descend({ tags: composedTags });
+        }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
+const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
+
+// Dropped elements displace as usual, but are not included in positive output.
+
+const drop = (tags, geometry) =>
+  rewriteTags(['compose/non-positive'], [], geometry, tags, 'has');
+
+const eachPoint = (emit, geometry) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'item':
+      case 'layout':
+        return descend();
+      case 'points':
+        return eachPoint$5(emit, geometry.points);
+      case 'paths':
+        return eachPoint$4(emit, geometry.paths);
+      case 'solid':
+        return eachPoint$3(emit, geometry.solid);
+      case 'surface':
+        return eachPoint$2(emit, geometry.surface);
+      case 'z0Surface':
+        return eachPoint$2(emit, geometry.z0Surface);
+      case 'graph':
+        return eachPoint$1(geometry.graph, emit);
+      default:
+        throw Error(
+          `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
+        );
+    }
+  };
+  visit(geometry, op);
+};
+
+const empty = ({ tags }) => taggedGraph({ tags }, fromEmpty());
+
+const eachNonVoidItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    // FIX: Sketches aren't real either -- but this is a bit unclear.
+    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
+      op(geometry);
+      descend();
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getNonVoidGraphs = (geometry) => {
+  const graphs = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'graph') {
+      graphs.push(item);
+    }
+  });
+  return graphs;
+};
+
+const getNonVoidPaths = (geometry) => {
+  const pathsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
+};
+
+const taggedGroup = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Group content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Group content is an array`);
+  }
+  if (content.length === 1) {
+    return content[0];
+  }
+  // FIX: Deprecate layers.
+  return { type: 'layers', tags, content };
 };
 
 // DEPRECATED
@@ -1255,6 +1118,26 @@ const getPoints = (geometry) => {
   return pointsets;
 };
 
+const getSolids = (geometry) => {
+  const solids = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'solid') {
+      solids.push(item);
+    }
+  });
+  return solids;
+};
+
+const getSurfaces = (geometry) => {
+  const surfaces = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'surface') {
+      surfaces.push(item);
+    }
+  });
+  return surfaces;
+};
+
 const getTags = (geometry) => {
   if (geometry.tags === undefined) {
     return [];
@@ -1296,97 +1179,30 @@ const hash = (geometry) => {
   return geometry.hash;
 };
 
-// import { toBspTree } from './toBspTree.js';
-
 const intersectionImpl = (geometry, ...geometries) => {
+  geometries = geometries.map(toDisjointGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        let intersected = geometry.graph;
+        let input = geometry.graph;
+        const intersections = [];
         for (const geometry of geometries) {
           for (const { graph } of getNonVoidGraphs(geometry)) {
-            intersected = intersection$2(intersected, graph);
-          }
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            intersected = intersection$2(
-              intersected,
-              fromSolid(solid)
+            intersections.push(
+              taggedGraph({ tags }, intersection$1(input, graph))
             );
           }
           for (const { paths } of getNonVoidFaceablePaths(geometry)) {
-            intersected = intersection$2(
-              intersected,
-              fromPaths(paths)
+            intersections.push(
+              taggedGraph(
+                { tags },
+                intersection$1(input, fromPaths(paths))
+              )
             );
           }
         }
-        return taggedGraph({ tags }, intersected);
-      }
-      case 'solid': {
-        const normalize = createNormalize3();
-        const otherGeometry = geometries[0];
-        const solids = [
-          ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
-          ...getAnyNonVoidSurfaces(
-            otherGeometry
-          ).map(({ surface, z0Surface }) =>
-            fromSurface$1(surface || z0Surface, normalize)
-          ),
-        ];
-        const intersections = solids
-          .map((solid) => intersection$1(geometry.solid, solid))
-          .filter((solid) => solid.length > 0)
-          .map((solid) => taggedSolid({ tags }, solid));
-        if (intersections.length === 1) {
-          return intersections[0];
-        } else if (geometries.length === 1) {
-          return taggedGroup({}, ...intersections);
-        } else {
-          return intersection(
-            taggedGroup({}, ...intersections),
-            ...geometries.slice(1)
-          );
-        }
-      }
-      case 'z0Surface':
-      case 'surface': {
-        const normalize = createNormalize3();
-        const thisSurface = geometry.surface || geometry.z0Surface;
-        const otherGeometry = geometries[0];
-        const solids = [
-          ...getNonVoidSolids(otherGeometry).map(({ solid }) => solid),
-          ...getAnyNonVoidSurfaces(
-            otherGeometry
-          ).map(({ surface, z0Surface }) =>
-            fromSurface$1(surface || z0Surface, normalize)
-          ),
-        ];
-        const intersections = solids
-          .map((solid) => {
-            const intersectedSurface = [];
-            intersectSurface(
-              fromSolid$1(solid, normalize),
-              thisSurface,
-              normalize,
-              (surface) => intersectedSurface.push(...surface)
-            );
-            return intersectedSurface;
-          })
-          .filter((surface) => surface.length > 0)
-          .map((surface) =>
-            taggedSurface({ tags }, makeWatertight$2(surface))
-          );
-        if (intersections.length === 1) {
-          return intersections[0];
-        } else if (geometries.length === 1) {
-          return taggedGroup({}, ...intersections);
-        } else {
-          return intersection(
-            taggedGroup({}, ...intersections),
-            ...geometries.slice(1)
-          );
-        }
+        return taggedGroup({ tags }, ...intersections);
       }
       case 'paths': {
         if (tags && tags.includes('paths/Wire')) {
@@ -1423,7 +1239,7 @@ const intersectionImpl = (geometry, ...geometries) => {
     }
   };
 
-  return rewrite(geometry, op);
+  return rewrite(toDisjointGeometry(geometry), op);
 };
 
 const intersection = cache(intersectionImpl);
@@ -1554,13 +1370,13 @@ const measureBoundingBox = (geometry) => {
 
 const toBspTree = (geometry, normalize) => {
   // Start with an empty tree.
-  let bspTree = fromSolid$1([], normalize);
+  let bspTree = fromSolid([], normalize);
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'solid': {
         bspTree = unifyBspTrees(
           bspTree,
-          fromSolid$1(geometry.solid, normalize)
+          fromSolid(geometry.solid, normalize)
         );
         return descend();
       }
@@ -1569,7 +1385,7 @@ const toBspTree = (geometry, normalize) => {
       case 'z0Surface': {
         bspTree = unifyBspTrees(
           bspTree,
-          fromSurface$2(geometry.surface || geometry.z0Surface, normalize)
+          fromSurface(geometry.surface || geometry.z0Surface, normalize)
         );
         return descend();
       }
@@ -1795,6 +1611,10 @@ const smooth = (geometry, options) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
+const taggedSolid = ({ tags }, solid) => {
+  return { type: 'solid', tags, solid };
+};
+
 const soup = (geometry) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
@@ -1809,6 +1629,8 @@ const soup = (geometry) => {
             taggedSolid({ tags }, toSolid(graph)),
             ...outline(geometry)
           );
+        } else if (graph.isEmpty) {
+          return taggedGroup({});
         } else {
           // FIX: Simplify this arrangement.
           return taggedGroup(
@@ -1996,6 +1818,7 @@ const toPoints = (geometry) => {
 
 // Union is a little more complex, since it can violate disjointAssembly invariants.
 const unionImpl = (geometry, ...geometries) => {
+  geometries = geometries.map(toDisjointGeometry);
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
@@ -2006,7 +1829,7 @@ const unionImpl = (geometry, ...geometries) => {
             unified = union$3(unified, graph);
           }
           for (const { solid } of getNonVoidSolids(geometry)) {
-            unified = union$3(unified, fromSolid(solid));
+            unified = union$3(unified, fromSolid$1(solid));
           }
           for (const { paths } of getNonVoidFaceablePaths(geometry)) {
             unified = union$3(unified, fromPaths(paths));
@@ -2040,7 +1863,7 @@ const unionImpl = (geometry, ...geometries) => {
         const unionedSolid = union$2(...solids);
         const clippedPolygons = [];
         intersectSurface(
-          fromSolid$1(unionedSolid, normalize),
+          fromSolid(unionedSolid, normalize),
           [planarPolygon],
           normalize,
           (polygons) => clippedPolygons.push(...polygons)
@@ -2089,7 +1912,7 @@ const unionImpl = (geometry, ...geometries) => {
     }
   };
 
-  return rewrite(geometry, op);
+  return rewrite(toDisjointGeometry(geometry), op);
 };
 
 const union = cache(unionImpl);
@@ -2114,4 +1937,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };

@@ -59,22 +59,6 @@ const bomViewMethod = function () {
 };
 Shape.prototype.bomView = bomViewMethod;
 
-const fuse = (shape, op = (_) => _) =>
-  Shape.fromGeometry(
-    rewrite(shape.toKeptGeometry(), (geometry, descend, walk) => {
-      if (geometry.item) {
-        return walk(geometry.item);
-      } else {
-        return descend();
-      }
-    })
-  );
-
-const fuseMethod = function (...args) {
-  return fuse(this, ...args);
-};
-Shape.prototype.fuse = fuseMethod;
-
 const inItems = (shape, op = (_) => _) => {
   const rewritten = rewrite(shape.toKeptGeometry(), (geometry, descend) => {
     if (geometry.item) {
@@ -132,11 +116,10 @@ leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
 const api = {
   Item,
   bom,
-  fuse,
   inItems,
   items,
   leafs,
 };
 
 export default api;
-export { Item, bom, fuse, inItems, items, leafs };
+export { Item, bom, inItems, items, leafs };

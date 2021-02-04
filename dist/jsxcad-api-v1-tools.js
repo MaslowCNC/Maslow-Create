@@ -9,6 +9,7 @@ const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 const carve = (block, { toolDiameter = 1, cutDepth = 1 } = {}, ...shapes) => {
   const { diameter = 1 } = toToolFromTags(
+    'grbl',
     block.toGeometry.tags,
     getDefinitions()
   );

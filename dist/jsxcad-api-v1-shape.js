@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, rewriteTags, taggedPaths, taggedGraph, taggedPoints, taggedSolid, taggedSurface, union as union$1, assemble as assemble$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, intersection as intersection$1, allTags, difference as difference$1, getLeafs, getSolids, empty, rewrite, taggedGroup, getAnySurfaces, getPaths, getGraphs, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureArea, taggedSketch, getNonVoidSolids, getAnyNonVoidSurfaces, test as test$1, outline, getNonVoidGraphs, realize, getNonVoidSurfaces, read, write } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add, scale as scale$1, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
@@ -221,9 +221,6 @@ const unionMethod = function (...shapes) {
   return union(this, ...shapes);
 };
 Shape.prototype.union = unionMethod;
-
-union.signature = 'union(shape:Shape, ...shapes:Shape) -> Shape';
-unionMethod.signature = 'Shape -> union(...shapes:Shape) -> Shape';
 
 /**
  *
@@ -738,6 +735,16 @@ const feedRateMethod = function (...args) {
   return feedRate(this, ...args);
 };
 Shape.prototype.feedRate = feedRateMethod;
+
+const fuse = (shape) => {
+  const geometry = shape.toGeometry();
+  return fromGeometry(union$1(empty({ tags: geometry.tags }), geometry));
+};
+
+const fuseMethod = function (...shapes) {
+  return fuse(this);
+};
+Shape.prototype.fuse = fuseMethod;
 
 const hole = (shape) =>
   Shape.fromGeometry(

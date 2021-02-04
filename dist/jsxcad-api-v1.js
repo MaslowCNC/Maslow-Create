@@ -262,7 +262,12 @@ const defThreejsMaterial = (name, definition) =>
 
 const defTool = (name, definition) => define(`tool/${name}`, definition);
 
-const defDynamicGrblLaser = (
+const defGrblSpindle = (name, { rpm, feedRate, diameter }) =>
+  defTool(name, {
+    grbl: { type: 'spindle', cutSpeed: rpm, feedRate, diameter },
+  });
+
+const defGrblDynamicLaser = (
   name,
   {
     jumpPower = 0,
@@ -284,7 +289,7 @@ const defDynamicGrblLaser = (
     },
   });
 
-const defConstantGrblLaser = (
+const defGrblConstantLaser = (
   name,
   {
     jumpPower,
@@ -425,8 +430,9 @@ var api = /*#__PURE__*/Object.freeze({
   y: y,
   z: z,
   define: define,
-  defConstantGrblLaser: defConstantGrblLaser,
-  defDynamicGrblLaser: defDynamicGrblLaser,
+  defGrblConstantLaser: defGrblConstantLaser,
+  defGrblDynamicLaser: defGrblDynamicLaser,
+  defGrblSpindle: defGrblSpindle,
   defRgbColor: defRgbColor,
   defThreejsMaterial: defThreejsMaterial,
   defTool: defTool,
@@ -568,7 +574,6 @@ extendedApi.importModule = importModule;
 const module = (name) => `@jsxcad/api-v1-${name}`;
 
 registerDynamicModule(module('armature'), './jsxcad-api-v1-armature.js');
-// registerDynamicModule(module('connector'), './jsxcad-api-v1-connector.js');
 registerDynamicModule(module('cursor'), './jsxcad-api-v1-cursor.js');
 registerDynamicModule(module('deform'), './jsxcad-api-v1-deform.js');
 registerDynamicModule(module('dst'), './jsxcad-api-v1-dst.js');
@@ -592,4 +597,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, checkBox, defConstantGrblLaser, defDynamicGrblLaser, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

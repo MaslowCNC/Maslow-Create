@@ -1221,7 +1221,6 @@ const difference = (a, b) => {
   if (doesNotOverlap(a, b)) {
     return a;
   }
-  // return fromNefPolyhedron(differenceOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b)));
   return fromSurfaceMeshLazy(
     differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
@@ -1279,6 +1278,8 @@ const fromFunction = (op, options) =>
   fromSurfaceMeshLazy(
     fromFunctionToSurfaceMesh((x = 0, y = 0, z = 0) => op([x, y, z]), options)
   );
+
+const fromEmpty = () => ({ isEmpty: true });
 
 const fromPoints = (points) =>
   fromSurfaceMeshLazy(fromPointsToSurfaceMesh(points));
@@ -1352,11 +1353,8 @@ const inset = (graph, initial, step, limit) => {
 const far$1 = 10000;
 
 const intersection = (a, b) => {
-  if (a.isEmpty) {
-    return a;
-  }
-  if (b.isEmpty) {
-    return b;
+  if (a.isEmpty || b.isEmpty) {
+    return fromEmpty();
   }
   if (!a.isClosed) {
     return fromPaths(
@@ -1367,9 +1365,8 @@ const intersection = (a, b) => {
     b = extrude(b, far$1, 0);
   }
   if (doesNotOverlap(a, b)) {
-    return { isEmpty: true };
+    return fromEmpty();
   }
-  // return fromNefPolyhedron(intersectionOfNefPolyhedrons(toNefPolyhedron(a), toNefPolyhedron(b)));
   return fromSurfaceMeshLazy(
     intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
@@ -1501,7 +1498,10 @@ const transform = (matrix, graph) =>
 const far$2 = 10000;
 
 const union = (a, b) => {
-  if (a.isEmpty || b.isEmpty) {
+  if (a.isEmpty) {
+    return b;
+  }
+  if (b.isEmpty) {
     return a;
   }
   if (!a.isClosed) {
@@ -1522,4 +1522,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, section, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };
