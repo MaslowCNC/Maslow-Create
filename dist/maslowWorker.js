@@ -199,7 +199,7 @@ const agent = async ({
             break;
         case "color":
             const shape2Color = await api.loadGeometry(question.readPath);
-            const coloredShape = shape2Color.color(question.color);
+            const coloredShape = shape2Color.color(question.color.toLowerCase());
             await api.saveGeometry(question.writePath, coloredShape);
             return 1;
             break;
