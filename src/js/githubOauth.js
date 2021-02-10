@@ -56,9 +56,6 @@ export default function GitHubModule(){
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
     })
-    document.getElementById("browseNonGit").addEventListener("mousedown", () => {
-        this.showProjectsToLoad()
-    })
     
     /** 
      * Try to login using the oauth popup.
