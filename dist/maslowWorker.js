@@ -198,9 +198,16 @@ const agent = async ({
             return 1;
             break;
         case "color":
-            const shape2Color = await api.loadGeometry(question.readPath);
-            const coloredShape = shape2Color.color(question.color.toLowerCase());
-            await api.saveGeometry(question.writePath, coloredShape);
+            if(question.color == "Keep Out"){
+                const shape2Color = await api.loadGeometry(question.readPath);
+                const coloredShape = shape2Color.void();
+                await api.saveGeometry(question.writePath, coloredShape);
+            }
+            else{
+                const shape2Color = await api.loadGeometry(question.readPath);
+                const coloredShape = shape2Color.color(question.color.toLowerCase());
+                await api.saveGeometry(question.writePath, coloredShape);
+            }
             return 1;
             break;
         case "tag":
