@@ -1,16 +1,16 @@
 import { identityMatrix, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, measureBoundingBox as measureBoundingBox$3, fromSurface as fromSurface$1 } from './jsxcad-geometry-solid.js';
+import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
 import { close, createOpenPath } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, flip as flip$3 } from './jsxcad-geometry-paths.js';
-import { canonicalize as canonicalize$4, toPolygon } from './jsxcad-math-plane.js';
+import { canonicalize as canonicalize$4 } from './jsxcad-math-plane.js';
 import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2, toPlane, makeWatertight as makeWatertight$2 } from './jsxcad-geometry-surface.js';
-import { realizeGraph, transform as transform$2, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, toSolid, toSurface, test as test$1, union as union$3, fromSolid as fromSolid$1 } from './jsxcad-geometry-graph.js';
+import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
+import { realizeGraph, transform as transform$2, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, toSolid, toSurface, test as test$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
-import { fromSolid, unifyBspTrees, fromSurface, removeExteriorPaths, union as union$2, intersectSurface } from './jsxcad-geometry-bsp.js';
+import { fromSolid, unifyBspTrees, fromSurface, removeExteriorPaths } from './jsxcad-geometry-bsp.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
 
@@ -1501,7 +1501,7 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
     outlines.push(taggedPaths({ tags }, outlineSolid(solid, normalize)));
   }
   for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
-    outlines.push(taggedPaths({ tags }, toPaths(outline$1(graph))));
+    outlines.push(taggedPaths({ tags }, toPaths(graph)));
   }
   // Turn paths into wires.
   for (const { tags = [], paths } of getNonVoidPaths(keptGeometry)) {
@@ -1826,52 +1826,13 @@ const unionImpl = (geometry, ...geometries) => {
         let unified = geometry.graph;
         for (const geometry of geometries) {
           for (const { graph } of getNonVoidGraphs(geometry)) {
-            unified = union$3(unified, graph);
-          }
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            unified = union$3(unified, fromSolid$1(solid));
+            unified = union$2(unified, graph);
           }
           for (const { paths } of getNonVoidFaceablePaths(geometry)) {
-            unified = union$3(unified, fromPaths(paths));
+            unified = union$2(unified, fromPaths(paths));
           }
         }
         return taggedGraph({ tags }, unified);
-      }
-      case 'solid': {
-        const solids = [];
-        for (const geometry of geometries) {
-          for (const { solid } of getNonVoidSolids(geometry)) {
-            solids.push(solid);
-          }
-        }
-        // No meaningful way to unify with a surface.
-        return taggedSolid({ tags }, union$2(geometry.solid, ...solids));
-      }
-      case 'surface': {
-        const normalize = createNormalize3();
-        const thisSurface = geometry.surface;
-        let planarPolygon = toPolygon(toPlane(thisSurface));
-        const solids = [];
-        for (const input of [geometry, ...geometries]) {
-          for (const { solid } of getNonVoidSolids(input)) {
-            solids.push(solid);
-          }
-          for (const { surface } of getNonVoidSurfaces(input)) {
-            solids.push(fromSurface$1(surface, normalize));
-          }
-        }
-        const unionedSolid = union$2(...solids);
-        const clippedPolygons = [];
-        intersectSurface(
-          fromSolid(unionedSolid, normalize),
-          [planarPolygon],
-          normalize,
-          (polygons) => clippedPolygons.push(...polygons)
-        );
-        return taggedSurface(
-          { tags },
-          makeWatertight$2(clippedPolygons, normalize)
-        );
       }
       case 'paths': {
         if (tags && tags.includes('path/Wire')) {

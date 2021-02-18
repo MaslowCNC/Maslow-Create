@@ -1760,7 +1760,7 @@ Shape.prototype.Pentagon = shapeMethod(Pentagon);
 
 // These are just excessively large polygons, which approximate planes.
 const Plane = (x = 0, y = 0, z = 1, w = 0) =>
-  Shape.fromPathToSurface(toPolygon([x, y, z, w]));
+  Shape.fromPath(toPolygon([x, y, z, w]));
 
 Shape.prototype.Plane = shapeMethod(Plane);
 

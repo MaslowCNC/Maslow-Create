@@ -130,10 +130,6 @@ Shape.fromPath = (path, context) =>
   fromGeometry(taggedPaths({}, [path]), context);
 Shape.fromPaths = (paths, context) =>
   fromGeometry(taggedPaths({}, paths), context);
-// Shape.fromPathToSurface = (path, context) =>
-//  fromGeometry(fromPathToSurface(path), context);
-// Shape.fromPathsToSurface = (paths, context) =>
-//  fromGeometry(fromPathsToSurface(paths), context);
 Shape.fromPoint = (point, context) =>
   fromGeometry(taggedPoints({}, [point]), context);
 Shape.fromPoints = (points, context) =>

@@ -1,7 +1,6 @@
 import { emit, log, onBoot } from './jsxcad-sys.js';
-import { equals, dot } from './jsxcad-math-vec3.js';
+import { equals } from './jsxcad-math-vec3.js';
 import { getEdges } from './jsxcad-geometry-path.js';
-import { fromPolygon } from './jsxcad-math-plane.js';
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -835,8 +834,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 2460,
-      maximum: 2460,
+      initial: 2274,
+      maximum: 2274,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1104,9 +1103,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5594496,
-      STACK_MAX = 351616,
-      DYNAMIC_BASE = 5594496;
+    var STACK_BASE = 5565936,
+      STACK_MAX = 323056,
+      DYNAMIC_BASE = 5565936;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -9688,7 +9687,7 @@ const arrangePaths = (x, y, z, w, paths) => {
         polygon.holes.push(target);
       } else {
         target = [];
-        polygon = { points: target, holes: [] };
+        polygon = { boundary: target, holes: [], plane: [x, y, z, w] };
         polygons.push(polygon);
       }
     },
@@ -9698,9 +9697,6 @@ const arrangePaths = (x, y, z, w, paths) => {
   );
   return polygons;
 };
-
-const differenceOfNefPolyhedrons = (a, b) =>
-  getCgal().DifferenceOfNefPolyhedrons(a, b);
 
 const differenceOfSurfaceMeshes = (a, b) =>
   getCgal().DifferenceOfSurfaceMeshes(a, b);
@@ -9828,22 +9824,19 @@ const fromGraphToSurfaceMesh = (graph) => {
   const mesh = new c.Surface_mesh();
 
   const vertexIndex = [];
-  graph.exact.forEach(([x, y, z]) =>
+  graph.exactPoints.forEach(([x, y, z]) =>
     vertexIndex.push(c.Surface_mesh__add_exact(mesh, x, y, z))
   );
 
-  // Surface_mesh faces are facets, represented by loops.
+  const seen = new Set();
 
-  graph.loops.forEach(({ edge }, loop) => {
-    if (
-      c.Surface_mesh__add_face_vertices(mesh, () => {
-        const edgeNode = graph.edges[edge];
-        edge = edgeNode.next;
-        return vertexIndex[edgeNode.point];
-      }) > 1000000
-    ) {
-      throw Error('die');
-    }
+  graph.facets.forEach(({ edge }) => {
+    c.Surface_mesh__add_face_vertices(mesh, () => {
+      seen.add(edge);
+      const edgeNode = graph.edges[edge];
+      edge = edgeNode.next;
+      return vertexIndex[edgeNode.point];
+    });
   });
 
   if (!mesh.is_valid(false)) {
@@ -9851,225 +9844,6 @@ const fromGraphToSurfaceMesh = (graph) => {
   }
 
   return mesh;
-};
-
-const fromSurfaceMeshToNefPolyhedron = (surfaceMesh) => {
-  const c = getCgal();
-  if (!surfaceMesh.is_valid(false)) {
-    surfaceMesh.is_valid(true);
-    throw Error('not valid');
-  }
-  if (!c.Surface_mesh__is_closed(surfaceMesh)) {
-    throw Error('not closed');
-  }
-  if (!c.Surface_mesh__is_valid_halfedge_graph(surfaceMesh)) {
-    throw Error('not valid_halfedge_graph');
-  }
-  if (!c.Surface_mesh__is_valid_face_graph(surfaceMesh)) {
-    throw Error('not valid_face_graph');
-  }
-  if (!c.Surface_mesh__is_valid_polygon_mesh(surfaceMesh)) {
-    throw Error('not valid_polygon_mesh');
-  }
-  const nefPolyhedron = c.FromSurfaceMeshToNefPolyhedron(surfaceMesh);
-  if (!nefPolyhedron.is_valid(false, 1)) {
-    throw Error('not valid');
-  }
-  return nefPolyhedron;
-};
-
-const fromGraphToNefPolyhedron = (graph) =>
-  fromSurfaceMeshToNefPolyhedron(fromGraphToSurfaceMesh(graph));
-
-const fromNefPolyhedronFacetsToGraph = (nefPolyhedron, plane) => {
-  const console = { log: () => undefined };
-  const c = getCgal();
-  const graph = {
-    points: [],
-    edges: [],
-    loops: [],
-    faces: [],
-    surfaces: [],
-    isClosed: false,
-    isOutline: true,
-  };
-  const vertexMap = [];
-  const addPoint = (vertex, point) => {
-    for (let index = 0; index < graph.points.length; index++) {
-      if (equals(point, graph.points[index])) {
-        vertexMap[vertex] = index;
-        return index;
-      }
-    }
-    const index = graph.points.length;
-    graph.points.push(point);
-    vertexMap[vertex] = index;
-  };
-  let facetId;
-  let facetPlane;
-  let loopId;
-  c.Nef_polyhedron__explore_facets(
-    nefPolyhedron,
-    (facet, x, y, z, w) => {
-      console.log(``);
-      console.log(`facet: ${facet}`);
-      facetId = facet;
-      facetPlane = [x, y, z, w];
-      if (dot(plane, facetPlane) < 0.99) {
-        facetId = -1;
-      }
-    },
-    (loop, sface) => {
-      loopId = loop;
-    },
-    (halfedge, vertex, next, twin) => {
-      if (facetId === -1) {
-        return;
-      }
-      console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
-      const point = vertexMap[vertex];
-      graph.edges[halfedge] = { point, next, twin, loop: facetId };
-      if (graph.faces[facetId] === undefined) {
-        // The facetPlane seems to be incorrect.
-        graph.faces[facetId] = { plane: facetPlane };
-        if (graph.surfaces[0] === undefined) {
-          graph.surfaces[0] = { faces: [] };
-        }
-        graph.surfaces[0].faces.push(facetId);
-      }
-      if (graph.loops[loopId] === undefined) {
-        graph.loops[loopId] = { edge: halfedge, face: facetId };
-        if (graph.faces[facetId].loop === undefined) {
-          graph.faces[facetId].loop = loopId;
-        } else if (graph.faces[facetId].holes) {
-          graph.faces[facetId].holes.push(loopId);
-        } else {
-          graph.faces[facetId].holes = [loopId];
-        }
-      }
-    },
-    (vertex, x, y, z) => {
-      addPoint(vertex, [x, y, z]);
-    }
-  );
-  if (graph.faces.length === 0) {
-    graph.isEmpty = true;
-  }
-  return graph;
-};
-
-const fromNefPolyhedronShellsToGraph = (nefPolyhedron) => {
-  const console = { log: () => undefined };
-  const c = getCgal();
-  const graph = {
-    points: [],
-    edges: [],
-    loops: [],
-    faces: [],
-    volumes: [],
-    isClosed: true,
-  };
-  const vertexMap = [];
-  const addPoint = (vertex, point) => {
-    for (let index = 0; index < graph.points.length; index++) {
-      if (equals(point, graph.points[index])) {
-        vertexMap[vertex] = index;
-        return index;
-      }
-    }
-    const index = graph.points.length;
-    graph.points.push(point);
-    vertexMap[vertex] = index;
-  };
-  let facetId;
-  let facetPlane;
-  let loopId;
-  let volumeId;
-  const polygon = [];
-  c.Nef_polyhedron__explore_shells(
-    nefPolyhedron,
-    (volume) => {
-      console.log(`volume`);
-      volumeId = volume;
-    },
-    () => {
-      console.log(`shell`);
-    },
-    (facet, x, y, z, w) => {
-      console.log(``);
-      console.log(`facet: ${facet}`);
-      facetId = facet;
-      facetPlane = [x, y, z, w];
-    },
-    (loop, sface) => {
-      console.log(`loop: ${loop} sface: ${sface}`);
-      loopId = loop;
-    },
-    (halfedge, vertex, next, twin) => {
-      console.log(`edge: ${halfedge} ${vertex} ${next} ${twin}`);
-      const point = vertexMap[vertex];
-      graph.edges[halfedge] = { point, next, twin, loop: facetId };
-      if (graph.faces[facetId] === undefined) {
-        // The facetPlane seems to be incorrect.
-        graph.faces[facetId] = { plane: facetPlane };
-        if (graph.volumes[volumeId] === undefined) {
-          graph.volumes[volumeId] = { faces: [] };
-        }
-        graph.volumes[volumeId].faces.push(facetId);
-      }
-      if (graph.loops[loopId] === undefined) {
-        graph.loops[loopId] = { edge: halfedge, face: facetId };
-        if (graph.faces[facetId].loop === undefined) {
-          graph.faces[facetId].loop = loopId;
-        } else if (graph.faces[facetId].holes) {
-          graph.faces[facetId].holes.push(loopId);
-        } else {
-          graph.faces[facetId].holes = [loopId];
-        }
-      }
-      polygon.push(graph.points[point]);
-    },
-    (vertex, x, y, z) => addPoint(vertex, [x, y, z])
-  );
-  return graph;
-};
-
-const fromNefPolyhedronToSurfaceMesh = (nefPolyhedron) => {
-  const c = getCgal();
-  const mesh = c.FromNefPolyhedronToSurfaceMesh(nefPolyhedron);
-  return mesh;
-};
-
-const fromNefPolyhedronToPolygons = (nef) => {
-  const c = getCgal();
-  const polygons = [];
-  let polygon;
-  c.FromNefPolyhedronToPolygons(
-    nef,
-    false,
-    (x, y, z) => polygon.push([x, y, z]),
-    () => {
-      polygon = [];
-      polygons.push(polygon);
-    }
-  );
-  return polygons;
-};
-
-const fromNefPolyhedronToTriangles = (nef) => {
-  const c = getCgal();
-  const triangles = [];
-  let triangle;
-  c.FromNefPolyhedronToPolygons(
-    nef,
-    true,
-    (x, y, z) => triangle.push([x, y, z]),
-    () => {
-      triangle = [];
-      triangles.push(triangle);
-    }
-  );
-  return triangles;
 };
 
 const fromPointsToAlphaShapeAsSurfaceMesh = (
@@ -10158,24 +9932,6 @@ const fromPointsToSurfaceMesh = (points) => {
   });
 };
 
-const fromPolygonsToNefPolyhedron = (jsPolygons) => {
-  const c = getCgal();
-  const nefPolyhedron = c.FromPolygonSoupToNefPolyhedron(
-    (triples, polygons) => {
-      let index = 0;
-      for (const jsPolygon of jsPolygons) {
-        const polygon = new c.Polygon();
-        for (const [x, y, z] of jsPolygon) {
-          c.addTriple(triples, x, y, z);
-          c.Polygon__push_back(polygon, index++);
-        }
-        polygons.push_back(polygon);
-      }
-    }
-  );
-  return nefPolyhedron;
-};
-
 const fromPolygonsToSurfaceMesh = (jsPolygons) => {
   const c = getCgal();
   const surfaceMesh = c.FromPolygonSoupToSurfaceMesh((triples, polygons) => {
@@ -10200,19 +9956,15 @@ const fromSurfaceMeshToGraph = (mesh) => {
   if (mesh.has_garbage()) {
     c.Surface_mesh__collect_garbage(mesh);
   }
-  const graph = { edges: [], faces: [], loops: [], points: [], exact: [] };
-  const polygon = [];
-  let face = -1;
+  const graph = {
+    edges: [],
+    points: [],
+    exactPoints: [],
+    faces: [],
+    facets: [],
+  };
   c.Surface_mesh__explore(
     mesh,
-    (faceId) => {
-      if (polygon.length >= 3) {
-        graph.faces[face].plane = fromPolygon(polygon);
-        if (graph.faces[face].plane === undefined) ;
-      }
-      polygon.length = 0;
-      face = faceId;
-    },
     (point, x, y, z, exactX, exactY, exactZ) => {
       if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
         throw Error('die');
@@ -10223,15 +9975,17 @@ const fromSurfaceMeshToGraph = (mesh) => {
         }
       }
       graph.points[point] = [x, y, z];
-      graph.exact[point] = [exactX, exactY, exactZ];
+      graph.exactPoints[point] = [exactX, exactY, exactZ];
     },
-    (point, edge, next, twin) => {
-      graph.edges[edge] = { point, next, twin, loop: face };
-      if (graph.faces[face] === undefined) {
-        graph.faces[face] = { loop: face };
-        graph.loops[face] = { edge, face };
-      }
-      polygon.push(graph.points[point]);
+    (edge, point, next, twin, facet, face) => {
+      graph.edges[edge] = { point, next, twin, facet, face };
+      graph.facets[facet] = { edge };
+    },
+    (face, x, y, z, w, exactX, exactY, exactZ, exactW) => {
+      graph.faces[face] = {
+        plane: [x, y, z, w],
+        exactPlane: [exactX, exactY, exactZ, exactW],
+      };
     }
   );
   graph.isClosed = c.Surface_mesh__is_closed(mesh);
@@ -10309,7 +10063,7 @@ const insetOfPolygon = (
       if (isHole) {
         output.holes.push(points);
       } else {
-        output = { boundary: points, holes: [] };
+        output = { boundary: points, holes: [], plane };
         outputs.push(output);
       }
     },
@@ -10319,9 +10073,6 @@ const insetOfPolygon = (
   );
   return outputs;
 };
-
-const intersectionOfNefPolyhedrons = (a, b) =>
-  getCgal().IntersectionOfNefPolyhedrons(a, b);
 
 const intersectionOfSurfaceMeshes = (a, b) =>
   getCgal().IntersectionOfSurfaceMeshes(a, b);
@@ -10363,7 +10114,7 @@ const offsetOfPolygon = (
       if (isHole) {
         output.holes.push(points);
       } else {
-        output = { boundary: points, holes: [] };
+        output = { boundary: points, holes: [], plane };
         outputs.push(output);
       }
     },
@@ -10392,18 +10143,6 @@ const projectToPlaneOfSurfaceMesh = (
     planeZ,
     -planeW
   );
-
-// Note that the topology of an outline is disconnected.
-const outlineOfSurfaceMesh = (mesh) =>
-  getCgal().OutlineOfSurfaceMesh(mesh);
-
-const sectionOfNefPolyhedron = (
-  nefPolyhedron,
-  x = 0,
-  y = 0,
-  z = 0,
-  w = 0
-) => getCgal().SectionOfNefPolyhedron(nefPolyhedron, x, y, z, -w);
 
 const sectionOfSurfaceMesh = (mesh, planes) => {
   const c = getCgal();
@@ -10520,10 +10259,7 @@ const transformSurfaceMesh = (mesh, jsTransform) =>
     toCgalTransformFromJsTransform(jsTransform)
   );
 
-const unionOfNefPolyhedrons = (a, b) =>
-  getCgal().UnionOfNefPolyhedrons(a, b);
-
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, composeTransforms, differenceOfNefPolyhedrons, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToNefPolyhedron, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromNefPolyhedronFacetsToGraph, fromNefPolyhedronShellsToGraph, fromNefPolyhedronToPolygons, fromNefPolyhedronToSurfaceMesh, fromNefPolyhedronToTriangles, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToNefPolyhedron, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToNefPolyhedron, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfNefPolyhedrons, intersectionOfSurfaceMeshes, offsetOfPolygon, outlineOfSurfaceMesh, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, sectionOfNefPolyhedron, sectionOfSurfaceMesh, skeletalInsetOfPolygon, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfNefPolyhedrons, unionOfSurfaceMeshes };
+export { arrangePaths, composeTransforms, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygon, intersectionOfSurfaceMeshes, offsetOfPolygon, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, sectionOfSurfaceMesh, skeletalInsetOfPolygon, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfSurfaceMeshes };
