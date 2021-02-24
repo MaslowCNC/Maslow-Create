@@ -1,6 +1,6 @@
 import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, canonicalize as canonicalize$1, close as close$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon } from './jsxcad-geometry-path.js';
-import { arrangePaths, insetOfPolygon } from './jsxcad-algorithm-cgal.js';
+import { arrangePaths, insetOfPolygonWithHoles } from './jsxcad-algorithm-cgal.js';
 import { fromPoint, min, max, subtract, length, add, scale as scale$1, normalize } from './jsxcad-math-vec3.js';
 
 const transform = (matrix, paths) =>
@@ -66,23 +66,18 @@ const intersection = (pathset, ...pathsets) => pathset;
 const inset = (plane, paths, initial, step, limit) => {
   const [x = 0, y = 0, z = 1, w = 0] = plane;
   const output = [];
-  for (const { boundary: inputBoundary, holes: inputHoles } of arrangePaths(
-    x,
-    y,
-    z,
-    w,
-    paths
-  )) {
-    for (const { boundary, holes } of insetOfPolygon(
+  for (const polygonWithHoles of arrangePaths(x, y, z, w, paths)) {
+    for (const { points, holes } of insetOfPolygonWithHoles(
       initial,
       step,
       limit,
       [x, y, z, w],
-      inputBoundary,
-      inputHoles
+      polygonWithHoles
     )) {
-      output.push(boundary);
-      output.push(...holes);
+      output.push(points);
+      for (const { points } of holes) {
+        output.push(points);
+      }
     }
   }
   return output;

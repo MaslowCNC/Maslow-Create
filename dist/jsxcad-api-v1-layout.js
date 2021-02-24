@@ -1,4 +1,4 @@
-import { Empty, Square, Hershey } from './jsxcad-api-v1-shapes.js';
+import { Empty, Box, Hershey } from './jsxcad-api-v1-shapes.js';
 import { getLeafs, taggedItem, taggedDisjointAssembly, toDisjointGeometry, taggedLayers, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid } from './jsxcad-geometry-tagged.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { max } from './jsxcad-api-v1-math.js';
@@ -43,11 +43,7 @@ const pack = (
   }
   let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
   if (size === undefined) {
-    packedShape = packedShape.center({
-      centerX: true,
-      centerY: true,
-      centerZ: false,
-    });
+    packedShape = packedShape.align('xy');
   }
   return packedShape;
 };
@@ -94,7 +90,7 @@ const buildLayoutGeometry = ({
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
-  const visualization = Square(
+  const visualization = Box(
     Math.max(pageWidth, margin),
     Math.max(pageLength, margin)
   )
@@ -203,7 +199,6 @@ const Page = (
 const PageMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Page = PageMethod; // Deprecate
 Shape.prototype.page = PageMethod;
 
 const ensurePages = (geometry, depth = 0) => {
@@ -221,13 +216,11 @@ const ensurePages = (geometry, depth = 0) => {
 const PackMethod = function (options = {}) {
   return Page(options, this);
 };
-Shape.prototype.Pack = PackMethod; // Deprecate
 Shape.prototype.pack = PackMethod;
 
 const FixMethod = function (options = {}) {
   return Page({ ...options, pack: false }, this);
 };
-Shape.prototype.Fix = FixMethod; // Deprecate
 Shape.prototype.fix = FixMethod;
 
 const api = {

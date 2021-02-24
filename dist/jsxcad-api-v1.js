@@ -5,20 +5,17 @@ export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js
 import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
 export { Page, pack } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
-import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-tools.js';
-import { Peg, Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Block, Box, ChainedHull, Circle, Cone, Difference, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Intersection, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, RegularPolygon, Rod, Septagon, Spiral, Square, Tetragon, Toolpath, Torus, Triangle, Union, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
 export { Plan } from './jsxcad-api-v1-plan.js';
-import { Shell } from './jsxcad-api-v1-shell.js';
-export { Shell } from './jsxcad-api-v1-shell.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
@@ -27,6 +24,10 @@ import { readSvg } from './jsxcad-api-v1-svg.js';
 export { readSvg } from './jsxcad-api-v1-svg.js';
 import { readStl } from './jsxcad-api-v1-stl.js';
 export { readStl } from './jsxcad-api-v1-stl.js';
+import { readObj } from './jsxcad-api-v1-obj.js';
+export { readObj } from './jsxcad-api-v1-obj.js';
+import { readOff } from './jsxcad-api-v1-off.js';
+export { readOff } from './jsxcad-api-v1-off.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -471,15 +472,11 @@ var api = /*#__PURE__*/Object.freeze({
   saveGeometry: saveGeometry,
   Line2: Line2,
   Plan: Plan,
-  Shell: Shell,
   Arc: Arc,
   Assembly: Assembly,
-  Block: Block,
   Box: Box,
   ChainedHull: ChainedHull,
-  Circle: Circle,
   Cone: Cone,
-  Difference: Difference,
   Empty: Empty,
   Group: Group,
   Hershey: Hershey,
@@ -487,7 +484,6 @@ var api = /*#__PURE__*/Object.freeze({
   Hull: Hull,
   Icosahedron: Icosahedron,
   Implicit: Implicit,
-  Intersection: Intersection,
   Line: Line,
   LoopedHull: LoopedHull,
   Octagon: Octagon,
@@ -500,16 +496,12 @@ var api = /*#__PURE__*/Object.freeze({
   Points: Points,
   Polygon: Polygon,
   Polyhedron: Polyhedron,
-  RegularPolygon: RegularPolygon,
-  Rod: Rod,
   Septagon: Septagon,
   Spiral: Spiral,
-  Square: Square,
   Tetragon: Tetragon,
   Toolpath: Toolpath,
   Torus: Torus,
   Triangle: Triangle,
-  Union: Union,
   Wave: Wave,
   Weld: Weld,
   Item: Item,
@@ -527,6 +519,8 @@ var api = /*#__PURE__*/Object.freeze({
   vec: vec,
   readSvg: readSvg,
   readStl: readStl,
+  readObj: readObj,
+  readOff: readOff,
   foot: foot,
   inch: inch,
   mm: mm,

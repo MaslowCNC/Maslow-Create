@@ -1,15 +1,10 @@
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
 import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, taggedLayers, getSolids, union, taggedZ0Surface, getSurfaces, getZ0Surfaces, getPaths, taggedPaths, measureBoundingBox, taggedSolid, taggedPoints, measureHeights } from './jsxcad-geometry-tagged.js';
+import { taggedGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1 } from './jsxcad-geometry-tagged.js';
 import { Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
-import { isCounterClockwise, flip, getEdges } from './jsxcad-geometry-path.js';
-import { toPlane } from './jsxcad-math-poly3.js';
 import { add, normalize, subtract } from './jsxcad-math-vec3.js';
 import { fromNormalAndPoint } from './jsxcad-math-plane.js';
-import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
-import { fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { fromPolygons } from './jsxcad-geometry-solid.js';
+import { getEdges } from './jsxcad-geometry-path.js';
 
 const Alpha = (shape, componentLimit = 1) => {
   const points = [];
@@ -158,54 +153,6 @@ const sectionMethod = function (...args) {
 };
 Shape.prototype.section = sectionMethod;
 
-const squash = (shape) => {
-  const geometry = shape.toKeptGeometry();
-  const result = taggedLayers({});
-  for (const { solid, tags } of getSolids(geometry)) {
-    const polygons = [];
-    for (const surface of solid) {
-      for (const path of surface) {
-        const flat = path.map(([x, y]) => [x, y, 0]);
-        if (toPlane(flat) === undefined) continue;
-        polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
-      }
-    }
-    result.content.push(
-      union(...polygons.map((polygon) => taggedZ0Surface({ tags }, [polygon])))
-    );
-  }
-  for (const { surface, tags } of getSurfaces(geometry)) {
-    const polygons = [];
-    for (const path of surface) {
-      const flat = path.map(([x, y]) => [x, y, 0]);
-      if (toPlane(flat) === undefined) continue;
-      polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
-    }
-    result.content.push(taggedZ0Surface({ tags }, polygons));
-  }
-  for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
-    const polygons = [];
-    for (const path of z0Surface) {
-      polygons.push(path);
-    }
-    result.content.push(taggedZ0Surface({ tags }, polygons));
-  }
-  for (const { paths, tags } of getPaths(geometry)) {
-    const flatPaths = [];
-    for (const path of paths) {
-      flatPaths.push(path.map(([x, y]) => [x, y, 0]));
-    }
-    result.content.push({ type: 'paths', paths: flatPaths, tags });
-    result.content.push(taggedPaths({ tags }, flatPaths));
-  }
-  return Shape$1.fromGeometry(result);
-};
-
-const squashMethod = function () {
-  return squash(this);
-};
-Shape$1.prototype.squash = squashMethod;
-
 const START = 0;
 const END = 1;
 
@@ -256,235 +203,8 @@ Shape.prototype.withSweep = function (tool, up) {
   return this.with(sweep(this, tool, up));
 };
 
-const toolpath = (
-  shape,
-  diameter = 1,
-  { overcut = false, solid = true } = {}
-) =>
-  Shape.fromGeometry({
-    type: 'paths',
-    paths: toolpath$1(shape.toKeptGeometry(), diameter, overcut, solid),
-  });
-
-const method = function (...options) {
-  return toolpath(this, ...options);
-};
-
-Shape.prototype.toolpath = method;
-Shape.prototype.withToolpath = function (...args) {
-  return this.with(toolpath(this, ...args));
-};
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const floor = (value, resolution) =>
-  Math.floor(value / resolution) * resolution;
-const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
-
-const floorPoint = ([x, y, z], resolution) => [
-  floor(x, resolution),
-  floor(y, resolution),
-  floor(z, resolution),
-];
-const ceilPoint = ([x, y, z], resolution) => [
-  ceil(x, resolution),
-  ceil(y, resolution),
-  ceil(z, resolution),
-];
-
-const voxels = (shape, resolution = 1) => {
-  const offset = resolution / 2;
-  const geometry = shape.toDisjointGeometry();
-  const normalize = createNormalize3();
-  const [boxMin, boxMax] = measureBoundingBox(geometry);
-  const min = floorPoint(boxMin, resolution);
-  const max = ceilPoint(boxMax, resolution);
-  const classifiers = [];
-  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
-    classifiers.push({ bsp: fromSolid(solid, normalize) });
-  }
-  const test = (point) => {
-    for (const { bsp } of classifiers) {
-      if (containsPoint$1(bsp, point)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  const polygons = [];
-  for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-    for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
-        const state = test([x, y, z]);
-        if (state !== test([x + resolution, y, z])) {
-          const face = [
-            [x + offset, y - offset, z - offset],
-            [x + offset, y + offset, z - offset],
-            [x + offset, y + offset, z + offset],
-            [x + offset, y - offset, z + offset],
-          ];
-          polygons.push(state ? face : face.reverse());
-        }
-        if (state !== test([x, y + resolution, z])) {
-          const face = [
-            [x - offset, y + offset, z - offset],
-            [x + offset, y + offset, z - offset],
-            [x + offset, y + offset, z + offset],
-            [x - offset, y + offset, z + offset],
-          ];
-          polygons.push(state ? face.reverse() : face);
-        }
-        if (state !== test([x, y, z + resolution])) {
-          const face = [
-            [x - offset, y - offset, z + offset],
-            [x + offset, y - offset, z + offset],
-            [x + offset, y + offset, z + offset],
-            [x - offset, y + offset, z + offset],
-          ];
-          polygons.push(state ? face : face.reverse());
-        }
-      }
-    }
-  }
-  return Shape.fromGeometry(taggedSolid({}, fromPolygons(polygons)));
-};
-
-const voxelsMethod = function (...args) {
-  return voxels(this, ...args);
-};
-Shape.prototype.voxels = voxelsMethod;
-
-const surfaceCloud = (shape, resolution = 1) => {
-  const offset = resolution / 2;
-  const geometry = shape.toDisjointGeometry();
-  const normalize = createNormalize3();
-  const [boxMin, boxMax] = measureBoundingBox(geometry);
-  const min = floorPoint(boxMin, resolution);
-  const max = ceilPoint(boxMax, resolution);
-  const classifiers = [];
-  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
-    classifiers.push({ bsp: fromSolid(solid, normalize) });
-  }
-  const test = (point) => {
-    for (const { bsp } of classifiers) {
-      if (containsPoint$1(bsp, point)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  const paths = [];
-  for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-    for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
-        const state = test([x, y, z]);
-        if (state !== test([x + resolution, y, z])) {
-          paths.push([null, [x, y, z], [x + resolution, y, z]]);
-        }
-        if (state !== test([x, y + resolution, z])) {
-          paths.push([null, [x, y, z], [x, y + resolution, z]]);
-        }
-        if (state !== test([x, y, z + resolution])) {
-          paths.push([null, [x, y, z], [x, y, z + resolution]]);
-        }
-      }
-    }
-  }
-  return Shape.fromGeometry(taggedPaths({}, paths));
-};
-
-const surfaceCloudMethod = function (...args) {
-  return surfaceCloud(this, ...args);
-};
-Shape.prototype.surfaceCloud = surfaceCloudMethod;
-
-const withSurfaceCloudMethod = function (...args) {
-  return this.with(surfaceCloud(this, ...args));
-};
-Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
-
-const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
-  const dX = aX - bX;
-  if (dX !== 0) {
-    return dX;
-  }
-  const dY = aY - bY;
-  if (dY !== 0) {
-    return dY;
-  }
-  const dZ = aZ - bZ;
-  return dZ;
-};
-
-const cloud = (shape, resolution = 1) => {
-  const offset = resolution / 2;
-  const geometry = shape.toDisjointGeometry();
-  const normalize = createNormalize3();
-  const [boxMin, boxMax] = measureBoundingBox(geometry);
-  const min = floorPoint(boxMin, resolution);
-  const max = ceilPoint(boxMax, resolution);
-  const classifiers = [];
-  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
-    classifiers.push({ bsp: fromSolid(solid, normalize) });
-  }
-  const test = (point) => {
-    for (const { bsp } of classifiers) {
-      if (containsPoint$1(bsp, point)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  const points = [];
-  for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-    for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-      for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
-        if (test([x, y, z])) {
-          points.push([x, y, z]);
-        }
-      }
-    }
-  }
-  points.sort(orderPoints);
-  return Shape.fromGeometry(taggedPoints({}, points));
-};
-
-const cloudMethod = function (...args) {
-  return cloud(this, ...args);
-};
-Shape.prototype.cloud = cloudMethod;
-
-// FIX: move this
-const containsPoint = (shape, point) => {
-  for (const { solid } of getSolids(shape.toDisjointGeometry())) {
-    const bsp = fromSolid(solid, createNormalize3());
-    if (containsPoint$1(bsp, point)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const containsPointMethod = function (point) {
-  return containsPoint(this, point);
-};
-Shape.prototype.containsPoint = containsPointMethod;
-
-const heightCloud = (shape, resolution) => {
-  const heights = measureHeights(shape.toDisjointGeometry(), resolution);
-  return Shape.fromGeometry(taggedPoints({}, heights));
-};
-
-const heightCloudMethod = function (resolution) {
-  return heightCloud(this, resolution);
-};
-Shape.prototype.heightCloud = heightCloudMethod;
-
 const api = {
   Alpha,
-  // Loop,
   extrude,
   extrudeToPlane,
   fill,
@@ -492,11 +212,8 @@ const api = {
   outline,
   projectToPlane,
   section,
-  squash,
   sweep,
-  toolpath,
-  voxels,
 };
 
 export default api;
-export { Alpha, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, projectToPlane, section, squash, sweep, toolpath, voxels };
+export { Alpha, cloudSolid, extrude, extrudeToPlane, fill, inline, outline, projectToPlane, section, sweep };

@@ -3,7 +3,6 @@ import { scale, add, unit } from './jsxcad-math-vec3.js';
 import { cachePoints, cache as cache$1 } from './jsxcad-cache.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { scale as scale$1, translate, flip, assertGood, deduplicate, rotateX, isClosed } from './jsxcad-geometry-path.js';
-import { fromPolygons } from './jsxcad-geometry-solid.js';
 
 const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
 
@@ -427,7 +426,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  return fromPolygons(polygons);
+  return polygons;
 };
 
 const buildRingSphere = cache$1(buildRingSphereImpl);
@@ -573,7 +572,7 @@ const loopImpl = (
       lastPath
     );
   }
-  return { type: 'solid', solid: fromPolygons(polygons) };
+  return polygons;
 };
 
 const loop = cache$1(loopImpl);

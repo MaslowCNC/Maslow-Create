@@ -1,17 +1,12 @@
 import { identityMatrix, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$3, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$1, measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-solid.js';
-import { close, createOpenPath } from './jsxcad-geometry-path.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$5, canonicalize as canonicalize$5, eachPoint as eachPoint$4, flip as flip$3 } from './jsxcad-geometry-paths.js';
-import { canonicalize as canonicalize$4 } from './jsxcad-math-plane.js';
-import { transform as transform$4, canonicalize as canonicalize$3, eachPoint as eachPoint$5, flip as flip$4, measureBoundingBox as measureBoundingBox$1, union as union$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { realizeGraph, transform as transform$2, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$4, offset as offset$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, toSolid, toSurface, test as test$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as eachPoint$2, flip as flip$1 } from './jsxcad-geometry-paths.js';
+import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
+import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
+import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
+import { realizeGraph, transform as transform$1, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, offset as offset$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, toTriangles, test as test$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
-import { fromSolid, unifyBspTrees, fromSurface, removeExteriorPaths } from './jsxcad-geometry-bsp.js';
-import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
 
 const taggedTransform = (options = {}, matrix, untransformed) => {
@@ -27,6 +22,12 @@ const transformImpl = (matrix, untransformed) =>
   taggedTransform({}, matrix, untransformed);
 
 const transform = cacheTransform(transformImpl);
+
+const isNotVoid = ({ tags }) => {
+  return tags === undefined || tags.includes('compose/non-positive') === false;
+};
+
+const isVoid = (geometry) => !isNotVoid(geometry);
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -117,64 +118,6 @@ const visit = (geometry, op, state) => {
   return walk(geometry, state);
 };
 
-const reconcile = (geometry, normalize = createNormalize3()) =>
-  rewrite(geometry, (geometry, descend) => {
-    if (geometry.type === 'solid') {
-      return {
-        type: 'solid',
-        solid: reconcile$1(geometry.solid, normalize),
-        tags: geometry.tags,
-      };
-    } else {
-      return descend();
-    }
-  });
-
-const makeWatertight = (
-  geometry,
-  normalize = createNormalize3(),
-  onFixed
-) =>
-  rewrite(geometry, (geometry, descend) => {
-    if (geometry.type === 'solid') {
-      return {
-        type: 'solid',
-        solid: makeWatertight$1(geometry.solid, normalize, onFixed),
-        tags: geometry.tags,
-      };
-    } else {
-      return descend();
-    }
-  });
-
-const isWatertight = (geometry) => {
-  let watertight = true;
-  visit(geometry, (geometry, descend) => {
-    if (geometry.type === 'solid' && !isWatertight$1(geometry.solid)) {
-      watertight = false;
-    }
-    return descend();
-  });
-  return watertight;
-};
-
-const findOpenEdges = (geometry) => {
-  const openEdges = [];
-  visit(geometry, (geometry, descend) => {
-    if (geometry.type === 'solid') {
-      openEdges.push(...findOpenEdges$1(geometry.solid).map(close));
-    }
-    return descend();
-  });
-  return { type: 'paths', paths: openEdges };
-};
-
-const isNotVoid = ({ tags }) => {
-  return tags === undefined || tags.includes('compose/non-positive') === false;
-};
-
-const isVoid = (geometry) => !isNotVoid(geometry);
-
 const allTags = (geometry) => {
   const collectedTags = new Set();
   const op = ({ tags }, descend) => {
@@ -225,9 +168,7 @@ const realize = (geometry) => {
     switch (geometry.type) {
       case 'graph':
         return taggedGraph({ tags }, realizeGraph(geometry.graph));
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
       case 'paths':
         // No lazy representation to realize.
@@ -245,6 +186,7 @@ const realize = (geometry) => {
       case 'layers':
       case 'layout':
       case 'sketch':
+      case 'transform':
         return descend();
       default:
         throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
@@ -252,10 +194,6 @@ const realize = (geometry) => {
   };
 
   return rewrite(geometry, op);
-};
-
-const taggedSurface = ({ tags }, surface) => {
-  return { type: 'surface', tags, surface };
 };
 
 const transformedGeometry = Symbol('transformedGeometry');
@@ -301,27 +239,16 @@ const toTransformedGeometry = (geometry) => {
             composedMatrix
           );
         }
+        case 'triangles':
+          return descend({
+            triangles: transform$4(matrix, geometry.triangles),
+          });
         case 'paths':
-          return descend({ paths: transform$5(matrix, geometry.paths) });
+          return descend({ paths: transform$3(matrix, geometry.paths) });
         case 'points':
-          return descend({ points: transform$4(matrix, geometry.points) });
-        case 'solid':
-          return descend({ solid: transform$3(matrix, geometry.solid) });
+          return descend({ points: transform$2(matrix, geometry.points) });
         case 'graph':
-          return descend({ graph: transform$2(matrix, geometry.graph) });
-        case 'surface':
-        case 'z0Surface': {
-          const surface = geometry.z0Surface || geometry.surface;
-          if (surface.length === 0) {
-            // Empty geometries don't need transforming, but we'll return a
-            // fresh one to avoid any caching.
-            return taggedSurface({}, []);
-          }
-          return taggedSurface(
-            { tags: geometry.tags },
-            transform$1(matrix, surface)
-          );
-        }
+          return descend({ graph: transform$1(matrix, geometry.graph) });
         default:
           throw Error(
             `Unexpected geometry ${geometry.type} see ${JSON.stringify(
@@ -339,29 +266,25 @@ const canonicalize = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'points':
-        return descend({ points: canonicalize$3(geometry.points) });
+        return descend({ points: canonicalize$1(geometry.points) });
       case 'paths':
-        return descend({ paths: canonicalize$5(geometry.paths) });
+        return descend({ paths: canonicalize$4(geometry.paths) });
+      case 'triangles':
+        return descend({ triangles: canonicalize$3(geometry.triangles) });
       case 'plan':
         return descend({
-          marks: canonicalize$3(geometry.marks),
-          planes: geometry.planes.map(canonicalize$4),
+          marks: canonicalize$1(geometry.marks),
+          planes: geometry.planes.map(canonicalize$2),
         });
       case 'graph': {
         const realizedGeometry = realize(geometry);
         return descend({
           graph: {
             ...realizedGeometry.graph,
-            points: canonicalize$3(realizedGeometry.graph.points),
+            points: canonicalize$1(realizedGeometry.graph.points),
           },
         });
       }
-      case 'surface':
-        return descend({ surface: canonicalize$2(geometry.surface) });
-      case 'z0Surface':
-        return descend({ z0Surface: canonicalize$2(geometry.z0Surface) });
-      case 'solid':
-        return descend({ solid: canonicalize$1(geometry.solid) });
       case 'item':
       case 'assembly':
       case 'disjointAssembly':
@@ -422,8 +345,6 @@ const taggedPaths = ({ tags }, paths) => {
 
 const registry = new Map();
 
-// The plan is destructively updated with the reification as its content.
-// This should be safe as reification is idempotent.
 const reify = (geometry) => {
   if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
@@ -431,9 +352,7 @@ const reify = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
       case 'paths':
         // No plan to realize.
@@ -447,9 +366,9 @@ const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          geometry.content = [reifier(geometry)];
+          return descend({ content: [reifier(geometry)] });
         }
-        return descend();
+        return geometry;
       }
       case 'assembly':
       case 'item':
@@ -464,9 +383,7 @@ const reify = (geometry) => {
     }
   };
 
-  visit(geometry, op);
-
-  return geometry;
+  return rewrite(geometry, op);
 };
 
 // We expect the type to be uniquely qualified.
@@ -676,15 +593,9 @@ const eachPoint = (emit, geometry) => {
       case 'layout':
         return descend();
       case 'points':
-        return eachPoint$5(emit, geometry.points);
+        return eachPoint$3(emit, geometry.points);
       case 'paths':
-        return eachPoint$4(emit, geometry.paths);
-      case 'solid':
-        return eachPoint$3(emit, geometry.solid);
-      case 'surface':
-        return eachPoint$2(emit, geometry.surface);
-      case 'z0Surface':
-        return eachPoint$2(emit, geometry.z0Surface);
+        return eachPoint$2(emit, geometry.paths);
       case 'graph':
         return eachPoint$1(geometry.graph, emit);
       default:
@@ -778,9 +689,7 @@ const extrude = (geometry, height, depth) => {
           extrude$1(geometry.graph, height, depth)
         );
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
@@ -817,9 +726,7 @@ const extrudeToPlane = (geometry, highPlane, lowPlane, direction) => {
           extrudeToPlane$1(geometry.graph, highPlane, lowPlane, direction)
         );
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'paths':
       case 'points':
         // Not implemented yet.
@@ -847,15 +754,9 @@ const flip = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'points':
-        return { ...geometry, points: flip$4(geometry.points) };
+        return { ...geometry, points: flip$2(geometry.points) };
       case 'paths':
-        return { ...geometry, paths: flip$3(geometry.paths) };
-      case 'surface':
-        return { ...geometry, surface: flip$2(geometry.surface) };
-      case 'z0Surface':
-        return { ...geometry, surface: flip$2(geometry.z0Surface) };
-      case 'solid':
-        return { ...geometry, solid: flip$1(geometry.solid) };
+        return { ...geometry, paths: flip$1(geometry.paths) };
       case 'assembly':
       case 'disjointAssembly':
       case 'layers':
@@ -1021,36 +922,6 @@ const getNonVoidPoints = (geometry) => {
   return pointsets;
 };
 
-const getNonVoidSolids = (geometry) => {
-  const solids = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'solid') {
-      solids.push(item);
-    }
-  });
-  return solids;
-};
-
-const getNonVoidSurfaces = (geometry) => {
-  const surfaces = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'surface') {
-      surfaces.push(item);
-    }
-  });
-  return surfaces;
-};
-
-const getNonVoidZ0Surfaces = (geometry) => {
-  const z0Surfaces = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'z0Surface') {
-      z0Surfaces.push(item);
-    }
-  });
-  return z0Surfaces;
-};
-
 const getPaths = (geometry) => {
   const pathsets = [];
   eachItem(geometry, (item) => {
@@ -1118,42 +989,12 @@ const getPoints = (geometry) => {
   return pointsets;
 };
 
-const getSolids = (geometry) => {
-  const solids = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'solid') {
-      solids.push(item);
-    }
-  });
-  return solids;
-};
-
-const getSurfaces = (geometry) => {
-  const surfaces = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'surface') {
-      surfaces.push(item);
-    }
-  });
-  return surfaces;
-};
-
 const getTags = (geometry) => {
   if (geometry.tags === undefined) {
     return [];
   } else {
     return geometry.tags;
   }
-};
-
-const getZ0Surfaces = (geometry) => {
-  const z0Surfaces = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'z0Surface') {
-      z0Surfaces.push(item);
-    }
-  });
-  return z0Surfaces;
 };
 
 // This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
@@ -1249,22 +1090,18 @@ const inset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(inset$1(geometry.graph, initial, step, limit))
+          inset$1(geometry.graph, initial, step, limit)
         );
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(
-            inset$1(fromPaths(geometry.paths), initial, step, limit)
-          )
+          inset$1(fromPaths(geometry.paths), initial, step, limit)
         );
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);
@@ -1288,32 +1125,6 @@ const inset = (geometry, initial = 1, step, limit) => {
 
 const keep = (tags, geometry) =>
   rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
-
-const measureArea = (rawGeometry) => {
-  const geometry = toKeptGeometry(rawGeometry);
-  let area = 0;
-  const op = (geometry, descend) => {
-    if (isVoid(geometry)) {
-      return;
-    }
-    switch (geometry.type) {
-      case 'surface':
-        area += measureArea$1(geometry.surface);
-        break;
-      case 'z0Surface':
-        area += measureArea$1(geometry.z0Surface);
-        break;
-      case 'solid':
-        for (const surface of geometry.solid) {
-          area += measureArea$1(surface);
-        }
-        break;
-    }
-    descend();
-  };
-  visit(geometry, op);
-  return area;
-};
 
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
@@ -1347,17 +1158,15 @@ const measureBoundingBox = (geometry) => {
       case 'sketch':
         return descend();
       case 'graph':
-        return update(measureBoundingBox$4(geometry.graph));
+        return update(measureBoundingBox$3(geometry.graph));
       case 'layout':
         return update(geometry.marks);
-      case 'solid':
-        return update(measureBoundingBox$3(geometry.solid));
-      case 'surface':
-        return update(measureBoundingBox$2(geometry.surface));
       case 'points':
-        return update(measureBoundingBox$1(geometry.points));
+        return update(measureBoundingBox$2(geometry.points));
       case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
+      case 'triangles':
+        return update(measureBoundingBox$1(geometry.triangles));
       default:
         throw Error(`Unknown geometry: ${geometry.type}`);
     }
@@ -1368,103 +1177,23 @@ const measureBoundingBox = (geometry) => {
   return [minPoint, maxPoint];
 };
 
-const toBspTree = (geometry, normalize) => {
-  // Start with an empty tree.
-  let bspTree = fromSolid([], normalize);
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'solid': {
-        bspTree = unifyBspTrees(
-          bspTree,
-          fromSolid(geometry.solid, normalize)
-        );
-        return descend();
-      }
-      // FIX: We want some distinction between volumes for membership and volumes for composition.
-      case 'surface':
-      case 'z0Surface': {
-        bspTree = unifyBspTrees(
-          bspTree,
-          fromSurface(geometry.surface || geometry.z0Surface, normalize)
-        );
-        return descend();
-      }
-      case 'paths':
-      case 'points':
-      case 'plan':
-      case 'assembly':
-      case 'item':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'sketch': {
-        return descend();
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  visit(geometry, op);
-
-  return bspTree;
-};
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const measureHeights = (geometry, resolution = 1) => {
-  const normalize = createNormalize3();
-  const [min, max] = measureBoundingBox(geometry);
-  const bspTree = toBspTree(geometry, normalize);
-  const paths = [];
-  const minX = Math.floor(min[X]);
-  const maxX = Math.ceil(max[X]);
-  const minY = Math.floor(min[Y]);
-  const maxY = Math.ceil(max[Y]);
-  for (let x = minX; x <= maxX; x += resolution) {
-    for (let y = minY; y <= maxY; y += resolution) {
-      paths.push(
-        createOpenPath(normalize([x, y, min[Z]]), normalize([x, y, max[Z]]))
-      );
-    }
-  }
-  const clippedPaths = [];
-  removeExteriorPaths(bspTree, paths, normalize, (paths) =>
-    clippedPaths.push(...paths)
-  );
-  const heights = new Map();
-  const op = (point) => {
-    const key = `${point[X]}/${point[Y]}`;
-    if (!heights.has(key) || heights.get(key)[Z] < point[Z]) {
-      heights.set(key, point);
-    }
-  };
-  eachPoint$4(op, clippedPaths);
-  return [...heights.values()];
-};
-
 const offset = (geometry, initial = 1, step, limit) => {
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(offset$1(geometry.graph, initial, step, limit))
+          offset$1(geometry.graph, initial, step, limit)
         );
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedPaths(
+        return taggedGraph(
           { tags },
-          toPaths(
-            offset$1(fromPaths(geometry.paths), initial, step, limit)
-          )
+          offset$1(fromPaths(geometry.paths), initial, step, limit)
         );
       case 'plan':
         return offset(reify(geometry).content[0], initial, step, limit);
@@ -1493,29 +1222,14 @@ const offset = (geometry, initial = 1, step, limit) => {
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
 const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
-  const normalize = createNormalize3();
-
-  const keptGeometry = toKeptGeometry(geometry);
+  const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags, solid } of getNonVoidSolids(keptGeometry)) {
-    outlines.push(taggedPaths({ tags }, outlineSolid(solid, normalize)));
-  }
-  for (const { tags, graph } of getNonVoidGraphs(keptGeometry)) {
+  for (const { tags, graph } of getNonVoidGraphs(disjointGeometry)) {
     outlines.push(taggedPaths({ tags }, toPaths(graph)));
   }
   // Turn paths into wires.
-  for (const { tags = [], paths } of getNonVoidPaths(keptGeometry)) {
+  for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
     outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
-  }
-  // This is a bit tricky -- let's consider an assembly that produces an effective surface.
-  // For now, let's consolidate, and see what goes terribly wrong.
-  for (const { tags, surface } of getNonVoidSurfaces(keptGeometry)) {
-    outlines.push(
-      taggedPaths(
-        { tags },
-        outlineSurface(surface, normalize, includeFaces, includeHoles)
-      )
-    );
   }
   return outlines;
 };
@@ -1532,9 +1246,7 @@ const projectToPlane = (geometry, plane, direction) => {
           projectToPlane$1(geometry.graph, plane, direction)
         );
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
@@ -1569,8 +1281,8 @@ const sectionImpl = (geometry, planes) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const paths of section$1(graph, planes)) {
-      sections.push(taggedPaths({ tags }, paths));
+    for (const section of section$1(graph, planes)) {
+      sections.push(taggedGraph({ tags }, section));
     }
   }
   return taggedGroup({}, ...sections);
@@ -1585,9 +1297,7 @@ const smooth = (geometry, options) => {
       case 'graph': {
         return taggedGraph({ tags }, smooth$1(geometry.graph, options));
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
+      case 'triangles':
       case 'paths':
       case 'points':
         // Not implemented yet.
@@ -1611,8 +1321,8 @@ const smooth = (geometry, options) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const taggedSolid = ({ tags }, solid) => {
-  return { type: 'solid', tags, solid };
+const taggedTriangles = ({ tags }, triangles) => {
+  return { type: 'triangles', tags, triangles };
 };
 
 const soup = (geometry) => {
@@ -1626,7 +1336,7 @@ const soup = (geometry) => {
         } else if (graph.isClosed) {
           return taggedGroup(
             {},
-            taggedSolid({ tags }, toSolid(graph)),
+            taggedTriangles({ tags }, toTriangles(graph)),
             ...outline(geometry)
           );
         } else if (graph.isEmpty) {
@@ -1635,14 +1345,11 @@ const soup = (geometry) => {
           // FIX: Simplify this arrangement.
           return taggedGroup(
             {},
-            taggedSurface({ tags }, toSurface(graph)),
+            taggedTriangles({ tags }, toTriangles(graph)),
             ...outline(geometry)
           );
         }
       }
-      case 'solid':
-      case 'z0Surface':
-      case 'surface':
       case 'points':
       case 'paths':
         // Already soupy enough.
@@ -1730,10 +1437,6 @@ const taggedSketch = ({ tags }, ...content) => {
   return { type: 'sketch', tags, content };
 };
 
-const taggedZ0Surface = ({ tags }, z0Surface) => {
-  return { type: 'z0Surface', tags, z0Surface };
-};
-
 const test = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
@@ -1767,18 +1470,18 @@ const test = (geometry) => {
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 // FIX: Use createNormalize3
 const createPointNormalizer = () => {
   const map = new Map();
   const normalize = (coordinate) => {
     // Apply a spatial quantization to the 3 dimensional coordinate.
-    const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
-    const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
-    const nz = Math.floor(coordinate[Z$1] * multiplier - 0.5);
+    const nx = Math.floor(coordinate[X] * multiplier - 0.5);
+    const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
+    const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
     // Look for an existing inhabitant.
     const value = map.get(`${nx}/${ny}/${nz}`);
     if (value !== undefined) {
@@ -1898,4 +1601,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, findOpenEdges, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPeg, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, hash, inset, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, measureHeights, offset, outline, projectToPlane, read, realize, reconcile, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedTransform, taggedZ0Surface, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };

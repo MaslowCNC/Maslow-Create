@@ -53647,6 +53647,29 @@ const buildMeshes = async ({
       datasets.push(dataset);
       break;
     }
+    case 'triangles': {
+      const { positions, normals } = threejsGeometry.threejsTriangles;
+      const dataset = {};
+      const geometry = new BufferGeometry();
+      geometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
+      applyBoxUV(geometry);
+      const material = await buildMeshMaterial(definitions, tags);
+      if (tags.includes('compose/non-positive')) {
+        material.transparent = true;
+        material.opacity *= 0.2;
+      }
+      dataset.mesh = new Mesh(geometry, material);
+      dataset.mesh.layers.set(layer);
+      dataset.name = toName(threejsGeometry);
+      scene.add(dataset.mesh);
+      datasets.push(dataset);
+      break;
+    }
+    /*
     case 'solid': {
       const { positions, normals } = threejsGeometry.threejsSolid;
       const dataset = {};
@@ -53691,6 +53714,7 @@ const buildMeshes = async ({
       datasets.push(dataset);
       break;
     }
+*/
     default:
       throw Error(`Unexpected geometry: ${threejsGeometry.type}`);
   }

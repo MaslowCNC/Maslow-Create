@@ -1,33 +1,12 @@
-import { toPaths, toSolid, toSurface } from './jsxcad-geometry-graph.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toTriangles } from './jsxcad-geometry-polygons.js';
 import { toDisjointGeometry } from './jsxcad-geometry-tagged.js';
 
 const pointsToThreejsPoints = (points) => points;
 
-const solidToThreejsSolid = (solid) => {
+const trianglesToThreejsTriangles = (triangles) => {
   const normals = [];
   const positions = [];
-  for (const surface of solid) {
-    for (const triangle of toTriangles({}, surface)) {
-      const plane = toPlane(triangle);
-      if (plane === undefined) {
-        continue;
-      }
-      const [px, py, pz] = plane;
-      for (const [x = 0, y = 0, z = 0] of triangle) {
-        normals.push(px, py, pz);
-        positions.push(x, y, z);
-      }
-    }
-  }
-  return { normals, positions };
-};
-
-const surfaceToThreejsSurface = (surface) => {
-  const normals = [];
-  const positions = [];
-  for (const triangle of toTriangles({}, surface)) {
+  for (const triangle of triangles) {
     const plane = toPlane(triangle);
     if (plane === undefined) {
       continue;
@@ -105,39 +84,26 @@ const toThreejsGeometry = (geometry, supertags) => {
         tags,
         isThreejsGeometry: true,
       };
-    case 'solid':
+    case 'triangles':
       return {
-        type: 'solid',
-        threejsSolid: solidToThreejsSolid(geometry.solid),
+        type: 'triangles',
+        threejsTriangles: trianglesToThreejsTriangles(geometry.triangles),
         tags,
         isThreejsGeometry: true,
       };
-    case 'surface':
-      return {
-        type: 'surface',
-        threejsSurface: surfaceToThreejsSurface(geometry.surface),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'z0Surface':
-      return {
-        type: 'surface',
-        threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
-        tags,
-        isThreejsGeometry: true,
-      };
+    /*
     case 'graph':
       if (geometry.graph.isWireframe) {
         return {
           type: 'paths',
-          threejsPaths: toPaths(geometry.graph),
+          threejsPaths: toPathsFromGraph(geometry.graph),
           tags,
           isThreejsGeometry: true,
         };
       } else if (geometry.graph.isClosed) {
         return {
           type: 'solid',
-          threejsSolid: solidToThreejsSolid(toSolid(geometry.graph)),
+          threejsSolid: solidToThreejsSolid(toSolidFromGraph(geometry.graph)),
           tags,
           isThreejsGeometry: true,
         };
@@ -145,12 +111,13 @@ const toThreejsGeometry = (geometry, supertags) => {
         return {
           type: 'surface',
           threejsSurface: surfaceToThreejsSurface(
-            toSurface(geometry.graph)
+            toSurfaceFromGraph(geometry.graph)
           ),
           tags,
           isThreejsGeometry: true,
         };
       }
+*/
     default:
       throw Error(`Unexpected geometry: ${geometry.type}`);
   }
