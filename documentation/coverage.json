@@ -65,7 +65,7 @@
       "expectCount": 16,
       "actualCount": 15,
       "undocumentLines": [
-        58
+        51
       ]
     },
     "src/js/molecules/cutlayout.js": {
@@ -208,8 +208,8 @@
       "expectCount": 43,
       "actualCount": 41,
       "undocumentLines": [
-        530,
-        531
+        536,
+        537
       ]
     },
     "src/js/prototypes/connector.js": {

@@ -125,6 +125,9 @@ export default class Constant extends Atom{
          */
         this.max = 20
         
+        //Set the default
+        this.value = 10
+        
         this.setValues(values)
         
         this.addIO(&apos;output&apos;, &apos;number&apos;, this, &apos;number&apos;, 10)
