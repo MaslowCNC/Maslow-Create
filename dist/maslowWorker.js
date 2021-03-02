@@ -126,12 +126,12 @@ const agent = async ({
     try{
         switch(question.key) {
           case "rectangle":
-            const aSquare = api.Square(question.x, question.y);
+            const aSquare = api.Box(question.x, question.y);
             await api.saveGeometry(question.writePath, aSquare);
             return 1;
             break;
           case "circle":
-            const aCircle = api.Circle(question.diameter).sides(question.numSegments);
+            const aCircle = api.Arc(question.diameter).sides(question.numSegments);
             await api.saveGeometry(question.writePath, aCircle);
             return 1;
             break;
@@ -143,7 +143,7 @@ const agent = async ({
             break;
          case "translate":
             const aShape2Translate = await api.loadGeometry(question.readPath);
-            const translatedShape = aShape2Translate.translate(question.x, question.y, question.z);
+            const translatedShape = aShape2Translate.move(question.x, question.y, question.z);
             await api.saveGeometry(question.writePath, translatedShape);
             return 1;
             break;
@@ -156,7 +156,7 @@ const agent = async ({
         case "difference":
             const aShape2Difference1 = await api.loadGeometry(question.readPath1);
             const aShape2Difference2 = await api.loadGeometry(question.readPath2);
-            const cutShape = api.Difference(aShape2Difference1, aShape2Difference2);
+            const cutShape = aShape2Difference1.cut(aShape2Difference2);
             await api.saveGeometry(question.writePath, cutShape);
             return 1;
             break;
