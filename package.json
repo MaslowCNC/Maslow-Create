@@ -24,13 +24,13 @@
     "codemirror": "^5.46.0",
     "coveralls": "^3.0.4",
     "esm": "^3.2.22",
-    "gsap": "^2.0.1",
+    "gsap": "^3.6.0",
     "mathjs": "^6.0.4",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "oauthio-web": "^0.6.2",
     "showdown": "^1.9.1",
-    "three": "^0.104.0",
+    "three": "^0.125.0",
     "workerpool": "^6.0.0"
   },
   "devDependencies": {
