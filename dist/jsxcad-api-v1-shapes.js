@@ -32,8 +32,8 @@ const getScale = (plan) => {
   const corner1 = getCorner1(plan);
   const corner2 = getCorner2(plan);
   return [
-    scale(0.5, subtract(corner2, corner1)),
-    scale(0.5, add(corner2, corner1)),
+    scale(0.5, subtract(corner1, corner2)),
+    scale(0.5, add(corner1, corner2)),
   ];
 };
 
@@ -1767,6 +1767,7 @@ registerReifier('Orb', ({ tags, plan }) => {
       from: getFrom(plan),
       at: getTo(plan),
     })
+    .transform(getMatrix(plan))
     .setTags(tags)
     .toGeometry();
 });
