@@ -94,6 +94,10 @@ export default class Molecule extends Atom{
         
         
         const percentLoaded = 1-this.toProcess/this.totalAtomCount
+        if(percentLoaded < 1){
+            this.processing = true;
+        }
+        
         
         super.draw() //Super call to draw the rest
         
@@ -126,7 +130,6 @@ export default class Molecule extends Atom{
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
-        
         x = GlobalVariables.pixelsToWidth(x)
         y = GlobalVariables.pixelsToHeight(y)
         

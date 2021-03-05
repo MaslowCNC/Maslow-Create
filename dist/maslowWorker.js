@@ -167,7 +167,7 @@ const agent = async ({
             await api.saveGeometry(question.writePath, intersectionShape);
             return 1;
             break;
-        case "union":
+        case "group":
             var geometries = [];
             for (const path of question.paths) {
                 const unionGeometry = await api.loadGeometry(path);

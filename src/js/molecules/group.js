@@ -3,11 +3,11 @@ import { addOrDeletePorts } from '../alwaysOneFreeInput.js'
 import GlobalVariables from '../globalvariables.js'
 
 /**
- * This class creates the union atom instance.
+ * This class creates the group atom instance.
  */
-export default class Union extends Atom{
+export default class Group extends Atom{
     /**
-    * Creates a new union atom.
+    * Creates a new group atom.
     * @param {object} values - An object of values. Each of these values will be applied to the resulting atom.
     */
     constructor(values){
@@ -19,12 +19,12 @@ export default class Union extends Atom{
          * This atom's name
          * @type {string}
          */
-        this.name = 'Union'
+        this.name = 'Group'
         /**
          * This atom's type
          * @type {string}
          */
-        this.atomType = 'Union'
+        this.atomType = 'Group'
         /**
          * A list of all of the inputs to this molecule. May be loaded when the molecule is created.
          * @type {array}
@@ -57,7 +57,7 @@ export default class Union extends Atom{
     }
     
     /**
-     * Draw the union icon
+     * Draw the group icon
      */ 
     draw(){
 
@@ -93,7 +93,7 @@ export default class Union extends Atom{
     }
 
     /**
-    * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the union.
+    * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the group.
     */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
@@ -105,9 +105,9 @@ export default class Union extends Atom{
                     }
                 })
                 
-                const values = { key: "union",paths: inputValues, writePath: this.path }
+                const values = { key: "group",paths: inputValues, writePath: this.path }
                 
-                this.basicThreadValueProcessing(values, "union")
+                this.basicThreadValueProcessing(values, "group")
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
             

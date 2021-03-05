@@ -29,7 +29,7 @@ import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
-import Union             from './molecules/union.js'
+import Group             from './molecules/group.js'
 import GitHubModule     from './githubOauth'
 
 /**
@@ -61,7 +61,8 @@ class GlobalVariables{
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
-            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
+            union:              {creator: Group, atomType: 'Union', atomCategory: 'None'},
+            group:              {creator: Group, atomType: 'Group', atomCategory: 'Interactions'},
             shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
             
             
@@ -91,7 +92,7 @@ class GlobalVariables{
 
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
-            nest:                {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
+            nest:               {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
 
