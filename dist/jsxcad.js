@@ -1,4 +1,4 @@
-import { askService, askServices, touch, setupFilesystem } from './jsxcad-sys.js';
+import { askService, askServices, touch, setupFilesystem, listFiles } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
 
@@ -33,13 +33,8 @@ orbitDisplay({view: {fit: false}, withAxes: true, withGrid: true, gridLayer: 0},
 setupFilesystem({ fileBase: 'maslow' });
 
 //Test some things
-window.ask({key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }) //This just establishes the worker
+window.ask({key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }); //This just establishes the worker
 
-
-// .then( status => {
-    // window.ask({ evaluate: "md`hello`", key: "extrude", distance:5, readPath: "atomGeometry/test", writePath: "atomGeometry/test2" }).then( status => {
-        // var thingReturned = window.ask({ evaluate: "md`hello`", key: "display", readPath: "atomGeometry/test2" }).then( thingReturned => {
-            // window.updateDisplay(thingReturned);
-        // })
-    // })
+// listFiles().then(result => {
+    // console.log(result);
 // })
