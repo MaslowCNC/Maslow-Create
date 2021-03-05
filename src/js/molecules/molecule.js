@@ -545,6 +545,12 @@ export default class Molecule extends Atom{
             }
             
         })
+        
+        this.inputs.forEach(input => {
+            input.loadTree()
+        })
+        this.output.value = this.path
+        return this.path
     }
     
     /**

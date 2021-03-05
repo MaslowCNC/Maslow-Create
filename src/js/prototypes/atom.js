@@ -686,6 +686,8 @@ export default class Atom {
                 if (result != -1 ){
                     this.displayAndPropogate()
                 }else{
+                    console.log("Neitive 1 returned")
+                    console.log(this)
                     this.setAlert("Unable to compute")
                 }
                 this.processing = false
@@ -713,6 +715,9 @@ export default class Atom {
         return [1,waiting]
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         this.inputs.forEach(input => {
             input.loadTree()
@@ -753,17 +758,17 @@ export default class Atom {
     }
     
     /**
-     * Dump the stored copies of any geometry in this atom to free up ram.
+     * Dump the stored copies of any geometry in this atom to free up ram....probably can be deleted
      */ 
-    dumpBuffer(){
-        this.inputs.forEach(input => {
-            input.dumpBuffer()
-        })
-        if(this.output){
-            this.output.dumpBuffer()
-        }
-        this.value = null
-    }
+    // dumpBuffer(){
+        // this.inputs.forEach(input => {
+            // input.dumpBuffer()
+        // })
+        // if(this.output){
+            // this.output.dumpBuffer()
+        // }
+        // this.value = null
+    // }
     
     /**
      * Creates an editable HTML item to set the value of an object element. Used in the sidebar.

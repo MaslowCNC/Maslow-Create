@@ -520,6 +520,9 @@ export default class AttachmentPoint {
         }
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         this.connectors.forEach(connector => {
             this.value = connector.loadTree()

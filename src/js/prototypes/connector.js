@@ -201,6 +201,9 @@ export default class Connector {
         this.attachmentPoint1.parentMolecule.walkBackForConstants(callback)
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         return this.attachmentPoint1.parentMolecule.loadTree()
     }

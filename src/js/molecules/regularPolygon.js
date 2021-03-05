@@ -27,9 +27,6 @@ export default class RegularPolygon extends Atom {
          * @type {string}
          */
         this.atomType = 'RegularPolygon'
-
-        // create the polygon code block
-        this.updateValue()
         
         this.setValues(values)
     }

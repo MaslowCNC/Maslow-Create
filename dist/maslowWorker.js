@@ -285,7 +285,9 @@ const agent = async ({
         }
     }
     catch(err){
-        console.warn(err)
+        console.warn(err);
+        console.log(question);
+        return -1;
     }
 }; 
 
