@@ -550,7 +550,8 @@ export default class Atom {
             input.ready = false
         })
         
-        this.inputs.forEach(input => {
+        const inputsCopy = [...this.inputs]//Make a copy of the inputs list to delete all of them
+        inputsCopy.forEach(input => {
             input.deleteSelf()
         })
         if(this.output){
