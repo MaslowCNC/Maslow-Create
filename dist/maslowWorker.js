@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, touch } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch } from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
@@ -269,6 +269,10 @@ const agent = async ({
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
             return shape2getHash.geometry.hash;
+            break;
+        case "deletePath":
+            deleteFile({}, question.path);
+            return 1
             break;
         case "display":
             if(question.readPath != null){

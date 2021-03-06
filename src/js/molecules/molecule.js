@@ -530,6 +530,21 @@ export default class Molecule extends Atom{
     }
     
     /**
+     * Delete this molecule and everything in it.
+     */ 
+    deleteNode(){
+        
+        //make a copy of the nodes on the screen array since we will be modifying it
+        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen];
+        
+        copyOfNodesOnTheScreen.forEach(node => {
+            node.deleteNode()
+        })
+        
+        super.deleteNode()
+    }
+    
+    /**
      * Triggers the loadTree process from this molecules output
      */ 
     loadTree(){
