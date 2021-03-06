@@ -1,6 +1,6 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromPolygonsToSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromPolygonsToSurfaceMesh, fromSurfaceMeshToTriangles, fromFunctionToSurfaceMesh, arrangePaths, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 import { equals, min, max, scale } from './jsxcad-math-vec3.js';
-import { deduplicate as deduplicate$1, isClockwise, flip } from './jsxcad-geometry-path.js';
+import { isClockwise, flip, deduplicate as deduplicate$1 } from './jsxcad-geometry-path.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
@@ -174,43 +174,10 @@ const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
 const convexHull = (points) =>
   fromSurfaceMeshLazy(fromPointsToConvexHullAsSurfaceMesh(points));
 
-const deduplicate = (surface) => surface.map(deduplicate$1);
-
-const fromSurface = (surface) =>
-  fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(deduplicate(surface)));
-
-const realizeGraph = (graph) => {
-  if (graph.isLazy) {
-    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
-  } else {
-    return graph;
-  }
-};
-
-const toPolygons = (graph) => {
-  // CHECK: This should already be triangulated.
-  const surface = [];
-  eachFacet(realizeGraph(graph), (facet, { edge }) => {
-    const polygon = [];
-    eachEdgeLoop(graph, edge, (edge, { point }) => {
-      polygon.push(getPointNode(graph, point));
-    });
-    surface.push(polygon);
-  });
-  return surface;
-};
-
-const toSurface = (graph) => toPolygons(graph);
-
 const toSurfaceMesh = (graph) => {
   let surfaceMesh = graph[surfaceMeshSymbol];
   if (surfaceMesh === undefined) {
-    if (graph.isOutline) {
-      // SurfaceMesh can't handle outlines -- rebuild as a surface.
-      return toSurfaceMesh(fromSurface(toSurface(graph)));
-    } else {
-      surfaceMesh = fromGraphToSurfaceMesh(graph);
-    }
+    surfaceMesh = fromGraphToSurfaceMesh(graph);
     graph[surfaceMeshSymbol] = surfaceMesh;
     surfaceMesh[graphSymbol] = graph;
   }
@@ -277,6 +244,14 @@ const doesNotOverlap = (a, b) => {
     return true;
   }
   return false;
+};
+
+const realizeGraph = (graph) => {
+  if (graph.isLazy) {
+    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
+  } else {
+    return graph;
+  }
 };
 
 const extrude = (graph, height, depth) => {
@@ -351,8 +326,19 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
   return rerealizeGraph(graph);
 };
 
-const section = (graph, planes) =>
-  fromPolygonsWithHoles(sectionOfSurfaceMesh(toSurfaceMesh(graph), planes));
+const section = (graph, plane) => {
+  for (const polygons of sectionOfSurfaceMesh(toSurfaceMesh(graph), [plane])) {
+    return fromPolygonsWithHoles(polygons);
+  }
+};
+
+const sections = (graph, planes) => {
+  const graphs = [];
+  for (const polygons of sectionOfSurfaceMesh(toSurfaceMesh(graph), planes)) {
+    graphs.push(fromPolygonsWithHoles(polygons));
+  }
+  return graphs;
+};
 
 const far = 10000;
 
@@ -361,7 +347,7 @@ const difference = (a, b) => {
     return a;
   }
   if (!a.isClosed) {
-    return section(difference(extrude(a, far, 0), b), [principlePlane(a)]);
+    return section(difference(extrude(a, far, 0), b), principlePlane(a));
   }
   if (!b.isClosed) {
     b = extrude(b, far, 0);
@@ -411,12 +397,7 @@ const fromPolygons = (polygons) =>
   fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(polygons));
 
 const toTriangles = (graph) => {
-  if (graph.isOutline) {
-    // Outlines aren't compatible with SurfaceMesh.
-    return toSurface(graph);
-  } else {
-    return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
-  }
+  return fromSurfaceMeshToTriangles(toSurfaceMesh(graph));
 };
 
 // Convert an outline graph to a possibly closed surface.
@@ -472,6 +453,11 @@ const fromSolid = (solid) => {
   }
   return fromPolygons(polygons);
 };
+
+const deduplicate = (surface) => surface.map(deduplicate$1);
+
+const fromSurface = (surface) =>
+  fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(deduplicate(surface)));
 
 const outline = (graph) => {
   graph = realizeGraph(graph);
@@ -638,6 +624,21 @@ const toPaths = (graph) => {
   return paths;
 };
 
+const toPolygons = (graph) => {
+  // CHECK: This should already be triangulated.
+  const surface = [];
+  eachFacet(realizeGraph(graph), (facet, { edge }) => {
+    const polygon = [];
+    eachEdgeLoop(graph, edge, (edge, { point }) => {
+      polygon.push(getPointNode(graph, point));
+    });
+    surface.push(polygon);
+  });
+  return surface;
+};
+
+const toSurface = (graph) => toPolygons(graph);
+
 // FIX: Replace with toPolygons.
 const toSolid = (graph) => [toSurface(graph)];
 
@@ -669,4 +670,4 @@ const union = (a, b) => {
   );
 };
 
-export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, rerealizeGraph, reverseFaceOrientations, section, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };
+export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromSolid, fromSurface, inset, intersection, measureBoundingBox, offset, outline, projectToPlane, realizeGraph, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toSolid, toSurface, toTriangles, transform, union };

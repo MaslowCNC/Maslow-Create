@@ -4,7 +4,7 @@ import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as 
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
-import { realizeGraph, transform as transform$1, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, offset as offset$1, projectToPlane as projectToPlane$1, section as section$1, smooth as smooth$1, toTriangles, test as test$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { realizeGraph, transform as transform$1, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, offset as offset$1, projectToPlane as projectToPlane$1, sections, smooth as smooth$1, toTriangles, test as test$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -156,11 +156,16 @@ const assembleImpl = (...taggedGeometries) =>
 
 const assemble = cache(assembleImpl);
 
-const taggedGraph = ({ tags }, graph) => ({
-  type: 'graph',
-  tags,
-  graph,
-});
+const taggedGraph = ({ tags }, graph) => {
+  if (graph.length > 0) {
+    throw Error('Graph should not be an array');
+  }
+  return {
+    type: 'graph',
+    tags,
+    graph,
+  };
+};
 
 const realize = (geometry) => {
   const op = (geometry, descend) => {
@@ -1279,13 +1284,13 @@ const read = async (path) => read$1(path);
 
 const sectionImpl = (geometry, planes) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
-  const sections = [];
+  const sections$1 = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const section of section$1(graph, planes)) {
-      sections.push(taggedGraph({ tags }, section));
+    for (const section of sections(graph, planes)) {
+      sections$1.push(taggedGraph({ tags }, section));
     }
   }
-  return taggedGroup({}, ...sections);
+  return taggedGroup({}, ...sections$1);
 };
 
 const section = cacheSection(sectionImpl);

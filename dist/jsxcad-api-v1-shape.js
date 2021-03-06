@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, assemble as assemble$1, canonicalize as canonicalize$1, intersection, allTags, difference, getLeafs, empty, rewrite, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, taggedSketch, getAnyNonVoidSurfaces, test as test$1, getPaths, outline, read, write } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, assemble as assemble$1, canonicalize as canonicalize$1, intersection, allTags, difference, getLeafs, empty, rewrite, taggedLayers, isVoid, getNonVoidPaths, getPeg, taggedPlan, measureBoundingBox, taggedSketch, getAnyNonVoidSurfaces, test as test$1, getPaths, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
@@ -1396,7 +1396,7 @@ const logOp = (shape, op) => {
 };
 
 const logMethod = function (op = (shape) => JSON.stringify(shape)) {
-  logOp(this, op);
+  logOp(Shape.fromGeometry(realize(this.toGeometry())), op);
   return this;
 };
 Shape.prototype.log = logMethod;

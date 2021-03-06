@@ -1,5 +1,5 @@
 import { translate, scale, toKeptGeometry, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
-import { buildRegularPolygon } from './jsxcad-algorithm-shape.js';
+import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
 import { getEdges } from './jsxcad-geometry-path.js';
 
@@ -2447,6 +2447,16 @@ function getAcadColor$1(index) {
 // Code 6 of an entity indicates inheritance of properties (eg. color).
 //   BYBLOCK means inherits from block
 //   BYLAYER (default) mean inherits from layer
+
+const buildRegularPolygon = (sides = 32) => {
+  let points = [];
+  for (let i = 0; i < sides; i++) {
+    let radians = (2 * Math.PI * i) / sides;
+    let [x, y] = fromAngleRadians(radians);
+    points.push([x, y, 0]);
+  }
+  return points;
+};
 
 const fromDxf = async (data) => {
   const parser = new DxfParser();

@@ -2,11 +2,12 @@ import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
 import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedPoints } from './jsxcad-geometry-tagged.js';
-import { concatenate, rotateZ, translate as translate$1 } from './jsxcad-geometry-path.js';
+import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
-import { buildRegularIcosahedron, buildRingSphere } from './jsxcad-algorithm-shape.js';
+import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
+import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toPolygon } from './jsxcad-math-plane.js';
 
 const find = (plan, key, otherwise) => {
@@ -1683,9 +1684,71 @@ const Hexagon = (x, y, z) => Arc(x, y, z).sides(6);
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
 
+/** @type {function(Point[], Path[]):Triangle[]} */
+const fromPointsAndPaths = (points = [], paths = []) => {
+  /** @type {Polygon[]} */
+  const polygons = [];
+  for (const path of paths) {
+    polygons.push(fromPoints$2(path.map((nth) => points[nth])));
+  }
+  return polygons;
+};
+
+// Unit icosahedron vertices.
+/** @type {Point[]} */
+const points = [
+  [0.850651, 0.0, -0.525731],
+  [0.850651, -0.0, 0.525731],
+  [-0.850651, -0.0, 0.525731],
+  [-0.850651, 0.0, -0.525731],
+  [0.0, -0.525731, 0.850651],
+  [0.0, 0.525731, 0.850651],
+  [0.0, 0.525731, -0.850651],
+  [0.0, -0.525731, -0.850651],
+  [-0.525731, -0.850651, -0.0],
+  [0.525731, -0.850651, -0.0],
+  [0.525731, 0.850651, 0.0],
+  [-0.525731, 0.850651, 0.0],
+];
+
+// Triangular decomposition structure.
+/** @type {Path[]} */
+const paths = [
+  [1, 9, 0],
+  [0, 10, 1],
+  [0, 7, 6],
+  [0, 6, 10],
+  [0, 9, 7],
+  [4, 1, 5],
+  [9, 1, 4],
+  [1, 10, 5],
+  [3, 8, 2],
+  [2, 11, 3],
+  [4, 5, 2],
+  [2, 8, 4],
+  [5, 11, 2],
+  [6, 7, 3],
+  [3, 11, 6],
+  [3, 7, 8],
+  [4, 8, 9],
+  [5, 10, 11],
+  [6, 11, 10],
+  [7, 9, 8],
+];
+
+// FIX: Why aren't we computing the convex hull?
+
+/**
+ * Computes the polygons of a unit icosahedron.
+ * @type {function():Triangle[]}
+ */
+const buildRegularIcosahedron = () => {
+  return fromPointsAndPaths(points, paths);
+};
+
 registerReifier('Icosahedron', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
-  return Shape.fromPolygonsToSolid(buildRegularIcosahedron({}))
+  return Shape.fromPolygonsToSolid(buildRegularIcosahedron())
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -1756,6 +1819,72 @@ Shape.prototype.LoopedHull = shapeMethod(LoopedHull);
 const Octagon = (x, y, z) => Arc(x, y, z).sides(8);
 
 Shape.prototype.Octagon = shapeMethod(Octagon);
+
+const buildRegularPolygon = (sides = 32) => {
+  let points = [];
+  for (let i = 0; i < sides; i++) {
+    let radians = (2 * Math.PI * i) / sides;
+    let [x, y] = fromAngleRadians(radians);
+    points.push([x, y, 0]);
+  }
+  return points;
+};
+
+const buildWalls = (polygons, floor, roof) => {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
+    // Remember that we are walking CCW.
+    polygons.push(
+      deduplicate([floor[start], floor[end], roof[end], roof[start]])
+    );
+  }
+};
+
+// Approximates a UV sphere.
+const buildRingSphere = (resolution = 20) => {
+  /** @type {Polygon[]} */
+  const polygons = [];
+  let lastPath;
+
+  const latitudinalResolution = 2 + resolution;
+  const longitudinalResolution = 2 * latitudinalResolution;
+
+  // Trace out latitudinal rings.
+  const ring = buildRegularPolygon(longitudinalResolution);
+  let path;
+  const getEffectiveSlice = (slice) => {
+    if (slice === 0) {
+      return 0.5;
+    } else if (slice === latitudinalResolution) {
+      return latitudinalResolution - 0.5;
+    } else {
+      return slice;
+    }
+  };
+  for (let slice = 0; slice <= latitudinalResolution; slice++) {
+    const angle =
+      (Math.PI * 1.0 * getEffectiveSlice(slice)) / latitudinalResolution;
+    const height = Math.cos(angle);
+    const radius = Math.sin(angle);
+    const points = ring;
+    const scaledPath = scale$1([radius, radius, radius], points);
+    const translatedPath = translate$1([0, 0, height], scaledPath);
+    path = translatedPath;
+    if (lastPath !== undefined) {
+      buildWalls(polygons, path, lastPath);
+    } else {
+      polygons.push(path);
+    }
+    lastPath = path;
+  }
+  if (path) {
+    polygons.push(flip(path));
+  }
+  return polygons;
+};
 
 registerReifier('Orb', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
