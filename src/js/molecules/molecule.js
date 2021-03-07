@@ -160,7 +160,7 @@ export default class Molecule extends Atom{
          */
         this.selected = true
         this.updateSidebar()
-        this.sendToRender()
+        //this.sendToRender()   //This is removed because it was happening too often during loading
     }
 
     /**

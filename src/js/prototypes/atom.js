@@ -685,15 +685,15 @@ export default class Atom {
             
             //toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
             
-            window.ask(toAsk).then(result => {
-                if (result != -1 ){
-                    this.displayAndPropogate()
-                }else{
-                    console.log("Neitive 1 returned")
-                    console.log(this)
-                    this.setAlert("Unable to compute")
-                }
-                this.processing = false
+            const returned = window.ask(toAsk).then(returned => {
+                returned.answer.then(result => {
+                    if (result.answer != -1 ){
+                        this.displayAndPropogate()
+                    }else{
+                        this.setAlert("Unable to compute")
+                    }
+                    this.processing = false
+                })
             })
         }
     }

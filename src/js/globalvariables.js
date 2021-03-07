@@ -148,6 +148,16 @@ class GlobalVariables{
          * @type {number}
          */
         this.circleSegmentSize = 2
+        /** 
+         * A flag to indicate if a display value is currently being processed.
+         * @type {bool}
+         */
+        this.displayProcessing = false
+        /** 
+         * The function to call to cancel the processing of the prevous display value.
+         * @type {function}
+         */
+        this.cancelLastDisplayWorker = 0
         
         const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
@@ -196,10 +206,40 @@ class GlobalVariables{
     * @param {string} The path to read from
     */
     writeToDisplay(path){
+        
+        // Cancel the last write to display if there is one active because this one will replace it
+        // if(this.displayProcessing){
+            // console.log("Canceling previous display call")
+            // this.cancelLastDisplayWorker()
+            // this.displayProcessing = false
+            
+            // window.ask = async (question, context) => {
+                // const { ask, release, terminate } = await createService(serviceSpec);
+                // let answer;
+                // try {
+                   // answer = ask(question);
+                // } catch (error) {
+                   // console.log(`QQ/askService: ${error.stack}`);
+                // } finally {
+                   // await release();
+                // }
+                // const toReturn = {answer: answer, terminate: terminate};
+                // return toReturn;
+            // };
+            
+        // }
+        
         var returned = window.ask({ evaluate: "md`hello`", key: "display", readPath: path }).then( thingReturned => {
-            if(thingReturned && thingReturned != -1){
-                window.updateDisplay(thingReturned);
-            }
+            
+            this.cancelLastDisplayWorker = thingReturned.terminate
+            this.displayProcessing = true
+            
+            thingReturned.answer.then(result => {
+                this.displayProcessing = false
+                if(result && result != -1){
+                    window.updateDisplay(result);
+                }
+            })
         })
     }
     /** 

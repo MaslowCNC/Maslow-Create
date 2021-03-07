@@ -1,4 +1,4 @@
-import { askService, askServices, touch, setupFilesystem, listFiles } from './jsxcad-sys.js';
+import { askService, askServices, createService, touch, setupFilesystem, listFiles } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
 
@@ -14,15 +14,27 @@ const agent = async ({ ask, question }) => {
     await askServices({ touchFile: { path, workspace } });
   }
 };
-        
+
 const serviceSpec = {
   webWorker: './maslowWorker.js',
   agent,
   workerType: 'module',
 };
 
-window.ask = async (question, context) =>
-    askService(serviceSpec, question, context);
+window.ask = async (question, context) => {
+    const { ask, release, terminate } = await createService(serviceSpec);
+    let answer;
+    try {
+       answer = ask(question);
+    } catch (error) {
+       console.log(`QQ/askService: ${error.stack}`);
+    } finally {
+       await release();
+    }
+    const toReturn = {answer: answer, terminate: terminate};
+    return toReturn;
+};
+
 
 
 //Add 3d view //With axis does not work right now. Needs to be changed in jsxcad-ui-threejs
