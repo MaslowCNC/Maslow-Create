@@ -216,6 +216,10 @@ const agent = async ({
             await api.saveGeometry(question.writePath, taggedShape);
             return 1;
             break;
+        case "listTags":
+            const shape2ListTags = await api.loadGeometry(question.readPath);
+            return shape2ListTags.tags();
+            break;
         case "extractTag":
             const shape2extractFrom = await api.loadGeometry(question.readPath);
             const extractedShape = shape2extractFrom.keep(question.tag).noVoid();

@@ -348,10 +348,9 @@ export default class Molecule extends Atom{
      * @param {object} list - The HTML object to append the created element to.
      */ 
     displaySimpleBOM(list){
-        
-        if(this.value != null){
-            try{
-                var bomList = extractBomTags(this.value)
+        try{
+            
+            const placementFunction = (bomList) => {
                 
                 if(bomList.length > 0){
                 
@@ -371,11 +370,13 @@ export default class Molecule extends Atom{
                         this.createNonEditableValueListItem(list,bomEntry,'numberNeeded', bomEntry.BOMitemName, false)
                     })
                 }
-            }catch(err){
-                this.setAlert("Unable to read BOM")
             }
+            
+            extractBomTags(this.path, placementFunction)
+            
+        }catch(err){
+            this.setAlert("Unable to read BOM")
         }
-        
     }
     
     /**

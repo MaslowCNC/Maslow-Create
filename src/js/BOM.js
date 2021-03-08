@@ -48,42 +48,35 @@ export class BOMEntry {
  * Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.
  * @param {object} geometry - The geometry which should be scanned for tags.
  */ 
-export const extractBomTags = function(assembly){
-    
-    //Catch empty input
-    if(assembly == null){
-        return []
-    }
-    
+export const extractBomTags = function(path, functionToPlace){
     //Extract all of the tags
-    var tags = []
-    assembly.forEach(item => {
-        tags = tags.concat(item.tags)
+    window.ask({key: "listTags", readPath: path }).then( thingReturned => {
+        thingReturned.answer.then( tags => {
+            // Filter for only bomItems
+            var bomItems = tags.filter(item => {
+                return item.substring(2, 13) == "BOMitemName"
+            })
+            
+            bomItems = bomItems.map(JSON.parse)
+            
+            // Consolidate similar items into a single item
+            var compiledArray = []
+            bomItems.forEach(function (bomElement) {
+                if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn't already have one of these
+                    this[bomElement.BOMitemName] = new BOMEntry             //Create one
+                    this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
+                    this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
+                    this[bomElement.BOMitemName].source = bomElement.source
+                    compiledArray.push(this[bomElement.BOMitemName])
+                }
+                this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
+                this[bomElement.BOMitemName].costUSD += bomElement.costUSD
+            }, Object.create(null))
+            
+            // Alphabetize by source
+            compiledArray = compiledArray.sort((a,b) => (a.source > b.source) ? 1 : ((b.source > a.source) ? -1 : 0)) 
+            
+            functionToPlace(compiledArray)
+        })
     })
-    
-    // Filter for only bomItems
-    var bomItems = tags.filter(item => {
-        return item.substring(2, 13) == "BOMitemName"
-    })
-    
-    bomItems = bomItems.map(JSON.parse)
-    
-    // Consolidate similar items into a single item
-    var compiledArray = []
-    bomItems.forEach(function (bomElement) {
-        if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn't already have one of these
-            this[bomElement.BOMitemName] = new BOMEntry             //Create one
-            this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
-            this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
-            this[bomElement.BOMitemName].source = bomElement.source
-            compiledArray.push(this[bomElement.BOMitemName])
-        }
-        this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
-        this[bomElement.BOMitemName].costUSD += bomElement.costUSD
-    }, Object.create(null))
-    
-    // Alphabetize by source
-    compiledArray = compiledArray.sort((a,b) => (a.source > b.source) ? 1 : ((b.source > a.source) ? -1 : 0)) 
-    
-    return compiledArray
 }
