@@ -342,6 +342,7 @@ function init() {
     }
     else{
         var ID = window.location.href.split('?')[1]
+        
         //Have the current molecule load it
         if(typeof ID != undefined){
             GlobalVariables.currentMolecule = new GitHubMolecule({
@@ -349,9 +350,13 @@ function init() {
                 topLevel: true
             })
             GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
-            GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
-                GlobalVariables.topLevelMolecule.backgroundClick()
-            })
+            
+            //This is used because window.ask takes some time to load so we need to wait for it. This sets up a callback which will be called in jsxcad.js once window.ask exists
+            window.askSetupCallback = () => {
+                GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
+                    GlobalVariables.topLevelMolecule.backgroundClick()
+                })
+            }
         }
     }
     window.addEventListener('resize', () => { onWindowResize() }, false)

@@ -9,3 +9,5 @@ dist/index.html
 coverage
 .nyc_output/*
 /.gtm/
+dist/js/0.flowDraw.bundle.js
+dist/js/0.flowDraw.bundle.js.map

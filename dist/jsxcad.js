@@ -15,14 +15,26 @@ const agent = async ({ ask, question }) => {
   }
 };
 
-const serviceSpec = {
-  webWorker: './maslowWorker.js',
-  agent,
-  workerType: 'module',
-};
+var serviceSpec = {};
+
+if(window.location.href.includes('run')){
+    serviceSpec = {
+      webWorker: '../maslowWorker.js',  //'../maslowWorker.js', fixes this for run mode
+      agent,
+      workerType: 'module',
+    };
+}
+else{
+    serviceSpec = {
+      webWorker: './maslowWorker.js',  //'../maslowWorker.js', fixes this for run mode
+      agent,
+      workerType: 'module',
+    };
+}
 
 window.ask = async (question, context) => {
     const { ask, release, terminate } = await createService(serviceSpec);
+    
     let answer;
     try {
        answer = ask(question);
@@ -36,7 +48,6 @@ window.ask = async (question, context) => {
 };
 
 
-
 //Add 3d view //With axis does not work right now. Needs to be changed in jsxcad-ui-threejs
 orbitDisplay({view: {fit: false}, withAxes: true, withGrid: true, gridLayer: 0}, document.getElementById('viewerContext')).then(result=>{
     window.updateDisplay = result.updateGeometry
@@ -46,6 +57,12 @@ setupFilesystem({ fileBase: 'maslow' });
 
 //Test some things
 window.ask({key: "rectangle", x:5, y:5, writePath: "atomGeometry/test" }); //This just establishes the worker
+
+//If there is anything queued up to be called back when the ask worker is operational 
+if(window.askSetupCallback){
+    window.askSetupCallback();
+}
+
 
 //TODo: Add some garbage collection here which checks when a path was last written to or read from and deletes the old ones. Probably will require a wrapper for reading and writing to paths
 // listFiles().then(result => {

@@ -160,7 +160,7 @@ export default class Molecule extends Atom{
          */
         this.selected = true
         this.updateSidebar()
-        //this.sendToRender()   //This is removed because it was happening too often during loading
+        this.sendToRender()   //This is might need to be removed because it was happening too often during loading
     }
 
     /**
@@ -521,10 +521,10 @@ export default class Molecule extends Atom{
                 
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
-                this.backgroundClick()
                 this.census()
                 this.loadTree()  //Walks back up the tree from this molecule loading input values from any connected atoms
                 this.beginPropagation()
+                this.backgroundClick()
             }
         })
     }
