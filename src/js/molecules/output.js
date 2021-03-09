@@ -112,7 +112,7 @@ export default class Output extends Atom {
      * A function to allow you to still call the delete function if needed.
      */
     deleteOutputAtom(){
-        super.deleteNode()
+        super.deleteNode(false)
     }
     
     /**

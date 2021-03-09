@@ -891,8 +891,7 @@ export default function GitHubModule(){
                            
                     var decoder = new TextDecoder('utf8')
                     var finalSVG = decoder.decode(contentSvg)
-                    console.log(finalSVG)
-                        
+                    
                     this.createCommit(octokit,{
                         owner: saveUser,
                         repo: saveRepoName,

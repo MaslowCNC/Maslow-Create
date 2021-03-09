@@ -158,9 +158,11 @@ export default class Molecule extends Atom{
         /**
          * Flag that the atom is now selected.
          */
-        this.selected = true
-        this.updateSidebar()
-        this.sendToRender()   //This is might need to be removed because it was happening too often during loading
+        if(this.selected == false){
+            this.selected = true
+            this.updateSidebar()
+            this.sendToRender()   //This is might need to be removed because it was happening too often during loading
+        }
     }
 
     /**
@@ -625,7 +627,6 @@ export default class Molecule extends Atom{
                         this.nodesOnTheScreen.forEach(atom => {
                             if(atom.atomType == 'Output'){
                                 atom.deleteOutputAtom() //Remove them
-                                this.decreaseToProcessCountByOne() //Don't count removed outputs
                             }
                         })
                     }

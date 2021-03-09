@@ -124,6 +124,7 @@ const agent = async ({
     }
     
     try{
+        console.log(question.key);
         switch(question.key) {
           case "rectangle":
             const aSquare = api.Box(question.x, question.y);

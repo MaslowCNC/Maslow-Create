@@ -67,9 +67,6 @@ export default class Box extends Atom {
         this.startY
 
         this.setValues(values)
-        
-        this.decreaseToProcessCountByOne() //Since this isn't really a molecule to process remove it from the list
-        
     }
     
     /**
@@ -129,7 +126,7 @@ export default class Box extends Atom {
          */
         this.startY = yInPixels
         
-        this.deleteNode()
+        this.deleteNode(false, false)
         this.parent.nodesOnTheScreen.forEach(atom => {
             atom.selectBox(this.startX, this.startY, x, y)
         })

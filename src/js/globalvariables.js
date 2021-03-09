@@ -206,16 +206,9 @@ class GlobalVariables{
     * @param {string} The path to read from
     */
     writeToDisplay(path){
-        
         // Cancel the last write to display if there is one active because this one will replace it
         if(this.displayProcessing){
-            console.log("Canceling previous display call")
-            try {
-              this.cancelLastDisplayWorker()
-            }
-            catch(err) {
-              console.log("unable to cancel display");
-            }
+            this.cancelLastDisplayWorker()
             this.displayProcessing = false
         }
         
@@ -228,7 +221,7 @@ class GlobalVariables{
             if(result && result != -1){
                 window.updateDisplay(result);
             }
-        })
+        }).catch (error => console.log("Canceled display update"))
         
         this.displayProcessing = true
         

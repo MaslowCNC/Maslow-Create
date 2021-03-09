@@ -543,7 +543,7 @@ export default class Atom {
     /**
      * Delete this atom.
      */ 
-    deleteNode(){
+    deleteNode(backgroundClickAfter = true, deletePath = true){
         //deletes this node and all of it's inputs
         
         this.inputs.forEach(input => { //disable the inputs before deleting
@@ -560,9 +560,13 @@ export default class Atom {
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
-        this.basicThreadValueProcessing({key: "deletePath", path: this.path }) //Delete the cached geometry
+        if(deletePath){
+            this.basicThreadValueProcessing({key: "deletePath", path: this.path }) //Delete the cached geometry
+        }
         
-        GlobalVariables.currentMolecule.backgroundClick()
+        if(backgroundClickAfter){
+            GlobalVariables.currentMolecule.backgroundClick()
+        }
         
     }
     
