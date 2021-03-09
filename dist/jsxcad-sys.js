@@ -436,47 +436,36 @@ const createService = async ({
   }
 };
 
-/*
-export const askService = async (spec, question) => {
-  const { ask, release } = await createService(spec);
-  let answer;
-  try {
-    answer = await ask(question);
-  } catch (error) {
-    console.log(`QQ/askService: ${error.stack}`);
-  } finally {
-    await release();
-  }
-  return answer;
-};
-*/
-
 const askService = (spec, question) => {
- let cancel;
- const promise = new Promise((resolve, reject) => {
-   let ask, release, terminate;
-   createService(spec)
-     .then(service => {
-             ask = service.ask;
-             release = service.release;
-             terminate = service.terminate;
-             cancel = () => {
-               terminate();
-               reject(Error('Terminated'));
-             };
-           })
-     .then(() => ask(question))
-     .then(resolve)
-     .then(() => { if (release) { release(); } })
-     .catch((error) => {
-       console.log(`QQ/askService: ${error.stack}`);
-     });
-   cancel = () => {
-     reject(Error('Terminated'));
-   };
- });
- promise.cancel = cancel;
- return promise;
+  let cancel;
+  const promise = new Promise((resolve, reject) => {
+    let ask, release, terminate;
+    createService(spec)
+      .then((service) => {
+        ask = service.ask;
+        release = service.release;
+        terminate = service.terminate;
+        cancel = () => {
+          terminate();
+          reject(Error('Terminated'));
+        };
+      })
+      .then(() => ask(question))
+      .then((answer) => {
+        if (release) {
+          release();
+        }
+        resolve(answer);
+      })
+      .catch((error) => {
+        console.log(`QQ/askService: ${error.stack}`);
+      });
+    cancel = () => {
+      reject(Error('Cancelled'));
+    };
+  });
+  promise.cancel = cancel;
+  return promise;
 };
 
 var empty = {};
