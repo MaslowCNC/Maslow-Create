@@ -218,12 +218,15 @@ class GlobalVariables{
         returned.then( result => {
             
             this.displayProcessing = false
+            document.getElementById('viewerContext').style.filter="sepia(0%)"
+            
             if(result && result != -1){
                 window.updateDisplay(result);
             }
         }).catch (error => console.log("Canceled display update"))
         
         this.displayProcessing = true
+        document.getElementById('viewerContext').style.filter="sepia(100%)"
         
         this.cancelLastDisplayWorker = returned.cancel
     }

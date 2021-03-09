@@ -270,7 +270,7 @@ export default class Molecule extends Atom{
         
         //Display the percent loaded while loading
         const percentLoaded = 100*(1-this.toProcess/this.totalAtomCount)
-        if(this.toProcess > 0){
+        if(this.toProcess > 0 && this.topLevel){
             this.createNonEditableValueListItem(valueList,{percentLoaded:percentLoaded.toFixed(0) + "%"},"percentLoaded",'Loading')
         }
         
