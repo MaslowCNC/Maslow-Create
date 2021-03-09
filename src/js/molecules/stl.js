@@ -87,12 +87,10 @@ export default class Stl extends Atom {
         try{
             const values = {key: "stl", readPath: this.findIOValue('geometry')}
             window.ask(values).then(result => {
-                
-                //var enc = new TextDecoder("utf-8");
-                //const stlString = enc.decode(result)
-                
-                const blob = new Blob([result])
-                saveAs(blob, GlobalVariables.currentMolecule.name+'.stl')
+                result.answer.then( returnedAnswer => {
+                    const blob = new Blob([returnedAnswer])
+                    saveAs(blob, GlobalVariables.currentMolecule.name+'.stl')
+                })
             })
         }catch(err){this.setAlert(err)}
     }

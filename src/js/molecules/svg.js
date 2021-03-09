@@ -96,8 +96,6 @@ export default class Svg extends Atom {
                 result.answer.then( answer => {
                     
                     var enc = new TextDecoder("utf-8");
-                    console.log(enc.decode(answer));
-                    
                     
                     const blob = new Blob([answer])
                     saveAs(blob, GlobalVariables.currentMolecule.name+'.svg')
