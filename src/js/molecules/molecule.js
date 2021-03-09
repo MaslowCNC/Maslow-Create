@@ -243,6 +243,10 @@ export default class Molecule extends Atom{
             this.toProcess      = this.toProcess + newInformation[1]
         })
         
+        if(this.topLevel && this.selected){
+            this.updateSidebar()
+        }
+        
         return [this.totalAtomCount, this.toProcess]
     }
     
@@ -262,6 +266,12 @@ export default class Molecule extends Atom{
             this.createSegmentSlider(valueList)
         }
         
+        //Display the percent loaded while loading
+        const percentLoaded = 100*(1-this.toProcess/this.totalAtomCount)
+        if(this.toProcess > 0){
+            this.createNonEditableValueListItem(valueList,{percentLoaded:percentLoaded.toFixed(0) + "%"},"percentLoaded",'Loading')
+        }
+        
         //removes 3d view menu on background click
         let viewerBar = document.querySelector('#viewer_bar')
         if(viewerBar && viewerBar.firstChild){
@@ -270,7 +280,9 @@ export default class Molecule extends Atom{
                 viewerBar.setAttribute('style', 'background-color:none;')
             }
         }
-
+        
+        
+        
         //Add options to set all of the inputs
         this.inputs.forEach(child => {
             if(child.type == 'input' && child.valueType != 'geometry'){
@@ -278,7 +290,10 @@ export default class Molecule extends Atom{
             }
         })
         
-        this.displaySimpleBOM(valueList)
+        //Only bother to generate the bom if we are not currently processing data
+        if(this.toProcess == 0){
+            this.displaySimpleBOM(valueList)
+        }
         
         this.displaySidebarReadme(valueList)
         

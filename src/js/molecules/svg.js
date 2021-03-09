@@ -93,15 +93,15 @@ export default class Svg extends Atom {
         try{
             const values = {key: "svg", readPath: this.findIOValue('geometry')}
             window.ask(values).then(result => {
-                
-                console.log(result)
-                
-                var enc = new TextDecoder("utf-8");
-                console.log(enc.decode(result));
-                
-                
-                const blob = new Blob([result])
-                saveAs(blob, GlobalVariables.currentMolecule.name+'.svg')
+                result.answer.then( answer => {
+                    
+                    var enc = new TextDecoder("utf-8");
+                    console.log(enc.decode(answer));
+                    
+                    
+                    const blob = new Blob([answer])
+                    saveAs(blob, GlobalVariables.currentMolecule.name+'.svg')
+                })
             })
         }catch(err){this.setAlert(err)}
     }
