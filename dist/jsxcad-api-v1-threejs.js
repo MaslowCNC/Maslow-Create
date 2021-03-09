@@ -1,6 +1,6 @@
 import { emit, addPending, writeFile, getPendingErrorHandler } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
+import { ensurePages } from './jsxcad-api-v1-shapes.js';
 import { toThreejsPage } from './jsxcad-convert-threejs.js';
 
 const prepareThreejsPage = (shape, name, options = {}) => {

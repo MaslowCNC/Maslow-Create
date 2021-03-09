@@ -1,7 +1,7 @@
 import { addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
+import { ensurePages } from './jsxcad-api-v1-shapes.js';
 
 const preparePdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   let index = 0;

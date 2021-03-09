@@ -50,33 +50,31 @@ export class BOMEntry {
  */ 
 export const extractBomTags = function(path, functionToPlace){
     //Extract all of the tags
-    window.ask({key: "listTags", readPath: path }).then( thingReturned => {
-        thingReturned.answer.then( tags => {
-            // Filter for only bomItems
-            var bomItems = tags.filter(item => {
-                return item.substring(2, 13) == "BOMitemName"
-            })
-            
-            bomItems = bomItems.map(JSON.parse)
-            
-            // Consolidate similar items into a single item
-            var compiledArray = []
-            bomItems.forEach(function (bomElement) {
-                if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn't already have one of these
-                    this[bomElement.BOMitemName] = new BOMEntry             //Create one
-                    this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
-                    this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
-                    this[bomElement.BOMitemName].source = bomElement.source
-                    compiledArray.push(this[bomElement.BOMitemName])
-                }
-                this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
-                this[bomElement.BOMitemName].costUSD += bomElement.costUSD
-            }, Object.create(null))
-            
-            // Alphabetize by source
-            compiledArray = compiledArray.sort((a,b) => (a.source > b.source) ? 1 : ((b.source > a.source) ? -1 : 0)) 
-            
-            functionToPlace(compiledArray)
+    window.ask({key: "listTags", readPath: path }).then( tags => {
+        // Filter for only bomItems
+        var bomItems = tags.filter(item => {
+            return item.substring(2, 13) == "BOMitemName"
         })
+        
+        bomItems = bomItems.map(JSON.parse)
+        
+        // Consolidate similar items into a single item
+        var compiledArray = []
+        bomItems.forEach(function (bomElement) {
+            if (!this[bomElement.BOMitemName]) {                    //If the list of items doesn't already have one of these
+                this[bomElement.BOMitemName] = new BOMEntry             //Create one
+                this[bomElement.BOMitemName].numberNeeded = 0           //Set the number needed to zerio initially
+                this[bomElement.BOMitemName].BOMitemName = bomElement.BOMitemName   //With the information from the item
+                this[bomElement.BOMitemName].source = bomElement.source
+                compiledArray.push(this[bomElement.BOMitemName])
+            }
+            this[bomElement.BOMitemName].numberNeeded += bomElement.numberNeeded
+            this[bomElement.BOMitemName].costUSD += bomElement.costUSD
+        }, Object.create(null))
+        
+        // Alphabetize by source
+        compiledArray = compiledArray.sort((a,b) => (a.source > b.source) ? 1 : ((b.source > a.source) ? -1 : 0)) 
+        
+        functionToPlace(compiledArray)
     })
 }

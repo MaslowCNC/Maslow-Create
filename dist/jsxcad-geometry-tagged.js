@@ -1095,19 +1095,18 @@ const inset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph(
+        return taggedGroup(
           { tags },
-          inset$1(geometry.graph, initial, step, limit)
+          ...inset$1(geometry.graph, initial, step, limit).map((graph) =>
+            taggedGraph({}, graph)
+          )
         );
       case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedGraph(
-          { tags },
-          inset$1(fromPaths(geometry.paths), initial, step, limit)
-        );
+        return inset(fromPaths(geometry.paths), initial, step, limit);
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
@@ -1187,19 +1186,18 @@ const offset = (geometry, initial = 1, step, limit) => {
     const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph(
+        return taggedGroup(
           { tags },
-          offset$1(geometry.graph, initial, step, limit)
+          ...offset$1(geometry.graph, initial, step, limit).map((graph) =>
+            taggedGraph({}, graph)
+          )
         );
       case 'triangles':
       case 'points':
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return taggedGraph(
-          { tags },
-          offset$1(fromPaths(geometry.paths), initial, step, limit)
-        );
+        return offset(fromPaths(geometry.paths), initial, step, limit);
       case 'plan':
         return offset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':

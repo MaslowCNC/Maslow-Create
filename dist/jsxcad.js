@@ -32,19 +32,10 @@ else{
     };
 }
 
-window.ask = async (question, context) => {
-    const { ask, release, terminate } = await createService(serviceSpec);
+window.ask = (question) => {
     
-    let answer;
-    try {
-       answer = ask(question);
-    } catch (error) {
-       console.log(`QQ/askService: ${error.stack}`);
-    } finally {
-       await release();
-    }
-    const toReturn = {answer: answer, terminate: terminate};
-    return toReturn;
+    const result = askService(serviceSpec, question);
+    return result;
 };
 
 

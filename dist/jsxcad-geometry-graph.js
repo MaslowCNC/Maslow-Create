@@ -309,6 +309,7 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
     const faceId = graph.faces.length;
     graph.faces[faceId] = { plane, exactPlane };
   };
+  // FIX: If we want to build a graph, these need to be triangulated.
   for (const { points, exactPoints, plane, exactPlane } of polygonsWithHoles) {
     // FIX: No face association.
     graph.facets[facet] = {
@@ -459,6 +460,15 @@ const deduplicate = (surface) => surface.map(deduplicate$1);
 const fromSurface = (surface) =>
   fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(deduplicate(surface)));
 
+const fromPolygonWithHolesToPaths = (polygon) => {
+  const paths = [];
+  paths.push(polygon.points);
+  for (const hole of polygon.holes) {
+    paths.push(hole.points);
+  }
+  return paths;
+};
+
 const outline = (graph) => {
   graph = realizeGraph(graph);
 
@@ -509,21 +519,20 @@ const outline = (graph) => {
 };
 
 const inset = (graph, initial, step, limit) => {
-  const insetPolygonsWithHoles = [];
+  const insetGraphs = [];
   for (const polygonWithHoles of outline(graph)) {
-    insetPolygonsWithHoles.push(
-      ...insetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
-    );
+    for (const insetPolygon of insetOfPolygonWithHoles(
+      initial,
+      step,
+      limit,
+      polygonWithHoles
+    )) {
+      insetGraphs.push(
+        fromPaths(fromPolygonWithHolesToPaths(insetPolygon), insetPolygon.plane)
+      );
+    }
   }
-  const insetGraph = realizeGraph(
-    fromPolygonsWithHoles(insetPolygonsWithHoles)
-  );
-  insetGraph.isClosed = false;
-  insetGraph.isOutline = true;
-  if (insetGraph.points.length === 0) {
-    insetGraph.isEmpty = true;
-  }
-  return insetGraph;
+  return insetGraphs;
 };
 
 const far$1 = 10000;
@@ -533,7 +542,7 @@ const intersection = (a, b) => {
     return fromEmpty();
   }
   if (!a.isClosed) {
-    return section(intersection(extrude(a, far$1, 0), b), [principlePlane(a)]);
+    return section(intersection(extrude(a, far$1, 0), b), principlePlane(a));
   }
   if (!b.isClosed) {
     b = extrude(b, far$1, 0);
@@ -547,21 +556,23 @@ const intersection = (a, b) => {
 };
 
 const offset = (graph, initial, step, limit) => {
-  const offsetPolygonsWithHoles = [];
+  const offsetGraphs = [];
   for (const polygonWithHoles of outline(graph)) {
-    offsetPolygonsWithHoles.push(
-      ...offsetOfPolygonWithHoles(initial, step, limit, polygonWithHoles)
-    );
+    for (const offsetPolygon of offsetOfPolygonWithHoles(
+      initial,
+      step,
+      limit,
+      polygonWithHoles
+    )) {
+      offsetGraphs.push(
+        fromPaths(
+          fromPolygonWithHolesToPaths(offsetPolygon),
+          offsetPolygon.plane
+        )
+      );
+    }
   }
-  const offsetGraph = realizeGraph(
-    fromPolygonsWithHoles(offsetPolygonsWithHoles)
-  );
-  offsetGraph.isClosed = false;
-  offsetGraph.isOutline = true;
-  if (offsetGraph.points.length === 0) {
-    offsetGraph.isEmpty = true;
-  }
-  return offsetGraph;
+  return offsetGraphs;
 };
 
 const projectToPlane = (graph, plane, direction) => {
@@ -658,7 +669,7 @@ const union = (a, b) => {
     if (!b.isClosed) {
       b = extrude(b, far$2, 0);
     }
-    return section(union(extrude(a, far$2, 0), b), [principlePlane(a)]);
+    return section(union(extrude(a, far$2, 0), b), principlePlane(a));
   }
   if (!b.isClosed) {
     // The union of a surface and a solid is the solid.

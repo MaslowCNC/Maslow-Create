@@ -2,20 +2,14 @@ import { getModule, addPending, write, emit, read, getCurrentPath, addSource, ad
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
-import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
-export { Page, pack } from './jsxcad-api-v1-layout.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
-import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-tools.js';
-import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-import { Line2 } from './jsxcad-api-v1-line2.js';
-export { Line2 } from './jsxcad-api-v1-line2.js';
-import { Plan } from './jsxcad-api-v1-plan.js';
-export { Plan } from './jsxcad-api-v1-plan.js';
+import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
@@ -326,6 +320,14 @@ const defGrblConstantLaser = (
     },
   });
 
+const card = (strings, ...placeholders) => {
+  const card = strings.reduce(
+    (result, string, i) => result + placeholders[i - 1] + string
+  );
+  emit({ hash: hashSum(card), setContext: { card } });
+  return card;
+};
+
 const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
@@ -451,8 +453,7 @@ var api = /*#__PURE__*/Object.freeze({
   defRgbColor: defRgbColor,
   defThreejsMaterial: defThreejsMaterial,
   defTool: defTool,
-  Page: Page,
-  pack: pack,
+  card: card,
   md: md,
   checkBox: checkBox,
   numberBox: numberBox,
@@ -470,8 +471,6 @@ var api = /*#__PURE__*/Object.freeze({
   loadGeometry: loadGeometry,
   log: log,
   saveGeometry: saveGeometry,
-  Line2: Line2,
-  Plan: Plan,
   Arc: Arc,
   Assembly: Assembly,
   Box: Box,
@@ -488,6 +487,7 @@ var api = /*#__PURE__*/Object.freeze({
   LoopedHull: LoopedHull,
   Octagon: Octagon,
   Orb: Orb,
+  Page: Page,
   Path: Path,
   Peg: Peg,
   Pentagon: Pentagon,
@@ -499,8 +499,6 @@ var api = /*#__PURE__*/Object.freeze({
   Septagon: Septagon,
   Spiral: Spiral,
   Tetragon: Tetragon,
-  Toolpath: Toolpath,
-  Torus: Torus,
   Triangle: Triangle,
   Wave: Wave,
   Weld: Weld,
@@ -599,10 +597,9 @@ registerDynamicModule(module('png'), './jsxcad-api-v1-png.js');
 registerDynamicModule(module('shape'), './jsxcad-api-v1-shape.js');
 registerDynamicModule(module('shapefile'), './jsxcad-api-v1-shapefile.js');
 registerDynamicModule(module('shapes'), './jsxcad-api-v1-shapes.js');
-registerDynamicModule(module('shell'), './jsxcad-api-v1-shell.js');
 registerDynamicModule(module('stl'), './jsxcad-api-v1-stl.js');
 registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, card, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };

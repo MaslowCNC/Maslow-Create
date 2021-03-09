@@ -10740,7 +10740,7 @@ const sectionOfSurfaceMesh = (mesh, planes) => {
       const [x, y, z, w] = plane;
       c.fillQuadruple(out, x, y, z, -w);
       section = [];
-      sections.push({ section, plane });
+      sections.push({ section, plane: [x, y, z, -w] });
     },
     () => {
       path = [];

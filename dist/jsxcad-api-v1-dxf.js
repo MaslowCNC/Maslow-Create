@@ -1,7 +1,7 @@
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
 import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
+import { ensurePages } from './jsxcad-api-v1-shapes.js';
 
 const readDxf = async (path) => {
   let data = await read(`source/${path}`, { doSerialize: false });

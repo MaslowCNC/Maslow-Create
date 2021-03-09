@@ -1,11 +1,11 @@
+import { registerReifier, taggedPlan, taggedDisjointAssembly, taggedPaths, getLeafs, taggedLayers, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
-import { registerReifier, taggedPlan, taggedAssembly, taggedLayers, taggedGraph, taggedDisjointAssembly, taggedPaths, taggedPoints } from './jsxcad-geometry-tagged.js';
-import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
-import { numbers } from './jsxcad-api-v1-math.js';
-import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { translate } from './jsxcad-geometry-paths.js';
+import { max, numbers } from './jsxcad-api-v1-math.js';
+import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
+import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toPolygon } from './jsxcad-math-plane.js';
@@ -38,93 +38,9 @@ const getScale = (plan) => {
   ];
 };
 
-const Spiral = (
-  toPathFromAngle = (angle) => [[angle]],
-  { from = 0, to, upto, by, resolution } = {}
-) => {
-  if (by === undefined && resolution === undefined) {
-    by = 1;
-  }
-  if (to === undefined && upto === undefined) {
-    to = 360;
-  }
-  let path = [null];
-  for (const angle of numbers((angle) => angle, {
-    from,
-    to,
-    upto,
-    by,
-    resolution,
-  })) {
-    const radians = (angle * Math.PI) / 180;
-    const subpath = toPathFromAngle(angle);
-    path = concatenate(path, rotateZ(radians, subpath));
-  }
-  return Shape.fromPath(path);
-};
-
-Shape.prototype.Spiral = shapeMethod(Spiral);
-
-const Z = 2;
-
-registerReifier('Arc', ({ tags, plan }) => {
-  const { start = 0, end = 360 } = getAngle(plan);
-  const [scale, middle] = getScale(plan);
-  const corner1 = getCorner1(plan);
-  const corner2 = getCorner2(plan);
-  const top = corner2[Z];
-  const bottom = corner1[Z];
-
-  // FIX: corner1 is not really right.
-  const spiral = Spiral((a) => [[1]], {
-    from: start - 90,
-    upto: end - 90,
-    by: 360 / getSides(plan, 32),
-  })
-    .scale(...scale)
-    .move(...middle);
-  if (end - start === 360) {
-    return spiral
-      .close()
-      .fill()
-      .ex(top, bottom)
-      .orient({
-        center: negate(getAt(plan)),
-        from: getFrom(plan),
-        at: getTo(plan),
-      })
-      .transform(getMatrix(plan))
-      .setTags(tags)
-      .toGeometry();
-  } else {
-    return spiral
-      .move(...getAt(plan))
-      .transform(getMatrix(plan))
-      .setTags(tags)
-      .toGeometry();
-  }
-});
-
-const Arc = (x = 1, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).diameter(x, y, z);
-
-Shape.prototype.Arc = shapeMethod(Arc);
-
-const isDefined = (value) => value !== undefined;
-
-const Assembly = (...shapes) =>
-  Shape.fromGeometry(
-    taggedAssembly(
-      {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Assembly = shapeMethod(Assembly);
-
 const X = 0;
 const Y = 1;
-const Z$1 = 2;
+const Z = 2;
 
 registerReifier('Box', ({ tags, plan }) => {
   const corner1 = getCorner1(plan);
@@ -133,8 +49,8 @@ registerReifier('Box', ({ tags, plan }) => {
   const right = corner2[X];
   const front = corner1[Y];
   const back = corner2[Y];
-  const top = corner2[Z$1];
-  const bottom = corner1[Z$1];
+  const top = corner2[Z];
+  const bottom = corner1[Z];
 
   return Shape.fromPath([
     [left, back, bottom],
@@ -158,87 +74,6 @@ const Box = (x, y = x, z = 0) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Box' })).diameter(x, y, z);
 
 Shape.prototype.Box = shapeMethod(Box);
-
-const isDefined$1 = (value) => value;
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedLayers(
-      {},
-      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Group = shapeMethod(Group);
-
-const Hull = (...shapes) => {
-  const points = [];
-  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
-  return Shape.fromGeometry(taggedGraph({}, convexHull(points)));
-};
-
-const hullMethod = function (...shapes) {
-  return Hull(this, ...shapes);
-};
-
-Shape.prototype.Hull = shapeMethod(Hull);
-Shape.prototype.hull = hullMethod;
-
-const fromPoints = (...args) =>
-  Shape.fromPoints(args.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
-
-const Points = (...args) => fromPoints(...args);
-Points.fromPoints = fromPoints;
-
-Shape.prototype.Points = shapeMethod(Points);
-
-const ChainedHull = (...shapes) => {
-  const pointsets = shapes.map((shape) => shape.toPoints());
-  const chain = [];
-  for (let nth = 1; nth < pointsets.length; nth++) {
-    const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    chain.push(Hull(Points(...points)));
-  }
-  return Group(...chain);
-};
-
-const chainHullMethod = function (...shapes) {
-  return ChainedHull(this, ...shapes);
-};
-
-Shape.prototype.chainHull = chainHullMethod;
-Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
-
-const fromPoint = ([x = 0, y = 0, z = 0]) => Shape.fromPoint([x, y, z]);
-const Point = (...args) => fromPoint([...args]);
-Point.fromPoint = fromPoint;
-
-Shape.prototype.Point = shapeMethod(Point);
-
-const Z$2 = 2;
-
-// FIX: This looks wrong.
-registerReifier('Cone', ({ tags, plan }) =>
-  Hull(
-    Arc(...getCorner2(plan)).sides(getSides(plan, 32)),
-    Point(0, 0, getCorner1(plan)[Z$2])
-  )
-    .orient({
-      center: negate(getAt(plan)),
-      from: getFrom(plan),
-      at: getTo(plan),
-    })
-    .transform(getMatrix(plan))
-    .setTags(tags)
-    .toGeometry()
-);
-
-const Cone = (diameter = 1, top = 1, base = -top) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
-    .corner1(0, 0, top)
-    .corner2(diameter, diameter, base);
-
-Shape.prototype.Cone = shapeMethod(Cone);
 
 const Empty = (...shapes) =>
   Shape.fromGeometry(taggedDisjointAssembly({}));
@@ -1680,6 +1515,350 @@ const Hershey = (size) => ofSize(size);
 Hershey.ofSize = ofSize;
 Hershey.toPaths = toPaths;
 
+const MIN = 0;
+const MAX = 1;
+const X$1 = 0;
+const Y$1 = 1;
+
+const getItemNames = (geometry) => {
+  const names = new Set();
+  const op = (geometry, descend) => {
+    if (
+      geometry.type === 'item' &&
+      isNotVoid(geometry) &&
+      geometry.tags &&
+      geometry.tags.some((tag) => tag.startsWith('item/'))
+    ) {
+      geometry.tags
+        .filter((tag) => tag.startsWith('item/'))
+        .forEach((tag) => names.add(tag.substring(5)));
+    } else {
+      descend();
+    }
+  };
+  visit(geometry, op);
+  return [...names].sort();
+};
+
+const buildLayoutGeometry = ({
+  layer,
+  packSize,
+  pageWidth,
+  pageLength,
+  margin,
+}) => {
+  const itemNames = getItemNames(layer).filter((name) => name !== '');
+  const labelScale = 0.0125 * 10;
+  const size = [pageWidth, pageLength];
+  const r = (v) => Math.floor(v * 100) / 100;
+  const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  const visualization = Box(
+    Math.max(pageWidth, margin),
+    Math.max(pageLength, margin)
+  )
+    .outline()
+    .and(
+      Hershey(max(pageWidth, pageLength) * labelScale)(title).move(
+        pageWidth / -2,
+        (pageLength * (1 + labelScale)) / 2
+      )
+    )
+    .color('red')
+    .sketch()
+    .toGeometry();
+  return taggedLayout(
+    { size, margin, title, marks: packSize },
+    layer,
+    visualization
+  );
+};
+
+const Page = (
+  {
+    size,
+    pageMargin = 5,
+    itemMargin = 1,
+    itemsPerPage = Infinity,
+    pack = true,
+  },
+  ...shapes
+) => {
+  const margin = itemMargin;
+  const layers = [];
+  for (const shape of shapes) {
+    for (const leaf of getLeafs(shape.toDisjointGeometry())) {
+      layers.push(leaf);
+    }
+  }
+  if (!pack) {
+    const layer = taggedLayers({}, ...layers);
+    const packSize = measureBoundingBox(layer);
+    const pageWidth =
+      Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]) + pageMargin * 2;
+    const pageLength =
+      Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]) + pageMargin * 2;
+    return Shape$1.fromGeometry(
+      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+    );
+  } else if (size) {
+    // Content fits to page size.
+    const packSize = [];
+    const content = Shape$1.fromGeometry(taggedLayers({}, ...layers)).pack({
+      size,
+      pageMargin,
+      itemMargin,
+      perLayout: itemsPerPage,
+      packSize,
+    });
+    if (packSize.length === 0) {
+      throw Error('Packing failed');
+    }
+    const pageWidth = Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]);
+    const pageLength = Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]);
+    const plans = [];
+    for (const layer of content.toDisjointGeometry().content[0].content) {
+      plans.push(
+        buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+      );
+    }
+    return Shape$1.fromGeometry(taggedLayers({}, ...plans));
+  } else {
+    const packSize = [];
+    // Page fits to content size.
+    const content = Shape$1.fromGeometry(taggedLayers({}, ...layers)).pack({
+      pageMargin,
+      itemMargin,
+      perLayout: itemsPerPage,
+      packSize,
+    });
+    if (packSize.length === 0) {
+      throw Error('Packing failed');
+    }
+    // FIX: Using content.size() loses the margin, which is a problem for repacking.
+    // Probably page plans should be generated by pack and count toward the size.
+    const pageWidth = packSize[MAX][X$1] - packSize[MIN][X$1];
+    const pageLength = packSize[MAX][Y$1] - packSize[MIN][Y$1];
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      const plans = [];
+      for (const layer of content.toDisjointGeometry().content[0].content) {
+        const layoutGeometry = buildLayoutGeometry({
+          layer,
+          packSize,
+          pageWidth,
+          pageLength,
+          margin,
+        });
+        Shape$1.fromGeometry(layoutGeometry);
+        plans.push(layoutGeometry);
+      }
+      return Shape$1.fromGeometry(taggedLayers({}, ...plans));
+    } else {
+      return Empty();
+    }
+  }
+};
+
+const PageMethod = function (options = {}) {
+  return Page(options, this);
+};
+Shape$1.prototype.page = PageMethod;
+
+const ensurePages = (geometry, depth = 0) => {
+  const pages = getLayouts(geometry);
+  if (pages.length === 0 && depth === 0) {
+    return ensurePages(
+      Page({ pack: false }, Shape$1.fromGeometry(geometry)).toDisjointGeometry(),
+      depth + 1
+    );
+  } else {
+    return pages;
+  }
+};
+
+const PackMethod = function (options = {}) {
+  return Page(options, this);
+};
+Shape$1.prototype.pack = PackMethod;
+
+const FixMethod = function (options = {}) {
+  return Page({ ...options, pack: false }, this);
+};
+Shape$1.prototype.fix = FixMethod;
+
+const Spiral = (
+  toPathFromAngle = (angle) => [[angle]],
+  { from = 0, to, upto, by, resolution } = {}
+) => {
+  if (by === undefined && resolution === undefined) {
+    by = 1;
+  }
+  if (to === undefined && upto === undefined) {
+    to = 360;
+  }
+  let path = [null];
+  for (const angle of numbers((angle) => angle, {
+    from,
+    to,
+    upto,
+    by,
+    resolution,
+  })) {
+    const radians = (angle * Math.PI) / 180;
+    const subpath = toPathFromAngle(angle);
+    path = concatenate(path, rotateZ(radians, subpath));
+  }
+  return Shape.fromPath(path);
+};
+
+Shape.prototype.Spiral = shapeMethod(Spiral);
+
+const Z$1 = 2;
+
+registerReifier('Arc', ({ tags, plan }) => {
+  const { start = 0, end = 360 } = getAngle(plan);
+  const [scale, middle] = getScale(plan);
+  const corner1 = getCorner1(plan);
+  const corner2 = getCorner2(plan);
+  const top = corner2[Z$1];
+  const bottom = corner1[Z$1];
+  const step = 360 / getSides(plan, 32);
+  const steps = Math.ceil((end - start) / step);
+  const effectiveStep = (end - start) / steps;
+
+  // FIX: corner1 is not really right.
+  if (end - start === 360) {
+    return Spiral((a) => [[1]], {
+      from: start - 90,
+      upto: end - 90,
+      by: effectiveStep,
+    })
+      .scale(...scale)
+      .move(...middle)
+      .close()
+      .fill()
+      .ex(top, bottom)
+      .orient({
+        center: negate(getAt(plan)),
+        from: getFrom(plan),
+        at: getTo(plan),
+      })
+      .transform(getMatrix(plan))
+      .setTags(tags)
+      .toGeometry();
+  } else {
+    return Spiral((a) => [[1]], {
+      from: start - 90,
+      to: end - 90,
+      by: effectiveStep,
+    })
+      .scale(...scale)
+      .move(...middle)
+      .move(...getAt(plan))
+      .transform(getMatrix(plan))
+      .setTags(tags)
+      .toGeometry();
+  }
+});
+
+const Arc = (x = 1, y = x, z = 0) =>
+  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).diameter(x, y, z);
+
+Shape.prototype.Arc = shapeMethod(Arc);
+
+const isDefined = (value) => value !== undefined;
+
+const Assembly = (...shapes) =>
+  Shape.fromGeometry(
+    taggedAssembly(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Assembly = shapeMethod(Assembly);
+
+const isDefined$1 = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedLayers(
+      {},
+      ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Group = shapeMethod(Group);
+
+const Hull = (...shapes) => {
+  const points = [];
+  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
+  return Shape.fromGeometry(taggedGraph({}, convexHull(points)));
+};
+
+const hullMethod = function (...shapes) {
+  return Hull(this, ...shapes);
+};
+
+Shape.prototype.Hull = shapeMethod(Hull);
+Shape.prototype.hull = hullMethod;
+
+const fromPoints = (...args) =>
+  Shape.fromPoints(args.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+
+const Points = (...args) => fromPoints(...args);
+Points.fromPoints = fromPoints;
+
+Shape.prototype.Points = shapeMethod(Points);
+
+const ChainedHull = (...shapes) => {
+  const pointsets = shapes.map((shape) => shape.toPoints());
+  const chain = [];
+  for (let nth = 1; nth < pointsets.length; nth++) {
+    const points = [...pointsets[nth - 1], ...pointsets[nth]];
+    chain.push(Hull(Points(...points)));
+  }
+  return Group(...chain);
+};
+
+const chainHullMethod = function (...shapes) {
+  return ChainedHull(this, ...shapes);
+};
+
+Shape.prototype.chainHull = chainHullMethod;
+Shape.prototype.ChainedHull = shapeMethod(ChainedHull);
+
+const fromPoint = ([x = 0, y = 0, z = 0]) => Shape.fromPoint([x, y, z]);
+const Point = (...args) => fromPoint([...args]);
+Point.fromPoint = fromPoint;
+
+Shape.prototype.Point = shapeMethod(Point);
+
+const Z$2 = 2;
+
+// FIX: This looks wrong.
+registerReifier('Cone', ({ tags, plan }) => {
+  const [x, y, z] = getCorner2(plan);
+  return Hull(
+    Arc(x, y).sides(getSides(plan, 32)).z(z),
+    Point(0, 0, getCorner1(plan)[Z$2])
+  )
+    .orient({
+      center: negate(getAt(plan)),
+      from: getFrom(plan),
+      at: getTo(plan),
+    })
+    .transform(getMatrix(plan))
+    .setTags(tags)
+    .toGeometry();
+});
+
+const Cone = (diameter = 1, top = 1, base = -top) =>
+  Shape.fromGeometry(taggedPlan({}, { type: 'Cone' }))
+    .corner1(0, 0, top)
+    .corner2(diameter, diameter, base);
+
+Shape.prototype.Cone = shapeMethod(Cone);
+
 const Hexagon = (x, y, z) => Arc(x, y, z).sides(6);
 
 Shape.prototype.Hexagon = shapeMethod(Hexagon);
@@ -1748,7 +1927,7 @@ const buildRegularIcosahedron = () => {
 
 registerReifier('Icosahedron', ({ tags, plan }) => {
   const [scale, middle] = getScale(plan);
-  return Shape.fromPolygonsToSolid(buildRegularIcosahedron())
+  return Shape.fromPolygons(buildRegularIcosahedron())
     .scale(...scale)
     .move(...middle)
     .orient({
@@ -1761,9 +1940,7 @@ registerReifier('Icosahedron', ({ tags, plan }) => {
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
-  Shape.fromGeometry(
-    taggedPlan({}, { diameter: [x, y, z], type: 'Icosahedron' })
-  );
+  Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' })).diameter(x, y, z);
 
 Shape.prototype.Icosahedron = shapeMethod(Icosahedron);
 
@@ -1906,8 +2083,8 @@ const Orb = (x = 1, y = x, z = x) =>
 
 Shape.prototype.Orb = shapeMethod(Orb);
 
-const X$1 = 0;
-const Y$1 = 1;
+const X$2 = 0;
+const Y$2 = 1;
 const Z$3 = 2;
 
 const Peg = (
@@ -1920,7 +2097,7 @@ const Peg = (
   const r = add(origin, right);
   return Shape.fromGeometry(
     taggedPoints({ tags: ['peg'] }, [
-      [o[X$1], o[Y$1], o[Z$3], f[X$1], f[Y$1], f[Z$3], r[X$1], r[Y$1], r[Z$3]],
+      [o[X$2], o[Y$2], o[Z$3], f[X$2], f[Y$2], f[Z$3], r[X$2], r[Y$2], r[Z$3]],
     ])
   );
 };
@@ -1965,32 +2142,9 @@ const Septagon = (x, y, z) => Arc(x, y, z).sides(7);
 
 Shape.prototype.Septagon = shapeMethod(Septagon);
 
-// FIX: This name is confusing wrt Shape.sketch().
-const Sketch = (shape) => shape.sketch();
-
-Shape.prototype.Sketch = shapeMethod(Sketch);
-
 const Tetragon = (x, y, z) => Arc(x, y, z).sides(4);
 
 Shape.prototype.Tetragon = shapeMethod(Tetragon);
-
-const Toolpath = (...points) =>
-  Path(...points).setTags(['path/Toolpath']);
-
-Shape.prototype.Toolpath = shapeMethod(Toolpath);
-
-const Torus = (
-  radius = 1,
-  height = 1,
-  { segments = 32, sides = 32, rotation = 0 } = {}
-) =>
-  Arc(height / 2, { sides })
-    .rotateZ(rotation)
-    .moveY(radius)
-    .Loop(360, { sides: segments })
-    .rotateY(90);
-
-Shape.prototype.Torus = shapeMethod(Torus);
 
 const Triangle = (x, y, z) => Arc(x, y, z).sides(3);
 
@@ -2034,6 +2188,7 @@ const api = {
   LoopedHull,
   Octagon,
   Orb,
+  Page,
   Path,
   Peg,
   Pentagon,
@@ -2043,15 +2198,12 @@ const api = {
   Polygon,
   Polyhedron,
   Septagon,
-  Sketch,
   Spiral,
   Tetragon,
-  Toolpath,
-  Torus,
   Triangle,
   Wave,
   Weld,
 };
 
 export default api;
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Sketch, Spiral, Tetragon, Toolpath, Torus, Triangle, Wave, Weld };
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ensurePages };

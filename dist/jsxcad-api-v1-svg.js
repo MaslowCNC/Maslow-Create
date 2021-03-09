@@ -1,7 +1,7 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { read, addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
+import { ensurePages } from './jsxcad-api-v1-shapes.js';
 import { hash } from './jsxcad-geometry-tagged.js';
 
 /**
