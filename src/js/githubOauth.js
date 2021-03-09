@@ -329,7 +329,7 @@ export default function GitHubModule(){
                 }
             }).then(result => {
                 result.data.items.forEach(repo => {
-                    const thumbnailPath = "/defaultThumbnail.svg" //"https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
+                    const thumbnailPath = "https://raw.githubusercontent.com/"+repo.full_name+"/master/project.svg?sanitize=true"
                     
                     this.addProject(repo.name, repo.id, repo.owner.login, repo.created_at, repo.updated_at, owned, thumbnailPath)
                 })
@@ -858,53 +858,59 @@ export default function GitHubModule(){
             // shape = GlobalVariables.topLevelMolecule.value
             // }
             
-            // var contentSvg = "" //Would compute the svg picture here
-            this.progressSave(10)
-            
             const passBOMOn = (bomItems) => {
-            
-                var bomContent = bomHeader
-                
-                var totalParts = 0
-                var totalCost  = 0
-                if(bomItems != undefined){
-                    bomItems.forEach(item => {
-                        totalParts += item.numberNeeded
-                        totalCost  += item.costUSD
-                        bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
-                    })
-                }
-                bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
-                bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
-                
-                var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
-                GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
-                    readmeContent = readmeContent + item + "\n\n\n"
-                })
+                const values = {key: "svg", readPath: GlobalVariables.topLevelMolecule.path}
+                window.ask(values).then(result => {
+                result.answer.then( answer => {
+                    this.progressSave(10)
                     
-                var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
-                jsonRepOfProject.filetypeVersion = 1
-                jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
-                const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
-                       
-                // var decoder = new TextDecoder('utf8')
-                //var finalSVG = decoder.decode(contentSvg)
+                    var contentSvg = answer //Would compute the svg picture here
                     
-                this.createCommit(octokit,{
-                    owner: saveUser,
-                    repo: saveRepoName,
-                    changes: {
-                        files: {
-                            'BillOfMaterials.md': bomContent,
-                            'README.md': readmeContent,
-                            //'project.svg': finalSVG,
-                            'project.maslowcreate': projectContent
-                        },
-                        commit: 'Autosave'
-                    }
-                })
+                        var bomContent = bomHeader
+                        
+                        var totalParts = 0
+                        var totalCost  = 0
+                        if(bomItems != undefined){
+                            bomItems.forEach(item => {
+                                totalParts += item.numberNeeded
+                                totalCost  += item.costUSD
+                                bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
+                            })
+                        }
+                        bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                        bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
+                        
+                        var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
+                        GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
+                            readmeContent = readmeContent + item + "\n\n\n"
+                        })
+                            
+                        var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                        jsonRepOfProject.filetypeVersion = 1
+                        jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                        const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+                               
+                        var decoder = new TextDecoder('utf8')
+                        var finalSVG = decoder.decode(contentSvg)
+                        console.log(finalSVG)
+                            
+                        this.createCommit(octokit,{
+                            owner: saveUser,
+                            repo: saveRepoName,
+                            changes: {
+                                files: {
+                                    'BillOfMaterials.md': bomContent,
+                                    'README.md': readmeContent,
+                                    'project.svg': finalSVG,
+                                    'project.maslowcreate': projectContent
+                                },
+                                commit: 'Autosave'
+                            }
+                        })
 
-                intervalTimer = setInterval(() => this.saveProject(), 1200000)
+                        intervalTimer = setInterval(() => this.saveProject(), 1200000)
+                    })
+                })
             }
             
             var bomItems = extractBomTags(GlobalVariables.topLevelMolecule.path, passBOMOn)

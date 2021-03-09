@@ -265,7 +265,6 @@ const agent = async ({
             
             for (const entry of ensurePages(geometryToSvg.toKeptGeometry())) {
                 const op = await toSvg(entry);
-                console.log(op);
             }
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
