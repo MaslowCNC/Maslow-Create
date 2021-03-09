@@ -619,6 +619,12 @@ export default class Molecule extends Atom{
                     //If this is a github molecule load it from the web
                     if(atom.atomType == 'GitHubMolecule'){
                         promise = atom.loadProjectByID(atom.projectID)
+                        if(unlock){
+                            promise.then( ()=> {
+                                atom.beginPropagation()
+                                console.log("Beginning propogation from github atom")
+                            })
+                        }
                     }
                     
                     //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
