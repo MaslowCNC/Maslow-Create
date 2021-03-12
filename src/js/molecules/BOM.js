@@ -51,13 +51,14 @@ export default class AddBOMTag extends Atom{
     }
     
     /**
-     * Set the value to be the BOMitem, then call super updateValue()
+     * Set the value to be the BOMitem
      */ 
     updateValue(){
         if(this.inputs.every(x => x.ready)){
             try{
-                const values = [this.findIOValue('geometry'), JSON.stringify(this.BOMitem)]
-                this.basicThreadValueProcessing(values, "tag")
+                var inputPath = this.findIOValue('geometry')
+                const values = {key: "tag", tag: JSON.stringify(this.BOMitem), readPath: inputPath, writePath: this.path }
+            this.basicThreadValueProcessing(values)
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
         }
@@ -70,8 +71,6 @@ export default class AddBOMTag extends Atom{
         var valueList = super.updateSidebar() //call the super function
         this.createBOM(valueList)
     }
-    
- 
     
     /**
      * Draw the constant which is more rectangular than the regular shape.

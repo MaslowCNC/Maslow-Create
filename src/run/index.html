@@ -11,6 +11,7 @@
     
 	<link rel="stylesheet" href="../maslowCreate.css" type="text/css">
 	<link rel="stylesheet" href="../login.css" type="text/css">
+    <link rel="stylesheet" href="../menuIcons.css" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css">
     <link rel="icon" href="https://www.maslowcnc.com/favicon.ico">
@@ -30,7 +31,7 @@
             <button class="tablinks" id="localTab" >Local</button>
             <button class="tablinks" id="githubTab" >GitHub</button>
         </div>
-        <input type="text" id="menuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search">
+        <input type="text" id="notmenuInput" onfocusout="value=''" placeholder="Search for atom..", class = "menu_search">
         <ul id="menuList" class = "menu_list tabcontent">
         </ul>
         <ul id="githubList" class = "menu_list tabcontent">
@@ -86,6 +87,10 @@
         </div>
     </div>
     
+    
+    <script type="module"; src="../jsxcad.js"></script>
+    <script src="../three.js"></script>
+    <script src="../TrackballControls.js"></script>
     <script src="../js/flowDraw.bundle.js"></script>
     
 </body>

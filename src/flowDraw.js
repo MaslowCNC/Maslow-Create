@@ -1,11 +1,9 @@
 import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
-import Display from './js/display.js'
 import {cmenu, showGitHubSearch} from './js/NewMenu.js'
 
 
-GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector('canvas')
 GlobalVariables.c = GlobalVariables.canvas.getContext('2d')
 GlobalVariables.runMode = window.location.href.includes('run') //Check if we are using the run mode based on url
@@ -344,6 +342,7 @@ function init() {
     }
     else{
         var ID = window.location.href.split('?')[1]
+        
         //Have the current molecule load it
         if(typeof ID != undefined){
             GlobalVariables.currentMolecule = new GitHubMolecule({
@@ -351,20 +350,19 @@ function init() {
                 topLevel: true
             })
             GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
-            GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
-                GlobalVariables.topLevelMolecule.backgroundClick()
-            })
+            
+            //This is used because window.ask takes some time to load so we need to wait for it. This sets up a callback which will be called in jsxcad.js once window.ask exists
+            window.askSetupCallback = () => {
+                GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=> {
+                    GlobalVariables.topLevelMolecule.backgroundClick()
+                })
+            }
         }
     }
     window.addEventListener('resize', () => { onWindowResize() }, false)
 
     onWindowResize()
     animate()
-    
-    //GlobalVariables.display.render()
-
-    //GlobalVariables.display.init()
-
 }
 
 /**
@@ -381,8 +379,6 @@ function onWindowResize() {
         document.querySelector('.flex-parent').setAttribute('style','height:'+innerHeight+'px')
     }
     document.querySelector('.jscad-container').setAttribute('style','width:'+innerWidth/1.7+'px')
-    GlobalVariables.display.onWindowResize()
-
 }
 
 
@@ -396,9 +392,6 @@ function animate() {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom => {
         atom.update()
     })
-
-    GlobalVariables.display.rendering()
-    //GlobalVariables.display.controls.update()
 }
 
 init()

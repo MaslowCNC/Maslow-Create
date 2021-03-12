@@ -32,6 +32,23 @@ export default class Rectangle extends Atom {
     }
 
     /**
+     * Starts propagation from this atom if it is not waiting for anything up stream.
+     */ 
+    beginPropagation(){
+        
+        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        const values = {key: "getHash", readPath: this.path }
+        window.ask(values).then( hash => {
+            if(hash == undefined){
+                //Triggers inputs with nothing connected to begin propagation
+                this.inputs.forEach(input => {
+                    input.beginPropagation()
+                })
+            }
+        })
+    }
+
+    /**
      * Draw the rectangle atom & icon.
      */ 
     draw(){
@@ -54,8 +71,10 @@ export default class Rectangle extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('x length'),this.findIOValue('y length')]
-            this.basicThreadValueProcessing(values, "rectangle")
+            var xVal = this.findIOValue('x length')
+            var yVal = this.findIOValue('y length')
+            const values = {key: "rectangle", x: xVal, y:yVal, writePath: this.path }
+            this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
 }

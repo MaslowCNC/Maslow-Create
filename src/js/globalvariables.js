@@ -29,10 +29,8 @@ import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
-import Union             from './molecules/union.js'
+import Group             from './molecules/group.js'
 import GitHubModule     from './githubOauth'
-
-const workerpool = require('workerpool')
 
 /**
  * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.
@@ -63,7 +61,8 @@ class GlobalVariables{
             intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
-            union:              {creator: Union, atomType: 'Union', atomCategory: 'Interactions'},
+            union:              {creator: Group, atomType: 'Union', atomCategory: 'None'},
+            group:              {creator: Group, atomType: 'Group', atomCategory: 'Interactions'},
             shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
             
             
@@ -93,7 +92,7 @@ class GlobalVariables{
 
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
-            nest:                {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
+            nest:               {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
 
@@ -149,11 +148,18 @@ class GlobalVariables{
          * @type {number}
          */
         this.circleSegmentSize = 2
+        /** 
+         * A flag to indicate if a display value is currently being processed.
+         * @type {bool}
+         */
+        this.displayProcessing = false
+        /** 
+         * The function to call to cancel the processing of the prevous display value.
+         * @type {function}
+         */
+        this.cancelLastDisplayWorker = 0
         
-        // create a worker pool using an external worker script
-        this.pool = workerpool.pool('./JSCADworker.js', {minWorkers: 'max'})
-        
-        const math = create(all)  //What does this do?
+        const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
          * An evaluator for strings as mathmatical equations which is sandboxed and secure.
          * @type {function}
@@ -194,6 +200,35 @@ class GlobalVariables{
         height = Math.min(height, 1) //Constrain the position of the max value to be 1
         let pixels = this.canvas.height * height
         return pixels
+    }
+    /** 
+    * A function which reads from a path and displays the geometry it contains
+    * @param {string} The path to read from
+    */
+    writeToDisplay(path){
+        // Cancel the last write to display if there is one active because this one will replace it
+        if(this.displayProcessing){
+            this.cancelLastDisplayWorker()
+            this.displayProcessing = false
+        }
+        
+        var returned = window.ask({ evaluate: "md`hello`", key: "display", readPath: path })
+        
+        
+        returned.then( result => {
+            
+            this.displayProcessing = false
+            document.getElementById('viewerContext').style.filter="sepia(0%)"
+            
+            if(result && result != -1){
+                window.updateDisplay(result);
+            }
+        }).catch (error => console.log("Canceled display update"))
+        
+        this.displayProcessing = true
+        document.getElementById('viewerContext').style.filter="sepia(100%)"
+        
+        this.cancelLastDisplayWorker = returned.cancel
     }
     /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height

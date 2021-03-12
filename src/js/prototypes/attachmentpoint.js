@@ -263,7 +263,7 @@ export default class AttachmentPoint {
                     isMoving: true
                 })
             }
-            
+            console.log(this.value)
             if(this.type == 'input'){ //connectors can only be selected by clicking on an input
                 this.connectors.forEach(connector => {     //select any connectors attached to this node
                     connector.selected = true
@@ -384,7 +384,7 @@ export default class AttachmentPoint {
      */ 
     deleteSelf(){
         //remove any connectors which were attached to this attachment point
-        var connectorsList = this.connectors //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list
+        var connectorsList = [...this.connectors] //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list
         connectorsList.forEach( connector => {
             connector.deleteSelf()
         })
@@ -448,7 +448,7 @@ export default class AttachmentPoint {
      */ 
     beginPropagation(){
         
-        //If anything is connected to this it shouldn't be a starting point
+        //If nothing is connected it is a starting point
         if(this.connectors.length == 0){
             this.setValue(this.value)
         }
@@ -506,27 +506,28 @@ export default class AttachmentPoint {
      * Sets the current value of the ap. Force forces an update even if the value hasn't changed.
      */ 
     setValue(newValue){
-        if(newValue != this.value || this.ready == false){ //Don't update if nothing has changed unless it's the first time
-            this.value = newValue
-            this.ready = true
-            //propagate the change to linked elements if this is an output
-            if (this.type == 'output'){
-                this.connectors.forEach(connector => {     //select any connectors attached to this node
-                    connector.propogate()
-                })
-            }
-            //if this is an input attachment point
-            else{
-                this.parentMolecule.updateValue(this.name)
-            }
+        this.value = newValue
+        this.ready = true
+        //propagate the change to linked elements if this is an output
+        if (this.type == 'output'){
+            this.connectors.forEach(connector => {     //select any connectors attached to this node
+                connector.propogate()
+            })
+        }
+        //if this is an input attachment point
+        else{
+            this.parentMolecule.updateValue(this.name)
         }
     }
     
     /**
-     * Clears any references to geometry this ap is holding onto to free up ram.
-     */
-    dumpBuffer(){
-        this.value = null
+     * Sets all the input and output values to match their associated atoms.
+     */ 
+    loadTree(){
+        this.connectors.forEach(connector => {
+            this.value = connector.loadTree()
+        })
+        return this.value
     }
     
     /**

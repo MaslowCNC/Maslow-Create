@@ -32,6 +32,24 @@ export default class Circle extends Atom {
     }
 
     /**
+     * Starts propagation from this atom if it is not waiting for anything up stream.
+     */ 
+    beginPropagation(){
+        
+        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        const values = {key: "getHash", readPath: this.path }
+        window.ask(values).then( hash => {
+            if(hash == undefined){
+                //Triggers inputs with nothing connected to begin propagation
+                this.inputs.forEach(input => {
+                    console.log("Circle beginning propagation");
+                    input.beginPropagation()
+                })
+            }
+        })
+    }
+
+    /**
      * Draw the circle atom & icon.
      */ 
     draw(){
@@ -42,7 +60,7 @@ export default class Circle extends Atom {
         GlobalVariables.c.fillStyle = '#949294'
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), 
             GlobalVariables.heightToPixels(this.y), 
-            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)       
+            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)
         //GlobalVariables.c.fill()
         GlobalVariables.c.stroke() 
         GlobalVariables.c.closePath() 
@@ -56,8 +74,9 @@ export default class Circle extends Atom {
             const circumference  = 3.14*this.findIOValue('diameter')
             const numberOfSegments = Math.min(Math.max(parseInt( circumference / GlobalVariables.circleSegmentSize ),5), 100)
             
-            const values = [this.findIOValue('diameter'), numberOfSegments]
-            this.basicThreadValueProcessing(values, "circle")
+            var diameter = this.findIOValue('diameter')
+            const values = {key: "circle", diameter: diameter, numSegments:numberOfSegments, writePath: this.path }
+            this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
 }

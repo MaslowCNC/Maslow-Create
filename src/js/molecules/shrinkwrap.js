@@ -50,8 +50,8 @@ export default class ShrinkWrap extends Atom{
             })
         }
         
-        this.updateValue()
     }
+    
     /**
      * Draw the translate icon.
      */ 
@@ -86,6 +86,7 @@ export default class ShrinkWrap extends Atom{
           
 
     }
+    
     /**
      * Generates a list of all of the input shapes, then passees them to a worker thread to compute the hull
      */ 
@@ -98,11 +99,9 @@ export default class ShrinkWrap extends Atom{
                         inputsList.push(io.getValue())
                     }
                 })
-                const values = inputsList.map(x => {
-                    return x
-                })
                 
-                this.basicThreadValueProcessing(values, "hull")
+                const values = { key: "hull", paths: inputsList, writePath: this.path }
+                this.basicThreadValueProcessing(values)
             }catch(err){this.setAlert(err)}
             
             //Delete or add ports as needed

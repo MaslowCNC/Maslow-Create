@@ -56,9 +56,6 @@ export default function GitHubModule(){
     document.getElementById("loginButton").addEventListener("mousedown", () => {
         this.tryLogin()
     })
-    document.getElementById("browseNonGit").addEventListener("mousedown", () => {
-        this.showProjectsToLoad()
-    })
     
     /** 
      * Try to login using the oauth popup.
@@ -197,7 +194,7 @@ export default function GitHubModule(){
         searchBar.addEventListener('keydown', (e) => {
             
             this.loadProjectsBySearch("yoursButton",e, searchBar.value, "updated")
-            this.loadProjectsBySearch("githubButton",e, searchBar.value, "stars") // updated just sorts content by most recently updated
+            //this.loadProjectsBySearch("githubButton",e, searchBar.value, "stars") // updated just sorts content by most recently updated
         })
         
 
@@ -468,7 +465,7 @@ export default function GitHubModule(){
         document.getElementById('menuInput').focus()
         
         this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
-        this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)
+        //this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)
     }
     
     /** 
@@ -861,53 +858,59 @@ export default function GitHubModule(){
             // shape = GlobalVariables.topLevelMolecule.value
             // }
             
-            // var contentSvg = "" //Would compute the svg picture here
-            this.progressSave(10)
-                
-            var bomContent = bomHeader
-            var bomItems = extractBomTags(GlobalVariables.topLevelMolecule.value)
-                
-            var totalParts = 0
-            var totalCost  = 0
-            if(bomItems != undefined){
-                bomItems.forEach(item => {
-                    totalParts += item.numberNeeded
-                    totalCost  += item.costUSD
-                    bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
+            const passBOMOn = (bomItems) => {
+                const values = {key: "svg", readPath: GlobalVariables.topLevelMolecule.path}
+                window.ask(values).then( answer => {
+                    this.progressSave(10)
+                    
+                    var contentSvg = answer //Would compute the svg picture here
+                    
+                    var bomContent = bomHeader
+                    
+                    var totalParts = 0
+                    var totalCost  = 0
+                    if(bomItems != undefined){
+                        bomItems.forEach(item => {
+                            totalParts += item.numberNeeded
+                            totalCost  += item.costUSD
+                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
+                        })
+                    }
+                    bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
+                    bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
+                    
+                    var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
+                    GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
+                        readmeContent = readmeContent + item + "\n\n\n"
+                    })
+                        
+                    var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
+                    jsonRepOfProject.filetypeVersion = 1
+                    jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
+                    const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
+                           
+                    var decoder = new TextDecoder('utf8')
+                    var finalSVG = decoder.decode(contentSvg)
+                    
+                    this.createCommit(octokit,{
+                        owner: saveUser,
+                        repo: saveRepoName,
+                        changes: {
+                            files: {
+                                'BillOfMaterials.md': bomContent,
+                                'README.md': readmeContent,
+                                'project.svg': finalSVG,
+                                'project.maslowcreate': projectContent
+                            },
+                            commit: 'Autosave'
+                        }
+                    })
+
+                    intervalTimer = setInterval(() => this.saveProject(), 1200000)
                 })
             }
-            bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
-            bomContent = bomContent+"\n\n 3xCOG MSRP: $" + (3*totalCost).toFixed(2)
-                    
-                    
-            var readmeContent = readmeHeader + "\n\n" + "# " + saveRepoName + "\n\n![](/project.svg)\n\n"
-            GlobalVariables.topLevelMolecule.requestReadme().forEach(item => {
-                readmeContent = readmeContent + item + "\n\n\n"
-            })
-                
-            var jsonRepOfProject = GlobalVariables.topLevelMolecule.serialize()
-            jsonRepOfProject.filetypeVersion = 1
-            jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
-            const projectContent = JSON.stringify(jsonRepOfProject, null, 4)
-                   
-            // var decoder = new TextDecoder('utf8')
-            //var finalSVG = decoder.decode(contentSvg)
-                
-            this.createCommit(octokit,{
-                owner: saveUser,
-                repo: saveRepoName,
-                changes: {
-                    files: {
-                        'BillOfMaterials.md': bomContent,
-                        'README.md': readmeContent,
-                        //'project.svg': finalSVG,
-                        'project.maslowcreate': projectContent
-                    },
-                    commit: 'Autosave'
-                }
-            })
-
-            intervalTimer = setInterval(() => this.saveProject(), 1200000)
+            
+            var bomItems = extractBomTags(GlobalVariables.topLevelMolecule.path, passBOMOn)
         }
     }
     
