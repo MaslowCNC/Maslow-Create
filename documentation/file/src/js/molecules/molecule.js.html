@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -140,7 +140,8 @@ export default class Molecule extends Atom{
             y: GlobalVariables.pixelsToHeight(GlobalVariables.canvas.height/2),
             parent: this,
             name: &apos;Output&apos;,
-            atomType: &apos;Output&apos;
+            atomType: &apos;Output&apos;,
+            uniqueID: GlobalVariables.generateUniqueID()
         }, false)
     }
     
@@ -171,6 +172,10 @@ export default class Molecule extends Atom{
         
         
         const percentLoaded = 1-this.toProcess/this.totalAtomCount
+        if(percentLoaded &lt; 1){
+            this.processing = true;
+        }
+        
         
         super.draw() //Super call to draw the rest
         
@@ -203,7 +208,6 @@ export default class Molecule extends Atom{
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
-        
         x = GlobalVariables.pixelsToWidth(x)
         y = GlobalVariables.pixelsToHeight(y)
         
@@ -232,9 +236,11 @@ export default class Molecule extends Atom{
         /**
          * Flag that the atom is now selected.
          */
-        this.selected = true
-        this.updateSidebar()
-        this.sendToRender()
+        if(this.selected == false){
+            this.selected = true
+            this.updateSidebar()
+            this.sendToRender()   //This is might need to be removed because it was happening too often during loading
+        }
     }
 
     /**
@@ -278,7 +284,8 @@ export default class Molecule extends Atom{
     propogate(){
         //Set the output nodes with type &apos;geometry&apos; to be the generated code
         if(this.output){
-            this.output.setValue(this.value)
+            this.output.setValue(this.path)
+            this.output.ready = true
         }
         
         //If this molecule is selected, send the updated value to the renderer
@@ -291,18 +298,16 @@ export default class Molecule extends Atom{
      * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
     beginPropagation(){
-        //Begin propagation from this molecules inputs
-        super.beginPropagation()
         
         //Tell every atom inside this molecule to begin Propagation
         this.nodesOnTheScreen.forEach(node =&gt; {
             node.beginPropagation()
         })
         
-        //Catch the corner case where this has no inputs which means it won&apos;t be marked as processing by super
-        if(this.inputs.length == 0){
-            this.processing = true
-        }
+        // Catch the corner case where this has no inputs which means it won&apos;t be marked as processing by super
+        // if(this.inputs.length == 0){
+            // this.processing = true
+        // }
     }
     
     /**
@@ -317,6 +322,10 @@ export default class Molecule extends Atom{
             this.totalAtomCount = this.totalAtomCount + newInformation[0]
             this.toProcess      = this.toProcess + newInformation[1]
         })
+        
+        if(this.topLevel &amp;&amp; this.selected){
+            this.updateSidebar()
+        }
         
         return [this.totalAtomCount, this.toProcess]
     }
@@ -337,6 +346,12 @@ export default class Molecule extends Atom{
             this.createSegmentSlider(valueList)
         }
         
+        //Display the percent loaded while loading
+        const percentLoaded = 100*(1-this.toProcess/this.totalAtomCount)
+        if(this.toProcess &gt; 0 &amp;&amp; this.topLevel){
+            this.createNonEditableValueListItem(valueList,{percentLoaded:percentLoaded.toFixed(0) + &quot;%&quot;},&quot;percentLoaded&quot;,&apos;Loading&apos;)
+        }
+        
         //removes 3d view menu on background click
         let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
         if(viewerBar &amp;&amp; viewerBar.firstChild){
@@ -345,7 +360,9 @@ export default class Molecule extends Atom{
                 viewerBar.setAttribute(&apos;style&apos;, &apos;background-color:none;&apos;)
             }
         }
-
+        
+        
+        
         //Add options to set all of the inputs
         this.inputs.forEach(child =&gt; {
             if(child.type == &apos;input&apos; &amp;&amp; child.valueType != &apos;geometry&apos;){
@@ -353,7 +370,10 @@ export default class Molecule extends Atom{
             }
         })
         
-        this.displaySimpleBOM(valueList)
+        //Only bother to generate the bom if we are not currently processing data
+        if(this.toProcess == 0){
+            this.displaySimpleBOM(valueList)
+        }
         
         this.displaySidebarReadme(valueList)
         
@@ -423,10 +443,9 @@ export default class Molecule extends Atom{
      * @param {object} list - The HTML object to append the created element to.
      */ 
     displaySimpleBOM(list){
-        
-        if(this.value != null){
-            try{
-                var bomList = extractBomTags(this.value)
+        try{
+            
+            const placementFunction = (bomList) =&gt; {
                 
                 if(bomList.length &gt; 0){
                 
@@ -446,11 +465,13 @@ export default class Molecule extends Atom{
                         this.createNonEditableValueListItem(list,bomEntry,&apos;numberNeeded&apos;, bomEntry.BOMitemName, false)
                     })
                 }
-            }catch(err){
-                this.setAlert(&quot;Unable to read BOM&quot;)
             }
+            
+            extractBomTags(this.path, placementFunction)
+            
+        }catch(err){
+            this.setAlert(&quot;Unable to read BOM&quot;)
         }
-        
     }
     
     /**
@@ -497,8 +518,15 @@ export default class Molecule extends Atom{
                 atom.selected = false
             })
             
-            //Push any changes up to the next level
-            this.propogate()
+            //Push any changes up to the next level if there are any changes waiting in the output
+            this.nodesOnTheScreen.forEach(atom =&gt; {
+                if(atom.atomType == &quot;Output&quot;){
+                    if(atom.awaitingPropagationFlag == true){
+                        this.propogate()
+                        atom.awaitingPropagationFlag = false
+                    }
+                }
+            })
             
             GlobalVariables.currentMolecule = this.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
@@ -557,12 +585,14 @@ export default class Molecule extends Atom{
     /**
      * Load the children of this from a JSON representation
      * @param {object} json - A json representation of the molecule
+     * @param {object} values - An array of values to apply to this molecule before deserializing it&apos;s contents. Used by githubmolecules to set top level correctly
      */
-    deserialize(json){
+    deserialize(json, values = {}){
         //Find the target molecule in the list
         let promiseArray = []
         
         this.setValues(json) //Grab the values of everything from the passed object
+        this.setValues(values) //Over write those values with the passed ones where needed
         
         if(json.allAtoms){
             json.allAtoms.forEach(atom =&gt; { //Place the atoms
@@ -587,26 +617,51 @@ export default class Molecule extends Atom{
                 
                 GlobalVariables.totalAtomCount = GlobalVariables.numberOfAtomsToLoad
                 
-                this.backgroundClick()
                 this.census()
+                this.loadTree()  //Walks back up the tree from this molecule loading input values from any connected atoms
                 this.beginPropagation()
+                this.backgroundClick()
             }
         })
     }
     
     /**
-     * Dump the stored copies of any geometry in this molecule to free up ram.
+     * Delete this molecule and everything in it.
      */ 
-    dumpBuffer(keepThisValue){
+    deleteNode(){
         
-        //Preserve the output of this molecule if we need to keep using it
-        if(!keepThisValue){
-            super.dumpBuffer()
-        }
+        //make a copy of the nodes on the screen array since we will be modifying it
+        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen];
         
-        this.nodesOnTheScreen.forEach(atom =&gt; {
-            atom.dumpBuffer()
+        copyOfNodesOnTheScreen.forEach(node =&gt; {
+            node.deleteNode()
         })
+        
+        super.deleteNode()
+    }
+    
+    /**
+     * Triggers the loadTree process from this molecules output
+     */ 
+    loadTree(){
+        this.nodesOnTheScreen.forEach(node =&gt; {
+            if(node.atomType == &quot;Output&quot;){
+                node.loadTree()
+            }
+            
+            if(node.output){
+                if(node.output.connectors.length == 0){
+                    node.loadTree()
+                }
+            }
+            
+        })
+        
+        this.inputs.forEach(input =&gt; {
+            input.loadTree()
+        })
+        this.output.value = this.path
+        return this.path
     }
     
     /**
@@ -642,6 +697,12 @@ export default class Molecule extends Atom{
                     //If this is a github molecule load it from the web
                     if(atom.atomType == &apos;GitHubMolecule&apos;){
                         promise = atom.loadProjectByID(atom.projectID)
+                        if(unlock){
+                            promise.then( ()=&gt; {
+                                atom.beginPropagation()
+                                console.log(&quot;Beginning propogation from github atom&quot;)
+                            })
+                        }
                     }
                     
                     //If this is an output, check to make sure there are no existing outputs, and if there are delete the existing one because there can only be one
@@ -650,7 +711,6 @@ export default class Molecule extends Atom{
                         this.nodesOnTheScreen.forEach(atom =&gt; {
                             if(atom.atomType == &apos;Output&apos;){
                                 atom.deleteOutputAtom() //Remove them
-                                this.decreaseToProcessCountByOne() //Don&apos;t count removed outputs
                             }
                         })
                     }
@@ -666,14 +726,14 @@ export default class Molecule extends Atom{
                         }
                         
                         //Make begin propagation from an atom when it is placed
-                        if(promise != null){
-                            promise.then( ()=&gt; {
-                                atom.beginPropagation()
-                            })
-                        }
-                        else{
-                            atom.beginPropagation()
-                        }
+                        // if(promise != null){
+                            // promise.then( ()=&gt; {
+                                // atom.beginPropagation()
+                            // })
+                        // }
+                        // else{
+                            // atom.beginPropagation()
+                        // }
                         
                         //Fake a click on the newly placed atom
                         const downEvt = new MouseEvent(&apos;mousedown&apos;, {
@@ -684,6 +744,8 @@ export default class Molecule extends Atom{
                             clientX: atom.x,
                             clientY: atom.y
                         })
+                        
+                        atom.updateValue()
                         
                         document.getElementById(&apos;flow-canvas&apos;).dispatchEvent(downEvt)
                         document.getElementById(&apos;flow-canvas&apos;).dispatchEvent(upEvt)

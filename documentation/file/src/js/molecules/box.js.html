@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -145,9 +145,6 @@ export default class Box extends Atom {
         this.startY
 
         this.setValues(values)
-        
-        this.decreaseToProcessCountByOne() //Since this isn&apos;t really a molecule to process remove it from the list
-        
     }
     
     /**
@@ -207,7 +204,7 @@ export default class Box extends Atom {
          */
         this.startY = yInPixels
         
-        this.deleteNode()
+        this.deleteNode(false, false)
         this.parent.nodesOnTheScreen.forEach(atom =&gt; {
             atom.selectBox(this.startX, this.startY, x, y)
         })

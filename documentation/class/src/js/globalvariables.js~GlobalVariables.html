@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -82,7 +82,7 @@
   
   
   
-  <span data-ice="source">| <span><a href="file/src/js/globalvariables.js.html#lineNumber40">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/js/globalvariables.js.html#lineNumber38">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -262,6 +262,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-cancelLastDisplayWorker">cancelLastDisplayWorker</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The function to call to cancel the processing of the prevous display value.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-canvas">canvas</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
@@ -327,6 +356,35 @@
         
         
         <div data-ice="description"><p>A flag to indicate if command is pressed</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayProcessing">displayProcessing</a></span></span><span class="code" data-ice="signature">: <span>bool</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>A flag to indicate if a display value is currently being processed.</p>
 </div>
       </div>
     </td>
@@ -444,34 +502,6 @@
         
         <div data-ice="description"><p>A counter used during the loading process to keep track of how many atoms are still to be loaded.</p>
 </div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-member-pool">pool</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
       </div>
     </td>
     <td>
@@ -718,6 +748,35 @@
       
     </td>
   </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html#instance-method-writeToDisplay">writeToDisplay</a></span></span><span class="code" data-ice="signature">(The: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>A function which reads from a path and displays the geometry it contains</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 </div>
@@ -740,7 +799,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber44">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber42">source</a></span></span>
     </span>
   </h3>
 
@@ -787,7 +846,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber146">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber145">source</a></span></span>
     </span>
   </h3>
 
@@ -831,7 +890,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber59">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber57">source</a></span></span>
     </span>
   </h3>
 
@@ -875,7 +934,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber54">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber52">source</a></span></span>
     </span>
   </h3>
 
@@ -883,6 +942,50 @@
   
   
   <div data-ice="description"><p>The 2D reference to the canvas object on which the atoms are drawn.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-cancelLastDisplayWorker">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">cancelLastDisplayWorker</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber160">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>The function to call to cancel the processing of the prevous display value.</p>
 </div>
 
   
@@ -919,7 +1022,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber49">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber47">source</a></span></span>
     </span>
   </h3>
 
@@ -963,7 +1066,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber151">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber150">source</a></span></span>
     </span>
   </h3>
 
@@ -1007,7 +1110,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber141">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber140">source</a></span></span>
     </span>
   </h3>
 
@@ -1015,6 +1118,50 @@
   
   
   <div data-ice="description"><p>A flag to indicate if command is pressed</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-displayProcessing">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">displayProcessing</span><span class="code" data-ice="signature">: <span>bool</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber155">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>A flag to indicate if a display value is currently being processed.</p>
 </div>
 
   
@@ -1051,7 +1198,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber136">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber135">source</a></span></span>
     </span>
   </h3>
 
@@ -1095,7 +1242,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber121">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber120">source</a></span></span>
     </span>
   </h3>
 
@@ -1139,7 +1286,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber161">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber167">source</a></span></span>
     </span>
   </h3>
 
@@ -1183,7 +1330,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber131">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber130">source</a></span></span>
     </span>
   </h3>
 
@@ -1192,49 +1339,6 @@
   
   <div data-ice="description"><p>A counter used during the loading process to keep track of how many atoms are still to be loaded.</p>
 </div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-pool">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">pool</span><span class="code" data-ice="signature">: <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber154">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
 
   
 
@@ -1270,7 +1374,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber116">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber115">source</a></span></span>
     </span>
   </h3>
 
@@ -1314,7 +1418,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber126">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber125">source</a></span></span>
     </span>
   </h3>
 
@@ -1361,7 +1465,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber221">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber256">source</a></span></span>
     </span>
   </h3>
 
@@ -1455,7 +1559,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber210">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber245">source</a></span></span>
     </span>
   </h3>
 
@@ -1511,7 +1615,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber193">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber199">source</a></span></span>
     </span>
   </h3>
 
@@ -1584,7 +1688,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber202">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber237">source</a></span></span>
     </span>
   </h3>
 
@@ -1657,7 +1761,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber185">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber191">source</a></span></span>
     </span>
   </h3>
 
@@ -1730,7 +1834,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber176">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber182">source</a></span></span>
     </span>
   </h3>
 
@@ -1775,6 +1879,67 @@
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-writeToDisplay">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">writeToDisplay</span><span class="code" data-ice="signature">(The: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/js/globalvariables.js.html#lineNumber208">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>A function which reads from a path and displays the geometry it contains</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">The</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>path to read from</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
 
   
 

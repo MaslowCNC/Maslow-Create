@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -126,6 +126,7 @@ export default class Equation extends Atom {
         
         
     }
+    
     /**
      * Draw the Bill of material atom which has a BOM icon.
      */ 
@@ -179,6 +180,23 @@ export default class Equation extends Atom {
         }
     }
     
+    evaluateEquation(){
+        //Substitute numbers into the string
+        var substitutedEquation = this.currentEquation
+        
+        //Find all the letters in this equation
+        var re = /[a-zA-Z]/g
+        const variables = this.currentEquation.match(re)
+        for (var variable in variables){
+            for (var i= 0; i&lt;this.inputs.length; i++){
+                if (this.inputs[i].name == variables[variable]) {
+                    substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))
+                }
+            }
+        }
+        return GlobalVariables.limitedEvaluate(substitutedEquation)
+    }
+    
     /**
      * Evaluate the equation adding and removing inputs as needed
      */ 
@@ -190,21 +208,9 @@ export default class Equation extends Atom {
             if(this.inputs.every(x =&gt; x.ready)){
                 
                 this.decreaseToProcessCountByOne()
-                //Substitute numbers into the string
-                var substitutedEquation = this.currentEquation
                 
-                //Find all the letters in this equation
-                var re = /[a-zA-Z]/g
-                const variables = this.currentEquation.match(re)
-                for (var variable in variables){
-                    for (var i= 0; i&lt;this.inputs.length; i++){
-                        if (this.inputs[i].name == variables[variable]) {
-                            substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))
-                        }
-                    }
-                }
                 //Evaluate the equation
-                this.value = GlobalVariables.limitedEvaluate(substitutedEquation)
+                this.value = this.evaluateEquation()
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
@@ -213,6 +219,17 @@ export default class Equation extends Atom {
             console.warn(err)
             this.setAlert(err)
         }
+    }
+    
+    loadTree(){
+        this.inputs.forEach(input =&gt; {
+            input.loadTree()
+        })
+        
+        this.value = this.evaluateEquation()
+        this.output.value = this.value
+        
+        return this.value
     }
     
     /**

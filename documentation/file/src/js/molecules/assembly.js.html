@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -109,7 +109,7 @@ export default class Assembly extends Atom{
          */
         this.ioValues = []
         /**
-         * A flag to determine if cutaway geometry is removed.
+         * A flag to determine if cutaway geometry is removed....not used anymore?
          * @type {boolean}
          */
         this.removeCutawayGeometry = true
@@ -184,9 +184,8 @@ export default class Assembly extends Atom{
                     }
                 })
                 
-                const values = [inputValues]
-                
-                this.basicThreadValueProcessing(values, &quot;assemble&quot;)
+                const values = { key: &quot;assembly&quot;, paths: inputValues, writePath: this.path }
+                this.basicThreadValueProcessing(values)
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
             

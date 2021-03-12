@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -107,10 +107,8 @@ import GitHubMolecule   from &apos;./molecules/githubmolecule.js&apos;
 import Output           from &apos;./molecules/output.js&apos;
 import Gcode            from &apos;./molecules/gcode.js&apos;
 import Code             from &apos;./molecules/code.js&apos;
-import Union             from &apos;./molecules/union.js&apos;
+import Group             from &apos;./molecules/group.js&apos;
 import GitHubModule     from &apos;./githubOauth&apos;
-
-const workerpool = require(&apos;workerpool&apos;)
 
 /**
  * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.
@@ -141,7 +139,8 @@ class GlobalVariables{
             intersection:       {creator: Intersection, atomType: &apos;Intersection&apos;, atomCategory: &apos;Interactions&apos;},
             difference:         {creator: Difference, atomType: &apos;Difference&apos;, atomCategory: &apos;Interactions&apos;},
             assembly:           {creator: Assembly, atomType: &apos;Assembly&apos;, atomCategory: &apos;Interactions&apos;},
-            union:              {creator: Union, atomType: &apos;Union&apos;, atomCategory: &apos;Interactions&apos;},
+            union:              {creator: Group, atomType: &apos;Union&apos;, atomCategory: &apos;None&apos;},
+            group:              {creator: Group, atomType: &apos;Group&apos;, atomCategory: &apos;Interactions&apos;},
             shrinkwrap:         {creator: ShrinkWrap, atomType: &apos;ShrinkWrap&apos;, atomCategory: &apos;Interactions&apos;},
             
             
@@ -171,7 +170,7 @@ class GlobalVariables{
 
             stl:                {creator: Stl, atomType: &apos;Stl&apos;, atomCategory: &apos;Export&apos;},
             svg:                {creator: Svg, atomType: &apos;Svg&apos;, atomCategory: &apos;Export&apos;},
-            nest:                {creator: Nest, atomType: &apos;Nest&apos;, atomCategory: &apos;Export&apos;},
+            nest:               {creator: Nest, atomType: &apos;Nest&apos;, atomCategory: &apos;Export&apos;},
             gcode:              {creator: Gcode, atomType: &apos;Gcode&apos;, atomCategory: &apos;Export&apos;},
             githubmolecule:     {creator: GitHubMolecule, atomType: &apos;GitHubMolecule&apos;, atomCategory: &apos;Inputs&apos;},
 
@@ -227,11 +226,18 @@ class GlobalVariables{
          * @type {number}
          */
         this.circleSegmentSize = 2
+        /** 
+         * A flag to indicate if a display value is currently being processed.
+         * @type {bool}
+         */
+        this.displayProcessing = false
+        /** 
+         * The function to call to cancel the processing of the prevous display value.
+         * @type {function}
+         */
+        this.cancelLastDisplayWorker = 0
         
-        // create a worker pool using an external worker script
-        this.pool = workerpool.pool(&apos;./JSCADworker.js&apos;, {minWorkers: &apos;max&apos;})
-        
-        const math = create(all)  //What does this do?
+        const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
          * An evaluator for strings as mathmatical equations which is sandboxed and secure.
          * @type {function}
@@ -272,6 +278,35 @@ class GlobalVariables{
         height = Math.min(height, 1) //Constrain the position of the max value to be 1
         let pixels = this.canvas.height * height
         return pixels
+    }
+    /** 
+    * A function which reads from a path and displays the geometry it contains
+    * @param {string} The path to read from
+    */
+    writeToDisplay(path){
+        // Cancel the last write to display if there is one active because this one will replace it
+        if(this.displayProcessing){
+            this.cancelLastDisplayWorker()
+            this.displayProcessing = false
+        }
+        
+        var returned = window.ask({ evaluate: &quot;md`hello`&quot;, key: &quot;display&quot;, readPath: path })
+        
+        
+        returned.then( result =&gt; {
+            
+            this.displayProcessing = false
+            document.getElementById(&apos;viewerContext&apos;).style.filter=&quot;sepia(0%)&quot;
+            
+            if(result &amp;&amp; result != -1){
+                window.updateDisplay(result);
+            }
+        }).catch (error =&gt; console.log(&quot;Canceled display update&quot;))
+        
+        this.displayProcessing = true
+        document.getElementById(&apos;viewerContext&apos;).style.filter=&quot;sepia(100%)&quot;
+        
+        this.cancelLastDisplayWorker = returned.cancel
     }
     /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height

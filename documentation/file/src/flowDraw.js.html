@@ -53,6 +53,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/gcode.js~Gcode.html">Gcode</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html">GeneticAlgorithm</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/githubmolecule.js~GitHubMolecule.html">GitHubMolecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/group.js~Group.html">Group</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
@@ -67,7 +68,6 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/union.js~Union.html">Union</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -79,11 +79,9 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GlobalVariables from &apos;./js/globalvariables&apos;
 import Molecule from &apos;./js/molecules/molecule.js&apos;
 import GitHubMolecule from &apos;./js/molecules/githubmolecule.js&apos;
-import Display from &apos;./js/display.js&apos;
 import {cmenu, showGitHubSearch} from &apos;./js/NewMenu.js&apos;
 
 
-GlobalVariables.display = new Display()
 GlobalVariables.canvas = document.querySelector(&apos;canvas&apos;)
 GlobalVariables.c = GlobalVariables.canvas.getContext(&apos;2d&apos;)
 GlobalVariables.runMode = window.location.href.includes(&apos;run&apos;) //Check if we are using the run mode based on url
@@ -422,6 +420,7 @@ function init() {
     }
     else{
         var ID = window.location.href.split(&apos;?&apos;)[1]
+        
         //Have the current molecule load it
         if(typeof ID != undefined){
             GlobalVariables.currentMolecule = new GitHubMolecule({
@@ -429,20 +428,19 @@ function init() {
                 topLevel: true
             })
             GlobalVariables.topLevelMolecule = GlobalVariables.currentMolecule
-            GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=&gt; {
-                GlobalVariables.topLevelMolecule.backgroundClick()
-            })
+            
+            //This is used because window.ask takes some time to load so we need to wait for it. This sets up a callback which will be called in jsxcad.js once window.ask exists
+            window.askSetupCallback = () =&gt; {
+                GlobalVariables.topLevelMolecule.loadProjectByID(ID).then( ()=&gt; {
+                    GlobalVariables.topLevelMolecule.backgroundClick()
+                })
+            }
         }
     }
     window.addEventListener(&apos;resize&apos;, () =&gt; { onWindowResize() }, false)
 
     onWindowResize()
     animate()
-    
-    //GlobalVariables.display.render()
-
-    //GlobalVariables.display.init()
-
 }
 
 /**
@@ -459,8 +457,6 @@ function onWindowResize() {
         document.querySelector(&apos;.flex-parent&apos;).setAttribute(&apos;style&apos;,&apos;height:&apos;+innerHeight+&apos;px&apos;)
     }
     document.querySelector(&apos;.jscad-container&apos;).setAttribute(&apos;style&apos;,&apos;width:&apos;+innerWidth/1.7+&apos;px&apos;)
-    GlobalVariables.display.onWindowResize()
-
 }
 
 
@@ -474,9 +470,6 @@ function animate() {
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(atom =&gt; {
         atom.update()
     })
-
-    GlobalVariables.display.rendering()
-    //GlobalVariables.display.controls.update()
 }
 
 init()
