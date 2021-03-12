@@ -42,14 +42,14 @@ export default class GitHubMolecule extends Molecule {
      * @param {number} x - The x coordinate of the click
      * @param {number} y - The y coordinate of the click
      // */ 
-    doubleClick(x,y){
-        var clickProcessed = false
-        var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
-        if (distFromClick < this.radius){
-            clickProcessed = true
-        }
-        return clickProcessed 
-    }
+    // doubleClick(x,y){
+        // var clickProcessed = false
+        // var distFromClick = GlobalVariables.distBetweenPoints(x, this.x, y, this.y)
+        // if (distFromClick < this.radius){
+            // clickProcessed = true
+        // }
+        // return clickProcessed 
+    // }
     
     /**
      * Loads a project into this GitHub molecule from github based on the passed github ID. This function is async and execution time depends on project complexity, and network speed.
@@ -60,16 +60,17 @@ export default class GitHubMolecule extends Molecule {
         //Get the repo by ID
         const result = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
-        //Preserve values which will be overwritten by the de-serialize process. We only want to keep them if this is not the top level atom
-        var preservedValues
+        //Store values that we want to overwrite in the loaded version
+        var valuesToOverwriteInLoadedVersion
         if(this.topLevel){
-            preservedValues = {atomType: this.atomType, topLevel: this.topLevel}
+            valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
         }
         else{
-            preservedValues = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+            valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
         }
-        const promsie =  this.deserialize(result)
-        this.setValues(preservedValues)
+        const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
+            this.setValues(valuesToOverwriteInLoadedVersion)
+        })
         return promsie
     }
 

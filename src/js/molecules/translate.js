@@ -65,9 +65,14 @@ export default class Translate extends Atom{
     updateValue(){
         if(this.inputs.every(x => x.ready)){
             try{
-                const values = [this.findIOValue('geometry'), this.findIOValue('xDist'), this.findIOValue('yDist'), this.findIOValue('zDist')]
+                var inputPath = this.findIOValue('geometry')
+                var extrudeDistance = this.findIOValue('height')
+                var x = this.findIOValue('xDist')
+                var y = this.findIOValue('yDist')
+                var z = this.findIOValue('zDist')
+                const values = { key: "translate", x:x, y:y, z:z, readPath: inputPath, writePath: this.path }
                 
-                this.basicThreadValueProcessing(values, "translate")
+                this.basicThreadValueProcessing(values)
             }catch(err){this.setAlert(err)}
         }
     }

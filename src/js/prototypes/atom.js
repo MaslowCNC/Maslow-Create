@@ -23,7 +23,11 @@ export default class Atom {
          * @type {object}
          */
         this.output = null
-        
+        /** 
+         * This atom's unique ID. Often overwritten later when loading
+         * @type {number}
+         */
+        this.uniqueID = GlobalVariables.generateUniqueID()
         /** 
          * The X cordinate of this atom
          * @type {number}
@@ -122,6 +126,21 @@ export default class Atom {
             this[key] = values[key]
         }
         
+        this.generatePath();
+    }
+    
+    /**
+     * Generates the path for this atom from it's location in the graph
+     */ 
+    generatePath(){
+        let levelToInspect = this
+        let topPath = ""
+        while(!levelToInspect.topLevel){
+            topPath = "/" + levelToInspect.uniqueID + topPath
+            levelToInspect = levelToInspect.parent
+        }
+        
+        this.path ="atoms/" + levelToInspect.uniqueID + topPath + this.atomType
     }
     
     /**
@@ -135,6 +154,8 @@ export default class Atom {
             this[key] = values[key]
         }
         
+        this.generatePath()
+        
         if (typeof this.ioValues !== 'undefined') {
             this.ioValues.forEach(ioValue => { //for each saved value
                 this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value
@@ -143,6 +164,12 @@ export default class Atom {
                     }
                 })
             })
+        }
+        
+        
+        if(this.output){
+            this.output.setValue(this.path)
+            this.output.ready = true
         }
     }
    
@@ -237,7 +264,7 @@ export default class Atom {
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 
-    addIO(type, name, target, valueType, defaultValue, ready = false, primary = false){
+    addIO(type, name, target, valueType, defaultValue, ready = true, primary = false){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
@@ -260,7 +287,7 @@ export default class Atom {
                 defaultValue: defaultValue,
                 uniqueID: GlobalVariables.generateUniqueID(),
                 atomType: 'AttachmentPoint',
-                ready: ready
+                ready: true
             })
             
             if(type == 'input'){
@@ -516,14 +543,15 @@ export default class Atom {
     /**
      * Delete this atom.
      */ 
-    deleteNode(){
+    deleteNode(backgroundClickAfter = true, deletePath = true){
         //deletes this node and all of it's inputs
         
         this.inputs.forEach(input => { //disable the inputs before deleting
             input.ready = false
         })
         
-        this.inputs.forEach(input => {
+        const inputsCopy = [...this.inputs]//Make a copy of the inputs list to delete all of them
+        inputsCopy.forEach(input => {
             input.deleteSelf()
         })
         if(this.output){
@@ -532,8 +560,14 @@ export default class Atom {
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
-        GlobalVariables.currentMolecule.backgroundClick()
-
+        if(deletePath){
+            this.basicThreadValueProcessing({key: "deletePath", path: this.path }) //Delete the cached geometry
+        }
+        
+        if(backgroundClickAfter){
+            GlobalVariables.currentMolecule.backgroundClick()
+        }
+        
     }
     
     /**
@@ -559,14 +593,11 @@ export default class Atom {
         var ioValues = []
         this.inputs.forEach(io => {
             if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){
-                //We only want to save inputs values with nothing connected to them
-                if(io.connectors.length == 0){
-                    var saveIO = {
-                        name: io.name,
-                        ioValue: io.getValue()
-                    }
-                    ioValues.push(saveIO)
+                var saveIO = {
+                    name: io.name,
+                    ioValue: io.getValue()
                 }
+                ioValues.push(saveIO)
             }
         })
         
@@ -608,7 +639,7 @@ export default class Atom {
     }
     
     /**
-     * Used to walk back out the tree generating a list of constants
+     * Used to walk back out the tree generating a list of constants...used for evolve
      */ 
     walkBackForConstants(callback){
         //Pass the call further up the chain
@@ -625,7 +656,7 @@ export default class Atom {
     displayAndPropogate(){
         //If this has an output write to it
         if(this.output){
-            this.output.setValue(this.value)
+            this.output.setValue(this.path)
             this.output.ready = true
         }
         
@@ -638,7 +669,7 @@ export default class Atom {
     /**
      * Calls a worker thread to compute the atom's value.
      */ 
-    basicThreadValueProcessing(values, key){
+    basicThreadValueProcessing(toAsk){
         //If the inputs are all ready
         var go = true
         this.inputs.forEach(input => {
@@ -650,29 +681,16 @@ export default class Atom {
             this.processing = true
             this.decreaseToProcessCountByOne()
             
-            //console.log("Processing: " + key)
-            //console.log(GlobalVariables.pool.stats())
-            
-            if(this.output){  //If this atom has an ouput
+            if(this.output){  //If this atom has an output
                 this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
             }
             
             this.clearAlert()
-            const computeValue = async (values, key) => {
-                let promise = new Promise( resolve =>{
-                    GlobalVariables.pool.exec(key, [values]).then((result) => {
-                        resolve(result)
-                    })
-                })
-                let result1 = await promise
-                    
-                return result1
-            }
             
-            computeValue(values, key).then((result) => {
-                if (result != -1 ){
-                    this.value = result
-
+            //toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
+            
+            const returned = window.ask(toAsk).then(result => {
+                if (result.answer != -1 ){
                     this.displayAndPropogate()
                 }else{
                     this.setAlert("Unable to compute")
@@ -686,10 +704,7 @@ export default class Atom {
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(){
-        //If anything is connected to this it shouldn't be a starting point
-        this.inputs.forEach(input => {
-            input.beginPropagation()
-        })
+        
     }
     
     /**
@@ -706,12 +721,23 @@ export default class Atom {
     }
     
     /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
+    loadTree(){
+        this.inputs.forEach(input => {
+            input.loadTree()
+        })
+        this.output.value = this.path
+        return this.path
+    }
+    
+    /**
      * Send the value of this atom to the 3D display.
      */ 
     sendToRender(){
         //Send code to JSxCAD to render
         try{
-            GlobalVariables.display.writeToDisplay(this.value)
+            GlobalVariables.writeToDisplay(this.path)
         }
         catch(err){
             this.setAlert(err)
@@ -737,17 +763,17 @@ export default class Atom {
     }
     
     /**
-     * Dump the stored copies of any geometry in this atom to free up ram.
+     * Dump the stored copies of any geometry in this atom to free up ram....probably can be deleted
      */ 
-    dumpBuffer(){
-        this.inputs.forEach(input => {
-            input.dumpBuffer()
-        })
-        if(this.output){
-            this.output.dumpBuffer()
-        }
-        this.value = null
-    }
+    // dumpBuffer(){
+        // this.inputs.forEach(input => {
+            // input.dumpBuffer()
+        // })
+        // if(this.output){
+            // this.output.dumpBuffer()
+        // }
+        // this.value = null
+    // }
     
     /**
      * Creates an editable HTML item to set the value of an object element. Used in the sidebar.

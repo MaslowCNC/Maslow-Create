@@ -84,8 +84,12 @@ export default class Constant extends Atom{
     /**
      * Starts propagation from this constant.
      */ 
-    beginPropagation(){
-        this.output.setValue(this.value)
+    // beginPropagation(){
+        // this.output.setValue(this.value)
+    // }
+    
+    loadTree(){
+        return this.value
     }
     
     /**
@@ -115,7 +119,7 @@ export default class Constant extends Atom{
     }
     
     /**
-     * Used to walk back out the tree generating a list of constants
+     * Used to walk back out the tree generating a list of constants...used for evolving
      */ 
     walkBackForConstants(callback){
         //If this constant can evolve then add it to the target list

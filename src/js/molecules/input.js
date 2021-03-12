@@ -168,11 +168,22 @@ export default class Input extends Atom {
                 
                 this.value = input.getValue()
                 
-                this.output.waitOnComingInformation()              //Lock all of the dependents
+                this.output.waitOnComingInformation()         //Lock all of the dependents
                 
                 this.output.setValue(this.value)
             }
         })
+    }
+    
+    loadTree(){
+        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list
+            if(input.name == this.name){
+                input.loadTree()
+                this.value = input.value
+                this.output.value = input.value
+            }
+        })
+        return this.value
     }
     
     /**

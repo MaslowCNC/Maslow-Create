@@ -72,10 +72,10 @@ export default class Svg extends Atom {
      * Set the value to be the input geometry, then call super updateValue()
      */ 
     updateValue(){
-        try{
-            const values = [this.findIOValue('geometry')]
-            this.basicThreadValueProcessing(values, "outline")
-        }catch(err){this.setAlert(err)}
+        // try{
+            // const values = [this.findIOValue('geometry')]
+            // this.basicThreadValueProcessing(values, "outline")
+        // }catch(err){this.setAlert(err)}
     }
     
     /**
@@ -90,24 +90,15 @@ export default class Svg extends Atom {
      * The function which is called when you press the download button.
      */ 
     downloadSvg(){
-        const values = [this.findIOValue('geometry')]
-        
-        const computeValue = async (values, key) => {
-            try{
-                return await GlobalVariables.ask({values: values, key: key})
-            }
-            catch(err){
-                this.setAlert(err)
-            }
-        }
-        
-        computeValue(values, "svg").then(result => {
-            if (result != -1 ){
-                const blob = new Blob([result], {type: 'text/plain;charset=utf-8'})
+        try{
+            const values = {key: "svg", readPath: this.findIOValue('geometry')}
+            window.ask(values).then( answer => {
+                
+                //var enc = new TextDecoder("utf-8");
+                
+                const blob = new Blob([answer])
                 saveAs(blob, GlobalVariables.currentMolecule.name+'.svg')
-            }else{
-                this.setAlert("Unable to compute")
-            }
-        })
+            })
+        }catch(err){this.setAlert(err)}
     }
 }

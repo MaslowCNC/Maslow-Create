@@ -63,9 +63,9 @@ export default class Code extends Atom {
                 argumentsArray[input.name] = input.value
             })
             
-            const values = [this.code, argumentsArray]
+            const values = { key: "code", code: this.code, paths: argumentsArray, writePath: this.path }
+            this.basicThreadValueProcessing(values)
             
-            this.basicThreadValueProcessing(values, "code")
         }catch(err){this.setAlert(err)}
     }
     

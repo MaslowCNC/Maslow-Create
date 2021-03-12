@@ -19,7 +19,7 @@ export default class Output extends Atom {
         }
         
         /**
-         * This atom's type
+         * This atom's type...not used?
          * @type {string}
          */
         this.type = 'output'
@@ -48,6 +48,12 @@ export default class Output extends Atom {
          * @type {number}
          */
         this.radius = 1/75
+        /**
+         * A flag to indicate if this molecule was waiting propagation. If it is it will take place
+         *the next time we go up one level.
+         * @type {number}
+         */
+        this.awaitingPropagationFlag = false
         
         this.setValues(values)
         
@@ -62,26 +68,37 @@ export default class Output extends Atom {
             this.decreaseToProcessCountByOne()
             this.decreaseToProcessCountByOne()//Called twice to count for the molecule it is in
             
-            this.value = this.findIOValue('number or geometry')
-            this.parent.value = this.value
+            this.path = this.findIOValue('number or geometry')
+            this.parent.path = this.path
             
-            //If this molecule is the top level or if it is not open, propogate up. Basically prevents propagation for opened molecules
+            //If this molecule is the top level or if it is not open, propagate up. Basically prevents propagation for opened molecules
             if(this.parent.topLevel || this.parent != GlobalVariables.currentMolecule){
                 this.parent.propogate()
+            }
+            else{
+                this.awaitingPropagationFlag = true
             }
             
             this.parent.processing = false
             
             if(this.parent.topLevel){
                 const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000
-                console.warn("Loading finished in " + timeToLoad + " seconds")
+                // console.warn("Loading finished in " + timeToLoad + " seconds")
             }
             
-            //Remove all the information stored in github molecules with no inputs after they have been computed to save ram
-            // if(this.parent.inputs.length == 0 && this.parent.atomType == "GitHubMolecule" && !this.parent.topLevel){
-            // this.parent.dumpBuffer(true)
-            // }
+            //Update the display when the value changes if the parent is selected
+            if(this.parent.selected){
+                this.parent.sendToRender()
+            }
         }
+    }
+    
+    loadTree(){
+        this.path = this.inputs[0].loadTree()
+        this.parent.path = this.path
+        this.parent.output.value = this.path
+        this.value = this.path
+        return this.path
     }
     
     /**
@@ -95,7 +112,7 @@ export default class Output extends Atom {
      * A function to allow you to still call the delete function if needed.
      */
     deleteOutputAtom(){
-        super.deleteNode()
+        super.deleteNode(false)
     }
     
     /**
