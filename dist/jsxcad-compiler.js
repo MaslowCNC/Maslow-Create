@@ -6549,6 +6549,9 @@ const toEcmascript = async (
   const body = ast.body;
   const out = [];
 
+  // Start by loading the controls
+  const controls = (await read(`control/${path}`)) || {};
+
   const fromIdToSha = (id) => {
     const entry = topLevel.get(id);
     if (entry !== undefined) {
@@ -6561,6 +6564,29 @@ const toEcmascript = async (
     declarator,
     { doExport = false } = {}
   ) => {
+    if (
+      declarator.init &&
+      declarator.init.type === 'CallExpression' &&
+      declarator.init.callee.type === 'Identifier' &&
+      declarator.init.callee.name === 'control'
+    ) {
+      const [label, value] = declarator.init.arguments;
+      let controlValue = controls[label.value];
+      if (controlValue !== undefined) {
+        // FIX: Let check these are valid.
+        switch (typeof value.value) {
+          case 'string':
+            // FIX: Quotes
+            value.raw = `'${controlValue}'`;
+            value.value = String(controlValue);
+            break;
+          default:
+            value.raw = `${controlValue}`;
+            value.value = controlValue;
+        }
+      }
+    }
+
     const id = declarator.id.name;
     const code = {
       type: 'VariableDeclaration',
@@ -6637,8 +6663,18 @@ const toEcmascript = async (
         out.push(declaration);
         entry.isNotCacheable = true;
         return;
+      } else if (
+        declarator.init.type === 'CallExpression' &&
+        declarator.init.callee.type === 'Identifier' &&
+        declarator.init.callee.name === 'control'
+      ) {
+        // We've already patched this.
+        out.push(declaration);
+        entry.isNotCacheable = true;
+        return;
       }
     }
+
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.sha === sha) {
@@ -6665,6 +6701,8 @@ const toEcmascript = async (
       entry.isComputed = true;
     } else {
       out.push(parse('beginRecordingNotes()', parseOptions));
+      // FIX: Let's not hard-code card declarations.
+      out.push(parse(`card\`${path}/${id}\`;`, parseOptions));
       out.push({ ...declaration, declarations: [declarator] });
       // Only cache Shapes.
       out.push(
@@ -6689,7 +6727,6 @@ const toEcmascript = async (
       for (const declarator of entry.declarations) {
         await declareVariable(entry, declarator);
       }
-      // out.push(entry);
     } else if (entry.type === 'ExportNamedDeclaration') {
       // Note the names and replace the export with the declaration.
       const declaration = entry.declaration;
@@ -6700,9 +6737,7 @@ const toEcmascript = async (
           });
         }
       }
-      // out.push(entry.declaration);
     } else if (entry.type === 'ImportDeclaration') {
-      // FIX: This works for non-redefinable modules, but not redefinable modules.
       const entry = body[nth];
       // Rewrite
       //   import { foo } from 'bar';
@@ -6747,11 +6782,6 @@ const toEcmascript = async (
           }
         }
       }
-    } else if (
-      entry.type === 'ExpressionStatement' &&
-      entry.expression.type === 'ObjectExpression'
-    ) {
-      out.push(entry);
     } else {
       out.push(entry);
     }

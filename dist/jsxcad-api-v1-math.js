@@ -3966,8 +3966,6 @@ cos.signature = 'cos(angle:number) -> number';
 
 const max = Math.max;
 
-max.signature = 'max(...values:number) -> number';
-
 /**
  *
  * # Min

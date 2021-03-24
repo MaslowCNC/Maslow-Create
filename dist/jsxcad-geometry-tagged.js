@@ -4,7 +4,7 @@ import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as 
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
-import { realizeGraph, transform as transform$1, toPaths, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, fill as fill$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, offset as offset$1, projectToPlane as projectToPlane$1, sections, smooth as smooth$1, toTriangles, test as test$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, offset as offset$1, projectToPlane as projectToPlane$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -344,10 +344,6 @@ const getGraphs = (geometry) => {
   return graphs;
 };
 
-const taggedPaths = ({ tags }, paths) => {
-  return { type: 'paths', tags, paths };
-};
-
 const registry = new Map();
 
 const reify = (geometry) => {
@@ -474,23 +470,26 @@ const differenceImpl = (geometry, ...geometries) => {
             differenced = difference$1(differenced, graph);
           }
           for (const { paths } of getFaceablePaths(geometry)) {
-            differenced = difference$1(differenced, fromPaths(paths));
+            differenced = difference$1(
+              differenced,
+              fill$1(
+                fromPaths(paths.map((path) => ({ points: path })))
+              )
+            );
           }
         }
         return taggedGraph({ tags }, differenced);
       }
       case 'paths':
-        if (tags && tags.includes('paths/Wire')) {
-          return geometry;
-        }
-        return taggedPaths(
-          { tags },
-          toPaths(
-            difference(
-              taggedGraph({ tags }, fromPaths(geometry.paths)),
-              ...geometries
-            ).graph
-          )
+        // This will have problems with open paths, but we want to phase this out anyhow.
+        return difference(
+          taggedGraph(
+            { tags },
+            fill$1(
+              fromPaths(geometry.paths.map((path) => ({ points: path })))
+            )
+          ),
+          ...geometries
         );
       case 'points': {
         // Not implemented yet.
@@ -678,7 +677,12 @@ const fill = (geometry, includeFaces = true, includeHoles = true) => {
       continue;
     }
     fills.push(
-      taggedGraph({ tags }, fill$1(fromPaths(paths)))
+      taggedGraph(
+        { tags },
+        fill$1(
+          fromPaths(paths.map((path) => ({ points: path })))
+        )
+      )
     );
   }
   return taggedGroup({}, ...fills);
@@ -1025,6 +1029,10 @@ const hash = (geometry) => {
   return geometry.hash;
 };
 
+const taggedPaths = ({ tags }, paths) => {
+  return { type: 'paths', tags, paths };
+};
+
 const intersectionImpl = (geometry, ...geometries) => {
   geometries = geometries.map(toDisjointGeometry);
   const op = (geometry, descend) => {
@@ -1227,8 +1235,10 @@ const offset = (geometry, initial = 1, step, limit) => {
 const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags, graph } of getNonVoidGraphs(disjointGeometry)) {
-    outlines.push(taggedPaths({ tags }, toPaths(graph)));
+  for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+    outlines.push(
+      taggedPaths({ tags: [...tags, 'path/Wire'] }, toPaths(graph))
+    );
   }
   // Turn paths into wires.
   for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
@@ -1306,6 +1316,7 @@ const smooth = (geometry, options) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
+        return smooth(reify(geometry).content[0], options);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1522,6 +1533,41 @@ const toPoints = (geometry) => {
   return { type: 'points', points: [...points] };
 };
 
+const toPolygonsWithHoles = (geometry) => {
+  const polygonsWithHoles = [];
+
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph': {
+        polygonsWithHoles.push({
+          tags: geometry.tags,
+          polygonsWithHoles: toPolygonsWithHoles$1(geometry.graph),
+        });
+        break;
+      }
+      // FIX: Support 'triangles'?
+      case 'points':
+      case 'paths':
+        break;
+      case 'layout':
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'sketch':
+      case 'layers': {
+        return descend();
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  visit(toTransformedGeometry(geometry), op);
+
+  return polygonsWithHoles;
+};
+
 // Union is a little more complex, since it can violate disjointAssembly invariants.
 const unionImpl = (geometry, ...geometries) => {
   geometries = geometries.map(toDisjointGeometry);
@@ -1604,4 +1650,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, transform, translate, union, update, visit, write };

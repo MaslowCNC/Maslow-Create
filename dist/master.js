@@ -10,7 +10,7 @@ document.onreadystatechange = () => {
       document.getElementById('loading').appendChild(booting);
       const hash = location.hash.substring(1);
       const [project, source] = hash.split('@');
-      await installUi({ document, project, source });
+      await installUi({ document, project, source, sha: 'master' });
       document.body.removeChild(document.getElementById('loading'));
     };
     bootstrap();
