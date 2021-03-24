@@ -228,15 +228,8 @@ const doesNotOverlap = (a, b) => {
   return false;
 };
 
-const realizeGraph = (graph) => {
-  if (graph.isLazy) {
-    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
-  } else {
-    return graph;
-  }
-};
-
 const extrude = (graph, height, depth) => {
+  /*
   graph = realizeGraph(graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the first face normal.
@@ -249,6 +242,18 @@ const extrude = (graph, height, depth) => {
         ...scale(depth, normal)
       )
     );
+  } else {
+    return graph;
+  }
+*/
+  return fromSurfaceMeshLazy(
+    extrudeSurfaceMesh(toSurfaceMesh(graph), height, depth)
+  );
+};
+
+const realizeGraph = (graph) => {
+  if (graph.isLazy) {
+    return fromSurfaceMesh(graph[surfaceMeshSymbol]);
   } else {
     return graph;
   }
