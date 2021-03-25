@@ -1339,7 +1339,8 @@ const taggedTriangles = ({ tags }, triangles) => {
   return { type: 'triangles', tags, triangles };
 };
 
-const soup = (geometry) => {
+const soup = (geometry, { doOutline = true } = {}) => {
+  const outline$1 = doOutline ? outline : () => [];
   const op = (geometry, descend) => {
     const { tags } = geometry;
     switch (geometry.type) {
@@ -1351,7 +1352,7 @@ const soup = (geometry) => {
           return taggedGroup(
             {},
             taggedTriangles({ tags }, toTriangles(graph)),
-            ...outline(geometry)
+            ...outline$1(geometry)
           );
         } else if (graph.isEmpty) {
           return taggedGroup({});
@@ -1360,7 +1361,7 @@ const soup = (geometry) => {
           return taggedGroup(
             {},
             taggedTriangles({ tags }, toTriangles(graph)),
-            ...outline(geometry)
+            ...outline$1(geometry)
           );
         }
       }

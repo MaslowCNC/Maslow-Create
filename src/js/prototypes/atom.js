@@ -215,6 +215,7 @@ export default class Atom {
         GlobalVariables.c.textAlign = 'start' 
         GlobalVariables.c.fill()
         GlobalVariables.c.strokeStyle = this.strokeColor
+        GlobalVariables.c.fillStyle = "white"
         GlobalVariables.c.stroke()
         GlobalVariables.c.closePath()
 
