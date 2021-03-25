@@ -53901,6 +53901,7 @@ const orbitDisplay = async (
 
   const updateGeometry = async (geometry) => {
     // Delete any previous dataset in the window.
+    console.log("Update geometry ran");
     for (const { mesh } of datasets) {
       scene.remove(mesh);
     }

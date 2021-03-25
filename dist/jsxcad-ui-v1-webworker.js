@@ -1,4 +1,4 @@
-import * as api from './jsxcad-api-v1.js';
+import * as baseApi from './jsxcad-api-v1.js';
 import { setPendingErrorHandler, emit, log, boot, conversation, touch, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
 
 function pad (hash, len) {
@@ -160,6 +160,9 @@ const agent = async ({
         op: 'text',
         text: `QQ/ecmascript: ${ecmascript}`
       });
+      const api = { ...baseApi,
+        sha: question.sha || 'master'
+      };
       const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
       const module = await builder(api);
 

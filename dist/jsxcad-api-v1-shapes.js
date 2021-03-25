@@ -1,10 +1,10 @@
-import { registerReifier, taggedPlan, taggedDisjointAssembly, taggedPaths, getLeafs, taggedLayers, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
+import { registerReifier, taggedPlan, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
 import { translate } from './jsxcad-geometry-paths.js';
-import { max, numbers } from './jsxcad-api-v1-math.js';
 import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
+import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
@@ -79,6 +79,18 @@ const Empty = (...shapes) =>
   Shape.fromGeometry(taggedDisjointAssembly({}));
 
 Shape.prototype.Empty = shapeMethod(Empty);
+
+const isDefined = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedLayers(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Group = shapeMethod(Group);
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -1551,17 +1563,21 @@ const buildLayoutGeometry = ({
   const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
-  const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  // const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
+  const font = Hershey(fontHeight);
+  const title = [];
+  title.push(font(`${r(pageWidth)} x ${r(pageLength)}`));
+  for (let nth = 0; nth < itemNames.length; nth++) {
+    title.push(font(itemNames[nth]).y((nth + 1) * fontHeight));
+  }
   const visualization = Box(
     Math.max(pageWidth, margin),
     Math.max(pageLength, margin)
   )
     .outline()
     .and(
-      Hershey(max(pageWidth, pageLength) * labelScale)(title).move(
-        pageWidth / -2,
-        (pageLength * (1 + labelScale)) / 2
-      )
+      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
     .sketch()
@@ -1675,11 +1691,6 @@ const ensurePages = (geometry, depth = 0) => {
   }
 };
 
-const PackMethod = function (options = {}) {
-  return Page(options, this);
-};
-Shape$1.prototype.pack = PackMethod;
-
 const FixMethod = function (options = {}) {
   return Page({ ...options, pack: false }, this);
 };
@@ -1765,29 +1776,17 @@ const Arc = (x = 1, y = x, z = 0) =>
 
 Shape.prototype.Arc = shapeMethod(Arc);
 
-const isDefined = (value) => value !== undefined;
+const isDefined$1 = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
     taggedAssembly(
       {},
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Assembly = shapeMethod(Assembly);
-
-const isDefined$1 = (value) => value;
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedLayers(
-      {},
       ...shapes.filter(isDefined$1).map((shape) => shape.toGeometry())
     )
   );
 
-Shape.prototype.Group = shapeMethod(Group);
+Shape.prototype.Assembly = shapeMethod(Assembly);
 
 const Hull = (...shapes) => {
   const points = [];
@@ -1868,7 +1867,7 @@ const fromPointsAndPaths = (points = [], paths = []) => {
   /** @type {Polygon[]} */
   const polygons = [];
   for (const path of paths) {
-    polygons.push(fromPoints$2(path.map((nth) => points[nth])));
+    polygons.push({ points: fromPoints$2(path.map((nth) => points[nth])) });
   }
   return polygons;
 };
@@ -2014,9 +2013,9 @@ const buildWalls = (polygons, floor, roof) => {
     start = end++
   ) {
     // Remember that we are walking CCW.
-    polygons.push(
-      deduplicate([floor[start], floor[end], roof[end], roof[start]])
-    );
+    polygons.push({
+      points: deduplicate([floor[start], floor[end], roof[end], roof[start]]),
+    });
   }
 };
 
@@ -2053,12 +2052,12 @@ const buildRingSphere = (resolution = 20) => {
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
     } else {
-      polygons.push(path);
+      polygons.push({ points: path });
     }
     lastPath = path;
   }
   if (path) {
-    polygons.push(flip(path));
+    polygons.push({ points: flip(path) });
   }
   return polygons;
 };
@@ -2119,7 +2118,7 @@ const Polygon = (...points) => {
   for (const point of points) {
     point.eachPoint((p) => path.push(p));
   }
-  return Shape.fromGraph(fromPaths([path]));
+  return Shape.fromGraph(fromPaths([{ points: path }]));
 };
 
 Shape.prototype.Polygon = shapeMethod(Polygon);
@@ -2127,7 +2126,7 @@ Shape.prototype.Polygon = shapeMethod(Polygon);
 const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(path.map((point) => points[point]));
+    polygons.push({ points: path.map((point) => points[point]) });
   }
   return Shape.fromPolygons(polygons);
 };

@@ -279,10 +279,13 @@ const agent = async ({
             return 1
             break;
         case "display":
+            console.log("Display called");
             if(question.readPath != null){
                 const geometryToDisplay = await api.loadGeometry(question.readPath);
+                console.log("Loaded");
                 if(geometryToDisplay.geometry.hash){//Verify that something was read
                     const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
+                    console.log("Threejs geometry produced");
                     return threejsGeometry;
                 }
             }
