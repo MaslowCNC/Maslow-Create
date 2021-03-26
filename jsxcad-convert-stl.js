@@ -125,16 +125,7 @@ const fromStl = async (
     if (pa.some((value) => !isFinite(value))) continue;
     if (pb.some((value) => !isFinite(value))) continue;
     if (pc.some((value) => !isFinite(value))) continue;
-    polygons.push([[...pa], [...pb], [...pc]]);
-  }
-  for (const polygon of polygons) {
-    for (const point of polygon) {
-      for (const value of point) {
-        if (!isFinite(value)) {
-          throw Error('die');
-        }
-      }
-    }
+    polygons.push({ points: [[...pa], [...pb], [...pc]] });
   }
   switch (geometry) {
     case 'graph':

@@ -110,6 +110,25 @@ const toHtml = async (
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <style>
+    div.book {
+      height: 100%;
+      overflow: scroll;
+      margin-left: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      justify-content: flex-start;
+    }
+
+    div.note.card {
+      border: 1px dashed crimson;
+      margin: 4px 4px;
+      padding: 4px 4px;
+      display: inline-block;
+      width: fit-content;
+      height: fit-content;
+    }
+
     .note.log {
       font-family: "Arial Black", Gadget, sans-serif;
       color: red
@@ -160,9 +179,34 @@ const toHtml = async (
 
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
-      const notebookElement = await toDomElement(notebook);
-      notebookElement.classList.add('notebook', 'loaded');
-      body.appendChild(notebookElement);
+      const bookElement = document.createElement('div');
+
+      // Organize by card.
+      const cards = [];
+      const cardNotes = new Map();
+
+      for (const note of notebook) {
+        let card = '';
+        if (note.context && note.context.card) {
+          card = note.context.card;
+        }
+        if (!cardNotes.has(card)) {
+          cards.push(card);
+          cardNotes.set(card, []);
+        }
+        cardNotes.get(card).push(note);
+      }
+
+      for (const cardId of cards) {
+        const cardElement = document.createElement('div');
+        cardElement.className = 'note card';
+        const notebookElement = await toDomElement(cardNotes.get(cardId));
+        cardElement.appendChild(notebookElement);
+        bookElement.appendChild(cardElement);
+      }
+
+      bookElement.classList.add('book', 'notebook', 'loaded');
+      body.appendChild(bookElement);
     };
 
     if (document.readyState === 'complete') {

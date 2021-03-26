@@ -1,15 +1,14 @@
-import { getModule, addPending, write, emit, read, getCurrentPath, addSource, addOnEmitHandler, pushModule, popModule } from './jsxcad-sys.js';
+import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, pushModule, popModule } from './jsxcad-sys.js';
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
+import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
-import { Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
@@ -46,9 +45,10 @@ let nanoid = (size = 21) => {
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  inline,
+  size,
   op = (x) => x,
   {
+    inline,
     width = 1024,
     height = 512,
     position = [100, -100, 100],
@@ -56,6 +56,10 @@ const view = (
     withGrid = false,
   } = {}
 ) => {
+  if (size !== undefined) {
+    width = size;
+    height = size / 2;
+  }
   const viewShape = op(shape);
   for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
     const path = `view/${getModule()}/${nanoid()}`;
@@ -67,7 +71,7 @@ const view = (
 };
 
 Shape.prototype.view = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -78,7 +82,7 @@ Shape.prototype.view = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -89,7 +93,7 @@ Shape.prototype.view = function (
 };
 
 Shape.prototype.topView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -100,7 +104,7 @@ Shape.prototype.topView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -111,7 +115,7 @@ Shape.prototype.topView = function (
 };
 
 Shape.prototype.gridView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -122,7 +126,7 @@ Shape.prototype.gridView = function (
     withGrid = true,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -133,7 +137,7 @@ Shape.prototype.gridView = function (
 };
 
 Shape.prototype.frontView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -144,7 +148,7 @@ Shape.prototype.frontView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -155,7 +159,7 @@ Shape.prototype.frontView = function (
 };
 
 Shape.prototype.sideView = function (
-  inline,
+  size = 256,
   op,
   {
     path,
@@ -166,7 +170,7 @@ Shape.prototype.sideView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, inline, op, {
+  return view(this, size, op, {
     path,
     width,
     height,
@@ -343,45 +347,20 @@ const mdMethod = function (string, ...placeholders) {
 
 Shape.prototype.md = mdMethod;
 
-// FIX: This needs to consider the current module.
-// FIX: Needs to communicate cache invalidation with other workers.
-const getControlValues = async () =>
-  (await read(`control/${getCurrentPath()}`, { useCache: false })) || {};
+/*
+  Options
+  slider: { min, max, step }
+  select: { options }
+*/
 
-const stringBox = async (label, otherwise) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'stringBox', label, value };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return value;
-};
-
-const numberBox = async (label, otherwise) =>
-  Number(await stringBox(label, otherwise));
-
-const sliderBox = async (
-  label,
-  otherwise,
-  { min = 0, max = 100, step = 1 } = {}
-) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'sliderBox', label, value, min, max, step };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return Number(value);
-};
-
-const checkBox = async (label, otherwise) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'checkBox', label, value };
-  const hash = hashSum(control);
-  emit({ control, hash });
-  return Boolean(value);
-};
-
-const selectBox = async (label, otherwise, options) => {
-  const { [label]: value = otherwise } = await getControlValues();
-  const control = { type: 'selectBox', label, value, options };
+const control = (label, value, type, options) => {
+  const control = {
+    type,
+    label,
+    value: getControlValue(getModule(), label, value),
+    options,
+    path: getModule(),
+  };
   const hash = hashSum(control);
   emit({ control, hash });
   return value;
@@ -455,11 +434,7 @@ var api = /*#__PURE__*/Object.freeze({
   defTool: defTool,
   card: card,
   md: md,
-  checkBox: checkBox,
-  numberBox: numberBox,
-  selectBox: selectBox,
-  sliderBox: sliderBox,
-  stringBox: stringBox,
+  control: control,
   source: source,
   emit: emit,
   read: read,
@@ -588,7 +563,6 @@ registerDynamicModule(module('extrude'), './jsxcad-api-v1-extrude.js');
 registerDynamicModule(module('font'), './jsxcad-api-v1-font.js');
 registerDynamicModule(module('gcode'), './jsxcad-api-v1-gcode.js');
 registerDynamicModule(module('item'), './jsxcad-api-v1-item.js');
-registerDynamicModule(module('layout'), './jsxcad-api-v1-layout.js');
 registerDynamicModule(module('math'), './jsxcad-api-v1-math.js');
 registerDynamicModule(module('pdf'), './jsxcad-api-v1-pdf.js');
 registerDynamicModule(module('plan'), './jsxcad-api-v1-plan.js');
@@ -602,4 +576,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, card, checkBox, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, numberBox, replayRecordedNotes, saveRecordedNotes, selectBox, sliderBox, source, stringBox, x, y, z };
+export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };
