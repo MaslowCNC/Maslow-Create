@@ -174,7 +174,7 @@ const agent = async ({
                 const unionGeometry = await api.loadGeometry(path);
                 geometries.push(unionGeometry);
             }
-            const unionShape = api.Group(...geometries);
+            const unionShape = api.Group(...geometries).toDisjointGeometry();
             await api.saveGeometry(question.writePath, unionShape);
             return 1;
             break;
@@ -194,7 +194,7 @@ const agent = async ({
                 const assemblyGeometry = await api.loadGeometry(path);
                 assemblyGeometries.push(assemblyGeometry);
             }
-            const assemblyShape = api.Assembly(...assemblyGeometries);
+            const assemblyShape = api.Assembly(...assemblyGeometries).toDisjointGeometry();
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;
             break;
@@ -223,7 +223,7 @@ const agent = async ({
             break;
         case "extractTag":
             const shape2extractFrom = await api.loadGeometry(question.readPath);
-            const extractedShape = shape2extractFrom.keep(question.tag).noVoid();
+            const extractedShape = shape2extractFrom.keep(question.tag).noVoid().toDisjointGeometry();
             await api.saveGeometry(question.writePath, extractedShape);
             return 1;
             break;

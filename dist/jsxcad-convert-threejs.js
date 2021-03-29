@@ -1,8 +1,10 @@
-import { toPlane } from './jsxcad-math-poly3.js';
 import { toDisjointGeometry } from './jsxcad-geometry-tagged.js';
 
-const pointsToThreejsPoints = (points) => points;
+// import { toPlane } from './jsxcad-math-poly3.js';
 
+// const pointsToThreejsPoints = (points) => points;
+
+/*
 const trianglesToThreejsTriangles = (triangles) => {
   const normals = [];
   const positions = [];
@@ -19,8 +21,11 @@ const trianglesToThreejsTriangles = (triangles) => {
   }
   return { normals, positions };
 };
+*/
 
 const toThreejsGeometry = (geometry, supertags) => {
+  return geometry;
+  /*
   const tags = [...(supertags || []), ...(geometry.tags || [])];
   // if (tags.includes('compose/non-positive')) {
   //   return;
@@ -94,6 +99,7 @@ const toThreejsGeometry = (geometry, supertags) => {
     default:
       throw Error(`Unexpected geometry: ${geometry.type}`);
   }
+*/
 };
 
 const toThreejsPage = async (
@@ -110,8 +116,8 @@ const toThreejsPage = async (
  </head>
  <body>
   <script type='module'>
-    import { dataUrl } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-threejs.js';
-    import { Shape } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1-shape.js';
+    import { dataUrl } from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-threejs.js';
+    import { Shape } from 'https://gitcdn.xyz/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1-shape.js';
 
     const geometry = ${JSON.stringify(disjointGeometry)};
 

@@ -1,66 +1,9 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
-import { equals, min, max, scale } from './jsxcad-math-vec3.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, extrudeSurfaceMesh, arrangePaths, fromPolygonsToSurfaceMesh, sectionOfSurfaceMesh, differenceOfSurfaceMeshes, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPointsToSurfaceMesh, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, subdivideSurfaceMesh, remeshSurfaceMesh, doesSelfIntersectOfSurfaceMesh, transformSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { min, max, scale } from './jsxcad-math-vec3.js';
 import { isClockwise, flip, deduplicate } from './jsxcad-geometry-path.js';
 
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
-
-const create = () => ({
-  exactPoints: [],
-  points: [],
-  edges: [],
-  faces: [],
-  facets: [],
-});
-
-const addEdge = (
-  graph,
-  { point, next = -1, facet = -1, face = -1, twin = -1 }
-) => {
-  const edge = graph.edges.length;
-  graph.edges.push({ point, facet, face, twin, next });
-  return edge;
-};
-
-const fillFacetFromPoints = (
-  graph,
-  facet,
-  face,
-  points,
-  exactPoints
-) => {
-  let lastEdgeNode;
-  let firstEdge;
-  for (let nth = 0; nth < points.length; nth++) {
-    const point = addPoint(
-      graph,
-      points[nth],
-      exactPoints ? exactPoints[nth] : undefined
-    );
-    const edge = addEdge(graph, { facet, face, point });
-    if (lastEdgeNode) {
-      lastEdgeNode.next = edge;
-    } else {
-      firstEdge = edge;
-    }
-    lastEdgeNode = getEdgeNode(graph, edge);
-  }
-  lastEdgeNode.next = firstEdge;
-  return firstEdge;
-};
-
-const addPoint = (graph, point, exactPoint) => {
-  // FIX: This deduplication doesn't consider exact points.
-  for (let nth = 0; nth < graph.points.length; nth++) {
-    if (equals(graph.points[nth], point)) {
-      return nth;
-    }
-  }
-  const id = graph.points.length;
-  graph.points.push(point);
-  graph.exactPoints.push(exactPoint);
-  return id;
-};
 
 const eachEdge = (graph, op) =>
   graph.edges.forEach((node, nth) => {
@@ -228,28 +171,8 @@ const doesNotOverlap = (a, b) => {
   return false;
 };
 
-const extrude = (graph, height, depth) => {
-  /*
-  graph = realizeGraph(graph);
-  if (graph.faces.length > 0) {
-    // Arbitrarily pick the first face normal.
-    // FIX: use exactPlane.
-    const normal = graph.faces[0].plane;
-    return fromSurfaceMeshLazy(
-      extrudeSurfaceMesh(
-        toSurfaceMesh(graph),
-        ...scale(height, normal),
-        ...scale(depth, normal)
-      )
-    );
-  } else {
-    return graph;
-  }
-*/
-  return fromSurfaceMeshLazy(
-    extrudeSurfaceMesh(toSurfaceMesh(graph), height, depth)
-  );
-};
+const extrude = (graph, height, depth) =>
+  fromSurfaceMeshLazy(extrudeSurfaceMesh(toSurfaceMesh(graph), height, depth));
 
 const realizeGraph = (graph) => {
   if (graph.isLazy) {
@@ -284,16 +207,17 @@ const fromPolygonsWithHolesToTriangles = (polygonsWithHoles) => {
   return triangles;
 };
 
-const rerealizeGraph = (graph) =>
-  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
+// import { create, fillFacetFromPoints } from './graph.js';
+// import { rerealizeGraph } from './rerealizeGraph.js';
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-const W = 3;
+// const X = 0;
+// const Y = 1;
+// const Z = 2;
+// const W = 3;
 
-// FIX: Actually, this doesn't do holes.
-const fromPolygonsWithHoles = (polygonsWithHoles) => {
+const fromTriangles = (triangles) => {
+  return fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(triangles));
+  /*
   const graph = create();
   let facet = 0;
   const ensureFace = (plane, exactPlane) => {
@@ -301,9 +225,9 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
       const face = graph.faces[nth];
       // FIX: Use exactPlane.
       if (
-        face.plane[X$1] === plane[X$1] &&
-        face.plane[Y$1] === plane[Y$1] &&
-        face.plane[Z$1] === plane[Z$1] &&
+        face.plane[X] === plane[X] &&
+        face.plane[Y] === plane[Y] &&
+        face.plane[Z] === plane[Z] &&
         face.plane[W] === plane[W]
       ) {
         return nth;
@@ -312,12 +236,16 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
     const faceId = graph.faces.length;
     graph.faces[faceId] = { plane, exactPlane };
   };
-  for (const {
-    points,
-    exactPoints,
-    plane,
-    exactPlane,
-  } of fromPolygonsWithHolesToTriangles(polygonsWithHoles)) {
+  for (const { points, exactPoints, plane, exactPlane } of triangles) {
+    if (
+      equals(points[0], points[1]) ||
+      equals(points[1], points[2]) ||
+      equals(points[2], points[0])
+    ) {
+      // throw Error(`Degenerate triangle: ${JSON.stringify(points)}`);
+      console.log(`Degenerate triangle: ${JSON.stringify(points)}`);
+      continue;
+    }
     // FIX: No face association.
     graph.facets[facet] = {
       edge: fillFacetFromPoints(
@@ -334,7 +262,11 @@ const fromPolygonsWithHoles = (polygonsWithHoles) => {
   const rerealized = rerealizeGraph(graph);
   rerealized.provenance = 'fromPolygonsWithHoles';
   return rerealized;
+*/
 };
+
+const fromPolygonsWithHoles = (polygonsWithHoles) =>
+  fromTriangles(fromPolygonsWithHolesToTriangles(polygonsWithHoles));
 
 const section = (graph, plane) => {
   for (const polygons of sectionOfSurfaceMesh(toSurfaceMesh(graph), [plane])) {
@@ -494,6 +426,11 @@ const toPolygonsWithHoles = (graph) => {
           graph.points[point],
           graph.points[graph.edges[next].point],
         ],
+        exactPoints: [
+          null,
+          graph.exactPoints[point],
+          graph.exactPoints[graph.edges[next].point],
+        ],
       });
     }
     polygonWithHoles.push(
@@ -580,6 +517,9 @@ const projectToPlane = (graph, plane, direction) => {
   }
 };
 
+const rerealizeGraph = (graph) =>
+  fromSurfaceMeshLazy(toSurfaceMesh(graph), /* forceNewGraph= */ true);
+
 const reverseFaceOrientations = (graph) =>
   fromSurfaceMeshLazy(
     reverseFaceOrientationsOfSurfaceMesh(toSurfaceMesh(graph))
@@ -621,8 +561,6 @@ const toTriangles = (graph) => {
   const triangles = [];
   // The realized graph should already be triangulated.
   graph = realizeGraph(graph);
-  console.log("Facets: ");
-  console.log(graph.facets);
   for (let { edge } of graph.facets) {
     const triangle = [];
     const start = edge;

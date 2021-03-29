@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, getPeg, taggedPlan, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, getPeg, taggedPlan, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
@@ -50,6 +50,10 @@ class Shape {
 
   flip() {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
+  }
+
+  toDisplayGeometry() {
+    return toDisplayGeometry(toGeometry(this));
   }
 
   toKeptGeometry(options = {}) {

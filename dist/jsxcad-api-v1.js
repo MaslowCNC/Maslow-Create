@@ -4,7 +4,6 @@ import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxc
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-import { soup } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
@@ -61,7 +60,7 @@ const view = (
     height = size / 2;
   }
   const viewShape = op(shape);
-  for (const entry of ensurePages(soup(viewShape.toDisjointGeometry()))) {
+  for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
     const path = `view/${getModule()}/${nanoid()}`;
     addPending(write(path, entry));
     const view = { width, height, position, inline, withAxes, withGrid };

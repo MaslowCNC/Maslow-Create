@@ -83,13 +83,13 @@ const rewrite = (geometry, op, state) => {
     if (geometry.content) {
       return op(
         geometry,
-        (changes, state) =>
+        (changes, newState = state) =>
           update(
             geometry,
             {
               content: validateContent(
                 geometry,
-                geometry.content?.map?.((entry) => walk(entry, state))
+                geometry.content?.map?.((entry) => walk(entry, newState))
               ),
             },
             changes
@@ -173,6 +173,7 @@ const realize = (geometry) => {
     switch (geometry.type) {
       case 'graph':
         return taggedGraph({ tags }, realizeGraph(geometry.graph));
+      case 'displayGeometry':
       case 'triangles':
       case 'points':
       case 'paths':
@@ -233,9 +234,10 @@ const toTransformedGeometry = (geometry) => {
             matrix,
             geometry.plan.matrix || identityMatrix
           );
-          return descend(
+          const planUpdate = descend(
             {
-              ...geometry,
+              tags: geometry.tags,
+              type: geometry.type,
               plan: {
                 ...geometry.plan,
                 matrix: composedMatrix,
@@ -243,6 +245,7 @@ const toTransformedGeometry = (geometry) => {
             },
             composedMatrix
           );
+          return planUpdate;
         }
         case 'triangles':
           return descend({
@@ -371,6 +374,9 @@ const reify = (geometry) => {
         }
         return geometry;
       }
+      case 'displayGeometry':
+        // CHECK: Should this taint the results if there is a plan?
+        return geometry;
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -409,27 +415,70 @@ const taggedDisjointAssembly = ({ tags }, ...content) => {
   const disjointAssembly = { type: 'disjointAssembly', tags, content };
   visit(disjointAssembly, (geometry, descend) => {
     if (geometry.type === 'transform') {
-      throw Error('DisjointAssembly contains transform.');
+      throw Error(
+        `DisjointAssembly contains transform: ${JSON.stringify(geometry)}`
+      );
     }
     return descend();
   });
   return disjointAssembly;
 };
 
+const taggedDisplayGeometry = ({ tags }, ...content) => {
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined DisplayGeometry content`);
+  }
+  if (content.length !== 1) {
+    throw Error(`DisplayGeometry expects a single content geometry`);
+  }
+  return { type: 'displayGeometry', tags, content };
+};
+
 const linkDisjointAssembly = Symbol('linkDisjointAssembly');
 
-const toDisjointGeometry = (geometry) => {
-  const op = (geometry, descend, walk) => {
+const hasVoidGeometry = (geometry) => {
+  if (isVoid(geometry)) {
+    return true;
+  }
+  if (geometry.content) {
+    for (const content of geometry.content) {
+      if (hasVoidGeometry(content)) {
+        return true;
+      }
+    }
+  }
+};
+
+const DISJUNCTION_TOTAL = 'complete';
+const DISJUNCTION_VISIBLE = 'visible';
+
+const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
+  const op = (geometry, descend, walk, state) => {
     if (geometry[linkDisjointAssembly]) {
       return geometry[linkDisjointAssembly];
     } else if (geometry.type === 'disjointAssembly') {
       // Everything below this point is disjoint.
+      return geometry;
+    } else if (geometry.type === 'displayGeometry') {
+      // We pretend that everything below this point is disjoint.
       return geometry;
     } else if (geometry.type === 'plan') {
       return walk(reify(geometry).content[0], op);
     } else if (geometry.type === 'transform') {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
+      if (mode === DISJUNCTION_VISIBLE && !hasVoidGeometry(geometry)) {
+        console.log(`QQ/Visible Disjunction Skipped`);
+        // This leads to some potential invariant violations.
+        // With toVisiblyDisjoint geometry we may get assembly within
+        // disjointAssembly.
+        // This is acceptable for displayGeometry, but otherwise problematic.
+        // For this reason we wrap the output as DisplayGeometry.
+        return taggedDisplayGeometry(
+          {},
+          toTransformedGeometry(reify(geometry))
+        );
+      }
       const assembly = geometry.content.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
       for (let i = assembly.length - 1; i >= 0; i--) {
@@ -457,6 +506,9 @@ const toDisjointGeometry = (geometry) => {
     }
   }
 };
+
+const toVisiblyDisjointGeometry = (geometry) =>
+  toDisjointGeometry(geometry, DISJUNCTION_VISIBLE);
 
 const differenceImpl = (geometry, ...geometries) => {
   geometries = geometries.map(toDisjointGeometry);
@@ -1114,7 +1166,12 @@ const inset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return inset(fromPaths(geometry.paths), initial, step, limit);
+        return inset(
+          fromPaths(geometry.paths.map((path) => ({ points: path }))),
+          initial,
+          step,
+          limit
+        );
       case 'plan':
         return inset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
@@ -1168,6 +1225,7 @@ const measureBoundingBox = (geometry) => {
       case 'disjointAssembly':
       case 'item':
       case 'sketch':
+      case 'displayGeometry':
         return descend();
       case 'graph':
         return update(measureBoundingBox$3(geometry.graph));
@@ -1205,7 +1263,12 @@ const offset = (geometry, initial = 1, step, limit) => {
         // Not implemented yet.
         return geometry;
       case 'paths':
-        return offset(fromPaths(geometry.paths), initial, step, limit);
+        return offset(
+          fromPaths(geometry.paths.map((path) => ({ points: path }))),
+          initial,
+          step,
+          limit
+        );
       case 'plan':
         return offset(reify(geometry).content[0], initial, step, limit);
       case 'assembly':
@@ -1365,10 +1428,15 @@ const soup = (geometry, { doOutline = true } = {}) => {
           );
         }
       }
+      // Unreachable.
+      case 'triangles':
       case 'points':
       case 'paths':
         // Already soupy enough.
         return geometry;
+      case 'displayGeometry':
+        // soup can handle displayGeometry.
+        return descend();
       case 'layout':
       case 'plan':
       case 'assembly':
@@ -1481,6 +1549,9 @@ const test = (geometry) => {
   visit(geometry, op);
   return geometry;
 };
+
+const toDisplayGeometry = (geometry, options) =>
+  soup(toVisiblyDisjointGeometry(geometry), options);
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -1651,4 +1722,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, transform, translate, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, offset, outline, projectToPlane, read, realize, registerReifier, reify, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, union, update, visit, write };
