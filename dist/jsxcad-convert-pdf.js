@@ -1,6 +1,9 @@
 import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { toKeptGeometry, transform, getNonVoidGraphs, outline, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { measureBoundingBox, toKeptGeometry, transform, getNonVoidGraphs, outline, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
+
+const X = 0;
+const Y = 1;
 
 const toFillColor = (rgb) =>
   `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(
@@ -18,20 +21,22 @@ const black = [0, 0, 0];
 
 // Width and height are in post-script points.
 const header = ({
+  min,
+  max,
   scale = 1,
   width = 210,
   height = 297,
   trim = 5,
   lineWidth = 0.096,
 }) => {
-  const mediaX1 = 0 * scale;
-  const mediaY1 = 0 * scale;
-  const mediaX2 = width * scale;
-  const mediaY2 = height * scale;
-  const trimX1 = trim * scale;
-  const trimY1 = trim * scale;
-  const trimX2 = (width - trim) * scale;
-  const trimY2 = (height - trim) * scale;
+  const mediaX1 = (min[X] - trim) * scale;
+  const mediaY1 = (min[Y] - trim) * scale;
+  const mediaX2 = (max[X] + trim) * scale;
+  const mediaY2 = (max[Y] + trim) * scale;
+  const trimX1 = min[X] * scale;
+  const trimY1 = min[Y] * scale;
+  const trimX2 = max[X] * scale;
+  const trimY2 = max[Y] * scale;
   return [
     `%PDF-1.5`,
     `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
@@ -65,13 +70,16 @@ const toPdf = async (
   geometry,
   { lineWidth = 0.096, size = [210, 297], definitions } = {}
 ) => {
+  const [min, max] = measureBoundingBox(geometry);
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;
-  const [width, height] = size;
+  const width = max[X] - min[X];
+  const height = max[Y] - min[Y];
   const lines = [];
   const matrix = multiply(
-    fromTranslation([(width * scale) / 2, (height * scale) / 2, 0]),
+    // fromTranslation([(width * scale) / 2, (height * scale) / 2, 0]),
+    fromTranslation([1, 1, 0]),
     fromScaling([scale, scale, scale])
   );
   const keptGeometry = toKeptGeometry(transform(matrix, await geometry));
@@ -117,7 +125,11 @@ const toPdf = async (
   }
 
   const output = []
-    .concat(header({ scale, width, height, lineWidth }), lines, footer)
+    .concat(
+      header({ scale, min, max, width, height, lineWidth }),
+      lines,
+      footer
+    )
     .join('\n');
   return new TextEncoder('utf8').encode(output);
 };

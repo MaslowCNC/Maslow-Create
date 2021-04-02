@@ -164,7 +164,7 @@ const agent = async ({
         case "intersection":
             const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
             const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
-            const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
+            const intersectionShape = aShape2Intersect1.clip(aShape2Intersect2);
             await api.saveGeometry(question.writePath, intersectionShape);
             return 1;
             break;

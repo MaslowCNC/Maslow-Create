@@ -138,11 +138,11 @@ Shape$1.prototype.projectToPlane = projectToPlaneMethod;
 const section = (shape, ...pegs) => {
   const planes = [];
   if (pegs.length === 0) {
-    planes.push([0, 0, 1, 0]);
+    planes.push({ plane: [0, 0, 1, 0] });
   } else {
     for (const peg of pegs) {
       const { plane } = getPegCoords(peg);
-      planes.push(plane);
+      planes.push({ plane });
     }
   }
   return Shape.fromGeometry(section$1(shape.toGeometry(), planes));
