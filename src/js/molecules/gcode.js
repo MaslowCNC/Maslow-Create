@@ -65,8 +65,14 @@ export default class Gcode extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue('geometry'), this.findIOValue('tool size'), this.findIOValue('passes'), this.findIOValue('speed'), this.findIOValue('tabs'), this.findIOValue('safe height')]
-            this.basicThreadValueProcessing(values, "stackedOutline")
+            var geometry = this.findIOValue('geometry')
+            var toolSize = this.findIOValue('tool size')
+            var passes = this.findIOValue('passes')
+            var speed = this.findIOValue('speed')
+            var tabs = this.findIOValue('tabs')
+            var safeHeight = this.findIOValue('safe height')
+            const values = {key: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
+            this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
     

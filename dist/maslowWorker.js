@@ -270,6 +270,22 @@ const agent = async ({
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
             break;
+        case "gcode":
+            
+            console.log("Gcode generation ran");
+            
+            
+            const geometryToGcode = await api.loadGeometry(question.readPath);
+            
+            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: 0.1, feedRate: question.speed, diameter: question.toolSize });
+            
+            const toolPath = geometryToGcode.tool('cnc').engrave(1);
+            await api.saveGeometry(question.writePath, toolPath);
+            //const c = Arc(4).tool('cnc').engrave(1).view();
+            //Group(c, Arc(4)).view();
+            
+            return "Test gcode string";
+            break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
             return shape2getHash.geometry.hash;
