@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, getPeg, taggedPlan, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, outline, read, write, realize } from './jsxcad-geometry-tagged.js';
-import { fromPolygons } from './jsxcad-geometry-graph.js';
+import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, taggedGroup, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTriangles } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -101,6 +101,14 @@ class Shape {
 const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
+const registerShapeMethod = (name, method) => {
+  if (Shape.prototype.hasOwnProperty(name)) {
+    throw Error(`Method ${name} is already in use.`);
+  }
+  Shape.prototype[name] = method;
+  return method;
+};
+
 Shape.fromClosedPath = (path, context) =>
   fromGeometry(taggedPaths({}, [close(path)]), context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
@@ -118,6 +126,7 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
+Shape.registerMethod = registerShapeMethod;
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
@@ -520,6 +529,17 @@ const materialMethod = function (name) {
 };
 Shape.prototype.material = materialMethod;
 
+const minkowskiSum = (shape, offset) =>
+  Shape.fromGeometry(
+    minkowskiSum$1(shape.toGeometry(), offset.toGeometry())
+  );
+
+const minkowskiSumMethod = function (offset) {
+  return minkowskiSum(this, offset);
+};
+
+Shape.registerMethod('minkowskiSum', minkowskiSumMethod);
+
 const move = (shape, x = 0, y = 0, z = 0) =>
   shape.transform(fromTranslation([x, y, z]));
 
@@ -676,6 +696,26 @@ const packMethod = function (...args) {
 };
 Shape.prototype.pack = packMethod;
 
+const push = (
+  shape,
+  force = 0.1,
+  minimumDistance = 1,
+  maximumDistance = 10
+) =>
+  Shape.fromGeometry(
+    push$1(shape.toGeometry(), {
+      force,
+      minimumDistance,
+      maximumDistance,
+    })
+  );
+
+const pushMethod = function (force = 0.1, minimumDistance, maximumDistance) {
+  return push(this, force, minimumDistance, maximumDistance);
+};
+
+Shape.prototype.push = pushMethod;
+
 const normalizeCoords = ([
   x = 0,
   y = 0,
@@ -706,13 +746,21 @@ const getPegCoords = (shape) => {
 // https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
 
 const orient$1 = (origin, forward, right, shapeToPeg) => {
-  const plane = fromPoints(right, forward, origin);
+  console.log(`QQ/orient`);
+  console.log(`QQ/right: ${JSON.stringify(right)}`);
+  console.log(`QQ/forward: ${JSON.stringify(forward)}`);
+  console.log(`QQ/origin: ${JSON.stringify(origin)}`);
+  // const plane = fromPoints(right, forward, origin);
+  const plane = fromPoints(origin, forward, right);
+  console.log(`QQ/orient/plane: ${JSON.stringify(plane)}`);
   const d = Math.abs(dot(plane, [0, 0, 1, 0]));
   if (d >= 0.99999) {
     return shapeToPeg.move(...origin);
   }
   const rightDirection = subtract(right, origin);
+  console.log(`QQ/orient/rightDirection: ${JSON.stringify(rightDirection)}`);
   const [, from] = toXYPlaneTransforms(plane, rightDirection);
+  console.log(`QQ/orient/from: ${JSON.stringify(from)}`);
   return shapeToPeg.transform(from).move(...origin);
 };
 
@@ -860,6 +908,15 @@ Shape.prototype.radius = radiusMethod;
 Shape.prototype.sides = sidesMethod;
 Shape.prototype.to = toMethod;
 Shape.prototype.top = topMethod;
+
+const remesh = (shape, options = {}) =>
+  Shape.fromGeometry(remesh$1(shape.toGeometry(), options));
+
+const remeshMethod = function (options) {
+  return remesh(this, options);
+};
+
+Shape.prototype.remesh = remeshMethod;
 
 /**
  *
@@ -1018,6 +1075,15 @@ const toolMethod = function (name) {
 };
 Shape.prototype.tool = toolMethod;
 
+const twist = (shape, degreesPerZ) =>
+  Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerZ));
+
+const twistMethod = function (degreesPerZ) {
+  return twist(this, degreesPerZ);
+};
+
+Shape.prototype.twist = twistMethod;
+
 const voidFn = (shape) =>
   Shape.fromGeometry(
     rewriteTags(['compose/non-positive'], [], shape.toGeometry())
@@ -1029,13 +1095,34 @@ const voidMethod = function () {
 Shape.prototype.void = voidMethod;
 
 const weld = (...shapes) => {
-  const weld = [];
+  console.log(`QQ/weld`);
+  const unwelded = [];
   for (const shape of shapes) {
-    for (const { paths } of outline(shape.toTransformedGeometry())) {
-      weld.push(...paths);
+    // We lose the tags at this point.
+    const result = toPolygonsWithHoles(shape.toGeometry());
+    console.log(`QQ/weld/result: ${JSON.stringify(result)}`);
+    for (const { polygonsWithHoles } of result) {
+      console.log(
+        `QQ/weld/polygonsWithHoles: ${JSON.stringify(polygonsWithHoles)}`
+      );
+      unwelded.push(...polygonsWithHoles);
     }
   }
-  return Shape.fromGeometry(taggedPaths({}, weld));
+  const welds = [];
+  console.log(`QQ/unwelded: ${JSON.stringify(unwelded)}`);
+  const arrangements = arrangePolygonsWithHoles(unwelded);
+  console.log(`QQ/arrangements: ${JSON.stringify(arrangements)}`);
+  for (const { polygonsWithHoles } of arrangements) {
+    // Keep the planar grouping.
+    console.log(
+      `QQ/arranged/polygonsWithHoles: ${JSON.stringify(polygonsWithHoles)}`
+    );
+    const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
+    const graph = fromTriangles(triangles);
+    welds.push(taggedGraph({}, graph));
+  }
+  // A group of planar welds.
+  return Shape.fromGeometry(taggedGroup({}, ...welds));
 };
 
 const weldMethod = function (...shapes) {

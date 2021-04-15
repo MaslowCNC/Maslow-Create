@@ -2087,6 +2087,7 @@ const Y$2 = 1;
 const Z$3 = 2;
 
 const Peg = (
+  name,
   origin = [0, 0, 0],
   forward = [0, 1, 0],
   right = [1, 0, 0]
@@ -2094,8 +2095,12 @@ const Peg = (
   const o = origin;
   const f = add(origin, forward);
   const r = add(origin, right);
+  const tags = ['peg'];
+  if (name) {
+    tags.push(`peg/${name}`);
+  }
   return Shape.fromGeometry(
-    taggedPoints({ tags: ['peg'] }, [
+    taggedPoints({ tags }, [
       [o[X$2], o[Y$2], o[Z$3], f[X$2], f[Y$2], f[Z$3], r[X$2], r[Y$2], r[Z$3]],
     ])
   );

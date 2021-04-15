@@ -1,5 +1,5 @@
 import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { measureBoundingBox, toKeptGeometry, transform, getNonVoidGraphs, outline, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { measureBoundingBox, toDisjointGeometry, transform, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const X = 0;
@@ -78,32 +78,37 @@ const toPdf = async (
   const height = max[Y] - min[Y];
   const lines = [];
   const matrix = multiply(
-    // fromTranslation([(width * scale) / 2, (height * scale) / 2, 0]),
     fromTranslation([1, 1, 0]),
     fromScaling([scale, scale, scale])
   );
-  const keptGeometry = toKeptGeometry(transform(matrix, await geometry));
-  for (const surface of getNonVoidGraphs(keptGeometry)) {
-    for (const { tags, paths } of outline(surface)) {
+  const disjointGeometry = toDisjointGeometry(
+    transform(matrix, await geometry)
+  );
+  for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(
+    disjointGeometry
+  )) {
+    for (const { points, holes } of polygonsWithHoles) {
       lines.push(toFillColor(toRgbFromTags(tags, definitions, black)));
       lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
-      for (const path of paths) {
-        let nth = path[0] === null ? 1 : 0;
-        if (nth >= path.length) {
-          continue;
-        }
-        const [x1, y1] = path[nth];
-        lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
-        for (nth++; nth < path.length; nth++) {
-          const [x2, y2] = path[nth];
-          lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
-        }
-        lines.push(`h`); // Surface paths are always closed.
+      const drawLines = (points) => {
+        points.forEach(([x, y], nth) => {
+          if (nth === 0) {
+            lines.push(`${x.toFixed(9)} ${y.toFixed(9)} m`); // move-to.
+          } else {
+            lines.push(`${x.toFixed(9)} ${y.toFixed(9)} l`); // line-to.
+          }
+        });
+        lines.push(`h`); // Polygons are always closed.
+      };
+      drawLines(points);
+      for (const { points } of holes) {
+        drawLines(points);
       }
+      // This should be controlled by tags.
       lines.push(`f`); // Surface paths are always filled.
     }
   }
-  for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
+  for (const { tags, paths } of getNonVoidPaths(disjointGeometry)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     for (const path of paths) {
       let nth = path[0] === null ? 1 : 0;

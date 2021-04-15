@@ -8,7 +8,7 @@ const Z = 2;
 
 // FIX: This is actually GRBL.
 const toGcode = async (geometry, { definitions } = {}) => {
-  const topZ = 0;
+  // const topZ = 0;
   const codes = [];
   const _ = undefined;
 
@@ -139,11 +139,11 @@ const toGcode = async (geometry, { definitions } = {}) => {
       setSpeed(speed);
       cut(_, _, state.tool.jumpZ, jumpRate, speed); // up
       cut(x, y, _, jumpRate, speed); // across
-      cut(_, _, topZ, jumpRate, speed); // down
+      // cut(_, _, topZ, jumpRate, speed); // down
     } else {
       rapid(_, _, state.tool.jumpZ); // up
       rapid(x, y, _); // across
-      rapid(_, _, topZ); // down
+      // rapid(_, _, topZ); // down
       state.jumped = true;
     }
   };

@@ -81,10 +81,9 @@ function sum (o) {
 var hashSum = sum;
 
 const prepareStl = (shape, name, options = {}) => {
-  // CHECK: Should this be limited to Page plans?
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toKeptGeometry())) {
+  for (const entry of ensurePages(shape.toDisjointGeometry())) {
     const op = toStl(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({

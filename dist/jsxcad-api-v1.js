@@ -1,5 +1,5 @@
-import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, pushModule, popModule } from './jsxcad-sys.js';
-export { emit, read, write } from './jsxcad-sys.js';
+import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, pushModule, popModule } from './jsxcad-sys.js';
+export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
@@ -415,9 +415,9 @@ const replayRecordedNotes = async (path) => {
  * the api uses.
  */
 
-const x = Peg([0, 0, 0], [0, 0, 1], [0, -1, 0]);
-const y = Peg([0, 0, 0], [0, 0, 1], [1, 0, 0]);
-const z = Peg([0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+const x = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
+const y = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
+const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
@@ -435,6 +435,7 @@ var api = /*#__PURE__*/Object.freeze({
   md: md,
   control: control,
   source: source,
+  elapsed: elapsed,
   emit: emit,
   read: read,
   write: write,
