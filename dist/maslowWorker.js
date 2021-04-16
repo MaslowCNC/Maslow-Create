@@ -3,6 +3,7 @@ import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem,
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
+import { toGcode } from './jsxcad-convert-gcode.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 
@@ -174,7 +175,7 @@ const agent = async ({
                 const unionGeometry = await api.loadGeometry(path);
                 geometries.push(unionGeometry);
             }
-            const unionShape = api.Group(...geometries).toDisjointGeometry();
+            const unionShape = api.Shape.fromGeometry(api.Group(...geometries).toDisjointGeometry());
             await api.saveGeometry(question.writePath, unionShape);
             return 1;
             break;
@@ -194,7 +195,13 @@ const agent = async ({
                 const assemblyGeometry = await api.loadGeometry(path);
                 assemblyGeometries.push(assemblyGeometry);
             }
-            const assemblyShape = api.Assembly(...assemblyGeometries).toDisjointGeometry();
+            
+            console.log(assemblyGeometries);
+            
+            const assemblyShape = api.Shape.fromGeometry(api.Assembly(...assemblyGeometries).toDisjointGeometry());
+            
+            console.log(JSON.stringify(assemblyShape));
+            
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;
             break;
@@ -274,15 +281,20 @@ const agent = async ({
             
             console.log("Gcode generation ran");
             
-            
             const geometryToGcode = await api.loadGeometry(question.readPath);
             
-            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: 0.1, feedRate: question.speed, diameter: question.toolSize });
+            const shapeHeight = geometryToGcode.size().height;
             
-            const toolPath = geometryToGcode.tool('cnc').engrave(1);
+            const cutDepth = shapeHeight / question.passes;
+            
+            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize });
+            
+            const toolPath = geometryToGcode.toDisjointGeometry().section().offset(question.toolSize/2)//.tool('cnc').engrave(shapeHeight);
             await api.saveGeometry(question.writePath, toolPath);
             //const c = Arc(4).tool('cnc').engrave(1).view();
             //Group(c, Arc(4)).view();
+            
+            console.log(toGcode(geometryToGcode.tool('cnc')));
             
             return "Test gcode string";
             break;
