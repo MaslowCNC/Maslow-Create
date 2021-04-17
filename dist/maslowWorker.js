@@ -289,12 +289,10 @@ const agent = async ({
             
             api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize });
             
-            const toolPath = geometryToGcode.toDisjointGeometry().section().offset(question.toolSize/2)//.tool('cnc').engrave(shapeHeight);
+            const toolPath = geometryToGcode.section().offset(question.toolSize/2)//.tool('cnc').engrave(shapeHeight);
             await api.saveGeometry(question.writePath, toolPath);
             //const c = Arc(4).tool('cnc').engrave(1).view();
             //Group(c, Arc(4)).view();
-            
-            console.log(toGcode(geometryToGcode.tool('cnc')));
             
             return "Test gcode string";
             break;
