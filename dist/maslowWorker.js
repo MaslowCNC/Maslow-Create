@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
@@ -287,12 +287,14 @@ const agent = async ({
             
             const cutDepth = shapeHeight / question.passes;
             
-            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize });
+            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize, type: 'spindle' });
             
-            const toolPath = geometryToGcode.section().offset(question.toolSize/2)//.tool('cnc').engrave(shapeHeight);
+            const toolPath = geometryToGcode.section().offset(question.toolSize/2).tool('cnc').engrave(shapeHeight);
             await api.saveGeometry(question.writePath, toolPath);
             //const c = Arc(4).tool('cnc').engrave(1).view();
             //Group(c, Arc(4)).view();
+            
+            console.log(new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()})));
             
             return "Test gcode string";
             break;
