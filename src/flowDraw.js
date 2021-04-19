@@ -409,7 +409,6 @@ function checkBoxes(){
     
     
     //Display faces
-
     var facesDiv = document.createElement('div')
     viewerBar.appendChild(facesDiv)
     var facesCheck = document.createElement('input')
@@ -434,6 +433,64 @@ function checkBoxes(){
         }
         else{
             GlobalVariables.displayTriangles = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+    
+    //Display edges
+    var edgesDiv = document.createElement('div')
+    viewerBar.appendChild(edgesDiv)
+    var edgesCheck = document.createElement('input')
+    edgesDiv.appendChild(edgesCheck)
+    edgesCheck.setAttribute('type', 'checkbox')
+    edgesCheck.setAttribute('id', 'edgesCheck')
+    
+    edgesCheck.setAttribute('checked', 'true')
+    
+    var edgesCheckLabel = document.createElement('label')
+    edgesDiv.appendChild(edgesCheckLabel)
+    edgesCheckLabel.setAttribute('for', 'edgesCheck')
+    edgesCheckLabel.setAttribute('style', 'margin-right:1em;')
+    edgesDiv.setAttribute('style', 'float:right;')
+    edgesCheckLabel.textContent= "Edges"
+    edgesCheckLabel.setAttribute('style', 'user-select: none;')
+
+    edgesCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            GlobalVariables.displayEdges = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayEdges = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+    
+    //Display wireframe
+    var wireframeDiv = document.createElement('div')
+    viewerBar.appendChild(wireframeDiv)
+    var wireframeCheck = document.createElement('input')
+    wireframeDiv.appendChild(wireframeCheck)
+    wireframeCheck.setAttribute('type', 'checkbox')
+    wireframeCheck.setAttribute('id', 'wireframeCheck')
+    
+    wireframeCheck.setAttribute('checked', 'false')
+    
+    var wireframeCheckLabel = document.createElement('label')
+    wireframeDiv.appendChild(wireframeCheckLabel)
+    wireframeCheckLabel.setAttribute('for', 'wireframeCheck')
+    wireframeCheckLabel.setAttribute('style', 'margin-right:1em;')
+    wireframeDiv.setAttribute('style', 'float:right;')
+    wireframeCheckLabel.textContent= "Wireframe"
+    wireframeCheckLabel.setAttribute('style', 'user-select: none;')
+
+    wireframeCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            GlobalVariables.displayWireframe = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayWireframe = false
             GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
         }
     })
