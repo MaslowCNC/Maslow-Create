@@ -337,7 +337,6 @@ var displayAxis = true
  * Creates the checkbox hidden menu when viewer is active
  */ 
 function checkBoxes(){
-    console.log("Check boxes ran")
     let viewerBar = document.querySelector('#viewer_bar')   
     viewerBar.classList.add('slidedown')
 
@@ -365,12 +364,12 @@ function checkBoxes(){
 
     gridCheck.addEventListener('change', event => {
         if(event.target.checked){
-            showGrid = true
+            displayGrid = true
             this.writeToDisplay(this.displayedGeometry)
 
         }
         else{
-            showGrid = false
+            displayGrid = false
             this.writeToDisplay(this.displayedGeometry)
         }
     })
@@ -407,68 +406,37 @@ function checkBoxes(){
             this.writeToDisplay(this.displayedGeometry)
         }
     })
-    /*
-    //Solid HTML element
-    var solidDiv = document.createElement('div')
-    viewerBar.appendChild(solidDiv)
-    solidDiv.setAttribute('id', 'solidDiv')
-    var solidCheck = document.createElement('input')
-    solidDiv.appendChild(solidCheck)
-    solidCheck.setAttribute('type', 'checkbox')
-    solidCheck.setAttribute('id', 'solidCheck')
-           
-    if (this.solidDisplay){
-        solidCheck.setAttribute('checked', 'true')
-        this.threeMaterial.solid = true
-    }
-    //solidCheck.setAttribute('checked', false)
-    var solidCheckLabel = document.createElement('label')
-    solidDiv.appendChild(solidCheckLabel)
-    solidCheckLabel.setAttribute('for', 'solidCheck')
-    //solidCheckLabel.setAttribute('style', 'margin-right:10em;')
-    solidDiv.setAttribute('style', 'float:right;')
-    solidCheckLabel.textContent= "Solid"
-    solidCheckLabel.setAttribute('style', 'user-select: none;')
-    solidCheck.addEventListener('change', event => {
-        if( event.target.checked){
-            this.solidDisplay = true
+    
+    
+    //Display faces
+
+    var facesDiv = document.createElement('div')
+    viewerBar.appendChild(facesDiv)
+    var facesCheck = document.createElement('input')
+    facesDiv.appendChild(facesCheck)
+    facesCheck.setAttribute('type', 'checkbox')
+    facesCheck.setAttribute('id', 'facesCheck')
+    
+    facesCheck.setAttribute('checked', 'true')
+    
+    var facesCheckLabel = document.createElement('label')
+    facesDiv.appendChild(facesCheckLabel)
+    facesCheckLabel.setAttribute('for', 'facesCheck')
+    facesCheckLabel.setAttribute('style', 'margin-right:1em;')
+    facesDiv.setAttribute('style', 'float:right;')
+    facesCheckLabel.textContent= "Faces"
+    facesCheckLabel.setAttribute('style', 'user-select: none;')
+
+    facesCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            GlobalVariables.displayTriangles = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
         }
         else{
-            this.solidDisplay = false
+            GlobalVariables.displayTriangles = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
         }
-        this.writeToDisplay(this.displayedGeometry)
     })
-
-    //Wireframe HTML element
-    var wireDiv = document.createElement('div')
-    viewerBar.appendChild(wireDiv)
-    wireDiv.setAttribute('id', 'wireDiv')
-    var wireCheck = document.createElement('input')
-    wireDiv.appendChild(wireCheck)
-    wireCheck.setAttribute('type', 'checkbox')
-    wireCheck.setAttribute('id', 'wireCheck')
-           
-    if (this.wireDisplay){
-        wireCheck.setAttribute('checked', 'true')
-    }
-    //wireCheck.setAttribute('checked', false)
-    var wireCheckLabel = document.createElement('label')
-    wireDiv.appendChild(wireCheckLabel)
-    wireCheckLabel.setAttribute('for', 'wireCheck')
-    //wireCheckLabel.setAttribute('style', 'margin-right:10em;')
-    wireDiv.setAttribute('style', 'float:right;')
-    wireCheckLabel.textContent= "Wireframe"
-    wireCheckLabel.setAttribute('style', 'user-select: none;')
-    wireCheck.addEventListener('change', event => {
-        if( event.target.checked){
-            this.wireDisplay = true
-        }
-        else{
-            this.wireDisplay = false
-        }
-        this.writeToDisplay(this.displayedGeometry)
-    })*/
-
 }
 
 document.getElementById('viewerContext').addEventListener('mouseenter', () => {

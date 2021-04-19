@@ -40,8 +40,6 @@ export default class Gcode extends Atom {
         this.addIO('output', 'gcode', this, 'geometry', '')
         
         this.setValues(values)
-        
-        this.updateValue()
     }
     
     /**
