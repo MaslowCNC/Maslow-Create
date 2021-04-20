@@ -291,12 +291,9 @@ const agent = async ({
             
             const toolPath = geometryToGcode.section().offset(question.toolSize/2).tool('cnc').engrave(shapeHeight);
             await api.saveGeometry(question.writePath, toolPath);
-            //const c = Arc(4).tool('cnc').engrave(1).view();
-            //Group(c, Arc(4)).view();
             
-            console.log(new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()})));
+            return new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()}));
             
-            return "Test gcode string";
             break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);

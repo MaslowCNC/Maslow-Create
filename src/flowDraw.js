@@ -474,8 +474,6 @@ function checkBoxes(){
     wireframeCheck.setAttribute('type', 'checkbox')
     wireframeCheck.setAttribute('id', 'wireframeCheck')
     
-    wireframeCheck.setAttribute('checked', 'false')
-    
     var wireframeCheckLabel = document.createElement('label')
     wireframeDiv.appendChild(wireframeCheckLabel)
     wireframeCheckLabel.setAttribute('for', 'wireframeCheck')
