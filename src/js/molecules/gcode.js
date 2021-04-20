@@ -40,8 +40,6 @@ export default class Gcode extends Atom {
         this.addIO('output', 'gcode', this, 'geometry', '')
         
         this.setValues(values)
-        
-        this.updateValue()
     }
     
     /**
@@ -72,26 +70,36 @@ export default class Gcode extends Atom {
             var tabs = this.findIOValue('tabs')
             var safeHeight = this.findIOValue('safe height')
             const values = {key: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
-            this.basicThreadValueProcessing(values)
+            this.gcodeString = this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
     
     /**
-     * Add a button to download the generated gcode
+     * Create a button to download the .stl file.
      */ 
     updateSidebar(){
-        var valueList =  super.updateSidebar() 
-        
-        this.createButton(valueList,this,'Download Gcode',() => {const feedRate = this.findIOValue('speed')
-            var gcodeString = "G20 \nG90 \n"
-            
-            this.value.paths[0].forEach(point => {
-                gcodeString += "G1 X" + point[0] + " Y" + point[1] + " Z" + point[2] + " F" + feedRate + "\n"
+        const list = super.updateSidebar()
+        this.createButton(list, this, "Download G-Code", ()=>{this.downloadGCode()})
+    }
+    
+    /**
+     * The function which is called when you press the download button.
+     */ 
+    downloadGCode(){
+        try{
+            var geometry = this.findIOValue('geometry')
+            var toolSize = this.findIOValue('tool size')
+            var passes = this.findIOValue('passes')
+            var speed = this.findIOValue('speed')
+            var tabs = this.findIOValue('tabs')
+            var safeHeight = this.findIOValue('safe height')
+            const values = {key: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
+            window.ask(values).then( returnedAnswer => {
+                const blob = new Blob([returnedAnswer])
+                saveAs(blob, GlobalVariables.currentMolecule.name+'.nc')
             })
-            
-            const blob = new Blob([gcodeString], {type: 'text/plain;charset=utf-8'})
-            saveAs(blob, GlobalVariables.topLevelMolecule.name+'.nc')
-        })
+        }catch(err){this.setAlert(err)}
+        
     }
     
 }

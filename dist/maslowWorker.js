@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
@@ -287,16 +287,13 @@ const agent = async ({
             
             const cutDepth = shapeHeight / question.passes;
             
-            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize });
+            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize, type: 'spindle' });
             
-            const toolPath = geometryToGcode.toDisjointGeometry().section().offset(question.toolSize/2)//.tool('cnc').engrave(shapeHeight);
+            const toolPath = geometryToGcode.section().offset(question.toolSize/2).tool('cnc').engrave(shapeHeight);
             await api.saveGeometry(question.writePath, toolPath);
-            //const c = Arc(4).tool('cnc').engrave(1).view();
-            //Group(c, Arc(4)).view();
             
-            console.log(toGcode(geometryToGcode.tool('cnc')));
+            return new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()}));
             
-            return "Test gcode string";
             break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
@@ -307,13 +304,10 @@ const agent = async ({
             return 1
             break;
         case "display":
-            console.log("Display called");
             if(question.readPath != null){
                 const geometryToDisplay = await api.loadGeometry(question.readPath);
-                console.log("Loaded");
                 if(geometryToDisplay.geometry.hash){//Verify that something was read
-                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
-                    console.log("Threejs geometry produced");
+                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
                     return threejsGeometry;
                 }
             }
