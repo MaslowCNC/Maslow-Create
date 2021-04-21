@@ -45,9 +45,13 @@ const toEmSizeFromMm = (mm) => mm * 1.5;
 const readFont = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
   const font = toFont({ path }, data);
-  const fontFactory = (size = 1) => (text) =>
-    Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
-  return fontFactory;
+  return font;
+  // const fontFactory = (size = 1) => (text) =>
+  //  Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
+  // return fontFactory;
 };
 
-export { readFont };
+const Text = (font, text, size = 10) =>
+  Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
+
+export { Text, readFont };

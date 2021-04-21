@@ -282,7 +282,6 @@ function closeTopMenu(){
 /**
  * Top Button menu event listeners if not in run mode
  */ 
-
 if (!GlobalVariables.runMode){
     
     let githubButton = document.getElementById('github_top')
@@ -324,6 +323,214 @@ if (!GlobalVariables.runMode){
         GlobalVariables.gitHub.makePullRequest() 
     })
 }
+
+//Add viewer bar which lets you turn on and off things like wireframe view
+
+let viewerBar = document.querySelector('#viewer_bar')
+let arrowUpMenu = document.querySelector('#arrow-up-menu')
+
+
+var displayGrid = true
+var displayAxis = true
+
+/**
+ * Creates the checkbox hidden menu when viewer is active
+ */ 
+function checkBoxes(){
+    let viewerBar = document.querySelector('#viewer_bar')   
+    viewerBar.classList.add('slidedown')
+
+    //Grid display html element
+    var gridDiv = document.createElement('div')
+    viewerBar.appendChild(gridDiv)
+    gridDiv.setAttribute('id', 'gridDiv')
+    var gridCheck = document.createElement('input')
+    gridDiv.appendChild(gridCheck)
+    gridCheck.setAttribute('type', 'checkbox')
+    gridCheck.setAttribute('id', 'gridCheck')
+    gridDiv.setAttribute('style', 'float:right;')
+           
+    if (displayGrid){
+        gridCheck.setAttribute('checked', 'true')
+    }
+
+    var gridCheckLabel = document.createElement('label')
+    gridDiv.appendChild(gridCheckLabel)
+    gridCheckLabel.setAttribute('for', 'gridCheck')
+    gridCheckLabel.setAttribute('style', 'margin-right:1em;')
+    gridCheckLabel.textContent= "Grid"
+    gridCheckLabel.setAttribute('style', 'user-select: none;')
+
+
+    gridCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            displayGrid = true
+            this.writeToDisplay(this.displayedGeometry)
+
+        }
+        else{
+            displayGrid = false
+            this.writeToDisplay(this.displayedGeometry)
+        }
+    })
+
+    //Axes Html
+
+    var axesDiv = document.createElement('div')
+    viewerBar.appendChild(axesDiv)
+    var axesCheck = document.createElement('input')
+    axesDiv.appendChild(axesCheck)
+    axesCheck.setAttribute('type', 'checkbox')
+    axesCheck.setAttribute('id', 'axesCheck')
+            
+    if (displayAxis){
+        axesCheck.setAttribute('checked', 'true')
+    }
+
+    var axesCheckLabel = document.createElement('label')
+    axesDiv.appendChild(axesCheckLabel)
+    axesCheckLabel.setAttribute('for', 'axesCheck')
+    axesCheckLabel.setAttribute('style', 'margin-right:1em;')
+    axesDiv.setAttribute('style', 'float:right;')
+    axesCheckLabel.textContent= "Axes"
+    axesCheckLabel.setAttribute('style', 'user-select: none;')
+
+    axesCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            displayAxis = true
+
+            this.writeToDisplay(this.displayedGeometry)
+        }
+        else{
+            displayAxis = false
+            this.writeToDisplay(this.displayedGeometry)
+        }
+    })
+    
+    
+    //Display faces
+    var facesDiv = document.createElement('div')
+    viewerBar.appendChild(facesDiv)
+    var facesCheck = document.createElement('input')
+    facesDiv.appendChild(facesCheck)
+    facesCheck.setAttribute('type', 'checkbox')
+    facesCheck.setAttribute('id', 'facesCheck')
+    
+    facesCheck.setAttribute('checked', 'true')
+    
+    var facesCheckLabel = document.createElement('label')
+    facesDiv.appendChild(facesCheckLabel)
+    facesCheckLabel.setAttribute('for', 'facesCheck')
+    facesCheckLabel.setAttribute('style', 'margin-right:1em;')
+    facesDiv.setAttribute('style', 'float:right;')
+    facesCheckLabel.textContent= "Faces"
+    facesCheckLabel.setAttribute('style', 'user-select: none;')
+
+    facesCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            GlobalVariables.displayTriangles = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayTriangles = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+    
+    //Display edges
+    var edgesDiv = document.createElement('div')
+    viewerBar.appendChild(edgesDiv)
+    var edgesCheck = document.createElement('input')
+    edgesDiv.appendChild(edgesCheck)
+    edgesCheck.setAttribute('type', 'checkbox')
+    edgesCheck.setAttribute('id', 'edgesCheck')
+    
+    edgesCheck.setAttribute('checked', 'true')
+    
+    var edgesCheckLabel = document.createElement('label')
+    edgesDiv.appendChild(edgesCheckLabel)
+    edgesCheckLabel.setAttribute('for', 'edgesCheck')
+    edgesCheckLabel.setAttribute('style', 'margin-right:1em;')
+    edgesDiv.setAttribute('style', 'float:right;')
+    edgesCheckLabel.textContent= "Edges"
+    edgesCheckLabel.setAttribute('style', 'user-select: none;')
+
+    edgesCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            GlobalVariables.displayEdges = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayEdges = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+    
+    //Display wireframe
+    var wireframeDiv = document.createElement('div')
+    viewerBar.appendChild(wireframeDiv)
+    var wireframeCheck = document.createElement('input')
+    wireframeDiv.appendChild(wireframeCheck)
+    wireframeCheck.setAttribute('type', 'checkbox')
+    wireframeCheck.setAttribute('id', 'wireframeCheck')
+    
+    var wireframeCheckLabel = document.createElement('label')
+    wireframeDiv.appendChild(wireframeCheckLabel)
+    wireframeCheckLabel.setAttribute('for', 'wireframeCheck')
+    wireframeCheckLabel.setAttribute('style', 'margin-right:1em;')
+    wireframeDiv.setAttribute('style', 'float:right;')
+    wireframeCheckLabel.textContent= "Wireframe"
+    wireframeCheckLabel.setAttribute('style', 'user-select: none;')
+
+    wireframeCheck.addEventListener('change', event => {
+        if(event.target.checked){
+            GlobalVariables.displayWireframe = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayWireframe = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+}
+
+document.getElementById('viewerContext').addEventListener('mouseenter', () => {
+    if(viewerBar.innerHTML.trim().length == 0){
+        checkBoxes()
+    }
+})
+
+var evtFired = false
+var g_timer
+
+function startTimer(){
+    g_timer = setTimeout(function() {
+        if (!evtFired) {
+            viewerBar.classList.remove("slideup")
+            viewerBar.classList.add('slidedown')  
+        }
+    }, 2000)
+}
+
+arrowUpMenu.addEventListener('mouseenter', () =>{
+    clearTimeout(g_timer)
+    viewerBar.classList.remove("slidedown")
+    viewerBar.classList.add('slideup')   
+})
+viewerBar.addEventListener('mouseleave', () =>{
+    evtFired = false
+    viewerBar.classList.remove("slideup")
+    viewerBar.classList.add('slidedown')   
+})
+viewerBar.addEventListener('mouseenter', () =>{
+    evtFired = true
+    viewerBar.classList.remove("slidedown")
+    viewerBar.classList.add('slideup')   
+})
+arrowUpMenu.addEventListener('mouseleave', () =>{
+    startTimer()
+})
+
 
 // Implementation
 /**

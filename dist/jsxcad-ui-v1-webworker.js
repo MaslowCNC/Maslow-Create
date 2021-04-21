@@ -135,7 +135,6 @@ const agent = async ({
     clearEmitted();
     let nthNote = 0;
     onEmitHandler = addOnEmitHandler(async (note, index) => {
-      console.log(`QQ/onEmitHandler: index ${index} hash ${note.hash}`);
       nthNote += 1;
 
       if (note.download) {

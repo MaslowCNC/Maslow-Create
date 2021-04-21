@@ -59,6 +59,23 @@ export default class RegularPolygon extends Atom {
     }
     
     /**
+     * Starts propagation from this atom if it is not waiting for anything up stream.
+     */ 
+    beginPropagation(){
+        
+        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        const values = {key: "getHash", readPath: this.path }
+        window.ask(values).then( hash => {
+            if(hash == undefined){
+                //Triggers inputs with nothing connected to begin propagation
+                this.inputs.forEach(input => {
+                    input.beginPropagation()
+                })
+            }
+        })
+    }
+    
+    /**
      * Create a new regular polygon in a worker thread.
      */ 
     updateValue(){

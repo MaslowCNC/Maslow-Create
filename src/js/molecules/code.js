@@ -95,40 +95,65 @@ export default class Code extends Atom {
     }
     
     /**
+     * Edit the atom's code when it is double clicked
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
+    doubleClick(x,y){
+        //returns true if something was done with the click
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        var clickProcessed = false
+        
+        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)
+        
+        if (distFromClick < xInPixels){
+            this.editCode()
+            clickProcessed = true
+        }
+        
+        return clickProcessed 
+    }
+    
+    editCode(){
+        //Remove everything in the popup now
+        const popup = document.getElementById('projects-popup')
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        
+        popup.classList.remove('off')
+
+        //Add a title
+        var codeMirror = CodeMirror(popup, {
+            value: this.code,
+            mode:  "javascript",
+            lineNumbers: true,
+            gutter: true,
+            lineWrapping: true
+        })
+        
+        var form = document.createElement("form")
+        popup.appendChild(form)
+        var button = document.createElement("button")
+        button.setAttribute("type", "button")
+        button.appendChild(document.createTextNode("Save Code"))
+        button.addEventListener("click", () => {
+            this.code = codeMirror.getDoc().getValue('\n')
+            this.updateValue()
+            popup.classList.add('off')
+        })
+        form.appendChild(button)
+    }
+    
+    /**
      * Add a button to open the code editor to the side bar
      */ 
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
         this.createButton(valueList,this,"Edit Code",() => {
-            //Remove everything in the popup now
-            const popup = document.getElementById('projects-popup')
-            while (popup.firstChild) {
-                popup.removeChild(popup.firstChild)
-            }
-            
-            popup.classList.remove('off')
-
-            //Add a title
-            var codeMirror = CodeMirror(popup, {
-                value: this.code,
-                mode:  "javascript",
-                lineNumbers: true,
-                gutter: true,
-                lineWrapping: true
-            })
-            
-            var form = document.createElement("form")
-            popup.appendChild(form)
-            var button = document.createElement("button")
-            button.setAttribute("type", "button")
-            button.appendChild(document.createTextNode("Save Code"))
-            button.addEventListener("click", () => {
-                this.code = codeMirror.getDoc().getValue('\n')
-                this.updateValue()
-                popup.classList.add('off')
-            })
-            form.appendChild(button)
+            this.editCode()
         })
     }
     

@@ -1,8 +1,9 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
+import { toGcode } from './jsxcad-convert-gcode.js';
 import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { soup } from './jsxcad-geometry-tagged.js';
 
@@ -164,7 +165,7 @@ const agent = async ({
         case "intersection":
             const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
             const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
-            const intersectionShape = api.Intersection(aShape2Intersect1,aShape2Intersect2);
+            const intersectionShape = aShape2Intersect1.clip(aShape2Intersect2);
             await api.saveGeometry(question.writePath, intersectionShape);
             return 1;
             break;
@@ -174,7 +175,7 @@ const agent = async ({
                 const unionGeometry = await api.loadGeometry(path);
                 geometries.push(unionGeometry);
             }
-            const unionShape = api.Group(...geometries);
+            const unionShape = api.Shape.fromGeometry(api.Group(...geometries).toDisjointGeometry());
             await api.saveGeometry(question.writePath, unionShape);
             return 1;
             break;
@@ -194,7 +195,13 @@ const agent = async ({
                 const assemblyGeometry = await api.loadGeometry(path);
                 assemblyGeometries.push(assemblyGeometry);
             }
-            const assemblyShape = api.Assembly(...assemblyGeometries);
+            
+            console.log(assemblyGeometries);
+            
+            const assemblyShape = api.Shape.fromGeometry(api.Assembly(...assemblyGeometries).toDisjointGeometry());
+            
+            console.log(JSON.stringify(assemblyShape));
+            
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;
             break;
@@ -223,7 +230,7 @@ const agent = async ({
             break;
         case "extractTag":
             const shape2extractFrom = await api.loadGeometry(question.readPath);
-            const extractedShape = shape2extractFrom.keep(question.tag).noVoid();
+            const extractedShape = shape2extractFrom.keep(question.tag).noVoid().toDisjointGeometry();
             await api.saveGeometry(question.writePath, extractedShape);
             return 1;
             break;
@@ -270,6 +277,24 @@ const agent = async ({
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
             break;
+        case "gcode":
+            
+            console.log("Gcode generation ran");
+            
+            const geometryToGcode = await api.loadGeometry(question.readPath);
+            
+            const shapeHeight = geometryToGcode.size().height;
+            
+            const cutDepth = shapeHeight / question.passes;
+            
+            api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: question.speed, diameter: question.toolSize, type: 'spindle' });
+            
+            const toolPath = geometryToGcode.section().offset(question.toolSize/2).tool('cnc').engrave(shapeHeight);
+            await api.saveGeometry(question.writePath, toolPath);
+            
+            return new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()}));
+            
+            break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
             return shape2getHash.geometry.hash;
@@ -279,13 +304,10 @@ const agent = async ({
             return 1
             break;
         case "display":
-            console.log("Display called");
             if(question.readPath != null){
                 const geometryToDisplay = await api.loadGeometry(question.readPath);
-                console.log("Loaded");
                 if(geometryToDisplay.geometry.hash){//Verify that something was read
-                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry()));
-                    console.log("Threejs geometry produced");
+                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
                     return threejsGeometry;
                 }
             }
