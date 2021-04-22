@@ -3795,7 +3795,12 @@ const emitted = [];
 
 let context;
 
+let startTime$1 = new Date();
+
+const elapsed = () => new Date() - startTime$1;
+
 const clearEmitted = () => {
+  startTime$1 = new Date();
   emitted.length = 0;
   context = undefined;
 };
@@ -3947,4 +3952,4 @@ const deleteFile$1 = async (options, path) => {
   await deleteFile(options, path);
 };
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, elapsed, emit$1 as emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

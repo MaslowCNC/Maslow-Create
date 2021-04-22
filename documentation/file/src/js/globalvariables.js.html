@@ -236,7 +236,27 @@ class GlobalVariables{
          * @type {function}
          */
         this.cancelLastDisplayWorker = 0
-        
+        /** 
+         * The last path displayed. Used for updating the display when the controls change.
+         * @type {string}
+         */
+        this.displayedPath = &quot;&quot;
+        /** 
+         * A flag to indicate if the faces of the shape should be displayed.
+         * @type {boolean}
+         */
+        this.displayTriangles = true
+        /** 
+         * A flag to indicate if the edges of the shape should be displayed.
+         * @type {boolean}
+         */
+        this.displayEdges = true
+        /** 
+         * A flag to indicate if the wire frame of the shape should be displayed.
+         * @type {boolean}
+         */
+        this.displayWireframe = false
+         
         const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
          * An evaluator for strings as mathmatical equations which is sandboxed and secure.
@@ -284,14 +304,22 @@ class GlobalVariables{
     * @param {string} The path to read from
     */
     writeToDisplay(path){
+        
+        this.displayedPath = path
+        
         // Cancel the last write to display if there is one active because this one will replace it
         if(this.displayProcessing){
             this.cancelLastDisplayWorker()
             this.displayProcessing = false
         }
         
-        var returned = window.ask({ evaluate: &quot;md`hello`&quot;, key: &quot;display&quot;, readPath: path })
-        
+        var returned = window.ask({ evaluate: &quot;md`hello`&quot;, 
+            key: &quot;display&quot;, 
+            readPath: path, 
+            triangles: this.displayTriangles, 
+            outline: this.displayEdges, 
+            wireframe: this.displayWireframe 
+        })
         
         returned.then( result =&gt; {
             

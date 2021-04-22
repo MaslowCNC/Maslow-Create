@@ -360,7 +360,6 @@ function closeTopMenu(){
 /**
  * Top Button menu event listeners if not in run mode
  */ 
-
 if (!GlobalVariables.runMode){
     
     let githubButton = document.getElementById(&apos;github_top&apos;)
@@ -402,6 +401,214 @@ if (!GlobalVariables.runMode){
         GlobalVariables.gitHub.makePullRequest() 
     })
 }
+
+//Add viewer bar which lets you turn on and off things like wireframe view
+
+let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
+let arrowUpMenu = document.querySelector(&apos;#arrow-up-menu&apos;)
+
+
+var displayGrid = true
+var displayAxis = true
+
+/**
+ * Creates the checkbox hidden menu when viewer is active
+ */ 
+function checkBoxes(){
+    let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)   
+    viewerBar.classList.add(&apos;slidedown&apos;)
+
+    //Grid display html element
+    var gridDiv = document.createElement(&apos;div&apos;)
+    viewerBar.appendChild(gridDiv)
+    gridDiv.setAttribute(&apos;id&apos;, &apos;gridDiv&apos;)
+    var gridCheck = document.createElement(&apos;input&apos;)
+    gridDiv.appendChild(gridCheck)
+    gridCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+    gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
+    gridDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+           
+    if (displayGrid){
+        gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    }
+
+    var gridCheckLabel = document.createElement(&apos;label&apos;)
+    gridDiv.appendChild(gridCheckLabel)
+    gridCheckLabel.setAttribute(&apos;for&apos;, &apos;gridCheck&apos;)
+    gridCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+    gridCheckLabel.textContent= &quot;Grid&quot;
+    gridCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+
+    gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
+        if(event.target.checked){
+            displayGrid = true
+            this.writeToDisplay(this.displayedGeometry)
+
+        }
+        else{
+            displayGrid = false
+            this.writeToDisplay(this.displayedGeometry)
+        }
+    })
+
+    //Axes Html
+
+    var axesDiv = document.createElement(&apos;div&apos;)
+    viewerBar.appendChild(axesDiv)
+    var axesCheck = document.createElement(&apos;input&apos;)
+    axesDiv.appendChild(axesCheck)
+    axesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+    axesCheck.setAttribute(&apos;id&apos;, &apos;axesCheck&apos;)
+            
+    if (displayAxis){
+        axesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    }
+
+    var axesCheckLabel = document.createElement(&apos;label&apos;)
+    axesDiv.appendChild(axesCheckLabel)
+    axesCheckLabel.setAttribute(&apos;for&apos;, &apos;axesCheck&apos;)
+    axesCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+    axesDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+    axesCheckLabel.textContent= &quot;Axes&quot;
+    axesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+    axesCheck.addEventListener(&apos;change&apos;, event =&gt; {
+        if(event.target.checked){
+            displayAxis = true
+
+            this.writeToDisplay(this.displayedGeometry)
+        }
+        else{
+            displayAxis = false
+            this.writeToDisplay(this.displayedGeometry)
+        }
+    })
+    
+    
+    //Display faces
+    var facesDiv = document.createElement(&apos;div&apos;)
+    viewerBar.appendChild(facesDiv)
+    var facesCheck = document.createElement(&apos;input&apos;)
+    facesDiv.appendChild(facesCheck)
+    facesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+    facesCheck.setAttribute(&apos;id&apos;, &apos;facesCheck&apos;)
+    
+    facesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    
+    var facesCheckLabel = document.createElement(&apos;label&apos;)
+    facesDiv.appendChild(facesCheckLabel)
+    facesCheckLabel.setAttribute(&apos;for&apos;, &apos;facesCheck&apos;)
+    facesCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+    facesDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+    facesCheckLabel.textContent= &quot;Faces&quot;
+    facesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+    facesCheck.addEventListener(&apos;change&apos;, event =&gt; {
+        if(event.target.checked){
+            GlobalVariables.displayTriangles = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayTriangles = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+    
+    //Display edges
+    var edgesDiv = document.createElement(&apos;div&apos;)
+    viewerBar.appendChild(edgesDiv)
+    var edgesCheck = document.createElement(&apos;input&apos;)
+    edgesDiv.appendChild(edgesCheck)
+    edgesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+    edgesCheck.setAttribute(&apos;id&apos;, &apos;edgesCheck&apos;)
+    
+    edgesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    
+    var edgesCheckLabel = document.createElement(&apos;label&apos;)
+    edgesDiv.appendChild(edgesCheckLabel)
+    edgesCheckLabel.setAttribute(&apos;for&apos;, &apos;edgesCheck&apos;)
+    edgesCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+    edgesDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+    edgesCheckLabel.textContent= &quot;Edges&quot;
+    edgesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+    edgesCheck.addEventListener(&apos;change&apos;, event =&gt; {
+        if(event.target.checked){
+            GlobalVariables.displayEdges = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayEdges = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+    
+    //Display wireframe
+    var wireframeDiv = document.createElement(&apos;div&apos;)
+    viewerBar.appendChild(wireframeDiv)
+    var wireframeCheck = document.createElement(&apos;input&apos;)
+    wireframeDiv.appendChild(wireframeCheck)
+    wireframeCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+    wireframeCheck.setAttribute(&apos;id&apos;, &apos;wireframeCheck&apos;)
+    
+    var wireframeCheckLabel = document.createElement(&apos;label&apos;)
+    wireframeDiv.appendChild(wireframeCheckLabel)
+    wireframeCheckLabel.setAttribute(&apos;for&apos;, &apos;wireframeCheck&apos;)
+    wireframeCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+    wireframeDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+    wireframeCheckLabel.textContent= &quot;Wireframe&quot;
+    wireframeCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+
+    wireframeCheck.addEventListener(&apos;change&apos;, event =&gt; {
+        if(event.target.checked){
+            GlobalVariables.displayWireframe = true
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+        else{
+            GlobalVariables.displayWireframe = false
+            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+        }
+    })
+}
+
+document.getElementById(&apos;viewerContext&apos;).addEventListener(&apos;mouseenter&apos;, () =&gt; {
+    if(viewerBar.innerHTML.trim().length == 0){
+        checkBoxes()
+    }
+})
+
+var evtFired = false
+var g_timer
+
+function startTimer(){
+    g_timer = setTimeout(function() {
+        if (!evtFired) {
+            viewerBar.classList.remove(&quot;slideup&quot;)
+            viewerBar.classList.add(&apos;slidedown&apos;)  
+        }
+    }, 2000)
+}
+
+arrowUpMenu.addEventListener(&apos;mouseenter&apos;, () =&gt;{
+    clearTimeout(g_timer)
+    viewerBar.classList.remove(&quot;slidedown&quot;)
+    viewerBar.classList.add(&apos;slideup&apos;)   
+})
+viewerBar.addEventListener(&apos;mouseleave&apos;, () =&gt;{
+    evtFired = false
+    viewerBar.classList.remove(&quot;slideup&quot;)
+    viewerBar.classList.add(&apos;slidedown&apos;)   
+})
+viewerBar.addEventListener(&apos;mouseenter&apos;, () =&gt;{
+    evtFired = true
+    viewerBar.classList.remove(&quot;slidedown&quot;)
+    viewerBar.classList.add(&apos;slideup&apos;)   
+})
+arrowUpMenu.addEventListener(&apos;mouseleave&apos;, () =&gt;{
+    startTimer()
+})
+
 
 // Implementation
 /**

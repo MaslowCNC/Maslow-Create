@@ -1,12 +1,19 @@
 {
-  "coverage": "97.57%",
-  "expectCount": 535,
-  "actualCount": 522,
+  "coverage": "96.18%",
+  "expectCount": 551,
+  "actualCount": 530,
   "files": {
     "src/flowDraw.js": {
-      "expectCount": 6,
-      "actualCount": 6,
-      "undocumentLines": []
+      "expectCount": 13,
+      "actualCount": 7,
+      "undocumentLines": [
+        329,
+        330,
+        333,
+        334,
+        503,
+        506
+      ]
     },
     "src/js/alwaysOneFreeInput.js": {
       "expectCount": 4,
@@ -24,8 +31,8 @@
       "undocumentLines": []
     },
     "src/js/globalvariables.js": {
-      "expectCount": 24,
-      "actualCount": 24,
+      "expectCount": 28,
+      "actualCount": 28,
       "undocumentLines": []
     },
     "src/js/molecules/assembly.js": {
@@ -49,9 +56,11 @@
       "undocumentLines": []
     },
     "src/js/molecules/code.js": {
-      "expectCount": 10,
-      "actualCount": 10,
-      "undocumentLines": []
+      "expectCount": 12,
+      "actualCount": 11,
+      "undocumentLines": [
+        118
+      ]
     },
     "src/js/molecules/color.js": {
       "expectCount": 11,
@@ -99,9 +108,11 @@
       "undocumentLines": []
     },
     "src/js/molecules/gcode.js": {
-      "expectCount": 8,
-      "actualCount": 8,
-      "undocumentLines": []
+      "expectCount": 10,
+      "actualCount": 9,
+      "undocumentLines": [
+        73
+      ]
     },
     "src/js/molecules/geneticAlgorithm.js": {
       "expectCount": 21,
@@ -165,8 +176,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/regularPolygon.js": {
-      "expectCount": 6,
-      "actualCount": 6,
+      "expectCount": 7,
+      "actualCount": 7,
       "undocumentLines": []
     },
     "src/js/molecules/rotate.js": {

@@ -120,7 +120,6 @@ export default class Circle extends Atom {
             if(hash == undefined){
                 //Triggers inputs with nothing connected to begin propagation
                 this.inputs.forEach(input =&gt; {
-                    console.log(&quot;Circle beginning propagation&quot;);
                     input.beginPropagation()
                 })
             }

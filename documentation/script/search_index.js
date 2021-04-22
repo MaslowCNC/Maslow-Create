@@ -660,9 +660,33 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#displayedges",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayEdges",
+    "src/js/globalvariables.js~GlobalVariables#displayEdges",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#displayprocessing",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayProcessing",
     "src/js/globalvariables.js~GlobalVariables#displayProcessing",
+    "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#displaytriangles",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayTriangles",
+    "src/js/globalvariables.js~GlobalVariables#displayTriangles",
+    "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#displaywireframe",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayWireframe",
+    "src/js/globalvariables.js~GlobalVariables#displayWireframe",
+    "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#displayedpath",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayedPath",
+    "src/js/globalvariables.js~GlobalVariables#displayedPath",
     "member"
   ],
   [
@@ -1044,9 +1068,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/code.js~code#doubleclick",
+    "class/src/js/molecules/code.js~Code.html#instance-method-doubleClick",
+    "src/js/molecules/code.js~Code#doubleClick",
+    "method"
+  ],
+  [
     "src/js/molecules/code.js~code#draw",
     "class/src/js/molecules/code.js~Code.html#instance-method-draw",
     "src/js/molecules/code.js~Code#draw",
+    "method"
+  ],
+  [
+    "src/js/molecules/code.js~code#editcode",
+    "class/src/js/molecules/code.js~Code.html#instance-method-editCode",
+    "src/js/molecules/code.js~Code#editCode",
     "method"
   ],
   [
@@ -1560,10 +1596,22 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/gcode.js~gcode#downloadgcode",
+    "class/src/js/molecules/gcode.js~Gcode.html#instance-method-downloadGCode",
+    "src/js/molecules/gcode.js~Gcode#downloadGCode",
+    "method"
+  ],
+  [
     "src/js/molecules/gcode.js~gcode#draw",
     "class/src/js/molecules/gcode.js~Gcode.html#instance-method-draw",
     "src/js/molecules/gcode.js~Gcode#draw",
     "method"
+  ],
+  [
+    "src/js/molecules/gcode.js~gcode#gcodestring",
+    "class/src/js/molecules/gcode.js~Gcode.html#instance-member-gcodeString",
+    "src/js/molecules/gcode.js~Gcode#gcodeString",
+    "member"
   ],
   [
     "src/js/molecules/gcode.js~gcode#height",
@@ -2560,6 +2608,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/regularPolygon.js~RegularPolygon.html#instance-member-atomType",
     "src/js/molecules/regularPolygon.js~RegularPolygon#atomType",
     "member"
+  ],
+  [
+    "src/js/molecules/regularpolygon.js~regularpolygon#beginpropagation",
+    "class/src/js/molecules/regularPolygon.js~RegularPolygon.html#instance-method-beginPropagation",
+    "src/js/molecules/regularPolygon.js~RegularPolygon#beginPropagation",
+    "method"
   ],
   [
     "src/js/molecules/regularpolygon.js~regularpolygon#constructor",

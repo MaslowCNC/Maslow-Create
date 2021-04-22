@@ -769,7 +769,7 @@ export default class Atom {
             //toAsk.evaluate = &quot;md`hello`&quot; //This is needed to make JSxCAD worker happy. Should probably be removed someday
             
             const returned = window.ask(toAsk).then(result =&gt; {
-                if (result.answer != -1 ){
+                if (result != -1 ){
                     this.displayAndPropogate()
                 }else{
                     this.setAlert(&quot;Unable to compute&quot;)

@@ -37,23 +37,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 186,
+        "lineNumber": 206,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 187,
+        "lineNumber": 207,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 188,
+        "lineNumber": 208,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 189,
+        "lineNumber": 209,
         "line": "    */\r"
       },
       {
-        "lineNumber": 190,
+        "lineNumber": 210,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -69,23 +69,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 194,
+        "lineNumber": 214,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 195,
+        "lineNumber": 215,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 196,
+        "lineNumber": 216,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 197,
+        "lineNumber": 217,
         "line": "    */\r"
       },
       {
-        "lineNumber": 198,
+        "lineNumber": 218,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -101,23 +101,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 203,
+        "lineNumber": 223,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 204,
+        "lineNumber": 224,
         "line": "    * A function which reads from a path and displays the geometry it contains\r"
       },
       {
-        "lineNumber": 205,
+        "lineNumber": 225,
         "line": "    * @param {string} The path to read from\r"
       },
       {
-        "lineNumber": 206,
+        "lineNumber": 226,
         "line": "    */\r"
       },
       {
-        "lineNumber": 207,
+        "lineNumber": 227,
         "line": "    writeToDisplay(path){\r"
       }
     ],
@@ -133,23 +133,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 232,
+        "lineNumber": 260,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 233,
+        "lineNumber": 261,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 234,
+        "lineNumber": 262,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 235,
+        "lineNumber": 263,
         "line": "    */\r"
       },
       {
-        "lineNumber": 236,
+        "lineNumber": 264,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],

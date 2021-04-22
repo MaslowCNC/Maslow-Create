@@ -1,6 +1,6 @@
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
-import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
+import { toPlane } from './jsxcad-math-poly3.js';
 
 /**
  * dat-gui JavaScript Controller Library
@@ -53350,9 +53350,9 @@ const buildMeshMaterial = async (definitions, tags) => {
   return new MeshNormalMaterial();
 };
 
-const toName = (threejsGeometry) => {
-  if (threejsGeometry.tags !== undefined && threejsGeometry.tags.length >= 1) {
-    for (const tag of threejsGeometry.tags) {
+const toName = (geometry) => {
+  if (geometry.tags !== undefined && geometry.tags.length >= 1) {
+    for (const tag of geometry.tags) {
       if (tag.startsWith('user/')) {
         return tag.substring(5);
       }
@@ -53520,18 +53520,22 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
 
 const buildMeshes = async ({
   datasets,
-  threejsGeometry,
+  geometry,
   scene,
   layer = GEOMETRY_LAYER,
   render,
   definitions,
 }) => {
-  if (threejsGeometry === undefined) {
+  if (geometry === undefined) {
     return;
   }
-  const { tags } = threejsGeometry;
-  switch (threejsGeometry.type) {
+  const { tags = [] } = geometry;
+  switch (geometry.type) {
+    case 'displayGeometry':
     case 'assembly':
+    case 'disjointAssembly':
+    case 'layers':
+    case 'layout':
     case 'item':
     case 'plan':
       break;
@@ -53547,9 +53551,9 @@ const buildMeshes = async ({
         opacity = 0.5;
         transparent = true;
       }
-      const paths = threejsGeometry.threejsPaths;
+      const { paths } = geometry;
       const dataset = {};
-      const geometry = new BufferGeometry();
+      const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: 0xffffff,
         vertexColors: VertexColors,
@@ -53596,14 +53600,17 @@ const buildMeshes = async ({
           index.push(entry);
         }
       }
-      geometry.setAttribute(
+      bufferGeometry.setAttribute(
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.setAttribute('color', new Float32BufferAttribute(pathColors, 4));
-      dataset.mesh = new LineSegments(geometry, material);
+      bufferGeometry.setAttribute(
+        'color',
+        new Float32BufferAttribute(pathColors, 4)
+      );
+      dataset.mesh = new LineSegments(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
-      dataset.name = toName(threejsGeometry);
+      dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
       if (render && tags.includes('display/trace')) {
@@ -53611,11 +53618,11 @@ const buildMeshes = async ({
         let extent = 0;
         const animate = () => {
           if (dataset.mesh) {
-            const geometry = dataset.mesh.geometry;
+            const bufferGeometry = dataset.mesh.geometry;
             extent += index[current].length;
             // geometry.setDrawRange(index[current].start, extent - index[current].start);
-            geometry.setDrawRange(0, (extent += index[current].length));
-            geometry.attributes.position.needsUpdate = true;
+            bufferGeometry.setDrawRange(0, (extent += index[current].length));
+            bufferGeometry.attributes.position.needsUpdate = true;
             render();
             current += 1;
             if (current >= index.length) {
@@ -53630,100 +53637,75 @@ const buildMeshes = async ({
       break;
     }
     case 'points': {
-      const points = threejsGeometry.threejsPoints;
+      const { points } = geometry;
       const dataset = {};
-      const geometry = new Geometry();
+      const threeGeometry = new Geometry();
       const material = new PointsMaterial({
         color: setColor(definitions, tags, {}, [0, 0, 0]).color,
         size: 0.5,
       });
       for (const [aX = 0, aY = 0, aZ = 0] of points) {
-        geometry.vertices.push(new Vector3(aX, aY, aZ));
+        threeGeometry.vertices.push(new Vector3(aX, aY, aZ));
       }
-      dataset.mesh = new Points(geometry, material);
+      dataset.mesh = new Points(threeGeometry, material);
       dataset.mesh.layers.set(layer);
-      dataset.name = toName(threejsGeometry);
+      dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
       break;
     }
     case 'triangles': {
-      const { positions, normals } = threejsGeometry.threejsTriangles;
+      const prepareTriangles = (triangles) => {
+        const normals = [];
+        const positions = [];
+        for (const triangle of triangles) {
+          const plane = toPlane(triangle);
+          if (plane === undefined) {
+            continue;
+          }
+          const [px, py, pz] = plane;
+          for (const [x = 0, y = 0, z = 0] of triangle) {
+            normals.push(px, py, pz);
+            positions.push(x, y, z);
+          }
+        }
+        return { normals, positions };
+      };
+
+      const { triangles } = geometry;
+      const { positions, normals } = prepareTriangles(triangles);
       const dataset = {};
-      const geometry = new BufferGeometry();
-      geometry.setAttribute(
+      const bufferGeometry = new BufferGeometry();
+      bufferGeometry.setAttribute(
         'position',
         new Float32BufferAttribute(positions, 3)
       );
-      geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
-      applyBoxUV(geometry);
+      bufferGeometry.setAttribute(
+        'normal',
+        new Float32BufferAttribute(normals, 3)
+      );
+      applyBoxUV(bufferGeometry);
       const material = await buildMeshMaterial(definitions, tags);
       if (tags.includes('compose/non-positive')) {
         material.transparent = true;
         material.opacity *= 0.2;
       }
-      dataset.mesh = new Mesh(geometry, material);
+      dataset.mesh = new Mesh(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
-      dataset.name = toName(threejsGeometry);
+      dataset.name = toName(geometry);
       scene.add(dataset.mesh);
       datasets.push(dataset);
       break;
     }
-    /*
-    case 'solid': {
-      const { positions, normals } = threejsGeometry.threejsSolid;
-      const dataset = {};
-      const geometry = new BufferGeometry();
-      geometry.setAttribute(
-        'position',
-        new Float32BufferAttribute(positions, 3)
-      );
-      geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
-      applyBoxUV(geometry);
-      const material = await buildMeshMaterial(definitions, tags);
-      if (tags.includes('compose/non-positive')) {
-        material.transparent = true;
-        material.opacity *= 0.2;
-      }
-      dataset.mesh = new Mesh(geometry, material);
-      dataset.mesh.layers.set(layer);
-      dataset.name = toName(threejsGeometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-      break;
-    }
-    case 'z0Surface':
-    case 'surface': {
-      const { positions, normals } = threejsGeometry.threejsSurface;
-      const dataset = {};
-      const geometry = new BufferGeometry();
-      geometry.setAttribute(
-        'position',
-        new Float32BufferAttribute(positions, 3)
-      );
-      geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
-      applyBoxUV(geometry);
-      const material = await buildMeshMaterial(definitions, tags);
-      material.transparent = true;
-      material.opacity = 0.1;
-      material.side = DoubleSide;
-      dataset.mesh = new Mesh(geometry, material);
-      dataset.mesh.layers.set(layer);
-      dataset.name = toName(threejsGeometry);
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-      break;
-    }
-*/
     default:
-      throw Error(`Unexpected geometry: ${threejsGeometry.type}`);
+      throw Error(`Non-display geometry: ${geometry.type}`);
   }
 
-  if (threejsGeometry.content) {
-    for (const content of threejsGeometry.content) {
+  if (geometry.content) {
+    for (const content of geometry.content) {
       await buildMeshes({
         datasets,
-        threejsGeometry: content,
+        geometry: content,
         scene,
         layer,
         render,
@@ -53901,19 +53883,16 @@ const orbitDisplay = async (
 
   const updateGeometry = async (geometry) => {
     // Delete any previous dataset in the window.
-    console.log("Update geometry ran");
     for (const { mesh } of datasets) {
       scene.remove(mesh);
     }
-
-    const threejsGeometry = toThreejsGeometry(geometry);
 
     // Build new datasets from the written data, and display them.
     datasets = [];
 
     await buildMeshes({
       datasets,
-      threejsGeometry,
+      geometry,
       scene,
       render,
       definitions,
@@ -53969,13 +53948,7 @@ const release = async () => {
 };
 
 const staticDisplay = async (
-  {
-    view = {},
-    threejsGeometry,
-    withAxes = false,
-    withGrid = false,
-    definitions,
-  } = {},
+  { view = {}, geometry, withAxes = false, withGrid = false, definitions } = {},
   page
 ) => {
   if (locked === true) await acquire();
@@ -54011,7 +53984,7 @@ const staticDisplay = async (
     renderer.render(scene, camera);
   };
 
-  await buildMeshes({ datasets, threejsGeometry, scene, definitions });
+  await buildMeshes({ datasets, geometry, scene, definitions });
 
   moveToFit({ datasets, view, camera, scene, withGrid });
 
@@ -54047,11 +54020,10 @@ const staticView = async (
     definitions,
   } = {}
 ) => {
-  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay(
     {
       view: { target, position, up },
-      threejsGeometry,
+      geometry: shape.toDisplayGeometry(),
       withAxes,
       withGrid,
       definitions,

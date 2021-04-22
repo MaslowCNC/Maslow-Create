@@ -875,8 +875,8 @@ var Module = (function () {
     }
     var wasmMemory;
     var wasmTable = new WebAssembly.Table({
-      initial: 5482,
-      maximum: 5482,
+      initial: 6200,
+      maximum: 6200,
       element: 'anyfunc',
     });
     var ABORT = false;
@@ -1144,9 +1144,9 @@ var Module = (function () {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(buf);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(buf);
     }
-    var STACK_BASE = 5616624,
-      STACK_MAX = 373744,
-      DYNAMIC_BASE = 5616624;
+    var STACK_BASE = 5642864,
+      STACK_MAX = 399984,
+      DYNAMIC_BASE = 5642864;
     assert(STACK_BASE % 16 === 0, 'stack must start aligned');
     assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
     var TOTAL_STACK = 5242880;
@@ -7290,6 +7290,7 @@ var Module = (function () {
       invoke_v: invoke_v,
       invoke_vdddddddiiiii: invoke_vdddddddiiiii,
       invoke_vddddiiii: invoke_vddddiiii,
+      invoke_vddddiiiii: invoke_vddddiiiii,
       invoke_vdiii: invoke_vdiii,
       invoke_vi: invoke_vi,
       invoke_vid: invoke_vid,
@@ -7324,9 +7325,9 @@ var Module = (function () {
     var ___wasm_call_ctors = (Module[
       '___wasm_call_ctors'
     ] = createExportWrapper('__wasm_call_ctors'));
+    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _malloc = (Module['_malloc'] = createExportWrapper('malloc'));
     var _fflush = (Module['_fflush'] = createExportWrapper('fflush'));
-    var _memset = (Module['_memset'] = createExportWrapper('memset'));
     var _free = (Module['_free'] = createExportWrapper('free'));
     var ___getTypeName = (Module['___getTypeName'] = createExportWrapper(
       '__getTypeName'
@@ -7614,6 +7615,16 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_vdiii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_diii(index, a1, a2, a3) {
       var sp = stackSave();
       try {
@@ -7686,10 +7697,10 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_vdiii(index, a1, a2, a3, a4) {
+    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4);
+        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7700,6 +7711,16 @@ var Module = (function () {
       var sp = stackSave();
       try {
         return wasmTable.get(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_viiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -7785,16 +7806,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_iiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_iiiiiiiiiiiii(
       index,
       a1,
@@ -7846,16 +7857,6 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_viiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8046,6 +8047,16 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
+    function invoke_viddd(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_iiiiiiiiiiiiii(
       index,
       a1,
@@ -8085,10 +8096,43 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viddd(index, a1, a2, a3, a4) {
+    function invoke_viiiiiiiiiiiiiii(
+      index,
+      a1,
+      a2,
+      a3,
+      a4,
+      a5,
+      a6,
+      a7,
+      a8,
+      a9,
+      a10,
+      a11,
+      a12,
+      a13,
+      a14,
+      a15
+    ) {
       var sp = stackSave();
       try {
-        wasmTable.get(index)(a1, a2, a3, a4);
+        wasmTable.get(index)(
+          a1,
+          a2,
+          a3,
+          a4,
+          a5,
+          a6,
+          a7,
+          a8,
+          a9,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15
+        );
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -8144,49 +8188,6 @@ var Module = (function () {
         _setThrew(1, 0);
       }
     }
-    function invoke_viiiiiiiiiiiiiii(
-      index,
-      a1,
-      a2,
-      a3,
-      a4,
-      a5,
-      a6,
-      a7,
-      a8,
-      a9,
-      a10,
-      a11,
-      a12,
-      a13,
-      a14,
-      a15
-    ) {
-      var sp = stackSave();
-      try {
-        wasmTable.get(index)(
-          a1,
-          a2,
-          a3,
-          a4,
-          a5,
-          a6,
-          a7,
-          a8,
-          a9,
-          a10,
-          a11,
-          a12,
-          a13,
-          a14,
-          a15
-        );
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0 && e !== 'longjmp') throw e;
-        _setThrew(1, 0);
-      }
-    }
     function invoke_viiiiiiiiiiii(
       index,
       a1,
@@ -8205,6 +8206,16 @@ var Module = (function () {
       var sp = stackSave();
       try {
         wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0 && e !== 'longjmp') throw e;
+        _setThrew(1, 0);
+      }
+    }
+    function invoke_vddddiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+      var sp = stackSave();
+      try {
+        wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0 && e !== 'longjmp') throw e;
@@ -10044,7 +10055,7 @@ const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
-        console.log(texts);
+        // console.log(texts);
       },
       printErr(...texts) {
         const text = texts.join(' ');
@@ -10053,7 +10064,7 @@ const initCgal = async () => {
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
         log({ op: 'text', text, level });
-        console.log(texts);
+        // console.log(texts);
       },
       locateFile(path) {
         if (path === 'cgal.wasm') {
@@ -10208,36 +10219,46 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
+const arrangePaths = (
+  plane,
+  exactPlane,
+  inputPolygons,
+  triangulate = false
+) => {
   const c = getCgal();
   let nth = 0;
   let target;
   let polygon;
   let polygons = [];
-  const fill = (points) => {
-    const path = paths[nth++];
-    if (path) {
-      if (path === undefined || path.points === undefined) {
-        Error.stackTraceLimit = Infinity;
-        throw Error(`die: ${JSON.stringify(path)}`);
-      }
-      for (const [start, end] of getEdges(path.points)) {
-        if (equals(start, end)) {
-          continue;
+  const fill = (out) => {
+    if (nth < inputPolygons.length) {
+      const { exactPoints, points } = inputPolygons[nth++];
+      if (exactPoints) {
+        for (const [start, end] of getEdges(exactPoints)) {
+          if (equals(start, end)) {
+            continue;
+          }
+          c.addExactPoint(out, start[X], start[Y], start[Z]);
+          c.addExactPoint(out, end[X], end[Y], end[Z]);
         }
-        c.addPoint(points, start[X], start[Y], start[Z]);
-        c.addPoint(points, end[X], end[Y], end[Z]);
+      } else if (points) {
+        for (const [start, end] of getEdges(points)) {
+          if (equals(start, end)) {
+            continue;
+          }
+          c.addPoint(out, start[X], start[Y], start[Z]);
+          c.addPoint(out, end[X], end[Y], end[Z]);
+        }
       }
     }
   };
   const emitPolygon = (isHole) => {
+    target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
     if (isHole) {
-      target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
       polygon.holes.push(target);
     } else {
-      polygon = { points: [], exactPoints: [], holes: [], plane, exactPlane };
-      polygons.push(polygon);
-      target = polygon;
+      polygons.push(target);
+      polygon = target;
     }
   };
   const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
@@ -10263,8 +10284,199 @@ const arrangePaths = (plane, exactPlane, paths, triangulate = false) => {
   return polygons;
 };
 
-const arrangePathsIntoTriangles = (plane, exactPlane, paths) =>
-  arrangePaths(plane, exactPlane, paths, /* triangulate= */ true);
+const arrangePathsIntoTriangles = (plane, exactPlane, polygons) =>
+  arrangePaths(plane, exactPlane, polygons, /* triangulate= */ true);
+
+const arrangePolygonsWithHoles = (polygons) => {
+  const g = getCgal();
+  let nth = -1;
+  let polygon;
+
+  const fillPlane = (out) => {
+    polygon = polygons[++nth];
+    if (polygon.exactPlane) {
+      const [a, b, c, d] = polygon.exactPlane;
+      g.fillExactQuadruple(out, a, b, c, d);
+    } else {
+      const [x, y, z, w] = polygon.plane;
+      g.fillQuadruple(out, x, y, z, -w);
+    }
+  };
+
+  const fillBoundary = (out) => {
+    if (!polygon) {
+      return;
+    }
+    if (polygon.exactPoints) {
+      for (const [x, y, z] of polygon.exactPoints) {
+        g.addExactPoint(out, x, y, z);
+      }
+    } else {
+      for (const [x, y, z] of polygon.points) {
+        g.addPoint(out, x, y, z);
+      }
+    }
+  };
+
+  const fillHole = (out, nthPolygon, nthHole) => {
+    const hole = polygon.holes[nthHole];
+    if (!hole) {
+      return;
+    }
+    if (hole.exactPoints) {
+      for (const [x, y, z] of polygon.exactPoints) {
+        g.addExactPoint(out, x, y, z);
+      }
+    } else {
+      for (const [x, y, z] of polygon.points) {
+        g.addPoint(out, x, y, z);
+      }
+    }
+  };
+
+  const arrangements = [];
+
+  let outputPlane;
+  let outputExactPlane;
+  let outputPolygons;
+  let outputPolygon;
+
+  const emitPlane = (x, y, z, w, a, b, c, d) => {
+    outputPlane = [x, y, z, w];
+    outputExactPlane = [a, b, c, d];
+    outputPolygon = undefined;
+    outputPolygons = [];
+    arrangements.push({
+      plane: outputPlane,
+      exactPlane: outputExactPlane,
+      polygonsWithHoles: outputPolygons,
+    });
+  };
+
+  const emitPolygon = (isHole) => {
+    const polygon = {
+      plane: outputPlane,
+      exactPlane: outputExactPlane,
+      points: [],
+      exactPoints: [],
+      holes: [],
+    };
+    if (isHole) {
+      outputPolygon.holes.push(polygon);
+    } else {
+      outputPolygons.push(polygon);
+    }
+    outputPolygon = polygon;
+  };
+
+  const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
+    outputPolygon.points.push([x, y, z]);
+    outputPolygon.exactPoints.push([exactX, exactY, exactZ]);
+  };
+
+  g.ArrangePolygonsWithHoles(
+    polygons.length,
+    fillPlane,
+    fillBoundary,
+    fillHole,
+    emitPlane,
+    emitPolygon,
+    emitPoint
+  );
+
+  return arrangements;
+};
+
+const BOOLEAN_ADD = 1;
+const BOOLEAN_CUT = 2;
+const BOOLEAN_CLIP = 3;
+
+const booleansOfPolygonsWithHoles = (operations, polygons) => {
+  const g = getCgal();
+  const outputs = [];
+  let output;
+  let points;
+  let exactPoints;
+  const getOperation = (nthOperation) => operations[nthOperation];
+  const fillBoundary = (boundary, nthBoundary) => {
+    const polygon = polygons[nthBoundary];
+    if (!polygon) return;
+    if (polygon.exactPoints) {
+      for (const [x, y, z] of polygon.exactPoints) {
+        g.addExactPoint(boundary, x, y, z);
+      }
+    } else {
+      for (const [x, y, z] of polygon.points) {
+        g.addPoint(boundary, x, y, z);
+      }
+    }
+  };
+  const fillHole = (hole, nthBoundary, nthHole) => {
+    const polygon = polygons[nthBoundary];
+    if (!polygon) return;
+    if (!polygon.holes[nthHole]) return;
+    if (polygon.holes[nthHole].exactPoints) {
+      for (const [x, y, z] of polygon.holes[nthHole].exactPoints) {
+        g.addExactPoint(hole, x, y, z);
+      }
+    } else {
+      for (const [x, y, z] of polygon.holes[nthHole].points) {
+        g.addPoint(hole, x, y, z);
+      }
+    }
+  };
+  const outputPolygon = (isHole) => {
+    points = [];
+    exactPoints = [];
+    if (isHole) {
+      output.holes.push({ points, exactPoints });
+    } else {
+      output = {
+        points,
+        exactPoints,
+        holes: [],
+        plane: polygons[0].plane,
+        exactPlane: polygons[0].exactPlane,
+      };
+      outputs.push(output);
+    }
+  };
+  const outputPoint = (x, y, z, exactX, exactY, exactZ) => {
+    points.push([x, y, z]);
+    exactPoints.push([exactX, exactY, exactX]);
+  };
+  if (polygons[0].exactPlane) {
+    const [a, b, c, d] = polygons[0].exactPlane;
+    g.BooleansOfPolygonsWithHolesExact(
+      a,
+      b,
+      c,
+      d,
+      getOperation,
+      fillBoundary,
+      fillHole,
+      outputPolygon,
+      outputPoint
+    );
+  } else {
+    const [x, y, z, w] = polygons[0].plane;
+    g.BooleansOfPolygonsWithHolesApproximate(
+      x,
+      y,
+      z,
+      -w,
+      getOperation,
+      fillBoundary,
+      fillHole,
+      outputPolygon,
+      outputPoint
+    );
+  }
+  return outputs;
+};
+
+const deserializeSurfaceMesh = (mesh) =>
+  getCgal().DeserializeSurfaceMesh(mesh);
 
 const differenceOfSurfaceMeshes = (a, b) =>
   getCgal().DifferenceOfSurfaceMeshes(a, b);
@@ -10371,7 +10583,6 @@ const X$2 = 0;
 const Y$2 = 1;
 const Z$2 = 2;
 
-// Note: This assumes a graph without holes.
 const fromGraphToSurfaceMesh = (graph) => {
   const c = getCgal();
   const mesh = new c.Surface_mesh();
@@ -10401,15 +10612,21 @@ const fromGraphToSurfaceMesh = (graph) => {
   }
 
   graph.facets.forEach(({ edge }, facet) => {
+    const points = [];
     const faceIndex = c.Surface_mesh__add_face_vertices(mesh, () => {
       const edgeNode = graph.edges[edge];
       edge = edgeNode.next;
+      points.push(graph.points[edgeNode.point]);
       return vertexIndex[edgeNode.point];
     });
     if (faceIndex === 4294967295 /* -1 */) {
-      throw Error(`Face could not be added`);
+      throw Error(`Face could not be added: ${JSON.stringify(points)}`);
     }
   });
+
+  if (!c.Surface_mesh__triangulate_faces(mesh)) {
+    throw Error('triangulation failed');
+  }
 
   if (!mesh.is_valid(false)) {
     throw Error('die');
@@ -10597,11 +10814,58 @@ const fromSurfaceMeshToPolygons = (mesh, triangulate = false) => {
   return polygons;
 };
 
+const fromSurfaceMeshToPolygonsWithHoles = (mesh) => {
+  const g = getCgal();
+  const arrangements = [];
+
+  let outputPlane;
+  let outputExactPlane;
+  let outputPolygons;
+  let outputPolygon;
+
+  const emitPlane = (x, y, z, w, a, b, c, d) => {
+    outputPlane = [x, y, z, w];
+    outputExactPlane = [a, b, c, d];
+    outputPolygon = undefined;
+    outputPolygons = [];
+    arrangements.push({
+      plane: outputPlane,
+      exactPlane: outputExactPlane,
+      polygonsWithHoles: outputPolygons,
+    });
+  };
+
+  const emitPolygon = (isHole) => {
+    const polygon = {
+      plane: outputPlane,
+      exactPlane: outputExactPlane,
+      points: [],
+      exactPoints: [],
+      holes: [],
+    };
+    if (isHole) {
+      outputPolygon.holes.push(polygon);
+    } else {
+      outputPolygons.push(polygon);
+    }
+    outputPolygon = polygon;
+  };
+
+  const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
+    outputPolygon.points.push([x, y, z]);
+    outputPolygon.exactPoints.push([exactX, exactY, exactZ]);
+  };
+
+  g.FromSurfaceMeshToPolygonsWithHoles(mesh, emitPlane, emitPolygon, emitPoint);
+
+  return arrangements;
+};
+
 const fromSurfaceMeshToTriangles = (mesh) =>
   fromSurfaceMeshToPolygons(mesh, true);
 
-// FIX: Remove this rounding hack.
-const round = (n) => Math.round(n * 10000) / 10000;
+// const round = (n) => Math.round(n * 10000) / 10000;
+const round = (n) => n;
 
 const insetOfPolygonWithHoles = (
   initial = 1,
@@ -10614,7 +10878,8 @@ const insetOfPolygonWithHoles = (
   const outputs = [];
   let output;
   let points;
-  c.InsetOfPolygon(
+  let exactPoints;
+  c.InsetOfPolygonWithHoles(
     initial,
     step,
     limit,
@@ -10624,20 +10889,34 @@ const insetOfPolygonWithHoles = (
     -w,
     polygon.holes.length,
     (boundary) => {
-      for (let [x, y, z] of polygon.points) {
-        c.addPoint(boundary, round(x), round(y), round(z));
+      if (polygon.exactPoints) {
+        for (let [x, y, z] of polygon.exactPoints) {
+          c.addExactPoint(boundary, x, y, z);
+        }
+      } else {
+        for (let [x, y, z] of polygon.points) {
+          c.addPoint(boundary, round(x), round(y), round(z));
+        }
       }
     },
     (hole, nth) => {
-      for (const [x, y, z] of polygon.holes[nth].points) {
-        c.addPoint(hole, round(x), round(y), round(z));
+      if (polygon.holes[nth].exactPoints) {
+        for (const [x, y, z] of polygon.holes[nth].exactPoints) {
+          c.addExactPoint(hole, x, y, z);
+        }
+      } else {
+        for (const [x, y, z] of polygon.holes[nth].points) {
+          c.addPoint(hole, round(x), round(y), round(z));
+        }
       }
     },
     (isHole) => {
       points = [];
+      exactPoints = [];
       if (isHole) {
         output.holes.push({
           points,
+          exactPoints,
           holes: [],
           plane: polygon.plane,
           exactPlane: polygon.exactPlane,
@@ -10645,6 +10924,7 @@ const insetOfPolygonWithHoles = (
       } else {
         output = {
           points,
+          exactPoints,
           holes: [],
           plane: polygon.plane,
           exactPlane: polygon.exactPlane,
@@ -10652,8 +10932,9 @@ const insetOfPolygonWithHoles = (
         outputs.push(output);
       }
     },
-    (x, y, z) => {
+    (x, y, z, exactX, exactY, exactZ) => {
       points.push([x, y, z]);
+      exactPoints.push([exactX, exactY, exactZ]);
     }
   );
   return outputs;
@@ -10661,10 +10942,6 @@ const insetOfPolygonWithHoles = (
 
 const intersectionOfSurfaceMeshes = (a, b) =>
   getCgal().IntersectionOfSurfaceMeshes(a, b);
-
-const X$3 = 0;
-const Y$3 = 1;
-const Z$3 = 2;
 
 const offsetOfPolygonWithHoles = (
   initial = 1,
@@ -10677,7 +10954,7 @@ const offsetOfPolygonWithHoles = (
   const outputs = [];
   let output;
   let points;
-  let lastPoint;
+  let exactPoints;
   c.OffsetOfPolygonWithHoles(
     initial,
     step,
@@ -10688,23 +10965,36 @@ const offsetOfPolygonWithHoles = (
     -w,
     polygon.holes.length,
     (boundary) => {
-      for (const [x, y, z] of polygon.points) {
-        c.addPoint(boundary, x, y, z);
+      if (polygon.exactPoints) {
+        for (const [x, y, z] of polygon.exactPoints) {
+          c.addExactPoint(boundary, x, y, z);
+        }
+      } else {
+        for (const [x, y, z] of polygon.points) {
+          c.addPoint(boundary, x, y, z);
+        }
       }
     },
     (hole, nth) => {
-      for (const [x, y, z] of polygon.holes[nth].points) {
-        c.addPoint(hole, x, y, z);
+      if (polygon.holes[nth].exactPoints) {
+        for (const [x, y, z] of polygon.holes[nth].exactPoints) {
+          c.addExactPoint(hole, x, y, z);
+        }
+      } else {
+        for (const [x, y, z] of polygon.holes[nth].points) {
+          c.addPoint(hole, x, y, z);
+        }
       }
     },
     (isHole) => {
       points = [];
-      lastPoint = undefined;
+      exactPoints = [];
       if (isHole) {
-        output.holes.push({ points });
+        output.holes.push({ points, exactPoints });
       } else {
         output = {
           points,
+          exactPoints,
           holes: [],
           plane: polygon.plane,
           exactPlane: polygon.exactPlane,
@@ -10712,20 +11002,27 @@ const offsetOfPolygonWithHoles = (
         outputs.push(output);
       }
     },
-    (x, y, z) => {
-      if (
-        !lastPoint ||
-        lastPoint[X$3] !== x ||
-        lastPoint[Y$3] !== y ||
-        lastPoint[Z$3] !== z
-      ) {
-        lastPoint = [x, y, z];
-        points.push(lastPoint);
-      }
+    (x, y, z, exactX, exactY, exactZ) => {
+      points.push([x, y, z]);
+      exactPoints.push([exactX, exactY, exactX]);
     }
   );
   return outputs;
 };
+
+const outlineSurfaceMesh = (mesh) => {
+  const segments = [];
+  getCgal().OutlineSurfaceMesh(mesh, (sx, sy, sz, tx, ty, tz) =>
+    segments.push([
+      [sx, sy, sz],
+      [tx, ty, tz],
+    ])
+  );
+  return segments;
+};
+
+const minkowskiSumOfSurfaceMeshes = (mesh, offset) =>
+  getCgal().MinkowskiSumOfSurfaceMeshes(mesh, offset);
 
 const projectToPlaneOfSurfaceMesh = (
   mesh,
@@ -10748,47 +11045,37 @@ const projectToPlaneOfSurfaceMesh = (
     -planeW
   );
 
+const pushSurfaceMesh = (
+  mesh,
+  force,
+  minimumDistance,
+  maximumDistance
+) => getCgal().PushSurfaceMesh(mesh, force, minimumDistance, maximumDistance);
+
 const reverseFaceOrientationsOfSurfaceMesh = (mesh) =>
   getCgal().ReverseFaceOrientationsOfSurfaceMesh(mesh);
 
+// import { arrangePaths } from './arrangePaths.js';
+
 const sectionOfSurfaceMesh = (mesh, planes) => {
-  const c = getCgal();
-  let nthPlane = 0;
+  const g = getCgal();
   const sections = [];
-  let section;
-  let path;
-  c.SectionOfSurfaceMesh(
+  g.SectionOfSurfaceMesh(
     mesh,
     planes.length,
-    (out) => {
-      const plane = planes[nthPlane++];
-      const [x, y, z, w] = plane;
-      c.fillQuadruple(out, x, y, z, -w);
-      section = [];
-      sections.push({ section, plane: [x, y, z, -w] });
+    (nth, out) => {
+      const { plane, exactPlane } = planes[nth];
+      if (exactPlane) {
+        const [a, b, c, d] = exactPlane;
+        g.fillExactQuadruple(out, a, b, c, d);
+      } else if (plane) {
+        const [x, y, z, w] = plane;
+        g.fillQuadruple(out, x, y, z, -w);
+      }
     },
-    () => {
-      path = [];
-      section.push({ points: path });
-    },
-    (x, y, z) => {
-      path.push([x, y, z]);
-    }
+    (section) => sections.push(section)
   );
-  // Trim the last vertex, which is a duplicate of the first.
-  // FIX: Do this in cgal.cc
-  for (const { section } of sections) {
-    for (const { points } of section) {
-      points.pop();
-    }
-  }
-  const sectionPolygons = [];
-  for (const { section, plane } of sections) {
-    sectionPolygons.push(
-      arrangePaths(plane, undefined, section, /* triangulate= */ true)
-    );
-  }
-  return sectionPolygons;
+  return sections;
 };
 
 const remeshSurfaceMesh = (
@@ -10796,6 +11083,9 @@ const remeshSurfaceMesh = (
   { length = 1, angle = 10, relaxationSteps = 1, iterations = 1 }
 ) =>
   getCgal().RemeshSurfaceMesh(mesh, length, angle, relaxationSteps, iterations);
+
+const serializeSurfaceMesh = (mesh) =>
+  getCgal().SerializeSurfaceMesh(mesh);
 
 const toIndexFromMethod = (method) => {
   switch (method) {
@@ -10827,7 +11117,10 @@ const transformSurfaceMesh = (mesh, jsTransform) =>
     toCgalTransformFromJsTransform(jsTransform)
   );
 
+const twistSurfaceMesh = (mesh, degreesPerZ) =>
+  getCgal().TwistSurfaceMesh(mesh, degreesPerZ);
+
 const unionOfSurfaceMeshes = (a, b) =>
   getCgal().UnionOfSurfaceMeshes(a, b);
 
-export { arrangePaths, arrangePathsIntoTriangles, composeTransforms, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, unionOfSurfaceMeshes };
+export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, booleansOfPolygonsWithHoles, composeTransforms, deserializeSurfaceMesh, differenceOfSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, serializeSurfaceMesh, subdivideSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes };

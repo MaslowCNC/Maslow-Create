@@ -118,8 +118,6 @@ export default class Gcode extends Atom {
         this.addIO(&apos;output&apos;, &apos;gcode&apos;, this, &apos;geometry&apos;, &apos;&apos;)
         
         this.setValues(values)
-        
-        this.updateValue()
     }
     
     /**
@@ -143,27 +141,43 @@ export default class Gcode extends Atom {
      */ 
     updateValue(){
         try{
-            const values = [this.findIOValue(&apos;geometry&apos;), this.findIOValue(&apos;tool size&apos;), this.findIOValue(&apos;passes&apos;), this.findIOValue(&apos;speed&apos;), this.findIOValue(&apos;tabs&apos;), this.findIOValue(&apos;safe height&apos;)]
-            this.basicThreadValueProcessing(values, &quot;stackedOutline&quot;)
+            var geometry = this.findIOValue(&apos;geometry&apos;)
+            var toolSize = this.findIOValue(&apos;tool size&apos;)
+            var passes = this.findIOValue(&apos;passes&apos;)
+            var speed = this.findIOValue(&apos;speed&apos;)
+            var tabs = this.findIOValue(&apos;tabs&apos;)
+            var safeHeight = this.findIOValue(&apos;safe height&apos;)
+            const values = {key: &quot;gcode&quot;, readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
+            this.gcodeString = this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
     
     /**
-     * Add a button to download the generated gcode
+     * Create a button to download the .stl file.
      */ 
     updateSidebar(){
-        var valueList =  super.updateSidebar() 
-        
-        this.createButton(valueList,this,&apos;Download Gcode&apos;,() =&gt; {const feedRate = this.findIOValue(&apos;speed&apos;)
-            var gcodeString = &quot;G20 \nG90 \n&quot;
-            
-            this.value.paths[0].forEach(point =&gt; {
-                gcodeString += &quot;G1 X&quot; + point[0] + &quot; Y&quot; + point[1] + &quot; Z&quot; + point[2] + &quot; F&quot; + feedRate + &quot;\n&quot;
+        const list = super.updateSidebar()
+        this.createButton(list, this, &quot;Download G-Code&quot;, ()=&gt;{this.downloadGCode()})
+    }
+    
+    /**
+     * The function which is called when you press the download button.
+     */ 
+    downloadGCode(){
+        try{
+            var geometry = this.findIOValue(&apos;geometry&apos;)
+            var toolSize = this.findIOValue(&apos;tool size&apos;)
+            var passes = this.findIOValue(&apos;passes&apos;)
+            var speed = this.findIOValue(&apos;speed&apos;)
+            var tabs = this.findIOValue(&apos;tabs&apos;)
+            var safeHeight = this.findIOValue(&apos;safe height&apos;)
+            const values = {key: &quot;gcode&quot;, readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
+            window.ask(values).then( returnedAnswer =&gt; {
+                const blob = new Blob([returnedAnswer])
+                saveAs(blob, GlobalVariables.currentMolecule.name+&apos;.nc&apos;)
             })
-            
-            const blob = new Blob([gcodeString], {type: &apos;text/plain;charset=utf-8&apos;})
-            saveAs(blob, GlobalVariables.topLevelMolecule.name+&apos;.nc&apos;)
-        })
+        }catch(err){this.setAlert(err)}
+        
     }
     
 }</code></pre>

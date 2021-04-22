@@ -173,40 +173,65 @@ export default class Code extends Atom {
     }
     
     /**
+     * Edit the atom&apos;s code when it is double clicked
+     * @param {number} x - The X cordinate of the click
+     * @param {number} y - The Y cordinate of the click
+     */ 
+    doubleClick(x,y){
+        //returns true if something was done with the click
+        let xInPixels = GlobalVariables.widthToPixels(this.x)
+        let yInPixels = GlobalVariables.heightToPixels(this.y)
+        var clickProcessed = false
+        
+        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)
+        
+        if (distFromClick &lt; xInPixels){
+            this.editCode()
+            clickProcessed = true
+        }
+        
+        return clickProcessed 
+    }
+    
+    editCode(){
+        //Remove everything in the popup now
+        const popup = document.getElementById(&apos;projects-popup&apos;)
+        while (popup.firstChild) {
+            popup.removeChild(popup.firstChild)
+        }
+        
+        popup.classList.remove(&apos;off&apos;)
+
+        //Add a title
+        var codeMirror = CodeMirror(popup, {
+            value: this.code,
+            mode:  &quot;javascript&quot;,
+            lineNumbers: true,
+            gutter: true,
+            lineWrapping: true
+        })
+        
+        var form = document.createElement(&quot;form&quot;)
+        popup.appendChild(form)
+        var button = document.createElement(&quot;button&quot;)
+        button.setAttribute(&quot;type&quot;, &quot;button&quot;)
+        button.appendChild(document.createTextNode(&quot;Save Code&quot;))
+        button.addEventListener(&quot;click&quot;, () =&gt; {
+            this.code = codeMirror.getDoc().getValue(&apos;\n&apos;)
+            this.updateValue()
+            popup.classList.add(&apos;off&apos;)
+        })
+        form.appendChild(button)
+    }
+    
+    /**
      * Add a button to open the code editor to the side bar
      */ 
     updateSidebar(){
         var valueList =  super.updateSidebar() 
         
         this.createButton(valueList,this,&quot;Edit Code&quot;,() =&gt; {
-            //Remove everything in the popup now
-            const popup = document.getElementById(&apos;projects-popup&apos;)
-            while (popup.firstChild) {
-                popup.removeChild(popup.firstChild)
-            }
-            
-            popup.classList.remove(&apos;off&apos;)
-
-            //Add a title
-            var codeMirror = CodeMirror(popup, {
-                value: this.code,
-                mode:  &quot;javascript&quot;,
-                lineNumbers: true,
-                gutter: true,
-                lineWrapping: true
-            })
-            
-            var form = document.createElement(&quot;form&quot;)
-            popup.appendChild(form)
-            var button = document.createElement(&quot;button&quot;)
-            button.setAttribute(&quot;type&quot;, &quot;button&quot;)
-            button.appendChild(document.createTextNode(&quot;Save Code&quot;))
-            button.addEventListener(&quot;click&quot;, () =&gt; {
-                this.code = codeMirror.getDoc().getValue(&apos;\n&apos;)
-                this.updateValue()
-                popup.classList.add(&apos;off&apos;)
-            })
-            form.appendChild(button)
+            this.editCode()
         })
     }
     
