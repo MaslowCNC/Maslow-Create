@@ -196,11 +196,7 @@ const agent = async ({
                 assemblyGeometries.push(assemblyGeometry);
             }
             
-            console.log(assemblyGeometries);
-            
             const assemblyShape = api.Shape.fromGeometry(api.Assembly(...assemblyGeometries).toDisjointGeometry());
-            
-            console.log(JSON.stringify(assemblyShape));
             
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;
