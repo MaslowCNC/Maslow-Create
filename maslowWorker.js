@@ -118,7 +118,6 @@ const agent = async ({
   ask,
   question
 }) => {
-    
     if (question.touchFile) {
         const { path, workspace } = question.touchFile;
         await touch(path, { workspace });
@@ -196,11 +195,7 @@ const agent = async ({
                 assemblyGeometries.push(assemblyGeometry);
             }
             
-            console.log(assemblyGeometries);
-            
             const assemblyShape = api.Shape.fromGeometry(api.Assembly(...assemblyGeometries).toDisjointGeometry());
-            
-            console.log(JSON.stringify(assemblyShape));
             
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;
@@ -361,3 +356,4 @@ const bootstrap = async () => {
 };
 
 bootstrap();
+
