@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions} from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions, listFiles} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
@@ -292,6 +292,7 @@ const agent = async ({
             break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
+            //console.log(await listFiles());
             return shape2getHash.geometry.hash;
             break;
         case "deletePath":
@@ -327,7 +328,7 @@ onmessage = ({
 }) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
-  await boot();
+  
   const {
     ask,
     hear
@@ -336,6 +337,8 @@ const bootstrap = async () => {
     say
   });
   self.ask = ask;
+  
+  await boot();
 
   onmessage = ({
     data
