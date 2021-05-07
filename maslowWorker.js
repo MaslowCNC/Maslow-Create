@@ -225,7 +225,7 @@ const agent = async ({
             break;
         case "extractTag":
             const shape2extractFrom = await api.loadGeometry(question.readPath);
-            const extractedShape = shape2extractFrom.keep(question.tag).noVoid().toDisjointGeometry();
+            const extractedShape = shape2extractFrom.keep(question.tag).noVoid();//.toDisjointGeometry();
             await api.saveGeometry(question.writePath, extractedShape);
             return 1;
             break;
