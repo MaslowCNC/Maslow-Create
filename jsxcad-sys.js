@@ -370,7 +370,13 @@ const watchers = new Set();
 
 const log = async (entry) => {
   if (isWebWorker) {
-    return self.ask({ log: { entry } });
+    try{
+        return self.ask({ log: { entry } });
+    }
+    catch(err){
+        console.log(err);
+        console.log(self.ask);
+    }
   }
 
   for (const watcher of watchers) {
