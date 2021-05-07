@@ -10063,7 +10063,13 @@ const initCgal = async () => {
         const logEntry = { text, level };
         const hash = hashSum(log);
         emit({ log: logEntry, hash });
-        log({ op: 'text', text, level });
+        try{
+            log({ op: 'text', text, level });
+        }
+        catch(err){
+            console.log(err);
+            console.log(self);
+        }
         // console.log(texts);
       },
       locateFile(path) {
