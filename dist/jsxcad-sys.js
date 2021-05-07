@@ -375,7 +375,7 @@ const log = async (entry) => {
     }
     catch(err){
         console.log(err);
-        console.log(self);
+        console.log(self.ask);
     }
   }
 
