@@ -118,7 +118,6 @@ const agent = async ({
   ask,
   question
 }) => {
-    
     if (question.touchFile) {
         const { path, workspace } = question.touchFile;
         await touch(path, { workspace });
@@ -357,3 +356,4 @@ const bootstrap = async () => {
 };
 
 bootstrap();
+
