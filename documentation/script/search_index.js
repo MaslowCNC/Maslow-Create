@@ -618,6 +618,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#availablepaths",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-availablePaths",
+    "src/js/globalvariables.js~GlobalVariables#availablePaths",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#availabletypes",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-availableTypes",
     "src/js/globalvariables.js~GlobalVariables#availableTypes",

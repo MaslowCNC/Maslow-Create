@@ -37,23 +37,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 206,
+        "lineNumber": 211,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 207,
+        "lineNumber": 212,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 208,
+        "lineNumber": 213,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 209,
+        "lineNumber": 214,
         "line": "    */\r"
       },
       {
-        "lineNumber": 210,
+        "lineNumber": 215,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -69,23 +69,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 214,
+        "lineNumber": 219,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 215,
+        "lineNumber": 220,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 216,
+        "lineNumber": 221,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 217,
+        "lineNumber": 222,
         "line": "    */\r"
       },
       {
-        "lineNumber": 218,
+        "lineNumber": 223,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -101,23 +101,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 223,
+        "lineNumber": 228,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 224,
+        "lineNumber": 229,
         "line": "    * A function which reads from a path and displays the geometry it contains\r"
       },
       {
-        "lineNumber": 225,
+        "lineNumber": 230,
         "line": "    * @param {string} The path to read from\r"
       },
       {
-        "lineNumber": 226,
+        "lineNumber": 231,
         "line": "    */\r"
       },
       {
-        "lineNumber": 227,
+        "lineNumber": 232,
         "line": "    writeToDisplay(path){\r"
       }
     ],
@@ -133,23 +133,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 260,
+        "lineNumber": 265,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 261,
+        "lineNumber": 266,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 262,
+        "lineNumber": 267,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 263,
+        "lineNumber": 268,
         "line": "    */\r"
       },
       {
-        "lineNumber": 264,
+        "lineNumber": 269,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
@@ -165,35 +165,35 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 590,
+        "lineNumber": 598,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 591,
+        "lineNumber": 599,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 592,
+        "lineNumber": 600,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 593,
+        "lineNumber": 601,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 594,
+        "lineNumber": 602,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 595,
+        "lineNumber": 603,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 596,
+        "lineNumber": 604,
         "line": "     */\r"
       },
       {
-        "lineNumber": 597,
+        "lineNumber": 605,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],

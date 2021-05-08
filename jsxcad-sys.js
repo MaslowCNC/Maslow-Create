@@ -3874,7 +3874,7 @@ const getFileLister = async () => {
       listFiles(qualifiedPaths);
       return qualifiedPaths;
     };
-  } else if (isBrowser) {
+  } else if (true||isBrowser) {
     // FIX: Make localstorage optional.
     return async () => {
       const qualifiedPaths = new Set(await db().keys());
