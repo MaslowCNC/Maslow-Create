@@ -37,15 +37,12 @@ export default class Circle extends Atom {
     beginPropagation(){
         
         //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
-        const values = {key: "getHash", readPath: this.path }
-        window.ask(values).then( hash => {
-            if(hash == undefined){
-                //Triggers inputs with nothing connected to begin propagation
-                this.inputs.forEach(input => {
-                    input.beginPropagation()
-                })
-            }
-        })
+        if(!GlobalVariables.availablePaths.includes(this.path)){
+            //Triggers inputs with nothing connected to begin propagation
+            this.inputs.forEach(input => {
+                input.beginPropagation()
+            })
+        }
     }
 
     /**

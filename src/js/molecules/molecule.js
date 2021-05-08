@@ -543,7 +543,15 @@ export default class Molecule extends Atom{
                 
                 this.census()
                 this.loadTree()  //Walks back up the tree from this molecule loading input values from any connected atoms
-                this.beginPropagation()
+                
+                const splits = this.path.split('/')
+                const values = {key: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
+                window.ask(values).then( answer => {
+                    
+                    GlobalVariables.availablePaths = answer;
+                    this.beginPropagation()
+                    
+                })
                 this.backgroundClick()
             }
         })

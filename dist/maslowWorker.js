@@ -292,8 +292,12 @@ const agent = async ({
             break;
         case "getHash":
             const shape2getHash = await api.loadGeometry(question.readPath);
-            //console.log(await listFiles());
             return shape2getHash.geometry.hash;
+            break;
+        case "getPathsList":
+            const listedFiles = await listFiles();
+            const inThisProject = listedFiles.filter((path) => path.startsWith(question.prefacePath));
+            return inThisProject
             break;
         case "deletePath":
             deleteFile({}, question.path);
