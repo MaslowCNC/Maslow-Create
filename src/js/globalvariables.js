@@ -164,6 +164,11 @@ class GlobalVariables{
          */
         this.displayedPath = ""
         /** 
+         * A list of all of the paths in this project which can be read from memory
+         * @type {array}
+         */
+        this.availablePaths = []
+        /** 
          * A flag to indicate if the faces of the shape should be displayed.
          * @type {boolean}
          */
