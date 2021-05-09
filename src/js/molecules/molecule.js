@@ -320,9 +320,9 @@ export default class Molecule extends Atom{
         div.appendChild(rangeLabel)
         rangeLabel.appendChild(rangeElement)
         rangeElement.setAttribute('type', 'range')
-        rangeElement.setAttribute('min', '.1')
-        rangeElement.setAttribute('max', '10')
-        rangeElement.setAttribute('step', '.3')
+        rangeElement.setAttribute('min', '.001')
+        rangeElement.setAttribute('max', '1')
+        rangeElement.setAttribute('step', '.05')
         rangeElement.setAttribute('class', 'slider')
         rangeElement.setAttribute('value', GlobalVariables.circleSegmentSize)
             
