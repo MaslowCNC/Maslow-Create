@@ -114,6 +114,14 @@ setPendingErrorHandler(reportError);
 
 setupFilesystem({ fileBase: 'maslow' });
 
+const returnEmptyGeometryText = () => {
+    return api.Hershey(20)('No Geometry').align('xy');
+}
+
+const maslowRead = async (path) => {
+    return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+}
+
 const agent = async ({
   ask,
   question
@@ -137,33 +145,33 @@ const agent = async ({
             return 1;
             break;
           case "extrude":
-            const aShape = await api.loadGeometry(question.readPath);
+            const aShape = await maslowRead(question.readPath);
             const extrudedShape = aShape.pull(question.distance);
             await api.saveGeometry(question.writePath, extrudedShape);
             return 1;
             break;
          case "translate":
-            const aShape2Translate = await api.loadGeometry(question.readPath);
+            const aShape2Translate = await maslowRead(question.readPath);
             const translatedShape = aShape2Translate.move(question.x, question.y, question.z);
             await api.saveGeometry(question.writePath, translatedShape);
             return 1;
             break;
         case "rotate":
-            const aShape2Rotate = await api.loadGeometry(question.readPath);
+            const aShape2Rotate = await maslowRead(question.readPath);
             const rotatedShape = aShape2Rotate.rotateX(-1*question.x).rotateY(-1*question.y).rotateZ(-1*question.z);
             await api.saveGeometry(question.writePath, rotatedShape);
             return 1;
             break;
         case "difference":
-            const aShape2Difference1 = await api.loadGeometry(question.readPath1);
-            const aShape2Difference2 = await api.loadGeometry(question.readPath2);
+            const aShape2Difference1 = await maslowRead(question.readPath1);
+            const aShape2Difference2 = await maslowRead(question.readPath2);
             const cutShape = aShape2Difference1.cut(aShape2Difference2);
             await api.saveGeometry(question.writePath, cutShape);
             return 1;
             break;
         case "intersection":
-            const aShape2Intersect1 = await api.loadGeometry(question.readPath1);
-            const aShape2Intersect2 = await api.loadGeometry(question.readPath2);
+            const aShape2Intersect1 = await maslowRead(question.readPath1);
+            const aShape2Intersect2 = await maslowRead(question.readPath2);
             const intersectionShape = aShape2Intersect1.clip(aShape2Intersect2);
             await api.saveGeometry(question.writePath, intersectionShape);
             return 1;
@@ -171,7 +179,7 @@ const agent = async ({
         case "group":
             var geometries = [];
             for (const path of question.paths) {
-                const unionGeometry = await api.loadGeometry(path);
+                const unionGeometry = await maslowRead(path);
                 geometries.push(unionGeometry);
             }
             const unionShape = api.Shape.fromGeometry(api.Group(...geometries).toDisjointGeometry());
@@ -181,7 +189,7 @@ const agent = async ({
         case "hull":
             var hullGeometries = [];
             for (const path of question.paths) {
-                const hullGeometry = await api.loadGeometry(path);
+                const hullGeometry = await maslowRead(path);
                 hullGeometries.push(hullGeometry);
             }
             const hullShape = api.Hull(...hullGeometries);
@@ -191,7 +199,7 @@ const agent = async ({
         case "assembly":
             var assemblyGeometries = [];
             for (const path of question.paths) {
-                const assemblyGeometry = await api.loadGeometry(path);
+                const assemblyGeometry = await maslowRead(path);
                 assemblyGeometries.push(assemblyGeometry);
             }
             
@@ -202,29 +210,29 @@ const agent = async ({
             break;
         case "color":
             if(question.color == "Keep Out"){
-                const shape2Color = await api.loadGeometry(question.readPath);
+                const shape2Color = await maslowRead(question.readPath);
                 const coloredShape = shape2Color.void();
                 await api.saveGeometry(question.writePath, coloredShape);
             }
             else{
-                const shape2Color = await api.loadGeometry(question.readPath);
+                const shape2Color = await maslowRead(question.readPath);
                 const coloredShape = shape2Color.color(question.color.toLowerCase());
                 await api.saveGeometry(question.writePath, coloredShape);
             }
             return 1;
             break;
         case "tag":
-            const shape2tag = await api.loadGeometry(question.readPath);
+            const shape2tag = await maslowRead(question.readPath);
             const taggedShape = shape2tag.as(question.tag);
             await api.saveGeometry(question.writePath, taggedShape);
             return 1;
             break;
         case "listTags":
-            const shape2ListTags = await api.loadGeometry(question.readPath);
+            const shape2ListTags = await maslowRead(question.readPath);
             return shape2ListTags.tags();
             break;
         case "extractTag":
-            const shape2extractFrom = await api.loadGeometry(question.readPath);
+            const shape2extractFrom = await maslowRead(question.readPath);
             const extractedShape = shape2extractFrom.keep(question.tag).noVoid();//.toDisjointGeometry();
             await api.saveGeometry(question.writePath, extractedShape);
             return 1;
@@ -237,7 +245,7 @@ const agent = async ({
                     inputs[key] = question.paths[key];
                 } else {
                     console.log(key);
-                    inputs[key] = await api.loadGeometry(question.paths[key]);
+                    inputs[key] = await maslowRead(question.paths[key]);
                 }
             }
             
@@ -259,12 +267,12 @@ const agent = async ({
             }
             break;
         case "stl":
-            const geometryToStl = await api.loadGeometry(question.readPath);
+            const geometryToStl = await maslowRead(question.readPath);
             const stlString = await toStl(geometryToStl.toGeometry());
             return stlString;
             break;
         case "svg":
-            const geometryToSvg = await api.loadGeometry(question.readPath);
+            const geometryToSvg = await maslowRead(question.readPath);
             
             for (const entry of ensurePages(geometryToSvg.toKeptGeometry())) {
                 const op = await toSvg(entry);
@@ -276,7 +284,7 @@ const agent = async ({
             
             console.log("Gcode generation ran");
             
-            const geometryToGcode = await api.loadGeometry(question.readPath);
+            const geometryToGcode = await maslowRead(question.readPath);
             
             const shapeHeight = geometryToGcode.size().height;
             
@@ -291,7 +299,7 @@ const agent = async ({
             
             break;
         case "getHash":
-            const shape2getHash = await api.loadGeometry(question.readPath);
+            const shape2getHash = await maslowRead(question.readPath);
             return shape2getHash.geometry.hash;
             break;
         case "getPathsList":
@@ -304,16 +312,9 @@ const agent = async ({
             return 1
             break;
         case "display":
-            if(question.readPath != null){
-                const geometryToDisplay = await api.loadGeometry(question.readPath);
-                if(geometryToDisplay.geometry.hash){//Verify that something was read
-                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
-                    return threejsGeometry;
-                }
-            }
-            else{
-                return -1;
-            }
+            const geometryToDisplay = await maslowRead(question.readPath);
+            const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
+            return threejsGeometry;
             break;
         }
     }
