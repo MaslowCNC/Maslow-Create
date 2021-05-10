@@ -114,6 +114,15 @@ setPendingErrorHandler(reportError);
 
 setupFilesystem({ fileBase: 'maslow' });
 
+const returnEmptyGeometryText = () => {
+    console.log("This otherwise function ran");
+    return api.Hershey(20)('No Geometry').align('xy');
+}
+
+const maslowRead = async (path) => {
+    return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+}
+
 const agent = async ({
   ask,
   question
@@ -304,11 +313,11 @@ const agent = async ({
             return 1
             break;
         case "display":
-            const geometryToDisplay = await api.loadGeometry(question.readPath);
-            if(geometryToDisplay.geometry.hash){//Verify that something was read
-                const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
-                return threejsGeometry;
-            }
+            const geometryToDisplay = await maslowRead(question.readPath);
+            console.log("Displaying: ");
+            console.log(geometryToDisplay);
+            const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
+            return threejsGeometry;
             break;
         }
     }
