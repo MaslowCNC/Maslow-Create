@@ -304,15 +304,10 @@ const agent = async ({
             return 1
             break;
         case "display":
-            if(question.readPath != null){
-                const geometryToDisplay = await api.loadGeometry(question.readPath);
-                if(geometryToDisplay.geometry.hash){//Verify that something was read
-                    const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
-                    return threejsGeometry;
-                }
-            }
-            else{
-                return -1;
+            const geometryToDisplay = await api.loadGeometry(question.readPath);
+            if(geometryToDisplay.geometry.hash){//Verify that something was read
+                const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
+                return threejsGeometry;
             }
             break;
         }
