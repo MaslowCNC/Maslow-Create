@@ -101,7 +101,6 @@ export default class Atom {
          * The X cordinate of this atom now
          * @type {number}
          */
-
         this.x = 0
         /** 
          * The Y cordinate of this atom now
@@ -118,6 +117,11 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
+        /** 
+         * The path which contains the geometry represented by this atom
+         * @type {string}
+         */
+        this.path = ""
 
         for(var key in values) {
             /** 

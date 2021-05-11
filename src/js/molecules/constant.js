@@ -47,7 +47,10 @@ export default class Constant extends Atom{
          */
         this.max = 20
         
-        //Set the default
+        /**
+         * The default value for the constant
+         * @type {float}
+         */
         this.value = 10
         
         this.setValues(values)

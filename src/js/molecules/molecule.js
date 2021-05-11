@@ -53,6 +53,17 @@ export default class Molecule extends Atom{
          */
         this.runModeSidebarAdditions = []
         
+        /** 
+         * The total number of atoms contained in this molecule
+         * @type {integer}
+         */
+        this.totalAtomCount = 1
+        /** 
+         * The total number of atoms contained in this molecule which are waiting to process
+         * @type {integer}
+         */
+        this.toProcess = 0
+        
         this.setValues(values)
         
         //Add the molecule's output
@@ -91,8 +102,6 @@ export default class Molecule extends Atom{
      * Add the center dot to the molecule
      */ 
     draw(){
-        
-        
         const percentLoaded = 1-this.toProcess/this.totalAtomCount
         if(this.toProcess > 1){
             this.processing = true
@@ -101,9 +110,7 @@ export default class Molecule extends Atom{
             this.processing = false
         }
         
-        
         super.draw() //Super call to draw the rest
-        
         
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
@@ -111,7 +118,6 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
-
     }
     
     /**

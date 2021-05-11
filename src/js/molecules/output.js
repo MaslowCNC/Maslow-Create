@@ -86,6 +86,9 @@ export default class Output extends Atom {
         }
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         this.path = this.inputs[0].loadTree()
         this.parent.path = this.path

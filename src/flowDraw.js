@@ -325,12 +325,25 @@ if (!GlobalVariables.runMode){
 }
 
 //Add viewer bar which lets you turn on and off things like wireframe view
-
+/**
+ * Contains the check boxes to hide and show the display attributes
+ */ 
 let viewerBar = document.querySelector('#viewer_bar')
+/**
+ * The up arrow for going up one level
+ */ 
 let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
 
+/** 
+* A flag to indicate if the grid should be displayed
+* @type {boolean}
+*/
 var displayGrid = true
+/** 
+* A flag to indicate if the axis should be displayed
+* @type {boolean}
+*/
 var displayAxis = true
 
 /**
@@ -500,9 +513,16 @@ document.getElementById('viewerContext').addEventListener('mouseenter', () => {
     }
 })
 
+/** 
+* A flag to indicate if the startTimer event has already fired
+* @type {boolean}
+*/
 var evtFired = false
 var g_timer
 
+/**
+ * Starts the timer to retract the menu
+ */ 
 function startTimer(){
     g_timer = setTimeout(function() {
         if (!evtFired) {

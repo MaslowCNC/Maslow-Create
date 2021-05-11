@@ -37,6 +37,16 @@ export default class AttachmentPoint {
          */
         this.hoverOffsetY = 0
         /** 
+         * The attachment points X position
+         * @type {number}
+         */
+        this.x = 0
+        /** 
+         * The attachment point's Y position
+         * @type {number}
+         */
+        this.y = 0
+        /** 
          * A unique identifying number for this attachment point
          * @type {number}
          */
