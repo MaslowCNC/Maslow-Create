@@ -12,5 +12,4 @@ describe('Check Documentation', function() {
             expect(percentageCovered).to.be.above(99.5)
         })
     })
-  
 })
