@@ -79,11 +79,6 @@ export default class Output extends Atom {
                 this.awaitingPropagationFlag = true
             }
             
-            if(this.parent.topLevel){
-                const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000
-                // console.warn("Loading finished in " + timeToLoad + " seconds")
-            }
-            
             //Update the display when the value changes if the parent is selected
             if(this.parent.selected){
                 this.parent.sendToRender()

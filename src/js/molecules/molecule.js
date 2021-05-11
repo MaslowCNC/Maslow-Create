@@ -632,7 +632,6 @@ export default class Molecule extends Atom{
                         if(unlock){
                             promise.then( ()=> {
                                 atom.beginPropagation()
-                                console.log("Beginning propogation from github atom")
                             })
                         }
                     }

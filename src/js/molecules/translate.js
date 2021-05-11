@@ -66,7 +66,6 @@ export default class Translate extends Atom{
         if(this.inputs.every(x => x.ready)){
             try{
                 var inputPath = this.findIOValue('geometry')
-                var extrudeDistance = this.findIOValue('height')
                 var x = this.findIOValue('xDist')
                 var y = this.findIOValue('yDist')
                 var z = this.findIOValue('zDist')
