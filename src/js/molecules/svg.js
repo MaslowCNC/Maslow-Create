@@ -73,8 +73,8 @@ export default class Svg extends Atom {
      */ 
     updateValue(){
         // try{
-            // const values = [this.findIOValue('geometry')]
-            // this.basicThreadValueProcessing(values, "outline")
+        // const values = [this.findIOValue('geometry')]
+        // this.basicThreadValueProcessing(values, "outline")
         // }catch(err){this.setAlert(err)}
     }
     

@@ -126,7 +126,7 @@ export default class Atom {
             this[key] = values[key]
         }
         
-        this.generatePath();
+        this.generatePath()
     }
     
     /**
@@ -767,13 +767,13 @@ export default class Atom {
      * Dump the stored copies of any geometry in this atom to free up ram....probably can be deleted
      */ 
     // dumpBuffer(){
-        // this.inputs.forEach(input => {
-            // input.dumpBuffer()
-        // })
-        // if(this.output){
-            // this.output.dumpBuffer()
-        // }
-        // this.value = null
+    // this.inputs.forEach(input => {
+    // input.dumpBuffer()
+    // })
+    // if(this.output){
+    // this.output.dumpBuffer()
+    // }
+    // this.value = null
     // }
     
     /**

@@ -230,7 +230,7 @@ export default class Molecule extends Atom{
         
         // Catch the corner case where this has no inputs which means it won't be marked as processing by super
         // if(this.inputs.length == 0){
-            // this.processing = true
+        // this.processing = true
         // }
     }
     
@@ -548,7 +548,7 @@ export default class Molecule extends Atom{
                 const values = {key: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
                 window.ask(values).then( answer => {
                     
-                    GlobalVariables.availablePaths = answer;
+                    GlobalVariables.availablePaths = answer
                     this.beginPropagation()
                     
                 })
@@ -563,7 +563,7 @@ export default class Molecule extends Atom{
     deleteNode(){
         
         //make a copy of the nodes on the screen array since we will be modifying it
-        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen];
+        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         
         copyOfNodesOnTheScreen.forEach(node => {
             node.deleteNode()
@@ -659,12 +659,12 @@ export default class Molecule extends Atom{
                         
                         //Make begin propagation from an atom when it is placed
                         // if(promise != null){
-                            // promise.then( ()=> {
-                                // atom.beginPropagation()
-                            // })
+                        // promise.then( ()=> {
+                        // atom.beginPropagation()
+                        // })
                         // }
                         // else{
-                            // atom.beginPropagation()
+                        // atom.beginPropagation()
                         // }
                         
                         //Fake a click on the newly placed atom

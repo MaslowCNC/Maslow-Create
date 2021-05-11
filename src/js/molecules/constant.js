@@ -85,7 +85,7 @@ export default class Constant extends Atom{
      * Starts propagation from this constant.
      */ 
     // beginPropagation(){
-        // this.output.setValue(this.value)
+    // this.output.setValue(this.value)
     // }
     
     loadTree(){
