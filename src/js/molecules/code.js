@@ -115,6 +115,9 @@ export default class Code extends Atom {
         return clickProcessed 
     }
     
+    /**
+     * Callled to trigger editing the code atom
+     */ 
     editCode(){
         //Remove everything in the popup now
         const popup = document.getElementById('projects-popup')

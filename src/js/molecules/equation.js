@@ -102,6 +102,9 @@ export default class Equation extends Atom {
         }
     }
     
+    /**
+     * Evaluate the equation
+     */ 
     evaluateEquation(){
         //Substitute numbers into the string
         var substitutedEquation = this.currentEquation
@@ -143,6 +146,9 @@ export default class Equation extends Atom {
         }
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         this.inputs.forEach(input => {
             input.loadTree()

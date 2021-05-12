@@ -41,7 +41,7 @@ export default class Readme extends Atom{
         /**
          * This atom's height as drawn on the screen
          */
-        this.height
+        this.height = 10
         
         
         this.setValues(values)

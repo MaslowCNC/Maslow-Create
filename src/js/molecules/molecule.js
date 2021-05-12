@@ -53,6 +53,17 @@ export default class Molecule extends Atom{
          */
         this.runModeSidebarAdditions = []
         
+        /** 
+         * The total number of atoms contained in this molecule
+         * @type {integer}
+         */
+        this.totalAtomCount = 1
+        /** 
+         * The total number of atoms contained in this molecule which are waiting to process
+         * @type {integer}
+         */
+        this.toProcess = 0
+        
         this.setValues(values)
         
         //Add the molecule's output
@@ -91,8 +102,6 @@ export default class Molecule extends Atom{
      * Add the center dot to the molecule
      */ 
     draw(){
-        
-        
         const percentLoaded = 1-this.toProcess/this.totalAtomCount
         if(this.toProcess > 1){
             this.processing = true
@@ -101,9 +110,7 @@ export default class Molecule extends Atom{
             this.processing = false
         }
         
-        
         super.draw() //Super call to draw the rest
-        
         
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
@@ -111,7 +118,6 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
-
     }
     
     /**
@@ -230,7 +236,7 @@ export default class Molecule extends Atom{
         
         // Catch the corner case where this has no inputs which means it won't be marked as processing by super
         // if(this.inputs.length == 0){
-            // this.processing = true
+        // this.processing = true
         // }
     }
     
@@ -548,7 +554,7 @@ export default class Molecule extends Atom{
                 const values = {key: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
                 window.ask(values).then( answer => {
                     
-                    GlobalVariables.availablePaths = answer;
+                    GlobalVariables.availablePaths = answer
                     this.beginPropagation()
                     
                 })
@@ -563,7 +569,7 @@ export default class Molecule extends Atom{
     deleteNode(){
         
         //make a copy of the nodes on the screen array since we will be modifying it
-        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen];
+        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         
         copyOfNodesOnTheScreen.forEach(node => {
             node.deleteNode()
@@ -632,7 +638,6 @@ export default class Molecule extends Atom{
                         if(unlock){
                             promise.then( ()=> {
                                 atom.beginPropagation()
-                                console.log("Beginning propogation from github atom")
                             })
                         }
                     }
@@ -659,12 +664,12 @@ export default class Molecule extends Atom{
                         
                         //Make begin propagation from an atom when it is placed
                         // if(promise != null){
-                            // promise.then( ()=> {
-                                // atom.beginPropagation()
-                            // })
+                        // promise.then( ()=> {
+                        // atom.beginPropagation()
+                        // })
                         // }
                         // else{
-                            // atom.beginPropagation()
+                        // atom.beginPropagation()
                         // }
                         
                         //Fake a click on the newly placed atom
