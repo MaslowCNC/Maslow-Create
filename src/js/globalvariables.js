@@ -254,9 +254,9 @@ class GlobalVariables{
             document.getElementById('viewerContext').style.filter="sepia(0%)"
             
             if(result && result != -1){
-                window.updateDisplay(result);
+                window.updateDisplay(result)
             }
-        }).catch (error => console.log("Canceled display update"))
+        }).catch (() => console.warn("Canceled display update"))
         
         this.displayProcessing = true
         document.getElementById('viewerContext').style.filter="sepia(100%)"

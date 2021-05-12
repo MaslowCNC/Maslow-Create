@@ -1230,8 +1230,17 @@ const moveZMethod = function (z) {
 };
 Shape.prototype.z = moveZMethod;
 
-const loadGeometry = async (path) =>
-  Shape.fromGeometry(await read(path));
+const fromUndefined = () => Shape.fromGeometry();
+
+const loadGeometry = async (path, { otherwise = fromUndefined } = {}) => {
+  if(typeof path == 'string'){
+    const data = await read(path);
+    if (data != undefined){
+      return Shape.fromGeometry(data);
+    }
+  }
+  return otherwise();
+}
 
 const saveGeometry = async (path, shape) =>
   Shape.fromGeometry(await write(shape.toGeometry(), path));

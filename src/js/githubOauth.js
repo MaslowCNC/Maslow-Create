@@ -909,8 +909,7 @@ export default function GitHubModule(){
                     intervalTimer = setInterval(() => this.saveProject(), 1200000)
                 })
             }
-            
-            var bomItems = extractBomTags(GlobalVariables.topLevelMolecule.path, passBOMOn)
+            extractBomTags(GlobalVariables.topLevelMolecule.path, passBOMOn)
         }
     }
     

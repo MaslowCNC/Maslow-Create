@@ -57,7 +57,7 @@ export default class Output extends Atom {
         
         this.setValues(values)
         
-        this.addIO('input', 'number or geometry', this, 'geometry', null)
+        this.addIO('input', 'number or geometry', this, 'geometry', undefined)
     }
     
     /**
@@ -79,11 +79,6 @@ export default class Output extends Atom {
                 this.awaitingPropagationFlag = true
             }
             
-            if(this.parent.topLevel){
-                const timeToLoad = (new Date().getTime() - GlobalVariables.startTime)/1000
-                // console.warn("Loading finished in " + timeToLoad + " seconds")
-            }
-            
             //Update the display when the value changes if the parent is selected
             if(this.parent.selected){
                 this.parent.sendToRender()
@@ -91,6 +86,9 @@ export default class Output extends Atom {
         }
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         this.path = this.inputs[0].loadTree()
         this.parent.path = this.path

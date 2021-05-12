@@ -101,7 +101,6 @@ export default class Atom {
          * The X cordinate of this atom now
          * @type {number}
          */
-
         this.x = 0
         /** 
          * The Y cordinate of this atom now
@@ -118,6 +117,11 @@ export default class Atom {
          * @type {boolean}
          */
         this.processing = false
+        /** 
+         * The path which contains the geometry represented by this atom
+         * @type {string}
+         */
+        this.path = ""
 
         for(var key in values) {
             /** 
@@ -126,7 +130,7 @@ export default class Atom {
             this[key] = values[key]
         }
         
-        this.generatePath();
+        this.generatePath()
     }
     
     /**
@@ -265,7 +269,7 @@ export default class Atom {
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 
-    addIO(type, name, target, valueType, defaultValue, ready = true, primary = false){
+    addIO(type, name, target, valueType, defaultValue, ready, primary = false){
         
         if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name
             //compute the baseline offset from parent node
@@ -690,7 +694,7 @@ export default class Atom {
             
             //toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
             
-            const returned = window.ask(toAsk).then(result => {
+            window.ask(toAsk).then(result => {
                 if (result != -1 ){
                     this.displayAndPropogate()
                 }else{
@@ -767,13 +771,13 @@ export default class Atom {
      * Dump the stored copies of any geometry in this atom to free up ram....probably can be deleted
      */ 
     // dumpBuffer(){
-        // this.inputs.forEach(input => {
-            // input.dumpBuffer()
-        // })
-        // if(this.output){
-            // this.output.dumpBuffer()
-        // }
-        // this.value = null
+    // this.inputs.forEach(input => {
+    // input.dumpBuffer()
+    // })
+    // if(this.output){
+    // this.output.dumpBuffer()
+    // }
+    // this.value = null
     // }
     
     /**
