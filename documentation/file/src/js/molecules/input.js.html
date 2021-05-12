@@ -253,6 +253,9 @@ export default class Input extends Atom {
         })
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         this.parent.inputs.forEach(input =&gt; { //Grab the value for this input from the parent&apos;s inputs list
             if(input.name == this.name){

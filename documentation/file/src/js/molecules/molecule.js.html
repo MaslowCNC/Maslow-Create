@@ -131,6 +131,17 @@ export default class Molecule extends Atom{
          */
         this.runModeSidebarAdditions = []
         
+        /** 
+         * The total number of atoms contained in this molecule
+         * @type {integer}
+         */
+        this.totalAtomCount = 1
+        /** 
+         * The total number of atoms contained in this molecule which are waiting to process
+         * @type {integer}
+         */
+        this.toProcess = 0
+        
         this.setValues(values)
         
         //Add the molecule&apos;s output
@@ -169,8 +180,6 @@ export default class Molecule extends Atom{
      * Add the center dot to the molecule
      */ 
     draw(){
-        
-        
         const percentLoaded = 1-this.toProcess/this.totalAtomCount
         if(this.toProcess &gt; 1){
             this.processing = true
@@ -179,9 +188,7 @@ export default class Molecule extends Atom{
             this.processing = false
         }
         
-        
         super.draw() //Super call to draw the rest
-        
         
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
@@ -189,7 +196,6 @@ export default class Molecule extends Atom{
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
-
     }
     
     /**
@@ -308,7 +314,7 @@ export default class Molecule extends Atom{
         
         // Catch the corner case where this has no inputs which means it won&apos;t be marked as processing by super
         // if(this.inputs.length == 0){
-            // this.processing = true
+        // this.processing = true
         // }
     }
     
@@ -398,9 +404,9 @@ export default class Molecule extends Atom{
         div.appendChild(rangeLabel)
         rangeLabel.appendChild(rangeElement)
         rangeElement.setAttribute(&apos;type&apos;, &apos;range&apos;)
-        rangeElement.setAttribute(&apos;min&apos;, &apos;.1&apos;)
-        rangeElement.setAttribute(&apos;max&apos;, &apos;10&apos;)
-        rangeElement.setAttribute(&apos;step&apos;, &apos;.3&apos;)
+        rangeElement.setAttribute(&apos;min&apos;, &apos;.001&apos;)
+        rangeElement.setAttribute(&apos;max&apos;, &apos;1&apos;)
+        rangeElement.setAttribute(&apos;step&apos;, &apos;.05&apos;)
         rangeElement.setAttribute(&apos;class&apos;, &apos;slider&apos;)
         rangeElement.setAttribute(&apos;value&apos;, GlobalVariables.circleSegmentSize)
             
@@ -626,7 +632,7 @@ export default class Molecule extends Atom{
                 const values = {key: &quot;getPathsList&quot;, prefacePath: splits[0]+&apos;/&apos;+splits[1]}
                 window.ask(values).then( answer =&gt; {
                     
-                    GlobalVariables.availablePaths = answer;
+                    GlobalVariables.availablePaths = answer
                     this.beginPropagation()
                     
                 })
@@ -641,7 +647,7 @@ export default class Molecule extends Atom{
     deleteNode(){
         
         //make a copy of the nodes on the screen array since we will be modifying it
-        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen];
+        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         
         copyOfNodesOnTheScreen.forEach(node =&gt; {
             node.deleteNode()
@@ -710,7 +716,6 @@ export default class Molecule extends Atom{
                         if(unlock){
                             promise.then( ()=&gt; {
                                 atom.beginPropagation()
-                                console.log(&quot;Beginning propogation from github atom&quot;)
                             })
                         }
                     }
@@ -737,12 +742,12 @@ export default class Molecule extends Atom{
                         
                         //Make begin propagation from an atom when it is placed
                         // if(promise != null){
-                            // promise.then( ()=&gt; {
-                                // atom.beginPropagation()
-                            // })
+                        // promise.then( ()=&gt; {
+                        // atom.beginPropagation()
+                        // })
                         // }
                         // else{
-                            // atom.beginPropagation()
+                        // atom.beginPropagation()
                         // }
                         
                         //Fake a click on the newly placed atom

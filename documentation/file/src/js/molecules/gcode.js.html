@@ -107,6 +107,11 @@ export default class Gcode extends Atom {
          * This atom&apos;s height as drawn on the screen
          */
         this.height = 16
+        /**
+         * The generated gcode string
+         * @type {string}
+         */
+        this.gcodeString = &quot;&quot;
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
         this.addIO(&apos;input&apos;, &apos;tool size&apos;, this, &apos;number&apos;, 6.35)

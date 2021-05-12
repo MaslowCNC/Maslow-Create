@@ -115,6 +115,16 @@ export default class AttachmentPoint {
          */
         this.hoverOffsetY = 0
         /** 
+         * The attachment points X position
+         * @type {number}
+         */
+        this.x = 0
+        /** 
+         * The attachment point&apos;s Y position
+         * @type {number}
+         */
+        this.y = 0
+        /** 
          * A unique identifying number for this attachment point
          * @type {number}
          */
@@ -341,7 +351,6 @@ export default class AttachmentPoint {
                     isMoving: true
                 })
             }
-            console.log(this.value)
             if(this.type == &apos;input&apos;){ //connectors can only be selected by clicking on an input
                 this.connectors.forEach(connector =&gt; {     //select any connectors attached to this node
                     connector.selected = true
@@ -482,8 +491,8 @@ export default class AttachmentPoint {
             }
         }
         catch(err){
-            console.log(&quot;Error deleting connector: &quot;)
-            console.log(err)
+            console.warn(&quot;Error deleting connector: &quot;)
+            console.warn(err)
         }
     }
     

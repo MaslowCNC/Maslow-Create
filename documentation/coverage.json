@@ -1,19 +1,12 @@
 {
-  "coverage": "96.19%",
+  "coverage": "99.63%",
   "expectCount": 552,
-  "actualCount": 531,
+  "actualCount": 550,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 13,
-      "actualCount": 7,
-      "undocumentLines": [
-        329,
-        330,
-        333,
-        334,
-        503,
-        506
-      ]
+      "actualCount": 13,
+      "undocumentLines": []
     },
     "src/js/alwaysOneFreeInput.js": {
       "expectCount": 4,
@@ -57,10 +50,8 @@
     },
     "src/js/molecules/code.js": {
       "expectCount": 12,
-      "actualCount": 11,
-      "undocumentLines": [
-        118
-      ]
+      "actualCount": 12,
+      "undocumentLines": []
     },
     "src/js/molecules/color.js": {
       "expectCount": 11,
@@ -69,10 +60,8 @@
     },
     "src/js/molecules/constant.js": {
       "expectCount": 16,
-      "actualCount": 15,
-      "undocumentLines": [
-        51
-      ]
+      "actualCount": 16,
+      "undocumentLines": []
     },
     "src/js/molecules/cutlayout.js": {
       "expectCount": 7,
@@ -91,11 +80,8 @@
     },
     "src/js/molecules/equation.js": {
       "expectCount": 15,
-      "actualCount": 13,
-      "undocumentLines": [
-        105,
-        146
-      ]
+      "actualCount": 15,
+      "undocumentLines": []
     },
     "src/js/molecules/extracttag.js": {
       "expectCount": 8,
@@ -109,10 +95,8 @@
     },
     "src/js/molecules/gcode.js": {
       "expectCount": 10,
-      "actualCount": 9,
-      "undocumentLines": [
-        73
-      ]
+      "actualCount": 10,
+      "undocumentLines": []
     },
     "src/js/molecules/geneticAlgorithm.js": {
       "expectCount": 21,
@@ -131,10 +115,8 @@
     },
     "src/js/molecules/input.js": {
       "expectCount": 17,
-      "actualCount": 16,
-      "undocumentLines": [
-        178
-      ]
+      "actualCount": 17,
+      "undocumentLines": []
     },
     "src/js/molecules/intersection.js": {
       "expectCount": 6,
@@ -143,11 +125,9 @@
     },
     "src/js/molecules/molecule.js": {
       "expectCount": 38,
-      "actualCount": 35,
+      "actualCount": 37,
       "undocumentLines": [
-        98,
-        241,
-        242
+        107
       ]
     },
     "src/js/molecules/nest.js": {
@@ -157,18 +137,15 @@
     },
     "src/js/molecules/output.js": {
       "expectCount": 19,
-      "actualCount": 17,
+      "actualCount": 18,
       "undocumentLines": [
-        71,
-        94
+        71
       ]
     },
     "src/js/molecules/readme.js": {
       "expectCount": 13,
-      "actualCount": 12,
-      "undocumentLines": [
-        64
-      ]
+      "actualCount": 13,
+      "undocumentLines": []
     },
     "src/js/molecules/rectangle.js": {
       "expectCount": 7,
@@ -217,18 +194,13 @@
     },
     "src/js/prototypes/atom.js": {
       "expectCount": 57,
-      "actualCount": 56,
-      "undocumentLines": [
-        143
-      ]
+      "actualCount": 57,
+      "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {
       "expectCount": 43,
-      "actualCount": 41,
-      "undocumentLines": [
-        537,
-        538
-      ]
+      "actualCount": 43,
+      "undocumentLines": []
     },
     "src/js/prototypes/connector.js": {
       "expectCount": 24,
