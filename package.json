@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@octokit/rest": "16.25.0",
-    "codemirror": "^5.46.0",
+    "codemirror": "^5.58.2",
     "coveralls": "^3.0.4",
     "esm": "^3.2.22",
     "gsap": "^3.6.0",
