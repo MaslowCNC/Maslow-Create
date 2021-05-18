@@ -661,16 +661,7 @@ export default class Molecule extends Atom{
      */ 
     loadTree(){
         this.nodesOnTheScreen.forEach(node =&gt; {
-            if(node.atomType == &quot;Output&quot;){
-                node.loadTree()
-            }
-            
-            if(node.output){
-                if(node.output.connectors.length == 0){
-                    node.loadTree()
-                }
-            }
-            
+            node.loadTree()
         })
         
         this.inputs.forEach(input =&gt; {
