@@ -732,7 +732,9 @@ export default class Atom {
         this.inputs.forEach(input => {
             input.loadTree()
         })
-        this.output.value = this.path
+        if(this.output){
+            this.output.value = this.path
+        }
         return this.path
     }
     
