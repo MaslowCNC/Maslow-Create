@@ -119,7 +119,12 @@ const returnEmptyGeometryText = () => {
 }
 
 const maslowRead = async (path) => {
-    return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+    if(typeof path == 'string'){
+        return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+    }
+    else{
+        return returnEmptyGeometryText();
+    }
 }
 
 const agent = async ({

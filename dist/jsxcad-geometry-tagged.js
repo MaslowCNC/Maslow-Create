@@ -4,7 +4,7 @@ import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as 
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
-import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, grow as grow$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -38,9 +38,15 @@ const update = (geometry, updates, changes) => {
   }
   const updated = {};
   for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
-      updated[key] = geometry[key];
+    if (key === 'hash') {
+      // Hash is a bit like a symbol, but we want it to persist.
+      continue;
     }
+    if (typeof key === 'symbol') {
+      // Don't copy symbols.
+      continue;
+    }
+    updated[key] = geometry[key];
   }
   let changed = false;
   for (const key of Object.keys(updates)) {
@@ -462,7 +468,6 @@ const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
       return walk(toTransformedGeometry(geometry), op);
     } else if (geometry.type === 'assembly') {
       if (mode === DISJUNCTION_VISIBLE && !hasVoidGeometry(geometry)) {
-        console.log(`QQ/Visible Disjunction Skipped`);
         // This leads to some potential invariant violations.
         // With toVisiblyDisjoint geometry we may get assembly within
         // disjointAssembly.
@@ -523,6 +528,9 @@ const differenceImpl = (geometry, ...geometries) => {
               )
             );
           }
+        }
+        if (differenced.hash) {
+          throw Error(`hash`);
         }
         return taggedGraph({ tags }, differenced);
       }
@@ -1052,6 +1060,37 @@ const getTags = (geometry) => {
   }
 };
 
+const grow = (geometry, amount) => {
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph':
+        return taggedGraph({ tags }, grow$1(geometry.graph, amount));
+      case 'triangles':
+      case 'paths':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'plan':
+        return grow(reify(geometry).content[0], amount);
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for push.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
 // This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
 // optimize the gzip compression for this alphabet.
 let urlAlphabet =
@@ -1071,6 +1110,9 @@ let nanoid = (size = 21) => {
 const hash = (geometry) => {
   if (geometry.hash === undefined) {
     geometry.hash = nanoid();
+    console.log(`QQ/hash/new: ${geometry.hash}`);
+  } else {
+    console.log(`QQ/hash/old: ${geometry.hash}`);
   }
   return geometry.hash;
 };
@@ -1101,6 +1143,9 @@ const intersectionImpl = (geometry, ...geometries) => {
               )
             );
           }
+        }
+        if (intersection.hash) {
+          throw Error(`hash`);
         }
         return taggedGroup({ tags }, ...intersections);
       }
@@ -1241,6 +1286,87 @@ const measureBoundingBox = (geometry) => {
   return [minPoint, maxPoint];
 };
 
+const minkowskiDifference = (geometry, offset) => {
+  offset = reify(offset);
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph': {
+        const differences = [];
+        for (const { graph } of getNonVoidGraphs(offset)) {
+          differences.push(
+            taggedGraph(
+              { tags },
+              minkowskiDifference$1(geometry.graph, graph)
+            )
+          );
+        }
+        return taggedGroup({}, ...differences);
+      }
+      case 'triangles':
+      case 'paths':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'plan':
+        return minkowskiDifference(reify(geometry).content[0], offset);
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
+const minkowskiShell = (geometry, offset) => {
+  offset = reify(offset);
+  const op = (geometry, descend) => {
+    const { tags } = geometry;
+    switch (geometry.type) {
+      case 'graph': {
+        const sums = [];
+        for (const { graph } of getNonVoidGraphs(offset)) {
+          sums.push(
+            taggedGraph({ tags }, minkowskiShell$1(geometry.graph, graph))
+          );
+        }
+        return taggedGroup({}, ...sums);
+      }
+      case 'triangles':
+      case 'paths':
+      case 'points':
+        // Not implemented yet.
+        return geometry;
+      case 'plan':
+        return minkowskiShell(reify(geometry).content[0], offset);
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for push.
+        return geometry;
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
 const minkowskiSum = (geometry, offset) => {
   offset = reify(offset);
   const op = (geometry, descend) => {
@@ -1328,10 +1454,13 @@ const offset = (geometry, initial = 1, step, limit) => {
 // Currently we need this so that things like withOutline() will work properly,
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
-const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
+const outlineImpl = (geometry, tagsOverride) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   const outlines = [];
-  for (const { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+  for (let { tags = [], graph } of getNonVoidGraphs(disjointGeometry)) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    }
     outlines.push(
       taggedPaths(
         { tags: [...tags, 'path/Wire'] },
@@ -1340,7 +1469,10 @@ const outlineImpl = (geometry, includeFaces = true, includeHoles = true) => {
     );
   }
   // Turn paths into wires.
-  for (const { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+  for (let { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    }
     outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
   }
   return outlines;
@@ -1389,18 +1521,15 @@ const projectToPlane = (geometry, plane, direction) => {
 
 const prepareForSerialization = (geometry) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph':
-        return taggedGraph(
-          { tags },
-          prepareForSerialization$1(geometry.graph)
-        );
+        prepareForSerialization$1(geometry.graph);
+        return;
       case 'displayGeometry':
       case 'triangles':
       case 'points':
       case 'paths':
-        return geometry;
+        return;
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -1415,7 +1544,9 @@ const prepareForSerialization = (geometry) => {
     }
   };
 
-  return rewrite(geometry, op);
+  visit(geometry, op);
+
+  return geometry;
 };
 
 const push = (
@@ -1495,11 +1626,11 @@ const remesh = (geometry, options) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const sectionImpl = (geometry, planes) => {
+const sectionImpl = (geometry, planes, { profile = false }) => {
   const transformedGeometry = toTransformedGeometry(reify(geometry));
   const sections$1 = [];
   for (const { tags, graph } of getNonVoidGraphs(transformedGeometry)) {
-    for (const section of sections(graph, planes)) {
+    for (const section of sections(graph, planes, { profile })) {
       sections$1.push(taggedGraph({ tags }, section));
     }
   }
@@ -1567,7 +1698,7 @@ const soup = (
             {},
             ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
-            ...outline$1(geometry)
+            ...outline$1(geometry, ['color/black'])
           );
         } else if (graph.isEmpty) {
           return taggedGroup({});
@@ -1577,7 +1708,7 @@ const soup = (
             {},
             ...triangles(tags, toTriangles(graph)),
             ...wireframe(toTriangles(graph)),
-            ...outline$1(geometry)
+            ...outline$1(geometry, ['color/black'])
           );
         }
       }
@@ -1705,13 +1836,17 @@ const test = (geometry) => {
 
 const toDisplayGeometry = (
   geometry,
-  { doTriangles = true, doOutline = true, doWireframe = true } = {}
-) =>
-  soup(toVisiblyDisjointGeometry(geometry), {
-    doTriangles,
-    doOutline,
-    doWireframe,
+  { triangles = true, outline = true, wireframe = false } = {}
+) => {
+  if (!geometry) {
+    throw Error('die');
+  }
+  return soup(toVisiblyDisjointGeometry(geometry), {
+    doTriangles: triangles,
+    doOutline: outline,
+    doWireframe: wireframe,
   });
+};
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -1858,6 +1993,9 @@ const unionImpl = (geometry, ...geometries) => {
             unified = union$2(unified, fromPaths(paths));
           }
         }
+        if (unified.hash) {
+          throw Error(`hash`);
+        }
         return taggedGraph({ tags }, unified);
       }
       case 'paths': {
@@ -1924,4 +2062,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };
