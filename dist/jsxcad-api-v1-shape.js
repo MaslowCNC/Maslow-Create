@@ -1246,8 +1246,6 @@ const loadGeometry = async (
   { otherwise = fromUndefined } = {}
 ) => {
   const data = await read(path);
-  console.log("Data: ");
-  console.log(data);
   if (data === undefined) {
     return otherwise();
   } else {
