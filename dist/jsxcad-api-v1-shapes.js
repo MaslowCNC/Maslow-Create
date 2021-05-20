@@ -1,23 +1,35 @@
-import { registerReifier, taggedPlan, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
+import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
+import { zag, numbers } from './jsxcad-api-v1-math.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { concatenate, rotateZ, scale as scale$1, translate as translate$1, flip, deduplicate } from './jsxcad-geometry-path.js';
-import { numbers } from './jsxcad-api-v1-math.js';
 import { convexHull, fromFunction, fromPaths } from './jsxcad-geometry-graph.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-poly3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toPolygon } from './jsxcad-math-plane.js';
 
-const find = (plan, key, otherwise) => {
+const eachEntry = (plan, op, otherwise) => {
   for (let nth = plan.history.length - 1; nth >= 0; nth--) {
-    if (plan.history[nth][key] !== undefined) {
-      return plan.history[nth][key];
+    const result = op(plan.history[nth]);
+    if (result !== undefined) {
+      return result;
     }
   }
   return otherwise;
 };
+
+const find = (plan, key, otherwise) =>
+  eachEntry(
+    plan,
+    (entry) => {
+      return entry[key];
+    },
+    otherwise
+  );
+
+const ofPlan = find;
 
 const getAngle = (plan) => find(plan, 'angle', {});
 const getAt = (plan) => find(plan, 'at', [0, 0, 0]);
@@ -26,8 +38,27 @@ const getCorner2 = (plan) => find(plan, 'corner2', [0, 0, 0]);
 const getFrom = (plan) => find(plan, 'from', [0, 0, 0]);
 const getMatrix = (plan) => plan.matrix || identity();
 const getTo = (plan) => find(plan, 'to', [0, 0, 0]);
-const getSides = (plan, otherwise = 32) =>
-  find(plan, 'sides', otherwise);
+
+const defaultZag = 0.1;
+
+const getSides = (plan, otherwise = 32) => {
+  const [scale] = getScale(plan);
+  const [length, width] = scale;
+  {
+    otherwise = zag(Math.max(length, width) * 2, defaultZag);
+  }
+  return eachEntry(
+    plan,
+    (entry) => {
+      if (entry.sides !== undefined) {
+        return entry.sides;
+      } else if (entry.zag !== undefined) {
+        return zag(Math.max(length, width), entry.zag);
+      }
+    },
+    otherwise
+  );
+};
 
 const getScale = (plan) => {
   const corner1 = getCorner1(plan);
@@ -37,6 +68,8 @@ const getScale = (plan) => {
     scale(0.5, add(corner1, corner2)),
   ];
 };
+
+const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 const X = 0;
 const Y = 1;
@@ -1610,9 +1643,21 @@ const Page = (
     const layer = taggedLayers({}, ...layers);
     const packSize = measureBoundingBox(layer);
     const pageWidth =
-      Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]) + pageMargin * 2;
+      // Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X$1] * 2),
+        Math.abs(packSize[MIN][X$1] * 2)
+      ) +
+      pageMargin * 2;
     const pageLength =
-      Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]) + pageMargin * 2;
+      // Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y$1] * 2),
+        Math.abs(packSize[MIN][Y$1] * 2)
+      ) +
+      pageMargin * 2;
     return Shape$1.fromGeometry(
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
@@ -1714,7 +1759,7 @@ const Spiral = (
     by,
     resolution,
   })) {
-    const radians = (angle * Math.PI) / 180;
+    const radians = (-angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
   }
@@ -1726,7 +1771,7 @@ Shape.prototype.Spiral = shapeMethod(Spiral);
 const Z$1 = 2;
 
 registerReifier('Arc', ({ tags, plan }) => {
-  const { start = 0, end = 360 } = getAngle(plan);
+  let { start = 0, end = 360 } = getAngle(plan);
   const [scale, middle] = getScale(plan);
   const corner1 = getCorner1(plan);
   const corner2 = getCorner2(plan);
@@ -2196,6 +2241,7 @@ const api = {
   Path,
   Peg,
   Pentagon,
+  Plan,
   Plane,
   Point,
   Points,
@@ -2210,4 +2256,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ensurePages };
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ensurePages, ofPlan };

@@ -81,9 +81,10 @@ function sum (o) {
 var hashSum = sum;
 
 const prepareStl = (shape, name, options = {}) => {
+  const { prepareStl = (s) => s } = options;
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
+  for (const entry of ensurePages(prepareStl(shape).toDisjointGeometry())) {
     const op = toStl(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
@@ -95,11 +96,11 @@ const prepareStl = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadStlMethod = function (name, options = {}) {
+const downloadStlMethod = function (name, options) {
   const entries = prepareStl(this, name, options);
   const download = { entries };
   // We should be saving the stl data in the filesystem.
-  const hash$1 = hashSum({ name, options }) + hash(this.toGeometry());
+  const hash$1 = hashSum({ name }) + hash(this.toGeometry());
   emit({ download, hash: hash$1 });
   return this;
 };

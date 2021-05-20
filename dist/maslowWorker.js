@@ -115,11 +115,19 @@ setPendingErrorHandler(reportError);
 setupFilesystem({ fileBase: 'maslow' });
 
 const returnEmptyGeometryText = () => {
+    console.log("Returning empty geometry text");
     return api.Hershey(20)('No Geometry').align('xy');
 }
 
 const maslowRead = async (path) => {
-    return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+    console.log("Maslow read: ");
+    console.log(path);
+    if(typeof path == 'string'){
+        return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+    }
+    else{
+        return returnEmptyGeometryText();
+    }
 }
 
 const agent = async ({

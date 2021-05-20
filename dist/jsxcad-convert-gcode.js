@@ -1,13 +1,12 @@
 import { outline, toDisjointGeometry } from './jsxcad-geometry-tagged.js';
 import { getEdges } from './jsxcad-geometry-path.js';
-import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
 // FIX: This is actually GRBL.
-const toGcode = async (geometry, { definitions } = {}) => {
+const toGcode = async (geometry, tool, { definitions } = {}) => {
   // const topZ = 0;
   const codes = [];
   const _ = undefined;
@@ -131,6 +130,7 @@ const toGcode = async (geometry, { definitions } = {}) => {
       // Already there.
       return;
     }
+
     const speed = state.tool.jumpSpeed || 0;
     const jumpRate = state.tool.jumpRate || state.tool.feedRate;
     if (speed !== 0) {
@@ -157,15 +157,41 @@ const toGcode = async (geometry, { definitions } = {}) => {
 
   useMetric();
 
+  const computeDistance = ([x, y, z]) => {
+    const dX = x - state.position[X];
+    const dY = y - state.position[Y];
+    const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
+    return cost;
+  };
+
+  const computeCost = (entry) => {
+    const [start, end] = entry;
+    const startDistance = computeDistance(start);
+    const endDistance = computeDistance(end);
+    if (startDistance < endDistance) {
+      return [startDistance, start, end, entry];
+    } else {
+      return [endDistance, end, start, entry];
+    }
+  };
+
   // FIX: Should handle points as well as paths.
-  for (const { tags, paths } of outline(toDisjointGeometry(geometry))) {
-    toolChange(toToolFromTags('grbl', tags, definitions));
+  for (const { paths } of outline(toDisjointGeometry(geometry))) {
+    toolChange(tool.grbl);
+    const todo = new Set();
     for (const path of paths) {
       for (let [start, end] of getEdges(path)) {
-        jump(...start); // jump to the start x, y
-        cut(...start); // may need to drill down to the start z
-        cut(...end); // cut across
+        todo.add([start, end]);
       }
+    }
+    while (todo.size > 0) {
+      // Find the cheapest segment to cut.
+      const costs = [...todo].map(computeCost).sort();
+      const [, start, end, entry] = costs[0];
+      todo.delete(entry);
+      jump(...start); // jump to the start x, y
+      cut(...start); // may need to drill down to the start z
+      cut(...end); // cut across
     }
   }
 

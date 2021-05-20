@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, inset as inset$1, rewrite, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, taggedGroup, read, write, realize } from './jsxcad-geometry-tagged.js';
+import { taggedAssembly, eachPoint, flip, toDisplayGeometry, toDisjointGeometry as toDisjointGeometry$1, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, taggedPoints, registerReifier, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, assemble as assemble$1, taggedItem, taggedDisjointAssembly, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, taggedGroup, read, write, realize } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTriangles } from './jsxcad-geometry-graph.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
@@ -52,8 +52,8 @@ class Shape {
     return fromGeometry(flip(toDisjointGeometry(this)), this.context);
   }
 
-  toDisplayGeometry() {
-    return toDisplayGeometry(toGeometry(this));
+  toDisplayGeometry(options) {
+    return toDisplayGeometry(toGeometry(this), options);
   }
 
   toKeptGeometry(options = {}) {
@@ -101,10 +101,18 @@ class Shape {
 const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
-const registerShapeMethod = (name, method) => {
+const registerShapeMethod = (name, op) => {
+  /*
+  // FIX: See if we can switch these to dispatching via define?
   if (Shape.prototype.hasOwnProperty(name)) {
     throw Error(`Method ${name} is already in use.`);
   }
+*/
+  const { [name]: method } = {
+    [name]: function (...args) {
+      return op(this, ...args);
+    },
+  };
   Shape.prototype[name] = method;
   return method;
 };
@@ -127,6 +135,9 @@ Shape.fromPoints = (points, context) =>
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(taggedGraph({}, fromPolygons(polygons)), context);
 Shape.registerMethod = registerShapeMethod;
+// Let's consider 'method' instead of 'registerMethod'.
+Shape.method = registerShapeMethod;
+Shape.reifier = (name, op) => registerReifier(name, op);
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
@@ -344,6 +355,13 @@ const cutFromMethod = function (shape) {
 };
 Shape.prototype.cutFrom = cutFromMethod;
 
+const doMethod = function (op, ...args) {
+  op(this, ...args);
+  return this;
+};
+
+Shape.prototype.do = doMethod;
+
 const each = (shape, op = (leafs, shape) => leafs) =>
   op(
     getLeafs(shape.toDisjointGeometry()).map((leaf) =>
@@ -367,6 +385,11 @@ const fuseMethod = function (...shapes) {
   return fuse(this);
 };
 Shape.prototype.fuse = fuseMethod;
+
+const grow = (shape, amount) =>
+  Shape.fromGeometry(grow$1(shape.toGeometry(), amount));
+
+Shape.registerMethod('grow', grow);
 
 const inset = (shape, initial = 1, step, limit) =>
   Shape.fromGeometry(inset$1(shape.toGeometry(), initial, step, limit));
@@ -529,16 +552,26 @@ const materialMethod = function (name) {
 };
 Shape.prototype.material = materialMethod;
 
+const minkowskiDifference = (shape, offset) =>
+  Shape.fromGeometry(
+    minkowskiDifference$1(shape.toGeometry(), offset.toGeometry())
+  );
+
+Shape.registerMethod('minkowskiDifference', minkowskiDifference);
+
+const minkowskiShell = (shape, offset) =>
+  Shape.fromGeometry(
+    minkowskiShell$1(shape.toGeometry(), offset.toGeometry())
+  );
+
+Shape.registerMethod('minkowskiShell', minkowskiShell);
+
 const minkowskiSum = (shape, offset) =>
   Shape.fromGeometry(
     minkowskiSum$1(shape.toGeometry(), offset.toGeometry())
   );
 
-const minkowskiSumMethod = function (offset) {
-  return minkowskiSum(this, offset);
-};
-
-Shape.registerMethod('minkowskiSum', minkowskiSumMethod);
+Shape.registerMethod('minkowskiSum', minkowskiSum);
 
 const move = (shape, x = 0, y = 0, z = 0) =>
   shape.transform(fromTranslation([x, y, z]));
@@ -547,6 +580,8 @@ const moveMethod = function (...params) {
   return move(this, ...params);
 };
 Shape.prototype.move = moveMethod;
+Shape.prototype.xyz = moveMethod;
+Shape.prototype.xy = moveMethod;
 
 const noVoid = (shape, tags, select) => {
   const op = (geometry, descend) => {
@@ -856,58 +891,41 @@ const sides = (shape, sides = 1) => shape.updatePlan({ sides });
 const to = (shape, x = 0, y = 0, z = 0) =>
   shape.updatePlan({ to: [x, y, z], top: undefined });
 const top = (shape, top) => shape.updatePlan({ top });
+const zag = (shape, zag) => shape.updatePlan({ zag });
 
-const apothemMethod = function (x, y, z) {
-  return apothem(this, x, y, z);
-};
-const angleMethod = function (end, start) {
-  return angle(this, end, start);
-};
-const baseMethod = function (height) {
-  return base(this, height);
-};
-const atMethod = function (x, y, z) {
-  return at(this, x, y, z);
-};
-const corner1Method = function (x, y, z) {
-  return corner1(this, x, y, z);
-};
-const corner2Method = function (x, y, z) {
-  return corner2(this, x, y, z);
-};
-const diameterMethod = function (x, y, z) {
-  return diameter(this, x, y, z);
-};
-const fromMethod = function (x, y, z) {
-  return from(this, x, y, z);
-};
-const radiusMethod = function (x, y, z) {
-  return radius(this, x, y, z);
-};
-const sidesMethod = function (value) {
-  return sides(this, value);
-};
-const toMethod = function (x, y, z) {
-  return to(this, x, y, z);
-};
-const topMethod = function (height) {
-  return top(this, height);
-};
+Shape.registerMethod('apothem', apothem);
+Shape.registerMethod('angle', angle);
+Shape.registerMethod('at', at);
+Shape.registerMethod('base', base);
+Shape.registerMethod('corner1', corner1);
+Shape.registerMethod('c1', corner1);
+Shape.registerMethod('corner2', corner2);
+Shape.registerMethod('c2', corner2);
+Shape.registerMethod('diameter', diameter);
+Shape.registerMethod('from', from);
+Shape.registerMethod('radius', radius);
+Shape.registerMethod('sides', sides);
+Shape.registerMethod('to', to);
+Shape.registerMethod('top', top);
+Shape.registerMethod('zag', zag);
 
-Shape.prototype.apothem = apothemMethod;
-Shape.prototype.angle = angleMethod;
-Shape.prototype.at = atMethod;
-Shape.prototype.base = baseMethod;
-Shape.prototype.corner1 = corner1Method;
-Shape.prototype.c1 = corner1Method;
-Shape.prototype.corner2 = corner2Method;
-Shape.prototype.c2 = corner2Method;
-Shape.prototype.diameter = diameterMethod;
-Shape.prototype.from = fromMethod;
-Shape.prototype.radius = radiusMethod;
-Shape.prototype.sides = sidesMethod;
-Shape.prototype.to = toMethod;
-Shape.prototype.top = topMethod;
+// Let's consider migrating to a 'has' prefix for planning.
+
+Shape.registerMethod('hasApothem', apothem);
+Shape.registerMethod('hasAngle', angle);
+Shape.registerMethod('hasAt', at);
+Shape.registerMethod('hasBase', base);
+Shape.registerMethod('hasCorner1', corner1);
+Shape.registerMethod('hasC1', corner1);
+Shape.registerMethod('hasCorner2', corner2);
+Shape.registerMethod('hasC2', corner2);
+Shape.registerMethod('hasDiameter', diameter);
+Shape.registerMethod('hasFrom', from);
+Shape.registerMethod('hasRadius', radius);
+Shape.registerMethod('hasSides', sides);
+Shape.registerMethod('hasTo', to);
+Shape.registerMethod('hasTop', top);
+Shape.registerMethod('hasZag', zag);
 
 const remesh = (shape, options = {}) =>
   Shape.fromGeometry(remesh$1(shape.toGeometry(), options));
@@ -1095,28 +1113,19 @@ const voidMethod = function () {
 Shape.prototype.void = voidMethod;
 
 const weld = (...shapes) => {
-  console.log(`QQ/weld`);
   const unwelded = [];
   for (const shape of shapes) {
     // We lose the tags at this point.
     const result = toPolygonsWithHoles(shape.toGeometry());
-    console.log(`QQ/weld/result: ${JSON.stringify(result)}`);
     for (const { polygonsWithHoles } of result) {
-      console.log(
-        `QQ/weld/polygonsWithHoles: ${JSON.stringify(polygonsWithHoles)}`
-      );
       unwelded.push(...polygonsWithHoles);
     }
   }
   const welds = [];
-  console.log(`QQ/unwelded: ${JSON.stringify(unwelded)}`);
   const arrangements = arrangePolygonsWithHoles(unwelded);
   console.log(`QQ/arrangements: ${JSON.stringify(arrangements)}`);
   for (const { polygonsWithHoles } of arrangements) {
     // Keep the planar grouping.
-    console.log(
-      `QQ/arranged/polygonsWithHoles: ${JSON.stringify(polygonsWithHoles)}`
-    );
     const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
     const graph = fromTriangles(triangles);
     welds.push(taggedGraph({}, graph));
@@ -1232,15 +1241,19 @@ Shape.prototype.z = moveZMethod;
 
 const fromUndefined = () => Shape.fromGeometry();
 
-const loadGeometry = async (path, { otherwise = fromUndefined } = {}) => {
-  if(typeof path == 'string'){
-    const data = await read(path);
-    if (data != undefined){
-      return Shape.fromGeometry(data);
-    }
+const loadGeometry = async (
+  path,
+  { otherwise = fromUndefined } = {}
+) => {
+  const data = await read(path);
+  console.log("Data: ");
+  console.log(data);
+  if (data === undefined) {
+    return otherwise();
+  } else {
+    return Shape.fromGeometry(data);
   }
-  return otherwise();
-}
+};
 
 const saveGeometry = async (path, shape) =>
   Shape.fromGeometry(await write(shape.toGeometry(), path));

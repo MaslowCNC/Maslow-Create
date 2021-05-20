@@ -6540,6 +6540,7 @@ const toEcmascript = async (
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
     sourceType: 'module',
+    locations: true,
   };
 
   let ast = parse(script, parseOptions);
@@ -6675,6 +6676,13 @@ const toEcmascript = async (
       }
     }
 
+    out.push(
+      parse(
+        `emitSourceLocation({ line: ${declaration.loc.end.line}, column: ${declaration.loc.end.column} })`,
+        parseOptions
+      )
+    );
+
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${path}/${id}`);
     if (meta && meta.sha === sha) {
@@ -6782,6 +6790,14 @@ const toEcmascript = async (
           }
         }
       }
+    } else if (entry.type === 'ExpressionStatement') {
+      out.push(
+        parse(
+          `emitSourceLocation({ line: ${entry.loc.end.line}, column: ${entry.loc.end.column} })`,
+          parseOptions
+        )
+      );
+      out.push(entry);
     } else {
       out.push(entry);
     }

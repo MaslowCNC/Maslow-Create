@@ -135,7 +135,7 @@ const projectToPlaneMethod = function (plane, direction) {
 };
 Shape$1.prototype.projectToPlane = projectToPlaneMethod;
 
-const section = (shape, ...pegs) => {
+const section = (shape, { profile = false }, ...pegs) => {
   const planes = [];
   if (pegs.length === 0) {
     planes.push({ plane: [0, 0, 1, 0] });
@@ -145,13 +145,20 @@ const section = (shape, ...pegs) => {
       planes.push({ plane });
     }
   }
-  return Shape.fromGeometry(section$1(shape.toGeometry(), planes));
+  return Shape.fromGeometry(
+    section$1(shape.toGeometry(), planes, { profile })
+  );
 };
 
 const sectionMethod = function (...args) {
-  return section(this, ...args);
+  return section(this, { profile: false }, ...args);
 };
 Shape.prototype.section = sectionMethod;
+
+const sectionProfileMethod = function (...args) {
+  return section(this, { profile: true }, ...args);
+};
+Shape.prototype.sectionProfile = sectionProfileMethod;
 
 const START = 0;
 const END = 1;
