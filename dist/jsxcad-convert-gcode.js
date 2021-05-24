@@ -47,6 +47,7 @@ const toGcode = async (geometry, tool, { definitions } = {}) => {
     y = state.position[Y],
     z = state.position[Z],
     f = state.tool.feedRate,
+    d = state.tool.drillRate || state.tool.feedRate,
     s = state.tool.cutSpeed
   ) => {
     if (state.jumped && state.tool.warmupDuration) {
@@ -63,6 +64,10 @@ const toGcode = async (geometry, tool, { definitions } = {}) => {
       z === state.position[Z]
     ) {
       return;
+    }
+    if (z !== state.position[Z]) {
+      // Use drillRate instead of feedRate.
+      f = d;
     }
     emit(
       `G1 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
@@ -104,6 +109,7 @@ const toGcode = async (geometry, tool, { definitions } = {}) => {
     switch (state.tool.type) {
       case 'dynamicLaser':
       case 'constantLaser':
+      case 'plotter':
       case 'spindle':
         break;
       default:
