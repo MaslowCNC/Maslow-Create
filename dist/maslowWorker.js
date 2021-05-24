@@ -285,6 +285,13 @@ const agent = async ({
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
             break;
+        case "svgOutline":
+            const geometryToSvgOutline = await maslowRead(question.readPath);
+            
+            
+            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.section().fuse().outline().toKeptGeometry());//.fuse().outline());
+            return svgOutlineBuffer;
+            break;
         case "gcode":
             
             console.log("Gcode generation ran");
