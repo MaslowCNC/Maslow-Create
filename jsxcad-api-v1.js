@@ -2,16 +2,16 @@ import { getModule, addPending, write, emit, getControlValue, addSource, addOnEm
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
-import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld } from './jsxcad-api-v1-shapes.js';
+import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
 import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
-import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec, zag } from './jsxcad-api-v1-math.js';
+export { Noise, Random, acos, cos, each, ease, max, min, numbers, sin, sqrt, vec, zag } from './jsxcad-api-v1-math.js';
 import { readSvg } from './jsxcad-api-v1-svg.js';
 export { readSvg } from './jsxcad-api-v1-svg.js';
 import { readStl } from './jsxcad-api-v1-stl.js';
@@ -44,7 +44,7 @@ let nanoid = (size = 21) => {
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  size,
+  { size, triangles = true, outline = true, wireframe = false },
   op = (x) => x,
   {
     inline,
@@ -60,7 +60,9 @@ const view = (
     height = size / 2;
   }
   const viewShape = op(shape);
-  for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
+  for (const entry of ensurePages(
+    viewShape.toDisplayGeometry({ triangles, outline, wireframe })
+  )) {
     const path = `view/${getModule()}/${nanoid()}`;
     addPending(write(path, entry));
     const view = { width, height, position, inline, withAxes, withGrid };
@@ -70,7 +72,7 @@ const view = (
 };
 
 Shape.prototype.view = function (
-  size = 256,
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -81,7 +83,7 @@ Shape.prototype.view = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -92,7 +94,7 @@ Shape.prototype.view = function (
 };
 
 Shape.prototype.topView = function (
-  size = 256,
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -103,7 +105,7 @@ Shape.prototype.topView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -114,7 +116,7 @@ Shape.prototype.topView = function (
 };
 
 Shape.prototype.gridView = function (
-  size = 256,
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -125,7 +127,7 @@ Shape.prototype.gridView = function (
     withGrid = true,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -136,7 +138,7 @@ Shape.prototype.gridView = function (
 };
 
 Shape.prototype.frontView = function (
-  size = 256,
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -147,7 +149,7 @@ Shape.prototype.frontView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -158,7 +160,7 @@ Shape.prototype.frontView = function (
 };
 
 Shape.prototype.sideView = function (
-  size = 256,
+  { size = 512, triangles = true, outline = true, wireframe = false } = {},
   op,
   {
     path,
@@ -169,7 +171,7 @@ Shape.prototype.sideView = function (
     withGrid,
   } = {}
 ) {
-  return view(this, size, op, {
+  return view(this, { size, triangles, outline, wireframe }, op, {
     path,
     width,
     height,
@@ -250,7 +252,7 @@ var hashSum = sum;
 const define = (tag, data) => {
   const define = { tag, data };
   emit({ define, hash: hashSum(define) });
-  return define;
+  return data;
 };
 
 const defRgbColor = (name, rgb) => define(`color/${name}`, { rgb });
@@ -262,7 +264,7 @@ const defTool = (name, definition) => define(`tool/${name}`, definition);
 
 const defGrblSpindle = (
   name,
-  { cutDepth = 0.2, rpm, feedRate, diameter, jumpZ = 1 }
+  { cutDepth = 0.2, rpm, feedRate, drillRate, diameter, jumpZ = 1 } = {}
 ) =>
   defTool(name, {
     grbl: {
@@ -270,6 +272,7 @@ const defGrblSpindle = (
       cutDepth,
       cutSpeed: rpm,
       feedRate,
+      drillRate,
       diameter,
       jumpZ,
     },
@@ -279,6 +282,7 @@ const defGrblDynamicLaser = (
   name,
   {
     cutDepth = 0.2,
+    diameter = 0.09,
     jumpPower = 0,
     power = 1000,
     speed = 1000,
@@ -291,6 +295,7 @@ const defGrblDynamicLaser = (
       type: 'dynamicLaser',
       cutDepth,
       cutSpeed: -power,
+      diameter,
       jumpRate: speed,
       jumpSpeed: -jumpPower,
       feedRate: speed,
@@ -303,6 +308,7 @@ const defGrblConstantLaser = (
   name,
   {
     cutDepth = 0.2,
+    diameter = 0.09,
     jumpPower,
     power = 1000,
     speed = 1000,
@@ -315,6 +321,7 @@ const defGrblConstantLaser = (
       type: 'constantLaser',
       cutDepth,
       cutSpeed: power,
+      diameter,
       jumpRate: speed,
       jumpSpeed: jumpPower,
       feedRate: speed,
@@ -323,11 +330,19 @@ const defGrblConstantLaser = (
     },
   });
 
+const defGrblPlotter = (name, { feedRate = 1000 } = {}) =>
+  defTool(name, { grbl: { type: 'plotter', feedRate, cutSpeed: 1 } });
+
 const card = (strings, ...placeholders) => {
   const card = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
   emit({ hash: hashSum(card), setContext: { card } });
+  return card;
+};
+
+const emitSourceLocation = ({ line, column }) => {
+  emit({ setContext: { sourceLocation: { line, column } } });
   return card;
 };
 
@@ -427,11 +442,13 @@ var api = /*#__PURE__*/Object.freeze({
   define: define,
   defGrblConstantLaser: defGrblConstantLaser,
   defGrblDynamicLaser: defGrblDynamicLaser,
+  defGrblPlotter: defGrblPlotter,
   defGrblSpindle: defGrblSpindle,
   defRgbColor: defRgbColor,
   defThreejsMaterial: defThreejsMaterial,
   defTool: defTool,
   card: card,
+  emitSourceLocation: emitSourceLocation,
   md: md,
   control: control,
   source: source,
@@ -466,6 +483,7 @@ var api = /*#__PURE__*/Object.freeze({
   Path: Path,
   Peg: Peg,
   Pentagon: Pentagon,
+  Plan: Plan,
   Plane: Plane,
   Point: Point,
   Points: Points,
@@ -477,6 +495,7 @@ var api = /*#__PURE__*/Object.freeze({
   Triangle: Triangle,
   Wave: Wave,
   Weld: Weld,
+  ofPlan: ofPlan,
   Item: Item,
   Noise: Noise,
   Random: Random,
@@ -490,6 +509,7 @@ var api = /*#__PURE__*/Object.freeze({
   sin: sin,
   sqrt: sqrt,
   vec: vec,
+  zag: zag,
   readSvg: readSvg,
   readStl: readStl,
   readObj: readObj,
@@ -563,6 +583,7 @@ registerDynamicModule(module('extrude'), './jsxcad-api-v1-extrude.js');
 registerDynamicModule(module('font'), './jsxcad-api-v1-font.js');
 registerDynamicModule(module('gcode'), './jsxcad-api-v1-gcode.js');
 registerDynamicModule(module('item'), './jsxcad-api-v1-item.js');
+registerDynamicModule(module('ldraw'), './jsxcad-api-v1-ldraw.js');
 registerDynamicModule(module('math'), './jsxcad-api-v1-math.js');
 registerDynamicModule(module('pdf'), './jsxcad-api-v1-pdf.js');
 registerDynamicModule(module('plan'), './jsxcad-api-v1-plan.js');
@@ -576,4 +597,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };
+export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, emitSourceLocation, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };

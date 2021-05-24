@@ -169,7 +169,7 @@ export default class Svg extends Atom {
      */ 
     downloadSvg(){
         try{
-            const values = {key: &quot;svg&quot;, readPath: this.findIOValue(&apos;geometry&apos;)}
+            const values = {key: &quot;svgOutline&quot;, readPath: this.findIOValue(&apos;geometry&apos;)}
             window.ask(values).then( answer =&gt; {
                 
                 //var enc = new TextDecoder(&quot;utf-8&quot;);

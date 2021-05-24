@@ -1,5 +1,5 @@
 import * as baseApi from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, boot, conversation, touch, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, conversation, boot, touch, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -215,7 +215,6 @@ onmessage = ({
 }) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
-  await boot();
   const {
     ask,
     hear
@@ -223,7 +222,9 @@ const bootstrap = async () => {
     agent,
     say
   });
-  self.ask = ask;
+  self.ask = ask; // sys/log depends on ask, so set that up before we boot.
+
+  await boot();
 
   onmessage = ({
     data
