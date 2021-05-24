@@ -358,7 +358,11 @@ const conversation = ({ agent, say }) => {
       const answer = await agent({ ask, question });
       say({ id, answer });
     } else {
-      throw Error('die');
+      throw Error(
+        `Expected { answer } or { question } but received ${JSON.stringify(
+          message
+        )}`
+      );
     }
   };
   return { ask, hear };
@@ -370,13 +374,7 @@ const watchers = new Set();
 
 const log = async (entry) => {
   if (isWebWorker) {
-    try{
-        return self.ask({ log: { entry } });
-    }
-    catch(err){
-        console.log(err);
-        console.log(self.ask);
-    }
+    return self.ask({ log: { entry } });
   }
 
   for (const watcher of watchers) {
@@ -603,11 +601,18 @@ const unwatchFileDeletion = async (thunk) => {
   return thunk;
 };
 
-const watchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.add(thunk);
+const watchFile = async (path, thunk) => {
+  if (thunk) {
+    (await getFile({}, path)).watchers.add(thunk);
+    return thunk;
+  }
+};
 
-const unwatchFile = async (path, thunk) =>
-  (await getFile({}, path)).watchers.delete(thunk);
+const unwatchFile = async (path, thunk) => {
+  if (thunk) {
+    return (await getFile({}, path)).watchers.delete(thunk);
+  }
+};
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3493,9 +3498,6 @@ const { serialize } = v8$1;
 // FIX Convert data by representation.
 
 const writeFile = async (options, path, data) => {
-  if (path.startsWith('source/source/')) {
-    throw Error('source/source');
-  }
   data = await data;
 
   const {
@@ -3644,8 +3646,9 @@ const fetchSources = async (sources) => {
 
 // Deprecated
 const readFile = async (options, path) => {
-  const { allowFetch = true, ephemeral } = options;
   const {
+    allowFetch = true,
+    ephemeral,
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
@@ -3672,11 +3675,13 @@ const readFile = async (options, path) => {
     if (decode) {
       data = new TextDecoder(decode).decode(data);
     }
-    file.data = data;
     if (!ephemeral && file.data !== undefined) {
       // Update persistent cache.
-      await writeFile({ ...options, doSerialize: true }, path, file.data);
+      await writeFile({ ...options, doSerialize: true }, path, data);
     }
+    // The writeFile above can trigger a touch which can invalidate the cache
+    // so we need to set the cached value after that is resolved.
+    file.data = data;
   }
   if (file.data !== undefined) {
     if (file.data.then) {
@@ -3874,7 +3879,7 @@ const getFileLister = async () => {
       listFiles(qualifiedPaths);
       return qualifiedPaths;
     };
-  } else if (true||isBrowser) {
+  } else if (isBrowser || isWebWorker) {
     // FIX: Make localstorage optional.
     return async () => {
       const qualifiedPaths = new Set(await db().keys());
@@ -3882,7 +3887,7 @@ const getFileLister = async () => {
       return qualifiedPaths;
     };
   } else {
-    throw Error('die');
+    throw Error('Did not detect node, browser, or webworker');
   }
 };
 

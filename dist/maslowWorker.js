@@ -119,7 +119,12 @@ const returnEmptyGeometryText = () => {
 }
 
 const maslowRead = async (path) => {
-    return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+    if(typeof path == 'string'){
+        return await api.loadGeometry(path, {otherwise: returnEmptyGeometryText});
+    }
+    else{
+        return returnEmptyGeometryText();
+    }
 }
 
 const agent = async ({
@@ -279,6 +284,13 @@ const agent = async ({
             }
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
+            break;
+        case "svgOutline":
+            const geometryToSvgOutline = await maslowRead(question.readPath);
+            
+            
+            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.section().fuse().outline().toKeptGeometry());//.fuse().outline());
+            return svgOutlineBuffer;
             break;
         case "gcode":
             

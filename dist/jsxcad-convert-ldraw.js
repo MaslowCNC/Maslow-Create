@@ -2,7 +2,7 @@ import { isStrictlyCoplanar, flip, transform as transform$1 } from './jsxcad-mat
 import { rotateX, scale, taggedGraph } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-graph.js';
 import { fromValues } from './jsxcad-math-mat4.js';
-import { readFile } from './jsxcad-sys.js';
+import { read } from './jsxcad-sys.js';
 
 const transform = (matrix, polygons) =>
   polygons.map((polygon) => ({
@@ -14,32 +14,35 @@ const RESOLUTION = 10000;
 
 const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
+// Three numerics at the start seem to indicate parts vs primitives.
+
 const readPart = async (part, { allowFetch = true } = {}) => {
-  const sources = [
-    `${URL_PREFIX}/parts/${part}`,
-    `${URL_PREFIX}/p/48/${part}`,
-    `${URL_PREFIX}/p/${part}`,
-  ];
-  if (!allowFetch) sources.length = 0;
   part = part.toLowerCase().replace(/\\/, '/');
-  const parts = await readFile(
-    { allowFetch, ephemeral: true, sources, decode: 'utf8' },
-    `cache/ldraw/parts/${part}`
-  );
-  const p48 = await readFile(
-    { allowFetch, ephemeral: true, sources, decode: 'utf8' },
-    `cache/ldraw/p48/${part}`
-  );
-  const p = await readFile(
-    { allowFetch, ephemeral: true, sources, decode: 'utf8' },
-    `cache/ldraw/p/${part}`
-  );
-  return parts || p48 || p;
+  if (part.match(/^u[0-9]{4}/)) {
+    return read(`cache/ldraw/part/${part}`, {
+      sources: [`${URL_PREFIX}/parts/${part}`],
+    });
+  } else if (part.match(/^[0-9]{3}/)) {
+    return read(`cache/ldraw/part/${part}`, {
+      sources: [`${URL_PREFIX}/parts/${part}`],
+    });
+  } else if (part.match(/^s[/]/)) {
+    return read(`cache/ldraw/part/${part}`, {
+      sources: [`${URL_PREFIX}/parts/${part}`],
+    });
+  } else if (part.match(/^48[/]/)) {
+    return read(`cache/ldraw/primitive/${part}`, {
+      sources: [`${URL_PREFIX}/p/${part}`],
+    });
+  } else {
+    return read(`cache/ldraw/primitive/${part}`, {
+      sources: [`${URL_PREFIX}/p/48/${part}`, `${URL_PREFIX}/p/${part}`],
+    });
+  }
 };
 
-const loadPart = async (part, { allowFetch = true } = {}) => {
+const fromDataToCode = (data) => {
   const code = [];
-  const data = await readPart(part, { allowFetch });
   const source = new TextDecoder('utf8').decode(data);
   for (let line of source.split('\r\n')) {
     let args = line.replace(/^\s+/, '').split(/\s+/);
@@ -55,7 +58,15 @@ const fromPartToPolygons = async (
   part,
   { allowFetch = true, invert = false, stack = [] }
 ) => {
-  let code = await loadPart(part, { allowFetch });
+  const data = await readPart(part, { allowFetch });
+  const code = fromDataToCode(data);
+  return fromCodeToPolygons(code, { allowFetch, invert, stack });
+};
+
+const fromCodeToPolygons = async (
+  code,
+  { allowFetch = true, invert = false, stack = [] }
+) => {
   let polygons = [];
   let direction = 'CCW';
   let invertNext = 0;
@@ -190,16 +201,17 @@ const fromPartToPolygons = async (
   return polygons;
 };
 
-const fromLDraw = async (part, { allowFetch = true } = {}) =>
-  rotateX(
-    -90,
-    scale(
-      [0.4, 0.4, 0.4],
-      taggedGraph(
-        {},
-        fromPolygons(await fromPartToPolygons(`${part}.dat`, { allowFetch }))
-      )
-    )
-  );
+const fromLDrawPart = async (part, { allowFetch = true } = {}) => {
+  const polygons = await fromPartToPolygons(`${part}.dat`, { allowFetch });
+  const geometry = fromPolygons(polygons);
+  return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));
+};
 
-export { fromLDraw };
+const fromLDraw = async (data, { allowFetch = true } = {}) => {
+  const code = fromDataToCode(data);
+  const polygons = await fromCodeToPolygons(code, { allowFetch });
+  const geometry = fromPolygons(polygons);
+  return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));
+};
+
+export { fromLDraw, fromLDrawPart };

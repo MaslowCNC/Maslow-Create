@@ -53203,99 +53203,6 @@ const loadTexture = (url) =>
     texture.repeat.set(1, 1);
   });
 
-/*
-const basic = { metalness: 0.0, roughness: 0.5, reflectivity: 0.5 };
-const metal = { metalness: 0.0, roughness: 0.5, reflectivity: 0.8 };
-const transparent = { opacity: 0.5, transparent: true };
-const glass = {
-  ...transparent,
-  metalness: 0.0,
-  clearCoat: 1,
-  clearCoatRoughness: 0,
-};
-
-const materialProperties = {
-  basic,
-  metal,
-  transparent,
-  glass,
-  color: {
-    metalness: 0.0,
-    roughness: 0.9,
-    reflectivity: 0.1,
-    emissiveIntensity: 0.25,
-  },
-  cardboard: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/cardboard.png',
-  },
-  paper: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/paper.png',
-  },
-  wood: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/wood.png',
-  },
-  plastic: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/plastic.png',
-  },
-  leaves: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/leaves.png',
-  },
-  water: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/water.png',
-  },
-  grass: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/grass.png',
-  },
-  brick: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/brick.png',
-  },
-  circuit: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/circuit.png',
-  },
-  rock: {
-    ...basic,
-    map: 'https://jsxcad.js.org/texture/rock.png',
-  },
-  steel: {
-    ...metal,
-    map: 'https://jsxcad.js.org/texture/sheet-metal.png',
-  },
-  'zinc-steel': {
-    ...metal,
-    map: 'https://jsxcad.js.org/texture/zinc-steel.png',
-  },
-  thread: {
-    ...metal,
-    map: 'https://jsxcad.js.org/texture/thread.png',
-  },
-  aluminium: {
-    ...metal,
-    map: 'https://jsxcad.js.org/texture/aluminium.png',
-  },
-  brass: {
-    ...metal,
-    map: 'https://jsxcad.js.org/texture/brass.png',
-  },
-  copper: {
-    ...metal,
-    map: 'https://jsxcad.js.org/texture/copper.png',
-  },
-  'wet-glass': {
-    ...glass,
-    map: 'https://jsxcad.js.org/texture/wet-glass.png',
-  },
-};
-*/
-
 const merge = async (properties, parameters) => {
   for (const key of Object.keys(properties)) {
     if (key === 'map') {
@@ -53305,21 +53212,6 @@ const merge = async (properties, parameters) => {
     }
   }
 };
-
-/*
-export const setMaterial = async (tags, parameters) => {
-  for (const tag of tags) {
-    if (tag.startsWith('material/')) {
-      const material = tag.substring(9);
-      const properties = materialProperties[material];
-      if (properties !== undefined) {
-        await merge(properties, parameters);
-        return properties;
-      }
-    }
-  }
-};
-*/
 
 const setMaterial = async (definitions, tags, parameters) => {
   const threejsMaterial = toThreejsMaterialFromTags(tags, definitions);
@@ -53688,7 +53580,7 @@ const buildMeshes = async ({
       const material = await buildMeshMaterial(definitions, tags);
       if (tags.includes('compose/non-positive')) {
         material.transparent = true;
-        material.opacity *= 0.2;
+        material.opacity *= 0.5;
       }
       dataset.mesh = new Mesh(bufferGeometry, material);
       dataset.mesh.layers.set(layer);
@@ -53783,18 +53675,24 @@ const moveToFit = ({
   }
 
   const center = box.getCenter(new Vector3());
-  const size = box.getSize(new Vector3());
+  // const size = box.getSize(new Vector3());
+
+  const size = {
+    x: Math.max(Math.abs(box.min.x), Math.abs(box.max.x)),
+    y: Math.max(Math.abs(box.min.y), Math.abs(box.max.y)),
+    z: Math.max(Math.abs(box.min.z), Math.abs(box.max.z)),
+  };
 
   const maxSize = Math.max(size.x, size.y, size.z);
   const fitHeightDistance =
     maxSize / (2 * Math.atan((Math.PI * camera.fov) / 360));
   const fitWidthDistance = fitHeightDistance / (camera.aspect || 1);
-  const zoomOut = 1;
+  const zoomOut = 1.5;
   const distance =
     fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
 
   // const target = controls ? controls.target.clone() : center.clone();
-  const target = center;
+  const target = new Vector3(0, 0, 0);
 
   const direction = target
     .clone()
@@ -53819,6 +53717,7 @@ const orbitDisplay = async (
   {
     view = {},
     geometry,
+    path,
     canvas,
     withAxes = false,
     withGrid = false,
@@ -53847,7 +53746,9 @@ const orbitDisplay = async (
     withAxes,
   });
 
-  const render = () => {
+  let isRendering = false;
+
+  const doRender = () => {
     renderer.clear();
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
@@ -53856,6 +53757,16 @@ const orbitDisplay = async (
 
     camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
+
+    isRendering = false;
+  };
+
+  const render = () => {
+    if (isRendering) {
+      return;
+    }
+    isRendering = true;
+    requestAnimationFrame(doRender);
   };
 
   if (!canvas) {
@@ -53913,16 +53824,31 @@ const orbitDisplay = async (
 
   if (geometry) {
     await updateGeometry(geometry);
-    render();
   }
 
-  const animate = () => {
-    requestAnimationFrame(animate);
-    trackball.update();
+  trackball.addEventListener('change', () => {
     render();
+  });
+
+  let isUpdating = false;
+
+  const update = () => {
+    trackball.update();
+    if (isUpdating) {
+      requestAnimationFrame(update);
+    }
   };
 
-  animate();
+  trackball.addEventListener('start', () => {
+    if (!isUpdating) {
+      isUpdating = true;
+      requestAnimationFrame(update);
+    }
+  });
+
+  trackball.addEventListener('end', () => {
+    isUpdating = false;
+  });
 
   return { canvas: displayCanvas, render, updateGeometry, trackball };
 };

@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, toTransformedGeometry, toPolygonsWithHoles } from './jsxcad-geometry-tagged.js';
+import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, translate, toTransformedGeometry, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { equals } from './jsxcad-math-vec2.js';
@@ -4115,7 +4115,7 @@ const fromSvg = async (input, { definitions } = {}) => {
           }
         } else {
           if (attr === 'points' || attr === 'd') {
-            result[attr] = value;
+            result[attr] = value.trim();
           } else {
             result[attr] = parseFloat(value);
           }
@@ -4137,9 +4137,9 @@ const fromSvg = async (input, { definitions } = {}) => {
         const output = (svgPath) => {
           const paths = fromSvgPath$1(svgPath).paths;
           const attributes = {
-            fill: node.getAttribute('fill'),
-            stroke: node.getAttribute('stroke'),
-            'stroke-width': node.getAttribute('stroke-width'),
+            fill: node.getAttribute('fill') || 'black',
+            stroke: node.getAttribute('stroke') || 'none',
+            'stroke-width': node.getAttribute('stroke-width') || '1',
           };
           const style = node.getAttribute('style');
           for (const entry of style.split(';')) {
@@ -4299,8 +4299,7 @@ const toSvg = async (
     }
   }
 
-  /*
-  for (const { tags, paths } of outline(geometry)) {
+  for (const { tags, paths } of getNonVoidPaths(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
       if (isClosed(path)) {
@@ -4327,7 +4326,7 @@ const toSvg = async (
       }
     }
   }
-*/
+
   svg.push('</svg>');
   const output = svg.join('\n');
   return new TextEncoder('utf8').encode(output);
