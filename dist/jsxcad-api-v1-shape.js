@@ -844,10 +844,8 @@ const updatePlanMethod = function (...updates) {
 
 Shape.prototype.updatePlan = updatePlanMethod;
 
-const angle = (shape, end = 360, start = 0) =>
-  start > end
-    ? shape.updatePlan({ angle: { start: end, end: start } })
-    : shape.updatePlan({ angle: { start: start, end: end } });
+const angle = (shape, start = 0, end = 0) =>
+  shape.updatePlan({ angle: { start: start, end: end } });
 const base = (shape, base) => shape.updatePlan({ base });
 const at = (shape, x = 0, y = 0, z = 0) =>
   shape.updatePlan({

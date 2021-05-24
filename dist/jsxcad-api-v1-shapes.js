@@ -39,7 +39,7 @@ const getFrom = (plan) => find(plan, 'from', [0, 0, 0]);
 const getMatrix = (plan) => plan.matrix || identity();
 const getTo = (plan) => find(plan, 'to', [0, 0, 0]);
 
-const defaultZag = 0.1;
+const defaultZag = 0.01;
 
 const getSides = (plan, otherwise = 32) => {
   const [scale] = getScale(plan);
@@ -1772,6 +1772,11 @@ const Z$1 = 2;
 
 registerReifier('Arc', ({ tags, plan }) => {
   let { start = 0, end = 360 } = getAngle(plan);
+
+  while (start > end) {
+    start -= 360;
+  }
+
   const [scale, middle] = getScale(plan);
   const corner1 = getCorner1(plan);
   const corner2 = getCorner2(plan);

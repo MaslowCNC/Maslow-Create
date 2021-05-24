@@ -16,8 +16,9 @@ const carve = (block, tool = {}, ...shapes) => {
   const depth = max[Z] - min[Z];
   const cuts = Math.ceil(depth / cutDepth);
   const effectiveCutDepth = depth / cuts;
+  // Use sectionProfile when it is fixed.
   return negative
-    .sectionProfile(
+    .section(
       ...each((l) => z.z(l), {
         from: min[Z],
         upto: max[Z],
@@ -33,15 +34,16 @@ function carveMethod(tool, ...shapes) {
 
 Shape.prototype.carve = carveMethod;
 
-const mill = (negative, tool = {}) => {
+const mill = (tool = {}, negative) => {
   const { grbl = {} } = tool;
   const { diameter = 1, cutDepth = 0.2 } = grbl;
   const { max, min } = negative.size();
   const depth = max[Z] - min[Z];
   const cuts = Math.ceil(depth / cutDepth);
   const effectiveCutDepth = depth / cuts;
+  // Use sectionProfile when it is fixed.
   return negative
-    .sectionProfile(
+    .section(
       ...each((l) => z.z(l), {
         from: min[Z],
         upto: max[Z],
@@ -51,8 +53,8 @@ const mill = (negative, tool = {}) => {
     .inset(diameter / 2, diameter / 2);
 };
 
-function millMethod(tool) {
-  return mill(this, tool);
+function millMethod(tool = {}, negative) {
+  return mill(tool, negative);
 }
 
 Shape.prototype.mill = millMethod;

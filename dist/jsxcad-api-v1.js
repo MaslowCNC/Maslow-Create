@@ -264,7 +264,7 @@ const defTool = (name, definition) => define(`tool/${name}`, definition);
 
 const defGrblSpindle = (
   name,
-  { cutDepth = 0.2, rpm, feedRate, diameter, jumpZ = 1 }
+  { cutDepth = 0.2, rpm, feedRate, drillRate, diameter, jumpZ = 1 } = {}
 ) =>
   defTool(name, {
     grbl: {
@@ -272,6 +272,7 @@ const defGrblSpindle = (
       cutDepth,
       cutSpeed: rpm,
       feedRate,
+      drillRate,
       diameter,
       jumpZ,
     },
@@ -281,6 +282,7 @@ const defGrblDynamicLaser = (
   name,
   {
     cutDepth = 0.2,
+    diameter = 0.09,
     jumpPower = 0,
     power = 1000,
     speed = 1000,
@@ -293,6 +295,7 @@ const defGrblDynamicLaser = (
       type: 'dynamicLaser',
       cutDepth,
       cutSpeed: -power,
+      diameter,
       jumpRate: speed,
       jumpSpeed: -jumpPower,
       feedRate: speed,
@@ -305,6 +308,7 @@ const defGrblConstantLaser = (
   name,
   {
     cutDepth = 0.2,
+    diameter = 0.09,
     jumpPower,
     power = 1000,
     speed = 1000,
@@ -317,6 +321,7 @@ const defGrblConstantLaser = (
       type: 'constantLaser',
       cutDepth,
       cutSpeed: power,
+      diameter,
       jumpRate: speed,
       jumpSpeed: jumpPower,
       feedRate: speed,
@@ -324,6 +329,9 @@ const defGrblConstantLaser = (
       warmupSpeed: warmupPower,
     },
   });
+
+const defGrblPlotter = (name, { feedRate = 1000 } = {}) =>
+  defTool(name, { grbl: { type: 'plotter', feedRate, cutSpeed: 1 } });
 
 const card = (strings, ...placeholders) => {
   const card = strings.reduce(
@@ -434,6 +442,7 @@ var api = /*#__PURE__*/Object.freeze({
   define: define,
   defGrblConstantLaser: defGrblConstantLaser,
   defGrblDynamicLaser: defGrblDynamicLaser,
+  defGrblPlotter: defGrblPlotter,
   defGrblSpindle: defGrblSpindle,
   defRgbColor: defRgbColor,
   defThreejsMaterial: defThreejsMaterial,
@@ -588,4 +597,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, emitSourceLocation, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };
+export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, emitSourceLocation, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };
