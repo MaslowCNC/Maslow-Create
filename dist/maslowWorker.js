@@ -289,7 +289,7 @@ const agent = async ({
             const geometryToSvgOutline = await maslowRead(question.readPath);
             
             
-            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.section().fuse().outline().toKeptGeometry());//.fuse().outline());
+            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.align('z').section().fuse().outline().toKeptGeometry());//.fuse().outline());
             return svgOutlineBuffer;
             break;
         case "gcode":
