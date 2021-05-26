@@ -66,7 +66,16 @@ export default class GitHubMolecule extends Molecule {
             valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
         }
         else{
-            valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+            console.log(this.name + " io values:")
+            console.log(this.ioValues)
+            console.log(this.ioValues == undefined)
+            //If there are stored io values to recover
+            if(this.ioValues != undefined){
+                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+            }
+            else{
+                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+            }
         }
         const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)
