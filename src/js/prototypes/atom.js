@@ -368,7 +368,7 @@ export default class Atom {
         let yInPixels = GlobalVariables.heightToPixels(this.y)
         let radiusInPixels = GlobalVariables.widthToPixels(this.radius)
 
-        //If none of the inputs processed the click see if the atom should, if not clicked, then deselect
+        //If none of the inputs processed the click see if the atom should, if not clicked, then deselected
         if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){
             this.isMoving = true
             this.selected = true
@@ -376,7 +376,7 @@ export default class Atom {
             this.sendToRender()
             clickProcessed = true
         }
-        //needs to check if control is down so it doesn't deselect molecules thinking it's a background click
+        //Deselect this if it wasn't clicked on, unless control is held
         else if (!GlobalVariables.ctrlDown){
             this.selected = false
         }         
