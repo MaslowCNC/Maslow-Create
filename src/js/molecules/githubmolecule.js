@@ -66,7 +66,13 @@ export default class GitHubMolecule extends Molecule {
             valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
         }
         else{
-            valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+            //If there are stored io values to recover
+            if(this.ioValues != undefined){
+                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+            }
+            else{
+                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+            }
         }
         const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)
@@ -93,6 +99,24 @@ export default class GitHubMolecule extends Molecule {
             this.beginPropagation()
         })
         this.updateSidebar()
+    }
+    
+    /**
+     * Starts propagation from this atom if it is not waiting for anything up stream.
+     */ 
+    beginPropagation(){
+        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        if(!GlobalVariables.availablePaths.includes(this.path)){
+            //Triggers inputs with nothing connected to begin propagation
+            this.inputs.forEach(input => {
+                input.beginPropagation()
+            })
+        }
+        
+        //Tell every atom inside this molecule to begin Propagation
+        this.nodesOnTheScreen.forEach(node => {
+            node.beginPropagation()
+        })
     }
     
     /**

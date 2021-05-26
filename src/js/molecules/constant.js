@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the constant atom instance which can be used to define a numerical constant.
@@ -85,12 +86,21 @@ export default class Constant extends Atom{
     }
     
     /**
-     * Starts propagation from this constant.
+     * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    // beginPropagation(){
-    // this.output.setValue(this.value)
-    // }
+    beginPropagation(){
+        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        if(!GlobalVariables.availablePaths.includes(this.path)){
+            //Triggers inputs with nothing connected to begin propagation
+            this.inputs.forEach(input => {
+                input.beginPropagation()
+            })
+        }
+    }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         return this.value
     }
