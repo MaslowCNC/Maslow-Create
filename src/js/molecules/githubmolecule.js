@@ -73,7 +73,26 @@ export default class GitHubMolecule extends Molecule {
         })
         return promsie
     }
-
+    
+    /**
+     * Reload this github molecule from github
+     */
+    reloadMolecule(){
+        console.log("Reloading github molecule")
+        console.log(this.projectID)
+        
+        //Delete everything currently inside...Make a copy to prevent index issues
+        const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
+        copyOfNodesOnTheScreen.forEach(node => {
+            node.deleteNode()
+        })
+        
+        //Re-serialize this molecule
+        this.loadProjectByID(this.projectID).then( ()=> {
+            this.beginPropagation()
+        })
+    }
+    
     /**
      * Updates sidebar with buttons for user in runMode
      */
@@ -94,6 +113,9 @@ export default class GitHubMolecule extends Molecule {
             this.createButton(list, this, "Star", ()=>{
                 GlobalVariables.gitHub.starProject(this.projectID)
             })
+        }
+        else{
+            this.createButton(list, this, "Reload", ()=>{this.reloadMolecule()})
         }
     }
     
