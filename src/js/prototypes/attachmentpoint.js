@@ -460,6 +460,7 @@ export default class AttachmentPoint {
         //If nothing is connected it is a starting point
         if(this.connectors.length == 0){
             this.setValue(this.value)
+            console.log("Beginning propogation from " + this.name)
         }
     }
     
