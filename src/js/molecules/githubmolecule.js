@@ -78,8 +78,6 @@ export default class GitHubMolecule extends Molecule {
      * Reload this github molecule from github
      */
     reloadMolecule(){
-        console.log("Reloading github molecule")
-        console.log(this.projectID)
         
         //Delete everything currently inside...Make a copy to prevent index issues
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
