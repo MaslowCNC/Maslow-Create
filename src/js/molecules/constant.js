@@ -98,6 +98,9 @@ export default class Constant extends Atom{
         }
     }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         return this.value
     }
