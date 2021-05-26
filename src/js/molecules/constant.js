@@ -1,4 +1,5 @@
 import Atom from '../prototypes/atom'
+import GlobalVariables from '../globalvariables.js'
 
 /**
  * This class creates the constant atom instance which can be used to define a numerical constant.
