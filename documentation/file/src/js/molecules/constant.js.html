@@ -77,6 +77,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/molecules/constant.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Atom from &apos;../prototypes/atom&apos;
+import GlobalVariables from &apos;../globalvariables.js&apos;
 
 /**
  * This class creates the constant atom instance which can be used to define a numerical constant.
@@ -163,12 +164,21 @@ export default class Constant extends Atom{
     }
     
     /**
-     * Starts propagation from this constant.
+     * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    // beginPropagation(){
-    // this.output.setValue(this.value)
-    // }
+    beginPropagation(){
+        //Check to see if a value already exists. Generate it if it doesn&apos;t. Only do this for circles and rectangles
+        if(!GlobalVariables.availablePaths.includes(this.path)){
+            //Triggers inputs with nothing connected to begin propagation
+            this.inputs.forEach(input =&gt; {
+                input.beginPropagation()
+            })
+        }
+    }
     
+    /**
+     * Sets all the input and output values to match their associated atoms.
+     */ 
     loadTree(){
         return this.value
     }
