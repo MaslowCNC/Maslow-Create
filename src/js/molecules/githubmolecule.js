@@ -86,7 +86,7 @@ export default class GitHubMolecule extends Molecule {
         })
         
         //Deleting nodes background clicks on the host molecule so we want to bring the focus back to this atom by deslecting the top level molecule...a bit of a hack
-        GlobalVariables.topLevelMolecule.selected = false;
+        GlobalVariables.topLevelMolecule.selected = false
         
         //Re-serialize this molecule
         this.loadProjectByID(this.projectID).then( ()=> {
