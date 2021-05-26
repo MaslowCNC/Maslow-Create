@@ -35,7 +35,6 @@ export default class Circle extends Atom {
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(){
-        
         //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
         if(!GlobalVariables.availablePaths.includes(this.path)){
             //Triggers inputs with nothing connected to begin propagation
