@@ -233,11 +233,6 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(node => {
             node.beginPropagation()
         })
-        
-        // Catch the corner case where this has no inputs which means it won't be marked as processing by super
-        // if(this.inputs.length == 0){
-        // this.processing = true
-        // }
     }
     
     /**

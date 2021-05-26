@@ -78,8 +78,6 @@ export default class GitHubMolecule extends Molecule {
      * Reload this github molecule from github
      */
     reloadMolecule(){
-        console.log("Reloading github molecule")
-        console.log(this.projectID)
         
         //Delete everything currently inside...Make a copy to prevent index issues
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
@@ -87,10 +85,14 @@ export default class GitHubMolecule extends Molecule {
             node.deleteNode()
         })
         
+        //Deleting nodes background clicks on the host molecule so we want to bring the focus back to this atom by deslecting the top level molecule...a bit of a hack
+        GlobalVariables.topLevelMolecule.selected = false;
+        
         //Re-serialize this molecule
         this.loadProjectByID(this.projectID).then( ()=> {
             this.beginPropagation()
         })
+        this.updateSidebar()
     }
     
     /**
