@@ -145,6 +145,8 @@ export default class Equation extends Atom {
                 this.output.setValue(this.value)
                 this.output.ready = true
             }
+            
+            this.updateSidebar()
         }catch(err){
             console.warn(err)
             this.setAlert(err)
