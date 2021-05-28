@@ -25,6 +25,11 @@ export default class Color extends Atom {
          * @type {string}
          */
         this.atomType = 'Color'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Changes the color of the shape."
         
         /**
          * The color options to choose from

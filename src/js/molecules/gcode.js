@@ -28,7 +28,13 @@ export default class Gcode extends Atom {
         /**
          * This atom's height as drawn on the screen
          */
+         
         this.height = 16
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Generates Maslow gcode from the input geometry."
         /**
          * The generated gcode string
          * @type {string}

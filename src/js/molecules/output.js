@@ -54,6 +54,11 @@ export default class Output extends Atom {
          * @type {number}
          */
         this.awaitingPropagationFlag = false
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Connect geometry here to make it available in the next level up. "
         
         this.setValues(values)
         

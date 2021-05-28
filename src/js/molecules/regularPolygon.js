@@ -27,6 +27,11 @@ export default class RegularPolygon extends Atom {
          * @type {string}
          */
         this.atomType = 'RegularPolygon'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Creates a new regular polygon. Corners are on the diameter."
         
         this.setValues(values)
     }

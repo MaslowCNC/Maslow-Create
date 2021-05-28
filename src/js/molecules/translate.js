@@ -29,6 +29,11 @@ export default class Translate extends Atom{
          * @type {string}
          */
         this.atomType = 'Translate'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Moves a shape laterally in X, Y, Z."
         
         this.setValues(values)
     }

@@ -25,6 +25,11 @@ export default class Code extends Atom {
          * @type {string}
          */
         this.atomType = "Code"
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Defines a JSxCAD code block."
         /**
          * The code contained within the atom stored as a string.
          * @type {string}

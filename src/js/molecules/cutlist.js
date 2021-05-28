@@ -26,6 +26,11 @@ export default class CutList extends Atom{
          * @type {string}
          */
         this.atomType = 'cutList'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Adds a part to the cut list so that it will be included in the cut layout."
         
         this.setValues(values)
         /** 

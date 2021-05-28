@@ -27,6 +27,11 @@ export default class Intersection extends Atom {
          * @type {string}
          */
         this.atomType = 'Intersection'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "The space shared by two shapes."
         
         this.setValues(values)
     }

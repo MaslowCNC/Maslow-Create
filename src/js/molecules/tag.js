@@ -31,6 +31,11 @@ export default class Tag extends Atom{
          * This atom's height as drawn on the screen
          */
         this.height
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Tags geometry so that it can be extracted later."
         
         this.setValues(values)
     }
