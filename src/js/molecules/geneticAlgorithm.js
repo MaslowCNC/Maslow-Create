@@ -25,6 +25,11 @@ export default class GeneticAlgorithm extends Atom {
          * @type {string}
          */
         this.atomType = 'Genetic Algorithm'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Defines a new genetic algorithm which will simulate evolution to maximize the fitness function using the input population size and number of generations. Only constants which are upstream of this atom with evolve checked will be changed."
         
         /**
          * An array of constant objects which need to be evolved

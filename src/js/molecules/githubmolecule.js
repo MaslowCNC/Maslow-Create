@@ -33,6 +33,11 @@ export default class GitHubMolecule extends Molecule {
          * @type {string}
          */
         this.centerColor = 'black'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Project imported from GitHub"
         
         this.setValues(values)
     }

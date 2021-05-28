@@ -31,6 +31,11 @@ export default class ExtractTag extends Atom{
          * @type {string}
          */
         this.name = 'Extract Tag'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Extracts geometry containing the specified tag."
         
         this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('input', 'tag', this, 'string', 'Tag String')

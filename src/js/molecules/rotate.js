@@ -30,6 +30,11 @@ export default class Rotate extends Atom {
          * @type {string}
          */
         this.atomType = 'Rotate'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Rotates the input geometry around the X, Y, or Z axis. Inputs are degrees."
         
         this.setValues(values)
     }

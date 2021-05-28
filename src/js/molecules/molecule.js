@@ -33,6 +33,11 @@ export default class Molecule extends Atom{
          */
         this.name = 'Molecule'
         /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Molecules provide an organizational structure to contain atoms. Double click on a molecule to enter it. Use the up arrow in the upper right hand corner of the screen to go up one level."
+        /** 
          * This atom's type
          * @type {string}
          */

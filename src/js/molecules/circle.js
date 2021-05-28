@@ -24,7 +24,10 @@ export default class Circle extends Atom {
          * @type {string}
          */
         this.atomType = 'Circle'
-        
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
         this.description = "Creates a new circle."
         
         this.addIO('input', 'diameter', this, 'number', 10)

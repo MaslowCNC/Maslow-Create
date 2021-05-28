@@ -27,6 +27,11 @@ export default class Rectangle extends Atom {
          * @type {string}
          */
         this.atomType = 'Rectangle'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Creates a new rectangle."
         
         this.setValues(values)
     }

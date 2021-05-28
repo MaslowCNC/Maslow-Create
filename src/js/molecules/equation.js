@@ -31,6 +31,11 @@ export default class Equation extends Atom {
          * Evaluate the equation adding and removing inputs as needed
          */ 
         this.value = 0
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Defines a mathematical equation. Edit the output field to add or remove inputs."
         
         /**
          * This atom's height as drawn on the screen

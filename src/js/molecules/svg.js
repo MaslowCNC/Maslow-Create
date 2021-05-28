@@ -31,6 +31,11 @@ export default class Svg extends Atom {
          * @type {string}
          */
         this.value = null
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Exports an svg of the input geometry. Before generating an SVG the shape will be moved rest on the XY plane and the outline will be generated."
 
         /**
          * This atom's height as drawn on the screen

@@ -35,6 +35,11 @@ export default class Assembly extends Atom{
          * @type {boolean}
          */
         this.removeCutawayGeometry = true
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Assembles multiple shapes together into one. Shapes higher in the inputs list will cut into shapes lower on the input list where they overlap."
         
         this.setValues(values)
         

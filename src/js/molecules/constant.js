@@ -28,6 +28,11 @@ export default class Constant extends Atom{
          * @type {string}
          */
         this.atomType = 'Constant'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Defines a mathematical constant."
         /**
          * This atom's height as drawn on the screen
          */
