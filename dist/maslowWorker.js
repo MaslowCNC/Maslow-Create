@@ -285,11 +285,19 @@ const agent = async ({
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
             break;
+        case "outline":
+            const geometryToOutline = await maslowRead(question.readPath);
+            
+            const outlineShape = geometryToOutline.align('z').section().fuse().outline();
+            await api.saveGeometry(question.writePath, outlineShape);
+            
+            
+            return true
+            break;
         case "svgOutline":
             const geometryToSvgOutline = await maslowRead(question.readPath);
             
-            
-            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.align('z').section().fuse().outline().toKeptGeometry());//.fuse().outline());
+            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.toKeptGeometry());
             return svgOutlineBuffer;
             break;
         case "gcode":

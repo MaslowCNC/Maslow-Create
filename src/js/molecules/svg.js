@@ -74,13 +74,15 @@ export default class Svg extends Atom {
     
     
     /**
-     * Set the value to be the input geometry, then call super updateValue()
+     * Compute the outline
      */ 
     updateValue(){
-        // try{
-        // const values = [this.findIOValue('geometry')]
-        // this.basicThreadValueProcessing(values, "outline")
-        // }catch(err){this.setAlert(err)}
+        try{
+            var inputPath = this.findIOValue('geometry')
+            const values = { key: "outline", readPath: inputPath, writePath: this.path }
+            
+            this.basicThreadValueProcessing(values)
+        }catch(err){this.setAlert(err)}
     }
     
     /**
@@ -96,7 +98,7 @@ export default class Svg extends Atom {
      */ 
     downloadSvg(){
         try{
-            const values = {key: "svgOutline", readPath: this.findIOValue('geometry')}
+            const values = {key: "svgOutline", readPath: this.path}
             window.ask(values).then( answer => {
                 
                 //var enc = new TextDecoder("utf-8");
