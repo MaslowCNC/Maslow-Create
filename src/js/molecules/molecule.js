@@ -226,13 +226,15 @@ export default class Molecule extends Atom{
         if(this.output){
             if(this.simplify){
                 try{
-                    const values = {key: "simplify", readPath: this.path, writePath: this.path}
+                    this.processing = true
+                    const values = {key: "simplify", readPath: this.inputPath, writePath: this.path}
                     window.ask(values).then( answer => {
                         this.output.setValue(this.path)
                         this.output.ready = true
                         if(this.selected){
                             this.sendToRender()
                         }
+                        this.processing = false
                     })
                 }catch(err){this.setAlert(err)}
             }
@@ -284,6 +286,17 @@ export default class Molecule extends Atom{
      */
     simplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
+        if(this.simplify){
+            this.inputPath = this.path
+            this.generatePath() //Resets the molecule path to be something unique
+        }
+        else{  //Changes the path back to be the output atom
+            this.nodesOnTheScreen.forEach(atom => {
+                if(atom.atomType == "Output"){
+                    atom.loadTree()
+                }
+            })
+        }
         this.propogate()
     }
     
@@ -328,7 +341,7 @@ export default class Molecule extends Atom{
         })
         
         //Add the check box to simplify
-        this.createCheckbox(valueList,"Simplify",this.simplify,(anEvent)=>{this.simplifyFlag(anEvent)})
+        this.createCheckbox(valueList,"Simplify output",this.simplify,(anEvent)=>{this.simplifyFlag(anEvent)})
         
         //Only bother to generate the bom if we are not currently processing data
         if(this.toProcess == 0){
