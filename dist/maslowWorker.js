@@ -168,14 +168,19 @@ const agent = async ({
                   ...s.map((e) =>
                     e.size(({ min, max }) => {
                       const tags = e.toGeometry().tags;
-                      const rBox = api.Box()
-                        .c1(...min)
-                        .c2(...max);
-                      const coloredBox = api.Shape.fromGeometry({
-                        ...rBox.toGeometry(),
-                        tags: tags,
-                      });
-                      return coloredBox;
+                      if(tags.includes("user/Do not simplify")){
+                          return e;
+                      }
+                      else{
+                          const rBox = api.Box()
+                            .c1(...min)
+                            .c2(...max);
+                          const coloredBox = api.Shape.fromGeometry({
+                            ...rBox.toGeometry(),
+                            tags: tags,
+                          });
+                          return coloredBox;
+                      }
                     })
                   )
                 )
