@@ -53,6 +53,11 @@ export default class Molecule extends Atom{
          */
         this.topLevel = false
         /** 
+         * A flag to indicate if this molecule should simplify it's output.
+         * @type {boolean}
+         */
+        this.simplify = false
+        /** 
          * A list of things which should be displayed on the the top level sideBar when in toplevel mode.
          * @type {array}
          */
@@ -219,8 +224,22 @@ export default class Molecule extends Atom{
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
         if(this.output){
-            this.output.setValue(this.path)
-            this.output.ready = true
+            if(this.simplify){
+                try{
+                    const values = {key: "simplify", readPath: this.path, writePath: this.path}
+                    window.ask(values).then( answer => {
+                        this.output.setValue(this.path)
+                        this.output.ready = true
+                        if(this.selected){
+                            this.sendToRender()
+                        }
+                    })
+                }catch(err){this.setAlert(err)}
+            }
+            else{
+                this.output.setValue(this.path)
+                this.output.ready = true
+            }
         }
         
         //If this molecule is selected, send the updated value to the renderer
@@ -242,7 +261,7 @@ export default class Molecule extends Atom{
     
     /**
      * Walks through each of the atoms in this molecule and takes a census of how many there are and how many are currently waiting to be processed.
-     */ 
+     */
     census(){
         this.totalAtomCount = 0
         this.toProcess = 0
@@ -258,6 +277,14 @@ export default class Molecule extends Atom{
         }
         
         return [this.totalAtomCount, this.toProcess]
+    }
+    
+    /**
+     * Called when the simplify check box is checked or unchecked.
+     */
+    simplifyFlag(anEvent){
+        this.simplify = anEvent.target.checked
+        this.propogate()
     }
     
     /**
@@ -299,6 +326,9 @@ export default class Molecule extends Atom{
                 this.createEditableValueListItem(valueList,child,'value', child.name, true)
             }
         })
+        
+        //Add the check box to simplify
+        this.createCheckbox(valueList,"Simplify",this.simplify,(anEvent)=>{this.simplifyFlag(anEvent)})
         
         //Only bother to generate the bom if we are not currently processing data
         if(this.toProcess == 0){
