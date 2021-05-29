@@ -66,7 +66,7 @@ export default class Translate extends Atom{
     }
     /**
      * Pass the input geometry to a worker function to compute the translation.
-     */ 
+     */
     updateValue(){
         if(this.inputs.every(x => x.ready)){
             try{

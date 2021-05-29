@@ -120,6 +120,7 @@ export default class Molecule extends Atom{
         //draw the circle in the middle
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = this.centerColor
+        GlobalVariables.c.moveTo(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y))
         GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), GlobalVariables.heightToPixels(this.y), GlobalVariables.widthToPixels(this.radius)/2, 0, percentLoaded*Math.PI * 2, false)
         GlobalVariables.c.closePath()
         GlobalVariables.c.fill()
