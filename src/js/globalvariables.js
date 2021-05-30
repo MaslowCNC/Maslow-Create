@@ -29,7 +29,6 @@ import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
-import Simplify         from './molecules/simplify.js'
 import Group            from './molecules/group.js'
 import GitHubModule     from './githubOauth'
 
@@ -89,7 +88,6 @@ class GlobalVariables{
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
             translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
-            simplify:           {creator: Simplify, atomType: 'Simplify', atomCategory: 'Actions'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
 
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
