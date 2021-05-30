@@ -259,6 +259,12 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(node => {
             node.beginPropagation()
         })
+        
+        //Generate the simplified path if needed
+        if(this.simplify){
+            this.inputPath = this.path
+            this.generatePath()
+        }
     }
     
     /**

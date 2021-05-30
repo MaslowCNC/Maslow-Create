@@ -119,9 +119,7 @@ export default class GitHubMolecule extends Molecule {
         }
         
         //Tell every atom inside this molecule to begin Propagation
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropagation()
-        })
+        super.beginPropagation()
     }
     
     /**
