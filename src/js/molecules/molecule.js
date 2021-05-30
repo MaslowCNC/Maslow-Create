@@ -294,7 +294,7 @@ export default class Molecule extends Atom{
     /**
      * Called when the simplify check box is checked or unchecked.
      */
-    simplifyFlag(anEvent){
+    setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
         if(this.simplify){
             this.inputPath = this.path
@@ -351,7 +351,7 @@ export default class Molecule extends Atom{
         })
         
         //Add the check box to simplify
-        this.createCheckbox(valueList,"Simplify output",this.simplify,(anEvent)=>{this.simplifyFlag(anEvent)})
+        this.createCheckbox(valueList,"Simplify output",this.simplify,(anEvent)=>{this.setSimplifyFlag(anEvent)})
         
         //Only bother to generate the bom if we are not currently processing data
         if(this.toProcess == 0){

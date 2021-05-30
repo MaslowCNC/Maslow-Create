@@ -162,8 +162,6 @@ const agent = async ({
             return 1;
             break;
          case "simplify":
-            console.log("Simplifying: ");
-            console.log(question.readPath);
             const aShape2Smiplify = await maslowRead(question.readPath);
             const simplified = aShape2Smiplify.noVoid().each((s) =>
                 api.Group(
