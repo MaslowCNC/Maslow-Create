@@ -228,7 +228,7 @@ export default class Molecule extends Atom{
                 try{
                     this.processing = true
                     const values = {key: "simplify", readPath: this.inputPath, writePath: this.path}
-                    window.ask(values).then( answer => {
+                    window.ask(values).then( () => {
                         this.output.setValue(this.path)
                         this.output.ready = true
                         if(this.selected){
