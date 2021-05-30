@@ -551,6 +551,7 @@ export default class Molecule extends Atom{
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
         thisAsObject.fileTypeVersion = 1
+        thisAsObject.simplify= this.simplify
         
         return thisAsObject
     }

@@ -174,7 +174,8 @@ export default class GitHubMolecule extends Molecule {
             y: this.y,
             uniqueID: this.uniqueID,
             projectID: this.projectID,
-            ioValues: ioValues
+            ioValues: ioValues,
+            simplify: this.simplify
         }
         
         return object
