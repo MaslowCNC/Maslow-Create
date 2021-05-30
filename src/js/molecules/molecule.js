@@ -262,6 +262,10 @@ export default class Molecule extends Atom{
         
         //Generate the simplified path if needed
         if(this.simplify){
+            /** 
+             * Keeps a reference to the input path
+             * @type {string}
+             */
             this.inputPath = this.path
             this.generatePath()
         }
