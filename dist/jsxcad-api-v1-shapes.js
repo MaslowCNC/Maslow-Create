@@ -1,4 +1,4 @@
-import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, measureBoundingBox, taggedLayout, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
+import { taggedPlan, registerReifier, taggedDisjointAssembly, taggedLayers, taggedPaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, taggedAssembly, taggedGraph, taggedPoints } from './jsxcad-geometry-tagged.js';
 import Shape$1, { Shape, shapeMethod, weld } from './jsxcad-api-v1-shape.js';
 import { scale, subtract, add, negate } from './jsxcad-math-vec3.js';
 import { identity } from './jsxcad-math-mat4.js';
@@ -1639,11 +1639,14 @@ const Page = (
       layers.push(leaf);
     }
   }
-  if (!pack) {
+  if (!pack && size) {
     const layer = taggedLayers({}, ...layers);
-    const packSize = measureBoundingBox(layer);
+    const [width, height] = size;
+    const packSize = [
+      [-width / 2, -height / 2, 0],
+      [width / 2, height / 2, 0],
+    ];
     const pageWidth =
-      // Math.max(1, packSize[MAX][X] - packSize[MIN][X]) + pageMargin * 2;
       Math.max(
         1,
         Math.abs(packSize[MAX][X$1] * 2),
@@ -1651,7 +1654,6 @@ const Page = (
       ) +
       pageMargin * 2;
     const pageLength =
-      // Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]) + pageMargin * 2;
       Math.max(
         1,
         Math.abs(packSize[MAX][Y$1] * 2),
@@ -1661,7 +1663,27 @@ const Page = (
     return Shape$1.fromGeometry(
       buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
     );
-  } else if (size) {
+  } else if (!pack && !size) {
+    const layer = taggedLayers({}, ...layers);
+    const packSize = measureBoundingBox(layer);
+    const pageWidth =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X$1] * 2),
+        Math.abs(packSize[MIN][X$1] * 2)
+      ) +
+      pageMargin * 2;
+    const pageLength =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y$1] * 2),
+        Math.abs(packSize[MIN][Y$1] * 2)
+      ) +
+      pageMargin * 2;
+    return Shape$1.fromGeometry(
+      buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin })
+    );
+  } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
     const content = Shape$1.fromGeometry(taggedLayers({}, ...layers)).pack({
@@ -1683,7 +1705,7 @@ const Page = (
       );
     }
     return Shape$1.fromGeometry(taggedLayers({}, ...plans));
-  } else {
+  } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
     const content = Shape$1.fromGeometry(taggedLayers({}, ...layers)).pack({

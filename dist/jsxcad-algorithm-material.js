@@ -30,8 +30,6 @@ const standardMaterialDefinitions = {
   },
   'material/color': {
     threejsMaterial: {
-      metalness: 0.0,
-      roughness: 0.9,
       reflectivity: 0.1,
       emissiveIntensity: 0.25,
     },

@@ -105,6 +105,7 @@ const downloadStlMethod = function (name, options) {
   return this;
 };
 Shape$1.prototype.downloadStl = downloadStlMethod;
+Shape$1.prototype.stl = downloadStlMethod;
 
 const writeStl = (shape, name, options = {}) => {
   for (const { data, filename } of prepareStl(shape, name, {})) {

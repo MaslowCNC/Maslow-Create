@@ -3438,6 +3438,58 @@ const db = () => {
   return dbInstance;
 };
 
+const modules = [];
+
+const getModule = () => modules[modules.length - 1];
+
+const popModule = () => modules.pop();
+
+const pushModule = (module) => modules.push(module);
+
+const emitted = [];
+
+let context;
+
+let startTime$1 = new Date();
+
+const elapsed = () => new Date() - startTime$1;
+
+const clearEmitted = () => {
+  startTime$1 = new Date();
+  emitted.length = 0;
+  context = undefined;
+};
+
+const onEmitHandlers = new Set();
+
+const emit$1 = (value) => {
+  if (value.module === undefined) {
+    value.module = getModule();
+  }
+  if (value.setContext) {
+    context = value.setContext;
+  }
+  if (context) {
+    value.context = context;
+  }
+  const index = emitted.length;
+  emitted.push(value);
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler(value, index);
+  }
+};
+
+const getEmitted = () => [...emitted];
+
+const addOnEmitHandler = (handler) => {
+  onEmitHandlers.add(handler);
+  return handler;
+};
+
+const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
+
+const info = (text) => emit$1({ info: text });
+
 var nodeFetch = _ => _;
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -3625,12 +3677,14 @@ const fetchSources = async (sources) => {
       try {
         if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
+          info(`Fetching url ${source}`);
           const response = await fetchUrl(source, { cache: 'reload' });
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
           }
         } else {
           log({ op: 'text', text: `# Fetching ${source}` });
+          info(`Fetching file ${source}`);
           // Assume a file path.
           const data = await fetchFile(source);
           if (data !== undefined) {
@@ -3661,6 +3715,7 @@ const readFile = async (options, path) => {
     setupFilesystem({ fileBase: workspace });
   } else {
     log({ op: 'text', text: `Read ${path}` });
+    // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false) {
@@ -3794,56 +3849,6 @@ const boot = async () => {
   }
 };
 
-const modules = [];
-
-const getModule = () => modules[modules.length - 1];
-
-const popModule = () => modules.pop();
-
-const pushModule = (module) => modules.push(module);
-
-const emitted = [];
-
-let context;
-
-let startTime$1 = new Date();
-
-const elapsed = () => new Date() - startTime$1;
-
-const clearEmitted = () => {
-  startTime$1 = new Date();
-  emitted.length = 0;
-  context = undefined;
-};
-
-const onEmitHandlers = new Set();
-
-const emit$1 = (value) => {
-  if (value.module === undefined) {
-    value.module = getModule();
-  }
-  if (value.setContext) {
-    context = value.setContext;
-  }
-  if (context) {
-    value.context = context;
-  }
-  const index = emitted.length;
-  emitted.push(value);
-  for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value, index);
-  }
-};
-
-const getEmitted = () => [...emitted];
-
-const addOnEmitHandler = (handler) => {
-  onEmitHandlers.add(handler);
-  return handler;
-};
-
-const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
-
 const getDefinitions = () => {
   const definitions = {};
   for (const note of getEmitted()) {
@@ -3963,4 +3968,4 @@ const deleteFile$1 = async (options, path) => {
   await deleteFile(options, path);
 };
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, elapsed, emit$1 as emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, elapsed, emit$1 as emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
