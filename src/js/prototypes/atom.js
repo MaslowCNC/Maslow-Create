@@ -356,8 +356,6 @@ export default class Atom {
             if(yInPixels >= yIn && yInPixels <= yOut){
                 //this.isMoving = true
                 this.selected = true
-                this.updateSidebar()
-                this.sendToRender()
             }
         }
     }
