@@ -81,6 +81,7 @@ export default class GitHubMolecule extends Molecule {
         }
         const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)
+            this.loadTree()
         })
         return promsie
     }
