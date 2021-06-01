@@ -107,6 +107,11 @@ export default class Translate extends Atom{
          * @type {string}
          */
         this.atomType = &apos;Translate&apos;
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = &quot;Moves a shape laterally in X, Y, Z.&quot;
         
         this.setValues(values)
     }
@@ -139,7 +144,7 @@ export default class Translate extends Atom{
     }
     /**
      * Pass the input geometry to a worker function to compute the translation.
-     */ 
+     */
     updateValue(){
         if(this.inputs.every(x =&gt; x.ready)){
             try{

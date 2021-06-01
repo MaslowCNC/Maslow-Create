@@ -810,6 +810,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/bom.js~addbomtag#description",
+    "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-member-description",
+    "src/js/molecules/BOM.js~AddBOMTag#description",
+    "member"
+  ],
+  [
     "src/js/molecules/bom.js~addbomtag#draw",
     "class/src/js/molecules/BOM.js~AddBOMTag.html#instance-method-draw",
     "src/js/molecules/BOM.js~AddBOMTag#draw",
@@ -880,6 +886,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/assembly.js~Assembly.html#instance-constructor-constructor",
     "src/js/molecules/assembly.js~Assembly#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/assembly.js~assembly#description",
+    "class/src/js/molecules/assembly.js~Assembly.html#instance-member-description",
+    "src/js/molecules/assembly.js~Assembly#description",
+    "member"
   ],
   [
     "src/js/molecules/assembly.js~assembly#draw",
@@ -1032,6 +1044,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/circle.js~circle#description",
+    "class/src/js/molecules/circle.js~Circle.html#instance-member-description",
+    "src/js/molecules/circle.js~Circle#description",
+    "member"
+  ],
+  [
     "src/js/molecules/circle.js~circle#draw",
     "class/src/js/molecules/circle.js~Circle.html#instance-method-draw",
     "src/js/molecules/circle.js~Circle#draw",
@@ -1072,6 +1090,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/code.js~Code.html#instance-constructor-constructor",
     "src/js/molecules/code.js~Code#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/code.js~code#description",
+    "class/src/js/molecules/code.js~Code.html#instance-member-description",
+    "src/js/molecules/code.js~Code#description",
+    "member"
   ],
   [
     "src/js/molecules/code.js~code#doubleclick",
@@ -1152,6 +1176,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/color.js~color#description",
+    "class/src/js/molecules/color.js~Color.html#instance-member-description",
+    "src/js/molecules/color.js~Color#description",
+    "member"
+  ],
+  [
     "src/js/molecules/color.js~color#draw",
     "class/src/js/molecules/color.js~Color.html#instance-method-draw",
     "src/js/molecules/color.js~Color#draw",
@@ -1210,6 +1240,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/constant.js~Constant.html#instance-constructor-constructor",
     "src/js/molecules/constant.js~Constant#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#description",
+    "class/src/js/molecules/constant.js~Constant.html#instance-member-description",
+    "src/js/molecules/constant.js~Constant#description",
+    "member"
   ],
   [
     "src/js/molecules/constant.js~constant#draw",
@@ -1308,6 +1344,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/cutlayout.js~cutlayout#description",
+    "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-member-description",
+    "src/js/molecules/cutlayout.js~CutLayout#description",
+    "member"
+  ],
+  [
     "src/js/molecules/cutlayout.js~cutlayout#draw",
     "class/src/js/molecules/cutlayout.js~CutLayout.html#instance-method-draw",
     "src/js/molecules/cutlayout.js~CutLayout#draw",
@@ -1348,6 +1390,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/cutlist.js~CutList.html#instance-constructor-constructor",
     "src/js/molecules/cutlist.js~CutList#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/cutlist.js~cutlist#description",
+    "class/src/js/molecules/cutlist.js~CutList.html#instance-member-description",
+    "src/js/molecules/cutlist.js~CutList#description",
+    "member"
   ],
   [
     "src/js/molecules/cutlist.js~cutlist#draw",
@@ -1398,6 +1446,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/difference.js~difference#description",
+    "class/src/js/molecules/difference.js~Difference.html#instance-member-description",
+    "src/js/molecules/difference.js~Difference#description",
+    "member"
+  ],
+  [
     "src/js/molecules/difference.js~difference#draw",
     "class/src/js/molecules/difference.js~Difference.html#instance-method-draw",
     "src/js/molecules/difference.js~Difference#draw",
@@ -1443,6 +1497,12 @@ window.esdocSearchIndex = [
     "src/js/molecules/equation.js~equation#currentequation",
     "class/src/js/molecules/equation.js~Equation.html#instance-member-currentEquation",
     "src/js/molecules/equation.js~Equation#currentEquation",
+    "member"
+  ],
+  [
+    "src/js/molecules/equation.js~equation#description",
+    "class/src/js/molecules/equation.js~Equation.html#instance-member-description",
+    "src/js/molecules/equation.js~Equation#description",
     "member"
   ],
   [
@@ -1524,6 +1584,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/extracttag.js~extracttag#description",
+    "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-member-description",
+    "src/js/molecules/extracttag.js~ExtractTag#description",
+    "member"
+  ],
+  [
     "src/js/molecules/extracttag.js~extracttag#draw",
     "class/src/js/molecules/extracttag.js~ExtractTag.html#instance-method-draw",
     "src/js/molecules/extracttag.js~ExtractTag#draw",
@@ -1572,6 +1638,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/extrude.js~extrude#description",
+    "class/src/js/molecules/extrude.js~Extrude.html#instance-member-description",
+    "src/js/molecules/extrude.js~Extrude#description",
+    "member"
+  ],
+  [
     "src/js/molecules/extrude.js~extrude#draw",
     "class/src/js/molecules/extrude.js~Extrude.html#instance-method-draw",
     "src/js/molecules/extrude.js~Extrude#draw",
@@ -1606,6 +1678,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/gcode.js~Gcode.html#instance-constructor-constructor",
     "src/js/molecules/gcode.js~Gcode#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/gcode.js~gcode#description",
+    "class/src/js/molecules/gcode.js~Gcode.html#instance-member-description",
+    "src/js/molecules/gcode.js~Gcode#description",
+    "member"
   ],
   [
     "src/js/molecules/gcode.js~gcode#downloadgcode",
@@ -1696,6 +1774,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-constructor-constructor",
     "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/geneticalgorithm.js~geneticalgorithm#description",
+    "class/src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm.html#instance-member-description",
+    "src/js/molecules/geneticAlgorithm.js~GeneticAlgorithm#description",
+    "member"
   ],
   [
     "src/js/molecules/geneticalgorithm.js~geneticalgorithm#draw",
@@ -1806,6 +1890,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/githubmolecule.js~githubmolecule#description",
+    "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-member-description",
+    "src/js/molecules/githubmolecule.js~GitHubMolecule#description",
+    "member"
+  ],
+  [
     "src/js/molecules/githubmolecule.js~githubmolecule#loadprojectbyid",
     "class/src/js/molecules/githubmolecule.js~GitHubMolecule.html#instance-method-loadProjectByID",
     "src/js/molecules/githubmolecule.js~GitHubMolecule#loadProjectByID",
@@ -1864,6 +1954,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/group.js~Group.html#instance-constructor-constructor",
     "src/js/molecules/group.js~Group#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/group.js~group#description",
+    "class/src/js/molecules/group.js~Group.html#instance-member-description",
+    "src/js/molecules/group.js~Group#description",
+    "member"
   ],
   [
     "src/js/molecules/group.js~group#draw",
@@ -1930,6 +2026,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/input.js~Input.html#instance-method-deleteNode",
     "src/js/molecules/input.js~Input#deleteNode",
     "method"
+  ],
+  [
+    "src/js/molecules/input.js~input#description",
+    "class/src/js/molecules/input.js~Input.html#instance-member-description",
+    "src/js/molecules/input.js~Input#description",
+    "member"
   ],
   [
     "src/js/molecules/input.js~input#draw",
@@ -2022,6 +2124,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/intersection.js~intersection#description",
+    "class/src/js/molecules/intersection.js~Intersection.html#instance-member-description",
+    "src/js/molecules/intersection.js~Intersection#description",
+    "member"
+  ],
+  [
     "src/js/molecules/intersection.js~intersection#draw",
     "class/src/js/molecules/intersection.js~Intersection.html#instance-method-draw",
     "src/js/molecules/intersection.js~Intersection#draw",
@@ -2112,6 +2220,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#description",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-description",
+    "src/js/molecules/molecule.js~Molecule#description",
+    "member"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#deselect",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-deselect",
     "src/js/molecules/molecule.js~Molecule#deselect",
@@ -2152,6 +2266,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-goToParentMolecule",
     "src/js/molecules/molecule.js~Molecule#goToParentMolecule",
     "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#inputpath",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-inputPath",
+    "src/js/molecules/molecule.js~Molecule#inputPath",
+    "member"
   ],
   [
     "src/js/molecules/molecule.js~molecule#inputs",
@@ -2236,6 +2356,18 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-serialize",
     "src/js/molecules/molecule.js~Molecule#serialize",
     "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#setsimplifyflag",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-setSimplifyFlag",
+    "src/js/molecules/molecule.js~Molecule#setSimplifyFlag",
+    "method"
+  ],
+  [
+    "src/js/molecules/molecule.js~molecule#simplify",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-simplify",
+    "src/js/molecules/molecule.js~Molecule#simplify",
+    "member"
   ],
   [
     "src/js/molecules/molecule.js~molecule#toprocess",
@@ -2430,6 +2562,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/output.js~output#description",
+    "class/src/js/molecules/output.js~Output.html#instance-member-description",
+    "src/js/molecules/output.js~Output#description",
+    "member"
+  ],
+  [
     "src/js/molecules/output.js~output#draw",
     "class/src/js/molecules/output.js~Output.html#instance-method-draw",
     "src/js/molecules/output.js~Output#draw",
@@ -2520,6 +2658,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/readme.js~readme#description",
+    "class/src/js/molecules/readme.js~Readme.html#instance-member-description",
+    "src/js/molecules/readme.js~Readme#description",
+    "member"
+  ],
+  [
     "src/js/molecules/readme.js~readme#draw",
     "class/src/js/molecules/readme.js~Readme.html#instance-method-draw",
     "src/js/molecules/readme.js~Readme#draw",
@@ -2604,6 +2748,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/rectangle.js~rectangle#description",
+    "class/src/js/molecules/rectangle.js~Rectangle.html#instance-member-description",
+    "src/js/molecules/rectangle.js~Rectangle#description",
+    "member"
+  ],
+  [
     "src/js/molecules/rectangle.js~rectangle#draw",
     "class/src/js/molecules/rectangle.js~Rectangle.html#instance-method-draw",
     "src/js/molecules/rectangle.js~Rectangle#draw",
@@ -2646,6 +2796,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/regularpolygon.js~regularpolygon#description",
+    "class/src/js/molecules/regularPolygon.js~RegularPolygon.html#instance-member-description",
+    "src/js/molecules/regularPolygon.js~RegularPolygon#description",
+    "member"
+  ],
+  [
     "src/js/molecules/regularpolygon.js~regularpolygon#draw",
     "class/src/js/molecules/regularPolygon.js~RegularPolygon.html#instance-method-draw",
     "src/js/molecules/regularPolygon.js~RegularPolygon#draw",
@@ -2680,6 +2836,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/rotate.js~Rotate.html#instance-constructor-constructor",
     "src/js/molecules/rotate.js~Rotate#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/rotate.js~rotate#description",
+    "class/src/js/molecules/rotate.js~Rotate.html#instance-member-description",
+    "src/js/molecules/rotate.js~Rotate#description",
+    "member"
   ],
   [
     "src/js/molecules/rotate.js~rotate#draw",
@@ -2730,6 +2892,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/shrinkwrap.js~shrinkwrap#description",
+    "class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html#instance-member-description",
+    "src/js/molecules/shrinkwrap.js~ShrinkWrap#description",
+    "member"
+  ],
+  [
     "src/js/molecules/shrinkwrap.js~shrinkwrap#draw",
     "class/src/js/molecules/shrinkwrap.js~ShrinkWrap.html#instance-method-draw",
     "src/js/molecules/shrinkwrap.js~ShrinkWrap#draw",
@@ -2776,6 +2944,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/stl.js~Stl.html#instance-constructor-constructor",
     "src/js/molecules/stl.js~Stl#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/stl.js~stl#description",
+    "class/src/js/molecules/stl.js~Stl.html#instance-member-description",
+    "src/js/molecules/stl.js~Stl#description",
+    "member"
   ],
   [
     "src/js/molecules/stl.js~stl#downloadstl",
@@ -2838,6 +3012,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/svg.js~svg#description",
+    "class/src/js/molecules/svg.js~Svg.html#instance-member-description",
+    "src/js/molecules/svg.js~Svg#description",
+    "member"
+  ],
+  [
     "src/js/molecules/svg.js~svg#downloadsvg",
     "class/src/js/molecules/svg.js~Svg.html#instance-method-downloadSvg",
     "src/js/molecules/svg.js~Svg#downloadSvg",
@@ -2898,6 +3078,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/tag.js~tag#description",
+    "class/src/js/molecules/tag.js~Tag.html#instance-member-description",
+    "src/js/molecules/tag.js~Tag#description",
+    "member"
+  ],
+  [
     "src/js/molecules/tag.js~tag#draw",
     "class/src/js/molecules/tag.js~Tag.html#instance-method-draw",
     "src/js/molecules/tag.js~Tag#draw",
@@ -2938,6 +3124,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/translate.js~Translate.html#instance-constructor-constructor",
     "src/js/molecules/translate.js~Translate#constructor",
     "method"
+  ],
+  [
+    "src/js/molecules/translate.js~translate#description",
+    "class/src/js/molecules/translate.js~Translate.html#instance-member-description",
+    "src/js/molecules/translate.js~Translate#description",
+    "member"
   ],
   [
     "src/js/molecules/translate.js~translate#draw",
@@ -3088,6 +3280,12 @@ window.esdocSearchIndex = [
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-deleteNode",
     "src/js/prototypes/atom.js~Atom#deleteNode",
     "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#description",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-member-description",
+    "src/js/prototypes/atom.js~Atom#description",
+    "member"
   ],
   [
     "src/js/prototypes/atom.js~atom#displayandpropogate",

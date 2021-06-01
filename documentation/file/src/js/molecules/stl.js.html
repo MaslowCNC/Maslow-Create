@@ -114,6 +114,11 @@ export default class Stl extends Atom {
          * @type {string}
          */
         this.value = null
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = &quot;Exports an stl of the input geometry.&quot;
         
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)

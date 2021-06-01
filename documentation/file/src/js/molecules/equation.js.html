@@ -109,6 +109,11 @@ export default class Equation extends Atom {
          * Evaluate the equation adding and removing inputs as needed
          */ 
         this.value = 0
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = &quot;Defines a mathematical equation. Edit the output field to add or remove inputs.&quot;
         
         /**
          * This atom&apos;s height as drawn on the screen
@@ -217,6 +222,11 @@ export default class Equation extends Atom {
                 
                 this.output.setValue(this.value)
                 this.output.ready = true
+            }
+            
+            //Updates the inputs
+            if(this.selected){
+                this.updateSidebar()
             }
         }catch(err){
             console.warn(err)

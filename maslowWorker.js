@@ -161,6 +161,33 @@ const agent = async ({
             await api.saveGeometry(question.writePath, translatedShape);
             return 1;
             break;
+         case "simplify":
+            const aShape2Smiplify = await maslowRead(question.readPath);
+            const simplified = aShape2Smiplify.noVoid().each((s) =>
+                api.Group(
+                  ...s.map((e) =>
+                    e.size(({ min, max }) => {
+                      const tags = e.toGeometry().tags;
+                      if(tags.includes("user/Do not simplify")){
+                          return e;
+                      }
+                      else{
+                          const rBox = api.Box()
+                            .c1(...min)
+                            .c2(...max);
+                          const coloredBox = api.Shape.fromGeometry({
+                            ...rBox.toGeometry(),
+                            tags: tags,
+                          });
+                          return coloredBox;
+                      }
+                    })
+                  )
+                )
+              )
+            await api.saveGeometry(question.writePath, simplified);
+            return 1;
+            break;
         case "rotate":
             const aShape2Rotate = await maslowRead(question.readPath);
             const rotatedShape = aShape2Rotate.rotateX(-1*question.x).rotateY(-1*question.y).rotateZ(-1*question.z);
@@ -279,17 +306,22 @@ const agent = async ({
         case "svg":
             const geometryToSvg = await maslowRead(question.readPath);
             
-            for (const entry of ensurePages(geometryToSvg.toKeptGeometry())) {
-                const op = await toSvg(entry);
-            }
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
+            break;
+        case "outline":
+            const geometryToOutline = await maslowRead(question.readPath);
+            
+            const outlineShape = geometryToOutline.align('z').section().fuse().outline();
+            await api.saveGeometry(question.writePath, outlineShape);
+            
+            
+            return true
             break;
         case "svgOutline":
             const geometryToSvgOutline = await maslowRead(question.readPath);
             
-            
-            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.section().fuse().outline().toKeptGeometry());//.fuse().outline());
+            const svgOutlineBuffer = await toSvg(geometryToSvgOutline.toKeptGeometry());
             return svgOutlineBuffer;
             break;
         case "gcode":
