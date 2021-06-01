@@ -74,7 +74,7 @@ export default class Output extends Atom {
             this.decreaseToProcessCountByOne()//Called twice to count for the molecule it is in
             
             this.path = this.findIOValue('number or geometry')
-            this.parent.path = this.path
+            //this.parent.path = this.path
             
             //If this molecule is the top level or if it is not open, propagate up. Basically prevents propagation for opened molecules
             if(this.parent.topLevel || this.parent != GlobalVariables.currentMolecule){

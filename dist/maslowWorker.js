@@ -306,9 +306,6 @@ const agent = async ({
         case "svg":
             const geometryToSvg = await maslowRead(question.readPath);
             
-            for (const entry of ensurePages(geometryToSvg.toKeptGeometry())) {
-                const op = await toSvg(entry);
-            }
             const svgString = await toSvg(geometryToSvg.toKeptGeometry());
             return svgString;
             break;
