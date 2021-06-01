@@ -37,6 +37,11 @@ export default class Readme extends Atom{
          * @type {number}
          */
         this.radius = 1/72
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "A place to put project notes. These will appear in the GitHub readme and in the description of molecules up the chain. Markdown is supported. "
 
         /**
          * This atom's height as drawn on the screen

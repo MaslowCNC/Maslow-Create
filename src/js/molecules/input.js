@@ -18,6 +18,11 @@ export default class Input extends Atom {
          */
         this.name = 'Input' + GlobalVariables.generateUniqueID()
         /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Adds an input to the parent molecule. If the parent molecule is the top level of the project then the input will be available when the project is shared or imported into another project. Name is editable"
+        /** 
          * The value the input is set to, defaults to 10. Is this still used or are we using the value of the attachmentPoint now?
          * @type {number}
          */

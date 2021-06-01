@@ -28,6 +28,11 @@ export default class CutLayout extends Atom{
          * @type {string}
          */
         this.name = 'Cut Layout'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Extracts all of the parts tagged for layout and lays them out on a sheet to cut."
         
         this.addIO('input', 'geometry', this, 'geometry', null)
 

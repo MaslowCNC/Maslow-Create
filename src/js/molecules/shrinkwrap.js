@@ -31,6 +31,12 @@ export default class ShrinkWrap extends Atom{
          * @type {array}
          */
         this.ioValues = []
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Joins two or more shapes into a single solid by filling in the space between them. Also called 'hull'"
+        
         /**
          * This was used when there was a drop down to select closed...may be deleted
          * @type {number}

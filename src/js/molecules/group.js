@@ -35,6 +35,11 @@ export default class Group extends Atom{
          * @type {boolean}
          */
         this.removeCutawayGeometry = true
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Groups shapes together into one. Shapes are allowed to overlap."
         
         this.setValues(values)
         

@@ -29,6 +29,11 @@ export default class Atom {
          */
         this.uniqueID = GlobalVariables.generateUniqueID()
         /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "none"
+        /** 
          * The X cordinate of this atom
          * @type {number}
          */
@@ -519,6 +524,12 @@ export default class Atom {
         name2.textContent = this.name
         sideBar.appendChild(name2)
         name2.setAttribute('class','molecule_title')
+        
+        //adds the name of the molecule to sideBar
+        var description = document.createElement('p')
+        description.textContent = this.description
+        sideBar.appendChild(description)
+        description.setAttribute('class','atom_description')
         
 
         //add the name as of project title 

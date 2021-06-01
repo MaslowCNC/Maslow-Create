@@ -24,6 +24,11 @@ export default class Extrude extends Atom{
          * @type {string}
          */
         this.atomType = 'Extrude'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Extrudes a 2D shape. Input can be negitive. "
         
         this.addIO('input', 'geometry' , this, 'geometry', '', false, true)
         this.addIO('input', 'height'   , this, 'number', 10)

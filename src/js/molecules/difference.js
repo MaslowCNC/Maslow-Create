@@ -28,6 +28,11 @@ export default class Difference extends Atom{
          * @type {string}
          */
         this.atomType = 'Difference'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Subtracts shape two from shape one."
         
         this.setValues(values)
     }

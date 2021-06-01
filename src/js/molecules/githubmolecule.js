@@ -33,6 +33,11 @@ export default class GitHubMolecule extends Molecule {
          * @type {string}
          */
         this.centerColor = 'black'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Project imported from GitHub"
         
         this.setValues(values)
     }
@@ -114,9 +119,7 @@ export default class GitHubMolecule extends Molecule {
         }
         
         //Tell every atom inside this molecule to begin Propagation
-        this.nodesOnTheScreen.forEach(node => {
-            node.beginPropagation()
-        })
+        super.beginPropagation()
     }
     
     /**
@@ -169,7 +172,8 @@ export default class GitHubMolecule extends Molecule {
             y: this.y,
             uniqueID: this.uniqueID,
             projectID: this.projectID,
-            ioValues: ioValues
+            ioValues: ioValues,
+            simplify: this.simplify
         }
         
         return object

@@ -28,6 +28,11 @@ export default class AddBOMTag extends Atom{
          * @type {string}
          */
         this.name = 'Add BOM Tag'
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Adds a Bill Of Materials tag which appears in molecules containing this atom and in the GitHub project bill of materials."
         
         /**
          * The BOM item object created by this atom

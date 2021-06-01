@@ -591,6 +591,15 @@ input.menu_search:focus {
 
 }
 
+.atom_description {
+    color: black;
+    text-align: center;
+    margin: 0px;
+    padding: 10px;
+    border-bottom: 2px solid #e3e3e3;
+
+}
+
 .sidebar-list{
     list-style: none;
     padding:10px;

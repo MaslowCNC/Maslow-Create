@@ -54,6 +54,11 @@ export default class Output extends Atom {
          * @type {number}
          */
         this.awaitingPropagationFlag = false
+        /** 
+         * A description of this atom
+         * @type {string}
+         */
+        this.description = "Connect geometry here to make it available in the next level up. "
         
         this.setValues(values)
         
@@ -69,7 +74,7 @@ export default class Output extends Atom {
             this.decreaseToProcessCountByOne()//Called twice to count for the molecule it is in
             
             this.path = this.findIOValue('number or geometry')
-            this.parent.path = this.path
+            //this.parent.path = this.path
             
             //If this molecule is the top level or if it is not open, propagate up. Basically prevents propagation for opened molecules
             if(this.parent.topLevel || this.parent != GlobalVariables.currentMolecule){

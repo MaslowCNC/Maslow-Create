@@ -29,7 +29,7 @@ import GitHubMolecule   from './molecules/githubmolecule.js'
 import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
-import Group             from './molecules/group.js'
+import Group            from './molecules/group.js'
 import GitHubModule     from './githubOauth'
 
 /**
