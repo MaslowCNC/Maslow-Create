@@ -72,11 +72,11 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareGcode = (shape, name, options = {}) => {
+const prepareGcode = (shape, name, tool, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toGcode(entry, {
+    const op = toGcode(entry, tool, {
       definitions: getDefinitions(),
       ...options,
     }).catch(getPendingErrorHandler());
@@ -91,17 +91,19 @@ const prepareGcode = (shape, name, options = {}) => {
   return entries;
 };
 
-const downloadGcodeMethod = function (name, options = {}) {
-  const entries = prepareGcode(this, name, options);
+const downloadGcodeMethod = function (name, tool, options = {}) {
+  const entries = prepareGcode(this, name, tool, options);
   const download = { entries };
-  const hash$1 = hashSum({ name, options }) + hash(this.toGeometry());
+  const hash$1 =
+    hashSum({ name, tool, options }) + hash(this.toGeometry());
   emit({ download, hash: hash$1 });
   return this;
 };
 Shape.prototype.downloadGcode = downloadGcodeMethod;
+Shape.prototype.gcode = downloadGcodeMethod;
 
-const writeGcode = (shape, name, options = {}) => {
-  for (const { data, filename } of prepareGcode(shape, name, options)) {
+const writeGcode = (shape, name, tool, options = {}) => {
+  for (const { data, filename } of prepareGcode(shape, name, tool, options)) {
     addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }
   return shape;

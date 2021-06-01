@@ -1,6 +1,7 @@
-import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, fromSurfaceMeshEmitBoundingBox, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, serializeSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, serializeSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, doesSelfIntersectOfSurfaceMesh, fromSurfaceMeshToTriangles, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
-import { scale, min, max } from './jsxcad-math-vec3.js';
+import { min, max, scale } from './jsxcad-math-vec3.js';
+import { info } from './jsxcad-sys.js';
 import { isClockwise, flip, deduplicate } from './jsxcad-geometry-path.js';
 
 const graphSymbol = Symbol('graph');
@@ -115,13 +116,81 @@ const toSurfaceMesh = (graph) => {
   return surfaceMesh;
 };
 
+const measureBoundingBox = (graph) => {
+  if (graph.boundingBox === undefined) {
+    if (graph.isLazy) {
+      fromSurfaceMeshEmitBoundingBox(
+        toSurfaceMesh(graph),
+        (xMin, yMin, zMin, xMax, yMax, zMax) => {
+          graph.boundingBox = [
+            [xMin, yMin, zMin],
+            [xMax, yMax, zMax],
+          ];
+        }
+      );
+    } else {
+      let minPoint = [Infinity, Infinity, Infinity];
+      let maxPoint = [-Infinity, -Infinity, -Infinity];
+      if (graph.points) {
+        for (const point of graph.points) {
+          if (point !== undefined) {
+            minPoint = min(minPoint, point);
+            maxPoint = max(maxPoint, point);
+          }
+        }
+      }
+      graph.boundingBox = [minPoint, maxPoint];
+    }
+  }
+  return graph.boundingBox;
+};
+
+const iota = 1e-5;
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+// Requires a conservative gap.
+const doesNotOverlap = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return true;
+  }
+  const [minA, maxA] = measureBoundingBox(a);
+  const [minB, maxB] = measureBoundingBox(b);
+  if (maxA[X] <= minB[X] - iota * 10) {
+    return true;
+  }
+  if (maxA[Y] <= minB[Y] - iota * 10) {
+    return true;
+  }
+  if (maxA[Z] <= minB[Z] - iota * 10) {
+    return true;
+  }
+  if (maxB[X] <= minA[X] - iota * 10) {
+    return true;
+  }
+  if (maxB[Y] <= minA[Y] - iota * 10) {
+    return true;
+  }
+  if (maxB[Z] <= minA[Z] - iota * 10) {
+    return true;
+  }
+  return false;
+};
+
 const difference = (a, b) => {
   if (a.isEmpty || b.isEmpty) {
     return a;
   }
-  return fromSurfaceMeshLazy(
+  if (a.isClosed && b.isClosed && doesNotOverlap(a, b)) {
+    return a;
+  }
+  info('difference begin');
+  const result = fromSurfaceMeshLazy(
     differenceOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
+  info('difference end');
+  return result;
 };
 
 const realizeGraph = (graph) => {
@@ -309,6 +378,7 @@ export const toPolygonsWithHoles = (graph) => {
 */
 
 const inset = (graph, initial, step, limit) => {
+  info('inset begin');
   const insetGraphs = [];
   for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
     for (const polygonWithHoles of polygonsWithHoles) {
@@ -322,6 +392,7 @@ const inset = (graph, initial, step, limit) => {
       }
     }
   }
+  info('inset end');
   return insetGraphs;
 };
 
@@ -329,38 +400,15 @@ const intersection = (a, b) => {
   if (a.isEmpty || b.isEmpty) {
     return fromEmpty();
   }
-  return fromSurfaceMeshLazy(
+  if (a.isClosed && b.isClosed && doesNotOverlap(a, b)) {
+    return fromEmpty();
+  }
+  info('intersection begin');
+  const result = fromSurfaceMeshLazy(
     intersectionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
-};
-
-const measureBoundingBox = (graph) => {
-  if (graph.boundingBox === undefined) {
-    if (graph.isLazy) {
-      fromSurfaceMeshEmitBoundingBox(
-        toSurfaceMesh(graph),
-        (xMin, yMin, zMin, xMax, yMax, zMax) => {
-          graph.boundingBox = [
-            [xMin, yMin, zMin],
-            [xMax, yMax, zMax],
-          ];
-        }
-      );
-    } else {
-      let minPoint = [Infinity, Infinity, Infinity];
-      let maxPoint = [-Infinity, -Infinity, -Infinity];
-      if (graph.points) {
-        for (const point of graph.points) {
-          if (point !== undefined) {
-            minPoint = min(minPoint, point);
-            maxPoint = max(maxPoint, point);
-          }
-        }
-      }
-      graph.boundingBox = [minPoint, maxPoint];
-    }
-  }
-  return graph.boundingBox;
+  info('intersection end');
+  return result;
 };
 
 const minkowskiDifference = (a, b) => {
@@ -391,6 +439,7 @@ const minkowskiSum = (a, b) => {
 };
 
 const offset = (graph, initial, step, limit) => {
+  info('offset begin');
   const offsetGraphs = [];
   for (const { polygonsWithHoles } of toPolygonsWithHoles(graph)) {
     for (const polygonWithHoles of polygonsWithHoles) {
@@ -404,15 +453,20 @@ const offset = (graph, initial, step, limit) => {
       }
     }
   }
+  info('offset end');
   return offsetGraphs;
 };
 
-// import { toPolygonsWithHoles } from './toPolygonsWithHoles.js';
-
-const outline = (graph) => outlineSurfaceMesh(toSurfaceMesh(graph));
+const outline = (graph) => {
+  info('outline begin');
+  const result = outlineSurfaceMesh(toSurfaceMesh(graph));
+  info('outline end');
+  return result;
+};
 
 const prepareForSerialization = (graph) => {
   if (!graph.serializedSurfaceMesh) {
+    measureBoundingBox(graph);
     graph.serializedSurfaceMesh = serializeSurfaceMesh(toSurfaceMesh(graph));
   }
   return graph;
@@ -550,9 +604,13 @@ const union = (a, b) => {
   if (b.isEmpty) {
     return a;
   }
-  return fromSurfaceMeshLazy(
+  // FIX: In an ideal world, if a and b do not overlap, we would generate a disjointAssembly of the two.
+  info('union begin');
+  const result = fromSurfaceMeshLazy(
     unionOfSurfaceMeshes(toSurfaceMesh(a), toSurfaceMesh(b))
   );
+  info('union end');
+  return result;
 };
 
 export { alphaShape, convexHull, difference, eachPoint, extrude, extrudeToPlane, fill, fromEmpty, fromFunction, fromPaths, fromPoints, fromPolygons, fromPolygonsWithHolesToTriangles, fromTriangles, grow, inset, intersection, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, realizeGraph, remesh, rerealizeGraph, reverseFaceOrientations, section, sections, smooth, test, toPaths, toPolygonsWithHoles, toTriangles, transform, twist, union };
