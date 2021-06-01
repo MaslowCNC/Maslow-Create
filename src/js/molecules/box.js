@@ -2,7 +2,7 @@ import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
 /**
- * This class creates the output atom.
+ * This class is used for selecting multiple atoms. Probably shouldn't be done like this.
  */
 export default class Box extends Atom {
     
