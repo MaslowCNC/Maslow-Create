@@ -231,6 +231,20 @@ export default class Molecule extends Atom{
     }
     
     /**
+     * Reads the path of this molecule's output atom
+     */ 
+    readOutputAtomPath(){
+        var returnPath = ""
+        this.nodesOnTheScreen.forEach(atom => {
+            //If we have found this molecule's output atom use it to update the path here
+            if(atom.atomType == "Output"){
+                returnPath = atom.path
+            }
+        })
+        return returnPath
+    }
+    
+    /**
      * Called when this molecules value changes
      */ 
     propogate(){
@@ -238,7 +252,7 @@ export default class Molecule extends Atom{
         if(this.simplify){
             try{
                 this.processing = true
-                const values = {key: "simplify", readPath: this.inputPath, writePath: this.path}
+                const values = {key: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
                 window.ask(values).then( () => {
                     this.processing = false
                     this.pushPropogation()
@@ -246,6 +260,7 @@ export default class Molecule extends Atom{
             }catch(err){this.setAlert(err)}
         }
         else{
+            this.path = this.readOutputAtomPath()
             this.pushPropogation()
         }
     }
@@ -280,11 +295,6 @@ export default class Molecule extends Atom{
         
         //Generate the simplified path if needed
         if(this.simplify){
-            /** 
-             * Keeps a reference to the input path
-             * @type {string}
-             */
-            this.inputPath = this.path
             this.generatePath()
         }
     }
@@ -656,7 +666,6 @@ export default class Molecule extends Atom{
             //If we have found this molecule's output atom use it to update the path here
             if(atom.atomType == "Output"){
                 this.path = atom.loadTree()
-                this.inputPath = this.path
             }
             //If we have found an atom with nothing connected to it
             if(atom.output){
