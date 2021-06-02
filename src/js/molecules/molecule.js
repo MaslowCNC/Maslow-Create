@@ -297,11 +297,6 @@ export default class Molecule extends Atom{
         
         //Generate the simplified path if needed
         if(this.simplify){
-            /** 
-             * Keeps a reference to the input path
-             * @type {string}
-             */
-            this.inputPath = this.path
             this.generatePath()
         }
     }
@@ -673,7 +668,6 @@ export default class Molecule extends Atom{
             //If we have found this molecule's output atom use it to update the path here
             if(atom.atomType == "Output"){
                 this.path = atom.loadTree()
-                this.inputPath = this.path
             }
             //If we have found an atom with nothing connected to it
             if(atom.output){
