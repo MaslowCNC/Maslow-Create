@@ -644,16 +644,16 @@ export default class Molecule extends Atom{
     /**
      * Delete this molecule and everything in it.
      */ 
-    deleteNode(){
+    deleteNode(backgroundClickAfter = true, deletePath = true){
         
         //make a copy of the nodes on the screen array since we will be modifying it
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         
         copyOfNodesOnTheScreen.forEach(node => {
-            node.deleteNode()
+            node.deleteNode(backgroundClickAfter, deletePath)
         })
         
-        super.deleteNode()
+        super.deleteNode(backgroundClickAfter, deletePath)
     }
     
     /**

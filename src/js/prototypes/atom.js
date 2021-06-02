@@ -555,9 +555,9 @@ export default class Atom {
     }
 
     /**
-     * Delete this atom.
+     * Delete this atom. Silent prevents it from telling its neighbors
      */ 
-    deleteNode(backgroundClickAfter = true, deletePath = true){
+    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false){
         //deletes this node and all of it's inputs
         
         this.inputs.forEach(input => { //disable the inputs before deleting
@@ -566,10 +566,10 @@ export default class Atom {
         
         const inputsCopy = [...this.inputs]//Make a copy of the inputs list to delete all of them
         inputsCopy.forEach(input => {
-            input.deleteSelf()
+            input.deleteSelf(silent)
         })
         if(this.output){
-            this.output.deleteSelf()
+            this.output.deleteSelf(silent)
         }
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
@@ -581,7 +581,6 @@ export default class Atom {
         if(backgroundClickAfter){
             GlobalVariables.currentMolecule.backgroundClick()
         }
-        
     }
     
     /**

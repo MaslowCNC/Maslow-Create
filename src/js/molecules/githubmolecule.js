@@ -63,23 +63,26 @@ export default class GitHubMolecule extends Molecule {
     async loadProjectByID(id){
         
         //Get the repo by ID
-        const result = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
+        const json = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
         //Store values that we want to overwrite in the loaded version
         var valuesToOverwriteInLoadedVersion
         if(this.topLevel){
             valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
+            console.log("The first option")
         }
         else{
             //If there are stored io values to recover
             if(this.ioValues != undefined){
+                console.log("The second option")
                 valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
             }
             else{
+                console.log("The thrid option")
                 valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
             }
         }
-        const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
+        const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)
             this.loadTree()
         })
@@ -94,16 +97,16 @@ export default class GitHubMolecule extends Molecule {
         //Delete everything currently inside...Make a copy to prevent index issues
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         copyOfNodesOnTheScreen.forEach(node => {
-            node.deleteNode()
+            node.deleteNode(false, true, true)
         })
         
         //Deleting nodes background clicks on the host molecule so we want to bring the focus back to this atom by deslecting the top level molecule...a bit of a hack
-        GlobalVariables.topLevelMolecule.selected = false
+        // GlobalVariables.topLevelMolecule.selected = false
         
         //Re-serialize this molecule
-        this.loadProjectByID(this.projectID).then( ()=> {
-            this.beginPropagation()
-        })
+        // this.loadProjectByID(this.projectID).then( ()=> {
+            // this.beginPropagation()
+        // })
         this.updateSidebar()
     }
     

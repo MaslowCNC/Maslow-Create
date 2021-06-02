@@ -391,11 +391,11 @@ export default class AttachmentPoint {
     /**
      * Delete any connectors attached to this ap
      */ 
-    deleteSelf(){
+    deleteSelf(silent = false){
         //remove any connectors which were attached to this attachment point
         var connectorsList = [...this.connectors] //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list
         connectorsList.forEach( connector => {
-            connector.deleteSelf()
+            connector.deleteSelf(silent)
         })
     }
     
