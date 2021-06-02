@@ -236,12 +236,12 @@ export default class Molecule extends Atom{
                 const values = {key: "simplify", readPath: this.inputPath, writePath: this.path}
                 window.ask(values).then( () => {
                     this.processing = false
-                    this.pushPropogation();
+                    this.pushPropogation()
                 })
             }catch(err){this.setAlert(err)}
         }
         else{
-            this.pushPropogation();
+            this.pushPropogation()
         }
     }
     
