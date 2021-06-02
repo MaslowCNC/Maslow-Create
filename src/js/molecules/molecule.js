@@ -260,9 +260,7 @@ export default class Molecule extends Atom{
             }catch(err){this.setAlert(err)}
         }
         else{
-            this.path = this.readOutputAtomPath();
-            console.log("Path set to: ")
-            console.log(this.path)
+            this.path = this.readOutputAtomPath()
             this.pushPropogation()
         }
     }
@@ -815,8 +813,6 @@ export default class Molecule extends Atom{
      * Sends the output of this molecule to be displayed in the 3D view.
      */
     sendToRender(){
-        console.log("This.path: ")
-        console.log(this.path)
         super.sendToRender()
         if(this.value != null){
             if(this.topLevel){
