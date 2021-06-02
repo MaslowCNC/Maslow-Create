@@ -229,11 +229,6 @@ export default class Molecule extends Atom{
      * Called when this molecules value changes
      */ 
     propogate(){
-        
-        
-        console.log("Pushing path: ");
-        console.log(this.path);
-        
         //Set the output nodes with type 'geometry' to be the generated code
         if(this.simplify){
             try{
