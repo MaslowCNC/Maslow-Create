@@ -58,6 +58,11 @@ export default class Molecule extends Atom{
          */
         this.simplify = false
         /** 
+         * A flag to indicate if this molecule is currently processing.
+         * @type {boolean}
+         */
+        this.processing = false //Should be pulled from atom. Docs made me put this here
+        /** 
          * A list of things which should be displayed on the the top level sideBar when in toplevel mode.
          * @type {array}
          */

@@ -48,6 +48,11 @@ export default class Output extends Atom {
          * @type {number}
          */
         this.radius = 1/75
+        /**
+         * This atom's path
+         * @type {string}
+         */
+        this.path = "" //Not sure why documentation made me put this hear instead of pulling it from atom
         /** 
          * A description of this atom
          * @type {string}
