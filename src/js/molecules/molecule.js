@@ -58,6 +58,11 @@ export default class Molecule extends Atom{
          */
         this.simplify = false
         /** 
+         * A flag to indicate if this molecule is currently processing.
+         * @type {boolean}
+         */
+        this.processing = false //Should be pulled from atom. Docs made me put this here
+        /** 
          * A list of things which should be displayed on the the top level sideBar when in toplevel mode.
          * @type {array}
          */
@@ -73,6 +78,12 @@ export default class Molecule extends Atom{
          * @type {integer}
          */
         this.toProcess = 0
+        /**
+         * A flag to indicate if this molecule was waiting propagation. If it is it will take place
+         *the next time we go up one level.
+         * @type {number}
+         */
+        this.awaitingPropagationFlag = false
         
         this.setValues(values)
         
@@ -220,29 +231,35 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Trigger the output to propogate.
+     * Called when this molecules value changes
      */ 
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        if(this.output){
-            if(this.simplify){
-                try{
-                    this.processing = true
-                    const values = {key: "simplify", readPath: this.inputPath, writePath: this.path}
-                    window.ask(values).then( () => {
-                        this.output.setValue(this.path)
-                        this.output.ready = true
-                        if(this.selected){
-                            this.sendToRender()
-                        }
-                        this.processing = false
-                    })
-                }catch(err){this.setAlert(err)}
-            }
-            else{
-                this.output.setValue(this.path)
-                this.output.ready = true
-            }
+        if(this.simplify){
+            try{
+                this.processing = true
+                const values = {key: "simplify", readPath: this.inputPath, writePath: this.path}
+                window.ask(values).then( () => {
+                    this.processing = false
+                    this.pushPropogation()
+                })
+            }catch(err){this.setAlert(err)}
+        }
+        else{
+            this.pushPropogation()
+        }
+    }
+    
+    /**
+     * Called when this molecules value changes
+     */ 
+    pushPropogation(){
+        if(this != GlobalVariables.currentMolecule){
+            this.output.setValue(this.path)
+            this.output.ready = true
+        }
+        else{
+            this.awaitingPropagationFlag = true
         }
         
         //If this molecule is selected, send the updated value to the renderer
@@ -304,7 +321,7 @@ export default class Molecule extends Atom{
         else{  //Changes the path back to be the output atom
             this.nodesOnTheScreen.forEach(atom => {
                 if(atom.atomType == "Output"){
-                    atom.loadTree()
+                    this.path = atom.loadTree()
                 }
             })
         }
@@ -502,18 +519,14 @@ export default class Molecule extends Atom{
                 atom.selected = false
             })
             
-            //Push any changes up to the next level if there are any changes waiting in the output
-            this.nodesOnTheScreen.forEach(atom => {
-                if(atom.atomType == "Output"){
-                    if(atom.awaitingPropagationFlag == true){
-                        this.propogate()
-                        atom.awaitingPropagationFlag = false
-                    }
-                }
-            })
-            
             GlobalVariables.currentMolecule = this.parent //set parent this to be the currently displayed molecule
             GlobalVariables.currentMolecule.backgroundClick()
+            
+            //Push any changes up to the next level if there are any changes waiting in the output
+            if(this.awaitingPropagationFlag == true){
+                this.propogate()
+                this.awaitingPropagationFlag = false
+            }
         }
     }
     
@@ -637,13 +650,22 @@ export default class Molecule extends Atom{
      * Triggers the loadTree process from this molecules output
      */ 
     loadTree(){
-        this.nodesOnTheScreen.forEach(node => {
-            node.loadTree()
+        //We want to walk the tree from this's output and anything which has nothing coming out of it. Basically all the graph end points.
+        
+        this.nodesOnTheScreen.forEach(atom => {
+            //If we have found this molecule's output atom use it to update the path here
+            if(atom.atomType == "Output"){
+                this.path = atom.loadTree()
+                this.inputPath = this.path
+            }
+            //If we have found an atom with nothing connected to it
+            if(atom.output){
+                if(atom.output.connectors.length == 0){
+                    atom.loadTree()
+                }
+            }
         })
         
-        this.inputs.forEach(input => {
-            input.loadTree()
-        })
         this.output.value = this.path
         return this.path
     }

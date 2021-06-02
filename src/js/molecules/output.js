@@ -2,7 +2,7 @@ import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
 /**
- * This class creates the output atom.
+ * This class creates the output atom. The goal is that the output atom is fully transparent to the molecule which contains it
  */
 export default class Output extends Atom {
     
@@ -49,11 +49,10 @@ export default class Output extends Atom {
          */
         this.radius = 1/75
         /**
-         * A flag to indicate if this molecule was waiting propagation. If it is it will take place
-         *the next time we go up one level.
-         * @type {number}
+         * This atom's path
+         * @type {string}
          */
-        this.awaitingPropagationFlag = false
+        this.path = "" //Not sure why documentation made me put this hear instead of pulling it from atom
         /** 
          * A description of this atom
          * @type {string}
@@ -71,23 +70,11 @@ export default class Output extends Atom {
     updateValue(){
         if(this.inputs.every(x => x.ready)){
             this.decreaseToProcessCountByOne()
-            this.decreaseToProcessCountByOne()//Called twice to count for the molecule it is in
             
             this.path = this.findIOValue('number or geometry')
             //this.parent.path = this.path
             
-            //If this molecule is the top level or if it is not open, propagate up. Basically prevents propagation for opened molecules
-            if(this.parent.topLevel || this.parent != GlobalVariables.currentMolecule){
-                this.parent.propogate()
-            }
-            else{
-                this.awaitingPropagationFlag = true
-            }
-            
-            //Update the display when the value changes if the parent is selected
-            if(this.parent.selected){
-                this.parent.sendToRender()
-            }
+            this.parent.propogate()  //Propogate passes the updated value on while parent.updateValue is called when one of the molecule inputs changes
         }
     }
     
@@ -96,8 +83,6 @@ export default class Output extends Atom {
      */ 
     loadTree(){
         this.path = this.inputs[0].loadTree()
-        this.parent.path = this.path
-        this.parent.output.value = this.path
         this.value = this.path
         return this.path
     }
@@ -114,17 +99,6 @@ export default class Output extends Atom {
      */
     deleteOutputAtom(){
         super.deleteNode(false)
-    }
-    
-    /**
-     * I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.
-     */ 
-    setID(newID){
-        /**
-         * The unique ID of this atom.
-         * @type {number}
-         */ 
-        this.uniqueID = newID
     }
     
     /**
