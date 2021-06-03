@@ -68,9 +68,7 @@ export default class GitHubMolecule extends Molecule {
         const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
         if(projectData){
             const values = {key: "fromJSON", writePath: this.path, json: projectData}
-            window.ask(values).then( answer => {
-                console.log("After reading");
-            })
+            window.ask(values)
         }
         
         //Store values that we want to overwrite in the loaded version

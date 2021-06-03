@@ -1177,12 +1177,6 @@ export default function GitHubModule(){
         //Find out the owners info;
         const user     = repo.data.owner.login
         const repoName = repo.data.name
-        //Get the file contents
-        let result = await octokit.repos.getContents({
-            owner: user,
-            repo: repoName,
-            path: 'project.maslowcreate'
-        })
         
         try{
             let jsonData = await octokit.repos.getContents({
