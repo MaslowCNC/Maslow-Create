@@ -245,6 +245,17 @@ export default class Molecule extends Atom{
     }
     
     /**
+     * Sets the atom to wait on coming information. Basically a pass through, but used for molecules
+     */ 
+    waitOnComingInformation(inputName){
+        this.nodesOnTheScreen.forEach( atom => {
+            if(atom.name == inputName){
+                atom.waitOnComingInformation()
+            }
+        })
+    }
+    
+    /**
      * Called when this molecules value changes
      */ 
     propogate(){
@@ -286,11 +297,11 @@ export default class Molecule extends Atom{
     /**
      * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
-    beginPropagation(){
+    beginPropagation(force = false){
         
         //Tell every atom inside this molecule to begin Propagation
         this.nodesOnTheScreen.forEach(node => {
-            node.beginPropagation()
+            node.beginPropagation(force)
         })
         
         //Generate the simplified path if needed
@@ -595,7 +606,7 @@ export default class Molecule extends Atom{
      * @param {object} json - A json representation of the molecule
      * @param {object} values - An array of values to apply to this molecule before deserializing it's contents. Used by githubmolecules to set top level correctly
      */
-    deserialize(json, values = {}){
+    deserialize(json, values = {}, forceBeginPropagation = false){
         //Find the target molecule in the list
         let promiseArray = []
         
@@ -633,7 +644,7 @@ export default class Molecule extends Atom{
                 window.ask(values).then( answer => {
                     
                     GlobalVariables.availablePaths = answer
-                    this.beginPropagation()
+                    this.beginPropagation(forceBeginPropagation)
                     
                 })
                 this.backgroundClick()
@@ -644,16 +655,16 @@ export default class Molecule extends Atom{
     /**
      * Delete this molecule and everything in it.
      */ 
-    deleteNode(){
+    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false){
         
         //make a copy of the nodes on the screen array since we will be modifying it
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         
-        copyOfNodesOnTheScreen.forEach(node => {
-            node.deleteNode()
+        copyOfNodesOnTheScreen.forEach(atom => {
+            atom.deleteNode(backgroundClickAfter, deletePath, silent)
         })
         
-        super.deleteNode()
+        super.deleteNode(backgroundClickAfter, deletePath, silent)
     }
     
     /**
@@ -724,7 +735,7 @@ export default class Molecule extends Atom{
                         //Check for existing outputs
                         this.nodesOnTheScreen.forEach(atom => {
                             if(atom.atomType == 'Output'){
-                                atom.deleteOutputAtom() //Remove them
+                                atom.deleteOutputAtom(false) //Remove them
                             }
                         })
                     }

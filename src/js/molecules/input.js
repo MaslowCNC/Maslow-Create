@@ -141,13 +141,13 @@ export default class Input extends Atom {
     /**
      * Remove the input from the parent molecule, then delete the atom normally.
      */ 
-    deleteNode() {
+    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false) {
         //Remove this input from the parent molecule
         if (typeof this.parent !== 'undefined') {
-            this.parent.removeIO('input', this.name, this.parent)
+            this.parent.removeIO('input', this.name, this.parent, silent)
         }
         
-        super.deleteNode()
+        super.deleteNode(backgroundClickAfter, deletePath, silent)
     }
     
     /**

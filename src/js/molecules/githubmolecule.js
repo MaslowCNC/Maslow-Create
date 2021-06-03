@@ -63,7 +63,7 @@ export default class GitHubMolecule extends Molecule {
     async loadProjectByID(id){
         
         //Get the repo by ID
-        const result = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
+        const json = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
         //Store values that we want to overwrite in the loaded version
         var valuesToOverwriteInLoadedVersion
@@ -79,7 +79,7 @@ export default class GitHubMolecule extends Molecule {
                 valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
             }
         }
-        const promsie =  this.deserialize(result, valuesToOverwriteInLoadedVersion).then( () => {
+        const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)
             this.loadTree()
         })
@@ -94,33 +94,31 @@ export default class GitHubMolecule extends Molecule {
         //Delete everything currently inside...Make a copy to prevent index issues
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         copyOfNodesOnTheScreen.forEach(node => {
-            node.deleteNode()
+            node.deleteNode(false, false, true)
         })
-        
-        //Deleting nodes background clicks on the host molecule so we want to bring the focus back to this atom by deslecting the top level molecule...a bit of a hack
-        GlobalVariables.topLevelMolecule.selected = false
         
         //Re-serialize this molecule
         this.loadProjectByID(this.projectID).then( ()=> {
-            this.beginPropagation()
+            this.beginPropagation(true)
+            this.updateSidebar()
         })
-        this.updateSidebar()
     }
     
     /**
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    beginPropagation(){
-        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
-        if(!GlobalVariables.availablePaths.includes(this.path)){
-            //Triggers inputs with nothing connected to begin propagation
-            this.inputs.forEach(input => {
-                input.beginPropagation()
-            })
-        }
+    beginPropagation(force = false){
         
         //Tell every atom inside this molecule to begin Propagation
-        super.beginPropagation()
+        super.beginPropagation(force)
+        
+        //Trigger the inputs to this github molecule if needed
+        if(!GlobalVariables.availablePaths.includes(this.path) || force){
+            //Triggers inputs with nothing connected to begin propagation
+            this.inputs.forEach(input => {
+                input.beginPropagation(force)
+            })
+        }
     }
     
     /**

@@ -79,6 +79,13 @@ export default class Output extends Atom {
     }
     
     /**
+     * Sets the parent molecule output to wait on coming information
+     */ 
+    waitOnComingInformation(){
+        this.parent.output.waitOnComingInformation()
+    }
+    
+    /**
      * Sets all the input and output values to match their associated atoms. In this case it sets the path of this and it's parent to be correct.
      */ 
     loadTree(){
@@ -97,8 +104,8 @@ export default class Output extends Atom {
     /**
      * A function to allow you to still call the delete function if needed.
      */
-    deleteOutputAtom(){
-        super.deleteNode(false)
+    deleteOutputAtom(deletePath = true){
+        super.deleteNode(false, deletePath)
     }
     
     /**
