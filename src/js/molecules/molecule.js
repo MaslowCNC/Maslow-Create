@@ -724,7 +724,7 @@ export default class Molecule extends Atom{
                         //Check for existing outputs
                         this.nodesOnTheScreen.forEach(atom => {
                             if(atom.atomType == 'Output'){
-                                atom.deleteOutputAtom() //Remove them
+                                atom.deleteOutputAtom(false) //Remove them
                             }
                         })
                     }

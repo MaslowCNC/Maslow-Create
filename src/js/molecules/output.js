@@ -97,8 +97,8 @@ export default class Output extends Atom {
     /**
      * A function to allow you to still call the delete function if needed.
      */
-    deleteOutputAtom(){
-        super.deleteNode(false)
+    deleteOutputAtom(deletePath = true){
+        super.deleteNode(false, deletePath)
     }
     
     /**

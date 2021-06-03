@@ -577,6 +577,7 @@ export default class Atom {
         
         if(deletePath){
             this.basicThreadValueProcessing({key: "deletePath", path: this.path }) //Delete the cached geometry
+            console.trace()
         }
         
         if(backgroundClickAfter){

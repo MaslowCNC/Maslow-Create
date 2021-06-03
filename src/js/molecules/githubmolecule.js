@@ -69,16 +69,13 @@ export default class GitHubMolecule extends Molecule {
         var valuesToOverwriteInLoadedVersion
         if(this.topLevel){
             valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
-            console.log("The first option")
         }
         else{
             //If there are stored io values to recover
             if(this.ioValues != undefined){
-                console.log("The second option")
                 valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
             }
             else{
-                console.log("The thrid option")
                 valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
             }
         }
@@ -97,14 +94,14 @@ export default class GitHubMolecule extends Molecule {
         //Delete everything currently inside...Make a copy to prevent index issues
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         copyOfNodesOnTheScreen.forEach(node => {
-            node.deleteNode(false, true, true)
+            node.deleteNode(false, false, true)
         })
         
         //Re-serialize this molecule
         this.loadProjectByID(this.projectID).then( ()=> {
             this.beginPropagation(true)
+            this.updateSidebar()
         })
-        this.updateSidebar()
     }
     
     /**
