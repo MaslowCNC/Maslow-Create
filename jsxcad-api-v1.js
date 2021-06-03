@@ -1,5 +1,5 @@
-import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, pushModule, popModule } from './jsxcad-sys.js';
-export { elapsed, emit, read, write } from './jsxcad-sys.js';
+import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
+export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
@@ -454,6 +454,7 @@ var api = /*#__PURE__*/Object.freeze({
   source: source,
   elapsed: elapsed,
   emit: emit,
+  info: info,
   read: read,
   write: write,
   beginRecordingNotes: beginRecordingNotes,

@@ -469,11 +469,11 @@ export default class AttachmentPoint {
     /**
      * Delete any connectors attached to this ap
      */ 
-    deleteSelf(){
+    deleteSelf(silent = false){
         //remove any connectors which were attached to this attachment point
         var connectorsList = [...this.connectors] //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list
         connectorsList.forEach( connector =&gt; {
-            connector.deleteSelf()
+            connector.deleteSelf(silent)
         })
     }
     
@@ -550,16 +550,9 @@ export default class AttachmentPoint {
                 connector.waitOnComingInformation()
             })
         }
-        else{
+        else{  //If this is an input
             this.ready = false
-            if(this.parentMolecule.output){
-                this.parentMolecule.output.waitOnComingInformation()
-            }
-        }
-        
-        //Check if this is the output of a molecule. Pass the command out.
-        if(this.parentMolecule.atomType == &quot;Output&quot;){
-            this.parentMolecule.parent.output.waitOnComingInformation()
+            this.parentMolecule.waitOnComingInformation(this.name)
         }
     }
     

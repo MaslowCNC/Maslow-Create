@@ -102,7 +102,7 @@
 
   
   
-  <div class="description" data-ice="description"><p>This class creates the output atom.</p>
+  <div class="description" data-ice="description"><p>This class creates the output atom. The goal is that the output atom is fully transparent to the molecule which contains it</p>
 </div>
   
 
@@ -178,35 +178,6 @@
         
         
         <div data-ice="description"><p>This atom&apos;s type</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-member-awaitingPropagationFlag">awaitingPropagationFlag</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>A flag to indicate if this molecule was waiting propagation.</p>
 </div>
       </div>
     </td>
@@ -345,13 +316,14 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-member-path">path</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-member-path">path</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>This atom&apos;s path</p>
+</div>
       </div>
     </td>
     <td>
@@ -460,35 +432,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-member-uniqueID">uniqueID</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>The unique ID of this atom.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-member-value">value</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></span>
         </p>
       </div>
@@ -554,7 +497,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-method-deleteOutputAtom">deleteOutputAtom</a></span></span><span class="code" data-ice="signature">()</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-method-deleteOutputAtom">deleteOutputAtom</a></span></span><span class="code" data-ice="signature">(deletePath: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>)</span>
         </p>
       </div>
       <div>
@@ -641,13 +584,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-method-setID">setID</a></span></span><span class="code" data-ice="signature">(newID: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-method-updateValue">updateValue</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>I am not sure why this function is needed.</p>
+        <div data-ice="description"><p>Take the input value of this function and pass it to the parent Molecule to go up one level.</p>
 </div>
       </div>
     </td>
@@ -670,13 +613,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-method-updateValue">updateValue</a></span></span><span class="code" data-ice="signature">()</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html#instance-method-waitOnComingInformation">waitOnComingInformation</a></span></span><span class="code" data-ice="signature">()</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Take the input value of this function and pass it to the parent Molecule to go up one level.</p>
+        <div data-ice="description"><p>Sets the parent molecule output to wait on coming information</p>
 </div>
       </div>
     </td>
@@ -1751,7 +1694,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-deleteNode">deleteNode</a></span></span><span class="code" data-ice="signature">(backgroundClickAfter: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, deletePath: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-deleteNode">deleteNode</a></span></span><span class="code" data-ice="signature">(backgroundClickAfter: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, deletePath: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, silent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>)</span>
         </p>
       </div>
       <div>
@@ -2012,7 +1955,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-removeIO">removeIO</a></span></span><span class="code" data-ice="signature">(type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, target: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-removeIO">removeIO</a></span></span><span class="code" data-ice="signature">(type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>, name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, target: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>, silent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
         </p>
       </div>
       <div>
@@ -2302,6 +2245,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-waitOnComingInformation">waitOnComingInformation</a></span></span><span class="code" data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Sets the atom to wait on coming information.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-walkBackForConstants">walkBackForConstants</a></span></span><span class="code" data-ice="signature">(callback: <span>*</span>)</span>
         </p>
       </div>
@@ -2434,51 +2406,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-awaitingPropagationFlag">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">awaitingPropagationFlag</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber56">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>A flag to indicate if this molecule was waiting propagation. If it is it will take place
-the next time we go up one level.</p>
-</div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-color">
     <span class="access" data-ice="access">public</span>
     
@@ -2490,7 +2417,7 @@ the next time we go up one level.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber153">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber134">source</a></span></span>
     </span>
   </h3>
 
@@ -2534,7 +2461,7 @@ the next time we go up one level.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber61">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber60">source</a></span></span>
     </span>
   </h3>
 
@@ -2662,18 +2589,18 @@ the next time we go up one level.</p>
     
     
     
-    <span class="code" data-ice="name">path</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">path</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber76">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber55">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>The path which contains the geometry represented by this atom</p>
+  <div data-ice="description"><p>This atom&apos;s path</p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-member-path">Atom#path</a></span></div>
@@ -2754,7 +2681,7 @@ the next time we go up one level.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber158">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber139">source</a></span></span>
     </span>
   </h3>
 
@@ -2809,50 +2736,6 @@ the next time we go up one level.</p>
 </div>
 
   
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-uniqueID">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">uniqueID</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber127">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>The unique ID of this atom.</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-member-uniqueID">Atom#uniqueID</a></span></div>
 
   <div data-ice="properties">
 </div>
@@ -2933,7 +2816,7 @@ the next time we go up one level.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber108">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber100">source</a></span></span>
     </span>
   </h3>
 
@@ -2973,11 +2856,11 @@ the next time we go up one level.</p>
     
     
     
-    <span class="code" data-ice="name">deleteOutputAtom</span><span class="code" data-ice="signature">()</span>
+    <span class="code" data-ice="name">deleteOutputAtom</span><span class="code" data-ice="signature">(deletePath: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber115">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber107">source</a></span></span>
     </span>
   </h3>
 
@@ -2989,7 +2872,24 @@ the next time we go up one level.</p>
 
   
 
-  <div data-ice="properties">
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">deletePath</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: true</li></ul></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
 </div>
 
   
@@ -3021,7 +2921,7 @@ the next time we go up one level.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber133">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber114">source</a></span></span>
     </span>
   </h3>
 
@@ -3065,7 +2965,7 @@ the next time we go up one level.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber97">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber91">source</a></span></span>
     </span>
   </h3>
 
@@ -3110,46 +3010,30 @@ the next time we go up one level.</p>
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-setID">
+  <h3 data-ice="anchor" id="instance-method-updateValue">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">setID</span><span class="code" data-ice="signature">(newID: <span>*</span>)</span>
+    <span class="code" data-ice="name">updateValue</span><span class="code" data-ice="signature">()</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber122">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber70">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>I am not sure why this function is needed. Did I decide that it was a bad idea to pass the id directly? Should be looked into, can probably be simplified.</p>
+  <div data-ice="description"><p>Take the input value of this function and pass it to the parent Molecule to go up one level.</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-updateValue">Atom#updateValue</a></span></div>
 
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">newID</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
+  <div data-ice="properties">
 </div>
 
   
@@ -3170,28 +3054,28 @@ the next time we go up one level.</p>
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-updateValue">
+  <h3 data-ice="anchor" id="instance-method-waitOnComingInformation">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">updateValue</span><span class="code" data-ice="signature">()</span>
+    <span class="code" data-ice="name">waitOnComingInformation</span><span class="code" data-ice="signature">()</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber71">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/js/molecules/output.js.html#lineNumber84">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Take the input value of this function and pass it to the parent Molecule to go up one level.</p>
+  <div data-ice="description"><p>Sets the parent molecule output to wait on coming information</p>
 </div>
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-updateValue">Atom#updateValue</a></span></div>
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/js/prototypes/atom.js~Atom.html#instance-method-waitOnComingInformation">Atom#waitOnComingInformation</a></span></div>
 
   <div data-ice="properties">
 </div>

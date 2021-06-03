@@ -885,8 +885,23 @@ export default function GitHubModule(){
                             message: &quot;SVG Picture&quot;, 
                             content: &quot;&quot;
                         }).then(()=&gt;{
-                            intervalTimer = setInterval(() =&gt; { this.saveProject() }, 1200000) //Save the project regularly
-                    
+                            octokit.repos.createFile({ // Create empty file for SVG string
+                                owner: currentUser,
+                                repo: currentRepoName,
+                                path: &quot;.gitattributes&quot;,
+                                message: &quot;Create gitattributes&quot;, 
+                                content: window.btoa(&quot;data binary&quot;)
+                            }).then(()=&gt;{
+                                octokit.repos.createFile({ // Create empty file for SVG string
+                                    owner: currentUser,
+                                    repo: currentRepoName,
+                                    path: &quot;data.json&quot;,
+                                    message: &quot;Data file&quot;, 
+                                    content: &quot;&quot;
+                                }).then(()=&gt;{
+                                    intervalTimer = setInterval(() =&gt; { this.saveProject() }, 1200000) //Save the project regularly
+                                })
+                            })
                         })
                     })
                 })
@@ -970,18 +985,24 @@ export default function GitHubModule(){
                     var decoder = new TextDecoder(&apos;utf8&apos;)
                     var finalSVG = decoder.decode(contentSvg)
                     
-                    this.createCommit(octokit,{
-                        owner: saveUser,
-                        repo: saveRepoName,
-                        changes: {
-                            files: {
-                                &apos;BillOfMaterials.md&apos;: bomContent,
-                                &apos;README.md&apos;: readmeContent,
-                                &apos;project.svg&apos;: finalSVG,
-                                &apos;project.maslowcreate&apos;: projectContent
-                            },
-                            commit: &apos;Autosave&apos;
-                        }
+                    
+                    const askJsonVals = {key: &quot;getJSON&quot;, readPath: GlobalVariables.topLevelMolecule.path}
+                    window.ask(askJsonVals).then( JSONData =&gt; {
+                        
+                        this.createCommit(octokit,{
+                            owner: saveUser,
+                            repo: saveRepoName,
+                            changes: {
+                                files: {
+                                    &apos;BillOfMaterials.md&apos;: bomContent,
+                                    &apos;README.md&apos;: readmeContent,
+                                    &apos;project.svg&apos;: finalSVG,
+                                    &apos;project.maslowcreate&apos;: projectContent,
+                                    &apos;data.json&apos;: JSONData
+                                },
+                                commit: &apos;Autosave&apos;
+                            }
+                        })
                     })
 
                     intervalTimer = setInterval(() =&gt; this.saveProject(), 1200000)
@@ -1223,6 +1244,31 @@ export default function GitHubModule(){
         }
         else{
             return this.convertFromOldFormat(rawFile)
+        }
+    }
+    
+    /** 
+     * Loads a project&apos;s data from github by its github ID.
+     */
+    this.getProjectDataByID = async function(id){
+        let repo = await octokit.request(&apos;GET /repositories/:id&apos;, {id})
+        //Find out the owners info;
+        const user     = repo.data.owner.login
+        const repoName = repo.data.name
+        
+        try{
+            let jsonData = await octokit.repos.getContents({
+                owner: user,
+                repo: repoName,
+                path: &apos;data.json&apos;
+            })
+            
+            jsonData = atob(jsonData.data.content)
+            return jsonData
+            
+        }catch(err){
+            console.warn(&quot;Unable to load project data from github&quot;)
+            return false
         }
     }
     
