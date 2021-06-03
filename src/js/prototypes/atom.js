@@ -378,6 +378,7 @@ export default class Atom {
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
+            console.log(this.uniqueID)
             clickProcessed = true
         }
         //Deselect this if it wasn't clicked on, unless control is held
@@ -678,6 +679,15 @@ export default class Atom {
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
+        }
+    }
+    
+    /**
+     * Sets the atom to wait on coming information. Basically a pass through, but used for molecules
+     */ 
+    waitOnComingInformation(){
+        if(this.output){
+            this.output.waitOnComingInformation()
         }
     }
     

@@ -79,6 +79,13 @@ export default class Output extends Atom {
     }
     
     /**
+     * Sets the parent molecule output to wait on coming information
+     */ 
+    waitOnComingInformation(){
+            this.parent.output.waitOnComingInformation()
+    }
+    
+    /**
      * Sets all the input and output values to match their associated atoms. In this case it sets the path of this and it's parent to be correct.
      */ 
     loadTree(){

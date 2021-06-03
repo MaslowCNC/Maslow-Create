@@ -79,7 +79,7 @@ export default class GitHubMolecule extends Molecule {
                 valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
             }
         }
-        const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion).then( () => {
+        const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () => {
             this.setValues(valuesToOverwriteInLoadedVersion)
             this.loadTree()
         })
@@ -108,16 +108,17 @@ export default class GitHubMolecule extends Molecule {
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(force = false){
-        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        
+        //Tell every atom inside this molecule to begin Propagation
+        super.beginPropagation(force)
+        
+        //Trigger the inputs to this github molecule if needed
         if(!GlobalVariables.availablePaths.includes(this.path) || force){
             //Triggers inputs with nothing connected to begin propagation
             this.inputs.forEach(input => {
                 input.beginPropagation(force)
             })
         }
-        
-        //Tell every atom inside this molecule to begin Propagation
-        super.beginPropagation(force)
     }
     
     /**

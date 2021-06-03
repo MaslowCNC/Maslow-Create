@@ -245,6 +245,17 @@ export default class Molecule extends Atom{
     }
     
     /**
+     * Sets the atom to wait on coming information. Basically a pass through, but used for molecules
+     */ 
+    waitOnComingInformation(inputName){
+        this.nodesOnTheScreen.forEach( atom => {
+            if(atom.name == inputName){
+                atom.waitOnComingInformation()
+            }
+        })
+    }
+    
+    /**
      * Called when this molecules value changes
      */ 
     propogate(){
@@ -252,6 +263,7 @@ export default class Molecule extends Atom{
         if(this.simplify){
             try{
                 this.processing = true
+                console.log("simplify: " + this.uniqueID)
                 const values = {key: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
                 window.ask(values).then( () => {
                     this.processing = false
@@ -595,7 +607,7 @@ export default class Molecule extends Atom{
      * @param {object} json - A json representation of the molecule
      * @param {object} values - An array of values to apply to this molecule before deserializing it's contents. Used by githubmolecules to set top level correctly
      */
-    deserialize(json, values = {}){
+    deserialize(json, values = {}, forceBeginPropagation = false){
         //Find the target molecule in the list
         let promiseArray = []
         
@@ -633,7 +645,7 @@ export default class Molecule extends Atom{
                 window.ask(values).then( answer => {
                     
                     GlobalVariables.availablePaths = answer
-                    this.beginPropagation()
+                    this.beginPropagation(forceBeginPropagation)
                     
                 })
                 this.backgroundClick()

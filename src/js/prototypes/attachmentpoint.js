@@ -472,16 +472,9 @@ export default class AttachmentPoint {
                 connector.waitOnComingInformation()
             })
         }
-        else{
+        else{  //If this is an input
             this.ready = false
-            if(this.parentMolecule.output){
-                this.parentMolecule.output.waitOnComingInformation()
-            }
-        }
-        
-        //Check if this is the output of a molecule. Pass the command out.
-        if(this.parentMolecule.atomType == "Output"){
-            this.parentMolecule.parent.output.waitOnComingInformation()
+            this.parentMolecule.waitOnComingInformation(this.name)
         }
     }
     
