@@ -312,14 +312,15 @@ export default class Atom {
      * Removes an attachment point from an atom.
      * @param {boolean} type - The type of the IO (input or output).
      * @param {string} name - The name of the new attachment point.
-     * @param {object} target - The attom which the attachment point is attached to. Should this be forced to be this.?
+     * @param {object} target - The attom which the attachment point is attached to. Should 
+     * @param {object} silent - Should any connected atoms be informed of the change
      */ 
-    removeIO(type, name, target){
+    removeIO(type, name, target, silent = false){
         //Remove the target IO attachment point
         target.inputs.forEach(input => {
             if(input.name == name && input.type == type){
                 target.inputs.splice(target.inputs.indexOf(input),1)
-                input.deleteSelf()
+                input.deleteSelf(silent)
             }
         })
     }

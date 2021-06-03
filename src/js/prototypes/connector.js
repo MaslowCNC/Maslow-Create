@@ -160,6 +160,7 @@ export default class Connector {
             if(!silent){
                 this.attachmentPoint2.setDefault()
                 console.log("Settings something to it's default")
+                console.trace()
             }
         }
     }

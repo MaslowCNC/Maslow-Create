@@ -100,30 +100,27 @@ export default class GitHubMolecule extends Molecule {
             node.deleteNode(false, true, true)
         })
         
-        //Deleting nodes background clicks on the host molecule so we want to bring the focus back to this atom by deslecting the top level molecule...a bit of a hack
-        // GlobalVariables.topLevelMolecule.selected = false
-        
         //Re-serialize this molecule
-        // this.loadProjectByID(this.projectID).then( ()=> {
-            // this.beginPropagation()
-        // })
+        this.loadProjectByID(this.projectID).then( ()=> {
+            this.beginPropagation(true)
+        })
         this.updateSidebar()
     }
     
     /**
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
-    beginPropagation(){
+    beginPropagation(force = false){
         //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
-        if(!GlobalVariables.availablePaths.includes(this.path)){
+        if(!GlobalVariables.availablePaths.includes(this.path) || force){
             //Triggers inputs with nothing connected to begin propagation
             this.inputs.forEach(input => {
-                input.beginPropagation()
+                input.beginPropagation(force)
             })
         }
         
         //Tell every atom inside this molecule to begin Propagation
-        super.beginPropagation()
+        super.beginPropagation(force)
     }
     
     /**

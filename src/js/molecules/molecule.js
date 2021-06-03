@@ -286,11 +286,11 @@ export default class Molecule extends Atom{
     /**
      * Walks through each of the atoms in this molecule and begins Propagation from them if they have no inputs to wait for
      */ 
-    beginPropagation(){
+    beginPropagation(force = false){
         
         //Tell every atom inside this molecule to begin Propagation
         this.nodesOnTheScreen.forEach(node => {
-            node.beginPropagation()
+            node.beginPropagation(force)
         })
         
         //Generate the simplified path if needed
@@ -644,16 +644,16 @@ export default class Molecule extends Atom{
     /**
      * Delete this molecule and everything in it.
      */ 
-    deleteNode(backgroundClickAfter = true, deletePath = true){
+    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false){
         
         //make a copy of the nodes on the screen array since we will be modifying it
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         
-        copyOfNodesOnTheScreen.forEach(node => {
-            node.deleteNode(backgroundClickAfter, deletePath)
+        copyOfNodesOnTheScreen.forEach(atom => {
+            atom.deleteNode(backgroundClickAfter, deletePath, silent)
         })
         
-        super.deleteNode(backgroundClickAfter, deletePath)
+        super.deleteNode(backgroundClickAfter, deletePath, silent)
     }
     
     /**
