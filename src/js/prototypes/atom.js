@@ -176,10 +176,10 @@ export default class Atom {
         }
         
         
-        if(this.output){
-            this.output.setValue(this.path)
-            this.output.ready = true
-        }
+        // if(this.output){
+            // this.output.setValue(this.path)
+            // this.output.ready = true
+        // }
     }
    
     /**

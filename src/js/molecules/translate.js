@@ -70,7 +70,6 @@ export default class Translate extends Atom{
     updateValue(){
         if(this.inputs.every(x => x.ready)){
             try{
-                console.log("Translate " + this.uniqueID)
                 var inputPath = this.findIOValue('geometry')
                 var x = this.findIOValue('xDist')
                 var y = this.findIOValue('yDist')
