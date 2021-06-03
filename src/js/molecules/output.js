@@ -82,7 +82,7 @@ export default class Output extends Atom {
      * Sets the parent molecule output to wait on coming information
      */ 
     waitOnComingInformation(){
-            this.parent.output.waitOnComingInformation()
+        this.parent.output.waitOnComingInformation()
     }
     
     /**

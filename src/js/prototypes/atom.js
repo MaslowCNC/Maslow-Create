@@ -177,8 +177,8 @@ export default class Atom {
         
         
         // if(this.output){
-            // this.output.setValue(this.path)
-            // this.output.ready = true
+        // this.output.setValue(this.path)
+        // this.output.ready = true
         // }
     }
    
@@ -378,7 +378,6 @@ export default class Atom {
             this.selected = true
             this.updateSidebar()
             this.sendToRender()
-            console.log(this.uniqueID)
             clickProcessed = true
         }
         //Deselect this if it wasn't clicked on, unless control is held
@@ -578,7 +577,6 @@ export default class Atom {
         
         if(deletePath){
             this.basicThreadValueProcessing({key: "deletePath", path: this.path }) //Delete the cached geometry
-            console.trace()
         }
         
         if(backgroundClickAfter){

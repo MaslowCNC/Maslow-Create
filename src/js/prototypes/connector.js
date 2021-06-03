@@ -159,8 +159,6 @@ export default class Connector {
             this.attachmentPoint2.deleteConnector(this)
             if(!silent){
                 this.attachmentPoint2.setDefault()
-                console.log("Settings something to it's default")
-                console.trace()
             }
         }
     }

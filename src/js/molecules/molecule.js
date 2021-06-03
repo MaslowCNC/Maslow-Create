@@ -263,7 +263,6 @@ export default class Molecule extends Atom{
         if(this.simplify){
             try{
                 this.processing = true
-                console.log("simplify: " + this.uniqueID)
                 const values = {key: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
                 window.ask(values).then( () => {
                     this.processing = false
