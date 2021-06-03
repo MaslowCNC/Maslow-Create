@@ -348,6 +348,10 @@ const agent = async ({
             const shape2getHash = await maslowRead(question.readPath);
             return shape2getHash.geometry.hash;
             break;
+        case "getJSON":
+            const shape2getJSON = await maslowRead(question.readPath);
+            return JSON.stringify(shape2getJSON.toGeometry());
+            break;
         case "getPathsList":
             const listedFiles = await listFiles();
             const inThisProject = listedFiles.filter((path) => path.startsWith(question.prefacePath));

@@ -807,8 +807,23 @@ export default function GitHubModule(){
                             message: "SVG Picture", 
                             content: ""
                         }).then(()=>{
-                            intervalTimer = setInterval(() => { this.saveProject() }, 1200000) //Save the project regularly
-                    
+                            octokit.repos.createFile({ // Create empty file for SVG string
+                                owner: currentUser,
+                                repo: currentRepoName,
+                                path: ".gitattributes",
+                                message: "Create gitattributes", 
+                                content: window.btoa("data binary")
+                            }).then(()=>{
+                                octokit.repos.createFile({ // Create empty file for SVG string
+                                    owner: currentUser,
+                                    repo: currentRepoName,
+                                    path: "data.json",
+                                    message: "Data file", 
+                                    content: ""
+                                }).then(()=>{
+                                    intervalTimer = setInterval(() => { this.saveProject() }, 1200000) //Save the project regularly
+                                })
+                            })
                         })
                     })
                 })
@@ -892,18 +907,24 @@ export default function GitHubModule(){
                     var decoder = new TextDecoder('utf8')
                     var finalSVG = decoder.decode(contentSvg)
                     
-                    this.createCommit(octokit,{
-                        owner: saveUser,
-                        repo: saveRepoName,
-                        changes: {
-                            files: {
-                                'BillOfMaterials.md': bomContent,
-                                'README.md': readmeContent,
-                                'project.svg': finalSVG,
-                                'project.maslowcreate': projectContent
-                            },
-                            commit: 'Autosave'
-                        }
+                    
+                    const askJsonVals = {key: "getJSON", readPath: GlobalVariables.topLevelMolecule.path}
+                    window.ask(askJsonVals).then( JSONData => {
+                        
+                        this.createCommit(octokit,{
+                            owner: saveUser,
+                            repo: saveRepoName,
+                            changes: {
+                                files: {
+                                    'BillOfMaterials.md': bomContent,
+                                    'README.md': readmeContent,
+                                    'project.svg': finalSVG,
+                                    'project.maslowcreate': projectContent,
+                                    'data.json': JSONData
+                                },
+                                commit: 'Autosave'
+                            }
+                        })
                     })
 
                     intervalTimer = setInterval(() => this.saveProject(), 1200000)
