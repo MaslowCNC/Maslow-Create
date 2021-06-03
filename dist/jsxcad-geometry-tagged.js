@@ -2,9 +2,9 @@ import { identityMatrix, fromXRotation, fromYRotation, fromZRotation, fromTransl
 import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
 import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as eachPoint$2, flip as flip$1 } from './jsxcad-geometry-paths.js';
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
-import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, flip as flip$2, measureBoundingBox as measureBoundingBox$2, union as union$1 } from './jsxcad-geometry-points.js';
+import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, measureBoundingBox as measureBoundingBox$2, flip as flip$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
-import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, grow as grow$1, toPaths, intersection as intersection$1, inset as inset$1, measureBoundingBox as measureBoundingBox$3, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
+import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, measureBoundingBox as measureBoundingBox$3, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, grow as grow$1, toPaths, intersection as intersection$1, inset as inset$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
 import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
@@ -473,6 +473,7 @@ const toDisjointGeometry = (geometry, mode = DISJUNCTION_TOTAL) => {
         // disjointAssembly.
         // This is acceptable for displayGeometry, but otherwise problematic.
         // For this reason we wrap the output as DisplayGeometry.
+        // FIX: This is leaking backward via parent linkDisjointAssembly.
         return taggedDisplayGeometry(
           {},
           toTransformedGeometry(reify(geometry))
@@ -571,6 +572,118 @@ const differenceImpl = (geometry, ...geometries) => {
 
 const difference = cache(differenceImpl);
 
+const eachPoint = (emit, geometry) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'item':
+      case 'layout':
+        return descend();
+      case 'points':
+        return eachPoint$3(emit, geometry.points);
+      case 'paths':
+        return eachPoint$2(emit, geometry.paths);
+      case 'graph':
+        return eachPoint$1(geometry.graph, emit);
+      default:
+        throw Error(
+          `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
+        );
+    }
+  };
+  visit(geometry, op);
+};
+
+// DEPRECATED
+const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
+
+const measureBoundingBoxGeneric = (geometry) => {
+  let minPoint = [Infinity, Infinity, Infinity];
+  let maxPoint = [-Infinity, -Infinity, -Infinity];
+  eachPoint((point) => {
+    minPoint = min(minPoint, point);
+    maxPoint = max(maxPoint, point);
+  }, geometry);
+  return [minPoint, maxPoint];
+};
+
+const measureBoundingBox = (geometry) => {
+  let minPoint = [Infinity, Infinity, Infinity];
+  let maxPoint = [-Infinity, -Infinity, -Infinity];
+
+  const update = ([itemMinPoint, itemMaxPoint]) => {
+    minPoint = min(minPoint, itemMinPoint);
+    maxPoint = max(maxPoint, itemMaxPoint);
+  };
+
+  const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
+      return;
+    }
+    switch (geometry.type) {
+      case 'plan':
+      case 'assembly':
+      case 'layers':
+      case 'disjointAssembly':
+      case 'item':
+      case 'sketch':
+      case 'displayGeometry':
+        return descend();
+      case 'graph':
+        return update(measureBoundingBox$3(geometry.graph));
+      case 'layout':
+        return update(geometry.marks);
+      case 'points':
+        return update(measureBoundingBox$2(geometry.points));
+      case 'paths':
+        return update(measureBoundingBoxGeneric(geometry));
+      case 'triangles':
+        return update(measureBoundingBox$1(geometry.triangles));
+      default:
+        throw Error(`Unknown geometry: ${geometry.type}`);
+    }
+  };
+
+  visit(toKeptGeometry(reify(geometry)), op);
+
+  return [minPoint, maxPoint];
+};
+
+const iota = 1e-5;
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+// Requires a conservative gap.
+const doesNotOverlap = (a, b) => {
+  if (a.isEmpty || b.isEmpty) {
+    return true;
+  }
+  const [minA, maxA] = measureBoundingBox(a);
+  const [minB, maxB] = measureBoundingBox(b);
+  if (maxA[X] <= minB[X] - iota * 10) {
+    return true;
+  }
+  if (maxA[Y] <= minB[Y] - iota * 10) {
+    return true;
+  }
+  if (maxA[Z] <= minB[Z] - iota * 10) {
+    return true;
+  }
+  if (maxB[X] <= minA[X] - iota * 10) {
+    return true;
+  }
+  if (maxB[Y] <= minA[Y] - iota * 10) {
+    return true;
+  }
+  if (maxB[Z] <= minA[Z] - iota * 10) {
+    return true;
+  }
+  return false;
+};
+
 const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
   if (set === undefined) {
     return whenSetUndefined;
@@ -641,30 +754,6 @@ const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
 const drop = (tags, geometry) =>
   rewriteTags(['compose/non-positive'], [], geometry, tags, 'has');
 
-const eachPoint = (emit, geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'assembly':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'item':
-      case 'layout':
-        return descend();
-      case 'points':
-        return eachPoint$3(emit, geometry.points);
-      case 'paths':
-        return eachPoint$2(emit, geometry.paths);
-      case 'graph':
-        return eachPoint$1(geometry.graph, emit);
-      default:
-        throw Error(
-          `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
-        );
-    }
-  };
-  visit(geometry, op);
-};
-
 const empty = ({ tags }) => taggedGraph({ tags }, fromEmpty());
 
 const eachNonVoidItem = (geometry, op) => {
@@ -711,9 +800,6 @@ const taggedGroup = ({ tags }, ...content) => {
   // FIX: Deprecate layers.
   return { type: 'layers', tags, content };
 };
-
-// DEPRECATED
-const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
 
 const fill = (geometry, includeFaces = true, includeHoles = true) => {
   const keptGeometry = toKeptGeometry(geometry);
@@ -1233,58 +1319,6 @@ const inset = (geometry, initial = 1, step, limit) => {
 
 const keep = (tags, geometry) =>
   rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
-
-const measureBoundingBoxGeneric = (geometry) => {
-  let minPoint = [Infinity, Infinity, Infinity];
-  let maxPoint = [-Infinity, -Infinity, -Infinity];
-  eachPoint((point) => {
-    minPoint = min(minPoint, point);
-    maxPoint = max(maxPoint, point);
-  }, geometry);
-  return [minPoint, maxPoint];
-};
-
-const measureBoundingBox = (geometry) => {
-  let minPoint = [Infinity, Infinity, Infinity];
-  let maxPoint = [-Infinity, -Infinity, -Infinity];
-
-  const update = ([itemMinPoint, itemMaxPoint]) => {
-    minPoint = min(minPoint, itemMinPoint);
-    maxPoint = max(maxPoint, itemMaxPoint);
-  };
-
-  const op = (geometry, descend) => {
-    if (isVoid(geometry)) {
-      return;
-    }
-    switch (geometry.type) {
-      case 'plan':
-      case 'assembly':
-      case 'layers':
-      case 'disjointAssembly':
-      case 'item':
-      case 'sketch':
-      case 'displayGeometry':
-        return descend();
-      case 'graph':
-        return update(measureBoundingBox$3(geometry.graph));
-      case 'layout':
-        return update(geometry.marks);
-      case 'points':
-        return update(measureBoundingBox$2(geometry.points));
-      case 'paths':
-        return update(measureBoundingBoxGeneric(geometry));
-      case 'triangles':
-        return update(measureBoundingBox$1(geometry.triangles));
-      default:
-        throw Error(`Unknown geometry: ${geometry.type}`);
-    }
-  };
-
-  visit(toKeptGeometry(reify(geometry)), op);
-
-  return [minPoint, maxPoint];
-};
 
 const minkowskiDifference = (geometry, offset) => {
   offset = reify(offset);
@@ -1851,18 +1885,18 @@ const toDisplayGeometry = (
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 // FIX: Use createNormalize3
 const createPointNormalizer = () => {
   const map = new Map();
   const normalize = (coordinate) => {
     // Apply a spatial quantization to the 3 dimensional coordinate.
-    const nx = Math.floor(coordinate[X] * multiplier - 0.5);
-    const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
-    const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
+    const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
+    const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
+    const nz = Math.floor(coordinate[Z$1] * multiplier - 0.5);
     // Look for an existing inhabitant.
     const value = map.get(`${nx}/${ny}/${nz}`);
     if (value !== undefined) {
@@ -2062,4 +2096,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };
+export { allTags, assemble, canonicalize, difference, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };

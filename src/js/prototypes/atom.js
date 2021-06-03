@@ -176,10 +176,10 @@ export default class Atom {
         }
         
         
-        if(this.output){
-            this.output.setValue(this.path)
-            this.output.ready = true
-        }
+        // if(this.output){
+        // this.output.setValue(this.path)
+        // this.output.ready = true
+        // }
     }
    
     /**
@@ -312,14 +312,15 @@ export default class Atom {
      * Removes an attachment point from an atom.
      * @param {boolean} type - The type of the IO (input or output).
      * @param {string} name - The name of the new attachment point.
-     * @param {object} target - The attom which the attachment point is attached to. Should this be forced to be this.?
+     * @param {object} target - The attom which the attachment point is attached to. Should 
+     * @param {object} silent - Should any connected atoms be informed of the change
      */ 
-    removeIO(type, name, target){
+    removeIO(type, name, target, silent = false){
         //Remove the target IO attachment point
         target.inputs.forEach(input => {
             if(input.name == name && input.type == type){
                 target.inputs.splice(target.inputs.indexOf(input),1)
-                input.deleteSelf()
+                input.deleteSelf(silent)
             }
         })
     }
@@ -356,8 +357,6 @@ export default class Atom {
             if(yInPixels >= yIn && yInPixels <= yOut){
                 //this.isMoving = true
                 this.selected = true
-                this.updateSidebar()
-                this.sendToRender()
             }
         }
     }
@@ -557,9 +556,9 @@ export default class Atom {
     }
 
     /**
-     * Delete this atom.
+     * Delete this atom. Silent prevents it from telling its neighbors
      */ 
-    deleteNode(backgroundClickAfter = true, deletePath = true){
+    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false){
         //deletes this node and all of it's inputs
         
         this.inputs.forEach(input => { //disable the inputs before deleting
@@ -568,10 +567,10 @@ export default class Atom {
         
         const inputsCopy = [...this.inputs]//Make a copy of the inputs list to delete all of them
         inputsCopy.forEach(input => {
-            input.deleteSelf()
+            input.deleteSelf(silent)
         })
         if(this.output){
-            this.output.deleteSelf()
+            this.output.deleteSelf(silent)
         }
         
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
@@ -583,7 +582,6 @@ export default class Atom {
         if(backgroundClickAfter){
             GlobalVariables.currentMolecule.backgroundClick()
         }
-        
     }
     
     /**
@@ -679,6 +677,15 @@ export default class Atom {
         //If this atom is selected, send the updated value to the renderer
         if (this.selected){
             this.sendToRender()
+        }
+    }
+    
+    /**
+     * Sets the atom to wait on coming information. Basically a pass through, but used for molecules
+     */ 
+    waitOnComingInformation(){
+        if(this.output){
+            this.output.waitOnComingInformation()
         }
     }
     

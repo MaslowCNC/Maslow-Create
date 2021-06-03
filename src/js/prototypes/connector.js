@@ -150,14 +150,16 @@ export default class Connector {
     /**
      * Deletes the connector by calling its attachmentPoints to tell them to delete their references to this connector.
      */ 
-    deleteSelf(){
+    deleteSelf(silent = false){
         //Remove this connector from the output it is attached to
         this.attachmentPoint1.deleteConnector(this)
         
         //Free up the input to which this was attached
         if(this.attachmentPoint2 != null){
             this.attachmentPoint2.deleteConnector(this)
-            this.attachmentPoint2.setDefault()
+            if(!silent){
+                this.attachmentPoint2.setDefault()
+            }
         }
     }
     
