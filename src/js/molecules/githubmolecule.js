@@ -65,6 +65,14 @@ export default class GitHubMolecule extends Molecule {
         //Get the repo by ID
         const json = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
+        const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
+        if(projectData){
+            const values = {key: "fromJSON", writePath: this.path, json: projectData}
+            window.ask(values).then( answer => {
+                console.log("After reading");
+            })
+        }
+        
         //Store values that we want to overwrite in the loaded version
         var valuesToOverwriteInLoadedVersion
         if(this.topLevel){
@@ -80,8 +88,10 @@ export default class GitHubMolecule extends Molecule {
             }
         }
         const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () => {
-            this.setValues(valuesToOverwriteInLoadedVersion)
-            this.loadTree()
+            if(!projectData){  //If we haven't loaded the project directly then recompute the ouput
+                this.setValues(valuesToOverwriteInLoadedVersion)
+                this.loadTree()
+            }
         })
         return promsie
     }

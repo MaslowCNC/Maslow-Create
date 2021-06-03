@@ -1170,6 +1170,37 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Loads a project's data from github by its github ID.
+     */
+    this.getProjectDataByID = async function(id){
+        let repo = await octokit.request('GET /repositories/:id', {id})
+        //Find out the owners info;
+        const user     = repo.data.owner.login
+        const repoName = repo.data.name
+        //Get the file contents
+        let result = await octokit.repos.getContents({
+            owner: user,
+            repo: repoName,
+            path: 'project.maslowcreate'
+        })
+        
+        try{
+            let jsonData = await octokit.repos.getContents({
+                owner: user,
+                repo: repoName,
+                path: 'data.json'
+            })
+            
+            jsonData = atob(jsonData.data.content)
+            return jsonData
+            
+        }catch(err){
+            console.warn("Unable to load project data from github")
+            return false
+        }
+    }
+    
+    /** 
      * Export a molecule as a new github project.
      */
     this.exportCurrentMoleculeToGithub = function(molecule){
