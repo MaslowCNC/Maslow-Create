@@ -66,32 +66,47 @@ export default class GitHubMolecule extends Molecule {
         const json = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
         const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
-        if(projectData){
-            const values = {key: "fromJSON", writePath: this.path, json: projectData}
-            window.ask(values)
-        }
         
-        //Store values that we want to overwrite in the loaded version
-        var valuesToOverwriteInLoadedVersion
-        if(this.topLevel){
-            valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
+        if(projectData && json.ioValues.length == 0){ //If this github molecule has no inputs
+            const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
+            if(projectData){
+                this.name = json.name
+                const values = {key: "fromJSON", writePath: this.path, json: projectData}
+                window.ask(values)
+                this.nodesOnTheScreen.forEach( atom => {
+                    if(atom.atomType == "Output"){
+                        atom.path = this.path
+                        atom.inputs[0].setValue(this.path)
+                    }
+                })
+                this.propogate()
+            }
+            let aPromise = new Promise((resolve) => {
+                resolve()
+            })
+            return aPromise
         }
         else{
-            //If there are stored io values to recover
-            if(this.ioValues != undefined){
-                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+            //Store values that we want to overwrite in the loaded version
+            var valuesToOverwriteInLoadedVersion
+            if(this.topLevel){
+                valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
             }
             else{
-                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+                //If there are stored io values to recover
+                if(this.ioValues != undefined){
+                    valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+                }
+                else{
+                    valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+                }
             }
-        }
-        const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () => {
-            if(!projectData){  //If we haven't loaded the project directly then recompute the ouput
+            const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () => {
                 this.setValues(valuesToOverwriteInLoadedVersion)
                 this.loadTree()
-            }
-        })
-        return promsie
+            })
+            return promsie
+        }
     }
     
     /**
