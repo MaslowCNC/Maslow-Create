@@ -58,6 +58,9 @@ export const extractBomTags = function(path, functionToPlace){
         
         bomItems = bomItems.map(JSON.parse)
         
+        console.log("bomItems: ")
+        console.log(bomItems);
+        
         // Consolidate similar items into a single item
         var compiledArray = []
         bomItems.forEach(function (bomElement) {

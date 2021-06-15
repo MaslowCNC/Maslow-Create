@@ -1,12 +1,12 @@
-const pending = [];
+const pending$2 = [];
 
 let pendingErrorHandler = (error) => console.log(error);
 
-const addPending = (promise) => pending.push(promise);
+const addPending = (promise) => pending$2.push(promise);
 
 const resolvePending = async () => {
-  while (pending.length > 0) {
-    await pending.pop();
+  while (pending$2.length > 0) {
+    await pending$2.pop();
   }
 };
 
@@ -170,7 +170,7 @@ var once = noop;
 var off = noop;
 var removeListener = noop;
 var removeAllListeners = noop;
-var emit = noop;
+var emit$1 = noop;
 
 function binding(name) {
     throw new Error('process.binding is not supported');
@@ -208,10 +208,10 @@ function hrtime(previousTimestamp){
   return [seconds,nanoseconds]
 }
 
-var startTime = new Date();
+var startTime$1 = new Date();
 function uptime() {
   var currentTime = new Date();
-  var dif = currentTime - startTime;
+  var dif = currentTime - startTime$1;
   return dif / 1000;
 }
 
@@ -229,7 +229,7 @@ var process = {
   off: off,
   removeListener: removeListener,
   removeAllListeners: removeAllListeners,
-  emit: emit,
+  emit: emit$1,
   binding: binding,
   cwd: cwd,
   chdir: chdir,
@@ -555,13 +555,13 @@ const getFile = async (options, unqualifiedPath) => {
   return file;
 };
 
-const listFiles = (set) => {
+const listFiles$1 = (set) => {
   for (const file of files.keys()) {
     set.add(file);
   }
 };
 
-const deleteFile = async (options, unqualifiedPath) => {
+const deleteFile$1 = async (options, unqualifiedPath) => {
   const path = qualifyPath(unqualifiedPath);
   let file = files.get(path);
   if (file !== undefined) {
@@ -3438,6 +3438,74 @@ const db = () => {
   return dbInstance;
 };
 
+function pad (hash, len) {
+  while (hash.length < len) {
+    hash = '0' + hash;
+  }
+  return hash;
+}
+
+function fold (hash, text) {
+  var i;
+  var chr;
+  var len;
+  if (text.length === 0) {
+    return hash;
+  }
+  for (i = 0, len = text.length; i < len; i++) {
+    chr = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash < 0 ? hash * -2 : hash;
+}
+
+function foldObject (hash, o, seen) {
+  return Object.keys(o).sort().reduce(foldKey, hash);
+  function foldKey (hash, key) {
+    return foldValue(hash, o[key], key, seen);
+  }
+}
+
+function foldValue (input, value, key, seen) {
+  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
+  if (value === null) {
+    return fold(hash, 'null');
+  }
+  if (value === undefined) {
+    return fold(hash, 'undefined');
+  }
+  if (typeof value === 'object' || typeof value === 'function') {
+    if (seen.indexOf(value) !== -1) {
+      return fold(hash, '[Circular]' + key);
+    }
+    seen.push(value);
+
+    var objHash = foldObject(hash, value, seen);
+
+    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
+      return objHash;
+    }
+
+    try {
+      return fold(objHash, String(value.valueOf()))
+    } catch (err) {
+      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
+    }
+  }
+  return fold(hash, value.toString());
+}
+
+function toString (o) {
+  return Object.prototype.toString.call(o);
+}
+
+function sum (o) {
+  return pad(foldValue(0, o, '', []).toString(16), 8);
+}
+
+var hashSum = sum;
+
 const modules = [];
 
 const getModule = () => modules[modules.length - 1];
@@ -3450,19 +3518,19 @@ const emitted = [];
 
 let context;
 
-let startTime$1 = new Date();
+let startTime = new Date();
 
-const elapsed = () => new Date() - startTime$1;
+const elapsed = () => new Date() - startTime;
 
 const clearEmitted = () => {
-  startTime$1 = new Date();
+  startTime = new Date();
   emitted.length = 0;
   context = undefined;
 };
 
 const onEmitHandlers = new Set();
 
-const emit$1 = (value) => {
+const emit = (value) => {
   if (value.module === undefined) {
     value.module = getModule();
   }
@@ -3488,7 +3556,11 @@ const addOnEmitHandler = (handler) => {
 
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
-const info = (text) => emit$1({ info: text });
+const info = (text) => {
+  const entry = { info: text };
+  const hash = hashSum(entry);
+  emit({ info: text, hash });
+};
 
 var nodeFetch = _ => _;
 
@@ -3544,7 +3616,7 @@ const touch = async (path, { workspace, doClear = true } = {}) => {
 
 /* global self */
 
-const { promises } = fs;
+const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
 // FIX Convert data by representation.
@@ -3577,13 +3649,13 @@ const writeFile = async (options, path, data) => {
     const persistentPath = qualifyPath(path);
     if (isNode) {
       try {
-        await promises.mkdir(dirname(persistentPath), { recursive: true });
+        await promises$3.mkdir(dirname(persistentPath), { recursive: true });
       } catch (error) {}
       try {
         if (doSerialize) {
           data = serialize(data);
         }
-        await promises.writeFile(persistentPath, data);
+        await promises$3.writeFile(persistentPath, data);
         await touch(persistentPath, { workspace, doClear: false });
       } catch (error) {}
     } else if (isBrowser || isWebWorker) {
@@ -3612,7 +3684,7 @@ const write = async (path, data, options = {}) => {
 
 /* global self */
 
-const { promises: promises$1 } = fs;
+const { promises: promises$2 } = fs;
 const { deserialize } = v8$1;
 
 const getUrlFetcher = async () => {
@@ -3632,7 +3704,7 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      let data = await promises$1.readFile(qualify(path));
+      let data = await promises$2.readFile(qualify(path));
       if (doSerialize) {
         data = deserialize(data);
       }
@@ -3822,7 +3894,7 @@ const BOOTED = 'booted';
 
 let status = UNBOOTED;
 
-const pending$2 = [];
+const pending = [];
 
 // Execute tasks to complete before using system.
 const boot = async () => {
@@ -3833,7 +3905,7 @@ const boot = async () => {
   if (status === BOOTING) {
     // Wait for the system to boot.
     return new Promise((resolve, reject) => {
-      pending$2.push(resolve);
+      pending.push(resolve);
     });
   }
   // Initiate boot.
@@ -3844,8 +3916,8 @@ const boot = async () => {
   // Complete boot.
   status = BOOTED;
   // Release the pending clients.
-  while (pending$2.length > 0) {
-    pending$2.pop()();
+  while (pending.length > 0) {
+    pending.pop()();
   }
 };
 
@@ -3859,7 +3931,7 @@ const getDefinitions = () => {
   return definitions;
 };
 
-const { promises: promises$2 } = fs;
+const { promises: promises$1 } = fs;
 
 const getFileLister = async () => {
   if (isNode) {
@@ -3867,12 +3939,12 @@ const getFileLister = async () => {
     return async () => {
       const qualifiedPaths = new Set();
       const walk = async (path) => {
-        for (const file of await promises$2.readdir(path)) {
+        for (const file of await promises$1.readdir(path)) {
           if (file.startsWith('.') || file === 'node_modules') {
             continue;
           }
           const subpath = `${path}${file}`;
-          const stats = await promises$2.stat(subpath);
+          const stats = await promises$1.stat(subpath);
           if (stats.isDirectory()) {
             await walk(`${subpath}/`);
           } else {
@@ -3881,14 +3953,14 @@ const getFileLister = async () => {
         }
       };
       await walk('jsxcad/');
-      listFiles(qualifiedPaths);
+      listFiles$1(qualifiedPaths);
       return qualifiedPaths;
     };
   } else if (isBrowser || isWebWorker) {
     // FIX: Make localstorage optional.
     return async () => {
       const qualifiedPaths = new Set(await db().keys());
-      listFiles(qualifiedPaths);
+      listFiles$1(qualifiedPaths);
       return qualifiedPaths;
     };
   } else {
@@ -3925,7 +3997,7 @@ const listFilesystems = async () => {
   return [...filesystems];
 };
 
-const listFiles$1 = async ({ workspace } = {}) => {
+const listFiles = async ({ workspace } = {}) => {
   if (workspace === undefined) {
     workspace = getFilesystem();
   }
@@ -3942,13 +4014,13 @@ const listFiles$1 = async ({ workspace } = {}) => {
 
 /* global self */
 
-const { promises: promises$3 } = fs;
+const { promises } = fs;
 
 const getFileDeleter = async () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises$3.unlink(qualifyPath(path));
+      return promises.unlink(qualifyPath(path));
     };
   } else if (isBrowser) {
     return async (path) => {
@@ -3959,13 +4031,13 @@ const getFileDeleter = async () => {
   }
 };
 
-const deleteFile$1 = async (options, path) => {
+const deleteFile = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ deleteFile: { options, path } });
   }
   const deleter = await getFileDeleter();
   await deleter(path);
-  await deleteFile(options, path);
+  await deleteFile$1(options, path);
 };
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, elapsed, emit$1 as emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles$1 as listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

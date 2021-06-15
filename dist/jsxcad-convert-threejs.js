@@ -1,4 +1,4 @@
-import { toDisjointGeometry } from './jsxcad-geometry-tagged.js';
+import { toDisjointGeometry } from './jsxcad-geometry.js';
 
 // import { toPlane } from './jsxcad-math-poly3.js';
 

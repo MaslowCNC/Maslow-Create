@@ -355,6 +355,9 @@ const md = (strings, ...placeholders) => {
 };
 
 const mdMethod = function (string, ...placeholders) {
+  if (string instanceof Function) {
+    string = string(this);
+  }
   md([string], ...placeholders);
   return this;
 };

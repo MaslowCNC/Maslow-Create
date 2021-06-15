@@ -581,7 +581,7 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
-var Color = function () {
+var Color$1 = function () {
   function Color() {
     classCallCheck(this, Color);
     this.__state = interpret.apply(this, arguments);
@@ -614,12 +614,12 @@ function defineRGBComponent(target, component, componentHexIndex) {
       if (this.__state.space === 'RGB') {
         return this.__state[component];
       }
-      Color.recalculateRGB(this, component, componentHexIndex);
+      Color$1.recalculateRGB(this, component, componentHexIndex);
       return this.__state[component];
     },
     set: function set$$1(v) {
       if (this.__state.space !== 'RGB') {
-        Color.recalculateRGB(this, component, componentHexIndex);
+        Color$1.recalculateRGB(this, component, componentHexIndex);
         this.__state.space = 'RGB';
       }
       this.__state[component] = v;
@@ -632,19 +632,19 @@ function defineHSVComponent(target, component) {
       if (this.__state.space === 'HSV') {
         return this.__state[component];
       }
-      Color.recalculateHSV(this);
+      Color$1.recalculateHSV(this);
       return this.__state[component];
     },
     set: function set$$1(v) {
       if (this.__state.space !== 'HSV') {
-        Color.recalculateHSV(this);
+        Color$1.recalculateHSV(this);
         this.__state.space = 'HSV';
       }
       this.__state[component] = v;
     }
   });
 }
-Color.recalculateRGB = function (color, component, componentHexIndex) {
+Color$1.recalculateRGB = function (color, component, componentHexIndex) {
   if (color.__state.space === 'HEX') {
     color.__state[component] = ColorMath.component_from_hex(color.__state.hex, componentHexIndex);
   } else if (color.__state.space === 'HSV') {
@@ -653,7 +653,7 @@ Color.recalculateRGB = function (color, component, componentHexIndex) {
     throw new Error('Corrupted color state');
   }
 };
-Color.recalculateHSV = function (color) {
+Color$1.recalculateHSV = function (color) {
   var result = ColorMath.rgb_to_hsv(color.r, color.g, color.b);
   Common.extend(color.__state, {
     s: result.s,
@@ -665,14 +665,14 @@ Color.recalculateHSV = function (color) {
     color.__state.h = 0;
   }
 };
-Color.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
-defineRGBComponent(Color.prototype, 'r', 2);
-defineRGBComponent(Color.prototype, 'g', 1);
-defineRGBComponent(Color.prototype, 'b', 0);
-defineHSVComponent(Color.prototype, 'h');
-defineHSVComponent(Color.prototype, 's');
-defineHSVComponent(Color.prototype, 'v');
-Object.defineProperty(Color.prototype, 'a', {
+Color$1.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
+defineRGBComponent(Color$1.prototype, 'r', 2);
+defineRGBComponent(Color$1.prototype, 'g', 1);
+defineRGBComponent(Color$1.prototype, 'b', 0);
+defineHSVComponent(Color$1.prototype, 'h');
+defineHSVComponent(Color$1.prototype, 's');
+defineHSVComponent(Color$1.prototype, 'v');
+Object.defineProperty(Color$1.prototype, 'a', {
   get: function get$$1() {
     return this.__state.a;
   },
@@ -680,7 +680,7 @@ Object.defineProperty(Color.prototype, 'a', {
     this.__state.a = v;
   }
 });
-Object.defineProperty(Color.prototype, 'hex', {
+Object.defineProperty(Color$1.prototype, 'hex', {
   get: function get$$1() {
     if (!this.__state.space !== 'HEX') {
       this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
@@ -1287,8 +1287,8 @@ var ColorController = function (_Controller) {
   function ColorController(object, property) {
     classCallCheck(this, ColorController);
     var _this2 = possibleConstructorReturn(this, (ColorController.__proto__ || Object.getPrototypeOf(ColorController)).call(this, object, property));
-    _this2.__color = new Color(_this2.getValue());
-    _this2.__temp = new Color(0);
+    _this2.__color = new Color$1(_this2.getValue());
+    _this2.__temp = new Color$1(0);
     var _this = _this2;
     _this2.domElement = document.createElement('div');
     dom.makeSelectable(_this2.domElement, false);
@@ -1484,7 +1484,7 @@ var ColorController = function (_Controller) {
       var i = interpret(this.getValue());
       if (i !== false) {
         var mismatch = false;
-        Common.each(Color.COMPONENTS, function (component) {
+        Common.each(Color$1.COMPONENTS, function (component) {
           if (!Common.isUndefined(i[component]) && !Common.isUndefined(this.__color.__state[component]) && i[component] !== this.__color.__state[component]) {
             mismatch = true;
             return {};
@@ -10528,7 +10528,7 @@ var _colorKeywords = { 'aliceblue': 0xF0F8FF, 'antiquewhite': 0xFAEBD7, 'aqua': 
 var _hslA = { h: 0, s: 0, l: 0 };
 var _hslB = { h: 0, s: 0, l: 0 };
 
-function Color$1( r, g, b ) {
+function Color( r, g, b ) {
 
 	if ( g === undefined && b === undefined ) {
 
@@ -10564,7 +10564,7 @@ function LinearToSRGB( c ) {
 
 }
 
-Object.assign( Color$1.prototype, {
+Object.assign( Color.prototype, {
 
 	isColor: true,
 
@@ -11084,7 +11084,7 @@ Object.assign( Color$1.prototype, {
 
 } );
 
-Color$1.NAMES = _colorKeywords;
+Color.NAMES = _colorKeywords;
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -11100,7 +11100,7 @@ function Face3( a, b, c, normal, color, materialIndex ) {
 	this.normal = ( normal && normal.isVector3 ) ? normal : new Vector3();
 	this.vertexNormals = Array.isArray( normal ) ? normal : [];
 
-	this.color = ( color && color.isColor ) ? color : new Color$1();
+	this.color = ( color && color.isColor ) ? color : new Color();
 	this.vertexColors = Array.isArray( color ) ? color : [];
 
 	this.materialIndex = materialIndex !== undefined ? materialIndex : 0;
@@ -11625,7 +11625,7 @@ function MeshBasicMaterial( parameters ) {
 
 	this.type = 'MeshBasicMaterial';
 
-	this.color = new Color$1( 0xffffff ); // emissive
+	this.color = new Color( 0xffffff ); // emissive
 
 	this.map = null;
 
@@ -11796,7 +11796,7 @@ Object.assign( BufferAttribute.prototype, {
 			if ( color === undefined ) {
 
 				console.warn( 'THREE.BufferAttribute.copyColorsArray(): color is undefined', i );
-				color = new Color$1();
+				color = new Color();
 
 			}
 
@@ -14367,7 +14367,7 @@ Geometry.prototype = Object.assign( Object.create( EventDispatcher.prototype ), 
 
 			if ( colors !== undefined ) {
 
-				scope.colors.push( new Color$1().fromArray( colors, i ) );
+				scope.colors.push( new Color().fromArray( colors, i ) );
 
 			}
 
@@ -16775,7 +16775,7 @@ var UniformsLib = {
 
 	common: {
 
-		diffuse: { value: new Color$1( 0xeeeeee ) },
+		diffuse: { value: new Color( 0xeeeeee ) },
 		opacity: { value: 1.0 },
 
 		map: { value: null },
@@ -16867,7 +16867,7 @@ var UniformsLib = {
 		fogDensity: { value: 0.00025 },
 		fogNear: { value: 1 },
 		fogFar: { value: 2000 },
-		fogColor: { value: new Color$1( 0xffffff ) }
+		fogColor: { value: new Color( 0xffffff ) }
 
 	},
 
@@ -16946,7 +16946,7 @@ var UniformsLib = {
 
 	points: {
 
-		diffuse: { value: new Color$1( 0xeeeeee ) },
+		diffuse: { value: new Color( 0xeeeeee ) },
 		opacity: { value: 1.0 },
 		size: { value: 1.0 },
 		scale: { value: 1.0 },
@@ -16958,7 +16958,7 @@ var UniformsLib = {
 
 	sprite: {
 
-		diffuse: { value: new Color$1( 0xeeeeee ) },
+		diffuse: { value: new Color( 0xeeeeee ) },
 		opacity: { value: 1.0 },
 		center: { value: new Vector2( 0.5, 0.5 ) },
 		rotation: { value: 0.0 },
@@ -17722,7 +17722,7 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color$1( 0x000000 ) }
+				emissive: { value: new Color( 0x000000 ) }
 			}
 		] ),
 
@@ -17746,8 +17746,8 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color$1( 0x000000 ) },
-				specular: { value: new Color$1( 0x111111 ) },
+				emissive: { value: new Color( 0x000000 ) },
+				specular: { value: new Color( 0x111111 ) },
 				shininess: { value: 30 }
 			}
 		] ),
@@ -17773,7 +17773,7 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color$1( 0x000000 ) },
+				emissive: { value: new Color( 0x000000 ) },
 				roughness: { value: 1.0 },
 				metalness: { value: 0.0 },
 				envMapIntensity: { value: 1 } // temporary
@@ -17800,8 +17800,8 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color$1( 0x000000 ) },
-				specular: { value: new Color$1( 0x111111 ) },
+				emissive: { value: new Color( 0x000000 ) },
+				specular: { value: new Color( 0x111111 ) },
 				shininess: { value: 30 }
 			}
 		] ),
@@ -17962,7 +17962,7 @@ var ShaderLib = {
 			UniformsLib.lights,
 			UniformsLib.fog,
 			{
-				color: { value: new Color$1( 0x00000 ) },
+				color: { value: new Color( 0x00000 ) },
 				opacity: { value: 1.0 }
 			},
 		] ),
@@ -17985,7 +17985,7 @@ ShaderLib.physical = {
 			clearcoatRoughnessMap: { value: null },
 			clearcoatNormalScale: { value: new Vector2( 1, 1 ) },
 			clearcoatNormalMap: { value: null },
-			sheen: { value: new Color$1( 0x000000 ) },
+			sheen: { value: new Color( 0x000000 ) },
 			transparency: { value: 0 },
 		}
 	] ),
@@ -18001,7 +18001,7 @@ ShaderLib.physical = {
 
 function WebGLBackground( renderer, state, objects, premultipliedAlpha ) {
 
-	var clearColor = new Color$1( 0x000000 );
+	var clearColor = new Color( 0x000000 );
 	var clearAlpha = 0;
 
 	var planeMesh;
@@ -21697,7 +21697,7 @@ function UniformsCache() {
 				case 'DirectionalLight':
 					uniforms = {
 						direction: new Vector3(),
-						color: new Color$1()
+						color: new Color()
 					};
 					break;
 
@@ -21705,7 +21705,7 @@ function UniformsCache() {
 					uniforms = {
 						position: new Vector3(),
 						direction: new Vector3(),
-						color: new Color$1(),
+						color: new Color(),
 						distance: 0,
 						coneCos: 0,
 						penumbraCos: 0,
@@ -21716,7 +21716,7 @@ function UniformsCache() {
 				case 'PointLight':
 					uniforms = {
 						position: new Vector3(),
-						color: new Color$1(),
+						color: new Color(),
 						distance: 0,
 						decay: 0
 					};
@@ -21725,14 +21725,14 @@ function UniformsCache() {
 				case 'HemisphereLight':
 					uniforms = {
 						direction: new Vector3(),
-						skyColor: new Color$1(),
-						groundColor: new Color$1()
+						skyColor: new Color(),
+						groundColor: new Color()
 					};
 					break;
 
 				case 'RectAreaLight':
 					uniforms = {
-						color: new Color$1(),
+						color: new Color(),
 						position: new Vector3(),
 						halfWidth: new Vector3(),
 						halfHeight: new Vector3()
@@ -28802,7 +28802,7 @@ function FogExp2( color, density ) {
 
 	this.name = '';
 
-	this.color = new Color$1( color );
+	this.color = new Color( color );
 	this.density = ( density !== undefined ) ? density : 0.00025;
 
 }
@@ -28838,7 +28838,7 @@ function Fog( color, near, far ) {
 
 	this.name = '';
 
-	this.color = new Color$1( color );
+	this.color = new Color( color );
 
 	this.near = ( near !== undefined ) ? near : 1;
 	this.far = ( far !== undefined ) ? far : 1000;
@@ -29188,7 +29188,7 @@ function SpriteMaterial( parameters ) {
 
 	this.type = 'SpriteMaterial';
 
-	this.color = new Color$1( 0xffffff );
+	this.color = new Color( 0xffffff );
 
 	this.map = null;
 
@@ -30072,7 +30072,7 @@ function LineBasicMaterial( parameters ) {
 
 	this.type = 'LineBasicMaterial';
 
-	this.color = new Color$1( 0xffffff );
+	this.color = new Color( 0xffffff );
 
 	this.linewidth = 1;
 	this.linecap = 'round';
@@ -30506,7 +30506,7 @@ function PointsMaterial( parameters ) {
 
 	this.type = 'PointsMaterial';
 
-	this.color = new Color$1( 0xffffff );
+	this.color = new Color( 0xffffff );
 
 	this.map = null;
 
@@ -35419,7 +35419,7 @@ function ShadowMaterial( parameters ) {
 
 	this.type = 'ShadowMaterial';
 
-	this.color = new Color$1( 0x000000 );
+	this.color = new Color( 0x000000 );
 	this.transparent = true;
 
 	this.setValues( parameters );
@@ -35518,7 +35518,7 @@ function MeshStandardMaterial( parameters ) {
 
 	this.type = 'MeshStandardMaterial';
 
-	this.color = new Color$1( 0xffffff ); // diffuse
+	this.color = new Color( 0xffffff ); // diffuse
 	this.roughness = 1.0;
 	this.metalness = 0.0;
 
@@ -35530,7 +35530,7 @@ function MeshStandardMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color$1( 0x000000 );
+	this.emissive = new Color( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -35711,7 +35711,7 @@ MeshPhysicalMaterial.prototype.copy = function ( source ) {
 
 	if ( source.sheen ) {
 
-		this.sheen = ( this.sheen || new Color$1() ).copy( source.sheen );
+		this.sheen = ( this.sheen || new Color() ).copy( source.sheen );
 
 	} else {
 
@@ -35782,8 +35782,8 @@ function MeshPhongMaterial( parameters ) {
 
 	this.type = 'MeshPhongMaterial';
 
-	this.color = new Color$1( 0xffffff ); // diffuse
-	this.specular = new Color$1( 0x111111 );
+	this.color = new Color( 0xffffff ); // diffuse
+	this.specular = new Color( 0x111111 );
 	this.shininess = 30;
 
 	this.map = null;
@@ -35794,7 +35794,7 @@ function MeshPhongMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color$1( 0x000000 );
+	this.emissive = new Color( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -35942,8 +35942,8 @@ function MeshToonMaterial( parameters ) {
 
 	this.type = 'MeshToonMaterial';
 
-	this.color = new Color$1( 0xffffff );
-	this.specular = new Color$1( 0x111111 );
+	this.color = new Color( 0xffffff );
+	this.specular = new Color( 0x111111 );
 	this.shininess = 30;
 
 	this.map = null;
@@ -35955,7 +35955,7 @@ function MeshToonMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color$1( 0x000000 );
+	this.emissive = new Color( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -36173,7 +36173,7 @@ function MeshLambertMaterial( parameters ) {
 
 	this.type = 'MeshLambertMaterial';
 
-	this.color = new Color$1( 0xffffff ); // diffuse
+	this.color = new Color( 0xffffff ); // diffuse
 
 	this.map = null;
 
@@ -36183,7 +36183,7 @@ function MeshLambertMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color$1( 0x000000 );
+	this.emissive = new Color( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -36292,7 +36292,7 @@ function MeshMatcapMaterial( parameters ) {
 
 	this.type = 'MeshMatcapMaterial';
 
-	this.color = new Color$1( 0xffffff ); // diffuse
+	this.color = new Color( 0xffffff ); // diffuse
 
 	this.matcap = null;
 
@@ -41452,7 +41452,7 @@ function Light( color, intensity ) {
 
 	this.type = 'Light';
 
-	this.color = new Color$1( color );
+	this.color = new Color( color );
 	this.intensity = intensity !== undefined ? intensity : 1;
 
 	this.receiveShadow = undefined;
@@ -41513,7 +41513,7 @@ function HemisphereLight( skyColor, groundColor, intensity ) {
 	this.position.copy( Object3D.DefaultUp );
 	this.updateMatrix();
 
-	this.groundColor = new Color$1( groundColor );
+	this.groundColor = new Color( groundColor );
 
 }
 
@@ -42553,7 +42553,7 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 		if ( json.color !== undefined ) material.color.setHex( json.color );
 		if ( json.roughness !== undefined ) material.roughness = json.roughness;
 		if ( json.metalness !== undefined ) material.metalness = json.metalness;
-		if ( json.sheen !== undefined ) material.sheen = new Color$1().setHex( json.sheen );
+		if ( json.sheen !== undefined ) material.sheen = new Color().setHex( json.sheen );
 		if ( json.emissive !== undefined ) material.emissive.setHex( json.emissive );
 		if ( json.specular !== undefined ) material.specular.setHex( json.specular );
 		if ( json.shininess !== undefined ) material.shininess = json.shininess;
@@ -42640,7 +42640,7 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 						break;
 
 					case 'c':
-						material.uniforms[ name ].value = new Color$1().setHex( uniform.value );
+						material.uniforms[ name ].value = new Color().setHex( uniform.value );
 						break;
 
 					case 'v2':
@@ -43760,7 +43760,7 @@ ObjectLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 					if ( Number.isInteger( data.background ) ) {
 
-						object.background = new Color$1( data.background );
+						object.background = new Color( data.background );
 
 					}
 
@@ -44136,7 +44136,7 @@ function ShapePath() {
 
 	this.type = 'ShapePath';
 
-	this.color = new Color$1();
+	this.color = new Color();
 
 	this.subPaths = [];
 	this.currentPath = null;
@@ -44712,8 +44712,8 @@ function HemisphereLightProbe( skyColor, groundColor, intensity ) {
 
 	LightProbe.call( this, undefined, intensity );
 
-	var color1 = new Color$1().set( skyColor );
-	var color2 = new Color$1().set( groundColor );
+	var color1 = new Color().set( skyColor );
+	var color2 = new Color().set( groundColor );
 
 	var sky = new Vector3( color1.r, color1.g, color1.b );
 	var ground = new Vector3( color2.r, color2.g, color2.b );
@@ -44761,7 +44761,7 @@ function AmbientLightProbe( color, intensity ) {
 
 	LightProbe.call( this, undefined, intensity );
 
-	var color1 = new Color$1().set( color );
+	var color1 = new Color().set( color );
 
 	// without extra factor of PI in the shader, would be 2 / Math.sqrt( Math.PI );
 	this.sh.coefficients[ 0 ].set( color1.r, color1.g, color1.b ).multiplyScalar( 2 * Math.sqrt( Math.PI ) );
@@ -49393,8 +49393,8 @@ function SkeletonHelper( object ) {
 	var vertices = [];
 	var colors = [];
 
-	var color1 = new Color$1( 0, 0, 1 );
-	var color2 = new Color$1( 0, 1, 0 );
+	var color1 = new Color( 0, 0, 1 );
+	var color2 = new Color( 0, 1, 0 );
 
 	for ( var i = 0; i < bones.length; i ++ ) {
 
@@ -49563,8 +49563,8 @@ PointLightHelper.prototype.update = function () {
  */
 
 var _vector$a = new Vector3();
-var _color1 = new Color$1();
-var _color2 = new Color$1();
+var _color1 = new Color();
+var _color2 = new Color();
 
 function HemisphereLightHelper( light, size, color ) {
 
@@ -49644,8 +49644,8 @@ function GridHelper( size, divisions, color1, color2 ) {
 
 	size = size || 10;
 	divisions = divisions || 10;
-	color1 = new Color$1( color1 !== undefined ? color1 : 0x444444 );
-	color2 = new Color$1( color2 !== undefined ? color2 : 0x888888 );
+	color1 = new Color( color1 !== undefined ? color1 : 0x444444 );
+	color2 = new Color( color2 !== undefined ? color2 : 0x888888 );
 
 	var center = divisions / 2;
 	var step = size / divisions;
@@ -49714,8 +49714,8 @@ function PolarGridHelper( radius, radials, circles, divisions, color1, color2 ) 
 	radials = radials || 16;
 	circles = circles || 8;
 	divisions = divisions || 64;
-	color1 = new Color$1( color1 !== undefined ? color1 : 0x444444 );
-	color2 = new Color$1( color2 !== undefined ? color2 : 0x888888 );
+	color1 = new Color( color1 !== undefined ? color1 : 0x444444 );
+	color2 = new Color( color2 !== undefined ? color2 : 0x888888 );
 
 	var vertices = [];
 	var colors = [];
@@ -49901,11 +49901,11 @@ function CameraHelper( camera ) {
 
 	// colors
 
-	var colorFrustum = new Color$1( 0xffaa00 );
-	var colorCone = new Color$1( 0xff0000 );
-	var colorUp = new Color$1( 0x00aaff );
-	var colorTarget = new Color$1( 0xffffff );
-	var colorCross = new Color$1( 0x333333 );
+	var colorFrustum = new Color( 0xffaa00 );
+	var colorCone = new Color( 0xff0000 );
+	var colorUp = new Color( 0x00aaff );
+	var colorTarget = new Color( 0xffffff );
+	var colorCross = new Color( 0x333333 );
 
 	// near
 
@@ -50470,8 +50470,26 @@ var EXTRA_LOD_SIGMA = [ 0.125, 0.215, 0.35, 0.446, 0.526, 0.582 ];
 
 var TOTAL_LODS = LOD_MAX - LOD_MIN + 1 + EXTRA_LOD_SIGMA.length;
 
-var _flatCamera = new OrthographicCamera();
-var { _lodPlanes, _sizeLods, _sigmas } = _createPlanes();
+new OrthographicCamera();
+_createPlanes();
+
+// Golden Ratio
+var PHI = ( 1 + Math.sqrt( 5 ) ) / 2;
+var INV_PHI = 1 / PHI;
+
+// Vertices of a dodecahedron (except the opposites, which represent the
+// same axis), used as axis directions evenly spread on a sphere.
+[
+	new Vector3( 1, 1, 1 ),
+	new Vector3( - 1, 1, 1 ),
+	new Vector3( 1, 1, - 1 ),
+	new Vector3( - 1, 1, - 1 ),
+	new Vector3( 0, PHI, INV_PHI ),
+	new Vector3( 0, PHI, - INV_PHI ),
+	new Vector3( INV_PHI, 0, PHI ),
+	new Vector3( - INV_PHI, 0, PHI ),
+	new Vector3( PHI, INV_PHI, 0 ),
+	new Vector3( - PHI, INV_PHI, 0 ) ];
 
 function _createPlanes() {
 
@@ -51752,7 +51770,7 @@ Object.defineProperties( Material.prototype, {
 		get: function () {
 
 			console.warn( 'THREE.Material: .wrapRGB has been removed.' );
-			return new Color$1();
+			return new Color();
 
 		}
 	},
@@ -53452,7 +53470,7 @@ const buildMeshes = async ({
         transparent,
         opacity,
       });
-      const color = new Color$1(setColor(definitions, tags, {}, [0, 0, 0]).color);
+      const color = new Color(setColor(definitions, tags, {}, [0, 0, 0]).color);
       const pathColors = [];
       const positions = [];
       const index = [];
@@ -53736,7 +53754,12 @@ const orbitDisplay = async (
   const planLayers = new Layers();
   planLayers.set(SKETCH_LAYER);
 
-  const { camera, canvas: displayCanvas, renderer, scene } = buildScene({
+  const {
+    camera,
+    canvas: displayCanvas,
+    renderer,
+    scene,
+  } = buildScene({
     canvas,
     width,
     height,

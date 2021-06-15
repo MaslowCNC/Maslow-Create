@@ -1,8 +1,7 @@
-import { taggedPaths, taggedGroup } from './jsxcad-geometry-tagged.js';
+import { taggedPaths, taggedGroup, isClosedPath } from './jsxcad-geometry.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
-import { isClosed } from './jsxcad-geometry-path.js';
 import { numbers } from './jsxcad-api-v1-math.js';
 import { read } from './jsxcad-sys.js';
 
@@ -14,7 +13,7 @@ function getSqDist(p1, p2) {
 }
 
 // basic distance-based simplification
-var radialDistance = function simplifyRadialDist(points, tolerance) {
+var radialDistance$1 = function simplifyRadialDist(points, tolerance) {
     if (points.length<=1)
         return points;
     tolerance = typeof tolerance === 'number' ? tolerance : 1;
@@ -86,7 +85,7 @@ function simplifyDPStep(points, first, last, sqTolerance, simplified) {
 }
 
 // simplification using Ramer-Douglas-Peucker algorithm
-var douglasPeucker = function simplifyDouglasPeucker(points, tolerance) {
+var douglasPeucker$1 = function simplifyDouglasPeucker(points, tolerance) {
     if (points.length<=1)
         return points;
     tolerance = typeof tolerance === 'number' ? tolerance : 1;
@@ -102,22 +101,22 @@ var douglasPeucker = function simplifyDouglasPeucker(points, tolerance) {
 };
 
 //simplifies using both algorithms
-var simplifyPath = function simplify(points, tolerance) {
-    points = radialDistance(points, tolerance);
-    points = douglasPeucker(points, tolerance);
+var simplifyPath$1 = function simplify(points, tolerance) {
+    points = radialDistance$1(points, tolerance);
+    points = douglasPeucker$1(points, tolerance);
     return points;
 };
 
-var radialDistance$1 = radialDistance;
-var douglasPeucker$1 = douglasPeucker;
-simplifyPath.radialDistance = radialDistance$1;
-simplifyPath.douglasPeucker = douglasPeucker$1;
+var radialDistance = radialDistance$1;
+var douglasPeucker = douglasPeucker$1;
+simplifyPath$1.radialDistance = radialDistance;
+simplifyPath$1.douglasPeucker = douglasPeucker;
 
-const simplifyPath$1 = (path, tolerance = 0.01) => {
-  if (isClosed(path)) {
-    return simplifyPath(path, tolerance);
+const simplifyPath = (path, tolerance = 0.01) => {
+  if (isClosedPath(path)) {
+    return simplifyPath$1(path, tolerance);
   } else {
-    return [null, ...simplifyPath(path.slice(1), tolerance)];
+    return [null, ...simplifyPath$1(path.slice(1), tolerance)];
   }
 };
 
@@ -155,7 +154,7 @@ const readPngAsContours = async (
   const pathsets = [];
   for (const contour of contours) {
     const simplifiedContour = contour.map((path) =>
-      simplifyPath$1(path, tolerance)
+      simplifyPath(path, tolerance)
     );
     pathsets.push(taggedPaths({}, simplifiedContour));
   }

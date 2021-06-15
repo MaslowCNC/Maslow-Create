@@ -3398,27 +3398,27 @@ exports.p4D = [
 });
 
 unwrapExports(constants);
-var constants_1 = constants.NORM_2D;
-var constants_2 = constants.NORM_3D;
-var constants_3 = constants.NORM_4D;
-var constants_4 = constants.SQUISH_2D;
-var constants_5 = constants.SQUISH_3D;
-var constants_6 = constants.SQUISH_4D;
-var constants_7 = constants.STRETCH_2D;
-var constants_8 = constants.STRETCH_3D;
-var constants_9 = constants.STRETCH_4D;
-var constants_10 = constants.base2D;
-var constants_11 = constants.base3D;
-var constants_12 = constants.base4D;
-var constants_13 = constants.gradients2D;
-var constants_14 = constants.gradients3D;
-var constants_15 = constants.gradients4D;
-var constants_16 = constants.lookupPairs2D;
-var constants_17 = constants.lookupPairs3D;
-var constants_18 = constants.lookupPairs4D;
-var constants_19 = constants.p2D;
-var constants_20 = constants.p3D;
-var constants_21 = constants.p4D;
+constants.NORM_2D;
+constants.NORM_3D;
+constants.NORM_4D;
+constants.SQUISH_2D;
+constants.SQUISH_3D;
+constants.SQUISH_4D;
+constants.STRETCH_2D;
+constants.STRETCH_3D;
+constants.STRETCH_4D;
+constants.base2D;
+constants.base3D;
+constants.base4D;
+constants.gradients2D;
+constants.gradients3D;
+constants.gradients4D;
+constants.lookupPairs2D;
+constants.lookupPairs3D;
+constants.lookupPairs4D;
+constants.p2D;
+constants.p3D;
+constants.p4D;
 
 var lib = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -3716,9 +3716,9 @@ function shuffleSeed(seed) {
 });
 
 var OpenSimplexNoise = unwrapExports(lib);
-var lib_1 = lib.makeNoise2D;
-var lib_2 = lib.makeNoise3D;
-var lib_3 = lib.makeNoise4D;
+lib.makeNoise2D;
+lib.makeNoise3D;
+lib.makeNoise4D;
 
 const Noise = (seed = 0) => {
   const generator = OpenSimplexNoise.makeNoise3D(seed);

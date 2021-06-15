@@ -1,5 +1,5 @@
 import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { measureBoundingBox, toDisjointGeometry, transform, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { measureBoundingBox, toDisjointGeometry, transform, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const X = 0;

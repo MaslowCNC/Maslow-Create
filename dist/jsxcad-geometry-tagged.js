@@ -1,33 +1,13 @@
 import { identityMatrix, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { cacheTransform, cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
+import { composeTransforms } from './jsxcad-algorithm-cgal.js';
 import { transform as transform$3, canonicalize as canonicalize$4, eachPoint as eachPoint$2, flip as flip$1 } from './jsxcad-geometry-paths.js';
 import { canonicalize as canonicalize$2 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$3, measureBoundingBox as measureBoundingBox$2, flip as flip$2, union as union$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$3, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-polygons.js';
 import { realizeGraph, transform as transform$1, fill as fill$1, fromPaths, difference as difference$1, eachPoint as eachPoint$1, measureBoundingBox as measureBoundingBox$3, fromEmpty, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, grow as grow$1, toPaths, intersection as intersection$1, inset as inset$1, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, offset as offset$1, outline as outline$1, projectToPlane as projectToPlane$1, prepareForSerialization as prepareForSerialization$1, push as push$1, remesh as remesh$1, sections, smooth as smooth$1, toTriangles, test as test$1, toPolygonsWithHoles as toPolygonsWithHoles$1, twist as twist$1, union as union$2 } from './jsxcad-geometry-graph.js';
-import { composeTransforms } from './jsxcad-algorithm-cgal.js';
+import { cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { read as read$1, write as write$1 } from './jsxcad-sys.js';
-
-const taggedTransform = (options = {}, matrix, untransformed) => {
-  return {
-    type: 'transform',
-    matrix,
-    content: [untransformed],
-    tags: untransformed.tags,
-  };
-};
-
-const transformImpl = (matrix, untransformed) =>
-  taggedTransform({}, matrix, untransformed);
-
-const transform = cacheTransform(transformImpl);
-
-const isNotVoid = ({ tags }) => {
-  return tags === undefined || tags.includes('compose/non-positive') === false;
-};
-
-const isVoid = (geometry) => !isNotVoid(geometry);
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -124,6 +104,56 @@ const visit = (geometry, op, state) => {
   return walk(geometry, state);
 };
 
+const transform = (matrix, geometry) => {
+  const op = (geometry, descend, walk, matrix) => {
+    switch (geometry.type) {
+        // Branch
+        case 'assembly':
+        case 'layout':
+        case 'layers':
+        case 'item':
+        case 'sketch':
+        case 'disjointAssembly':
+            return descend(matrix, geometry);
+        // Leaf
+        case 'plan':
+          // If a plan has content, it is a branch.
+          if (geometry.content) {
+            return descend(matrix, geometry);
+          }
+          // Otherwise it is a leaf.
+          // fallthrough
+        case 'triangles':
+        case 'paths':
+        case 'points':
+        case 'graph':
+          const composedMatrix = composeTransforms(
+            matrix,
+            geometry.matrix || identityMatrix
+          );
+          return descend(
+            {
+              matrix: composedMatrix,
+            },
+            composedMatrix
+          );
+        default:
+          throw Error(
+            `Unexpected geometry ${geometry.type} see ${JSON.stringify(
+              geometry
+            )}`
+          );
+      }
+  };
+  return rewrite(geometry, op, identityMatrix);
+};
+
+const isNotVoid = ({ tags }) => {
+  return tags === undefined || tags.includes('compose/non-positive') === false;
+};
+
+const isVoid = (geometry) => !isNotVoid(geometry);
+
 const allTags = (geometry) => {
   const collectedTags = new Set();
   const op = ({ tags }, descend) => {
@@ -137,30 +167,6 @@ const allTags = (geometry) => {
   visit(geometry, op);
   return collectedTags;
 };
-
-const taggedAssembly = ({ tags }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined Assembly content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Assembly content is an array`);
-  }
-  if (content.some((value) => value.geometry)) {
-    throw Error(`Likely Shape instance in Assembly content`);
-  }
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags`);
-  }
-  if (typeof tags === 'function') {
-    throw Error(`Tags is a function`);
-  }
-  return { type: 'assembly', tags, content };
-};
-
-const assembleImpl = (...taggedGeometries) =>
-  taggedAssembly({}, ...taggedGeometries);
-
-const assemble = cache(assembleImpl);
 
 const taggedGraph = ({ tags }, graph) => {
   if (graph.length > 0) {
@@ -571,6 +577,15 @@ const differenceImpl = (geometry, ...geometries) => {
 };
 
 const difference = cache(differenceImpl);
+
+const disjoint = (geometries) => {
+  for (let sup = geometries.length - 1; sup >= 0; sup--) {
+    for (let sub = geometries.length - 1; sub > sup; sub--) {
+      geometries[sup] = difference(geometries[sup], geometries[sub]);
+    }
+  }
+  return taggedDisjointAssembly({}, ...geometries);
+};
 
 const eachPoint = (emit, geometry) => {
   const op = (geometry, descend) => {
@@ -1772,6 +1787,26 @@ const soup = (
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
+// FIX: Remove tags from branches.
+const taggedAssembly = ({ tags }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Assembly content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Assembly content is an array`);
+  }
+  if (content.some((value) => value.geometry)) {
+    throw Error(`Likely Shape instance in Assembly content`);
+  }
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags`);
+  }
+  if (typeof tags === 'function') {
+    throw Error(`Tags is a function`);
+  }
+  return disjoint(...content);
+};
+
 const taggedItem = ({ tags }, ...content) => {
   if (tags !== undefined && tags.length === undefined) {
     throw Error(`Bad tags: ${tags}`);
@@ -1836,6 +1871,15 @@ const taggedSketch = ({ tags }, ...content) => {
     throw Error(`Sketch expects a single content geometry`);
   }
   return { type: 'sketch', tags, content };
+};
+
+const taggedTransform = (options = {}, matrix, untransformed) => {
+  return {
+    type: 'transform',
+    matrix,
+    content: [untransformed],
+    tags: untransformed.tags,
+  };
 };
 
 const test = (geometry) => {
@@ -2096,4 +2140,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform(fromScaling(vector), geometry);
 
-export { allTags, assemble, canonicalize, difference, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };
+export { allTags, canonicalize, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, fresh, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, outline, prepareForSerialization, projectToPlane, push, read, realize, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toVisiblyDisjointGeometry, transform, translate, twist, union, update, visit, write };

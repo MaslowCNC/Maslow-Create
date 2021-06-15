@@ -1,10 +1,8 @@
+import { taggedGraph, alphaShape, fromPointsToGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1, getPathEdges } from './jsxcad-geometry.js';
 import Shape$1, { Shape, getPegCoords, orient } from './jsxcad-api-v1-shape.js';
-import { alphaShape, fromPoints } from './jsxcad-geometry-graph.js';
-import { taggedGraph, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, outline as outline$1, projectToPlane as projectToPlane$1, section as section$1 } from './jsxcad-geometry-tagged.js';
 import { Group, ChainedHull } from './jsxcad-api-v1-shapes.js';
 import { add, normalize, subtract } from './jsxcad-math-vec3.js';
 import { fromNormalAndPoint } from './jsxcad-math-plane.js';
-import { getEdges } from './jsxcad-geometry-path.js';
 
 const Alpha = (shape, componentLimit = 1) => {
   const points = [];
@@ -21,7 +19,7 @@ Shape.prototype.alpha = alphaMethod;
 
 const cloudSolid = (shape) => {
   const points = shape.toPoints();
-  return Shape.fromGeometry(taggedGraph({}, fromPoints(points)));
+  return Shape.fromGeometry(taggedGraph({}, fromPointsToGraph(points)));
 };
 
 const cloudSolidMethod = function () {
@@ -34,19 +32,32 @@ const withCloudSolidMethod = function () {
 };
 Shape.prototype.withCloudSolid = withCloudSolidMethod;
 
-const extrude = (shape, height = 1, depth = 0) => {
-  if (height === depth) {
-    // Return unextruded geometry at this height, instead.
-    return shape.z(height);
+const extrude = (shape, ...heights) => {
+  if (heights.length % 2 === 1) {
+    heights.push(0);
   }
-  if (height < depth) {
-    [height, depth] = [depth, height];
+  heights.sort();
+  const extrusions = [];
+  while (heights.length > 0) {
+    let height = heights.pop();
+    let depth = heights.pop();
+    if (height === depth) {
+      // Return unextruded geometry at this height, instead.
+      extrusions.push(shape.z(height));
+      continue;
+    }
+    if (height < depth) {
+      [height, depth] = [depth, height];
+    }
+    extrusions.push(
+      Shape$1.fromGeometry(extrude$1(shape.toGeometry(), height, depth))
+    );
   }
-  return Shape$1.fromGeometry(extrude$1(shape.toGeometry(), height, depth));
+  return Shape$1.Group(...extrusions);
 };
 
-const extrudeMethod = function (height = 1, depth = 0) {
-  return extrude(this, height, depth);
+const extrudeMethod = function (...heights) {
+  return extrude(this, ...heights);
 };
 Shape$1.prototype.extrude = extrudeMethod;
 Shape$1.prototype.pull = extrudeMethod;
@@ -179,7 +190,7 @@ const sweep = (toolpath, tool, up = [0, 0, 1, 0]) => {
     for (const path of paths) {
       // FIX: Handle open paths and bent polygons.
       const tools = [];
-      const edges = getEdges(path);
+      const edges = getPathEdges(path);
       const up = [0, 0, 1, 0];
       const length = edges.length;
       for (let nth = 0; nth < length + 1; nth++) {

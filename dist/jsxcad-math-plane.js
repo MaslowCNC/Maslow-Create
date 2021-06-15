@@ -91,10 +91,10 @@ const fromPointsOrthogonal = (a, b, c) => {
   return fromValues(normal[0], normal[1], normal[2], dot(normal, a));
 };
 
-const X = 0;
-const Y = 1;
-const Z = 2;
-const W = 3;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
+const W$5 = 3;
 
 // Newell's method for computing the plane of a polygon.
 const fromPolygon = (polygon) => {
@@ -102,34 +102,34 @@ const fromPolygon = (polygon) => {
   const reference = [0, 0, 0];
   let lastPoint = polygon[polygon.length - 1];
   for (const thisPoint of polygon) {
-    normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
-    normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
-    normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
-    reference[X] += lastPoint[X];
-    reference[Y] += lastPoint[Y];
-    reference[Z] += lastPoint[Z];
+    normal[X$1] += (lastPoint[Y$1] - thisPoint[Y$1]) * (lastPoint[Z$1] + thisPoint[Z$1]);
+    normal[Y$1] += (lastPoint[Z$1] - thisPoint[Z$1]) * (lastPoint[X$1] + thisPoint[X$1]);
+    normal[Z$1] += (lastPoint[X$1] - thisPoint[X$1]) * (lastPoint[Y$1] + thisPoint[Y$1]);
+    reference[X$1] += lastPoint[X$1];
+    reference[Y$1] += lastPoint[Y$1];
+    reference[Z$1] += lastPoint[Z$1];
     lastPoint = thisPoint;
   }
   const factor = 1 / length(normal);
   const plane = scale(factor, normal);
-  plane[W] = (dot(reference, normal) * factor) / polygon.length;
-  if (isNaN(plane[X])) {
+  plane[W$5] = (dot(reference, normal) * factor) / polygon.length;
+  if (isNaN(plane[X$1])) {
     return undefined;
   } else {
     return plane;
   }
 };
 
-const W$1 = 3;
+const W$4 = 3;
 
 /**
  * Calculate the distance to the given point
  * @return {Number} signed distance to point
  */
 const signedDistanceToPoint = (plane, point) =>
-  dot(plane, point) - plane[W$1];
+  dot(plane, point) - plane[W$4];
 
-const W$2 = 3;
+const W$3 = 3;
 /**
  * Split the given line by the given plane.
  * Robust splitting, even if the line is parallel to the plane
@@ -137,14 +137,14 @@ const W$2 = 3;
  */
 const splitLineByPlane = (plane, start, end) => {
   const direction = subtract(end, start);
-  const lambda = (plane[W$2] - dot(plane, start)) / dot(plane, direction);
+  const lambda = (plane[W$3] - dot(plane, start)) / dot(plane, direction);
   if (Number.isNaN(lambda)) {
     return start;
   }
   return add(start, scale(lambda, direction));
 };
 
-const W$3 = 3;
+const W$2 = 3;
 
 /**
  * Split the given line by the given plane.
@@ -153,19 +153,19 @@ const W$3 = 3;
  */
 const splitLineSegmentByPlane = (plane, start, end) => {
   const direction = subtract(end, start);
-  let lambda = (plane[W$3] - dot(plane, start)) / dot(plane, direction);
+  let lambda = (plane[W$2] - dot(plane, start)) / dot(plane, direction);
   if (Number.isNaN(lambda)) lambda = 0;
   if (lambda > 1) lambda = 1;
   if (lambda < 0) lambda = 0;
   return add(start, scale(lambda, direction));
 };
 
-const W$4 = 3;
+const W$1 = 3;
 
 const toPolygon = (plane, size = 1e10) => {
   const v = unit(cross(plane, orthogonal(plane)));
   const u = cross(v, plane);
-  const origin = scale(plane[W$4], plane);
+  const origin = scale(plane[W$1], plane);
   return [
     add(origin, scale(-size, u)),
     add(origin, scale(-size, v)),
@@ -174,10 +174,10 @@ const toPolygon = (plane, size = 1e10) => {
   ];
 };
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-const W$5 = 3;
+const X = 0;
+const Y = 1;
+const Z = 2;
+const W = 3;
 
 const toXYPlaneTransforms = (plane, rightVector) => {
   if (plane === undefined) {
@@ -189,43 +189,43 @@ const toXYPlaneTransforms = (plane, rightVector) => {
 
   const v = unit(cross(plane, rightVector));
   const u = cross(v, plane);
-  const p = multiply(plane, fromScalar(plane[W$5]));
+  const p = multiply(plane, fromScalar(plane[W]));
 
   const to = fromValues(
-    u[X$1],
-    v[X$1],
-    plane[X$1],
+    u[X],
+    v[X],
+    plane[X],
     0,
-    u[Y$1],
-    v[Y$1],
-    plane[Y$1],
+    u[Y],
+    v[Y],
+    plane[Y],
     0,
-    u[Z$1],
-    v[Z$1],
-    plane[Z$1],
+    u[Z],
+    v[Z],
+    plane[Z],
     0,
     0,
     0,
-    -plane[W$5],
+    -plane[W],
     1
   );
 
   const from = fromValues(
-    u[X$1],
-    u[Y$1],
-    u[Z$1],
+    u[X],
+    u[Y],
+    u[Z],
     0,
-    v[X$1],
-    v[Y$1],
-    v[Z$1],
+    v[X],
+    v[Y],
+    v[Z],
     0,
-    plane[X$1],
-    plane[Y$1],
-    plane[Z$1],
+    plane[X],
+    plane[Y],
+    plane[Z],
     0,
-    p[X$1],
-    p[Y$1],
-    p[Z$1],
+    p[X],
+    p[Y],
+    p[Z],
     1
   );
 

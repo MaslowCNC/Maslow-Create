@@ -24,8 +24,6 @@ const standardMaterialDefinitions = {
       opacity: 0.5,
       transparent: true,
       metalness: 0.0,
-      clearCoat: 1,
-      clearCoatRoughness: 0,
     },
   },
   'material/color': {
