@@ -130,7 +130,7 @@ export default class AddBOMTag extends Atom{
     
     /**
      * Add the bom item to the saved object
-     */ 
+     */
     serialize(values){
         //Save the readme text to the serial stream
         var valuesObj = super.serialize(values)
