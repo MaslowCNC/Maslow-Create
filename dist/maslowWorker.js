@@ -401,7 +401,11 @@ const bootstrap = async () => {
 
   onmessage = ({
     data
-  }) => hear(data); // Now that we're ready, drain the buffer.
+  }) => {
+      if(typeof(data) == "object"){
+        hear(data); // Now that we're ready, drain the buffer.
+      }
+  }
 
 
   if (self.messageBootQueue !== undefined) {
