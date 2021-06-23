@@ -167,7 +167,7 @@ const distanceToPoint = (point, line) => {
   return length(distancevector);
 };
 
-const EPS = 1e-5;
+const EPS$1 = 1e-5;
 
 /**
  * Compare the given 3D lines for equality
@@ -182,7 +182,7 @@ const equals = (line1, [point2, unit2]) => {
 
   // See if the reference point of the second line is on the first line.
   let distance = distanceToPoint(point2, line1);
-  if (distance >= EPS) return false;
+  if (distance >= EPS$1) return false;
 
   return true;
 };
@@ -203,12 +203,12 @@ const fromPointAndDirection = (point, direction) => [
   unit(direction),
 ];
 
-const EPS$1 = 1e-5;
+const EPS = 1e-5;
 
 const fromPlanes = (plane1, plane2) => {
   let direction = cross(plane1, plane2);
   let length$1 = length(direction);
-  if (length$1 < EPS$1) {
+  if (length$1 < EPS) {
     throw new Error('parallel planes do not intersect');
   }
   length$1 = 1.0 / length$1;

@@ -1,7 +1,6 @@
-import { translate, scale, toKeptGeometry, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { translate, scale, toKeptGeometry, getNonVoidPaths, getPathEdges } from './jsxcad-geometry.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
-import { getEdges } from './jsxcad-geometry-path.js';
 
 /**
  * DxfArrayScanner
@@ -417,7 +416,7 @@ var AUTO_CAD_COLOR_INDEX = [
  * Returns the truecolor value of the given AutoCad color index value
  * @return {Number} truecolor value as a number
  */
-function getAcadColor(index) {
+function getAcadColor$1(index) {
 	return AUTO_CAD_COLOR_INDEX[index];
 }
 
@@ -483,7 +482,7 @@ function checkCommonEntityProperties(entity, curr) {
             break;
         case 62: // Acad Index Color. 0 inherits ByBlock. 256 inherits ByLayer. Default is bylayer
             entity.colorIndex = curr.value;
-            entity.color = getAcadColor(Math.abs(curr.value));
+            entity.color = getAcadColor$1(Math.abs(curr.value));
             break;
         case 67:
             entity.inPaperSpace = curr.value !== 0;
@@ -522,11 +521,11 @@ function checkCommonEntityProperties(entity, curr) {
     return true;
 }
 
-function EntityParser() {}
+function EntityParser$f() {}
 
-EntityParser.ForEntityName = '3DFACE';
+EntityParser$f.ForEntityName = '3DFACE';
 
-EntityParser.prototype.parseEntity = function(scanner, curr) {
+EntityParser$f.prototype.parseEntity = function(scanner, curr) {
 
     var entity = { type: curr.value, vertices: [] };
     curr = scanner.next();
@@ -602,11 +601,11 @@ function parse3dFaceVertices(scanner, curr) {
     return vertices;
 }
 
-function EntityParser$1() {}
+function EntityParser$e() {}
 
-EntityParser$1.ForEntityName = 'ARC';
+EntityParser$e.ForEntityName = 'ARC';
 
-EntityParser$1.prototype.parseEntity = function(scanner, curr) {
+EntityParser$e.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -636,11 +635,11 @@ EntityParser$1.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$2() {}
+function EntityParser$d() {}
 
-EntityParser$2.ForEntityName = 'ATTDEF';
+EntityParser$d.ForEntityName = 'ATTDEF';
 
-EntityParser$2.prototype.parseEntity = function(scanner, curr) {
+EntityParser$d.prototype.parseEntity = function(scanner, curr) {
     var entity = {
         type: curr.value,
         scale: 1,
@@ -727,11 +726,11 @@ EntityParser$2.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$3() {}
+function EntityParser$c() {}
 
-EntityParser$3.ForEntityName = 'CIRCLE';
+EntityParser$c.ForEntityName = 'CIRCLE';
 
-EntityParser$3.prototype.parseEntity = function(scanner, curr) {
+EntityParser$c.prototype.parseEntity = function(scanner, curr) {
     var entity, endAngle;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -765,11 +764,11 @@ EntityParser$3.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$4() {}
+function EntityParser$b() {}
 
-EntityParser$4.ForEntityName = 'DIMENSION';
+EntityParser$b.ForEntityName = 'DIMENSION';
 
-EntityParser$4.prototype.parseEntity = function(scanner, curr) {
+EntityParser$b.prototype.parseEntity = function(scanner, curr) {
     var entity;
 		entity = { type: curr.value };
 		curr = scanner.next();
@@ -826,11 +825,11 @@ EntityParser$4.prototype.parseEntity = function(scanner, curr) {
 		return entity;
 };
 
-function EntityParser$5() {}
+function EntityParser$a() {}
 
-EntityParser$5.ForEntityName = 'ELLIPSE';
+EntityParser$a.ForEntityName = 'ELLIPSE';
 
-EntityParser$5.prototype.parseEntity = function(scanner, curr) {
+EntityParser$a.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -867,11 +866,11 @@ EntityParser$5.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$6() {}
+function EntityParser$9() {}
 
-EntityParser$6.ForEntityName = 'INSERT';
+EntityParser$9.ForEntityName = 'INSERT';
 
-EntityParser$6.prototype.parseEntity = function(scanner, curr) {
+EntityParser$9.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -922,11 +921,11 @@ EntityParser$6.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$7() {}
+function EntityParser$8() {}
 
-EntityParser$7.ForEntityName = 'LINE';
+EntityParser$8.ForEntityName = 'LINE';
 
-EntityParser$7.prototype.parseEntity = function(scanner, curr) {
+EntityParser$8.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value, vertices: [] };
     curr = scanner.next();
     while(curr !== 'EOF') {
@@ -954,11 +953,11 @@ EntityParser$7.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$8() {}
+function EntityParser$7() {}
 
-EntityParser$8.ForEntityName = 'LWPOLYLINE';
+EntityParser$7.ForEntityName = 'LWPOLYLINE';
 
-EntityParser$8.prototype.parseEntity = function(scanner, curr) {
+EntityParser$7.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value, vertices: [] },
         numberOfVertices = 0;
     curr = scanner.next();
@@ -1058,11 +1057,11 @@ function parseLWPolylineVertices(n, scanner) {
     return vertices;
 }
 
-function EntityParser$9() {}
+function EntityParser$6() {}
 
-EntityParser$9.ForEntityName = 'MTEXT';
+EntityParser$6.ForEntityName = 'MTEXT';
 
-EntityParser$9.prototype.parseEntity = function(scanner, curr) {
+EntityParser$6.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value };
 		curr = scanner.next();
     while(curr !== 'EOF') {
@@ -1103,11 +1102,11 @@ EntityParser$9.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$a() {}
+function EntityParser$5() {}
 
-EntityParser$a.ForEntityName = 'POINT';
+EntityParser$5.ForEntityName = 'POINT';
 
-EntityParser$a.prototype.parseEntity = function(scanner, curr) {
+EntityParser$5.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -1136,11 +1135,11 @@ EntityParser$a.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$b() {}
+function EntityParser$4() {}
 
-EntityParser$b.ForEntityName = 'VERTEX';
+EntityParser$4.ForEntityName = 'VERTEX';
 
-EntityParser$b.prototype.parseEntity = function(scanner, curr) {
+EntityParser$4.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value };
     curr = scanner.next();
     while(curr !== 'EOF') {
@@ -1196,11 +1195,11 @@ EntityParser$b.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$c() {}
+function EntityParser$3() {}
 
-EntityParser$c.ForEntityName = 'POLYLINE';
+EntityParser$3.ForEntityName = 'POLYLINE';
 
-EntityParser$c.prototype.parseEntity = function(scanner, curr) {
+EntityParser$3.prototype.parseEntity = function(scanner, curr) {
     var entity = { type: curr.value, vertices: [] };
 		curr = scanner.next();
 		while(curr !== 'EOF') {
@@ -1256,7 +1255,7 @@ EntityParser$c.prototype.parseEntity = function(scanner, curr) {
 };
 
 function parsePolylineVertices(scanner, curr) {
-    var vertexParser = new EntityParser$b();
+    var vertexParser = new EntityParser$4();
 
     var vertices = [];
     while (!scanner.isEOF()) {
@@ -1284,11 +1283,11 @@ function parseSeqEnd(scanner, curr) {
     return entity;
 }
 
-function EntityParser$d() {}
+function EntityParser$2() {}
 
-EntityParser$d.ForEntityName = 'SOLID';
+EntityParser$2.ForEntityName = 'SOLID';
 
-EntityParser$d.prototype.parseEntity = function(scanner, currentGroup) {
+EntityParser$2.prototype.parseEntity = function(scanner, currentGroup) {
     var entity;
     entity = { type: currentGroup.value };
     entity.points = [];
@@ -1322,11 +1321,11 @@ EntityParser$d.prototype.parseEntity = function(scanner, currentGroup) {
     return entity;
 };
 
-function EntityParser$e() {}
+function EntityParser$1() {}
 
-EntityParser$e.ForEntityName = 'SPLINE';
+EntityParser$1.ForEntityName = 'SPLINE';
 
-EntityParser$e.prototype.parseEntity = function(scanner, curr) {
+EntityParser$1.prototype.parseEntity = function(scanner, curr) {
     var entity;
     entity = { type: curr.value };
     curr = scanner.next();
@@ -1390,11 +1389,11 @@ EntityParser$e.prototype.parseEntity = function(scanner, curr) {
     return entity;
 };
 
-function EntityParser$f() {}
+function EntityParser() {}
 
-EntityParser$f.ForEntityName = 'TEXT';
+EntityParser.ForEntityName = 'TEXT';
 
-EntityParser$f.prototype.parseEntity = function(scanner, curr) {
+EntityParser.prototype.parseEntity = function(scanner, curr) {
     var entity;
 		entity = { type: curr.value };
     curr = scanner.next();
@@ -1449,7 +1448,7 @@ var loglevel = createCommonjsModule(function (module) {
 * Licensed under the MIT license.
 */
 (function (root, definition) {
-    if ( module.exports) {
+    if (module.exports) {
         module.exports = definition();
     } else {
         root.log = definition();
@@ -1723,21 +1722,21 @@ loglevel.setLevel('error');
 
 function registerDefaultEntityHandlers(dxfParser) {
 	// Supported entities here (some entity code is still being refactored into this flow)
-	dxfParser.registerEntityHandler(EntityParser);
-	dxfParser.registerEntityHandler(EntityParser$1);
-	dxfParser.registerEntityHandler(EntityParser$2);
-	dxfParser.registerEntityHandler(EntityParser$3);
-	dxfParser.registerEntityHandler(EntityParser$4);
-	dxfParser.registerEntityHandler(EntityParser$5);
-	dxfParser.registerEntityHandler(EntityParser$6);
-	dxfParser.registerEntityHandler(EntityParser$7);
-	dxfParser.registerEntityHandler(EntityParser$8);
-	dxfParser.registerEntityHandler(EntityParser$9);
-	dxfParser.registerEntityHandler(EntityParser$a);
-	dxfParser.registerEntityHandler(EntityParser$c);
-	dxfParser.registerEntityHandler(EntityParser$d);
-	dxfParser.registerEntityHandler(EntityParser$e);
 	dxfParser.registerEntityHandler(EntityParser$f);
+	dxfParser.registerEntityHandler(EntityParser$e);
+	dxfParser.registerEntityHandler(EntityParser$d);
+	dxfParser.registerEntityHandler(EntityParser$c);
+	dxfParser.registerEntityHandler(EntityParser$b);
+	dxfParser.registerEntityHandler(EntityParser$a);
+	dxfParser.registerEntityHandler(EntityParser$9);
+	dxfParser.registerEntityHandler(EntityParser$8);
+	dxfParser.registerEntityHandler(EntityParser$7);
+	dxfParser.registerEntityHandler(EntityParser$6);
+	dxfParser.registerEntityHandler(EntityParser$5);
+	dxfParser.registerEntityHandler(EntityParser$3);
+	dxfParser.registerEntityHandler(EntityParser$2);
+	dxfParser.registerEntityHandler(EntityParser$1);
+	dxfParser.registerEntityHandler(EntityParser);
 	//dxfParser.registerEntityHandler(require('./entities/vertex'));
 }
 
@@ -2287,7 +2286,7 @@ DxfParser.prototype._parse = function(dxfString) {
 					layer.visible = curr.value >= 0;
 					// TODO 0 and 256 are BYBLOCK and BYLAYER respectively. Need to handle these values for layers?.
 					layer.colorIndex = Math.abs(curr.value);
-					layer.color = getAcadColor$1(layer.colorIndex);
+					layer.color = getAcadColor(layer.colorIndex);
 					curr = scanner.next();
 					break;
 				case 70: // frozen layer
@@ -2438,7 +2437,7 @@ function debugCode(curr) {
  * Returns the truecolor value of the given AutoCad color index value
  * @return {Number} truecolor value as a number
  */
-function getAcadColor$1(index) {
+function getAcadColor(index) {
 	return AUTO_CAD_COLOR_INDEX[index];
 }
 
@@ -2881,6 +2880,153 @@ class Point
 
 var Point_1 = Point;
 
+class Spline
+{
+    /**
+     * Creates a spline. See https://www.autodesk.com/techpubs/autocad/acad2000/dxf/spline_dxf_06.htm
+     * @param {[Array]} controlPoints - Array of control points like [ [x1, y1], [x2, y2]... ]
+     * @param {number} degree - Degree of spline: 2 for quadratic, 3 for cubic. Default is 3
+     * @param {[number]} knots - Knot vector array. If null, will use a uniform knot vector. Default is null
+     * @param {[number]} weights - Control point weights. If provided, must be one weight for each control point. Default is null
+     * @param {[Array]} fitPoints - Array of fit points like [ [x1, y1], [x2, y2]... ]
+     */
+    constructor(controlPoints, degree = 3, knots = null, weights = null, fitPoints = [])
+    {
+        if (controlPoints.length < degree + 1) {
+            throw new Error(`For degree ${degree} spline, expected at least ${degree + 1} control points, but received only ${controlPoints.length}`);
+        }
+
+        if (knots == null) {
+            // Examples:
+            // degree 2, 3 pts:  0 0 0 1 1 1
+            // degree 2, 4 pts:  0 0 0 1 2 2 2
+            // degree 2, 5 pts:  0 0 0 1 2 3 3 3
+            // degree 3, 4 pts:  0 0 0 0 1 1 1 1
+            // degree 3, 5 pts:  0 0 0 0 1 2 2 2 2
+
+            knots = [];
+            for (let i = 0; i < degree + 1; i++) {
+                knots.push(0);
+            }
+            for (let i = 1; i < controlPoints.length - degree; i++) {
+                knots.push(i);
+            }
+            for (let i = 0; i < degree + 1; i++) {
+                knots.push(controlPoints.length - degree);
+            }
+        }
+
+        if (knots.length !== controlPoints.length + degree + 1) {
+            throw new Error(`Invalid knot vector length. Expected ${controlPoints.length + degree + 1} but received ${knots.length}.`);
+        }
+
+        this.controlPoints = controlPoints;
+        this.knots = knots;
+        this.fitPoints = fitPoints;
+        this.degree = degree;
+        this.weights = weights;
+
+        const closed = 0;
+        const periodic = 0;
+        const rational = this.weights ? 1 : 0;
+        const planar = 1;
+        const linear = 0;
+
+        this.type =
+            closed * 1 +
+            periodic * 2 +
+            rational * 4 +
+            planar * 8 +
+            linear * 16;
+
+        // Not certain where the values of these flags came from so I'm going to leave them commented for now
+        // const closed = 0
+        // const periodic = 0
+        // const rational = 1
+        // const planar = 1
+        // const linear = 0
+        // const splineType = 1024 * closed + 128 * periodic + 8 * rational + 4 * planar + 2 * linear
+
+    }
+
+    toDxfString() {
+        // https://www.autodesk.com/techpubs/autocad/acad2000/dxf/spline_dxf_06.htm
+        let s = `0\nSPLINE\n`;
+        s += `8\n${this.layer.name}\n`;
+        s += `100\nAcDbSpline\n`;
+        s += `210\n0.0\n220\n0.0\n230\n1.0\n`;
+
+        s += `70\n${this.type}\n`;
+        s += `71\n${this.degree}\n`;
+        s += `72\n${this.knots.length}\n`;
+        s += `73\n${this.controlPoints.length}\n`;
+        s += `74\n${this.fitPoints.length}\n`;
+        s += `42\n1e-7\n`;
+        s += `43\n1e-7\n`;
+        s += `44\n1e-10\n`;
+
+        for (let i = 0; i < this.knots.length; ++i) {
+            s += `40\n${this.knots[i]}\n`;
+        }
+
+        if (this.weights) {
+            for (let i = 0; i < this.knots.length; ++i) {
+                s += `41\n${this.weights[i]}\n`;
+            }
+        }
+
+        for (let i = 0; i < this.controlPoints.length; ++i) {
+            s += `10\n${this.controlPoints[i][0]}\n`;
+            s += `20\n${this.controlPoints[i][1]}\n`;
+            s += `30\n0\n`;
+        }
+
+        return s;
+    }
+}
+
+var Spline_1 = Spline;
+
+class Ellipse {
+    /**
+     * Creates an ellipse.
+     * @param {number} x1 - Center x
+     * @param {number} y1 - Center y
+     * @param {number} majorAxisX - Endpoint x of major axis, relative to center
+     * @param {number} majorAxisY - Endpoint y of major axis, relative to center
+     * @param {number} axisRatio - Ratio of minor axis to major axis
+     * @param {number} startAngle - Start angle
+     * @param {number} endAngle - End angle
+     */
+    constructor(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle, endAngle) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.majorAxisX = majorAxisX;
+        this.majorAxisY = majorAxisY;
+        this.axisRatio = axisRatio;
+        this.startAngle = startAngle;
+        this.endAngle = endAngle;
+    }
+
+    toDxfString() {
+        // https://www.autodesk.com/techpubs/autocad/acadr14/dxf/ellipse_al_u05_c.htm
+        let s = `0\nELLIPSE\n`;
+        s += `8\n${this.layer.name}\n`;
+        s += `10\n${this.x1}\n`;
+        s += `20\n${this.y1}\n`;
+        s += `30\n0\n`;
+        s += `11\n${this.majorAxisX}\n`;
+        s += `21\n${this.majorAxisY}\n`;
+        s += `31\n0\n`;
+        s += `40\n${this.axisRatio}\n`;
+        s += `41\n${this.startAngle}\n`;
+        s += `42\n${this.endAngle}\n`;
+        return s;
+    }
+}
+
+var Ellipse_1 = Ellipse;
+
 class Drawing
 {
     constructor()
@@ -2908,12 +3054,12 @@ class Drawing
 
         this.setActiveLayer('0');
     }
-    
-    
+
+
     /**
      * @param {string} name
      * @param {string} description
-     * @param {array} elements - if elem > 0 it is a line, if elem < 0 it is gap, if elem == 0.0 it is a 
+     * @param {array} elements - if elem > 0 it is a line, if elem < 0 it is gap, if elem == 0.0 it is a
      */
     addLineType(name, description, elements)
     {
@@ -2926,7 +3072,7 @@ class Drawing
         this.layers[name] = new Layer_1(name, colorNumber, lineTypeName);
         return this;
     }
-    
+
     setActiveLayer(name)
     {
         this.activeLayer = this.layers[name];
@@ -2944,7 +3090,7 @@ class Drawing
         this.activeLayer.addShape(new Point_1(x, y));
         return this;
     }
-    
+
     drawRect(x1, y1, x2, y2)
     {
         this.activeLayer.addShape(new Line_1(x1, y1, x2, y1));
@@ -2958,8 +3104,8 @@ class Drawing
      * @param {number} x1 - Center x
      * @param {number} y1 - Center y
      * @param {number} r - radius
-     * @param {number} startAngle - degree 
-     * @param {number} endAngle - degree 
+     * @param {number} startAngle - degree
+     * @param {number} endAngle - degree
      */
     drawArc(x1, y1, r, startAngle, endAngle)
     {
@@ -3026,6 +3172,34 @@ class Drawing
     setTrueColor(trueColor)
     {
         this.activeLayer.setTrueColor(trueColor);
+        return this;
+    }
+
+    /**
+     * Draw a spline.
+     * @param {[Array]} controlPoints - Array of control points like [ [x1, y1], [x2, y2]... ]
+     * @param {number} degree - Degree of spline: 2 for quadratic, 3 for cubic. Default is 3
+     * @param {[number]} knots - Knot vector array. If null, will use a uniform knot vector. Default is null
+     * @param {[number]} weights - Control point weights. If provided, must be one weight for each control point. Default is null
+     * @param {[Array]} fitPoints - Array of fit points like [ [x1, y1], [x2, y2]... ]
+     */
+    drawSpline(controlPoints, degree = 3, knots = null, weights = null, fitPoints = []) {
+        this.activeLayer.addShape(new Spline_1(controlPoints, degree, knots, weights, fitPoints));
+        return this;
+    }
+
+    /**
+     * Draw an ellipse.
+    * @param {number} x1 - Center x
+    * @param {number} y1 - Center y
+    * @param {number} majorAxisX - Endpoint x of major axis, relative to center
+    * @param {number} majorAxisY - Endpoint y of major axis, relative to center
+    * @param {number} axisRatio - Ratio of minor axis to major axis
+    * @param {number} startAngle - Start angle
+    * @param {number} endAngle - End angle
+    */
+    drawEllipse(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle = 0, endAngle = 2 * Math.PI) {
+        this.activeLayer.addShape(new Ellipse_1(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle, endAngle));
         return this;
     }
 
@@ -3106,7 +3280,7 @@ class Drawing
      * @param {string} unit see Drawing.UNITS
      */
     setUnits(unit) {
-        let value = (typeof Drawing.UNITS[unit] != 'undefined') ? Drawing.UNITS[unit]:Drawing.UNITS['Unitless'];
+        (typeof Drawing.UNITS[unit] != 'undefined') ? Drawing.UNITS[unit]:Drawing.UNITS['Unitless'];
         this.header('INSUNITS', [[70, Drawing.UNITS[unit]]]);
         return this;
     }
@@ -3164,7 +3338,7 @@ class Drawing
 
 //AutoCAD Color Index (ACI)
 //http://sub-atomic.com/~moses/acadcolors.html
-Drawing.ACI = 
+Drawing.ACI =
 {
     LAYER : 0,
     RED : 1,
@@ -3176,14 +3350,14 @@ Drawing.ACI =
     WHITE : 7
 };
 
-Drawing.LINE_TYPES = 
+Drawing.LINE_TYPES =
 [
     {name: 'CONTINUOUS', description: '______', elements: []},
     {name: 'DASHED',    description: '_ _ _ ', elements: [5.0, -5.0]},
     {name: 'DOTTED',    description: '. . . ', elements: [0.0, -5.0]}
 ];
 
-Drawing.LAYERS = 
+Drawing.LAYERS =
 [
     {name: '0',  colorNumber: Drawing.ACI.WHITE, lineTypeName: 'CONTINUOUS'}
 ];
@@ -3222,7 +3396,7 @@ const toDxf = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(await geometry);
   for (const { paths } of getNonVoidPaths(keptGeometry)) {
     for (const path of paths) {
-      for (const [[x1, y1], [x2, y2]] of getEdges(path)) {
+      for (const [[x1, y1], [x2, y2]] of getPathEdges(path)) {
         drawing.drawLine(x1, y1, x2, y2);
       }
     }

@@ -1,69 +1,6 @@
 var HAS_WEAKSET_SUPPORT = typeof WeakSet === 'function';
 var keys = Object.keys;
 /**
- * @function addToCache
- *
- * add object to cache if an object
- *
- * @param value the value to potentially add to cache
- * @param cache the cache to add to
- */
-function addToCache(value, cache) {
-    if (value && typeof value === 'object') {
-        cache.add(value);
-    }
-}
-/**
- * @function hasPair
- *
- * @description
- * does the `pairToMatch` exist in the list of `pairs` provided based on the
- * `isEqual` check
- *
- * @param pairs the pairs to compare against
- * @param pairToMatch the pair to match
- * @param isEqual the equality comparator used
- * @param meta the meta provided
- * @returns does the pair exist in the pairs provided
- */
-function hasPair(pairs, pairToMatch, isEqual, meta) {
-    var length = pairs.length;
-    var pair;
-    for (var index = 0; index < length; index++) {
-        pair = pairs[index];
-        if (isEqual(pair[0], pairToMatch[0], meta) &&
-            isEqual(pair[1], pairToMatch[1], meta)) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * @function hasValue
- *
- * @description
- * does the `valueToMatch` exist in the list of `values` provided based on the
- * `isEqual` check
- *
- * @param values the values to compare against
- * @param valueToMatch the value to match
- * @param isEqual the equality comparator used
- * @param meta the meta provided
- * @returns does the value exist in the values provided
- */
-function hasValue(values, valueToMatch, isEqual, meta) {
-    var length = values.length;
-    for (var index = 0; index < length; index++) {
-        if (isEqual(values[index], valueToMatch, meta)) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * @function sameValueZeroEqual
- *
- * @description
  * are the values passed strictly equal or both NaN
  *
  * @param a the value to compare against
@@ -74,9 +11,6 @@ function sameValueZeroEqual(a, b) {
     return a === b || (a !== a && b !== b);
 }
 /**
- * @function isPlainObject
- *
- * @description
  * is the value a plain object
  *
  * @param value the value to test
@@ -86,9 +20,6 @@ function isPlainObject(value) {
     return value.constructor === Object || value.constructor == null;
 }
 /**
- * @function isPromiseLike
- *
- * @description
  * is the value promise-like (meaning it is thenable)
  *
  * @param value the value to test
@@ -98,9 +29,6 @@ function isPromiseLike(value) {
     return !!value && typeof value.then === 'function';
 }
 /**
- * @function isReactElement
- *
- * @description
  * is the value passed a react element
  *
  * @param value the value to test
@@ -110,29 +38,23 @@ function isReactElement(value) {
     return !!(value && value.$$typeof);
 }
 /**
- * @function getNewCacheFallback
- *
- * @description
  * in cases where WeakSet is not supported, creates a new custom
  * object that mimics the necessary API aspects for cache purposes
  *
  * @returns the new cache object
  */
 function getNewCacheFallback() {
-    return Object.create({
-        _values: [],
+    var values = [];
+    return {
         add: function (value) {
-            this._values.push(value);
+            values.push(value);
         },
         has: function (value) {
-            return this._values.indexOf(value) !== -1;
+            return values.indexOf(value) !== -1;
         },
-    });
+    };
 }
 /**
- * @function getNewCache
- *
- * @description
  * get a new cache object to prevent circular references
  *
  * @returns the new cache object
@@ -146,9 +68,6 @@ var getNewCache = (function (canUseWeakMap) {
     return getNewCacheFallback;
 })(HAS_WEAKSET_SUPPORT);
 /**
- * @function createCircularEqualCreator
- *
- * @description
  * create a custom isEqual handler specific to circular objects
  *
  * @param [isEqual] the isEqual comparator to use instead of isDeepEqual
@@ -159,55 +78,26 @@ function createCircularEqualCreator(isEqual) {
         var _comparator = isEqual || comparator;
         return function circularEqual(a, b, cache) {
             if (cache === void 0) { cache = getNewCache(); }
-            var hasA = cache.has(a);
-            var hasB = cache.has(b);
-            if (hasA || hasB) {
-                return hasA && hasB;
+            var isCacheableA = !!a && typeof a === 'object';
+            var isCacheableB = !!b && typeof b === 'object';
+            if (isCacheableA || isCacheableB) {
+                var hasA = isCacheableA && cache.has(a);
+                var hasB = isCacheableB && cache.has(b);
+                if (hasA || hasB) {
+                    return hasA && hasB;
+                }
+                if (isCacheableA) {
+                    cache.add(a);
+                }
+                if (isCacheableB) {
+                    cache.add(b);
+                }
             }
-            addToCache(a, cache);
-            addToCache(b, cache);
             return _comparator(a, b, cache);
         };
     };
 }
 /**
- * @function toPairs
- *
- * @description
- * convert the map passed into pairs (meaning an array of [key, value] tuples)
- *
- * @param map the map to convert to [key, value] pairs (entries)
- * @returns the [key, value] pairs
- */
-function toPairs(map) {
-    var pairs = new Array(map.size);
-    var index = 0;
-    map.forEach(function (value, key) {
-        pairs[index++] = [key, value];
-    });
-    return pairs;
-}
-/**
- * @function toValues
- *
- * @description
- * convert the set passed into values
- *
- * @param set the set to convert to values
- * @returns the values
- */
-function toValues(set) {
-    var values = new Array(set.size);
-    var index = 0;
-    set.forEach(function (value) {
-        values[index++] = value;
-    });
-    return values;
-}
-/**
- * @function areArraysEqual
- *
- * @description
  * are the arrays equal in value
  *
  * @param a the array to test
@@ -217,11 +107,11 @@ function toValues(set) {
  * @returns are the arrays equal
  */
 function areArraysEqual(a, b, isEqual, meta) {
-    var length = a.length;
-    if (b.length !== length) {
+    var index = a.length;
+    if (b.length !== index) {
         return false;
     }
-    for (var index = 0; index < length; index++) {
+    while (index-- > 0) {
         if (!isEqual(a[index], b[index], meta)) {
             return false;
         }
@@ -229,9 +119,6 @@ function areArraysEqual(a, b, isEqual, meta) {
     return true;
 }
 /**
- * @function areMapsEqual
- *
- * @description
  * are the maps equal in value
  *
  * @param a the map to test
@@ -241,26 +128,24 @@ function areArraysEqual(a, b, isEqual, meta) {
  * @returns are the maps equal
  */
 function areMapsEqual(a, b, isEqual, meta) {
-    if (a.size !== b.size) {
-        return false;
+    var isValueEqual = a.size === b.size;
+    if (isValueEqual && a.size) {
+        a.forEach(function (aValue, aKey) {
+            if (isValueEqual) {
+                isValueEqual = false;
+                b.forEach(function (bValue, bKey) {
+                    if (!isValueEqual && isEqual(aKey, bKey, meta)) {
+                        isValueEqual = isEqual(aValue, bValue, meta);
+                    }
+                });
+            }
+        });
     }
-    var pairsA = toPairs(a);
-    var pairsB = toPairs(b);
-    var length = pairsA.length;
-    for (var index = 0; index < length; index++) {
-        if (!hasPair(pairsB, pairsA[index], isEqual, meta) ||
-            !hasPair(pairsA, pairsB[index], isEqual, meta)) {
-            return false;
-        }
-    }
-    return true;
+    return isValueEqual;
 }
 var OWNER = '_owner';
 var hasOwnProperty = Function.prototype.bind.call(Function.prototype.call, Object.prototype.hasOwnProperty);
 /**
- * @function areObjectsEqual
- *
- * @description
  * are the objects equal in value
  *
  * @param a the object to test
@@ -271,31 +156,30 @@ var hasOwnProperty = Function.prototype.bind.call(Function.prototype.call, Objec
  */
 function areObjectsEqual(a, b, isEqual, meta) {
     var keysA = keys(a);
-    var length = keysA.length;
-    if (keys(b).length !== length) {
+    var index = keysA.length;
+    if (keys(b).length !== index) {
         return false;
     }
-    var key;
-    for (var index = 0; index < length; index++) {
-        key = keysA[index];
-        if (!hasOwnProperty(b, key)) {
-            return false;
-        }
-        if (key === OWNER && isReactElement(a)) {
-            if (!isReactElement(b)) {
+    if (index) {
+        var key = void 0;
+        while (index-- > 0) {
+            key = keysA[index];
+            if (key === OWNER) {
+                var reactElementA = isReactElement(a);
+                var reactElementB = isReactElement(b);
+                if ((reactElementA || reactElementB) &&
+                    reactElementA !== reactElementB) {
+                    return false;
+                }
+            }
+            if (!hasOwnProperty(b, key) || !isEqual(a[key], b[key], meta)) {
                 return false;
             }
-        }
-        else if (!isEqual(a[key], b[key], meta)) {
-            return false;
         }
     }
     return true;
 }
 /**
- * @function areRegExpsEqual
- *
- * @description
  * are the regExps equal in value
  *
  * @param a the regExp to test
@@ -312,9 +196,6 @@ function areRegExpsEqual(a, b) {
         a.lastIndex === b.lastIndex);
 }
 /**
- * @function areSetsEqual
- *
- * @description
  * are the sets equal in value
  *
  * @param a the set to test
@@ -324,25 +205,24 @@ function areRegExpsEqual(a, b) {
  * @returns are the sets equal
  */
 function areSetsEqual(a, b, isEqual, meta) {
-    if (a.size !== b.size) {
-        return false;
+    var isValueEqual = a.size === b.size;
+    if (isValueEqual && a.size) {
+        a.forEach(function (aValue) {
+            if (isValueEqual) {
+                isValueEqual = false;
+                b.forEach(function (bValue) {
+                    if (!isValueEqual) {
+                        isValueEqual = isEqual(aValue, bValue, meta);
+                    }
+                });
+            }
+        });
     }
-    var valuesA = toValues(a);
-    var valuesB = toValues(b);
-    var length = valuesA.length;
-    for (var index = 0; index < length; index++) {
-        if (!hasValue(valuesB, valuesA[index], isEqual, meta) ||
-            !hasValue(valuesA, valuesB[index], isEqual, meta)) {
-            return false;
-        }
-    }
-    return true;
+    return isValueEqual;
 }
 
-var isArray = Array.isArray;
 var HAS_MAP_SUPPORT = typeof Map === 'function';
 var HAS_SET_SUPPORT = typeof Set === 'function';
-var OBJECT_TYPEOF = 'object';
 function createComparator(createIsEqual) {
     var isEqual = 
     /* eslint-disable no-use-before-define */
@@ -351,9 +231,6 @@ function createComparator(createIsEqual) {
         : comparator;
     /* eslint-enable */
     /**
-     * @function comparator
-     *
-     * @description
      * compare the value of the two objects and return true if they are equivalent in values
      *
      * @param a the value to test against
@@ -362,57 +239,56 @@ function createComparator(createIsEqual) {
      * @returns are a and b equivalent in value
      */
     function comparator(a, b, meta) {
-        if (sameValueZeroEqual(a, b)) {
+        if (a === b) {
             return true;
         }
-        if (a && b && typeof a === OBJECT_TYPEOF && typeof b === OBJECT_TYPEOF) {
+        if (a && b && typeof a === 'object' && typeof b === 'object') {
             if (isPlainObject(a) && isPlainObject(b)) {
                 return areObjectsEqual(a, b, isEqual, meta);
             }
-            var arrayA = isArray(a);
-            var arrayB = isArray(b);
-            if (arrayA || arrayB) {
-                return arrayA === arrayB && areArraysEqual(a, b, isEqual, meta);
+            var aShape = Array.isArray(a);
+            var bShape = Array.isArray(b);
+            if (aShape || bShape) {
+                return aShape === bShape && areArraysEqual(a, b, isEqual, meta);
             }
-            var aDate = a instanceof Date;
-            var bDate = b instanceof Date;
-            if (aDate || bDate) {
-                return aDate === bDate && sameValueZeroEqual(a.getTime(), b.getTime());
+            aShape = a instanceof Date;
+            bShape = b instanceof Date;
+            if (aShape || bShape) {
+                return (aShape === bShape && sameValueZeroEqual(a.getTime(), b.getTime()));
             }
-            var aRegExp = a instanceof RegExp;
-            var bRegExp = b instanceof RegExp;
-            if (aRegExp || bRegExp) {
-                return aRegExp === bRegExp && areRegExpsEqual(a, b);
+            aShape = a instanceof RegExp;
+            bShape = b instanceof RegExp;
+            if (aShape || bShape) {
+                return aShape === bShape && areRegExpsEqual(a, b);
             }
             if (isPromiseLike(a) || isPromiseLike(b)) {
                 return a === b;
             }
             if (HAS_MAP_SUPPORT) {
-                var aMap = a instanceof Map;
-                var bMap = b instanceof Map;
-                if (aMap || bMap) {
-                    return aMap === bMap && areMapsEqual(a, b, isEqual, meta);
+                aShape = a instanceof Map;
+                bShape = b instanceof Map;
+                if (aShape || bShape) {
+                    return aShape === bShape && areMapsEqual(a, b, isEqual, meta);
                 }
             }
             if (HAS_SET_SUPPORT) {
-                var aSet = a instanceof Set;
-                var bSet = b instanceof Set;
-                if (aSet || bSet) {
-                    return aSet === bSet && areSetsEqual(a, b, isEqual, meta);
+                aShape = a instanceof Set;
+                bShape = b instanceof Set;
+                if (aShape || bShape) {
+                    return aShape === bShape && areSetsEqual(a, b, isEqual, meta);
                 }
             }
             return areObjectsEqual(a, b, isEqual, meta);
         }
-        return false;
+        return a !== a && b !== b;
     }
     return comparator;
 }
 
-// comparator
 var deepEqual = createComparator();
-var shallowEqual = createComparator(function () { return sameValueZeroEqual; });
-var circularDeepEqual = createComparator(createCircularEqualCreator());
-var circularShallowEqual = createComparator(createCircularEqualCreator(sameValueZeroEqual));
+createComparator(function () { return sameValueZeroEqual; });
+createComparator(createCircularEqualCreator());
+createComparator(createCircularEqualCreator(sameValueZeroEqual));
 
 /**
  * @constant DEFAULT_OPTIONS_KEYS the default options keys

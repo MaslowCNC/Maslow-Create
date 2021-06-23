@@ -1,5 +1,5 @@
 import * as baseApi from './jsxcad-api-v1.js';
-import { setPendingErrorHandler, emit, log, conversation, boot, touch, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted } from './jsxcad-sys.js';
+import * as sys from './jsxcad-sys.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -72,9 +72,9 @@ var hashSum = sum;
 /* global postMessage, onmessage:writable, self */
 
 const resolveNotebook = async () => {
-  await resolvePending(); // Update the notebook.
+  await sys.resolvePending(); // Update the notebook.
 
-  const notebook = getEmitted(); // Resolve any promises.
+  const notebook = sys.getEmitted(); // Resolve any promises.
 
   for (const note of notebook) {
     if (note.download) {
@@ -93,28 +93,28 @@ const reportError = error => {
     level: 'serious'
   };
   const hash = hashSum(entry);
-  emit({
+  sys.emit({
     error: entry,
     hash
   });
-  log({
+  sys.log({
     op: 'text',
     text: error.stack ? error.stack : error,
     level: 'serious'
   });
 };
 
-setPendingErrorHandler(reportError);
+sys.setPendingErrorHandler(reportError);
 
 const agent = async ({
   ask,
   question
 }) => {
-  await log({
+  await sys.log({
     op: 'evaluate',
     status: 'run'
   });
-  await log({
+  await sys.log({
     op: 'text',
     text: 'Evaluation Started'
   });
@@ -125,16 +125,16 @@ const agent = async ({
       path,
       workspace
     } = question.touchFile;
-    await touch(path, {
+    await sys.touch(path, {
       workspace
     });
   } else if (question.evaluate) {
-    setupFilesystem({
+    sys.setupFilesystem({
       fileBase: question.workspace
     });
-    clearEmitted();
+    sys.clearEmitted();
     let nthNote = 0;
-    onEmitHandler = addOnEmitHandler(async (note, index) => {
+    onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
       nthNote += 1;
 
       if (note.download) {
@@ -166,43 +166,43 @@ const agent = async ({
       const module = await builder(api);
 
       try {
-        pushModule(question.path);
+        sys.pushModule(question.path);
         await module();
       } finally {
-        popModule();
+        sys.popModule();
       }
 
-      await log({
+      await sys.log({
         op: 'text',
         text: 'Evaluation Succeeded',
         level: 'serious'
       });
-      await log({
+      await sys.log({
         op: 'evaluate',
         status: 'success'
       }); // Wait for any pending operations.
     } catch (error) {
       reportError(error);
-      await log({
+      await sys.log({
         op: 'text',
         text: 'Evaluation Failed',
         level: 'serious'
       });
-      await log({
+      await sys.log({
         op: 'evaluate',
         status: 'failure'
       });
     } finally {
       await resolveNotebook();
-      await resolvePending();
+      await sys.resolvePending();
       ask({
         notebookLength: nthNote
       });
-      removeOnEmitHandler(onEmitHandler);
+      sys.removeOnEmitHandler(onEmitHandler);
     }
 
-    setupFilesystem();
-    return getEmitted();
+    sys.setupFilesystem();
+    return sys.getEmitted();
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
@@ -218,13 +218,13 @@ const bootstrap = async () => {
   const {
     ask,
     hear
-  } = conversation({
+  } = sys.conversation({
     agent,
     say
   });
   self.ask = ask; // sys/log depends on ask, so set that up before we boot.
 
-  await boot();
+  await sys.boot();
 
   onmessage = ({
     data

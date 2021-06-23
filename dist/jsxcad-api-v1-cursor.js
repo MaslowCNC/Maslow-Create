@@ -1,7 +1,7 @@
 import { add, transform } from './jsxcad-math-vec3.js';
 import { identity, fromZRotation, multiply } from './jsxcad-math-mat4.js';
 import Shape from './jsxcad-api-v1-shape.js';
-import { close } from './jsxcad-geometry-path.js';
+import { closePath } from './jsxcad-geometry.js';
 
 // Normalize (1, 2, 3) and ([1, 2, 3]).
 const normalizeVector = (...params) => {
@@ -48,7 +48,7 @@ class Cursor {
   }
 
   close() {
-    return new Cursor({ matrix: this.matrix, path: close(this.path) });
+    return new Cursor({ matrix: this.matrix, path: closePath(this.path) });
   }
 
   fill() {

@@ -1,6 +1,5 @@
 import { isStrictlyCoplanar, flip, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { rotateX, scale, taggedGraph } from './jsxcad-geometry-tagged.js';
-import { fromPolygons } from './jsxcad-geometry-graph.js';
+import { fromPolygonsToGraph, rotateX, scale } from './jsxcad-geometry.js';
 import { fromValues } from './jsxcad-math-mat4.js';
 import { read } from './jsxcad-sys.js';
 
@@ -203,15 +202,15 @@ const fromCodeToPolygons = async (
 
 const fromLDrawPart = async (part, { allowFetch = true } = {}) => {
   const polygons = await fromPartToPolygons(`${part}.dat`, { allowFetch });
-  const geometry = fromPolygons(polygons);
-  return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));
+  const geometry = fromPolygonsToGraph({}, polygons);
+  return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
 };
 
 const fromLDraw = async (data, { allowFetch = true } = {}) => {
   const code = fromDataToCode(data);
   const polygons = await fromCodeToPolygons(code, { allowFetch });
-  const geometry = fromPolygons(polygons);
-  return rotateX(-90, scale([0.4, 0.4, 0.4], taggedGraph({}, geometry)));
+  const geometry = fromPolygonsToGraph(polygons);
+  return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
 };
 
 export { fromLDraw, fromLDrawPart };

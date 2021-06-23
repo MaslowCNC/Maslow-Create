@@ -70,8 +70,8 @@ var base64Arraybuffer = createCommonjsModule(function (module, exports) {
   };
 })();
 });
-var base64Arraybuffer_1 = base64Arraybuffer.encode;
-var base64Arraybuffer_2 = base64Arraybuffer.decode;
+base64Arraybuffer.encode;
+base64Arraybuffer.decode;
 
 const encodeNotebook = async (notebook) => {
   const encoded = [];

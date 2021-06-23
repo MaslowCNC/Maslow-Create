@@ -1,7 +1,7 @@
 import { addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { ensurePages } from './jsxcad-api-v1-shapes.js';
-import { hash } from './jsxcad-geometry-tagged.js';
+import { hash } from './jsxcad-geometry.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 
 function pad (hash, len) {
