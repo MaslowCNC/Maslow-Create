@@ -411,6 +411,7 @@ const webService = async ({
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);
+          console.log(error);
         };
         const service = { ask, terminate };
         service.release = async () =>
@@ -4040,4 +4041,22 @@ const deleteFile = async (options, path) => {
   await deleteFile$1(options, path);
 };
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
+// optimize the gzip compression for this alphabet.
+let urlAlphabet =
+  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
+
+let nanoid = (size = 21) => {
+  let id = '';
+  // A compact alternative for `for (var i = 0; i < step; i++)`.
+  let i = size;
+  while (i--) {
+    // `| 0` is more compact and faster than `Math.floor()`.
+    id += urlAlphabet[(Math.random() * 64) | 0];
+  }
+  return id
+};
+
+const generateUniqueId = () => nanoid();
+
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

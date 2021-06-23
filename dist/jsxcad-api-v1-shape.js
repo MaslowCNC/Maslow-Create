@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, taggedAssembly, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedLayers, bend as bend$1, intersection, allTags, difference, getLeafs, empty, grow as grow$1, inset as inset$1, rewrite, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, taggedDisjointAssembly, toDisjointGeometry, push as push$1, getPeg, taggedPlan, remesh as remesh$1, smooth as smooth$1, measureBoundingBox, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, read, write, realize } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, negate, normalize, subtract, dot, cross, scale as scale$1, distance } from './jsxcad-math-vec3.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -281,6 +281,11 @@ const notAsMethod = function (...tags) {
 
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;
+
+const bend = (shape, degreesPerMm = 1) =>
+  Shape.fromGeometry(bend$1(shape.toGeometry(), degreesPerMm));
+
+Shape.registerMethod('bend', bend);
 
 const clip = (shape, ...shapes) =>
   Shape.fromGeometry(
@@ -975,43 +980,54 @@ Shape.prototype.remesh = remeshMethod;
 const rotate = (shape, angle = 0, axis = [0, 0, 1]) =>
   shape.transform(fromRotation(angle * 0.017453292519943295, axis));
 
-const rotateMethod = function (...args) {
-  return rotate(this, ...args);
-};
-Shape.prototype.rotate = rotateMethod;
+Shape.registerMethod('rotate', rotate);
 
 const rotateX = (shape, ...angles) =>
   Shape.Group(
     ...angles.map((angle) => shape.transform(fromRotateXToTransform(angle)))
   );
 
-const rotateXMethod = function (...angles) {
-  return rotateX(this, ...angles);
-};
-Shape.prototype.rotateX = rotateXMethod;
-Shape.prototype.rx = rotateXMethod;
+// rx is in terms of turns -- 1/2 is a half turn.
+const rx = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateXToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateX', rotateX);
+Shape.registerMethod('rx', rx);
 
 const rotateY = (shape, ...angles) =>
   Shape.Group(
     ...angles.map((angle) => shape.transform(fromRotateYToTransform(angle)))
   );
 
-const rotateYMethod = function (...angles) {
-  return rotateY(this, ...angles);
-};
-Shape.prototype.rotateY = rotateYMethod;
-Shape.prototype.ry = rotateYMethod;
+// ry is in terms of turns -- 1/2 is a half turn.
+const ry = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateYToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateY', rotateY);
+Shape.registerMethod('ry', ry);
 
 const rotateZ = (shape, ...angles) =>
   Shape.Group(
     ...angles.map((angle) => shape.transform(fromRotateZToTransform(angle)))
   );
 
-const rotateZMethod = function (...angles) {
-  return rotateZ(this, ...angles);
-};
-Shape.prototype.rotateZ = rotateZMethod;
-Shape.prototype.rz = rotateZMethod;
+const rz = (shape, ...angles) =>
+  Shape.Group(
+    ...angles.map((angle) =>
+      shape.transform(fromRotateZToTransform(angle * 360))
+    )
+  );
+
+Shape.registerMethod('rotateZ', rotateZ);
+Shape.registerMethod('rz', rz);
 
 const scale = (shape, x = 1, y = x, z = y) =>
   shape.transform(fromScaling([x, y, z]));
@@ -1112,14 +1128,10 @@ const toolMethod = function (name) {
 };
 Shape.prototype.tool = toolMethod;
 
-const twist = (shape, degreesPerZ) =>
-  Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerZ));
+const twist = (shape, degreesPerMm = 1) =>
+  Shape.fromGeometry(twist$1(shape.toGeometry(), degreesPerMm));
 
-const twistMethod = function (degreesPerZ) {
-  return twist(this, degreesPerZ);
-};
-
-Shape.prototype.twist = twistMethod;
+Shape.registerMethod('twist', twist);
 
 const voidFn = (shape) =>
   Shape.fromGeometry(

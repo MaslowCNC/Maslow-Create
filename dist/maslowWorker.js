@@ -4,8 +4,7 @@ import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
-import { soup } from './jsxcad-geometry-tagged.js';
+import { toDisplayGeometry } from './jsxcad-geometry.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -368,7 +367,7 @@ const agent = async ({
             break;
         case "display":
             const geometryToDisplay = await maslowRead(question.readPath);
-            const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
+            const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
             return threejsGeometry;
             break;
         }

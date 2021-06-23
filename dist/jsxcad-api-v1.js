@@ -1,4 +1,4 @@
-import { getModule, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
+import { getModule, generateUniqueId, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
 export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
@@ -25,22 +25,6 @@ export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js
 import { toEcmascript } from './jsxcad-compiler.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
-// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
-// optimize the gzip compression for this alphabet.
-let urlAlphabet =
-  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
-
-let nanoid = (size = 21) => {
-  let id = '';
-  // A compact alternative for `for (var i = 0; i < step; i++)`.
-  let i = size;
-  while (i--) {
-    // `| 0` is more compact and faster than `Math.floor()`.
-    id += urlAlphabet[(Math.random() * 64) | 0];
-  }
-  return id
-};
-
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
@@ -63,10 +47,10 @@ const view = (
   for (const entry of ensurePages(
     viewShape.toDisplayGeometry({ triangles, outline, wireframe })
   )) {
-    const path = `view/${getModule()}/${nanoid()}`;
+    const path = `view/${getModule()}/${generateUniqueId()}`;
     addPending(write(path, entry));
     const view = { width, height, position, inline, withAxes, withGrid };
-    emit({ hash: nanoid(), path, view });
+    emit({ hash: generateUniqueId(), path, view });
   }
   return shape;
 };
@@ -337,12 +321,14 @@ const card = (strings, ...placeholders) => {
   const card = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
-  emit({ hash: hashSum(card), setContext: { card } });
+  const setContext = { card };
+  emit({ hash: hashSum(setContext), setContext });
   return card;
 };
 
 const emitSourceLocation = ({ line, column }) => {
-  emit({ setContext: { sourceLocation: { line, column } } });
+  const setContext = { sourceLocation: { line, column } };
+  emit({ hash: hashSum(setContext), setContext });
   return card;
 };
 

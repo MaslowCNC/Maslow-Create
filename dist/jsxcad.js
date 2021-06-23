@@ -1,6 +1,8 @@
 import { askService, askServices, createService, touch, setupFilesystem, listFiles } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
+import("./maslowWorker.js");
+console.log("Imported web worker");
 
 //Setup worker
 const agent = async ({ ask, question }) => {

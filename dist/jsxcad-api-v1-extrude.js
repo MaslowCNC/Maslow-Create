@@ -36,18 +36,15 @@ const extrude = (shape, ...heights) => {
   if (heights.length % 2 === 1) {
     heights.push(0);
   }
-  heights.sort();
+  heights.sort((a, b) => a - b);
   const extrusions = [];
   while (heights.length > 0) {
-    let height = heights.pop();
-    let depth = heights.pop();
+    const height = heights.pop();
+    const depth = heights.pop();
     if (height === depth) {
       // Return unextruded geometry at this height, instead.
       extrusions.push(shape.z(height));
       continue;
-    }
-    if (height < depth) {
-      [height, depth] = [depth, height];
     }
     extrusions.push(
       Shape$1.fromGeometry(extrude$1(shape.toGeometry(), height, depth))

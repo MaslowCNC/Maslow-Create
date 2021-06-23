@@ -1,9 +1,9 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshToLazyGraph, fromPointsToConvexHullAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, intersectionOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, fromSurfaceMeshToTriangles, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToGraph, fromPointsToAlphaShapeAsSurfaceMesh, fromSurfaceMeshToLazyGraph, deserializeSurfaceMesh, fromGraphToSurfaceMesh, bendSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, arrangePaths, growSurfaceMesh, intersectionOfSurfaceMeshes, fromSurfaceMeshToPolygonsWithHoles, insetOfPolygonWithHoles, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, serializeSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, fromSurfaceMeshToTriangles, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
-import { canonicalize as canonicalize$5, equals, transform as transform$5, min, max, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
+import { transform as transform$5, canonicalize as canonicalize$5, equals, min, max, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
+import { transform as transform$6, canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
-import { canonicalize as canonicalize$6, transform as transform$6 } from './jsxcad-math-poly3.js';
 import { cache, cacheRewriteTags, cacheSection } from './jsxcad-cache.js';
 import { info, read as read$1, write as write$1 } from './jsxcad-sys.js';
 
@@ -241,56 +241,31 @@ const fromSurfaceMesh = (surfaceMesh) => {
 const alphaShape = (points, componentLimit) =>
   fromSurfaceMesh(fromPointsToAlphaShapeAsSurfaceMesh(points, componentLimit));
 
-const isClosed = (path) => path.length === 0 || path[0] !== null;
-const isOpen = (path) => !isClosed(path);
-
-const close = (path) => (isClosed(path) ? path : path.slice(1));
-
-const concatenate = (...paths) => {
-  const result = [null, ...[].concat(...paths.map(close))];
-  return result;
+const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
+  if (!surfaceMesh) {
+    throw Error('null surfaceMesh');
+  }
+  let graph = surfaceMesh[graphSymbol];
+  if (forceNewGraph || graph === undefined) {
+    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
+    surfaceMesh[graphSymbol] = graph;
+    graph[surfaceMeshSymbol] = surfaceMesh;
+  }
+  return graph;
 };
 
-const canonicalizePoint = (point, index) => {
-  if (point === null) {
-    if (index !== 0) throw Error('Path has null not at head');
-    return point;
-  } else {
-    return canonicalize$5(point);
+const taggedGraph = ({ tags }, graph) => {
+  if (graph.length > 0) {
+    throw Error('Graph should not be an array');
   }
-};
-
-const canonicalize$4 = (path) => path.map(canonicalizePoint);
-
-const canonicalize$3 = (paths) => {
-  let canonicalized = paths.map(canonicalize$4);
-  if (paths.properties !== undefined) {
-    // Transfer properties.
-    canonicalized.properties = paths.properties;
+  if (graph.graph) {
+    throw Error('malformed graph');
   }
-  return canonicalized;
-};
-
-const canonicalize$2 = (points) => points.map(canonicalize$5);
-
-const isDegenerate = (polygon) => {
-  for (let nth = 0; nth < polygon.length; nth++) {
-    if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const canonicalize$1 = (polygons) => {
-  const canonicalized = [];
-  for (let polygon of polygons) {
-    polygon = canonicalize$6(polygon);
-    if (!isDegenerate(polygon)) {
-      canonicalized.push(polygon);
-    }
-  }
-  return canonicalized;
+  return {
+    type: 'graph',
+    tags,
+    graph,
+  };
 };
 
 const toSurfaceMesh = (graph) => {
@@ -308,29 +283,50 @@ const toSurfaceMesh = (graph) => {
   return surfaceMesh;
 };
 
-const realizeGraph = (geometry) => {
-  if (geometry.graph.isLazy) {
-    return {
-      ...geometry,
-      graph: fromSurfaceMesh(toSurfaceMesh(geometry.graph)),
-    };
-  } else {
+const bend$1 = (geometry, degreesPerMm = 1) =>
+  taggedGraph(
+    { tags: geometry.tags },
+    fromSurfaceMeshLazy(
+      bendSurfaceMesh(
+        toSurfaceMesh(geometry.graph),
+        geometry.matrix,
+        degreesPerMm
+      )
+    )
+  );
+
+const registry = new Map();
+
+const reify = (geometry) => {
+  if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
   }
-};
-
-const realize = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        return realizeGraph(geometry);
-      case 'displayGeometry':
       case 'triangles':
       case 'points':
       case 'paths':
-        // No lazy representation to realize.
+        // No plan to realize.
         return geometry;
-      case 'plan':
+      case 'plan': {
+        if (geometry.content.length === 0) {
+          // This plan is not reified, generate content.
+          const reifier = registry.get(geometry.plan.type);
+          if (reifier === undefined) {
+            throw Error(
+              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
+            );
+          }
+          const reified = reifier(geometry);
+          geometry.content.push(reified);
+          return descend();
+        }
+        return geometry;
+      }
+      case 'displayGeometry':
+        // CHECK: Should this taint the results if there is a plan?
+        return geometry;
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -346,6 +342,12 @@ const realize = (geometry) => {
 
   return rewrite(geometry, op);
 };
+
+// We expect the type to be uniquely qualified.
+const registerReifier = (type, reifier) => registry.set(type, reifier);
+
+const isClosed = (path) => path.length === 0 || path[0] !== null;
+const isOpen = (path) => !isClosed(path);
 
 // A path point may be supplemented by a 'forward' and a 'right' vector
 // allowing it to define a plane with a rotation.
@@ -452,6 +454,130 @@ const toTransformedGeometry = (geometry) => {
   return geometry[transformedGeometry];
 };
 
+const op =
+  ({ graph }) =>
+  (geometry, ...args) => {
+    const walk = (geometry, descend) => {
+      switch (geometry.type) {
+        case 'graph': {
+          return graph(geometry, ...args);
+        }
+        case 'triangles':
+        case 'paths':
+        case 'points':
+          // Not implemented yet.
+          return geometry;
+        case 'plan':
+          reify(geometry);
+        // fall through
+        case 'assembly':
+        case 'item':
+        case 'disjointAssembly':
+        case 'layers': {
+          return descend();
+        }
+        case 'sketch': {
+          // Sketches aren't real for op.
+          return geometry;
+        }
+        default:
+          throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+      }
+    };
+
+    return rewrite(toTransformedGeometry(geometry), walk);
+  };
+
+const bend = op({ graph: bend$1 });
+
+const close = (path) => (isClosed(path) ? path : path.slice(1));
+
+const concatenate = (...paths) => {
+  const result = [null, ...[].concat(...paths.map(close))];
+  return result;
+};
+
+const canonicalizePoint = (point, index) => {
+  if (point === null) {
+    if (index !== 0) throw Error('Path has null not at head');
+    return point;
+  } else {
+    return canonicalize$5(point);
+  }
+};
+
+const canonicalize$4 = (path) => path.map(canonicalizePoint);
+
+const canonicalize$3 = (paths) => {
+  let canonicalized = paths.map(canonicalize$4);
+  if (paths.properties !== undefined) {
+    // Transfer properties.
+    canonicalized.properties = paths.properties;
+  }
+  return canonicalized;
+};
+
+const canonicalize$2 = (points) => points.map(canonicalize$5);
+
+const isDegenerate = (polygon) => {
+  for (let nth = 0; nth < polygon.length; nth++) {
+    if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const canonicalize$1 = (polygons) => {
+  const canonicalized = [];
+  for (let polygon of polygons) {
+    polygon = canonicalize$6(polygon);
+    if (!isDegenerate(polygon)) {
+      canonicalized.push(polygon);
+    }
+  }
+  return canonicalized;
+};
+
+const realizeGraph = (geometry) => {
+  if (geometry.graph.isLazy) {
+    return {
+      ...geometry,
+      graph: fromSurfaceMesh(toSurfaceMesh(geometry.graph)),
+    };
+  } else {
+    return geometry;
+  }
+};
+
+const realize = (geometry) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph':
+        return realizeGraph(geometry);
+      case 'displayGeometry':
+      case 'triangles':
+      case 'points':
+      case 'paths':
+        // No lazy representation to realize.
+        return geometry;
+      case 'plan':
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout':
+      case 'sketch':
+      case 'transform':
+        return descend();
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(geometry, op);
+};
+
 const canonicalize = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
@@ -487,33 +613,6 @@ const canonicalize = (geometry) => {
     }
   };
   return rewrite(toTransformedGeometry(geometry), op);
-};
-
-const fromSurfaceMeshLazy = (surfaceMesh, forceNewGraph = false) => {
-  if (!surfaceMesh) {
-    throw Error('null surfaceMesh');
-  }
-  let graph = surfaceMesh[graphSymbol];
-  if (forceNewGraph || graph === undefined) {
-    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
-    surfaceMesh[graphSymbol] = graph;
-    graph[surfaceMeshSymbol] = surfaceMesh;
-  }
-  return graph;
-};
-
-const taggedGraph = ({ tags }, graph) => {
-  if (graph.length > 0) {
-    throw Error('Graph should not be an array');
-  }
-  if (graph.graph) {
-    throw Error('malformed graph');
-  }
-  return {
-    type: 'graph',
-    tags,
-    graph,
-  };
 };
 
 const convexHull = ({ tags }, points) =>
@@ -730,57 +829,6 @@ const difference$1 = (a, b) => {
   info('difference end');
   return taggedGraph({ tags: a.tags }, result);
 };
-
-const registry = new Map();
-
-const reify = (geometry) => {
-  if (geometry.type === 'plan' && geometry.content.length > 0) {
-    return geometry;
-  }
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-      case 'triangles':
-      case 'points':
-      case 'paths':
-        // No plan to realize.
-        return geometry;
-      case 'plan': {
-        if (geometry.content.length === 0) {
-          // This plan is not reified, generate content.
-          const reifier = registry.get(geometry.plan.type);
-          if (reifier === undefined) {
-            throw Error(
-              `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
-            );
-          }
-          const reified = reifier(geometry);
-          geometry.content.push(reified);
-          return descend();
-        }
-        return geometry;
-      }
-      case 'displayGeometry':
-        // CHECK: Should this taint the results if there is a plan?
-        return geometry;
-      case 'assembly':
-      case 'item':
-      case 'disjointAssembly':
-      case 'layers':
-      case 'layout':
-      case 'sketch':
-      case 'transform':
-        return descend();
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(geometry, op);
-};
-
-// We expect the type to be uniquely qualified.
-const registerReifier = (type, reifier) => registry.set(type, reifier);
 
 const toConcreteGeometry = (geometry) =>
   toTransformedGeometry(reify(geometry));
@@ -1826,10 +1874,12 @@ const toPolygonsWithHoles$1 = (geometry) => {
 
 const toPaths = (geometry) => {
   const paths = [];
-  for (const { points, holes } of toPolygonsWithHoles$1(geometry)) {
-    paths.push(points);
-    for (const { points } of holes) {
+  for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
+    for (const { points, holes } of polygonsWithHoles) {
       paths.push(points);
+      for (const { points } of holes) {
+        paths.push(points);
+      }
     }
   }
   return paths;
@@ -2214,6 +2264,8 @@ const outline$1 = (geometry) => {
       geometry.matrix
     );
     info('outline end');
+  } else {
+    info('outline cached');
   }
   return geometry.cache.outline;
 };
@@ -2420,15 +2472,16 @@ const read = async (path) => read$1(path);
 const remesh$1 = (geometry, options = {}) =>
   taggedGraph(
     { tags: geometry.tags },
-    fromSurfaceMeshLazy(remeshSurfaceMesh(toSurfaceMesh(geometry), options))
+    fromSurfaceMeshLazy(
+      remeshSurfaceMesh(toSurfaceMesh(geometry.graph), options)
+    )
   );
 
 const remesh = (geometry, options) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        return taggedGraph({ tags }, remesh$1(geometry.graph, options));
+        return remesh$1(geometry, options);
       }
       case 'triangles':
       case 'paths':
@@ -2582,7 +2635,7 @@ const soup = (
 ) => {
   const outline$1 = doOutline ? outline : () => [];
   const wireframe = doWireframe
-    ? (geometry) => [toTriangles(geometry)]
+    ? (geometry) => [taggedPaths({ tags: geometry.tags }, toPaths(geometry))]
     : () => [];
   const triangles = doTriangles
     ? (geometry) => [toTriangles(geometry)]
@@ -2892,24 +2945,23 @@ const toPolygonsWithHoles = (geometry) => {
   return output;
 };
 
-const twist$1 = (geometry, degreesPerZ) =>
+const twist$1 = (geometry, degreesPerMm) =>
   taggedGraph(
     { tags: geometry.tags },
     fromSurfaceMeshLazy(
       twistSurfaceMesh(
         toSurfaceMesh(geometry.graph),
         geometry.matrix,
-        degreesPerZ
+        degreesPerMm
       )
     )
   );
 
-const twist = (geometry, degreesPerZ) => {
+const twist = (geometry, degreesPerMm, axis) => {
   const op = (geometry, descend) => {
-    const { tags } = geometry;
     switch (geometry.type) {
       case 'graph': {
-        return taggedGraph({ tags }, twist$1(geometry.graph, degreesPerZ));
+        return twist$1(geometry, degreesPerMm);
       }
       case 'triangles':
       case 'paths':
@@ -2917,7 +2969,7 @@ const twist = (geometry, degreesPerZ) => {
         // Not implemented yet.
         return geometry;
       case 'plan':
-        return twist(reify(geometry).content[0], degreesPerZ);
+        return twist(reify(geometry).content[0], degreesPerMm);
       case 'assembly':
       case 'item':
       case 'disjointAssembly':
@@ -3050,4 +3102,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$4(fromScaling(vector), geometry);
 
-export { allTags, alphaShape, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, union, update, visit, write };
+export { allTags, alphaShape, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, doesNotOverlap, drop, eachItem, eachPoint, empty, extrude, extrudeToPlane, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getItems, getLayers, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isNotVoid, isVoid, keep, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, smooth, soup, taggedAssembly, taggedDisjointAssembly, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedSketch, taggedTransform, taggedTriangles, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangles as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$4 as transform, transform$2 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, union, update, visit, write };
