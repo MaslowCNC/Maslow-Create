@@ -1,6 +1,6 @@
 
 /**
- * This class defines a BOMEntry object which is used to define one entry in a bill of materials.
+ * This class defines the available default licenses when creating a new project
  */ 
 const licenses = {
     "CC0": `Creative Commons Legal Code

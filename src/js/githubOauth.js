@@ -517,7 +517,7 @@ export default function GitHubModule(){
             var option = document.createElement('option')
             option.value = key
             option.text = key
-            licenseOptions.appendChild(option);
+            licenseOptions.appendChild(option)
         })
         
         form.appendChild(licenseOptions)
