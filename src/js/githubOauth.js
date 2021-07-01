@@ -1,5 +1,6 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
+import { licenses } from './licenseOptions.js'
 import { extractBomTags } from './BOM.js'
 import { OAuth } from 'oauthio-web'
 
@@ -509,6 +510,18 @@ export default function GitHubModule(){
         description.setAttribute("placeholder", "Project description")
         form.appendChild(description)
         
+        //Grab all of the available licenses
+        var licenseOptions = document.createElement('select')
+        licenseOptions.setAttribute("id", "license-options")
+        Object.keys(licenses).forEach( key => {
+            var option = document.createElement('option')
+            option.value = key
+            option.text = key
+            licenseOptions.appendChild(option);
+        })
+        
+        form.appendChild(licenseOptions)
+        
         //Add the button
         var createButton = document.createElement("button")
         createButton.setAttribute("type", "button")
@@ -748,8 +761,9 @@ export default function GitHubModule(){
         }
         
         //Get name and description
-        var name = document.getElementById('project-name').value
-        var description = document.getElementById('project-description').value
+        const name = document.getElementById('project-name').value
+        const description = document.getElementById('project-description').value
+        const licenseText = licenses[document.getElementById('license-options').value]
         
         //Load a blank project
         GlobalVariables.topLevelMolecule = new Molecule({
@@ -800,28 +814,36 @@ export default function GitHubModule(){
                         message: "initialize README", 
                         content: content
                     }).then(() => {
-                        octokit.repos.createFile({ // Create empty file for SVG string
+                        octokit.repos.createFile({
                             owner: currentUser,
                             repo: currentRepoName,
                             path: "project.svg",
                             message: "SVG Picture", 
                             content: ""
                         }).then(()=>{
-                            octokit.repos.createFile({ // Create empty file for SVG string
+                            octokit.repos.createFile({
                                 owner: currentUser,
                                 repo: currentRepoName,
                                 path: ".gitattributes",
                                 message: "Create gitattributes", 
                                 content: window.btoa("data binary")
                             }).then(()=>{
-                                octokit.repos.createFile({ // Create empty file for SVG string
+                                octokit.repos.createFile({ 
                                     owner: currentUser,
                                     repo: currentRepoName,
                                     path: "data.json",
                                     message: "Data file", 
                                     content: ""
                                 }).then(()=>{
-                                    intervalTimer = setInterval(() => { this.saveProject() }, 1200000) //Save the project regularly
+                                    octokit.repos.createFile({ 
+                                        owner: currentUser,
+                                        repo: currentRepoName,
+                                        path: "LICENSE.txt",
+                                        message: "Establish license", 
+                                        content:  window.btoa(licenseText)
+                                    }).then(()=>{
+                                        intervalTimer = setInterval(() => { this.saveProject() }, 1200000) //Save the project regularly
+                                    })
                                 })
                             })
                         })
