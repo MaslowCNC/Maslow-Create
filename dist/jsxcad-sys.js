@@ -332,6 +332,12 @@ const askServices = async (question) => {
   }
 };
 
+const tellServices = (question) => {
+  for (const { tell } of [...idleServices, ...activeServices]) {
+    tell(question);
+  }
+};
+
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
@@ -344,7 +350,7 @@ const conversation = ({ agent, say }) => {
     return promise;
   };
   const hear = async (message) => {
-    const { id, question, answer, error } = message;
+    const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
       const { resolve, reject } = openQuestions.get(id);
@@ -357,6 +363,8 @@ const conversation = ({ agent, say }) => {
     } else if (message.hasOwnProperty('question')) {
       const answer = await agent({ ask, question });
       say({ id, answer });
+    } else if (message.hasOwnProperty('statement')) {
+      await agent({ ask, statement });
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -407,13 +415,13 @@ const webService = async ({
         const worker = new Worker(webWorker, { type: workerType });
         const say = (message) => worker.postMessage(message);
         const { ask, hear } = conversation({ agent, say });
+        const tell = (statement) => say({ statement });
         const terminate = async () => worker.terminate();
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);
-          console.log(error);
         };
-        const service = { ask, terminate };
+        const service = { ask, tell, terminate };
         service.release = async () =>
           releaseService({ webWorker, type: workerType }, service);
         return service;
@@ -621,9 +629,269 @@ function commonjsRequire () {
 	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
 }
 
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
+
+var cjsCompat = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function promisifyRequest(request) {
+  return new Promise(function (resolve, reject) {
+    // @ts-ignore - file size hacks
+    request.oncomplete = request.onsuccess = function () {
+      return resolve(request.result);
+    }; // @ts-ignore - file size hacks
+
+
+    request.onabort = request.onerror = function () {
+      return reject(request.error);
+    };
+  });
+}
+
+function createStore(dbName, storeName) {
+  var request = indexedDB.open(dbName);
+
+  request.onupgradeneeded = function () {
+    return request.result.createObjectStore(storeName);
+  };
+
+  var dbp = promisifyRequest(request);
+  return function (txMode, callback) {
+    return dbp.then(function (db) {
+      return callback(db.transaction(storeName, txMode).objectStore(storeName));
+    });
+  };
+}
+
+var defaultGetStoreFunc;
+
+function defaultGetStore() {
+  if (!defaultGetStoreFunc) {
+    defaultGetStoreFunc = createStore('keyval-store', 'keyval');
+  }
+
+  return defaultGetStoreFunc;
+}
+/**
+ * Get a value by its key.
+ *
+ * @param key
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function get(key) {
+  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
+  return customStore('readonly', function (store) {
+    return promisifyRequest(store.get(key));
+  });
+}
+/**
+ * Set a value with a key.
+ *
+ * @param key
+ * @param value
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function set(key, value) {
+  var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
+  return customStore('readwrite', function (store) {
+    store.put(value, key);
+    return promisifyRequest(store.transaction);
+  });
+}
+/**
+ * Set multiple values at once. This is faster than calling set() multiple times.
+ * It's also atomic – if one of the pairs can't be added, none will be added.
+ *
+ * @param entries Array of entries, where each entry is an array of `[key, value]`.
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function setMany(entries) {
+  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
+  return customStore('readwrite', function (store) {
+    entries.forEach(function (entry) {
+      return store.put(entry[1], entry[0]);
+    });
+    return promisifyRequest(store.transaction);
+  });
+}
+/**
+ * Get multiple values by their keys
+ *
+ * @param keys
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function getMany(keys) {
+  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
+  return customStore('readonly', function (store) {
+    return Promise.all(keys.map(function (key) {
+      return promisifyRequest(store.get(key));
+    }));
+  });
+}
+/**
+ * Update a value. This lets you see the old value and update it as an atomic operation.
+ *
+ * @param key
+ * @param updater A callback that takes the old value and returns a new value.
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function update(key, updater) {
+  var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
+  return customStore('readwrite', function (store) {
+    return (// Need to create the promise manually.
+      // If I try to chain promises, the transaction closes in browsers
+      // that use a promise polyfill (IE10/11).
+      new Promise(function (resolve, reject) {
+        store.get(key).onsuccess = function () {
+          try {
+            store.put(updater(this.result), key);
+            resolve(promisifyRequest(store.transaction));
+          } catch (err) {
+            reject(err);
+          }
+        };
+      })
+    );
+  });
+}
+/**
+ * Delete a particular key from the store.
+ *
+ * @param key
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function del(key) {
+  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
+  return customStore('readwrite', function (store) {
+    store.delete(key);
+    return promisifyRequest(store.transaction);
+  });
+}
+/**
+ * Clear all values in the store.
+ *
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function clear() {
+  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
+  return customStore('readwrite', function (store) {
+    store.clear();
+    return promisifyRequest(store.transaction);
+  });
+}
+
+function eachCursor(customStore, callback) {
+  return customStore('readonly', function (store) {
+    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
+    // And openKeyCursor isn't supported by Safari.
+    store.openCursor().onsuccess = function () {
+      if (!this.result) return;
+      callback(this.result);
+      this.result.continue();
+    };
+
+    return promisifyRequest(store.transaction);
+  });
+}
+/**
+ * Get all keys in the store.
+ *
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function keys() {
+  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
+  var items = [];
+  return eachCursor(customStore, function (cursor) {
+    return items.push(cursor.key);
+  }).then(function () {
+    return items;
+  });
+}
+/**
+ * Get all values in the store.
+ *
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function values() {
+  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
+  var items = [];
+  return eachCursor(customStore, function (cursor) {
+    return items.push(cursor.value);
+  }).then(function () {
+    return items;
+  });
+}
+/**
+ * Get all entries in the store. Each entry is an array of `[key, value]`.
+ *
+ * @param customStore Method to get a custom store. Use with caution (see the docs).
+ */
+
+
+function entries() {
+  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
+  var items = [];
+  return eachCursor(customStore, function (cursor) {
+    return items.push([cursor.key, cursor.value]);
+  }).then(function () {
+    return items;
+  });
+}
+
+exports.clear = clear;
+exports.createStore = createStore;
+exports.del = del;
+exports.entries = entries;
+exports.get = get;
+exports.getMany = getMany;
+exports.keys = keys;
+exports.promisifyRequest = promisifyRequest;
+exports.set = set;
+exports.setMany = setMany;
+exports.update = update;
+exports.values = values;
+});
+
+unwrapExports(cjsCompat);
+cjsCompat.clear;
+cjsCompat.createStore;
+cjsCompat.del;
+cjsCompat.entries;
+cjsCompat.get;
+cjsCompat.getMany;
+cjsCompat.keys;
+cjsCompat.promisifyRequest;
+cjsCompat.set;
+cjsCompat.setMany;
+cjsCompat.update;
+cjsCompat.values;
 
 var localforage = createCommonjsModule(function (module, exports) {
 /*!
@@ -3425,19 +3693,22 @@ module.exports = localforage_js;
 });
 });
 
-let dbInstance;
+let localForageDbInstance;
 
-const db = () => {
-  if (dbInstance === undefined) {
-    dbInstance = localforage.createInstance({
+const localForageDb = () => {
+  if (localForageDbInstance === undefined) {
+    localForageDbInstance = localforage.createInstance({
       name: 'jsxcad',
       driver: localforage.INDEXEDDB,
       storeName: 'jsxcad',
       description: 'jsxcad local filesystem',
     });
   }
-  return dbInstance;
+  return localForageDbInstance;
 };
+
+const db = localForageDb;
+// export const db = idbKeyvalDb;
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -3932,6 +4203,8 @@ const getDefinitions = () => {
   return definitions;
 };
 
+const hash = (item) => hashSum(item);
+
 const { promises: promises$1 } = fs;
 
 const getFileLister = async () => {
@@ -4059,4 +4332,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };

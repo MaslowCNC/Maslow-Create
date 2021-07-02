@@ -128,11 +128,13 @@ const maslowRead = async (path) => {
 
 const agent = async ({
   ask,
-  question
+  question,
+  statement
 }) => {
-    if (question.touchFile) {
-        const { path, workspace } = question.touchFile;
+    if ((statement || question).touchFile) {
+        const { path, workspace } = (statement || question).touchFile;
         await touch(path, { workspace });
+        return;
     }
     
     try{

@@ -108,7 +108,8 @@ sys.setPendingErrorHandler(reportError);
 
 const agent = async ({
   ask,
-  question
+  question,
+  statement
 }) => {
   await sys.log({
     op: 'evaluate',
@@ -120,11 +121,11 @@ const agent = async ({
   });
   let onEmitHandler;
 
-  if (question.touchFile) {
+  if ((statement || question).touchFile) {
     const {
       path,
       workspace
-    } = question.touchFile;
+    } = (statement || question).touchFile;
     await sys.touch(path, {
       workspace
     });

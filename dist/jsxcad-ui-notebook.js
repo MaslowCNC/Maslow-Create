@@ -471,7 +471,7 @@ var Tokenizer_1 = class Tokenizer {
         };
       }
 
-      const text = cap[0].replace(/^ {1,4}/gm, '');
+      const text = cap[0].replace(/^ {4}/gm, '');
       return {
         type: 'code',
         raw: cap[0],
@@ -504,11 +504,11 @@ var Tokenizer_1 = class Tokenizer {
       let text = cap[2].trim();
 
       // remove trailing #s
-      if (/#$/.test(text)) {
+      if (text.endsWith('#')) {
         const trimmed = rtrim(text, '#');
         if (this.options.pedantic) {
           text = trimmed.trim();
-        } else if (!trimmed || / $/.test(trimmed)) {
+        } else if (!trimmed || trimmed.endsWith(' ')) {
           // CommonMark requires space before trailing #s
           text = trimmed.trim();
         }
@@ -621,11 +621,8 @@ var Tokenizer_1 = class Tokenizer {
         // Backpedal if it does not belong in this list.
         if (i !== l - 1) {
           bnext = this.rules.block.listItemStart.exec(itemMatch[i + 1]);
-          if (
-            !this.options.pedantic
-              ? bnext[1].length > bcurr[0].length || bnext[1].length > 3
-              : bnext[1].length > bcurr[1].length
-          ) {
+
+          if (bnext[1].length > bcurr[0].length || bnext[1].length > 3) {
             // nested list
             itemMatch.splice(i, 2, itemMatch[i] + '\n' + itemMatch[i + 1]);
             i--;
@@ -854,9 +851,9 @@ var Tokenizer_1 = class Tokenizer {
     const cap = this.rules.inline.link.exec(src);
     if (cap) {
       const trimmedUrl = cap[2].trim();
-      if (!this.options.pedantic && /^</.test(trimmedUrl)) {
+      if (!this.options.pedantic && trimmedUrl.startsWith('<')) {
         // commonmark requires matching angle brackets
-        if (!(/>$/.test(trimmedUrl))) {
+        if (!trimmedUrl.endsWith('>')) {
           return;
         }
 
@@ -891,8 +888,8 @@ var Tokenizer_1 = class Tokenizer {
       }
 
       href = href.trim();
-      if (/^</.test(href)) {
-        if (this.options.pedantic && !(/>$/.test(trimmedUrl))) {
+      if (href.startsWith('<')) {
+        if (this.options.pedantic && !trimmedUrl.endsWith('>')) {
           // pedantic allows starting angle bracket without ending angle bracket
           href = href.slice(1);
         } else {
@@ -975,7 +972,7 @@ var Tokenizer_1 = class Tokenizer {
     if (cap) {
       let text = cap[2].replace(/\n/g, ' ');
       const hasNonSpaceChars = /[^ ]/.test(text);
-      const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
+      const hasSpaceCharsOnBothEnds = text.startsWith(' ') && text.endsWith(' ');
       if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
         text = text.substring(1, text.length - 1);
       }
@@ -1102,8 +1099,8 @@ const {
  * Block-Level Grammar
  */
 const block$1 = {
-  newline: /^(?: *(?:\n|$))+/,
-  code: /^( {4}[^\n]+(?:\n(?: *(?:\n|$))*)?)+/,
+  newline: /^\n+/,
+  code: /^( {4}[^\n]+\n*)+/,
   fences: /^ {0,3}(`{3,}(?=[^`\n]*\n)|~{3,})([^\n]*)\n(?:|([\s\S]*?)\n)(?: {0,3}\1[~`]* *(?:\n+|$)|$)/,
   hr: /^ {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\* *){3,})(?:\n+|$)/,
   heading: /^ {0,3}(#{1,6})(?=\s|$)(.*)(?:\n+|$)/,
@@ -1125,7 +1122,7 @@ const block$1 = {
   lheading: /^([^\n]+)\n {0,3}(=+|-+) *(?:\n+|$)/,
   // regex template, placeholders will be replaced according to different paragraph
   // interruption rules of commonmark and the original markdown spec:
-  _paragraph: /^([^\n]+(?:\n(?!hr|heading|lheading|blockquote|fences|list|html| +\n)[^\n]+)*)/,
+  _paragraph: /^([^\n]+(?:\n(?!hr|heading|lheading|blockquote|fences|list|html)[^\n]+)*)/,
   text: /^[^\n]+/
 };
 
@@ -1557,9 +1554,7 @@ var Lexer_1 = class Lexer {
    * Lexing
    */
   blockTokens(src, tokens = [], top = true) {
-    if (this.options.pedantic) {
-      src = src.replace(/^ +$/gm, '');
-    }
+    src = src.replace(/^ +$/gm, '');
     let token, i, l, lastToken;
 
     while (src) {
@@ -1928,8 +1923,6 @@ var Renderer_1 = class Renderer {
         code = out;
       }
     }
-
-    code = code.replace(/\n$/, '') + '\n';
 
     if (!lang) {
       return '<pre><code>'
