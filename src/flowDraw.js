@@ -27,7 +27,7 @@ flowCanvas.addEventListener('mousemove', event => {
 
 
 flowCanvas.addEventListener('touchstart', event => {
-    onMouseDown(event)
+    onMouseDown(event.touches[0])
 })
 flowCanvas.addEventListener('mousedown', event => {
     onMouseDown(event)
