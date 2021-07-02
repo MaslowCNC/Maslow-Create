@@ -18,16 +18,61 @@ GlobalVariables.canvas.height = window.innerHeight/2.5
  */
 let flowCanvas = document.getElementById('flow-canvas')
 
+flowCanvas.addEventListener('touchmove', event => {
+    onMouseMove(event)
+})
 flowCanvas.addEventListener('mousemove', event => {
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-
-        molecule.clickMove(event.clientX,event.clientY)    
-    })
+    onMouseMove(event)
 })
 
-flowCanvas.addEventListener('mousedown', event => {
 
-    //every time the mouse button goes down
+flowCanvas.addEventListener('touchstart', event => {
+    onMouseDown(event)
+})
+flowCanvas.addEventListener('mousedown', event => {
+    onMouseDown(event)
+})
+
+flowCanvas.addEventListener('dblclick', event => {
+    //every time the mouse button goes down    
+    var clickHandledByMolecule = false
+    
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        if (molecule.doubleClick(event.clientX,event.clientY) == true){
+            clickHandledByMolecule = true
+        }
+    })
+    
+    if (clickHandledByMolecule == false){
+        console.warn('double click menu open not working in flowDraw.js')
+        //showmenu(event);
+    }
+})
+
+document.addEventListener('mouseup',(e)=>{
+    console.log("Mouseup ran")
+    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
+        && e.srcElement.tagName.toLowerCase() !== ("input")
+        && e.srcElement.tagName.toLowerCase() !== ("select")
+        &&(!e.srcElement.isContentEditable)){
+        //puts focus back into mainbody after clicking button
+        document.activeElement.blur()
+        document.getElementById("mainBody").focus()
+    }
+})
+flowCanvas.addEventListener('touchend', event => {
+    onMouseUp(event)
+})
+flowCanvas.addEventListener('mouseup', event => {
+    onMouseUp(event)
+})
+
+/** 
+* Called by mouse down
+*/
+function onMouseDown(event){
+    console.log("Mousedown ran")
+    console.log(event)
     
     var isRightMB
     if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
@@ -89,46 +134,25 @@ flowCanvas.addEventListener('mousedown', event => {
         })
     }
     
-})
-
-flowCanvas.addEventListener('dblclick', event => {
-    //every time the mouse button goes down    
-    var clickHandledByMolecule = false
-    
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (molecule.doubleClick(event.clientX,event.clientY) == true){
-            clickHandledByMolecule = true
-        }
-    })
-    
-    if (clickHandledByMolecule == false){
-        console.warn('double click menu open not working in flowDraw.js')
-        //showmenu(event);
-    }
-})
-
-
-document.addEventListener('mouseup',(e)=>{
-
-    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
-        && e.srcElement.tagName.toLowerCase() !== ("input")
-        && e.srcElement.tagName.toLowerCase() !== ("select")
-        &&(!e.srcElement.isContentEditable)){
-        //puts focus back into mainbody after clicking button
-        document.activeElement.blur()
-        document.getElementById("mainBody").focus()
-    }
-})
-
-
-flowCanvas.addEventListener('mouseup', event => {
+}
+/** 
+* Called by mouse up
+*/
+function onMouseUp(event){
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.clickUp(event.clientX,event.clientY)      
+        molecule.clickUp(event.clientX,event.clientY)
     })
-    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)      
-})
-
+    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)
+}
+/** 
+* Called by mouse moves
+*/
+function onMouseMove(event){
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.clickMove(event.clientX,event.clientY)
+    })
+}
 
 /** 
 * Array containing selected atoms to copy or delete
