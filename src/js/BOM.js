@@ -84,10 +84,8 @@ export const extractBomTags = function(path, functionToPlace){
  * @param {string} link - The link to check.
  */ 
 export const convertLinks = function(link){
-    console.log("Converting link: " + link);
     if(link.toLowerCase().includes("amazon")){
-        console.log("Amazon seen")
         return "[Amazon](" + link + "?tag=maslowcnc01-20)"
     }
-    return link;
+    return link
 }
