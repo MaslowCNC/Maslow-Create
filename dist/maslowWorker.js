@@ -149,7 +149,7 @@ const agent = async ({
             break;
           case "circle":
             console.log(api.Arc(10));
-            const aCircle = api.Arc(question.diameter);//.sides(question.numSegments);
+            const aCircle = api.Arc(question.diameter).hasSides(question.numSegments);
             await api.saveGeometry(question.writePath, aCircle);
             return 1;
             break;
