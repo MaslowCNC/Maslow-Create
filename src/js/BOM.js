@@ -46,7 +46,7 @@ export class BOMEntry {
 
 /**
  * Computes and returns an array of BOMEntry objects after looking at the tags of a geometry.
- * @param {object} geometry - The geometry which should be scanned for tags.
+ * @param {string} path - The geometry which should be scanned for tags.
  */ 
 export const extractBomTags = function(path, functionToPlace){
     //Extract all of the tags
@@ -77,4 +77,17 @@ export const extractBomTags = function(path, functionToPlace){
         
         functionToPlace(compiledArray)
     })
+}
+
+/**
+ * Takes a link and converts it to be an affiliate link if it should be.
+ * @param {string} link - The link to check.
+ */ 
+export const convertLinks = function(link){
+    console.log("Converting link: " + link);
+    if(link.toLowerCase().includes("amazon")){
+        console.log("Amazon seen")
+        return "[Amazon](" + link + "?tag=maslowcnc01-20)"
+    }
+    return link;
 }

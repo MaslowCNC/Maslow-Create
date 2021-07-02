@@ -1,7 +1,7 @@
 import Molecule from './molecules/molecule.js'
 import GlobalVariables from './globalvariables.js'
 import { licenses } from './licenseOptions.js'
-import { extractBomTags } from './BOM.js'
+import { extractBomTags, convertLinks } from './BOM.js'
 import { OAuth } from 'oauthio-web'
 
 /**
@@ -910,7 +910,7 @@ export default function GitHubModule(){
                         bomItems.forEach(item => {
                             totalParts += item.numberNeeded
                             totalCost  += item.costUSD
-                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + item.source + "|"
+                            bomContent = bomContent + "\n|" + item.BOMitemName + "|" + item.numberNeeded + "|$" + item.costUSD.toFixed(2) + "|" + convertLinks(item.source) + "|"
                         })
                     }
                     bomContent = bomContent + "\n|" + "Total: " + "|" + totalParts + "|$" + totalCost.toFixed(2) + "|" + " " + "|"
