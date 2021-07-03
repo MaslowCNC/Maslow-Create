@@ -672,9 +672,6 @@ const differenceImpl = (geometry, ...geometries) => {
             );
           }
         }
-        if (differenced.hash) {
-          throw Error(`hash`);
-        }
         return differenced;
       }
       case 'paths':
