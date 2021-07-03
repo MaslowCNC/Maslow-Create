@@ -2,7 +2,7 @@ import { squaredDistance, add, scale, subtract } from './jsxcad-math-vec3.js';
 
 const EPSILON2 = 1e-10;
 
-const relax = (constraint, stepCoefficient) =>
+const relax$3 = (constraint, stepCoefficient) =>
   constraint.relax(constraint, stepCoefficient);
 
 const verlet = ({
@@ -36,7 +36,7 @@ const update = ({ constraints, forces, particles }, step = 16) => {
 
   for (let i = 0; i < step; i++) {
     for (const constraint of constraints) {
-      relax(constraint, stepCoefficient);
+      relax$3(constraint, stepCoefficient);
     }
   }
 };
@@ -60,14 +60,14 @@ const solve = (verlet, stepLimit = 0) => {
   return true;
 };
 
-const force = ({ forces }, vector) => {
+const force$1 = ({ forces }, vector) => {
   const applyGravity = ({ particle }) => {
     particle.position = add(particle.position, vector);
   };
   forces.push(applyGravity);
 };
 
-const force$1 = ({ forces }, friction = 0.99) => {
+const force = ({ forces }, friction = 0.99) => {
   const applyInertia = ({ particle }) => {
     const velocity = scale(
       friction,
@@ -112,7 +112,7 @@ const rotate = ([pointX, pointY], [originX, originY], theta) => {
   ];
 };
 
-const relax$1 = ({ pivot, left, right, radians, stiffness }, stepCoefficient) => {
+const relax$2 = ({ pivot, left, right, radians, stiffness }, stepCoefficient) => {
   const currentRadians = angle2(pivot.position, left.position, right.position);
   let diff = currentRadians - radians;
 
@@ -130,7 +130,7 @@ const relax$1 = ({ pivot, left, right, radians, stiffness }, stepCoefficient) =>
   pivot.position = rotate(pivot.position, right.position, -diff);
 };
 
-const create = ({ constraints, ids, particles }) => {
+const create$2 = ({ constraints, ids, particles }) => {
   const constrain = (left, pivot, right, angle, stiffness = 0.5) => {
     constraints.push({
       pivot: ensureParticle(ids, particles, pivot),
@@ -138,7 +138,7 @@ const create = ({ constraints, ids, particles }) => {
       right: ensureParticle(ids, particles, right),
       stiffness,
       radians: (angle * Math.PI) / 180,
-      relax: relax$1,
+      relax: relax$2,
     });
   };
   return constrain;
@@ -146,7 +146,7 @@ const create = ({ constraints, ids, particles }) => {
 
 // Distance
 
-const relax$2 = ({ a, b, distance, stiffness }, stepCoefficient) => {
+const relax$1 = ({ a, b, distance, stiffness }, stepCoefficient) => {
   const normal = subtract(a.position, b.position);
   let m = squaredDistance(normal, [0, 0, 0]);
   if (m === 0) {
@@ -166,7 +166,7 @@ const create$1 = ({ constraints, ids, particles }) => {
       a: ensureParticle(ids, particles, a),
       b: ensureParticle(ids, particles, b),
       distance,
-      relax: relax$2,
+      relax: relax$1,
       stiffness,
     });
   };
@@ -175,7 +175,7 @@ const create$1 = ({ constraints, ids, particles }) => {
 
 // Pinning Constraint
 
-const relax$3 = ({ particle, position }, stepCoefficient) => {
+const relax = ({ particle, position }, stepCoefficient) => {
   if (position[0] !== undefined) {
     particle.position[0] = position[0];
   }
@@ -187,15 +187,15 @@ const relax$3 = ({ particle, position }, stepCoefficient) => {
   }
 };
 
-const create$2 = ({ constraints, ids, particles }) => {
+const create = ({ constraints, ids, particles }) => {
   const constrain = (particle, position) => {
     constraints.push({
       particle: ensureParticle(ids, particles, particle),
       position,
-      relax: relax$3,
+      relax,
     });
   };
   return constrain;
 };
 
-export { force as addGravity, force$1 as addInertia, create as createAngleConstraint, create$1 as createDistanceConstraint, create$2 as createPinnedConstraint, positions, solve, verlet };
+export { force$1 as addGravity, force as addInertia, create$2 as createAngleConstraint, create$1 as createDistanceConstraint, create as createPinnedConstraint, positions, solve, verlet };

@@ -1,5 +1,5 @@
 import { min, max } from './jsxcad-math-vec3.js';
-import { toKeptGeometry, translate, measureBoundingBox } from './jsxcad-geometry-tagged.js';
+import { toKeptGeometry, translate, measureBoundingBox } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -13,7 +13,7 @@ function createCommonjsModule(fn, module) {
 
 var binPacking = createCommonjsModule(function (module, exports) {
 (function (global, factory) {
-   factory(exports) ;
+  factory(exports) ;
 }(commonjsGlobal, (function (exports) {
 /******************************************************************************
 

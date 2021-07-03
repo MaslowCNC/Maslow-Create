@@ -11,7 +11,7 @@ function createCommonjsModule(fn, module) {
 var shapefile = createCommonjsModule(function (module, exports) {
 // https://github.com/mbostock/shapefile Version 0.6.6. Copyright 2017 Mike Bostock.
 (function (global, factory) {
-	 factory(exports) ;
+	factory(exports) ;
 }(commonjsGlobal, (function (exports) {
 var array_cancel = function() {
   this._array = null;

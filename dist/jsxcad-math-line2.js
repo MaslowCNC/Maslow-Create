@@ -29,9 +29,9 @@ const direction = (line) => negate(normal(line));
  * @param {line2} line the 2D line of reference
  * @return {vec2} the origin of the line
  */
-const W = 2;
+const W$1 = 2;
 
-const origin = (line) => scale(line[W], line);
+const origin = (line) => scale(line[W$1], line);
 
 /**
  * Determine the closest point on the given line to the given point.
@@ -67,7 +67,7 @@ const closestPoint = (point, line) => {
 const distanceToPoint = (point, line) =>
   Math.abs(dot(point, line) - line[2]);
 
-const EPS = 1e-5;
+const EPS$1 = 1e-5;
 
 // see if the line between p0start and p0end intersects with the line between p1start and p1end
 // returns true if the lines strictly intersect, the end points are not counted!
@@ -82,7 +82,7 @@ const doLinesIntersect = function (p0start, p0end, p1start, p1end) {
     const unitVec1 = normalize(subtract(p1end, p1start));
     const unitVec2 = normalize(subtract(p0end, p0start));
     let d = length(add(unitVec1, unitVec2));
-    if (d < EPS) {
+    if (d < EPS$1) {
       return true;
     }
   } else {
@@ -110,8 +110,8 @@ const doLinesIntersect = function (p0start, p0end, p1start, p1end) {
   return false;
 };
 
-const EPS$1 = 1e-5;
-const W$1 = 2;
+const EPS = 1e-5;
+const W = 2;
 
 /**
  * Compare the given 2D lines for equality
@@ -122,7 +122,7 @@ const equals = (line1, line2) => {
   if (!equals$1(line1, line2)) {
     return false;
   }
-  if (Math.abs(line1[W$1] - line2[W$1]) > EPS$1) {
+  if (Math.abs(line1[W] - line2[W]) > EPS) {
     return false;
   }
   return true;

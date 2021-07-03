@@ -1,4 +1,4 @@
-import { taggedGroup, outline, translate } from './jsxcad-geometry-tagged.js';
+import { taggedGroup, outline, translate } from './jsxcad-geometry.js';
 import { Peg } from './jsxcad-api-v1-shapes.js';
 import { Shape } from './jsxcad-api-v1-shape.js';
 import { each } from './jsxcad-api-v1-math.js';
@@ -77,7 +77,7 @@ const engrave = (paths, depth = 0.5) => {
 };
 
 function engraveMethod(tool, ...shapes) {
-  return engrave(this, tool);
+  return engrave(this, tool, ...shapes);
 }
 
 Shape.prototype.engrave = engraveMethod;

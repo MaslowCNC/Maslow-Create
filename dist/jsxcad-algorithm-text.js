@@ -1,5 +1,4 @@
-import { scale, taggedGraph, taggedGroup } from './jsxcad-geometry-tagged.js';
-import { fromPaths } from './jsxcad-geometry-graph.js';
+import { scale, fromPathsToGraph, taggedGroup } from './jsxcad-geometry.js';
 import { fromSvgPath } from './jsxcad-convert-svg.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
@@ -1985,7 +1984,7 @@ var opentype = createCommonjsModule(function (module, exports) {
  */
 
 (function (global, factory) {
-	 factory(exports) ;
+	factory(exports) ;
 }(commonjsGlobal, (function (exports) {
 	/*! https://mths.be/codepointat v0.2.0 by @mathias */
 	if (!String.prototype.codePointAt) {
@@ -2515,7 +2514,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {number} y - The ending Y coordinate.
 	 */
 	BoundingBox.prototype.addBezier = function(x0, y0, x1, y1, x2, y2, x, y) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    // This code is based on http://nishiohirokazu.blogspot.com/2009/06/how-to-calculate-bezier-curves-bounding.html
 	    // and https://github.com/icons8/svg-path-bounding-box
@@ -2537,8 +2536,8 @@ var opentype = createCommonjsModule(function (module, exports) {
 	            if (b === 0) { continue; }
 	            var t = -c / b;
 	            if (0 < t && t < 1) {
-	                if (i === 0) { this$1.addX(derive(p0[i], p1[i], p2[i], p3[i], t)); }
-	                if (i === 1) { this$1.addY(derive(p0[i], p1[i], p2[i], p3[i], t)); }
+	                if (i === 0) { this$1$1.addX(derive(p0[i], p1[i], p2[i], p3[i], t)); }
+	                if (i === 1) { this$1$1.addY(derive(p0[i], p1[i], p2[i], p3[i], t)); }
 	            }
 	            continue;
 	        }
@@ -2547,13 +2546,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        if (b2ac < 0) { continue; }
 	        var t1 = (-b + Math.sqrt(b2ac)) / (2 * a);
 	        if (0 < t1 && t1 < 1) {
-	            if (i === 0) { this$1.addX(derive(p0[i], p1[i], p2[i], p3[i], t1)); }
-	            if (i === 1) { this$1.addY(derive(p0[i], p1[i], p2[i], p3[i], t1)); }
+	            if (i === 0) { this$1$1.addX(derive(p0[i], p1[i], p2[i], p3[i], t1)); }
+	            if (i === 1) { this$1$1.addY(derive(p0[i], p1[i], p2[i], p3[i], t1)); }
 	        }
 	        var t2 = (-b - Math.sqrt(b2ac)) / (2 * a);
 	        if (0 < t2 && t2 < 1) {
-	            if (i === 0) { this$1.addX(derive(p0[i], p1[i], p2[i], p3[i], t2)); }
-	            if (i === 1) { this$1.addY(derive(p0[i], p1[i], p2[i], p3[i], t2)); }
+	            if (i === 0) { this$1$1.addX(derive(p0[i], p1[i], p2[i], p3[i], t2)); }
+	            if (i === 1) { this$1$1.addY(derive(p0[i], p1[i], p2[i], p3[i], t2)); }
 	        }
 	    }
 	};
@@ -2727,7 +2726,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @returns {opentype.BoundingBox}
 	 */
 	Path.prototype.getBoundingBox = function() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var box = new BoundingBox();
 
@@ -2736,7 +2735,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    var prevX = 0;
 	    var prevY = 0;
 	    for (var i = 0; i < this.commands.length; i++) {
-	        var cmd = this$1.commands[i];
+	        var cmd = this$1$1.commands[i];
 	        switch (cmd.type) {
 	            case 'M':
 	                box.addPoint(cmd.x, cmd.y);
@@ -2777,11 +2776,11 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {CanvasRenderingContext2D} ctx - A 2D drawing context.
 	 */
 	Path.prototype.draw = function(ctx) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    ctx.beginPath();
 	    for (var i = 0; i < this.commands.length; i += 1) {
-	        var cmd = this$1.commands[i];
+	        var cmd = this$1$1.commands[i];
 	        if (cmd.type === 'M') {
 	            ctx.moveTo(cmd.x, cmd.y);
 	        } else if (cmd.type === 'L') {
@@ -2814,7 +2813,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @return {string}
 	 */
 	Path.prototype.toPathData = function(decimalPlaces) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    decimalPlaces = decimalPlaces !== undefined ? decimalPlaces : 2;
 
@@ -2844,7 +2843,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 
 	    var d = '';
 	    for (var i = 0; i < this.commands.length; i += 1) {
-	        var cmd = this$1.commands[i];
+	        var cmd = this$1$1.commands[i];
 	        if (cmd.type === 'M') {
 	            d += 'M' + packValues(cmd.x, cmd.y);
 	        } else if (cmd.type === 'L') {
@@ -3891,11 +3890,11 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @constructor
 	 */
 	function Table(tableName, fields, options) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    for (var i = 0; i < fields.length; i += 1) {
 	        var field = fields[i];
-	        this$1[field.name] = field.value;
+	        this$1$1[field.name] = field.value;
 	    }
 
 	    this.tableName = tableName;
@@ -3905,8 +3904,8 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        for (var i$1 = 0; i$1 < optionKeys.length; i$1 += 1) {
 	            var k = optionKeys[i$1];
 	            var v = options[k];
-	            if (this$1[k] !== undefined) {
-	                this$1[k] = v;
+	            if (this$1$1[k] !== undefined) {
+	                this$1$1[k] = v;
 	            }
 	        }
 	    }
@@ -4338,7 +4337,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * itemCallback is one of the Parser methods.
 	 */
 	Parser.prototype.parseList = function(count, itemCallback) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    if (!itemCallback) {
 	        itemCallback = count;
@@ -4346,13 +4345,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    }
 	    var list = new Array(count);
 	    for (var i = 0; i < count; i++) {
-	        list[i] = itemCallback.call(this$1);
+	        list[i] = itemCallback.call(this$1$1);
 	    }
 	    return list;
 	};
 
 	Parser.prototype.parseList32 = function(count, itemCallback) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    if (!itemCallback) {
 	        itemCallback = count;
@@ -4360,7 +4359,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    }
 	    var list = new Array(count);
 	    for (var i = 0; i < count; i++) {
-	        list[i] = itemCallback.call(this$1);
+	        list[i] = itemCallback.call(this$1$1);
 	    }
 	    return list;
 	};
@@ -4371,7 +4370,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * Example of recordDescription: { sequenceIndex: Parser.uShort, lookupListIndex: Parser.uShort }
 	 */
 	Parser.prototype.parseRecordList = function(count, recordDescription) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    // If the count argument is absent, read it in the stream.
 	    if (!recordDescription) {
@@ -4385,7 +4384,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        for (var j = 0; j < fields.length; j++) {
 	            var fieldName = fields[j];
 	            var fieldType = recordDescription[fieldName];
-	            rec[fieldName] = fieldType.call(this$1);
+	            rec[fieldName] = fieldType.call(this$1$1);
 	        }
 	        records[i] = rec;
 	    }
@@ -4393,7 +4392,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	};
 
 	Parser.prototype.parseRecordList32 = function(count, recordDescription) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    // If the count argument is absent, read it in the stream.
 	    if (!recordDescription) {
@@ -4407,7 +4406,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        for (var j = 0; j < fields.length; j++) {
 	            var fieldName = fields[j];
 	            var fieldType = recordDescription[fieldName];
-	            rec[fieldName] = fieldType.call(this$1);
+	            rec[fieldName] = fieldType.call(this$1$1);
 	        }
 	        records[i] = rec;
 	    }
@@ -4417,7 +4416,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	// Parse a data structure into an object
 	// Example of description: { sequenceIndex: Parser.uShort, lookupListIndex: Parser.uShort }
 	Parser.prototype.parseStruct = function(description) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    if (typeof description === 'function') {
 	        return description.call(this);
@@ -4427,7 +4426,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        for (var j = 0; j < fields.length; j++) {
 	            var fieldName = fields[j];
 	            var fieldType = description[fieldName];
-	            struct[fieldName] = fieldType.call(this$1);
+	            struct[fieldName] = fieldType.call(this$1$1);
 	        }
 	        return struct;
 	    }
@@ -4470,13 +4469,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * valueFormat and valueCount are read from the stream.
 	 */
 	Parser.prototype.parseValueRecordList = function() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var valueFormat = this.parseUShort();
 	    var valueCount = this.parseUShort();
 	    var values = new Array(valueCount);
 	    for (var i = 0; i < valueCount; i++) {
-	        values[i] = this$1.parseValueRecord(valueFormat);
+	        values[i] = this$1$1.parseValueRecord(valueFormat);
 	    }
 	    return values;
 	};
@@ -4507,7 +4506,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * See examples in tables/gsub.js
 	 */
 	Parser.prototype.parseListOfLists = function(itemCallback) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var offsets = this.parseOffset16List();
 	    var count = offsets.length;
@@ -4521,17 +4520,17 @@ var opentype = createCommonjsModule(function (module, exports) {
 	            list[i] = undefined;
 	            continue;
 	        }
-	        this$1.relativeOffset = start;
+	        this$1$1.relativeOffset = start;
 	        if (itemCallback) {
-	            var subOffsets = this$1.parseOffset16List();
+	            var subOffsets = this$1$1.parseOffset16List();
 	            var subList = new Array(subOffsets.length);
 	            for (var j = 0; j < subOffsets.length; j++) {
-	                this$1.relativeOffset = start + subOffsets[j];
-	                subList[j] = itemCallback.call(this$1);
+	                this$1$1.relativeOffset = start + subOffsets[j];
+	                subList[j] = itemCallback.call(this$1$1);
 	            }
 	            list[i] = subList;
 	        } else {
-	            list[i] = this$1.parseUShortList();
+	            list[i] = this$1$1.parseUShortList();
 	        }
 	    }
 	    this.relativeOffset = relativeOffset;
@@ -4544,7 +4543,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	// https://www.microsoft.com/typography/OTSPEC/chapter2.htm
 	// parser.offset must point to the start of the table containing the coverage.
 	Parser.prototype.parseCoverage = function() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var startOffset = this.offset + this.relativeOffset;
 	    var format = this.parseUShort();
@@ -4558,9 +4557,9 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        var ranges = new Array(count);
 	        for (var i = 0; i < count; i++) {
 	            ranges[i] = {
-	                start: this$1.parseUShort(),
-	                end: this$1.parseUShort(),
-	                index: this$1.parseUShort()
+	                start: this$1$1.parseUShort(),
+	                end: this$1$1.parseUShort(),
+	                index: this$1$1.parseUShort()
 	            };
 	        }
 	        return {
@@ -5199,7 +5198,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {Object} post
 	 */
 	function GlyphNames(post) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    switch (post.version) {
 	        case 1:
@@ -5209,9 +5208,9 @@ var opentype = createCommonjsModule(function (module, exports) {
 	            this.names = new Array(post.numberOfGlyphs);
 	            for (var i = 0; i < post.numberOfGlyphs; i++) {
 	                if (post.glyphNameIndex[i] < standardNames.length) {
-	                    this$1.names[i] = standardNames[post.glyphNameIndex[i]];
+	                    this$1$1.names[i] = standardNames[post.glyphNameIndex[i]];
 	                } else {
-	                    this$1.names[i] = post.names[post.glyphNameIndex[i] - standardNames.length];
+	                    this$1$1.names[i] = post.names[post.glyphNameIndex[i] - standardNames.length];
 	                }
 	            }
 
@@ -5219,7 +5218,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        case 2.5:
 	            this.names = new Array(post.numberOfGlyphs);
 	            for (var i$1 = 0; i$1 < post.numberOfGlyphs; i$1++) {
-	                this$1.names[i$1] = standardNames[i$1 + post.glyphNameIndex[i$1]];
+	                this$1$1.names[i$1] = standardNames[i$1 + post.glyphNameIndex[i$1]];
 	            }
 
 	            break;
@@ -5470,7 +5469,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @return {Array}
 	 */
 	Glyph.prototype.getContours = function() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    if (this.points === undefined) {
 	        return [];
@@ -5479,7 +5478,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    var contours = [];
 	    var currentContour = [];
 	    for (var i = 0; i < this.points.length; i += 1) {
-	        var pt = this$1.points[i];
+	        var pt = this$1$1.points[i];
 	        currentContour.push(pt);
 	        if (pt.lastPointOfContour) {
 	            contours.push(currentContour);
@@ -5678,13 +5677,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {Array}
 	 */
 	function GlyphSet(font, glyphs) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    this.font = font;
 	    this.glyphs = {};
 	    if (Array.isArray(glyphs)) {
 	        for (var i = 0; i < glyphs.length; i++) {
-	            this$1.glyphs[i] = glyphs[i];
+	            this$1$1.glyphs[i] = glyphs[i];
 	        }
 	    }
 
@@ -7923,11 +7922,9 @@ var opentype = createCommonjsModule(function (module, exports) {
 	            }
 	        }
 	    }
-
-	    var langTagCount = 0;
 	    if (format === 1) {
 	        // FIXME: Also handle Microsoft's 'name' table 1.
-	        langTagCount = p.parseUShort();
+	        p.parseUShort();
 	    }
 
 	    return name;
@@ -9404,13 +9401,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @returns {integer}
 	 */
 	Position.prototype.getKerningValue = function(kerningLookups, leftIndex, rightIndex) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    for (var i = 0; i < kerningLookups.length; i++) {
 	        var subtables = kerningLookups[i].subtables;
 	        for (var j = 0; j < subtables.length; j++) {
 	            var subtable = subtables[j];
-	            var covIndex = this$1.getCoverageIndex(subtable.coverage, leftIndex);
+	            var covIndex = this$1$1.getCoverageIndex(subtable.coverage, leftIndex);
 	            if (covIndex < 0) { continue; }
 	            switch (subtable.posFormat) {
 	                case 1:
@@ -9425,8 +9422,8 @@ var opentype = createCommonjsModule(function (module, exports) {
 	                    break;      // left glyph found, not right glyph - try next subtable
 	                case 2:
 	                    // Search Pair Adjustment Positioning Format 2
-	                    var class1 = this$1.getGlyphClass(subtable.classDef1, leftIndex);
-	                    var class2 = this$1.getGlyphClass(subtable.classDef2, rightIndex);
+	                    var class1 = this$1$1.getGlyphClass(subtable.classDef1, leftIndex);
+	                    var class2 = this$1$1.getGlyphClass(subtable.classDef2, rightIndex);
 	                    var pair$1 = subtable.classRecords[class1][class2];
 	                    return pair$1.value1 && pair$1.value1.xAdvance || 0;
 	            }
@@ -9517,7 +9514,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @return {Array} substitutions - The list of substitutions.
 	 */
 	Substitution.prototype.getSingle = function(feature, script, language) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var substitutions = [];
 	    var lookupTables = this.getLookupTables(script, language, feature, 1);
@@ -9525,7 +9522,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        var subtables = lookupTables[idx].subtables;
 	        for (var i = 0; i < subtables.length; i++) {
 	            var subtable = subtables[i];
-	            var glyphs = this$1.expandCoverage(subtable.coverage);
+	            var glyphs = this$1$1.expandCoverage(subtable.coverage);
 	            var j = (void 0);
 	            if (subtable.substFormat === 1) {
 	                var delta = subtable.deltaGlyphId;
@@ -9552,7 +9549,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @return {Array} alternates - The list of alternates
 	 */
 	Substitution.prototype.getAlternates = function(feature, script, language) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var alternates = [];
 	    var lookupTables = this.getLookupTables(script, language, feature, 3);
@@ -9560,7 +9557,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        var subtables = lookupTables[idx].subtables;
 	        for (var i = 0; i < subtables.length; i++) {
 	            var subtable = subtables[i];
-	            var glyphs = this$1.expandCoverage(subtable.coverage);
+	            var glyphs = this$1$1.expandCoverage(subtable.coverage);
 	            var alternateSets = subtable.alternateSets;
 	            for (var j = 0; j < glyphs.length; j++) {
 	                alternates.push({ sub: glyphs[j], by: alternateSets[j] });
@@ -9579,7 +9576,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @return {Array} ligatures - The list of ligatures.
 	 */
 	Substitution.prototype.getLigatures = function(feature, script, language) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var ligatures = [];
 	    var lookupTables = this.getLookupTables(script, language, feature, 4);
@@ -9587,7 +9584,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        var subtables = lookupTables[idx].subtables;
 	        for (var i = 0; i < subtables.length; i++) {
 	            var subtable = subtables[i];
-	            var glyphs = this$1.expandCoverage(subtable.coverage);
+	            var glyphs = this$1$1.expandCoverage(subtable.coverage);
 	            var ligatureSets = subtable.ligatureSets;
 	            for (var j = 0; j < glyphs.length; j++) {
 	                var startGlyph = glyphs[j];
@@ -10026,11 +10023,10 @@ var opentype = createCommonjsModule(function (module, exports) {
 	                // This is a straight line.
 	                p.lineTo(curr.x, curr.y);
 	            } else {
-	                var prev2 = prev;
 	                var next2 = next;
 
 	                if (!prev.onCurve) {
-	                    prev2 = { x: (curr.x + prev.x) * 0.5, y: (curr.y + prev.y) * 0.5 };
+	                    ({ x: (curr.x + prev.x) * 0.5, y: (curr.y + prev.y) * 0.5 });
 	                }
 
 	                if (!next.onCurve) {
@@ -13229,7 +13225,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {any} events an object that enlists core events handlers
 	 */
 	function initializeCoreEvents(events) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var coreEvents = [
 	        'start', 'end', 'next', 'newToken', 'contextStart',
@@ -13238,7 +13234,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    ];
 
 	    coreEvents.forEach(function (eventId) {
-	        Object.defineProperty(this$1.events, eventId, {
+	        Object.defineProperty(this$1$1.events, eventId, {
 	            value: new Event(eventId)
 	        });
 	    });
@@ -13247,7 +13243,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        coreEvents.forEach(function (eventId) {
 	            var event = events[eventId];
 	            if (typeof event === 'function') {
-	                this$1.events[eventId].subscribe(event);
+	                this$1$1.events[eventId].subscribe(event);
 	            }
 	        });
 	    }
@@ -13256,8 +13252,8 @@ var opentype = createCommonjsModule(function (module, exports) {
 	        'replaceToken', 'replaceRange', 'composeRUD'
 	    ];
 	    requiresContextUpdate.forEach(function (eventId) {
-	        this$1.events[eventId].subscribe(
-	            this$1.updateContextsRanges
+	        this$1$1.events[eventId].subscribe(
+	            this$1$1.updateContextsRanges
 	        );
 	    });
 	}
@@ -13305,11 +13301,11 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * TODO: Perf. Optimization (lengthBefore === lengthAfter ? dispatch once)
 	 */
 	Tokenizer.prototype.composeRUD = function (RUDs) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var silent = true;
 	    var state = RUDs.map(function (RUD) { return (
-	        this$1[RUD[0]].apply(this$1, RUD.slice(1).concat(silent))
+	        this$1$1[RUD[0]].apply(this$1$1, RUD.slice(1).concat(silent))
 	    ); });
 	    var hasFAILObject = function (obj) { return (
 	        typeof obj === 'object' &&
@@ -13532,12 +13528,12 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {any} args event handler arguments
 	 */
 	Tokenizer.prototype.dispatch = function(eventName, args) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var event = this.events[eventName];
 	    if (event instanceof Event) {
 	        event.subscribers.forEach(function (subscriber) {
-	            subscriber.apply(this$1, args || []);
+	            subscriber.apply(this$1$1, args || []);
 	        });
 	    }
 	};
@@ -13612,13 +13608,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * Updates context ranges
 	 */
 	Tokenizer.prototype.updateContextsRanges = function () {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    this.resetContextsRanges();
 	    var chars = this.tokens.map(function (token) { return token.char; });
 	    for (var i = 0; i < chars.length; i++) {
 	        var contextParams = new ContextParams(chars, i);
-	        this$1.runContextCheck(contextParams);
+	        this$1$1.runContextCheck(contextParams);
 	    }
 	    this.dispatch('updateContextsRanges', [this.registeredContexts]);
 	};
@@ -13643,21 +13639,21 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {contextParams} contextParams current context params
 	 */
 	Tokenizer.prototype.runContextCheck = function(contextParams) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var index = contextParams.index;
 	    this.contextCheckers.forEach(function (contextChecker) {
 	        var contextName = contextChecker.contextName;
-	        var openRange = this$1.getContext(contextName).openRange;
+	        var openRange = this$1$1.getContext(contextName).openRange;
 	        if (!openRange && contextChecker.checkStart(contextParams)) {
 	            openRange = new ContextRange(index, null, contextName);
-	            this$1.getContext(contextName).openRange = openRange;
-	            this$1.dispatch('contextStart', [contextName, index]);
+	            this$1$1.getContext(contextName).openRange = openRange;
+	            this$1$1.dispatch('contextStart', [contextName, index]);
 	        }
 	        if (!!openRange && contextChecker.checkEnd(contextParams)) {
 	            var offset = (index - openRange.startIndex) + 1;
-	            var range = this$1.setEndOffset(offset, contextName);
-	            this$1.dispatch('contextEnd', [contextName, range]);
+	            var range = this$1$1.setEndOffset(offset, contextName);
+	            this$1$1.dispatch('contextEnd', [contextName, range]);
 	        }
 	    });
 	};
@@ -13667,7 +13663,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {string} text a text to tokenize
 	 */
 	Tokenizer.prototype.tokenize = function (text) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    this.tokens = [];
 	    this.resetContextsRanges();
@@ -13676,11 +13672,11 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    for (var i = 0; i < chars.length; i++) {
 	        var char = chars[i];
 	        var contextParams = new ContextParams(chars, i);
-	        this$1.dispatch('next', [contextParams]);
-	        this$1.runContextCheck(contextParams);
+	        this$1$1.dispatch('next', [contextParams]);
+	        this$1$1.runContextCheck(contextParams);
 	        var token = new Token(char);
-	        this$1.tokens.push(token);
-	        this$1.dispatch('newToken', [token, contextParams]);
+	        this$1$1.tokens.push(token);
+	        this$1$1.dispatch('newToken', [token, contextParams]);
 	    }
 	    this.dispatch('end', [this.tokens]);
 	    return this.tokens;
@@ -13984,12 +13980,12 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * TODO: check base dir before applying adjustments - priority low
 	 */
 	function reverseArabicSentences() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var ranges = this.tokenizer.getContextRanges('arabicSentence');
 	    ranges.forEach(function (range) {
-	        var rangeTokens = this$1.tokenizer.getRangeTokens(range);
-	        this$1.tokenizer.replaceRange(
+	        var rangeTokens = this$1$1.tokenizer.getRangeTokens(range);
+	        this$1$1.tokenizer.replaceRange(
 	            range.startIndex,
 	            range.endOffset,
 	            rangeTokens.reverse()
@@ -14002,13 +13998,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {feature} feature a feature to apply
 	 */
 	Bidi.prototype.subscribeArabicForms = function(feature) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    this.tokenizer.events.contextEnd.subscribe(
 	        function (contextName, range) {
 	            if (contextName === 'arabicWord') {
 	                return arabicPresentationForms.call(
-	                    this$1.tokenizer, range, feature
+	                    this$1$1.tokenizer, range, feature
 	                );
 	            }
 	        }
@@ -14020,16 +14016,16 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {feature} features a list of features
 	 */
 	Bidi.prototype.applyFeatures = function (features) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    for (var i = 0; i < features.length; i++) {
 	        var feature = features[i];
 	        if (feature) {
 	            var script = feature.script;
-	            if (!this$1.features[script]) {
-	                this$1.features[script] = {};
+	            if (!this$1$1.features[script]) {
+	                this$1$1.features[script] = {};
 	            }
-	            this$1.features[script][feature.tag] = feature;
+	            this$1$1.features[script][feature.tag] = feature;
 	        }
 	    }
 	};
@@ -14060,13 +14056,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * Apply arabic presentation forms features
 	 */
 	function applyArabicPresentationForms() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    if (!this.features.hasOwnProperty('arab')) { return; }
 	    checkGlyphIndexStatus.call(this);
 	    var ranges = this.tokenizer.getContextRanges('arabicWord');
 	    ranges.forEach(function (range) {
-	        arabicPresentationForms.call(this$1, range);
+	        arabicPresentationForms.call(this$1$1, range);
 	    });
 	}
 
@@ -14074,14 +14070,14 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * Apply required arabic ligatures
 	 */
 	function applyArabicRequireLigatures() {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    if (!this.features.hasOwnProperty('arab')) { return; }
 	    if (!this.features.arab.hasOwnProperty('rlig')) { return; }
 	    checkGlyphIndexStatus.call(this);
 	    var ranges = this.tokenizer.getContextRanges('arabicWord');
 	    ranges.forEach(function (range) {
-	        arabicRequiredLigatures.call(this$1, range);
+	        arabicRequiredLigatures.call(this$1$1, range);
 	    });
 	}
 
@@ -14114,12 +14110,12 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {text} text an input text
 	 */
 	Bidi.prototype.getTextGlyphs = function (text) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    this.processText(text);
 	    var indexes = [];
 	    for (var i = 0; i < this.tokenizer.tokens.length; i++) {
-	        var token = this$1.tokenizer.tokens[i];
+	        var token = this$1$1.tokenizer.tokens[i];
 	        if (token.state.deleted) { continue; }
 	        var index = token.activeState.value;
 	        indexes.push(Array.isArray(index) ? index[0] : index);
@@ -14265,11 +14261,11 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {ContextParams} contextParams context params to lookup
 	 */
 	LookupTable.prototype.lookup = function (contextParams) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var substitutions = [];
 	    for (var i = 0; i < this.subtables.length; i++) {
-	        var subsTable = this$1.subtables[i];
+	        var subsTable = this$1$1.subtables[i];
 	        var substitution = subsTable.lookup(contextParams);
 	        if (substitution !== null || substitution.length) {
 	            substitutions = substitutions.concat(substitution);
@@ -14315,7 +14311,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {any} contextParams context params to lookup
 	 */
 	function chainingSubstitutionFormat3(contextParams) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var lookupsCount = (
 	        this.inputCoverage.length +
@@ -14363,7 +14359,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	            for (var j = 0; j < inputLookups.length; j++) {
 	                var inputContext = new ContextParams([contextParams.get(j)], 0);
 	                var lookupIndex = lookupRecord.lookupListIndex;
-	                var lookupTable = new LookupTable(lookupIndex, this$1.lookups);
+	                var lookupTable = new LookupTable(lookupIndex, this$1$1.lookups);
 	                var lookup = lookupTable.lookup(inputContext);
 	                substitutions = substitutions.concat(lookup);
 	            }
@@ -14456,11 +14452,11 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {any} contextParams context params to lookup
 	 */
 	Feature.prototype.lookup = function(contextParams) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var lookups = [];
 	    for (var i = 0; i < this.lookups.length; i++) {
-	        var lookupTable = this$1.lookups[i];
+	        var lookupTable = this$1$1.lookups[i];
 	        var lookup = lookupTable.lookup(contextParams);
 	        if (lookup !== null || lookup.length) {
 	            lookups = lookups.concat(lookup);
@@ -14505,13 +14501,13 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param {*} scriptTag script tag
 	 */
 	FeatureQuery.prototype.mapTagsToFeatures = function (features, scriptTag) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    var tags = {};
 	    for (var i = 0; i < features.length; i++) {
 	        var feature = features[i].feature;
 	        var tag = features[i].tag;
-	        var lookups = this$1.font.tables.gsub.lookups;
+	        var lookups = this$1$1.font.tables.gsub.lookups;
 	        var featureLookups = new FeatureLookups(lookups, feature.lookupListIndexes);
 	        tags[tag] = new Feature(tag, feature, featureLookups, scriptTag);
 	    }
@@ -14690,14 +14686,14 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @return {opentype.Glyph[]}
 	 */
 	Font.prototype.stringToGlyphs = function(s, options) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    options = options || this.defaultRenderOptions;
 
 	    var bidi = new Bidi();
 
 	    // Create and register 'glyphIndex' state modifier
-	    var charToGlyphIndexMod = function (token) { return this$1.charToGlyphIndex(token.char); };
+	    var charToGlyphIndexMod = function (token) { return this$1$1.charToGlyphIndex(token.char); };
 	    bidi.registerModifier('glyphIndex', null, charToGlyphIndexMod);
 
 	    var arabFeatureQuery = new FeatureQuery(this);
@@ -14738,7 +14734,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    var glyphs = new Array(length);
 	    var notdef = this.glyphs.get(0);
 	    for (var i$1 = 0; i$1 < length; i$1 += 1) {
-	        glyphs[i$1] = this$1.glyphs.get(indexes[i$1]) || notdef;
+	        glyphs[i$1] = this$1$1.glyphs.get(indexes[i$1]) || notdef;
 	    }
 	    return glyphs;
 	};
@@ -14830,7 +14826,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	 * @param  {Function} callback
 	 */
 	Font.prototype.forEachGlyph = function(text, x, y, fontSize, options, callback) {
-	    var this$1 = this;
+	    var this$1$1 = this;
 
 	    x = x !== undefined ? x : 0;
 	    y = y !== undefined ? y : 0;
@@ -14845,7 +14841,7 @@ var opentype = createCommonjsModule(function (module, exports) {
 	    }
 	    for (var i = 0; i < glyphs.length; i += 1) {
 	        var glyph = glyphs[i];
-	        callback.call(this$1, glyph, x, y, fontSize, options);
+	        callback.call(this$1$1, glyph, x, y, fontSize, options);
 	        if (glyph.advanceWidth) {
 	            x += glyph.advanceWidth * fontScale;
 	        }
@@ -14854,8 +14850,8 @@ var opentype = createCommonjsModule(function (module, exports) {
 	            // We should apply position adjustment lookups in a more generic way.
 	            // Here we only use the xAdvance value.
 	            var kerningValue = kerningLookups ?
-	                  this$1.position.getKerningValue(kerningLookups, glyph.index, glyphs[i + 1].index) :
-	                  this$1.getKerningValue(glyph, glyphs[i + 1]);
+	                  this$1$1.position.getKerningValue(kerningLookups, glyph.index, glyphs[i + 1].index) :
+	                  this$1$1.getKerningValue(glyph, glyphs[i + 1]);
 	            x += kerningValue * fontScale;
 	        }
 
@@ -15885,7 +15881,10 @@ const toFont = (options = {}, data) => {
       group.push(
         scale(
           [factor, factor, factor],
-          taggedGraph({}, fromPaths(paths.map((path) => ({ points: path }))))
+          fromPathsToGraph(
+            {},
+            paths.map((path) => ({ points: path }))
+          )
         )
       );
     }

@@ -1,8 +1,8 @@
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { read, addPending, writeFile, getPendingErrorHandler, emit } from './jsxcad-sys.js';
+import { read, addPending, writeFile, getModule, generateUniqueId, write, getPendingErrorHandler, emit } from './jsxcad-sys.js';
 import { ensurePages } from './jsxcad-api-v1-shapes.js';
-import { hash } from './jsxcad-geometry-tagged.js';
+import { hash } from './jsxcad-geometry.js';
 
 const readStl = async (
   path,
@@ -85,10 +85,14 @@ const prepareStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(prepareStl(shape).toDisjointGeometry())) {
-    const op = toStl(entry, options).catch(getPendingErrorHandler());
+    const path = `stl/${getModule()}/${generateUniqueId()}`;
+    const op = toStl(entry, options)
+      .then((data) => write(path, data))
+      .catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
-      data: op,
+      // data: op,
+      path,
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
     });
