@@ -128,11 +128,13 @@ const maslowRead = async (path) => {
 
 const agent = async ({
   ask,
-  question
+  question,
+  statement
 }) => {
-    if (question.touchFile) {
-        const { path, workspace } = question.touchFile;
+    if ((statement || question).touchFile) {
+        const { path, workspace } = (statement || question).touchFile;
         await touch(path, { workspace });
+        return;
     }
     
     try{
@@ -146,7 +148,8 @@ const agent = async ({
             return 1;
             break;
           case "circle":
-            const aCircle = api.Arc(question.diameter).sides(question.numSegments);
+            console.log(api.Arc(10));
+            const aCircle = api.Arc(question.diameter).hasSides(question.numSegments);
             await api.saveGeometry(question.writePath, aCircle);
             return 1;
             break;
@@ -236,7 +239,7 @@ const agent = async ({
                 assemblyGeometries.push(assemblyGeometry);
             }
             
-            const assemblyShape = api.Shape.fromGeometry(api.Assembly(...assemblyGeometries).toDisjointGeometry());
+            const assemblyShape = api.Assembly(...assemblyGeometries);
             
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;

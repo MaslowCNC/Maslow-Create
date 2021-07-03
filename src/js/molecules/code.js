@@ -112,7 +112,7 @@ export default class Code extends Atom {
         
         var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)
         
-        if (distFromClick < xInPixels){
+        if (distFromClick < this.radius){
             this.editCode()
             clickProcessed = true
         }

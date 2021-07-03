@@ -53442,9 +53442,7 @@ const buildMeshes = async ({
   const { tags = [] } = geometry;
   switch (geometry.type) {
     case 'displayGeometry':
-    case 'assembly':
-    case 'disjointAssembly':
-    case 'layers':
+    case 'group':
     case 'layout':
     case 'item':
     case 'plan':
@@ -53598,6 +53596,7 @@ const buildMeshes = async ({
       const material = await buildMeshMaterial(definitions, tags);
       if (tags.includes('compose/non-positive')) {
         material.transparent = true;
+        material.depthWrite = false;
         material.opacity *= 0.5;
       }
       dataset.mesh = new Mesh(bufferGeometry, material);
