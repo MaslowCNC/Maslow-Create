@@ -26,14 +26,17 @@ flowCanvas.addEventListener('touchstart', event => {
     //Keep track of this for the touch up
     lastMoveTouch = event.touches[0]
     
-    //This should be a fake right click https://stackoverflow.com/questions/433919/javascript-simulate-right-click-through-code?rq=1
-    var fakeEvent = {
-        clientX: event.clientX,
-        clientY: event.clientY,
-        which: 3
-    }
+    //This should be a fake right click 
     longTouchTimer = setTimeout(function() {
-        onMouseDown(fakeEvent)
+        console.log("Long touch timout")
+        const downEvt = new MouseEvent('mousedown', {
+            clientX: event.touches[0].clientX,
+            clientY: event.touches[0].clientY,
+            which: 3,
+            button: 2,
+            detail: 1
+        })
+        document.getElementById('flow-canvas').dispatchEvent(downEvt)
     }, 1500)
 })
 flowCanvas.addEventListener('mousedown', event => {
@@ -90,7 +93,6 @@ flowCanvas.addEventListener('mouseup', event => {
 */
 function onMouseDown(event){
     console.log("Mousedown ran")
-    console.log(event)
     
     var isRightMB
     if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
@@ -132,6 +134,7 @@ function onMouseDown(event){
         GlobalVariables.currentMolecule.selected = false
     }
     
+    console.log("Hiding menu")
     //hide the menu if it is visible
     if (!document.querySelector('#circle-menu1').contains(event.target)) {
         cmenu.hide()

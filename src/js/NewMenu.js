@@ -98,6 +98,8 @@ var doubleClick
 /* Right click to open circular menu -- mouse click and drag*/
 document.getElementById('flow-canvas').addEventListener('mousedown', event => {
     //every time the mouse button goes down
+    console.log("Menu opener called")
+    console.log(event.detail);
     if (event.detail === 1) {
         doubleClick = false
         // it was a single click
@@ -110,6 +112,7 @@ document.getElementById('flow-canvas').addEventListener('mousedown', event => {
             isRightMB = event.button == 2
         }
         if(isRightMB){
+            console.log("Showing menu")
             cmenu.show([event.clientX, event.clientY],doubleClick)
             return
         }
