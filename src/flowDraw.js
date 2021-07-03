@@ -17,20 +17,38 @@ GlobalVariables.canvas.height = window.innerHeight/2.5
  * @type {object}
  */
 let flowCanvas = document.getElementById('flow-canvas')
-
-flowCanvas.addEventListener('touchmove', event => {
-    onMouseMove(event)
-})
-flowCanvas.addEventListener('mousemove', event => {
-    onMouseMove(event)
-})
-
+var longTouchTimer
+var lastMoveTouch
 
 flowCanvas.addEventListener('touchstart', event => {
     onMouseDown(event.touches[0])
+    
+    //Keep track of this for the touch up
+    lastMoveTouch = event.touches[0]
+    
+    //This should be a fake right click https://stackoverflow.com/questions/433919/javascript-simulate-right-click-through-code?rq=1
+    var fakeEvent = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        which: 3
+    }
+    longTouchTimer = setTimeout(function() {
+        onMouseDown(fakeEvent)
+    }, 1500)
 })
 flowCanvas.addEventListener('mousedown', event => {
     onMouseDown(event)
+})
+
+
+flowCanvas.addEventListener('touchmove', event => {
+    console.log("Touch move happened")
+    lastMoveTouch = event.touches[0]
+    clearTimeout(longTouchTimer)
+    onMouseMove(lastMoveTouch)
+})
+flowCanvas.addEventListener('mousemove', event => {
+    onMouseMove(event)
 })
 
 flowCanvas.addEventListener('dblclick', event => {
@@ -45,7 +63,6 @@ flowCanvas.addEventListener('dblclick', event => {
     
     if (clickHandledByMolecule == false){
         console.warn('double click menu open not working in flowDraw.js')
-        //showmenu(event);
     }
 })
 
@@ -61,7 +78,8 @@ document.addEventListener('mouseup',(e)=>{
     }
 })
 flowCanvas.addEventListener('touchend', event => {
-    onMouseUp(event)
+    clearTimeout(longTouchTimer)
+    onMouseUp(lastMoveTouch)
 })
 flowCanvas.addEventListener('mouseup', event => {
     onMouseUp(event)
