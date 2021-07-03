@@ -1,4 +1,4 @@
-import { scale } from './jsxcad-geometry-paths.js';
+import { scalePaths } from './jsxcad-geometry.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
@@ -2133,7 +2133,7 @@ const fromDst = async (data, options = {}) => {
   const header = fetchHeader({}, fetcher);
   return {
     type: 'paths',
-    paths: scale([0.1, 0.1, 0.1], fetchStitches(header, fetcher)),
+    paths: scalePaths([0.1, 0.1, 0.1], fetchStitches(header, fetcher)),
   };
 };
 

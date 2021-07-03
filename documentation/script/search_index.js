@@ -234,6 +234,12 @@ window.esdocSearchIndex = [
     "variable"
   ],
   [
+    "canvas-template/src/js/bom.js~convertlinks",
+    "function/index.html#static-function-convertLinks",
+    "<span>convertLinks</span> <span class=\"search-result-import-path\">canvas-template/src/js/BOM.js</span>",
+    "function"
+  ],
+  [
     "canvas-template/src/js/bom.js~extractbomtags",
     "function/index.html#static-function-extractBomTags",
     "<span>extractBomTags</span> <span class=\"search-result-import-path\">canvas-template/src/js/BOM.js</span>",
@@ -243,6 +249,12 @@ window.esdocSearchIndex = [
     "canvas-template/src/js/globalvariables.js~globalvariables",
     "variable/index.html#static-variable-globalVariables",
     "<span>globalVariables</span> <span class=\"search-result-import-path\">canvas-template/src/js/globalvariables.js</span>",
+    "variable"
+  ],
+  [
+    "canvas-template/src/js/licenseoptions.js~licenses",
+    "variable/index.html#static-variable-licenses",
+    "<span>licenses</span> <span class=\"search-result-import-path\">canvas-template/src/js/licenseOptions.js</span>",
     "variable"
   ],
   [
@@ -777,6 +789,12 @@ window.esdocSearchIndex = [
     "src/js/initialpopup.js",
     "file/src/js/initialPopup.js.html",
     "src/js/initialPopup.js",
+    "file"
+  ],
+  [
+    "src/js/licenseoptions.js",
+    "file/src/js/licenseOptions.js.html",
+    "src/js/licenseOptions.js",
     "file"
   ],
   [

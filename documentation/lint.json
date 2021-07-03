@@ -13,7 +13,7 @@
       },
       {
         "lineNumber": 48,
-        "line": " * @param {object} geometry - The geometry which should be scanned for tags.\r"
+        "line": " * @param {string} path - The geometry which should be scanned for tags.\r"
       },
       {
         "lineNumber": 49,
@@ -29,7 +29,7 @@
       "functionToPlace"
     ],
     "docParams": [
-      "geometry"
+      "path"
     ]
   },
   {

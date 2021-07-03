@@ -1,5 +1,4 @@
-import { outline, toDisjointGeometry } from './jsxcad-geometry-tagged.js';
-import { getEdges } from './jsxcad-geometry-path.js';
+import { outline, toDisjointGeometry, getPathEdges } from './jsxcad-geometry.js';
 
 function sortKD(ids, coords, nodeSize, left, right, depth) {
     if (right - left <= nodeSize) return;
@@ -366,7 +365,7 @@ const toGcode = async (
     const points = [];
     for (const { paths } of outline(toDisjointGeometry(geometry))) {
       for (const path of paths) {
-        for (const edge of getEdges(path)) {
+        for (const edge of getPathEdges(path)) {
           // Deduplicate edges.
           {
             const forward = JSON.stringify(edge);

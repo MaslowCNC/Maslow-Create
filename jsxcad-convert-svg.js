@@ -1,9 +1,7 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { taggedGroup, transform as transform$1, fill, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { transformPaths, isClosedPath, canonicalizePath, taggedGroup, transform, fill, taggedPaths, scale, measureBoundingBox, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
 import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
-import { assertGood, isClosed, canonicalize as canonicalize$1 } from './jsxcad-geometry-path.js';
 import { equals } from './jsxcad-math-vec2.js';
-import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -696,9 +694,9 @@ exports.valid = _valid2.default;
 });
 
 var SvgPoints = unwrapExports(cjs);
-var cjs_1 = cjs.valid;
-var cjs_2 = cjs.toPoints;
-var cjs_3 = cjs.toPath;
+cjs.valid;
+cjs.toPoints;
+cjs.toPath;
 
 var entityMap = {
        lt: '<',
@@ -992,12 +990,12 @@ XMLReader.prototype = {
 		var domBuilder = this.domBuilder;
 		domBuilder.startDocument();
 		_copy(defaultNSMap ,defaultNSMap = {});
-		parse(source,defaultNSMap,entityMap,
+		parse$1(source,defaultNSMap,entityMap,
 				domBuilder,this.errorHandler);
 		domBuilder.endDocument();
 	}
 };
-function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
+function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 	function fixedFromCharCode(code) {
 		// String.prototype.fromCharCode does not supports
 		// > 2 bytes unicode chars directly
@@ -1330,7 +1328,7 @@ function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,error
 				//case S_ATTR:void();break;
 				//case S_ATTR_NOQUOT_VALUE:void();break;
 				case S_ATTR_SPACE:
-					var tagName =  el.tagName;
+					el.tagName;
 					if(currentNSMap[''] !== 'http://www.w3.org/1999/xhtml' || !attrName.match(/^(?:disabled|checked|selected)$/i)){
 						errorHandler.warning('attribute "'+attrName+'" missed value!! "'+attrName+'" instead2!!');
 					}
@@ -1533,7 +1531,7 @@ function parseInstruction(source,start,domBuilder){
 	if(end){
 		var match = source.substring(start,end).match(/^<\?(\S*)\s*([\s\S]*?)\s*$/);
 		if(match){
-			var len = match[0].length;
+			match[0].length;
 			domBuilder.processingInstruction(match[1], match[2]) ;
 			return end+2;
 		}else {//error
@@ -1627,38 +1625,38 @@ function _extends(Class,Super){
 var htmlns = 'http://www.w3.org/1999/xhtml' ;
 // Node Types
 var NodeType = {};
-var ELEMENT_NODE                = NodeType.ELEMENT_NODE                = 1;
-var ATTRIBUTE_NODE              = NodeType.ATTRIBUTE_NODE              = 2;
-var TEXT_NODE                   = NodeType.TEXT_NODE                   = 3;
-var CDATA_SECTION_NODE          = NodeType.CDATA_SECTION_NODE          = 4;
-var ENTITY_REFERENCE_NODE       = NodeType.ENTITY_REFERENCE_NODE       = 5;
-var ENTITY_NODE                 = NodeType.ENTITY_NODE                 = 6;
-var PROCESSING_INSTRUCTION_NODE = NodeType.PROCESSING_INSTRUCTION_NODE = 7;
-var COMMENT_NODE                = NodeType.COMMENT_NODE                = 8;
-var DOCUMENT_NODE               = NodeType.DOCUMENT_NODE               = 9;
-var DOCUMENT_TYPE_NODE          = NodeType.DOCUMENT_TYPE_NODE          = 10;
-var DOCUMENT_FRAGMENT_NODE      = NodeType.DOCUMENT_FRAGMENT_NODE      = 11;
-var NOTATION_NODE               = NodeType.NOTATION_NODE               = 12;
+var ELEMENT_NODE$1                = NodeType.ELEMENT_NODE                = 1;
+var ATTRIBUTE_NODE$1              = NodeType.ATTRIBUTE_NODE              = 2;
+var TEXT_NODE$1                   = NodeType.TEXT_NODE                   = 3;
+var CDATA_SECTION_NODE$1          = NodeType.CDATA_SECTION_NODE          = 4;
+var ENTITY_REFERENCE_NODE$1       = NodeType.ENTITY_REFERENCE_NODE       = 5;
+var ENTITY_NODE$1                 = NodeType.ENTITY_NODE                 = 6;
+var PROCESSING_INSTRUCTION_NODE$1 = NodeType.PROCESSING_INSTRUCTION_NODE = 7;
+var COMMENT_NODE$1                = NodeType.COMMENT_NODE                = 8;
+var DOCUMENT_NODE$1               = NodeType.DOCUMENT_NODE               = 9;
+var DOCUMENT_TYPE_NODE$1          = NodeType.DOCUMENT_TYPE_NODE          = 10;
+var DOCUMENT_FRAGMENT_NODE$1      = NodeType.DOCUMENT_FRAGMENT_NODE      = 11;
+var NOTATION_NODE$1               = NodeType.NOTATION_NODE               = 12;
 
 // ExceptionCode
 var ExceptionCode = {};
 var ExceptionMessage = {};
-var INDEX_SIZE_ERR              = ExceptionCode.INDEX_SIZE_ERR              = ((ExceptionMessage[1]="Index size error"),1);
-var DOMSTRING_SIZE_ERR          = ExceptionCode.DOMSTRING_SIZE_ERR          = ((ExceptionMessage[2]="DOMString size error"),2);
+ExceptionCode.INDEX_SIZE_ERR              = ((ExceptionMessage[1]="Index size error"),1);
+ExceptionCode.DOMSTRING_SIZE_ERR          = ((ExceptionMessage[2]="DOMString size error"),2);
 var HIERARCHY_REQUEST_ERR       = ExceptionCode.HIERARCHY_REQUEST_ERR       = ((ExceptionMessage[3]="Hierarchy request error"),3);
-var WRONG_DOCUMENT_ERR          = ExceptionCode.WRONG_DOCUMENT_ERR          = ((ExceptionMessage[4]="Wrong document"),4);
-var INVALID_CHARACTER_ERR       = ExceptionCode.INVALID_CHARACTER_ERR       = ((ExceptionMessage[5]="Invalid character"),5);
-var NO_DATA_ALLOWED_ERR         = ExceptionCode.NO_DATA_ALLOWED_ERR         = ((ExceptionMessage[6]="No data allowed"),6);
-var NO_MODIFICATION_ALLOWED_ERR = ExceptionCode.NO_MODIFICATION_ALLOWED_ERR = ((ExceptionMessage[7]="No modification allowed"),7);
+ExceptionCode.WRONG_DOCUMENT_ERR          = ((ExceptionMessage[4]="Wrong document"),4);
+ExceptionCode.INVALID_CHARACTER_ERR       = ((ExceptionMessage[5]="Invalid character"),5);
+ExceptionCode.NO_DATA_ALLOWED_ERR         = ((ExceptionMessage[6]="No data allowed"),6);
+ExceptionCode.NO_MODIFICATION_ALLOWED_ERR = ((ExceptionMessage[7]="No modification allowed"),7);
 var NOT_FOUND_ERR               = ExceptionCode.NOT_FOUND_ERR               = ((ExceptionMessage[8]="Not found"),8);
-var NOT_SUPPORTED_ERR           = ExceptionCode.NOT_SUPPORTED_ERR           = ((ExceptionMessage[9]="Not supported"),9);
+ExceptionCode.NOT_SUPPORTED_ERR           = ((ExceptionMessage[9]="Not supported"),9);
 var INUSE_ATTRIBUTE_ERR         = ExceptionCode.INUSE_ATTRIBUTE_ERR         = ((ExceptionMessage[10]="Attribute in use"),10);
 //level2
-var INVALID_STATE_ERR        	= ExceptionCode.INVALID_STATE_ERR        	= ((ExceptionMessage[11]="Invalid state"),11);
-var SYNTAX_ERR               	= ExceptionCode.SYNTAX_ERR               	= ((ExceptionMessage[12]="Syntax error"),12);
-var INVALID_MODIFICATION_ERR 	= ExceptionCode.INVALID_MODIFICATION_ERR 	= ((ExceptionMessage[13]="Invalid modification"),13);
-var NAMESPACE_ERR            	= ExceptionCode.NAMESPACE_ERR           	= ((ExceptionMessage[14]="Invalid namespace"),14);
-var INVALID_ACCESS_ERR       	= ExceptionCode.INVALID_ACCESS_ERR      	= ((ExceptionMessage[15]="Invalid access"),15);
+ExceptionCode.INVALID_STATE_ERR        	= ((ExceptionMessage[11]="Invalid state"),11);
+ExceptionCode.SYNTAX_ERR               	= ((ExceptionMessage[12]="Syntax error"),12);
+ExceptionCode.INVALID_MODIFICATION_ERR 	= ((ExceptionMessage[13]="Invalid modification"),13);
+ExceptionCode.NAMESPACE_ERR           	= ((ExceptionMessage[14]="Invalid namespace"),14);
+ExceptionCode.INVALID_ACCESS_ERR      	= ((ExceptionMessage[15]="Invalid access"),15);
 
 /**
  * DOM Level 2
@@ -1943,7 +1941,7 @@ Node.prototype = {
 		var child = this.firstChild;
 		while(child){
 			var next = child.nextSibling;
-			if(next && next.nodeType == TEXT_NODE && child.nodeType == TEXT_NODE){
+			if(next && next.nodeType == TEXT_NODE$1 && child.nodeType == TEXT_NODE$1){
 				this.removeChild(next);
 				child.appendData(next.data);
 			}else {
@@ -1972,7 +1970,7 @@ Node.prototype = {
     				}
     			}
     		}
-    		el = el.nodeType == ATTRIBUTE_NODE?el.ownerDocument : el.parentNode;
+    		el = el.nodeType == ATTRIBUTE_NODE$1?el.ownerDocument : el.parentNode;
     	}
     	return null;
     },
@@ -1987,7 +1985,7 @@ Node.prototype = {
     				return map[prefix] ;
     			}
     		}
-    		el = el.nodeType == ATTRIBUTE_NODE?el.ownerDocument : el.parentNode;
+    		el = el.nodeType == ATTRIBUTE_NODE$1?el.ownerDocument : el.parentNode;
     	}
     	return null;
     },
@@ -2098,7 +2096,7 @@ function _insertBefore(parentNode,newChild,nextChild){
 	if(cp){
 		cp.removeChild(newChild);//remove and update
 	}
-	if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE){
+	if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE$1){
 		var newFirst = newChild.firstChild;
 		if (newFirst == null) {
 			return newChild;
@@ -2128,7 +2126,7 @@ function _insertBefore(parentNode,newChild,nextChild){
 	}while(newFirst !== newLast && (newFirst= newFirst.nextSibling))
 	_onUpdateChild(parentNode.ownerDocument||parentNode,parentNode);
 	//console.log(parentNode.lastChild.nextSibling == null)
-	if (newChild.nodeType == DOCUMENT_FRAGMENT_NODE) {
+	if (newChild.nodeType == DOCUMENT_FRAGMENT_NODE$1) {
 		newChild.firstChild = newChild.lastChild = null;
 	}
 	return newChild;
@@ -2157,13 +2155,13 @@ function _appendSingleChild(parentNode,newChild){
 Document.prototype = {
 	//implementation : null,
 	nodeName :  '#document',
-	nodeType :  DOCUMENT_NODE,
+	nodeType :  DOCUMENT_NODE$1,
 	doctype :  null,
 	documentElement :  null,
 	_inc : 1,
 	
 	insertBefore :  function(newChild, refChild){//raises 
-		if(newChild.nodeType == DOCUMENT_FRAGMENT_NODE){
+		if(newChild.nodeType == DOCUMENT_FRAGMENT_NODE$1){
 			var child = newChild.firstChild;
 			while(child){
 				var next = child.nextSibling;
@@ -2172,7 +2170,7 @@ Document.prototype = {
 			}
 			return newChild;
 		}
-		if(this.documentElement == null && newChild.nodeType == ELEMENT_NODE){
+		if(this.documentElement == null && newChild.nodeType == ELEMENT_NODE$1){
 			this.documentElement = newChild;
 		}
 		
@@ -2192,7 +2190,7 @@ Document.prototype = {
 	getElementById :	function(id){
 		var rtv = null;
 		_visitNode(this.documentElement,function(node){
-			if(node.nodeType == ELEMENT_NODE){
+			if(node.nodeType == ELEMENT_NODE$1){
 				if(node.getAttribute('id') == id){
 					rtv = node;
 					return true;
@@ -2207,7 +2205,7 @@ Document.prototype = {
 		return new LiveNodeList(this, function(base) {
 			var ls = [];
 			_visitNode(base.documentElement, function(node) {
-				if(node !== base && node.nodeType == ELEMENT_NODE) {
+				if(node !== base && node.nodeType == ELEMENT_NODE$1) {
 					if(pattern.test(node.getAttribute('class'))) {
 						ls.push(node);
 					}
@@ -2319,7 +2317,7 @@ _extends(Document,Node);
 function Element() {
 	this._nsMap = {};
 }Element.prototype = {
-	nodeType : ELEMENT_NODE,
+	nodeType : ELEMENT_NODE$1,
 	hasAttribute : function(name){
 		return this.getAttributeNode(name)!=null;
 	},
@@ -2342,7 +2340,7 @@ function Element() {
 	
 	//four real opeartion method
 	appendChild:function(newChild){
-		if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE){
+		if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE$1){
 			return this.insertBefore(newChild,null);
 		}else {
 			return _appendSingleChild(this,newChild);
@@ -2384,7 +2382,7 @@ function Element() {
 		return new LiveNodeList(this,function(base){
 			var ls = [];
 			_visitNode(base,function(node){
-				if(node !== base && node.nodeType == ELEMENT_NODE && (tagName === '*' || node.tagName == tagName)){
+				if(node !== base && node.nodeType == ELEMENT_NODE$1 && (tagName === '*' || node.tagName == tagName)){
 					ls.push(node);
 				}
 			});
@@ -2395,7 +2393,7 @@ function Element() {
 		return new LiveNodeList(this,function(base){
 			var ls = [];
 			_visitNode(base,function(node){
-				if(node !== base && node.nodeType === ELEMENT_NODE && (namespaceURI === '*' || node.namespaceURI === namespaceURI) && (localName === '*' || node.localName == localName)){
+				if(node !== base && node.nodeType === ELEMENT_NODE$1 && (namespaceURI === '*' || node.namespaceURI === namespaceURI) && (localName === '*' || node.localName == localName)){
 					ls.push(node);
 				}
 			});
@@ -2410,7 +2408,7 @@ Document.prototype.getElementsByTagNameNS = Element.prototype.getElementsByTagNa
 
 _extends(Element,Node);
 function Attr() {
-}Attr.prototype.nodeType = ATTRIBUTE_NODE;
+}Attr.prototype.nodeType = ATTRIBUTE_NODE$1;
 _extends(Attr,Node);
 
 
@@ -2447,7 +2445,7 @@ _extends(CharacterData,Node);
 function Text() {
 }Text.prototype = {
 	nodeName : "#text",
-	nodeType : TEXT_NODE,
+	nodeType : TEXT_NODE$1,
 	splitText : function(offset) {
 		var text = this.data;
 		var newText = text.substring(offset);
@@ -2465,43 +2463,43 @@ _extends(Text,CharacterData);
 function Comment() {
 }Comment.prototype = {
 	nodeName : "#comment",
-	nodeType : COMMENT_NODE
+	nodeType : COMMENT_NODE$1
 };
 _extends(Comment,CharacterData);
 
 function CDATASection() {
 }CDATASection.prototype = {
 	nodeName : "#cdata-section",
-	nodeType : CDATA_SECTION_NODE
+	nodeType : CDATA_SECTION_NODE$1
 };
 _extends(CDATASection,CharacterData);
 
 
 function DocumentType() {
-}DocumentType.prototype.nodeType = DOCUMENT_TYPE_NODE;
+}DocumentType.prototype.nodeType = DOCUMENT_TYPE_NODE$1;
 _extends(DocumentType,Node);
 
 function Notation() {
-}Notation.prototype.nodeType = NOTATION_NODE;
+}Notation.prototype.nodeType = NOTATION_NODE$1;
 _extends(Notation,Node);
 
 function Entity() {
-}Entity.prototype.nodeType = ENTITY_NODE;
+}Entity.prototype.nodeType = ENTITY_NODE$1;
 _extends(Entity,Node);
 
 function EntityReference() {
-}EntityReference.prototype.nodeType = ENTITY_REFERENCE_NODE;
+}EntityReference.prototype.nodeType = ENTITY_REFERENCE_NODE$1;
 _extends(EntityReference,Node);
 
 function DocumentFragment() {
 }DocumentFragment.prototype.nodeName =	"#document-fragment";
-DocumentFragment.prototype.nodeType =	DOCUMENT_FRAGMENT_NODE;
+DocumentFragment.prototype.nodeType =	DOCUMENT_FRAGMENT_NODE$1;
 _extends(DocumentFragment,Node);
 
 
 function ProcessingInstruction() {
 }
-ProcessingInstruction.prototype.nodeType = PROCESSING_INSTRUCTION_NODE;
+ProcessingInstruction.prototype.nodeType = PROCESSING_INSTRUCTION_NODE$1;
 _extends(ProcessingInstruction,Node);
 function XMLSerializer(){}
 XMLSerializer.prototype.serializeToString = function(node,isHtml,nodeFilter){
@@ -2572,9 +2570,9 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 		//buf.sort.apply(attrs, attributeSorter);
 	}
 	switch(node.nodeType){
-	case ELEMENT_NODE:
+	case ELEMENT_NODE$1:
 		if (!visibleNamespaces) visibleNamespaces = [];
-		var startVisibleNamespaces = visibleNamespaces.length;
+		visibleNamespaces.length;
 		var attrs = node.attributes;
 		var len = attrs.length;
 		var child = node.firstChild;
@@ -2640,17 +2638,17 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 		// remove added visible namespaces
 		//visibleNamespaces.length = startVisibleNamespaces;
 		return;
-	case DOCUMENT_NODE:
-	case DOCUMENT_FRAGMENT_NODE:
+	case DOCUMENT_NODE$1:
+	case DOCUMENT_FRAGMENT_NODE$1:
 		var child = node.firstChild;
 		while(child){
 			serializeToString(child,buf,isHTML,nodeFilter,visibleNamespaces);
 			child = child.nextSibling;
 		}
 		return;
-	case ATTRIBUTE_NODE:
+	case ATTRIBUTE_NODE$1:
 		return buf.push(' ',node.name,'="',node.value.replace(/[&"]/g,_xmlEncoder),'"');
-	case TEXT_NODE:
+	case TEXT_NODE$1:
 		/**
 		 * The ampersand character (&) and the left angle bracket (<) must not appear in their literal form,
 		 * except when used as markup delimiters, or within a comment, a processing instruction, or a CDATA section.
@@ -2670,11 +2668,11 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 			.replace(/[<&]/g,_xmlEncoder)
 			.replace(/]]>/g, ']]&gt;')
 		);
-	case CDATA_SECTION_NODE:
+	case CDATA_SECTION_NODE$1:
 		return buf.push( '<![CDATA[',node.data,']]>');
-	case COMMENT_NODE:
+	case COMMENT_NODE$1:
 		return buf.push( "<!--",node.data,"-->");
-	case DOCUMENT_TYPE_NODE:
+	case DOCUMENT_TYPE_NODE$1:
 		var pubid = node.publicId;
 		var sysid = node.systemId;
 		buf.push('<!DOCTYPE ',node.name);
@@ -2694,9 +2692,9 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 			buf.push(">");
 		}
 		return;
-	case PROCESSING_INSTRUCTION_NODE:
+	case PROCESSING_INSTRUCTION_NODE$1:
 		return buf.push( "<?",node.target," ",node.data,"?>");
-	case ENTITY_REFERENCE_NODE:
+	case ENTITY_REFERENCE_NODE$1:
 		return buf.push( '&',node.nodeName,';');
 	//case ENTITY_NODE:
 	//case NOTATION_NODE:
@@ -2707,7 +2705,7 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 function importNode(doc,node,deep){
 	var node2;
 	switch (node.nodeType) {
-	case ELEMENT_NODE:
+	case ELEMENT_NODE$1:
 		node2 = node.cloneNode(false);
 		node2.ownerDocument = doc;
 		//var attrs = node2.attributes;
@@ -2715,9 +2713,9 @@ function importNode(doc,node,deep){
 		//for(var i=0;i<len;i++){
 			//node2.setAttributeNodeNS(importNode(doc,attrs.item(i),deep));
 		//}
-	case DOCUMENT_FRAGMENT_NODE:
+	case DOCUMENT_FRAGMENT_NODE$1:
 		break;
-	case ATTRIBUTE_NODE:
+	case ATTRIBUTE_NODE$1:
 		deep = true;
 		break;
 	//case ENTITY_REFERENCE_NODE:
@@ -2767,7 +2765,7 @@ function cloneNode(doc,node,deep){
 	}
 	node2.ownerDocument = doc;
 	switch (node2.nodeType) {
-	case ELEMENT_NODE:
+	case ELEMENT_NODE$1:
 		var attrs	= node.attributes;
 		var attrs2	= node2.attributes = new NamedNodeMap();
 		var len = attrs.length;
@@ -2775,7 +2773,7 @@ function cloneNode(doc,node,deep){
 		for(var i=0;i<len;i++){
 			node2.setAttributeNode(cloneNode(doc,attrs.item(i),true));
 		}
-		break;	case ATTRIBUTE_NODE:
+		break;	case ATTRIBUTE_NODE$1:
 		deep = true;
 	}
 	if(deep){
@@ -2806,8 +2804,8 @@ try{
 			},
 			set:function(data){
 				switch(this.nodeType){
-				case ELEMENT_NODE:
-				case DOCUMENT_FRAGMENT_NODE:
+				case ELEMENT_NODE$1:
+				case DOCUMENT_FRAGMENT_NODE$1:
 					while(this.firstChild){
 						this.removeChild(this.firstChild);
 					}
@@ -2826,8 +2824,8 @@ try{
 		
 		function getTextContent(node){
 			switch(node.nodeType){
-			case ELEMENT_NODE:
-			case DOCUMENT_FRAGMENT_NODE:
+			case ELEMENT_NODE$1:
+			case DOCUMENT_FRAGMENT_NODE$1:
 				var buf = [];
 				node = node.firstChild;
 				while(node){
@@ -2967,7 +2965,7 @@ DOMHandler.prototype = {
 	},
 	endElement:function(namespaceURI, localName, qName) {
 		var current = this.currentElement;
-		var tagName = current.tagName;
+		current.tagName;
 		this.currentElement = current.parentNode;
 	},
 	startPrefixMapping:function(prefix, uri) {
@@ -3118,10 +3116,10 @@ exports.DOMParser = DOMParser;
 exports.__DOMHandler = DOMHandler;
 //}
 });
-var domParser_1 = domParser.DOMImplementation;
-var domParser_2 = domParser.XMLSerializer;
-var domParser_3 = domParser.DOMParser;
-var domParser_4 = domParser.__DOMHandler;
+domParser.DOMImplementation;
+domParser.XMLSerializer;
+domParser.DOMParser;
+domParser.__DOMHandler;
 
 var absSvgPath = absolutize;
 
@@ -3648,7 +3646,7 @@ function quadratic(x1, y1, cx, cy, x2, y2) {
   ];
 }
 
-var parseSvgPath = parse$1;
+var parseSvgPath = parse;
 
 /**
  * expected argument lengths
@@ -3673,7 +3671,7 @@ var segment = /([astvzqmhlc])([^astvzqmhlc]*)/ig;
  * @return {Array}
  */
 
-function parse$1(path) {
+function parse(path) {
 	var data = [];
 	path.replace(segment, function(_, command, args){
 		var type = command.toLowerCase();
@@ -3713,7 +3711,7 @@ function getSqDist(p1, p2) {
 }
 
 // basic distance-based simplification
-var radialDistance = function simplifyRadialDist(points, tolerance) {
+var radialDistance$1 = function simplifyRadialDist(points, tolerance) {
     if (points.length<=1)
         return points;
     tolerance = typeof tolerance === 'number' ? tolerance : 1;
@@ -3785,7 +3783,7 @@ function simplifyDPStep(points, first, last, sqTolerance, simplified) {
 }
 
 // simplification using Ramer-Douglas-Peucker algorithm
-var douglasPeucker = function simplifyDouglasPeucker(points, tolerance) {
+var douglasPeucker$1 = function simplifyDouglasPeucker(points, tolerance) {
     if (points.length<=1)
         return points;
     tolerance = typeof tolerance === 'number' ? tolerance : 1;
@@ -3802,18 +3800,18 @@ var douglasPeucker = function simplifyDouglasPeucker(points, tolerance) {
 
 //simplifies using both algorithms
 var simplifyPath = function simplify(points, tolerance) {
-    points = radialDistance(points, tolerance);
-    points = douglasPeucker(points, tolerance);
+    points = radialDistance$1(points, tolerance);
+    points = douglasPeucker$1(points, tolerance);
     return points;
 };
 
-var radialDistance$1 = radialDistance;
-var douglasPeucker$1 = douglasPeucker;
-simplifyPath.radialDistance = radialDistance$1;
-simplifyPath.douglasPeucker = douglasPeucker$1;
+var radialDistance = radialDistance$1;
+var douglasPeucker = douglasPeucker$1;
+simplifyPath.radialDistance = radialDistance;
+simplifyPath.douglasPeucker = douglasPeucker;
 
 const simplify = (path, tolerance) => {
-  if (isClosed(path)) {
+  if (isClosedPath(path)) {
     return simplifyPath(path, tolerance);
   } else {
     return [null, ...simplifyPath(path.slice(1), tolerance)];
@@ -3852,7 +3850,7 @@ const toPaths = (
   };
 
   const maybeClosePath = () => {
-    path = removeRepeatedPoints(canonicalize$1(path));
+    path = removeRepeatedPoints(canonicalizePath(path));
     if (path.length > 3) {
       if (path[0] === null && equals(path[1], path[path.length - 1])) {
         // The path is closed, remove the leading null, and the duplicate point at the end.
@@ -3899,45 +3897,42 @@ const toPaths = (
 
   if (normalizeCoordinateSystem) {
     // Turn it upside down.
-    return transform(fromScaling([1, -1, 0]), simplifiedPaths);
+    return transformPaths(fromScaling([1, -1, 0]), simplifiedPaths);
   } else {
     return simplifiedPaths;
   }
 };
 
-const fromSvgPath = (svgPath, options = {}) => {
+const fromSvgPath$1 = (svgPath, options = {}) => {
   const paths = toPaths(
     options,
     curvify(
       absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  for (const path of paths) {
-    assertGood(path);
-  }
   const geometry = { type: 'paths', paths };
   return geometry;
 };
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
-const fromSvgPath$1 = (svgPath, options = {}) =>
-  fromSvgPath(
+const fromSvgPath = (svgPath, options = {}) =>
+  fromSvgPath$1(
     new TextEncoder('utf8').encode(svgPath),
     Object.assign({ normalizeCoordinateSystem: false }, options)
   );
 
-const ELEMENT_NODE$1 = 1;
-const ATTRIBUTE_NODE$1 = 2;
-const TEXT_NODE$1 = 3;
-const CDATA_SECTION_NODE$1 = 4;
-const ENTITY_REFERENCE_NODE$1 = 5;
-const ENTITY_NODE$1 = 6;
-const PROCESSING_INSTRUCTION_NODE$1 = 7;
-const COMMENT_NODE$1 = 8;
-const DOCUMENT_NODE$1 = 9;
-const DOCUMENT_TYPE_NODE$1 = 10;
-const DOCUMENT_FRAGMENT_NODE$1 = 11;
-const NOTATION_NODE$1 = 12;
+const ELEMENT_NODE = 1;
+const ATTRIBUTE_NODE = 2;
+const TEXT_NODE = 3;
+const CDATA_SECTION_NODE = 4;
+const ENTITY_REFERENCE_NODE = 5;
+const ENTITY_NODE = 6;
+const PROCESSING_INSTRUCTION_NODE = 7;
+const COMMENT_NODE = 8;
+const DOCUMENT_NODE = 9;
+const DOCUMENT_TYPE_NODE = 10;
+const DOCUMENT_FRAGMENT_NODE = 11;
+const NOTATION_NODE = 12;
 
 const applyTransforms = ({ matrix }, transformText) => {
   const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
@@ -4127,7 +4122,7 @@ const fromSvg = async (
       return result;
     };
     switch (node.nodeType) {
-      case ELEMENT_NODE$1: {
+      case ELEMENT_NODE: {
         ({ matrix } = applyTransforms(
           { matrix },
           node.getAttribute('transform')
@@ -4138,7 +4133,7 @@ const fromSvg = async (
         }
 
         const output = (svgPath) => {
-          const paths = fromSvgPath$1(svgPath).paths;
+          const paths = fromSvgPath(svgPath).paths;
           const attributes = {
             fill: node.getAttribute('fill') || 'black',
             stroke: node.getAttribute('stroke') || 'none',
@@ -4154,13 +4149,9 @@ const fromSvg = async (
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill$1, definitions);
             geometry.content.push(
-              transform$1(
+              transform(
                 scale(matrix),
-                fill({
-                  type: 'paths',
-                  paths: paths,
-                  tags,
-                })
+                fill(taggedPaths({ tags }, paths))
               )
             );
           }
@@ -4182,7 +4173,7 @@ const fromSvg = async (
             }
             const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
-              transform$1(scaledMatrix, {
+              transform(scaledMatrix, {
                 type: 'paths',
                 paths: paths,
                 tags,
@@ -4221,17 +4212,17 @@ const fromSvg = async (
         }
         break;
       }
-      case ATTRIBUTE_NODE$1:
-      case TEXT_NODE$1:
-      case CDATA_SECTION_NODE$1:
-      case ENTITY_REFERENCE_NODE$1:
-      case ENTITY_NODE$1:
-      case PROCESSING_INSTRUCTION_NODE$1:
-      case COMMENT_NODE$1:
-      case DOCUMENT_NODE$1:
-      case DOCUMENT_TYPE_NODE$1:
-      case DOCUMENT_FRAGMENT_NODE$1:
-      case NOTATION_NODE$1:
+      case ATTRIBUTE_NODE:
+      case TEXT_NODE:
+      case CDATA_SECTION_NODE:
+      case ENTITY_REFERENCE_NODE:
+      case ENTITY_NODE:
+      case PROCESSING_INSTRUCTION_NODE:
+      case COMMENT_NODE:
+      case DOCUMENT_NODE:
+      case DOCUMENT_TYPE_NODE:
+      case DOCUMENT_FRAGMENT_NODE:
+      case NOTATION_NODE:
         break;
       default:
         throw Error(`Unexpected svg node type: ${node.nodeType}`);
@@ -4304,7 +4295,7 @@ const toSvg = async (
   for (const { tags, paths } of getNonVoidPaths(geometry)) {
     const color = toRgbColorFromTags(tags, definitions);
     for (const path of paths) {
-      if (isClosed(path)) {
+      if (isClosedPath(path)) {
         const d = path.map(
           (point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
         );
@@ -4334,4 +4325,4 @@ const toSvg = async (
   return new TextEncoder('utf8').encode(output);
 };
 
-export { canonicalize, fromSvg, fromSvgPath, toSvg };
+export { canonicalize, fromSvg, fromSvgPath$1 as fromSvgPath, toSvg };

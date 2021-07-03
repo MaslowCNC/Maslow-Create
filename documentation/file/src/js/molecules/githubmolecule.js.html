@@ -31,12 +31,14 @@
     
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertLinks">convertLinks</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-licenses">licenses</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
@@ -144,32 +146,47 @@ export default class GitHubMolecule extends Molecule {
         const json = await GlobalVariables.gitHub.getProjectByID(id, this.topLevel)
         
         const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
-        if(projectData){
-            const values = {key: &quot;fromJSON&quot;, writePath: this.path, json: projectData}
-            window.ask(values)
-        }
         
-        //Store values that we want to overwrite in the loaded version
-        var valuesToOverwriteInLoadedVersion
-        if(this.topLevel){
-            valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
+        if(projectData &amp;&amp; json.ioValues.length == 0){ //If this github molecule has no inputs
+            const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
+            if(projectData){
+                this.name = json.name
+                const values = {key: &quot;fromJSON&quot;, writePath: this.path, json: projectData}
+                window.ask(values)
+                this.nodesOnTheScreen.forEach( atom =&gt; {
+                    if(atom.atomType == &quot;Output&quot;){
+                        atom.path = this.path
+                        atom.inputs[0].setValue(this.path)
+                    }
+                })
+                this.propogate()
+            }
+            let aPromise = new Promise((resolve) =&gt; {
+                resolve()
+            })
+            return aPromise
         }
         else{
-            //If there are stored io values to recover
-            if(this.ioValues != undefined){
-                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+            //Store values that we want to overwrite in the loaded version
+            var valuesToOverwriteInLoadedVersion
+            if(this.topLevel){
+                valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
             }
             else{
-                valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+                //If there are stored io values to recover
+                if(this.ioValues != undefined){
+                    valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel, ioValues: this.ioValues}
+                }
+                else{
+                    valuesToOverwriteInLoadedVersion = {uniqueID: this.uniqueID, x: this.x, y: this.y, atomType: this.atomType, topLevel: this.topLevel}
+                }
             }
-        }
-        const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () =&gt; {
-            if(!projectData){  //If we haven&apos;t loaded the project directly then recompute the ouput
+            const promsie =  this.deserialize(json, valuesToOverwriteInLoadedVersion, true).then( () =&gt; {
                 this.setValues(valuesToOverwriteInLoadedVersion)
                 this.loadTree()
-            }
-        })
-        return promsie
+            })
+            return promsie
+        }
     }
     
     /**

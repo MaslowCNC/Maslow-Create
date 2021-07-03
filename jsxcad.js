@@ -1,7 +1,6 @@
 import { askService, askServices, createService, touch, setupFilesystem, listFiles } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
-
 //Setup worker
 const agent = async ({ ask, question }) => {
   if (question.ask) {

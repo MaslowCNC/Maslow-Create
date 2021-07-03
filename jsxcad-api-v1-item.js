@@ -1,4 +1,4 @@
-import { taggedItem, taggedAssembly, visit, rewrite, update, getItems, getLeafs } from './jsxcad-geometry-tagged.js';
+import { taggedItem, assemble, visit, rewrite, update, getItems, getLeafs } from './jsxcad-geometry.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { emit } from './jsxcad-sys.js';
 
@@ -7,7 +7,7 @@ const Item = (id = '', ...shapes) =>
   Shape.fromGeometry(
     taggedItem(
       { tags: [`item/${id}`] },
-      taggedAssembly({}, ...shapes.map((shape) => shape.toGeometry()))
+      assemble(...shapes.map((shape) => shape.toGeometry()))
     )
   );
 
@@ -109,9 +109,6 @@ const leafsMethod = function (...args) {
   return leafs(this, ...args);
 };
 Shape.prototype.leafs = leafsMethod;
-
-leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
-leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
 
 const api = {
   Item,

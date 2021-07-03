@@ -1,5 +1,4 @@
-import { reverseFaceOrientations, rerealizeGraph } from './jsxcad-geometry-graph.js';
-import { taggedGraph, taggedGroup } from './jsxcad-geometry-tagged.js';
+import { reverseFaceOrientationsOfGraph, taggedGraph, rerealizeGraph, taggedGroup } from './jsxcad-geometry.js';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -262,7 +261,7 @@ const fromObjSync = (data, { invert = false } = {}) => {
       graph.facets[facet] = { edge: firstEdgeId };
     }
     if (invert) {
-      graph = reverseFaceOrientations(graph);
+      graph = reverseFaceOrientationsOfGraph(graph);
     }
     group.push(taggedGraph({}, rerealizeGraph(graph)));
   }

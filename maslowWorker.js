@@ -4,8 +4,7 @@ import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
-import { ensurePages } from './jsxcad-api-v1-layout.js';
-import { soup } from './jsxcad-geometry-tagged.js';
+import { toDisplayGeometry } from './jsxcad-geometry.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -129,11 +128,13 @@ const maslowRead = async (path) => {
 
 const agent = async ({
   ask,
-  question
+  question,
+  statement
 }) => {
-    if (question.touchFile) {
-        const { path, workspace } = question.touchFile;
+    if ((statement || question).touchFile) {
+        const { path, workspace } = (statement || question).touchFile;
         await touch(path, { workspace });
+        return;
     }
     
     try{
@@ -147,7 +148,8 @@ const agent = async ({
             return 1;
             break;
           case "circle":
-            const aCircle = api.Arc(question.diameter).sides(question.numSegments);
+            console.log(api.Arc(10));
+            const aCircle = api.Arc(question.diameter).hasSides(question.numSegments);
             await api.saveGeometry(question.writePath, aCircle);
             return 1;
             break;
@@ -237,7 +239,7 @@ const agent = async ({
                 assemblyGeometries.push(assemblyGeometry);
             }
             
-            const assemblyShape = api.Shape.fromGeometry(api.Assembly(...assemblyGeometries).toDisjointGeometry());
+            const assemblyShape = api.Assembly(...assemblyGeometries);
             
             await api.saveGeometry(question.writePath, assemblyShape);
             return 1;
@@ -368,7 +370,7 @@ const agent = async ({
             break;
         case "display":
             const geometryToDisplay = await maslowRead(question.readPath);
-            const threejsGeometry = toThreejsGeometry(soup(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
+            const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
             return threejsGeometry;
             break;
         }
@@ -402,7 +404,11 @@ const bootstrap = async () => {
 
   onmessage = ({
     data
-  }) => hear(data); // Now that we're ready, drain the buffer.
+  }) => {
+      if(typeof(data) == "object"){
+        hear(data); // Now that we're ready, drain the buffer.
+      }
+  }
 
 
   if (self.messageBootQueue !== undefined) {

@@ -31,12 +31,14 @@
     
   <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js">js</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/BOM.js~BOMEntry.html">BOMEntry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/globalvariables.js~GlobalVariables.html">GlobalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertLinks">convertLinks</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-extractBomTags">extractBomTags</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGitHubSearch">showGitHubSearch</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addOrDeletePorts">addOrDeletePorts</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-GitHubModule">GitHubModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-cmenu">cmenu</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-globalVariables">globalVariables</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-licenses">licenses</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-molecules">js/molecules</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/BOM.js~AddBOMTag.html">AddBOMTag</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/assembly.js~Assembly.html">Assembly</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/box.js~Box.html">Box</a></span></span></li>
@@ -78,7 +80,8 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/js/githubOauth.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Molecule from &apos;./molecules/molecule.js&apos;
 import GlobalVariables from &apos;./globalvariables.js&apos;
-import { extractBomTags } from &apos;./BOM.js&apos;
+import { licenses } from &apos;./licenseOptions.js&apos;
+import { extractBomTags, convertLinks } from &apos;./BOM.js&apos;
 import { OAuth } from &apos;oauthio-web&apos;
 
 /**
@@ -587,6 +590,18 @@ export default function GitHubModule(){
         description.setAttribute(&quot;placeholder&quot;, &quot;Project description&quot;)
         form.appendChild(description)
         
+        //Grab all of the available licenses
+        var licenseOptions = document.createElement(&apos;select&apos;)
+        licenseOptions.setAttribute(&quot;id&quot;, &quot;license-options&quot;)
+        Object.keys(licenses).forEach( key =&gt; {
+            var option = document.createElement(&apos;option&apos;)
+            option.value = key
+            option.text = key
+            licenseOptions.appendChild(option)
+        })
+        
+        form.appendChild(licenseOptions)
+        
         //Add the button
         var createButton = document.createElement(&quot;button&quot;)
         createButton.setAttribute(&quot;type&quot;, &quot;button&quot;)
@@ -826,8 +841,9 @@ export default function GitHubModule(){
         }
         
         //Get name and description
-        var name = document.getElementById(&apos;project-name&apos;).value
-        var description = document.getElementById(&apos;project-description&apos;).value
+        const name = document.getElementById(&apos;project-name&apos;).value
+        const description = document.getElementById(&apos;project-description&apos;).value
+        const licenseText = licenses[document.getElementById(&apos;license-options&apos;).value]
         
         //Load a blank project
         GlobalVariables.topLevelMolecule = new Molecule({
@@ -878,28 +894,36 @@ export default function GitHubModule(){
                         message: &quot;initialize README&quot;, 
                         content: content
                     }).then(() =&gt; {
-                        octokit.repos.createFile({ // Create empty file for SVG string
+                        octokit.repos.createFile({
                             owner: currentUser,
                             repo: currentRepoName,
                             path: &quot;project.svg&quot;,
                             message: &quot;SVG Picture&quot;, 
                             content: &quot;&quot;
                         }).then(()=&gt;{
-                            octokit.repos.createFile({ // Create empty file for SVG string
+                            octokit.repos.createFile({
                                 owner: currentUser,
                                 repo: currentRepoName,
                                 path: &quot;.gitattributes&quot;,
                                 message: &quot;Create gitattributes&quot;, 
                                 content: window.btoa(&quot;data binary&quot;)
                             }).then(()=&gt;{
-                                octokit.repos.createFile({ // Create empty file for SVG string
+                                octokit.repos.createFile({ 
                                     owner: currentUser,
                                     repo: currentRepoName,
                                     path: &quot;data.json&quot;,
                                     message: &quot;Data file&quot;, 
                                     content: &quot;&quot;
                                 }).then(()=&gt;{
-                                    intervalTimer = setInterval(() =&gt; { this.saveProject() }, 1200000) //Save the project regularly
+                                    octokit.repos.createFile({ 
+                                        owner: currentUser,
+                                        repo: currentRepoName,
+                                        path: &quot;LICENSE.txt&quot;,
+                                        message: &quot;Establish license&quot;, 
+                                        content:  window.btoa(licenseText)
+                                    }).then(()=&gt;{
+                                        intervalTimer = setInterval(() =&gt; { this.saveProject() }, 1200000) //Save the project regularly
+                                    })
                                 })
                             })
                         })
@@ -966,7 +990,7 @@ export default function GitHubModule(){
                         bomItems.forEach(item =&gt; {
                             totalParts += item.numberNeeded
                             totalCost  += item.costUSD
-                            bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + item.source + &quot;|&quot;
+                            bomContent = bomContent + &quot;\n|&quot; + item.BOMitemName + &quot;|&quot; + item.numberNeeded + &quot;|$&quot; + item.costUSD.toFixed(2) + &quot;|&quot; + convertLinks(item.source) + &quot;|&quot;
                         })
                     }
                     bomContent = bomContent + &quot;\n|&quot; + &quot;Total: &quot; + &quot;|&quot; + totalParts + &quot;|$&quot; + totalCost.toFixed(2) + &quot;|&quot; + &quot; &quot; + &quot;|&quot;
@@ -1224,6 +1248,7 @@ export default function GitHubModule(){
         //Find out the owners info;
         const user     = repo.data.owner.login
         const repoName = repo.data.name
+        const description = repo.data.description
         //Get the file contents
         let result = await octokit.repos.getContents({
             owner: user,
@@ -1238,6 +1263,8 @@ export default function GitHubModule(){
         }
         
         let rawFile = JSON.parse(atob(result.data.content))
+        
+        rawFile.description = description
         
         if(rawFile.filetypeVersion == 1){
             return rawFile
