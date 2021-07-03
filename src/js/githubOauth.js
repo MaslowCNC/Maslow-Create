@@ -1168,6 +1168,7 @@ export default function GitHubModule(){
         //Find out the owners info;
         const user     = repo.data.owner.login
         const repoName = repo.data.name
+        const description = repo.data.description
         //Get the file contents
         let result = await octokit.repos.getContents({
             owner: user,
@@ -1182,6 +1183,8 @@ export default function GitHubModule(){
         }
         
         let rawFile = JSON.parse(atob(result.data.content))
+        
+        rawFile.description = description
         
         if(rawFile.filetypeVersion == 1){
             return rawFile
