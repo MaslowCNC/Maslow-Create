@@ -498,6 +498,11 @@ export default class Atom {
             }
         })
         
+        //Add a delete button if we are using the touch interface
+        if(GlobalVariables.touchInterface){
+            this.createButton(valueList,this,"Delete",()=>{this.deleteNode()})
+        }
+        
         return valueList
     }
     

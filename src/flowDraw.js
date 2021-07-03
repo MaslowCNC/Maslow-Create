@@ -25,6 +25,7 @@ flowCanvas.addEventListener('touchstart', event => {
     
     //Keep track of this for the touch up
     lastMoveTouch = event.touches[0]
+    GlobalVariables.touchInterface = true
     
     //Check for a double touch
     var timesinceLastTouch = new Date().getTime() - lastTouchTime;

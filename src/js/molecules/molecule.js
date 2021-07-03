@@ -441,6 +441,10 @@ export default class Molecule extends Atom{
             
         }
         
+        rangeElement.addEventListener('touchend', () => {
+            GlobalVariables.topLevelMolecule.refreshCircles()
+        })
+        
         rangeElement.addEventListener('mouseup', () => {
             GlobalVariables.topLevelMolecule.refreshCircles()
         })
