@@ -28,7 +28,7 @@ flowCanvas.addEventListener('touchstart', event => {
     GlobalVariables.touchInterface = true
     
     //Check for a double touch
-    var timesinceLastTouch = new Date().getTime() - lastTouchTime;
+    var timesinceLastTouch = new Date().getTime() - lastTouchTime
     if((timesinceLastTouch < 600) && (timesinceLastTouch > 0)){
         onDoubleClick(event.touches[0])
     }
@@ -40,7 +40,6 @@ flowCanvas.addEventListener('touchstart', event => {
     
     //This should be a fake right click 
     longTouchTimer = setTimeout(function() {
-        console.log("Long touch timout")
         const downEvt = new MouseEvent('mousedown', {
             clientX: event.touches[0].clientX,
             clientY: event.touches[0].clientY,
@@ -57,7 +56,6 @@ flowCanvas.addEventListener('mousedown', event => {
 
 
 flowCanvas.addEventListener('touchmove', event => {
-    console.log("Touch move happened")
     lastMoveTouch = event.touches[0]
     clearTimeout(longTouchTimer)
     onMouseMove(lastMoveTouch)
@@ -71,7 +69,6 @@ flowCanvas.addEventListener('dblclick', event => {
 })
 
 document.addEventListener('mouseup',(e)=>{
-    console.log("Mouseup ran")
     if(e.srcElement.tagName.toLowerCase() !== ("textarea")
         && e.srcElement.tagName.toLowerCase() !== ("input")
         && e.srcElement.tagName.toLowerCase() !== ("select")
@@ -81,7 +78,7 @@ document.addEventListener('mouseup',(e)=>{
         document.getElementById("mainBody").focus()
     }
 })
-flowCanvas.addEventListener('touchend', event => {
+flowCanvas.addEventListener('touchend', () => {
     clearTimeout(longTouchTimer)
     onMouseUp(lastMoveTouch)
 })
@@ -93,7 +90,6 @@ flowCanvas.addEventListener('mouseup', event => {
 * Called by mouse down
 */
 function onMouseDown(event){
-    console.log("Mousedown ran")
     
     var isRightMB
     if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
@@ -135,7 +131,6 @@ function onMouseDown(event){
         GlobalVariables.currentMolecule.selected = false
     }
     
-    console.log("Hiding menu")
     //hide the menu if it is visible
     if (!document.querySelector('#circle-menu1').contains(event.target)) {
         cmenu.hide()
@@ -179,12 +174,8 @@ function onMouseMove(event){
 * Called by double clicks
 */
 function onDoubleClick(event){
-    var clickHandledByMolecule = false
-    
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (molecule.doubleClick(event.clientX,event.clientY) == true){
-            clickHandledByMolecule = true
-        }
+        molecule.doubleClick(event.clientX,event.clientY)
     })
 }
 
