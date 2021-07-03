@@ -19,12 +19,23 @@ GlobalVariables.canvas.height = window.innerHeight/2.5
 let flowCanvas = document.getElementById('flow-canvas')
 var longTouchTimer
 var lastMoveTouch
+var lastTouchTime = new Date().getTime()
 
 flowCanvas.addEventListener('touchstart', event => {
-    onMouseDown(event.touches[0])
     
     //Keep track of this for the touch up
     lastMoveTouch = event.touches[0]
+    
+    //Check for a double touch
+    var timesinceLastTouch = new Date().getTime() - lastTouchTime;
+    if((timesinceLastTouch < 600) && (timesinceLastTouch > 0)){
+        onDoubleClick(event.touches[0])
+    }
+    else{
+        onMouseDown(event.touches[0])
+    }
+    
+    lastTouchTime = new Date().getTime()
     
     //This should be a fake right click 
     longTouchTimer = setTimeout(function() {
@@ -55,18 +66,7 @@ flowCanvas.addEventListener('mousemove', event => {
 })
 
 flowCanvas.addEventListener('dblclick', event => {
-    //every time the mouse button goes down    
-    var clickHandledByMolecule = false
-    
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (molecule.doubleClick(event.clientX,event.clientY) == true){
-            clickHandledByMolecule = true
-        }
-    })
-    
-    if (clickHandledByMolecule == false){
-        console.warn('double click menu open not working in flowDraw.js')
-    }
+    onDoubleClick(event)
 })
 
 document.addEventListener('mouseup',(e)=>{
@@ -172,6 +172,18 @@ function onMouseUp(event){
 function onMouseMove(event){
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
         molecule.clickMove(event.clientX,event.clientY)
+    })
+}
+/** 
+* Called by double clicks
+*/
+function onDoubleClick(event){
+    var clickHandledByMolecule = false
+    
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        if (molecule.doubleClick(event.clientX,event.clientY) == true){
+            clickHandledByMolecule = true
+        }
     })
 }
 
