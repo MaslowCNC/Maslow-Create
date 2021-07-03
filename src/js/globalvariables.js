@@ -114,6 +114,11 @@ class GlobalVariables{
          */
         this.runMode = false
         /** 
+         * A flag to indicate if the program is running with a touch interface. Set in flowDraw.js.
+         * @type {boolean}
+         */
+        this.touchInterface = false
+        /** 
          * The github object which is used to interact with GitHub.
          * @type {object}
          */

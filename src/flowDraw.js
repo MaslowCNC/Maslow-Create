@@ -17,17 +17,82 @@ GlobalVariables.canvas.height = window.innerHeight/2.5
  * @type {object}
  */
 let flowCanvas = document.getElementById('flow-canvas')
+var longTouchTimer
+var lastMoveTouch
+/** 
+ * The last time a touch was detected...used for timing a long touch.
+ */
+var lastTouchTime = new Date().getTime()
 
-flowCanvas.addEventListener('mousemove', event => {
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-
-        molecule.clickMove(event.clientX,event.clientY)    
-    })
+flowCanvas.addEventListener('touchstart', event => {
+    
+    //Keep track of this for the touch up
+    lastMoveTouch = event.touches[0]
+    GlobalVariables.touchInterface = true
+    
+    //Check for a double touch
+    var timesinceLastTouch = new Date().getTime() - lastTouchTime
+    if((timesinceLastTouch < 600) && (timesinceLastTouch > 0)){
+        onDoubleClick(event.touches[0])
+    }
+    else{
+        onMouseDown(event.touches[0])
+    }
+    
+    lastTouchTime = new Date().getTime()
+    
+    //This should be a fake right click 
+    longTouchTimer = setTimeout(function() {
+        const downEvt = new MouseEvent('mousedown', {
+            clientX: event.touches[0].clientX,
+            clientY: event.touches[0].clientY,
+            which: 3,
+            button: 2,
+            detail: 1
+        })
+        document.getElementById('flow-canvas').dispatchEvent(downEvt)
+    }, 1500)
+})
+flowCanvas.addEventListener('mousedown', event => {
+    onMouseDown(event)
 })
 
-flowCanvas.addEventListener('mousedown', event => {
 
-    //every time the mouse button goes down
+flowCanvas.addEventListener('touchmove', event => {
+    lastMoveTouch = event.touches[0]
+    clearTimeout(longTouchTimer)
+    onMouseMove(lastMoveTouch)
+})
+flowCanvas.addEventListener('mousemove', event => {
+    onMouseMove(event)
+})
+
+flowCanvas.addEventListener('dblclick', event => {
+    onDoubleClick(event)
+})
+
+document.addEventListener('mouseup',(e)=>{
+    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
+        && e.srcElement.tagName.toLowerCase() !== ("input")
+        && e.srcElement.tagName.toLowerCase() !== ("select")
+        &&(!e.srcElement.isContentEditable)){
+        //puts focus back into mainbody after clicking button
+        document.activeElement.blur()
+        document.getElementById("mainBody").focus()
+    }
+})
+flowCanvas.addEventListener('touchend', () => {
+    clearTimeout(longTouchTimer)
+    onMouseUp(lastMoveTouch)
+})
+flowCanvas.addEventListener('mouseup', event => {
+    onMouseUp(event)
+})
+
+/** 
+* Called by mouse down
+*/
+function onMouseDown(event){
     
     var isRightMB
     if ("which" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
@@ -89,46 +154,33 @@ flowCanvas.addEventListener('mousedown', event => {
         })
     }
     
-})
-
-flowCanvas.addEventListener('dblclick', event => {
-    //every time the mouse button goes down    
-    var clickHandledByMolecule = false
-    
-    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        if (molecule.doubleClick(event.clientX,event.clientY) == true){
-            clickHandledByMolecule = true
-        }
-    })
-    
-    if (clickHandledByMolecule == false){
-        console.warn('double click menu open not working in flowDraw.js')
-        //showmenu(event);
-    }
-})
-
-
-document.addEventListener('mouseup',(e)=>{
-
-    if(e.srcElement.tagName.toLowerCase() !== ("textarea")
-        && e.srcElement.tagName.toLowerCase() !== ("input")
-        && e.srcElement.tagName.toLowerCase() !== ("select")
-        &&(!e.srcElement.isContentEditable)){
-        //puts focus back into mainbody after clicking button
-        document.activeElement.blur()
-        document.getElementById("mainBody").focus()
-    }
-})
-
-
-flowCanvas.addEventListener('mouseup', event => {
+}
+/** 
+* Called by mouse up
+*/
+function onMouseUp(event){
     //every time the mouse button goes up
     GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
-        molecule.clickUp(event.clientX,event.clientY)      
+        molecule.clickUp(event.clientX,event.clientY)
     })
-    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)      
-})
-
+    GlobalVariables.currentMolecule.clickUp(event.clientX,event.clientY)
+}
+/** 
+* Called by mouse moves
+*/
+function onMouseMove(event){
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.clickMove(event.clientX,event.clientY)
+    })
+}
+/** 
+* Called by double clicks
+*/
+function onDoubleClick(event){
+    GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {
+        molecule.doubleClick(event.clientX,event.clientY)
+    })
+}
 
 /** 
 * Array containing selected atoms to copy or delete
