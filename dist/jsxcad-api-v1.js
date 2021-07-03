@@ -1,7 +1,7 @@
-import { getModule, generateUniqueId, addPending, write, emit, getControlValue, addSource, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
+import { getModule, generateUniqueId, addPending, write, emit, getControlValue, addSource, hash, addOnEmitHandler, read, elapsed, info, pushModule, popModule } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
-import Shape, { Shape as Shape$1, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
-export { Shape, loadGeometry, log, saveGeometry } from './jsxcad-api-v1-shape.js';
+import Shape, { Shape as Shape$1, add, and, addTo, align, as, bend, clip, clipFrom, color, colors, cut, cutFrom, drop, fuse, grow, inset, keep, loadGeometry, loft, log, loop, material, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, offset, op, pack, push, peg, remesh, rotate, rx, ry, rz, rotateX, rotateY, rotateZ, saveGeometry, scale, smooth, size, sketch, split, tags, test, tint, tool, twist, voidFn, weld, withFn, withInset, withOp, x, y, z } from './jsxcad-api-v1-shape.js';
+export { Shape, add, addTo, align, and, as, bend, clip, clipFrom, color, colors, cut, cutFrom, drop, fuse, grow, inset, keep, loadGeometry, loft, log, loop, material, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, offset, op, pack, peg, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, size, sketch, smooth, split, tags, test, tint, tool, twist, voidFn, weld, withFn, withInset, withOp, x, y, z } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Peg, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, LoopedHull, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Plane, Point, Points, Polygon, Polyhedron, Septagon, Spiral, Tetragon, Triangle, Wave, Weld, ofPlan } from './jsxcad-api-v1-shapes.js';
 import './jsxcad-api-v1-extrude.js';
@@ -28,9 +28,12 @@ import { toSvg } from './jsxcad-convert-svg.js';
 // FIX: Avoid the extra read-write cycle.
 const view = (
   shape,
-  { size, triangles = true, outline = true, wireframe = false },
-  op = (x) => x,
   {
+    size,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    prepareView = (x) => x,
     inline,
     width = 1024,
     height = 512,
@@ -43,9 +46,9 @@ const view = (
     width = size;
     height = size / 2;
   }
-  const viewShape = op(shape);
+  const viewShape = prepareView(shape);
   for (const entry of ensurePages(
-    viewShape.toDisplayGeometry({ triangles, outline, wireframe })
+    viewShape.toDisplayGeometry({ skin, outline, wireframe })
   )) {
     const path = `view/${getModule()}/${generateUniqueId()}`;
     addPending(write(path, entry));
@@ -55,41 +58,25 @@ const view = (
   return shape;
 };
 
-Shape.prototype.view = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [100, -100, 100],
-    withAxes,
-    withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
-    path,
-    width,
-    height,
-    position,
-    withAxes,
-    withGrid,
-  });
-};
-
-Shape.prototype.topView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
+Shape.prototype.view = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [100, -100, 100],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
     width,
     height,
@@ -99,41 +86,25 @@ Shape.prototype.topView = function (
   });
 };
 
-Shape.prototype.gridView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, 0, 100],
-    withAxes,
-    withGrid = true,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
-    path,
-    width,
-    height,
-    position,
-    withAxes,
-    withGrid,
-  });
-};
-
-Shape.prototype.frontView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
-    path,
-    width = 1024,
-    height = 512,
-    position = [0, -100, 0],
-    withAxes,
-    withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
+Shape.prototype.topView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [0, 0, 100],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
     width,
     height,
@@ -143,19 +114,81 @@ Shape.prototype.frontView = function (
   });
 };
 
-Shape.prototype.sideView = function (
-  { size = 512, triangles = true, outline = true, wireframe = false } = {},
-  op,
-  {
+Shape.prototype.gridView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [0, 0, 100],
+  withAxes,
+  withGrid = true,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
-    width = 1024,
-    height = 512,
-    position = [100, 0, 0],
+    width,
+    height,
+    position,
     withAxes,
     withGrid,
-  } = {}
-) {
-  return view(this, { size, triangles, outline, wireframe }, op, {
+  });
+};
+
+Shape.prototype.frontView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [0, -100, 0],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
+    path,
+    width,
+    height,
+    position,
+    withAxes,
+    withGrid,
+  });
+};
+
+Shape.prototype.sideView = function ({
+  size = 512,
+  skin = true,
+  outline = true,
+  wireframe = false,
+  prepareView,
+  path,
+  width = 1024,
+  height = 512,
+  position = [100, 0, 0],
+  withAxes,
+  withGrid,
+} = {}) {
+  return view(this, {
+    size,
+    skin,
+    outline,
+    wireframe,
+    prepareView,
     path,
     width,
     height,
@@ -382,7 +415,10 @@ const recordNote = (note, index) => {
   }
 };
 
-const beginRecordingNotes = () => {
+const beginRecordingNotes = (path, id, sourceLocation) => {
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
@@ -390,15 +426,19 @@ const beginRecordingNotes = () => {
   notes = [];
 };
 
-const saveRecordedNotes = (path) => {
+const saveRecordedNotes = (path, id) => {
   let notesToSave = notes;
   notes = undefined;
   recording = false;
-  addPending(write(path, notesToSave));
+  addPending(write(`data/note/${path}/${id}`, notesToSave));
 };
 
-const replayRecordedNotes = async (path) => {
-  const notes = await read(path);
+const replayRecordedNotes = async (path, id) => {
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+
+  const notes = await read(`data/note/${path}/${id}`);
+
   if (notes === undefined) {
     return;
   }
@@ -419,15 +459,15 @@ const replayRecordedNotes = async (path) => {
  * the api uses.
  */
 
-const x = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
-const y = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
-const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
+const yz = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
+const xz = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
+const xy = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  x: x,
-  y: y,
-  z: z,
+  yz: yz,
+  xz: xz,
+  xy: xy,
   define: define,
   defGrblConstantLaser: defGrblConstantLaser,
   defGrblDynamicLaser: defGrblDynamicLaser,
@@ -450,9 +490,66 @@ var api = /*#__PURE__*/Object.freeze({
   replayRecordedNotes: replayRecordedNotes,
   saveRecordedNotes: saveRecordedNotes,
   Shape: Shape$1,
+  add: add,
+  and: and,
+  addTo: addTo,
+  align: align,
+  as: as,
+  bend: bend,
+  clip: clip,
+  clipFrom: clipFrom,
+  color: color,
+  colors: colors,
+  cut: cut,
+  cutFrom: cutFrom,
+  drop: drop,
+  fuse: fuse,
+  grow: grow,
+  inset: inset,
+  keep: keep,
   loadGeometry: loadGeometry,
+  loft: loft,
   log: log,
+  loop: loop,
+  material: material,
+  minkowskiDifference: minkowskiDifference,
+  minkowskiShell: minkowskiShell,
+  minkowskiSum: minkowskiSum,
+  move: move,
+  noVoid: noVoid,
+  notAs: notAs,
+  offset: offset,
+  op: op,
+  pack: pack,
+  push: push,
+  peg: peg,
+  remesh: remesh,
+  rotate: rotate,
+  rx: rx,
+  ry: ry,
+  rz: rz,
+  rotateX: rotateX,
+  rotateY: rotateY,
+  rotateZ: rotateZ,
   saveGeometry: saveGeometry,
+  scale: scale,
+  smooth: smooth,
+  size: size,
+  sketch: sketch,
+  split: split,
+  tags: tags,
+  test: test,
+  tint: tint,
+  tool: tool,
+  twist: twist,
+  voidFn: voidFn,
+  weld: weld,
+  withFn: withFn,
+  withInset: withInset,
+  withOp: withOp,
+  x: x,
+  y: y,
+  z: z,
   Arc: Arc,
   Assembly: Assembly,
   Box: Box,
@@ -587,4 +684,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, emitSourceLocation, importModule, md, replayRecordedNotes, saveRecordedNotes, source, x, y, z };
+export { beginRecordingNotes, card, control, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, emitSourceLocation, importModule, md, replayRecordedNotes, saveRecordedNotes, source, xy, xz, yz };
