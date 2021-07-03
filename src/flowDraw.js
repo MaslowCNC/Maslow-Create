@@ -19,6 +19,9 @@ GlobalVariables.canvas.height = window.innerHeight/2.5
 let flowCanvas = document.getElementById('flow-canvas')
 var longTouchTimer
 var lastMoveTouch
+/** 
+ * The last time a touch was detected...used for timing a long touch.
+ */
 var lastTouchTime = new Date().getTime()
 
 flowCanvas.addEventListener('touchstart', event => {
