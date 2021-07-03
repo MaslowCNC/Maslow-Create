@@ -774,6 +774,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#touchinterface",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-touchInterface",
+    "src/js/globalvariables.js~GlobalVariables#touchInterface",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#widthtopixels",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-method-widthToPixels",
     "src/js/globalvariables.js~GlobalVariables#widthToPixels",
