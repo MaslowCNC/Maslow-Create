@@ -3,62 +3,6 @@ export { jsxcadMathVec3_js as vec };
 
 /**
  *
- * # Numbers
- *
- * ```
- * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
- * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
- * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
- * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
- * ```
- *
- **/
-
-const EPSILON = 1e-5;
-
-const numbers = (
-  thunk = (n) => n,
-  { from = 0, to, upto, by, resolution } = {}
-) => {
-  const numbers = [];
-  if (by === undefined) {
-    if (resolution !== undefined) {
-      by = to / resolution;
-    } else {
-      by = 1;
-    }
-  }
-
-  if (to === undefined && upto === undefined) {
-    upto = 1;
-  }
-
-  if (upto !== undefined) {
-    // Exclusive
-    for (
-      let number = from, nth = 0;
-      number < upto - EPSILON;
-      number += by, nth++
-    ) {
-      numbers.push(thunk(number, nth));
-    }
-  } else if (to !== undefined) {
-    // Inclusive
-    for (
-      let number = from, nth = 0;
-      number <= to + EPSILON;
-      number += by, nth++
-    ) {
-      numbers.push(thunk(number, nth));
-    }
-  }
-  return numbers;
-};
-
-const each = numbers;
-
-/**
- *
  * # Ease
  *
  * Produces a function for composing easing functions.
@@ -4002,6 +3946,51 @@ min.signature = 'min(...values:number) -> number';
 
 /**
  *
+ * # Numbers
+ *
+ * ```
+ * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
+ * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
+ * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
+ * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
+ * ```
+ *
+ **/
+
+const EPSILON = 1e-5;
+
+const seq = (
+  op = (n) => n,
+  { from = 0, to = 1, upto, downto, by = 1 } = {}
+) => {
+  const numbers = [];
+
+  let consider;
+
+  if (by > 0) {
+    if (upto !== undefined) {
+      consider = (value) => value < upto - EPSILON;
+    } else {
+      consider = (value) => value <= to + EPSILON;
+    }
+  } else if (by < 0) {
+    if (downto !== undefined) {
+      consider = (value) => value > downto + EPSILON;
+    } else {
+      consider = (value) => value >= to - EPSILON;
+    }
+  } else {
+    throw Error('seq: Expects by != 0');
+  }
+
+  for (let number = from, nth = 0; consider(number); number += by, nth++) {
+    numbers.push(op(number, nth));
+  }
+  return numbers;
+};
+
+/**
+ *
  * # Sine
  *
  * Gives the sine in degrees.
@@ -4046,4 +4035,4 @@ const zag = (diameter, tolerance = 1) => {
   return s;
 };
 
-export { Noise, Random, acos, cos, each, ease, linear, max, min, numbers, sin, sqrt, zag };
+export { Noise, Random, acos, cos, ease, linear, max, min, seq, sin, sqrt, zag };

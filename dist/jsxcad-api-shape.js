@@ -1,11 +1,11 @@
-import { add as add$1, dot, subtract, scale as scale$1, negate, normalize, cross, distance } from './jsxcad-math-vec3.js';
+import { add as add$1, dot, subtract, scale as scale$1, abs, negate, normalize, cross, distance } from './jsxcad-math-vec3.js';
 import { fromPoints as fromPoints$2, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, getPeg, union, taggedGroup, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, taggedItem, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, smooth as smooth$1, taggedSketch, split as split$1, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { emit, log as log$1, getModule, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { zag, numbers } from './jsxcad-api-v1-math.js';
+import { zag, seq } from './jsxcad-api-v1-math.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
@@ -442,7 +442,7 @@ const and =
 
 Shape.registerMethod('and', and);
 
-const addTo = (other) => (shape) => add(other, shape);
+const addTo = (other) => (shape) => other.add(shape);
 Shape.registerMethod('addTo', addTo);
 
 const X$3 = 0;
@@ -543,7 +543,7 @@ const clip =
 
 Shape.registerMethod('clip', clip);
 
-const clipFrom = (other) => (shape) => clip(other, shape);
+const clipFrom = (other) => (shape) => other.clip(shape);
 Shape.registerMethod('clipFrom', clipFrom);
 
 const fromName$1 = (shape, name) =>
@@ -592,9 +592,7 @@ const cut =
 
 Shape.registerMethod('cut', cut);
 
-// a.cut(b) === b.cutFrom(a)
-
-const cutFrom = (other) => (shape) => cut(other, shape);
+const cutFrom = (other) => (shape) => other.cut(shape);
 Shape.registerMethod('cutFrom', cutFrom);
 
 const selectToKeep = (matchTags, geometryTags) => {
@@ -809,7 +807,7 @@ const defaultZag = 0.01;
 
 const getSides = (geometry, otherwise = 32) => {
   const [scale] = getScale(geometry);
-  const [length, width] = scale;
+  let [length, width] = abs(scale);
   {
     otherwise = zag(Math.max(length, width) * 2, defaultZag);
   }
@@ -2549,6 +2547,17 @@ const fix =
     Page({ ...options, pack: false }, shape);
 Shape.registerMethod('fix', fix);
 
+const each =
+  (op = (leafs, shape) => leafs) =>
+  (shape) =>
+    op(
+      getLeafs(shape.toDisjointGeometry()).map((leaf) =>
+        Shape.fromGeometry(leaf)
+      ),
+      shape
+    );
+Shape.registerMethod('each', each);
+
 const extrude =
   (...heights) =>
   (shape) => {
@@ -2931,54 +2940,11 @@ const remesh =
 Shape.registerMethod('remesh', remesh);
 
 const rotate =
-  (angle = 0, axis = [0, 0, 1]) =>
+  (turn = 0, axis = [0, 0, 1]) =>
   (shape) =>
-    shape.transform(fromRotation(angle * 0.017453292519943295, axis));
+    shape.transform(fromRotation(turn * Math.PI * 2, axis));
 
 Shape.registerMethod('rotate', rotate);
-
-// rx is in terms of turns -- 1/2 is a half turn.
-const rx$1 =
-  (...angles) =>
-  (shape) =>
-    Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateXToTransform(angle * 360))
-      )
-    );
-
-Shape.registerMethod('rx', rx$1);
-
-// ry is in terms of turns -- 1/2 is a half turn.
-const ry$1 =
-  (...angles) =>
-  (shape) =>
-    Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateYToTransform(angle * 360))
-      )
-    );
-
-Shape.registerMethod('ry', ry$1);
-
-// rz is in terms of turns -- 1/2 is a half turn.
-const rz$1 =
-  (...angles) =>
-  (shape) =>
-    Shape.Group(
-      ...angles.map((angle) =>
-        shape.transform(fromRotateZToTransform(angle * 360))
-      )
-    );
-
-Shape.registerMethod('rz', rz$1);
-
-const rotateX =
-  (...angles) =>
-  (shape) =>
-    Shape.Group(
-      ...angles.map((angle) => shape.transform(fromRotateXToTransform(angle)))
-    );
 
 // rx is in terms of turns -- 1/2 is a half turn.
 const rx =
@@ -2990,15 +2956,10 @@ const rx =
       )
     );
 
-Shape.registerMethod('rotateX', rotateX);
 Shape.registerMethod('rx', rx);
 
-const rotateY =
-  (...angles) =>
-  (shape) =>
-    Shape.Group(
-      ...angles.map((angle) => shape.transform(fromRotateYToTransform(angle)))
-    );
+const rotateX = rx;
+Shape.registerMethod('rotateX', rotateX);
 
 // ry is in terms of turns -- 1/2 is a half turn.
 const ry =
@@ -3010,16 +2971,12 @@ const ry =
       )
     );
 
-Shape.registerMethod('rotateY', rotateY);
 Shape.registerMethod('ry', ry);
 
-const rotateZ =
-  (...angles) =>
-  (shape) =>
-    Shape.Group(
-      ...angles.map((angle) => shape.transform(fromRotateZToTransform(angle)))
-    );
+const rotateY = ry;
+Shape.registerMethod('rotateY', ry);
 
+// rz is in terms of turns -- 1/2 is a half turn.
 const rz =
   (...angles) =>
   (shape) =>
@@ -3029,8 +2986,10 @@ const rz =
       )
     );
 
-Shape.registerMethod('rotateZ', rotateZ);
 Shape.registerMethod('rz', rz);
+
+const rotateZ = rz;
+Shape.registerMethod('rotateZ', rz);
 
 const saveGeometry = async (path, shape) =>
   Shape.fromGeometry(await write(shape.toGeometry(), path));
@@ -3331,8 +3290,8 @@ const weld =
     for (const { polygonsWithHoles } of arrangements) {
       // Keep the planar grouping.
       const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
-      const graph = fromTrianglesToGraph(triangles);
-      welds.push(taggedGraph({}, graph));
+      const graph = fromTrianglesToGraph({}, triangles);
+      welds.push(graph);
     }
     // A group of planar welds.
     return Shape.fromGeometry(taggedGroup({}, ...welds));
@@ -3340,7 +3299,7 @@ const weld =
 
 Shape.registerMethod('weld', weld);
 
-const Weld = (...shapes) => weld(...shapes);
+const Weld = (first, ...rest) => first.weld(...rest);
 
 Shape.prototype.Weld = Shape.shapeMethod(Weld);
 
@@ -3405,25 +3364,19 @@ const alpha =
 Shape.registerMethod('alpha', alpha);
 
 const Spiral = (
-  toPathFromAngle = (angle) => [[angle]],
-  { from = 0, to, upto, by, resolution } = {}
+  toPathFromTurn = (turn) => [[turn]],
+  { from, by, to, upto, downto } = {}
 ) => {
-  if (by === undefined && resolution === undefined) {
-    by = 1;
-  }
-  if (to === undefined && upto === undefined) {
-    to = 360;
-  }
   let path = [null];
-  for (const angle of numbers((angle) => angle, {
+  for (const turn of seq((turn) => turn, {
     from,
+    by,
     to,
     upto,
-    by,
-    resolution,
+    downto,
   })) {
-    const radians = (-angle * Math.PI) / 180;
-    const subpath = toPathFromAngle(angle);
+    const radians = -turn * Math.PI * 2;
+    const subpath = toPathFromTurn(turn);
     path = concatenatePath(path, rotateZPath(radians, subpath));
   }
   return Shape.fromPath(path);
@@ -3434,10 +3387,10 @@ Shape.prototype.Spiral = Shape.shapeMethod(Spiral);
 const Z$1 = 2;
 
 registerReifier('Arc', (geometry) => {
-  let { start = 0, end = 360 } = getAngle(geometry);
+  let { start = 0, end = 1 } = getAngle(geometry);
 
   while (start > end) {
-    start -= 360;
+    start -= 1;
   }
 
   const [scale, middle] = getScale(geometry);
@@ -3445,15 +3398,15 @@ registerReifier('Arc', (geometry) => {
   const corner2 = getCorner2(geometry);
   const top = corner2[Z$1];
   const bottom = corner1[Z$1];
-  const step = 360 / getSides(geometry, 32);
+  const step = 1 / getSides(geometry, 32);
   const steps = Math.ceil((end - start) / step);
   const effectiveStep = (end - start) / steps;
 
   // FIX: corner1 is not really right.
-  if (end - start === 360) {
+  if (end - start === 1) {
     return Spiral((a) => [[1]], {
-      from: start - 90,
-      upto: end - 90,
+      from: start - 1 / 4,
+      upto: end - 1 / 4,
       by: effectiveStep,
     })
       .scale(...scale)
@@ -3471,8 +3424,8 @@ registerReifier('Arc', (geometry) => {
       .toGeometry();
   } else {
     return Spiral((a) => [[1]], {
-      from: start - 90,
-      to: end - 90,
+      from: start - 1 / 4,
+      to: end - 1 / 4,
       by: effectiveStep,
     })
       .scale(...scale)
@@ -3666,7 +3619,7 @@ const Item = () => (shape) =>
 Shape.registerMethod('item', Item);
 
 const Implicit = (op, options) =>
-  Shape.fromGraph(fromFunctionToGraph(op, options));
+  Shape.fromGeometry(fromFunctionToGraph({}, op, options));
 
 Shape.prototype.Implicit = Shape.shapeMethod(Implicit);
 
@@ -3759,7 +3712,7 @@ const Polygon = (...points) => {
   for (const point of points) {
     point.eachPoint((p) => path.push(p));
   }
-  return Shape.fromGraph(fromPathsToGraph([{ points: path }]));
+  return Shape.fromGeometry(fromPathsToGraph({}, [{ points: path }]));
 };
 
 Shape.prototype.Polygon = Shape.shapeMethod(Polygon);
@@ -3792,13 +3745,16 @@ Shape.prototype.Triangle = Shape.shapeMethod(Triangle);
 
 const Wave = (
   toPathFromXDistance = (xDistance) => [[0]],
-  { from = 0, to = 360, by, resolution } = {}
+  { from, by, to, upto, downto } = {}
 ) => {
-  if (by === undefined && resolution === undefined) {
-    by = 1;
-  }
   let path = [null];
-  for (const xDistance of numbers((distance) => distance, { from, to, by })) {
+  for (const xDistance of seq((distance) => distance, {
+    from,
+    by,
+    to,
+    upto,
+    downto,
+  })) {
     const subpath = toPathFromXDistance(xDistance);
     path = concatenatePath(path, translatePath([xDistance, 0, 0], subpath));
   }
@@ -3820,4 +3776,4 @@ const yz = Peg('x', [0, 0, 0], [0, 0, 1], [0, -1, 0]);
 const xz = Peg('y', [0, 0, 0], [0, 0, 1], [1, 0, 0]);
 const xy = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Item, Line, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx$1 as rx, ry$1 as ry, rz$1 as rz, saveGeometry, scale, section, sectionProfile, size, sketch, smooth, split, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Item, Line, Octagon, Orb, Page, Path, Peg, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, size, sketch, smooth, split, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

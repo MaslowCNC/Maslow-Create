@@ -1,9 +1,9 @@
-import api from './jsxcad-api-shape.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import { emit, hash, addOnEmitHandler, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
+import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';

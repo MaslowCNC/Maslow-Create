@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { read, addPending, writeFile, getModule, generateUniqueId, write, getPendingErrorHandler, emit } from './jsxcad-sys.js';
+import { read, emit, addPending, writeFile, getModule, generateUniqueId, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 const readStl = async (

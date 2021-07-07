@@ -1,4 +1,4 @@
-import * as api from './jsxcad-api.js';
+import api from './jsxcad-api.js';
 import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions, listFiles} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
@@ -137,8 +137,6 @@ const agent = async ({
         return;
     }
     
-    console.log(api);
-    
     try{
         if(question.key){
             console.log(question.key);
@@ -157,7 +155,7 @@ const agent = async ({
             break;
           case "extrude":
             const aShape = await maslowRead(question.readPath);
-            const extrudedShape = aShape.pull(question.distance);
+            const extrudedShape = aShape.ex(question.distance);
             await api.saveGeometry(question.writePath, extrudedShape);
             return 1;
             break;

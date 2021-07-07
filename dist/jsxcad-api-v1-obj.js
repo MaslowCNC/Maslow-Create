@@ -1,4 +1,4 @@
-import { fromObj as fromObj$1, fromObjSync } from './jsxcad-convert-obj.js';
+import { fromObjSync, fromObj as fromObj$1 } from './jsxcad-convert-obj.js';
 import { Shape } from './jsxcad-api-shape.js';
 import { read } from './jsxcad-sys.js';
 

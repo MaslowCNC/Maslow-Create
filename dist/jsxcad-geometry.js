@@ -1141,7 +1141,7 @@ const drop = (tags, geometry) =>
 const fromEmpty = ({ tags } = {}) =>
   taggedGraph({ tags }, { isEmpty: true });
 
-const empty = ({ tags }) => taggedGraph({ tags }, fromEmpty());
+const empty = ({ tags }) => fromEmpty({ tags });
 
 const extrude$1 = (geometry, height, depth) => {
   const extrudedMesh = extrudeSurfaceMesh(

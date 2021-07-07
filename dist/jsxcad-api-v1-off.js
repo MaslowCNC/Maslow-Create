@@ -1,4 +1,4 @@
-import { fromOff as fromOff$1, fromOffSync } from './jsxcad-convert-off.js';
+import { fromOffSync, fromOff as fromOff$1 } from './jsxcad-convert-off.js';
 import { Shape } from './jsxcad-api-shape.js';
 import { read } from './jsxcad-sys.js';
 

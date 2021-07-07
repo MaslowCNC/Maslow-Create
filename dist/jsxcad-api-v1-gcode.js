@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
+import { emit, addPending, writeFile, getDefinitions, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 

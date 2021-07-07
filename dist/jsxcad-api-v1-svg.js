@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
+import { read, emit, addPending, writeFile, getDefinitions, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
