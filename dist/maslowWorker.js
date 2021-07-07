@@ -1,4 +1,4 @@
-import * as api from './jsxcad-api-v1.js';
+import * as api from './jsxcad-api.js';
 import { setPendingErrorHandler, emit, log, boot, conversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions, listFiles} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
@@ -136,6 +136,8 @@ const agent = async ({
         await touch(path, { workspace });
         return;
     }
+    
+    console.log(api);
     
     try{
         if(question.key){

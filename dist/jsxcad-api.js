@@ -1,4 +1,4 @@
-import * as shapeApi from './jsxcad-api-shape.js';
+import api from './jsxcad-api-shape.js';
 import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
