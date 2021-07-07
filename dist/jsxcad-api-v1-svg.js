@@ -1,7 +1,6 @@
-import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
+import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { read, addPending, writeFile, getDefinitions, getPendingErrorHandler, emit } from './jsxcad-sys.js';
-import { ensurePages } from './jsxcad-api-v1-shapes.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -30,7 +29,7 @@ const readSvg = async (path, { fill = true, stroke = true } = {}) => {
   if (data === undefined) {
     throw Error(`Cannot read svg from ${path}`);
   }
-  return Shape$1.fromGeometry(
+  return Shape.fromGeometry(
     await fromSvg(data, { doFill: fill, doStroke: stroke })
   );
 };
@@ -50,7 +49,7 @@ const readSvgPath = async (options) => {
   if (data === undefined) {
     data = await read(`cache/${path}`, { sources: [path] });
   }
-  return Shape$1.fromGeometry(await fromSvgPath(options, data));
+  return Shape.fromGeometry(await fromSvgPath(options, data));
 };
 
 function pad (hash, len) {
@@ -146,8 +145,8 @@ const downloadSvgMethod = function (name, options = {}) {
   emit({ download, hash: hash$1 });
   return this;
 };
-Shape$1.prototype.downloadSvg = downloadSvgMethod;
-Shape$1.prototype.svg = downloadSvgMethod;
+Shape.prototype.downloadSvg = downloadSvgMethod;
+Shape.prototype.svg = downloadSvgMethod;
 
 const writeSvg = (shape, name, options = {}) => {
   for (const { data, filename } of prepareSvg(shape, name, {})) {
@@ -159,7 +158,7 @@ const writeSvg = (shape, name, options = {}) => {
 const writeSvgMethod = function (...args) {
   return writeSvg(this, ...args);
 };
-Shape$1.prototype.writeSvg = writeSvgMethod;
+Shape.prototype.writeSvg = writeSvgMethod;
 
 const api = { SvgPath, readSvg, readSvgPath, writeSvg };
 

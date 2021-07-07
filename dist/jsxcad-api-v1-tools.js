@@ -1,6 +1,5 @@
+import { Peg, Shape } from './jsxcad-api-shape.js';
 import { taggedGroup, outline, translate } from './jsxcad-geometry.js';
-import { Peg } from './jsxcad-api-v1-shapes.js';
-import { Shape } from './jsxcad-api-v1-shape.js';
 import { each } from './jsxcad-api-v1-math.js';
 import { getDefinitions } from './jsxcad-sys.js';
 import { toToolFromTags } from './jsxcad-algorithm-tool.js';

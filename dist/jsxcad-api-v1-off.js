@@ -1,5 +1,5 @@
 import { fromOff as fromOff$1, fromOffSync } from './jsxcad-convert-off.js';
-import Shape from './jsxcad-api-v1-shape.js';
+import { Shape } from './jsxcad-api-shape.js';
 import { read } from './jsxcad-sys.js';
 
 const fromOff = async (data, { invert = false } = {}) =>
