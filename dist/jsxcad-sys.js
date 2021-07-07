@@ -270,6 +270,7 @@ let idleServiceLimit = 5;
 const activeServices = new Set();
 const idleServices = [];
 const pending$1 = [];
+const watchers$1 = new Set();
 
 // TODO: Consider different specifications.
 
@@ -308,7 +309,18 @@ const releaseService = async (spec, service) => {
     // Drop the service.
     activeServices.delete(service);
   }
+  for (const watcher of watchers$1) {
+    watcher();
+  }
 };
+
+const getServicePoolInfo = () => ({
+  activeServiceCount: activeServices.size,
+  serviceLimit,
+  idleServiceLimit,
+  idleServiceCount: idleServices.length,
+  pendingCount: pending$1.length,
+});
 
 const getServiceCount = () => activeServices.size + idleServices.length;
 
@@ -336,6 +348,27 @@ const tellServices = (question) => {
   for (const { tell } of [...idleServices, ...activeServices]) {
     tell(question);
   }
+};
+
+const waitServices = () => {
+  return new Promise((resolve, reject) => {
+    let watcher;
+    watcher = () => {
+      unwatchServices(watcher);
+      resolve();
+    };
+    watchServices(watcher);
+  });
+};
+
+const watchServices = (watcher) => {
+  watchers$1.add(watcher);
+  return watcher;
+};
+
+const unwatchServices = (watcher) => {
+  watchers$1.delete(watcher);
+  return watcher;
 };
 
 const conversation = ({ agent, say }) => {
@@ -4314,6 +4347,11 @@ const deleteFile = async (options, path) => {
   await deleteFile$1(options, path);
 };
 
+const sleep = (ms = 0) =>
+  new Promise((resolve, reject) => {
+    setTimeout(resolve, ms);
+  });
+
 // This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
 // optimize the gzip compression for this alphabet.
 let urlAlphabet =
@@ -4332,4 +4370,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write, writeFile };
+export { addOnEmitHandler, addPending, addSource, ask, askService, askServices, boot, clearEmitted, conversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, getSources, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

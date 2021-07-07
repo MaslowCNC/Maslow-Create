@@ -1,5 +1,5 @@
 import { taggedPaths, taggedGroup, isClosedPath } from './jsxcad-geometry.js';
-import Shape from './jsxcad-api-v1-shape.js';
+import { Shape } from './jsxcad-api-shape.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
 import { numbers } from './jsxcad-api-v1-math.js';
@@ -119,12 +119,6 @@ const simplifyPath = (path, tolerance = 0.01) => {
     return [null, ...simplifyPath$1(path.slice(1), tolerance)];
   }
 };
-
-/**
- *
- * # Read PNG
- *
- **/
 
 const readPng = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
