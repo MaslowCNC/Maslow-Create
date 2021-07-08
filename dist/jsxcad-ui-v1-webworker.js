@@ -69,7 +69,9 @@ function sum (o) {
 
 var hashSum = sum;
 
-/* global postMessage, onmessage:writable, self */
+/* global FileReaderSync, postMessage, onmessage:writable, self */
+
+self.window = {};
 
 const resolveNotebook = async () => {
   await sys.resolvePending(); // Update the notebook.
@@ -129,6 +131,28 @@ const agent = async ({
     await sys.touch(path, {
       workspace
     });
+  } else if (question.staticView) {
+    const {
+      path,
+      workspace,
+      view,
+      offscreenCanvas
+    } = question.staticView;
+    const geometry = await sys.readOrWatch(path, {
+      workspace
+    });
+    const {
+      staticView
+    } = await import('./jsxcad-ui-threejs.js');
+    await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
+      canvas: offscreenCanvas
+    });
+    const blob = await offscreenCanvas.convertToBlob({
+      type: 'image/png'
+    });
+    const dataURL = new FileReaderSync().readAsDataURL(blob);
+    console.log(`QQ/rendered: ${path}`);
+    return dataURL;
   } else if (question.evaluate) {
     sys.setupFilesystem({
       fileBase: question.workspace
