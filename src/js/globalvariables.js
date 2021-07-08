@@ -174,12 +174,22 @@ class GlobalVariables{
          */
         this.availablePaths = []
         /** 
-         * A flag to indicate if the faces of the shape should be displayed.
+         * A flag to indicate if a grid should be displayed behind the shape
+         * @type {boolean}
+         */
+        this.displayGrid = true
+        /** 
+         * A flag to indicate if the edges of the shape should be displayed.
+         * @type {boolean}
+         */
+        this.displayAxis = true
+        /** 
+         * A flag to indicate if the display should show axis.
          * @type {boolean}
          */
         this.displayTriangles = true
         /** 
-         * A flag to indicate if the edges of the shape should be displayed.
+         * A flag to indicate if the faces of the shape should be displayed.
          * @type {boolean}
          */
         this.displayEdges = true
@@ -259,7 +269,7 @@ class GlobalVariables{
             document.getElementById('viewerContext').style.filter="sepia(0%)"
             
             if(result && result != -1){
-                window.updateDisplay(result)
+                window.updateDisplay(result, {withGrid: this.displayGrid})
             }
         }).catch (() => console.warn("Canceled display update"))
         

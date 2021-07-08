@@ -409,7 +409,9 @@ function checkBoxes(){
         GlobalVariables.displayAxis = document.getElementById('axesCheck').checked
         GlobalVariables.displayWireframe = document.getElementById('wireframeCheck').checked
         GlobalVariables.displayEdges = document.getElementById('edgesCheck').checked
-        GlobalVariables.displayFaces = document.getElementById('facesCheck').checked
+        GlobalVariables.displayTriangles = document.getElementById('facesCheck').checked
+        
+        GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
     }
     
     let viewerBar = document.querySelector('#viewer_bar')
@@ -471,7 +473,7 @@ function checkBoxes(){
     facesCheck.setAttribute('type', 'checkbox')
     facesCheck.setAttribute('id', 'facesCheck')
     
-    if(GlobalVariables.displayFaces){
+    if(GlobalVariables.displayTriangles){
         facesCheck.setAttribute('checked', 'true')
     }
     
