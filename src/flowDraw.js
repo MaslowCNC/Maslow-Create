@@ -509,23 +509,23 @@ function checkBoxes(){
     edgesCheck.addEventListener('change', checkBoxChange)
     
     //Display wireframe
-    var wireframeDiv = document.createElement('div')
-    viewerBar.appendChild(wireframeDiv)
-    var wireframeCheck = document.createElement('button')
-    wireframeCheck.innerHTML = "Reset View"
-    wireframeDiv.appendChild(wireframeCheck)
-    wireframeCheck.setAttribute('type', 'checkbox')
-    wireframeCheck.setAttribute('id', 'wireframeCheck')
+    var resetDiv = document.createElement('div')
+    viewerBar.appendChild(resetDiv)
+    var resetButton = document.createElement('button')
+    resetButton.innerHTML = "Reset View"
+    resetDiv.appendChild(resetButton)
+    resetButton.setAttribute('type', 'checkbox')
+    resetButton.setAttribute('id', 'resetButton')
     
-    var wireframeCheckLabel = document.createElement('label')
-    wireframeDiv.appendChild(wireframeCheckLabel)
-    wireframeCheckLabel.setAttribute('for', 'wireframeCheck')
-    wireframeCheckLabel.setAttribute('style', 'margin-right:1em;')
-    wireframeDiv.setAttribute('style', 'float:right;')
-    wireframeCheckLabel.textContent= " "
-    wireframeCheckLabel.setAttribute('style', 'user-select: none;')
+    var resetButtonLabel = document.createElement('label')
+    resetDiv.appendChild(resetButtonLabel)
+    resetButtonLabel.setAttribute('for', 'resetButton')
+    resetButtonLabel.setAttribute('style', 'margin-right:1em;')
+    resetDiv.setAttribute('style', 'float:right;')
+    resetButtonLabel.textContent= " "
+    resetButtonLabel.setAttribute('style', 'user-select: none;')
 
-    wireframeCheck.addEventListener('click', ()=>{GlobalVariables.writeToDisplay(GlobalVariables.displayedPath, true)})
+    resetButton.addEventListener('click', ()=>{GlobalVariables.writeToDisplay(GlobalVariables.displayedPath, true)})
     
 }
 
