@@ -678,9 +678,21 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/globalvariables.js~globalvariables#displayaxis",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayAxis",
+    "src/js/globalvariables.js~GlobalVariables#displayAxis",
+    "member"
+  ],
+  [
     "src/js/globalvariables.js~globalvariables#displayedges",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayEdges",
     "src/js/globalvariables.js~GlobalVariables#displayEdges",
+    "member"
+  ],
+  [
+    "src/js/globalvariables.js~globalvariables#displaygrid",
+    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayGrid",
+    "src/js/globalvariables.js~GlobalVariables#displayGrid",
     "member"
   ],
   [
@@ -693,12 +705,6 @@ window.esdocSearchIndex = [
     "src/js/globalvariables.js~globalvariables#displaytriangles",
     "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayTriangles",
     "src/js/globalvariables.js~GlobalVariables#displayTriangles",
-    "member"
-  ],
-  [
-    "src/js/globalvariables.js~globalvariables#displaywireframe",
-    "class/src/js/globalvariables.js~GlobalVariables.html#instance-member-displayWireframe",
-    "src/js/globalvariables.js~GlobalVariables#displayWireframe",
     "member"
   ],
   [

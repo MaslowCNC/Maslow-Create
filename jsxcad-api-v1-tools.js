@@ -1,8 +1,7 @@
+import { Peg, Shape } from './jsxcad-api-shape.js';
 import { taggedGroup, outline, translate } from './jsxcad-geometry.js';
-import { Peg } from './jsxcad-api-v1-shapes.js';
-import { Shape } from './jsxcad-api-v1-shape.js';
-import { each } from './jsxcad-api-v1-math.js';
 import { getDefinitions } from './jsxcad-sys.js';
+import { seq } from './jsxcad-api-v1-math.js';
 import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
 const Z = 2;
@@ -19,7 +18,7 @@ const carve = (block, tool = {}, ...shapes) => {
   // Use sectionProfile when it is fixed.
   return negative
     .section(
-      ...each((l) => z.z(l), {
+      ...seq((l) => z.z(l), {
         from: min[Z],
         upto: max[Z],
         by: effectiveCutDepth,
@@ -44,7 +43,7 @@ const mill = (tool = {}, negative) => {
   // Use sectionProfile when it is fixed.
   return negative
     .section(
-      ...each((l) => z.z(l), {
+      ...seq((l) => z.z(l), {
         from: min[Z],
         upto: max[Z],
         by: effectiveCutDepth,

@@ -1,11 +1,11 @@
 {
   "coverage": "99.66%",
-  "expectCount": 600,
-  "actualCount": 598,
+  "expectCount": 599,
+  "actualCount": 597,
   "files": {
     "src/flowDraw.js": {
-      "expectCount": 18,
-      "actualCount": 18,
+      "expectCount": 16,
+      "actualCount": 16,
       "undocumentLines": []
     },
     "src/js/alwaysOneFreeInput.js": {
@@ -24,8 +24,8 @@
       "undocumentLines": []
     },
     "src/js/globalvariables.js": {
-      "expectCount": 30,
-      "actualCount": 30,
+      "expectCount": 31,
+      "actualCount": 31,
       "undocumentLines": []
     },
     "src/js/licenseOptions.js": {

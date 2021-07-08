@@ -466,23 +466,22 @@ let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
  */ 
 let arrowUpMenu = document.querySelector(&apos;#arrow-up-menu&apos;)
 
-
-/** 
-* A flag to indicate if the grid should be displayed
-* @type {boolean}
-*/
-var displayGrid = true
-/** 
-* A flag to indicate if the axis should be displayed
-* @type {boolean}
-*/
-var displayAxis = true
-
 /**
- * Creates the checkbox hidden menu when viewer is active
+ * Creates the checkbox hidden menu when viewer is active. These really shouldn&apos;t be regenerated every time. They should just be hidden.
  */ 
 function checkBoxes(){
-    let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)   
+    
+    //Update the values from all the check boxes
+    function checkBoxChange(){
+        GlobalVariables.displayGrid = document.getElementById(&apos;gridCheck&apos;).checked
+        GlobalVariables.displayAxis = document.getElementById(&apos;axesCheck&apos;).checked
+        GlobalVariables.displayEdges = document.getElementById(&apos;edgesCheck&apos;).checked
+        GlobalVariables.displayTriangles = document.getElementById(&apos;facesCheck&apos;).checked
+        
+        GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+    }
+    
+    let viewerBar = document.querySelector(&apos;#viewer_bar&apos;)
     viewerBar.classList.add(&apos;slidedown&apos;)
 
     //Grid display html element
@@ -495,7 +494,7 @@ function checkBoxes(){
     gridCheck.setAttribute(&apos;id&apos;, &apos;gridCheck&apos;)
     gridDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
            
-    if (displayGrid){
+    if (GlobalVariables.displayGrid){
         gridCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
     }
 
@@ -507,17 +506,7 @@ function checkBoxes(){
     gridCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
 
 
-    gridCheck.addEventListener(&apos;change&apos;, event =&gt; {
-        if(event.target.checked){
-            displayGrid = true
-            this.writeToDisplay(this.displayedGeometry)
-
-        }
-        else{
-            displayGrid = false
-            this.writeToDisplay(this.displayedGeometry)
-        }
-    })
+    gridCheck.addEventListener(&apos;change&apos;, checkBoxChange)
 
     //Axes Html
 
@@ -528,7 +517,7 @@ function checkBoxes(){
     axesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
     axesCheck.setAttribute(&apos;id&apos;, &apos;axesCheck&apos;)
             
-    if (displayAxis){
+    if (GlobalVariables.displayAxis){
         axesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
     }
 
@@ -540,17 +529,7 @@ function checkBoxes(){
     axesCheckLabel.textContent= &quot;Axes&quot;
     axesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
 
-    axesCheck.addEventListener(&apos;change&apos;, event =&gt; {
-        if(event.target.checked){
-            displayAxis = true
-
-            this.writeToDisplay(this.displayedGeometry)
-        }
-        else{
-            displayAxis = false
-            this.writeToDisplay(this.displayedGeometry)
-        }
-    })
+    axesCheck.addEventListener(&apos;change&apos;, checkBoxChange)
     
     
     //Display faces
@@ -561,7 +540,9 @@ function checkBoxes(){
     facesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
     facesCheck.setAttribute(&apos;id&apos;, &apos;facesCheck&apos;)
     
-    facesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    if(GlobalVariables.displayTriangles){
+        facesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    }
     
     var facesCheckLabel = document.createElement(&apos;label&apos;)
     facesDiv.appendChild(facesCheckLabel)
@@ -571,16 +552,7 @@ function checkBoxes(){
     facesCheckLabel.textContent= &quot;Faces&quot;
     facesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
 
-    facesCheck.addEventListener(&apos;change&apos;, event =&gt; {
-        if(event.target.checked){
-            GlobalVariables.displayTriangles = true
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-        else{
-            GlobalVariables.displayTriangles = false
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-    })
+    facesCheck.addEventListener(&apos;change&apos;, checkBoxChange)
     
     //Display edges
     var edgesDiv = document.createElement(&apos;div&apos;)
@@ -590,7 +562,9 @@ function checkBoxes(){
     edgesCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
     edgesCheck.setAttribute(&apos;id&apos;, &apos;edgesCheck&apos;)
     
-    edgesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    if(GlobalVariables.displayEdges){
+        edgesCheck.setAttribute(&apos;checked&apos;, &apos;true&apos;)
+    }
     
     var edgesCheckLabel = document.createElement(&apos;label&apos;)
     edgesDiv.appendChild(edgesCheckLabel)
@@ -600,43 +574,27 @@ function checkBoxes(){
     edgesCheckLabel.textContent= &quot;Edges&quot;
     edgesCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
 
-    edgesCheck.addEventListener(&apos;change&apos;, event =&gt; {
-        if(event.target.checked){
-            GlobalVariables.displayEdges = true
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-        else{
-            GlobalVariables.displayEdges = false
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-    })
+    edgesCheck.addEventListener(&apos;change&apos;, checkBoxChange)
     
     //Display wireframe
-    var wireframeDiv = document.createElement(&apos;div&apos;)
-    viewerBar.appendChild(wireframeDiv)
-    var wireframeCheck = document.createElement(&apos;input&apos;)
-    wireframeDiv.appendChild(wireframeCheck)
-    wireframeCheck.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
-    wireframeCheck.setAttribute(&apos;id&apos;, &apos;wireframeCheck&apos;)
+    var resetDiv = document.createElement(&apos;div&apos;)
+    viewerBar.appendChild(resetDiv)
+    var resetButton = document.createElement(&apos;button&apos;)
+    resetButton.innerHTML = &quot;Reset View&quot;
+    resetDiv.appendChild(resetButton)
+    resetButton.setAttribute(&apos;type&apos;, &apos;checkbox&apos;)
+    resetButton.setAttribute(&apos;id&apos;, &apos;resetButton&apos;)
     
-    var wireframeCheckLabel = document.createElement(&apos;label&apos;)
-    wireframeDiv.appendChild(wireframeCheckLabel)
-    wireframeCheckLabel.setAttribute(&apos;for&apos;, &apos;wireframeCheck&apos;)
-    wireframeCheckLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
-    wireframeDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
-    wireframeCheckLabel.textContent= &quot;Wireframe&quot;
-    wireframeCheckLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
+    var resetButtonLabel = document.createElement(&apos;label&apos;)
+    resetDiv.appendChild(resetButtonLabel)
+    resetButtonLabel.setAttribute(&apos;for&apos;, &apos;resetButton&apos;)
+    resetButtonLabel.setAttribute(&apos;style&apos;, &apos;margin-right:1em;&apos;)
+    resetDiv.setAttribute(&apos;style&apos;, &apos;float:right;&apos;)
+    resetButtonLabel.textContent= &quot; &quot;
+    resetButtonLabel.setAttribute(&apos;style&apos;, &apos;user-select: none;&apos;)
 
-    wireframeCheck.addEventListener(&apos;change&apos;, event =&gt; {
-        if(event.target.checked){
-            GlobalVariables.displayWireframe = true
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-        else{
-            GlobalVariables.displayWireframe = false
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-    })
+    resetButton.addEventListener(&apos;click&apos;, ()=&gt;{GlobalVariables.writeToDisplay(GlobalVariables.displayedPath, true)})
+    
 }
 
 document.getElementById(&apos;viewerContext&apos;).addEventListener(&apos;mouseenter&apos;, () =&gt; {

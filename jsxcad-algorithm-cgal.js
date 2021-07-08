@@ -1,4 +1,4 @@
-import { emit, log, onBoot, isNode } from './jsxcad-sys.js';
+import { onBoot, emit, log, isNode } from './jsxcad-sys.js';
 import { identityMatrix } from './jsxcad-math-mat4.js';
 import { equals } from './jsxcad-math-vec3.js';
 
@@ -1094,6 +1094,9 @@ const fromPointsToSurfaceMesh = (points) => {
 };
 
 const fromPolygonsToSurfaceMesh = (jsPolygons) => {
+  if (!Array.isArray(jsPolygons)) {
+    throw Error('Expected an array');
+  }
   const c = getCgal();
   const surfaceMesh = c.FromPolygonSoupToSurfaceMesh((triples, polygons) => {
     let index = 0;

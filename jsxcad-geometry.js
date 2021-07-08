@@ -1141,7 +1141,7 @@ const drop = (tags, geometry) =>
 const fromEmpty = ({ tags } = {}) =>
   taggedGraph({ tags }, { isEmpty: true });
 
-const empty = ({ tags }) => taggedGraph({ tags }, fromEmpty());
+const empty = ({ tags }) => fromEmpty({ tags });
 
 const extrude$1 = (geometry, height, depth) => {
   const extrudedMesh = extrudeSurfaceMesh(
@@ -1750,9 +1750,6 @@ const intersection = (geometry, ...geometries) => {
             );
           }
         }
-        if (intersection.hash) {
-          throw Error(`hash`);
-        }
         return taggedGroup({ tags }, ...intersections);
       }
       case 'paths': {
@@ -1790,8 +1787,6 @@ const intersection = (geometry, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
-
-// export const intersection = cache(intersectionImpl);
 
 const fromPolygonsWithHoles = ({ tags }, polygonsWithHoles) =>
   fromTriangles({ tags }, fromPolygonsWithHolesToTriangles(polygonsWithHoles));
@@ -2925,9 +2920,6 @@ const unionImpl = (geometry, ...geometries) => {
               )
             );
           }
-        }
-        if (unified.hash) {
-          throw Error(`hash`);
         }
         return unified;
       }
