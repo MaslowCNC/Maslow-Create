@@ -53814,7 +53814,10 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
-  const updateGeometry = async (geometry) => {
+  const updateGeometry = async (
+    geometry, 
+    { withGrid = true} = {}
+  ) => {
     // Delete any previous dataset in the window.
     for (const { mesh } of datasets) {
       scene.remove(mesh);
@@ -53822,7 +53825,9 @@ const orbitDisplay = async (
 
     // Build new datasets from the written data, and display them.
     datasets = [];
-
+    
+    console.log("withGrid in updateGeometry: " + withGrid);
+    
     await buildMeshes({
       datasets,
       geometry,
@@ -53830,7 +53835,7 @@ const orbitDisplay = async (
       render,
       definitions,
     });
-
+    
     moveToFit({
       datasets,
       view,

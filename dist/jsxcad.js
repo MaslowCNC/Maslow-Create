@@ -39,7 +39,7 @@ window.ask = (question) => {
 };
 
 
-//Add 3d view //With axis does not work right now. Needs to be changed in jsxcad-ui-threejs
+//Add 3d view
 orbitDisplay({view: {fit: false}, withAxes: true, withGrid: true, gridLayer: 0}, document.getElementById('viewerContext')).then(result=>{
     window.updateDisplay = result.updateGeometry
 });
