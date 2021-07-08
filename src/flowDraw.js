@@ -386,18 +386,6 @@ let viewerBar = document.querySelector('#viewer_bar')
  */ 
 let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
-
-/** 
-* A flag to indicate if the grid should be displayed
-* @type {boolean}
-*/
-var displayGrid = true
-/** 
-* A flag to indicate if the axis should be displayed
-* @type {boolean}
-*/
-var displayAxis = true
-
 /**
  * Creates the checkbox hidden menu when viewer is active. These really shouldn't be regenerated every time. They should just be hidden.
  */ 
