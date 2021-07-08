@@ -269,7 +269,7 @@ class GlobalVariables{
             document.getElementById('viewerContext').style.filter="sepia(0%)"
             
             if(result && result != -1){
-                window.updateDisplay(result, {withGrid: this.displayGrid})
+                window.updateDisplay(result, {withGrid: this.displayGrid, fit: false})
             }
         }).catch (() => console.warn("Canceled display update"))
         

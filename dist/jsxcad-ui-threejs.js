@@ -53686,10 +53686,12 @@ const moveToFit = ({
       datasets.push({ mesh: grid });
     }
   }
-
+  
   if (!fit) {
     return;
   }
+
+  controls.reset();
 
   const center = box.getCenter(new Vector3());
   // const size = box.getSize(new Vector3());
@@ -53816,7 +53818,7 @@ const orbitDisplay = async (
 
   const updateGeometry = async (
     geometry, 
-    { withGrid = true} = {}
+    { withGrid = true, fit = true} = {}
   ) => {
     // Delete any previous dataset in the window.
     for (const { mesh } of datasets) {
@@ -53826,7 +53828,9 @@ const orbitDisplay = async (
     // Build new datasets from the written data, and display them.
     datasets = [];
     
-    console.log("withGrid in updateGeometry: " + withGrid);
+    if(withGrid){
+        trackball
+    }
     
     await buildMeshes({
       datasets,
@@ -53835,6 +53839,8 @@ const orbitDisplay = async (
       render,
       definitions,
     });
+    
+    view.fit = fit;
     
     moveToFit({
       datasets,
