@@ -174,20 +174,25 @@ class GlobalVariables{
          */
         this.availablePaths = []
         /** 
-         * A flag to indicate if the faces of the shape should be displayed.
+         * A flag to indicate if a grid should be displayed behind the shape
          * @type {boolean}
          */
-        this.displayTriangles = true
+        this.displayGrid = true
         /** 
          * A flag to indicate if the edges of the shape should be displayed.
          * @type {boolean}
          */
-        this.displayEdges = true
+        this.displayAxis = true
         /** 
-         * A flag to indicate if the wire frame of the shape should be displayed.
+         * A flag to indicate if the display should show axis.
          * @type {boolean}
          */
-        this.displayWireframe = false
+        this.displayTriangles = true
+        /** 
+         * A flag to indicate if the faces of the shape should be displayed.
+         * @type {boolean}
+         */
+        this.displayEdges = true
          
         const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
@@ -235,7 +240,7 @@ class GlobalVariables{
     * A function which reads from a path and displays the geometry it contains
     * @param {string} The path to read from
     */
-    writeToDisplay(path){
+    writeToDisplay(path, resetView = false){
         
         this.displayedPath = path
         
@@ -250,7 +255,7 @@ class GlobalVariables{
             readPath: path, 
             triangles: this.displayTriangles, 
             outline: this.displayEdges, 
-            wireframe: this.displayWireframe 
+            wireframe: false 
         })
         
         returned.then( result => {
@@ -259,7 +264,7 @@ class GlobalVariables{
             document.getElementById('viewerContext').style.filter="sepia(0%)"
             
             if(result && result != -1){
-                window.updateDisplay(result)
+                window.updateDisplay(result, {withGrid: this.displayGrid, fit: resetView})
             }
         }).catch (() => console.warn("Canceled display update"))
         

@@ -1,5 +1,5 @@
-import { fromObj as fromObj$1, fromObjSync } from './jsxcad-convert-obj.js';
-import Shape from './jsxcad-api-v1-shape.js';
+import { fromObjSync, fromObj as fromObj$1 } from './jsxcad-convert-obj.js';
+import { Shape } from './jsxcad-api-shape.js';
 import { read } from './jsxcad-sys.js';
 
 const fromObj = async (data, { invert = false } = {}) =>

@@ -1,6 +1,6 @@
 import { add, transform } from './jsxcad-math-vec3.js';
 import { identity, fromZRotation, multiply } from './jsxcad-math-mat4.js';
-import Shape from './jsxcad-api-v1-shape.js';
+import { Shape } from './jsxcad-api-shape.js';
 import { closePath } from './jsxcad-geometry.js';
 
 // Normalize (1, 2, 3) and ([1, 2, 3]).
