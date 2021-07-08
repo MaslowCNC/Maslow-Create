@@ -284,7 +284,7 @@ const acquireService = async (spec, newService) => {
     return service;
   } else if (activeServices.size < serviceLimit) {
     // Create a new service.
-    const service = await newService(spec);
+    const service = newService(spec);
     activeServices.add(service);
     return service;
   } else {
@@ -295,8 +295,10 @@ const acquireService = async (spec, newService) => {
   }
 };
 
-const releaseService = async (spec, service) => {
-  if (pending$1.length > 0) {
+const releaseService = async (spec, service, terminated = false) => {
+  if (terminated) {
+    activeServices.drop(service);
+  } else if (pending$1.length > 0) {
     // Send it directly to someone who needs it.
     // FIX: Consider different specifications.
     const request = pending$1.shift();
@@ -332,7 +334,7 @@ const terminateActiveServices = async () => {
   // TODO: Enable up to activeService worth of pending tasks.
   while (pending$1.length < 0 && getServiceCount() < serviceLimit) {
     const { spec, newService, resolve } = pending$1.shift();
-    const service = await newService(spec);
+    const service = newService(spec);
     activeServices.add(service);
     resolve(service);
   }
@@ -374,11 +376,11 @@ const unwatchServices = (watcher) => {
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = new Map();
-  const ask = (question) => {
+  const ask = (question, transfer) => {
     const promise = new Promise((resolve, reject) => {
       openQuestions.set(id, { resolve, reject });
     });
-    say({ id, question });
+    say({ id, question }, transfer);
     id += 1;
     return promise;
   };
@@ -446,10 +448,18 @@ const webService = async ({
       { webWorker, type: workerType },
       ({ webWorker, type }) => {
         const worker = new Worker(webWorker, { type: workerType });
-        const say = (message) => worker.postMessage(message);
+        const say = (message, transfer) =>
+          worker.postMessage(message, transfer);
         const { ask, hear } = conversation({ agent, say });
         const tell = (statement) => say({ statement });
-        const terminate = async () => worker.terminate();
+        const terminate = async () => {
+          worker.terminate();
+          releaseService(
+            { webWorker, type: workerType },
+            service,
+            /* terminated= */ true
+          );
+        };
         worker.onmessage = ({ data }) => hear(data);
         worker.onerror = (error) => {
           console.log(`QQ/webWorker/error: ${error}`);
@@ -482,7 +492,7 @@ const createService = async ({
   }
 };
 
-const askService = (spec, question) => {
+const askService = (spec, question, transfer) => {
   let cancel;
   const promise = new Promise((resolve, reject) => {
     let ask, release, terminate;
@@ -493,22 +503,23 @@ const askService = (spec, question) => {
         terminate = service.terminate;
         cancel = () => {
           terminate();
+          release = false;
           reject(Error('Terminated'));
         };
       })
-      .then(() => ask(question))
+      .then(() => ask(question, transfer))
       .then((answer) => {
-        if (release) {
-          release();
-        }
         resolve(answer);
       })
       .catch((error) => {
         console.log(`QQ/askService: ${error.stack}`);
+        reject(error);
+      })
+      .finally(() => {
+        if (release) {
+          release();
+        }
       });
-    cancel = () => {
-      reject(Error('Cancelled'));
-    };
   });
   promise.cancel = cancel;
   return promise;

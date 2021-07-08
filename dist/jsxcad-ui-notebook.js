@@ -2768,7 +2768,7 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { data, path, view, openView } = note;
+      const { data, path, url, view, openView } = note;
       const { width, height, target, up, position, withAxes, withGrid } = view;
       const image = document.createElement('img');
       image.style.height = `${21 * 13}px`;
@@ -2793,7 +2793,9 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
         image.src = url;
       };
 
-      if (data) {
+      if (url) {
+        image.src = url;
+      } else if (data) {
         await updateImage(data);
       } else if (path) {
         readOrWatch(path).then(updateImage);
