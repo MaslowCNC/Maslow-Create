@@ -386,23 +386,22 @@ let viewerBar = document.querySelector('#viewer_bar')
  */ 
 let arrowUpMenu = document.querySelector('#arrow-up-menu')
 
-
-/** 
-* A flag to indicate if the grid should be displayed
-* @type {boolean}
-*/
-var displayGrid = true
-/** 
-* A flag to indicate if the axis should be displayed
-* @type {boolean}
-*/
-var displayAxis = true
-
 /**
- * Creates the checkbox hidden menu when viewer is active
+ * Creates the checkbox hidden menu when viewer is active. These really shouldn't be regenerated every time. They should just be hidden.
  */ 
 function checkBoxes(){
-    let viewerBar = document.querySelector('#viewer_bar')   
+    
+    //Update the values from all the check boxes
+    function checkBoxChange(){
+        GlobalVariables.displayGrid = document.getElementById('gridCheck').checked
+        GlobalVariables.displayAxis = document.getElementById('axesCheck').checked
+        GlobalVariables.displayEdges = document.getElementById('edgesCheck').checked
+        GlobalVariables.displayTriangles = document.getElementById('facesCheck').checked
+        
+        GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
+    }
+    
+    let viewerBar = document.querySelector('#viewer_bar')
     viewerBar.classList.add('slidedown')
 
     //Grid display html element
@@ -415,7 +414,7 @@ function checkBoxes(){
     gridCheck.setAttribute('id', 'gridCheck')
     gridDiv.setAttribute('style', 'float:right;')
            
-    if (displayGrid){
+    if (GlobalVariables.displayGrid){
         gridCheck.setAttribute('checked', 'true')
     }
 
@@ -427,17 +426,7 @@ function checkBoxes(){
     gridCheckLabel.setAttribute('style', 'user-select: none;')
 
 
-    gridCheck.addEventListener('change', event => {
-        if(event.target.checked){
-            displayGrid = true
-            this.writeToDisplay(this.displayedGeometry)
-
-        }
-        else{
-            displayGrid = false
-            this.writeToDisplay(this.displayedGeometry)
-        }
-    })
+    gridCheck.addEventListener('change', checkBoxChange)
 
     //Axes Html
 
@@ -448,7 +437,7 @@ function checkBoxes(){
     axesCheck.setAttribute('type', 'checkbox')
     axesCheck.setAttribute('id', 'axesCheck')
             
-    if (displayAxis){
+    if (GlobalVariables.displayAxis){
         axesCheck.setAttribute('checked', 'true')
     }
 
@@ -460,17 +449,7 @@ function checkBoxes(){
     axesCheckLabel.textContent= "Axes"
     axesCheckLabel.setAttribute('style', 'user-select: none;')
 
-    axesCheck.addEventListener('change', event => {
-        if(event.target.checked){
-            displayAxis = true
-
-            this.writeToDisplay(this.displayedGeometry)
-        }
-        else{
-            displayAxis = false
-            this.writeToDisplay(this.displayedGeometry)
-        }
-    })
+    axesCheck.addEventListener('change', checkBoxChange)
     
     
     //Display faces
@@ -481,7 +460,9 @@ function checkBoxes(){
     facesCheck.setAttribute('type', 'checkbox')
     facesCheck.setAttribute('id', 'facesCheck')
     
-    facesCheck.setAttribute('checked', 'true')
+    if(GlobalVariables.displayTriangles){
+        facesCheck.setAttribute('checked', 'true')
+    }
     
     var facesCheckLabel = document.createElement('label')
     facesDiv.appendChild(facesCheckLabel)
@@ -491,16 +472,7 @@ function checkBoxes(){
     facesCheckLabel.textContent= "Faces"
     facesCheckLabel.setAttribute('style', 'user-select: none;')
 
-    facesCheck.addEventListener('change', event => {
-        if(event.target.checked){
-            GlobalVariables.displayTriangles = true
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-        else{
-            GlobalVariables.displayTriangles = false
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-    })
+    facesCheck.addEventListener('change', checkBoxChange)
     
     //Display edges
     var edgesDiv = document.createElement('div')
@@ -510,7 +482,9 @@ function checkBoxes(){
     edgesCheck.setAttribute('type', 'checkbox')
     edgesCheck.setAttribute('id', 'edgesCheck')
     
-    edgesCheck.setAttribute('checked', 'true')
+    if(GlobalVariables.displayEdges){
+        edgesCheck.setAttribute('checked', 'true')
+    }
     
     var edgesCheckLabel = document.createElement('label')
     edgesDiv.appendChild(edgesCheckLabel)
@@ -520,43 +494,27 @@ function checkBoxes(){
     edgesCheckLabel.textContent= "Edges"
     edgesCheckLabel.setAttribute('style', 'user-select: none;')
 
-    edgesCheck.addEventListener('change', event => {
-        if(event.target.checked){
-            GlobalVariables.displayEdges = true
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-        else{
-            GlobalVariables.displayEdges = false
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-    })
+    edgesCheck.addEventListener('change', checkBoxChange)
     
     //Display wireframe
-    var wireframeDiv = document.createElement('div')
-    viewerBar.appendChild(wireframeDiv)
-    var wireframeCheck = document.createElement('input')
-    wireframeDiv.appendChild(wireframeCheck)
-    wireframeCheck.setAttribute('type', 'checkbox')
-    wireframeCheck.setAttribute('id', 'wireframeCheck')
+    var resetDiv = document.createElement('div')
+    viewerBar.appendChild(resetDiv)
+    var resetButton = document.createElement('button')
+    resetButton.innerHTML = "Reset View"
+    resetDiv.appendChild(resetButton)
+    resetButton.setAttribute('type', 'checkbox')
+    resetButton.setAttribute('id', 'resetButton')
     
-    var wireframeCheckLabel = document.createElement('label')
-    wireframeDiv.appendChild(wireframeCheckLabel)
-    wireframeCheckLabel.setAttribute('for', 'wireframeCheck')
-    wireframeCheckLabel.setAttribute('style', 'margin-right:1em;')
-    wireframeDiv.setAttribute('style', 'float:right;')
-    wireframeCheckLabel.textContent= "Wireframe"
-    wireframeCheckLabel.setAttribute('style', 'user-select: none;')
+    var resetButtonLabel = document.createElement('label')
+    resetDiv.appendChild(resetButtonLabel)
+    resetButtonLabel.setAttribute('for', 'resetButton')
+    resetButtonLabel.setAttribute('style', 'margin-right:1em;')
+    resetDiv.setAttribute('style', 'float:right;')
+    resetButtonLabel.textContent= " "
+    resetButtonLabel.setAttribute('style', 'user-select: none;')
 
-    wireframeCheck.addEventListener('change', event => {
-        if(event.target.checked){
-            GlobalVariables.displayWireframe = true
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-        else{
-            GlobalVariables.displayWireframe = false
-            GlobalVariables.writeToDisplay(GlobalVariables.displayedPath)
-        }
-    })
+    resetButton.addEventListener('click', ()=>{GlobalVariables.writeToDisplay(GlobalVariables.displayedPath, true)})
+    
 }
 
 document.getElementById('viewerContext').addEventListener('mouseenter', () => {

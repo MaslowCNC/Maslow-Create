@@ -370,7 +370,7 @@ const agent = async ({
             break;
         case "display":
             const geometryToDisplay = await maslowRead(question.readPath);
-            const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{doTriangles: question.triangles, doOutline: question.outline, doWireframe: question.wireframe }));
+            const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{triangles: question.triangles, outline: question.outline, wireframe: question.wireframe }));
             return threejsGeometry;
             break;
         }
