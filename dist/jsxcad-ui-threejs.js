@@ -53828,10 +53828,6 @@ const orbitDisplay = async (
     // Build new datasets from the written data, and display them.
     datasets = [];
     
-    if(withGrid){
-        trackball
-    }
-    
     await buildMeshes({
       datasets,
       geometry,
