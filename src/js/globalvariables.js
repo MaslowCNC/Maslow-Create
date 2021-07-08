@@ -193,11 +193,6 @@ class GlobalVariables{
          * @type {boolean}
          */
         this.displayEdges = true
-        /** 
-         * A flag to indicate if the wire frame of the shape should be displayed.
-         * @type {boolean}
-         */
-        this.displayWireframe = false
          
         const math = create(all)  //What does this do? I think it is used to evalue strings as math
         /** 
@@ -245,7 +240,7 @@ class GlobalVariables{
     * A function which reads from a path and displays the geometry it contains
     * @param {string} The path to read from
     */
-    writeToDisplay(path){
+    writeToDisplay(path, resetView = false){
         
         this.displayedPath = path
         
@@ -260,7 +255,7 @@ class GlobalVariables{
             readPath: path, 
             triangles: this.displayTriangles, 
             outline: this.displayEdges, 
-            wireframe: this.displayWireframe 
+            wireframe: false 
         })
         
         returned.then( result => {
@@ -269,7 +264,7 @@ class GlobalVariables{
             document.getElementById('viewerContext').style.filter="sepia(0%)"
             
             if(result && result != -1){
-                window.updateDisplay(result, {withGrid: this.displayGrid, fit: false})
+                window.updateDisplay(result, {withGrid: this.displayGrid, fit: resetView})
             }
         }).catch (() => console.warn("Canceled display update"))
         

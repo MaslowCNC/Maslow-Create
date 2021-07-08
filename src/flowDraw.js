@@ -407,7 +407,6 @@ function checkBoxes(){
     function checkBoxChange(){
         GlobalVariables.displayGrid = document.getElementById('gridCheck').checked
         GlobalVariables.displayAxis = document.getElementById('axesCheck').checked
-        GlobalVariables.displayWireframe = document.getElementById('wireframeCheck').checked
         GlobalVariables.displayEdges = document.getElementById('edgesCheck').checked
         GlobalVariables.displayTriangles = document.getElementById('facesCheck').checked
         
@@ -512,7 +511,8 @@ function checkBoxes(){
     //Display wireframe
     var wireframeDiv = document.createElement('div')
     viewerBar.appendChild(wireframeDiv)
-    var wireframeCheck = document.createElement('input')
+    var wireframeCheck = document.createElement('button')
+    wireframeCheck.innerHTML = "Reset View"
     wireframeDiv.appendChild(wireframeCheck)
     wireframeCheck.setAttribute('type', 'checkbox')
     wireframeCheck.setAttribute('id', 'wireframeCheck')
@@ -522,10 +522,11 @@ function checkBoxes(){
     wireframeCheckLabel.setAttribute('for', 'wireframeCheck')
     wireframeCheckLabel.setAttribute('style', 'margin-right:1em;')
     wireframeDiv.setAttribute('style', 'float:right;')
-    wireframeCheckLabel.textContent= "Wireframe"
+    wireframeCheckLabel.textContent= " "
     wireframeCheckLabel.setAttribute('style', 'user-select: none;')
 
-    wireframeCheck.addEventListener('change', checkBoxChange)
+    wireframeCheck.addEventListener('click', ()=>{GlobalVariables.writeToDisplay(GlobalVariables.displayedPath, true)})
+    
 }
 
 document.getElementById('viewerContext').addEventListener('mouseenter', () => {
