@@ -70,17 +70,83 @@ var notesApi = /*#__PURE__*/Object.freeze({
   emitSourceLocation: emitSourceLocation
 });
 
+const evaluate = async (ecmascript, { api, path }) => {
+  const builder = new Function(
+    `{ ${Object.keys(api).join(', ')} }`,
+    `return async () => { ${ecmascript} };`
+  );
+  const module = await builder(api);
+  try {
+    pushModule(path);
+    return await module();
+  } finally {
+    popModule();
+  }
+};
+
+const doNothing = () => {};
+
+const execute = async (
+  script,
+  { evaluate, path, topLevel = {}, onError = doNothing }
+) => {
+  console.log(`QQ/execute/0`);
+  const updates = {};
+  const ecmascript = await toEcmascript(script, {
+    path,
+    topLevel,
+    updates,
+  });
+  const pending = new Set(Object.keys(updates));
+  const unprocessed = new Set(Object.keys(updates));
+  let somethingHappened;
+  const schedule = () => {
+    console.log(`Updates remaining ${[...pending].join(', ')}`);
+    for (const id of [...pending]) {
+      const entry = updates[id];
+      const outstandingDependencies = entry.dependencies.filter(
+        (dependency) => updates[dependency]
+      );
+      if (outstandingDependencies.length === 0) {
+        console.log(`Scheduling: ${id}`);
+        pending.delete(id);
+        evaluate(updates[id].program)
+          .then(() => {
+            console.log(`Completed ${id}`);
+            delete updates[id];
+            unprocessed.delete(id);
+          })
+          .catch(onError) // FIX: Deadlock?
+          .finally(() => somethingHappened());
+      }
+    }
+  };
+  while (unprocessed.size > 0) {
+    const somethingHappens = new Promise((resolve, reject) => {
+      somethingHappened = resolve;
+    });
+    schedule();
+    if (unprocessed.size > 0) {
+      // Wait for something to happen.
+      await somethingHappens;
+    }
+  }
+  return evaluate(ecmascript, { path });
+};
+
 const DYNAMIC_MODULES = new Map();
 
 const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
-const buildImportModule = (api) => async (name) => {
+const buildImportModule = (baseApi) => async (name) => {
+  console.log(`QQ/importModule/0`);
   const internalModule = DYNAMIC_MODULES.get(name);
   if (internalModule !== undefined) {
     const module = await import(internalModule);
     return module;
   }
+  console.log(`QQ/importModule/1`);
   let script;
   if (script === undefined) {
     const path = `source/${name}`;
@@ -88,13 +154,26 @@ const buildImportModule = (api) => async (name) => {
     sources.push(name);
     script = await read(path, { sources });
   }
+  console.log(`QQ/importModule/2`);
   if (script === undefined) {
     throw Error(`Cannot import module ${name}`);
   }
+  console.log(`QQ/importModule/3`);
   const scriptText =
     typeof script === 'string'
       ? script
       : new TextDecoder('utf8').decode(script);
+  console.log(`QQ/importModule/4`);
+  const path = name;
+  const topLevel = new Map();
+  const onError = (error) => console.log(error.stack);
+  const api = { ...baseApi, sha: 'master' };
+  console.log(`QQ/importModule/5`);
+  const evaluate$1 = (script) => evaluate(script, { api, path });
+  console.log(`QQ/importModule/6`);
+
+  return execute(scriptText, { evaluate: evaluate$1, path, topLevel, onError });
+  /*
   const ecmascript = await toEcmascript(scriptText, { path: name });
   const builder = new Function(
     `{ ${Object.keys(api).join(', ')} }`,
@@ -108,6 +187,7 @@ const buildImportModule = (api) => async (name) => {
   } finally {
     popModule();
   }
+*/
 };
 
 /*
@@ -167,3 +247,4 @@ registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
 export default api;
+export { evaluate, execute };

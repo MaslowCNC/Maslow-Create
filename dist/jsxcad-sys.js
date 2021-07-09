@@ -493,21 +493,26 @@ const createService = async ({
 };
 
 const askService = (spec, question, transfer) => {
-  let cancel;
+  let terminated = false;
+  let terminate = () => {
+    terminated = true;
+  };
   const promise = new Promise((resolve, reject) => {
-    let ask, release, terminate;
+    let service;
+    let release = true;
     createService(spec)
-      .then((service) => {
-        ask = service.ask;
-        release = service.release;
-        terminate = service.terminate;
-        cancel = () => {
-          terminate();
+      .then((createdService) => {
+        service = createdService;
+        terminate = () => {
+          service.terminate();
           release = false;
           reject(Error('Terminated'));
         };
+        if (terminated) {
+          terminate();
+        }
       })
-      .then(() => ask(question, transfer))
+      .then(() => service.ask(question, transfer))
       .then((answer) => {
         resolve(answer);
       })
@@ -517,11 +522,11 @@ const askService = (spec, question, transfer) => {
       })
       .finally(() => {
         if (release) {
-          release();
+          service.release();
         }
       });
   });
-  promise.cancel = cancel;
+  promise.terminate = () => terminate();
   return promise;
 };
 

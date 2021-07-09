@@ -180,33 +180,10 @@ const toHtml = async (
     const run = async () => {
       const body = document.getElementsByTagName('body')[0];
       const bookElement = document.createElement('div');
-
-      // Organize by card.
-      const cards = [];
-      const cardNotes = new Map();
-
-      for (const note of notebook) {
-        let card = '';
-        if (note.context && note.context.card) {
-          card = note.context.card;
-        }
-        if (!cardNotes.has(card)) {
-          cards.push(card);
-          cardNotes.set(card, []);
-        }
-        cardNotes.get(card).push(note);
-      }
-
-      for (const cardId of cards) {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'note card';
-        const notebookElement = await toDomElement(cardNotes.get(cardId));
-        cardElement.appendChild(notebookElement);
-        bookElement.appendChild(cardElement);
-      }
-
-      bookElement.classList.add('book', 'notebook', 'loaded');
+      const notebookElement = await toDomElement(notebook);
+      bookElement.appendChild(notebookElement);
       body.appendChild(bookElement);
+      bookElement.classList.add('book', 'notebook', 'loaded');
     };
 
     if (document.readyState === 'complete') {

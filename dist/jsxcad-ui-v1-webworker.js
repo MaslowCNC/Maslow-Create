@@ -1,5 +1,5 @@
 import * as sys from './jsxcad-sys.js';
-import baseApi from './jsxcad-api.js';
+import baseApi, { evaluate } from './jsxcad-api.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -176,6 +176,10 @@ const agent = async ({
 
     try {
       const ecmascript = question.evaluate;
+      const {
+        path,
+        sha = 'master'
+      } = question;
       console.log({
         op: 'text',
         text: `QQ/script: ${question.evaluate}`
@@ -185,17 +189,25 @@ const agent = async ({
         text: `QQ/ecmascript: ${ecmascript}`
       });
       const api = { ...baseApi,
-        sha: question.sha || 'master'
+        sha
       };
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
+      const exports = await evaluate(ecmascript, {
+        api,
+        path
+      });
+      /*
+      const builder = new Function(
+        `{ ${Object.keys(api).join(', ')} }`,
+        `return async () => { ${ecmascript} };`
+      );
       const module = await builder(api);
-
       try {
         sys.pushModule(question.path);
         await module();
       } finally {
         sys.popModule();
       }
+      */
 
       await sys.log({
         op: 'text',
@@ -206,6 +218,8 @@ const agent = async ({
         op: 'evaluate',
         status: 'success'
       }); // Wait for any pending operations.
+
+      return exports;
     } catch (error) {
       reportError(error);
       await sys.log({
