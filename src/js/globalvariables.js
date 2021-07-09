@@ -271,6 +271,9 @@ class GlobalVariables{
         this.displayProcessing = true
         document.getElementById('viewerContext').style.filter="sepia(100%)"
         
+        /** 
+        * A function which cancels the worker processing display when called
+        */
         this.cancelLastDisplayWorker = returned.cancel
     }
     /** 
