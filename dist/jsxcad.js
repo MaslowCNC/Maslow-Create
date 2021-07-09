@@ -33,7 +33,6 @@ else{
 }
 
 window.ask = (question) => {
-    
     const result = askService(serviceSpec, question);
     return result;
 };
