@@ -274,7 +274,7 @@ class GlobalVariables{
         /** 
         * A function which cancels the worker processing display when called
         */
-        this.cancelLastDisplayWorker = returned.cancel
+        this.cancelLastDisplayWorker = returned.terminate
     }
     /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height
