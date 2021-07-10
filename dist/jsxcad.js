@@ -1,4 +1,4 @@
-import { askService, askServices, createService, touch, setupFilesystem, listFiles } from './jsxcad-sys.js';
+import { askService, askServices, createService, touch, setupFilesystem, listFiles, getServicePoolInfo } from './jsxcad-sys.js';
 import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
 
@@ -33,6 +33,7 @@ else{
 }
 
 window.ask = (question) => {
+    console.log("Number of active workers: " + getServicePoolInfo().activeServiceCount);
     const result = askService(serviceSpec, question);
     return result;
 };
