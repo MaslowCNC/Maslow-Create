@@ -1,5 +1,5 @@
 import * as sys from './jsxcad-sys.js';
-import baseApi from './jsxcad-api.js';
+import baseApi, { evaluate } from './jsxcad-api.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -74,8 +74,7 @@ var hashSum = sum;
 self.window = {};
 
 const resolveNotebook = async () => {
-  await sys.resolvePending(); // Update the notebook.
-
+  // Update the notebook.
   const notebook = sys.getEmitted(); // Resolve any promises.
 
   for (const note of notebook) {
@@ -85,9 +84,14 @@ const resolveNotebook = async () => {
       }
     }
   }
+
+  await sys.resolvePending();
 };
 
-const say = message => postMessage(message);
+const say = message => {
+  // console.log(`QQ/webworker/say: ${JSON.stringify(message)}`);
+  postMessage(message);
+};
 
 const reportError = error => {
   const entry = {
@@ -110,9 +114,13 @@ sys.setPendingErrorHandler(reportError);
 
 const agent = async ({
   ask,
-  question,
-  statement
+  message,
+  type,
+  tell
 }) => {
+  const {
+    op
+  } = message;
   await sys.log({
     op: 'evaluate',
     status: 'run'
@@ -121,113 +129,94 @@ const agent = async ({
     op: 'text',
     text: 'Evaluation Started'
   });
-  let onEmitHandler;
+  const {
+    script,
+    path,
+    workspace,
+    view,
+    offscreenCanvas,
+    sha = 'master'
+  } = message;
 
-  if ((statement || question).touchFile) {
-    const {
-      path,
-      workspace
-    } = (statement || question).touchFile;
-    await sys.touch(path, {
-      workspace
-    });
-  } else if (question.staticView) {
-    const {
-      path,
-      workspace,
-      view,
-      offscreenCanvas
-    } = question.staticView;
-    const geometry = await sys.readOrWatch(path, {
-      workspace
-    });
-    const {
-      staticView
-    } = await import('./jsxcad-ui-threejs.js');
-    await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
-      canvas: offscreenCanvas
-    });
-    const blob = await offscreenCanvas.convertToBlob({
-      type: 'image/png'
-    });
-    const dataURL = new FileReaderSync().readAsDataURL(blob);
-    console.log(`QQ/rendered: ${path}`);
-    return dataURL;
-  } else if (question.evaluate) {
+  if (workspace) {
     sys.setupFilesystem({
-      fileBase: question.workspace
+      fileBase: workspace
     });
-    sys.clearEmitted();
-    let nthNote = 0;
-    onEmitHandler = sys.addOnEmitHandler(async (note, index) => {
-      nthNote += 1;
+  }
 
-      if (note.download) {
-        for (const entry of note.download.entries) {
-          entry.data = await entry.data;
+  try {
+    switch (op) {
+      case 'touchFile':
+        await sys.touch(path, {
+          workspace
+        });
+        return;
+
+      case 'staticView':
+        sys.info('Load Geometry');
+        const geometry = await sys.readOrWatch(path, {
+          workspace
+        });
+        const {
+          staticView
+        } = await import('./jsxcad-ui-threejs.js');
+        sys.info('Render');
+        await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
+          canvas: offscreenCanvas
+        });
+        sys.info('Convert to PNG');
+        const blob = await offscreenCanvas.convertToBlob({
+          type: 'image/png'
+        });
+        const dataURL = new FileReaderSync().readAsDataURL(blob);
+        sys.info('Done');
+        return dataURL;
+
+      case 'evaluate':
+        sys.clearEmitted();
+
+        try {
+          // console.log({ op: 'text', text: `QQ/script: ${script}` });
+          const api = { ...baseApi,
+            sha
+          };
+          await evaluate(script, {
+            api,
+            path
+          });
+          await sys.log({
+            op: 'text',
+            text: 'Evaluation Succeeded',
+            level: 'serious'
+          });
+          await sys.log({
+            op: 'evaluate',
+            status: 'success'
+          }); // Wait for any pending operations.
+
+          await resolveNotebook(); // Finally answer the top level question.
+
+          return true;
+        } catch (error) {
+          reportError(error);
+          await sys.log({
+            op: 'text',
+            text: 'Evaluation Failed',
+            level: 'serious'
+          });
+          await sys.log({
+            op: 'evaluate',
+            status: 'failure'
+          });
+          await resolveNotebook();
+          return false;
         }
-      }
 
-      ask({
-        note,
-        index
-      });
-    });
-
-    try {
-      const ecmascript = question.evaluate;
-      console.log({
-        op: 'text',
-        text: `QQ/script: ${question.evaluate}`
-      });
-      console.log({
-        op: 'text',
-        text: `QQ/ecmascript: ${ecmascript}`
-      });
-      const api = { ...baseApi,
-        sha: question.sha || 'master'
-      };
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
-      const module = await builder(api);
-
-      try {
-        sys.pushModule(question.path);
-        await module();
-      } finally {
-        sys.popModule();
-      }
-
-      await sys.log({
-        op: 'text',
-        text: 'Evaluation Succeeded',
-        level: 'serious'
-      });
-      await sys.log({
-        op: 'evaluate',
-        status: 'success'
-      }); // Wait for any pending operations.
-    } catch (error) {
-      reportError(error);
-      await sys.log({
-        op: 'text',
-        text: 'Evaluation Failed',
-        level: 'serious'
-      });
-      await sys.log({
-        op: 'evaluate',
-        status: 'failure'
-      });
-    } finally {
-      await resolveNotebook();
-      await sys.resolvePending();
-      ask({
-        notebookLength: nthNote
-      });
-      sys.removeOnEmitHandler(onEmitHandler);
+      default:
+        throw Error(`Unknown operation ${op}`);
     }
-
-    sys.setupFilesystem();
-    return sys.getEmitted();
+  } catch (error) {
+    sys.info(error.stack);
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
@@ -242,14 +231,29 @@ onmessage = ({
 const bootstrap = async () => {
   const {
     ask,
-    hear
-  } = sys.conversation({
+    hear,
+    tell
+  } = sys.createConversation({
     agent,
     say
   });
-  self.ask = ask; // sys/log depends on ask, so set that up before we boot.
+  self.ask = ask;
+  self.tell = tell; // sys/log depends on ask, so set that up before we boot.
 
   await sys.boot();
+  sys.addOnEmitHandler(async (note, index) => {
+    if (note.download) {
+      for (const entry of note.download.entries) {
+        entry.data = await entry.data;
+      }
+    } // console.log(`QQ/webworker/emitHandler: ${JSON.stringify(note)}`);
+
+
+    self.tell({
+      op: 'note',
+      note
+    });
+  });
 
   onmessage = ({
     data

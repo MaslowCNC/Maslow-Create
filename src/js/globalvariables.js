@@ -162,7 +162,7 @@ class GlobalVariables{
          * The function to call to cancel the processing of the prevous display value.
          * @type {function}
          */
-        this.cancelLastDisplayWorker = 0
+        this.cancelLastDisplayWorker = function(){}
         /** 
          * The last path displayed. Used for updating the display when the controls change.
          * @type {string}
@@ -271,7 +271,10 @@ class GlobalVariables{
         this.displayProcessing = true
         document.getElementById('viewerContext').style.filter="sepia(100%)"
         
-        this.cancelLastDisplayWorker = returned.cancel
+        /** 
+        * A function which cancels the worker processing display when called
+        */
+        this.cancelLastDisplayWorker = returned.terminate
     }
     /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height

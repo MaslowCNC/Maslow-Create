@@ -113,6 +113,7 @@ export default class Equation extends Atom {
     evaluateEquation(){
         //Substitute numbers into the string
         var substitutedEquation = this.currentEquation
+        this.name = this.currentEquation
         
         //Find all the letters in this equation
         var re = /[a-zA-Z]/g
