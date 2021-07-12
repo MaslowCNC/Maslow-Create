@@ -51223,7 +51223,9 @@ const moveToFit = ({
     return;
   }
 
-  controls.reset();
+  if (controls) {
+    controls.reset();
+  }
 
   const center = box.getCenter(new Vector3());
   // const size = box.getSize(new Vector3());

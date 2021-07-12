@@ -78,60 +78,64 @@ const evaluate = async (ecmascript, { api, path }) => {
   const module = await builder(api);
   try {
     pushModule(path);
-    return await module();
+    await module();
   } finally {
     popModule();
   }
 };
 
-const doNothing = () => {};
-
 const execute = async (
   script,
-  { evaluate, path, topLevel = {}, onError = doNothing }
+  { evaluate, replay, path, topLevel = {} }
 ) => {
-  console.log(`QQ/execute/0`);
-  const updates = {};
-  const ecmascript = await toEcmascript(script, {
-    path,
-    topLevel,
-    updates,
-  });
-  const pending = new Set(Object.keys(updates));
-  const unprocessed = new Set(Object.keys(updates));
-  let somethingHappened;
-  const schedule = () => {
-    console.log(`Updates remaining ${[...pending].join(', ')}`);
-    for (const id of [...pending]) {
-      const entry = updates[id];
-      const outstandingDependencies = entry.dependencies.filter(
-        (dependency) => updates[dependency]
-      );
-      if (outstandingDependencies.length === 0) {
-        console.log(`Scheduling: ${id}`);
-        pending.delete(id);
-        evaluate(updates[id].program)
-          .then(() => {
-            console.log(`Completed ${id}`);
-            delete updates[id];
-            unprocessed.delete(id);
-          })
-          .catch(onError) // FIX: Deadlock?
-          .finally(() => somethingHappened());
+  try {
+    console.log(`QQ/execute/0`);
+    const updates = {};
+    const ecmascript = await toEcmascript(script, {
+      path,
+      topLevel,
+      updates,
+    });
+    const pending = new Set(Object.keys(updates));
+    const unprocessed = new Set(Object.keys(updates));
+    let somethingHappened;
+    let somethingFailed;
+    const schedule = () => {
+      console.log(`Updates remaining ${[...pending].join(', ')}`);
+      for (const id of [...pending]) {
+        const entry = updates[id];
+        const outstandingDependencies = entry.dependencies.filter(
+          (dependency) => updates[dependency]
+        );
+        if (outstandingDependencies.length === 0) {
+          console.log(`Scheduling: ${id}`);
+          pending.delete(id);
+          evaluate(updates[id].program)
+            .then(() => {
+              console.log(`Completed ${id}`);
+              delete updates[id];
+              unprocessed.delete(id);
+            })
+            .catch((error) => somethingFailed(error)) // FIX: Deadlock?
+            .finally(() => somethingHappened());
+        }
+      }
+    };
+    while (unprocessed.size > 0) {
+      const somethingHappens = new Promise((resolve, reject) => {
+        somethingHappened = resolve;
+        somethingFailed = reject;
+      });
+      schedule();
+      if (unprocessed.size > 0) {
+        // Wait for something to happen.
+        await somethingHappens;
       }
     }
-  };
-  while (unprocessed.size > 0) {
-    const somethingHappens = new Promise((resolve, reject) => {
-      somethingHappened = resolve;
-    });
-    schedule();
-    if (unprocessed.size > 0) {
-      // Wait for something to happen.
-      await somethingHappens;
-    }
+    return replay(ecmascript, { path });
+  } catch (error) {
+    throw error;
   }
-  return evaluate(ecmascript, { path });
 };
 
 const DYNAMIC_MODULES = new Map();

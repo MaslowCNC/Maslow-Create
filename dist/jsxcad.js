@@ -3,12 +3,12 @@ import { buildMeshes, orbitDisplay } from './jsxcad-ui-threejs.js';
 
 
 //Setup worker
-const agent = async ({ ask, question }) => {
-  if (question.ask) {
-    const { identifier, options } = question.ask;
+const agent = async ({ ask, message }) => {
+  if (message.ask) {
+    const { identifier, options } = message.ask;
     return askSys(identifier, options);
-  }else if (question.touchFile) {
-    const { path, workspace } = question.touchFile;
+  }else if (message.touchFile) {
+    const { path, workspace } = message.touchFile;
     await touch(path, { workspace });
     // Invalidate the path in all workers.
     await askServices({ touchFile: { path, workspace } });
