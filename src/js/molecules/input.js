@@ -70,7 +70,7 @@ export default class Input extends Atom {
      * Draws the atom on the screen.
      */ 
     draw() {
-
+        
         // //Snap the inputs to the far right side
         /**
         * The x position of the atom
@@ -120,10 +120,9 @@ export default class Input extends Atom {
         if(this.output){
             this.output.draw()
         }
-        if(this.showHover){
-            GlobalVariables.c.textAlign = 'start' 
-            GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)
-        }
+        
+        GlobalVariables.c.textAlign = 'start' 
+        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)
         GlobalVariables.c.beginPath()
         GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels + this.height/2)
         GlobalVariables.c.lineTo(xInPixels, yInPixels + this.height/2)
