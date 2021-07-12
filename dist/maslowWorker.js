@@ -132,8 +132,6 @@ const agent = async ({
   type,
   tell
 }) => {
-    console.log("Got message");
-    console.log(message);
     const {
       op
     } = message;
