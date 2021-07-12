@@ -1303,7 +1303,7 @@
     "__docId__": 83,
     "kind": "file",
     "name": "src/js/globalvariables.js",
-    "content": "import { create, all }  from 'mathjs'\r\nimport Assembly         from './molecules/assembly.js'\r\nimport Box              from './molecules/box.js'\r\nimport CutList          from './molecules/cutlist.js'\r\nimport Circle           from './molecules/circle.js'\r\nimport Color            from './molecules/color.js'\r\nimport CutLayout        from './molecules/cutlayout.js'\r\nimport Rectangle        from './molecules/rectangle.js'\r\nimport ShrinkWrap       from './molecules/shrinkwrap.js'\r\nimport Translate        from './molecules/translate.js'\r\nimport Tag              from './molecules/tag.js'\r\nimport RegularPolygon   from './molecules/regularpolygon.js'\r\nimport Extrude          from './molecules/extrude.js'\r\nimport Stl              from './molecules/stl.js'\r\nimport Svg              from './molecules/svg.js'\r\n//import Nest              from './molecules/nest.js'\r\nimport Intersection     from './molecules/intersection.js'\r\nimport Difference       from './molecules/difference.js'\r\nimport Constant         from './molecules/constant.js'\r\nimport Equation         from './molecules/equation.js'\r\nimport ExtractTag       from './molecules/extracttag.js'\r\nimport Molecule         from './molecules/molecule.js'\r\nimport GeneticAlgorithm from './molecules/geneticAlgorithm.js'\r\nimport Input            from './molecules/input.js'\r\nimport Readme           from './molecules/readme.js'\r\nimport AddBOMTag        from './molecules/BOM.js'\r\nimport Rotate           from './molecules/rotate.js'\r\nimport GitHubMolecule   from './molecules/githubmolecule.js'\r\nimport Output           from './molecules/output.js'\r\nimport Gcode            from './molecules/gcode.js'\r\nimport Code             from './molecules/code.js'\r\nimport Group            from './molecules/group.js'\r\nimport GitHubModule     from './githubOauth'\r\n\r\n/**\r\n * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.\r\n */\r\nclass GlobalVariables{\r\n    /**\r\n     * The constructor creates a new instance of the Global Variables object.\r\n     */\r\n    constructor(){\r\n        /** \r\n         * The canvas object on which the atoms are drawn.\r\n         * @type {object}\r\n         */\r\n        this.canvas = null\r\n        /** \r\n         * The 2D reference to the canvas object on which the atoms are drawn.\r\n         * @type {object}\r\n         */\r\n        this.c = null\r\n        /** \r\n        * An array of all of the available types of atoms which can be placed with a right click.\r\n        * @type {array}\r\n        */\r\n        this.availableTypes = {\r\n        \r\n            box:                {creator: Box, atomType: 'Box'},\r\n            \r\n            intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},\r\n            difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},\r\n            assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},\r\n            union:              {creator: Group, atomType: 'Union', atomCategory: 'None'},\r\n            group:              {creator: Group, atomType: 'Group', atomCategory: 'Interactions'},\r\n            shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},\r\n            \r\n            \r\n            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},\r\n            addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},\r\n            color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},\r\n            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Tags'},\r\n            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Tags'},\r\n            cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Tags'},\r\n            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Tags'},\r\n\r\n\r\n            \r\n            regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},\r\n            costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Inputs'},\r\n            circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},\r\n            rectangle:          {creator: Rectangle, atomType: 'Rectangle', atomCategory: 'Shapes'},\r\n            molecule:           {creator: Molecule, atomType: 'Molecule', atomCategory: 'Shapes'},\r\n            input:              {creator: Input, atomType: 'Input', atomCategory: 'Inputs'},\r\n            equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Inputs'},\r\n            code:               {creator: Code, atomType: 'Code', atomCategory: 'Inputs'},\r\n            \r\n            rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},\r\n            extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},\r\n            translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},\r\n            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},\r\n\r\n            stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},\r\n            svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},\r\n            //nest:               {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},\r\n            gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},\r\n            githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},\r\n\r\n            output:             {creator: Output, atomType: 'Output'}\r\n        }\r\n        /** \r\n         * A reference to the molecule curently being displayed on the screen.\r\n         * @type {object}\r\n         */\r\n        this.currentMolecule\r\n        /** \r\n         * A reference to the top level molecule of the project.\r\n         * @type {object}\r\n         */\r\n        this.topLevelMolecule\r\n        /** \r\n         * A flag to indicate if the program is running in run mode (ie a shared link).\r\n         * @type {boolean}\r\n         */\r\n        this.runMode = false\r\n        /** \r\n         * A flag to indicate if the program is running with a touch interface. Set in flowDraw.js.\r\n         * @type {boolean}\r\n         */\r\n        this.touchInterface = false\r\n        /** \r\n         * The github object which is used to interact with GitHub.\r\n         * @type {object}\r\n         */\r\n        this.gitHub = new GitHubModule()\r\n        /** \r\n         * A total of the number of atoms in this project\r\n         * @type {integer}\r\n         */\r\n        this.totalAtomCount = 0\r\n        /** \r\n         * A counter used during the loading process to keep track of how many atoms are still to be loaded.\r\n         * @type {integer}\r\n         */\r\n        this.numberOfAtomsToLoad = 0\r\n        /** \r\n         * A flag to indicate if the project is a fork.\r\n         * @type {boolean}\r\n         */\r\n        this.fork = false\r\n        /** \r\n         * A flag to indicate if command is pressed\r\n         * @type {boolean}\r\n         */\r\n        this.ctrlDown = false\r\n        /** \r\n         * A variable to save array to be copied\r\n         * @type {array}\r\n         */\r\n        this.atomsSelected = []\r\n        /** \r\n         * The size (in mm) of segments to use for circles.\r\n         * @type {number}\r\n         */\r\n        this.circleSegmentSize = 2\r\n        /** \r\n         * A flag to indicate if a display value is currently being processed.\r\n         * @type {bool}\r\n         */\r\n        this.displayProcessing = false\r\n        /** \r\n         * The function to call to cancel the processing of the prevous display value.\r\n         * @type {function}\r\n         */\r\n        this.cancelLastDisplayWorker = 0\r\n        /** \r\n         * The last path displayed. Used for updating the display when the controls change.\r\n         * @type {string}\r\n         */\r\n        this.displayedPath = \"\"\r\n        /** \r\n         * A list of all of the paths in this project which can be read from memory\r\n         * @type {array}\r\n         */\r\n        this.availablePaths = []\r\n        /** \r\n         * A flag to indicate if a grid should be displayed behind the shape\r\n         * @type {boolean}\r\n         */\r\n        this.displayGrid = true\r\n        /** \r\n         * A flag to indicate if the edges of the shape should be displayed.\r\n         * @type {boolean}\r\n         */\r\n        this.displayAxis = true\r\n        /** \r\n         * A flag to indicate if the display should show axis.\r\n         * @type {boolean}\r\n         */\r\n        this.displayTriangles = true\r\n        /** \r\n         * A flag to indicate if the faces of the shape should be displayed.\r\n         * @type {boolean}\r\n         */\r\n        this.displayEdges = true\r\n         \r\n        const math = create(all)  //What does this do? I think it is used to evalue strings as math\r\n        /** \r\n         * An evaluator for strings as mathmatical equations which is sandboxed and secure.\r\n         * @type {function}\r\n         */\r\n        this.limitedEvaluate = math.evaluate\r\n        math.import({\r\n            'import':     function () { throw new Error('Function import is disabled') },\r\n            'createUnit': function () { throw new Error('Function createUnit is disabled') },\r\n            'evaluate':   function () { throw new Error('Function evaluate is disabled') },\r\n            'parse':      function () { throw new Error('Function parse is disabled') },\r\n            'simplify':   function () { throw new Error('Function simplify is disabled') },\r\n            'derivative': function () { throw new Error('Function derivative is disabled') }\r\n        }, { override: true })\r\n    }\r\n\r\n    /** \r\n    * A function to generate a pixel value for 0-1 location on screen depending on screen width\r\n    * @param {number} width 0-1 \r\n    */\r\n    widthToPixels(width){\r\n        width = Math.min(width, 1) //Constrain the position to be a max of 1\r\n        let pixels = this.canvas.width * width\r\n        return pixels\r\n    }\r\n    /** \r\n    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r\n    * @param {number} width 0-1 \r\n    */\r\n    pixelsToWidth(pixels){\r\n        let width = 1 /(this.canvas.width / pixels)\r\n        return width\r\n    }\r\n    /** \r\n    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r\n    * @param {number} width 0-1 \r\n    */\r\n    heightToPixels(height){\r\n        height = Math.min(height, 1) //Constrain the position of the max value to be 1\r\n        let pixels = this.canvas.height * height\r\n        return pixels\r\n    }\r\n    /** \r\n    * A function which reads from a path and displays the geometry it contains\r\n    * @param {string} The path to read from\r\n    */\r\n    writeToDisplay(path, resetView = false){\r\n        \r\n        this.displayedPath = path\r\n        \r\n        // Cancel the last write to display if there is one active because this one will replace it\r\n        if(this.displayProcessing){\r\n            this.cancelLastDisplayWorker()\r\n            this.displayProcessing = false\r\n        }\r\n        \r\n        var returned = window.ask({ evaluate: \"md`hello`\", \r\n            key: \"display\", \r\n            readPath: path, \r\n            triangles: this.displayTriangles, \r\n            outline: this.displayEdges, \r\n            wireframe: false \r\n        })\r\n        \r\n        returned.then( result => {\r\n            \r\n            this.displayProcessing = false\r\n            document.getElementById('viewerContext').style.filter=\"sepia(0%)\"\r\n            \r\n            if(result && result != -1){\r\n                window.updateDisplay(result, {withGrid: this.displayGrid, fit: resetView})\r\n            }\r\n        }).catch (() => console.warn(\"Canceled display update\"))\r\n        \r\n        this.displayProcessing = true\r\n        document.getElementById('viewerContext').style.filter=\"sepia(100%)\"\r\n        \r\n        this.cancelLastDisplayWorker = returned.cancel\r\n    }\r\n    /** \r\n    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r\n    * @param {number} width 0-1 \r\n    */\r\n    pixelsToHeight(pixels){\r\n        let height = 1 /(this.canvas.height / pixels)\r\n        return height\r\n    }\r\n    \r\n    /** \r\n     * A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.\r\n     */\r\n    generateUniqueID(){\r\n        return Math.floor(Math.random()*900000) + 100000\r\n    }\r\n    \r\n    /**\r\n     * Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.\r\n     * @param {number} x1 - The x cordinate of the first point.\r\n     * @param {number} x2 - The x cordinate of the second point.\r\n     * @param {number} y1 - The y cordinate of the first point.\r\n     * @param {number} y2 - The y cordinate of the second point.\r\n     */ \r\n    distBetweenPoints(x1, x2, y1, y2){\r\n        var a2 = Math.pow(x1 - x2, 2)\r\n        var b2 = Math.pow(y1 - y2, 2)\r\n        var dist = Math.sqrt(a2 + b2)\r\n        \r\n        return dist\r\n    }\r\n\r\n\r\n}\r\n\r\n/**\r\n * Because we want global variables to be the same every time it is imported we export an instance of global variables instead of the constructor.\r\n */\r\nexport default (new GlobalVariables)",
+    "content": "import { create, all }  from 'mathjs'\r\nimport Assembly         from './molecules/assembly.js'\r\nimport Box              from './molecules/box.js'\r\nimport CutList          from './molecules/cutlist.js'\r\nimport Circle           from './molecules/circle.js'\r\nimport Color            from './molecules/color.js'\r\nimport CutLayout        from './molecules/cutlayout.js'\r\nimport Rectangle        from './molecules/rectangle.js'\r\nimport ShrinkWrap       from './molecules/shrinkwrap.js'\r\nimport Translate        from './molecules/translate.js'\r\nimport Tag              from './molecules/tag.js'\r\nimport RegularPolygon   from './molecules/regularpolygon.js'\r\nimport Extrude          from './molecules/extrude.js'\r\nimport Stl              from './molecules/stl.js'\r\nimport Svg              from './molecules/svg.js'\r\n//import Nest              from './molecules/nest.js'\r\nimport Intersection     from './molecules/intersection.js'\r\nimport Difference       from './molecules/difference.js'\r\nimport Constant         from './molecules/constant.js'\r\nimport Equation         from './molecules/equation.js'\r\nimport ExtractTag       from './molecules/extracttag.js'\r\nimport Molecule         from './molecules/molecule.js'\r\nimport GeneticAlgorithm from './molecules/geneticAlgorithm.js'\r\nimport Input            from './molecules/input.js'\r\nimport Readme           from './molecules/readme.js'\r\nimport AddBOMTag        from './molecules/BOM.js'\r\nimport Rotate           from './molecules/rotate.js'\r\nimport GitHubMolecule   from './molecules/githubmolecule.js'\r\nimport Output           from './molecules/output.js'\r\nimport Gcode            from './molecules/gcode.js'\r\nimport Code             from './molecules/code.js'\r\nimport Group            from './molecules/group.js'\r\nimport GitHubModule     from './githubOauth'\r\n\r\n/**\r\n * This class defines things which are made available to all objects which import it. It is a singlton which means that each time it is imported the same instance is made available so if it is written to in one place, it can be read somewhere else.\r\n */\r\nclass GlobalVariables{\r\n    /**\r\n     * The constructor creates a new instance of the Global Variables object.\r\n     */\r\n    constructor(){\r\n        /** \r\n         * The canvas object on which the atoms are drawn.\r\n         * @type {object}\r\n         */\r\n        this.canvas = null\r\n        /** \r\n         * The 2D reference to the canvas object on which the atoms are drawn.\r\n         * @type {object}\r\n         */\r\n        this.c = null\r\n        /** \r\n        * An array of all of the available types of atoms which can be placed with a right click.\r\n        * @type {array}\r\n        */\r\n        this.availableTypes = {\r\n        \r\n            box:                {creator: Box, atomType: 'Box'},\r\n            \r\n            intersection:       {creator: Intersection, atomType: 'Intersection', atomCategory: 'Interactions'},\r\n            difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},\r\n            assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},\r\n            union:              {creator: Group, atomType: 'Union', atomCategory: 'None'},\r\n            group:              {creator: Group, atomType: 'Group', atomCategory: 'Interactions'},\r\n            shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},\r\n            \r\n            \r\n            readme:             {creator: Readme, atomType: 'Readme', atomCategory: 'Tags'},\r\n            addBOMTag:          {creator: AddBOMTag, atomType: 'Add-BOM-Tag', atomCategory: 'Tags'},\r\n            color:              {creator: Color, atomType: 'Color', atomCategory: 'Tags'},\r\n            tag:                {creator: Tag, atomType: 'Tag', atomCategory: 'Tags'},\r\n            extracttag:         {creator: ExtractTag, atomType: 'ExtractTag', atomCategory: 'Tags'},\r\n            cutLayout:          {creator: CutLayout, atomType: 'CutLayout', atomCategory: 'Tags'},\r\n            CutList:            {creator: CutList, atomType: 'CutList', atomCategory: 'Tags'},\r\n\r\n\r\n            \r\n            regularPolygon:     {creator: RegularPolygon, atomType: 'RegularPolygon', atomCategory: 'Shapes'},\r\n            costant:            {creator: Constant, atomType: 'Constant', atomCategory: 'Inputs'},\r\n            circle:             {creator: Circle, atomType: 'Circle', atomCategory: 'Shapes'},\r\n            rectangle:          {creator: Rectangle, atomType: 'Rectangle', atomCategory: 'Shapes'},\r\n            molecule:           {creator: Molecule, atomType: 'Molecule', atomCategory: 'Shapes'},\r\n            input:              {creator: Input, atomType: 'Input', atomCategory: 'Inputs'},\r\n            equation:           {creator: Equation, atomType: 'Equation', atomCategory: 'Inputs'},\r\n            code:               {creator: Code, atomType: 'Code', atomCategory: 'Inputs'},\r\n            \r\n            rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},\r\n            extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},\r\n            translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},\r\n            GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},\r\n\r\n            stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},\r\n            svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},\r\n            //nest:               {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},\r\n            gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},\r\n            githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},\r\n\r\n            output:             {creator: Output, atomType: 'Output'}\r\n        }\r\n        /** \r\n         * A reference to the molecule curently being displayed on the screen.\r\n         * @type {object}\r\n         */\r\n        this.currentMolecule\r\n        /** \r\n         * A reference to the top level molecule of the project.\r\n         * @type {object}\r\n         */\r\n        this.topLevelMolecule\r\n        /** \r\n         * A flag to indicate if the program is running in run mode (ie a shared link).\r\n         * @type {boolean}\r\n         */\r\n        this.runMode = false\r\n        /** \r\n         * A flag to indicate if the program is running with a touch interface. Set in flowDraw.js.\r\n         * @type {boolean}\r\n         */\r\n        this.touchInterface = false\r\n        /** \r\n         * The github object which is used to interact with GitHub.\r\n         * @type {object}\r\n         */\r\n        this.gitHub = new GitHubModule()\r\n        /** \r\n         * A total of the number of atoms in this project\r\n         * @type {integer}\r\n         */\r\n        this.totalAtomCount = 0\r\n        /** \r\n         * A counter used during the loading process to keep track of how many atoms are still to be loaded.\r\n         * @type {integer}\r\n         */\r\n        this.numberOfAtomsToLoad = 0\r\n        /** \r\n         * A flag to indicate if the project is a fork.\r\n         * @type {boolean}\r\n         */\r\n        this.fork = false\r\n        /** \r\n         * A flag to indicate if command is pressed\r\n         * @type {boolean}\r\n         */\r\n        this.ctrlDown = false\r\n        /** \r\n         * A variable to save array to be copied\r\n         * @type {array}\r\n         */\r\n        this.atomsSelected = []\r\n        /** \r\n         * The size (in mm) of segments to use for circles.\r\n         * @type {number}\r\n         */\r\n        this.circleSegmentSize = 2\r\n        /** \r\n         * A flag to indicate if a display value is currently being processed.\r\n         * @type {bool}\r\n         */\r\n        this.displayProcessing = false\r\n        /** \r\n         * The function to call to cancel the processing of the prevous display value.\r\n         * @type {function}\r\n         */\r\n        this.cancelLastDisplayWorker = function(){}\r\n        /** \r\n         * The last path displayed. Used for updating the display when the controls change.\r\n         * @type {string}\r\n         */\r\n        this.displayedPath = \"\"\r\n        /** \r\n         * A list of all of the paths in this project which can be read from memory\r\n         * @type {array}\r\n         */\r\n        this.availablePaths = []\r\n        /** \r\n         * A flag to indicate if a grid should be displayed behind the shape\r\n         * @type {boolean}\r\n         */\r\n        this.displayGrid = true\r\n        /** \r\n         * A flag to indicate if the edges of the shape should be displayed.\r\n         * @type {boolean}\r\n         */\r\n        this.displayAxis = true\r\n        /** \r\n         * A flag to indicate if the display should show axis.\r\n         * @type {boolean}\r\n         */\r\n        this.displayTriangles = true\r\n        /** \r\n         * A flag to indicate if the faces of the shape should be displayed.\r\n         * @type {boolean}\r\n         */\r\n        this.displayEdges = true\r\n         \r\n        const math = create(all)  //What does this do? I think it is used to evalue strings as math\r\n        /** \r\n         * An evaluator for strings as mathmatical equations which is sandboxed and secure.\r\n         * @type {function}\r\n         */\r\n        this.limitedEvaluate = math.evaluate\r\n        math.import({\r\n            'import':     function () { throw new Error('Function import is disabled') },\r\n            'createUnit': function () { throw new Error('Function createUnit is disabled') },\r\n            'evaluate':   function () { throw new Error('Function evaluate is disabled') },\r\n            'parse':      function () { throw new Error('Function parse is disabled') },\r\n            'simplify':   function () { throw new Error('Function simplify is disabled') },\r\n            'derivative': function () { throw new Error('Function derivative is disabled') }\r\n        }, { override: true })\r\n    }\r\n\r\n    /** \r\n    * A function to generate a pixel value for 0-1 location on screen depending on screen width\r\n    * @param {number} width 0-1 \r\n    */\r\n    widthToPixels(width){\r\n        width = Math.min(width, 1) //Constrain the position to be a max of 1\r\n        let pixels = this.canvas.width * width\r\n        return pixels\r\n    }\r\n    /** \r\n    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r\n    * @param {number} width 0-1 \r\n    */\r\n    pixelsToWidth(pixels){\r\n        let width = 1 /(this.canvas.width / pixels)\r\n        return width\r\n    }\r\n    /** \r\n    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r\n    * @param {number} width 0-1 \r\n    */\r\n    heightToPixels(height){\r\n        height = Math.min(height, 1) //Constrain the position of the max value to be 1\r\n        let pixels = this.canvas.height * height\r\n        return pixels\r\n    }\r\n    /** \r\n    * A function which reads from a path and displays the geometry it contains\r\n    * @param {string} The path to read from\r\n    */\r\n    writeToDisplay(path, resetView = false){\r\n        \r\n        this.displayedPath = path\r\n        \r\n        // Cancel the last write to display if there is one active because this one will replace it\r\n        if(this.displayProcessing){\r\n            this.cancelLastDisplayWorker()\r\n            this.displayProcessing = false\r\n        }\r\n        \r\n        var returned = window.ask({ evaluate: \"md`hello`\", \r\n            key: \"display\", \r\n            readPath: path, \r\n            triangles: this.displayTriangles, \r\n            outline: this.displayEdges, \r\n            wireframe: false \r\n        })\r\n        \r\n        returned.then( result => {\r\n            \r\n            this.displayProcessing = false\r\n            document.getElementById('viewerContext').style.filter=\"sepia(0%)\"\r\n            \r\n            if(result && result != -1){\r\n                window.updateDisplay(result, {withGrid: this.displayGrid, fit: resetView})\r\n            }\r\n        }).catch (() => console.warn(\"Canceled display update\"))\r\n        \r\n        this.displayProcessing = true\r\n        document.getElementById('viewerContext').style.filter=\"sepia(100%)\"\r\n        \r\n        /** \r\n        * A function which cancels the worker processing display when called\r\n        */\r\n        this.cancelLastDisplayWorker = returned.terminate\r\n    }\r\n    /** \r\n    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r\n    * @param {number} width 0-1 \r\n    */\r\n    pixelsToHeight(pixels){\r\n        let height = 1 /(this.canvas.height / pixels)\r\n        return height\r\n    }\r\n    \r\n    /** \r\n     * A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.\r\n     */\r\n    generateUniqueID(){\r\n        return Math.floor(Math.random()*900000) + 100000\r\n    }\r\n    \r\n    /**\r\n     * Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.\r\n     * @param {number} x1 - The x cordinate of the first point.\r\n     * @param {number} x2 - The x cordinate of the second point.\r\n     * @param {number} y1 - The y cordinate of the first point.\r\n     * @param {number} y2 - The y cordinate of the second point.\r\n     */ \r\n    distBetweenPoints(x1, x2, y1, y2){\r\n        var a2 = Math.pow(x1 - x2, 2)\r\n        var b2 = Math.pow(y1 - y2, 2)\r\n        var dist = Math.sqrt(a2 + b2)\r\n        \r\n        return dist\r\n    }\r\n\r\n\r\n}\r\n\r\n/**\r\n * Because we want global variables to be the same every time it is imported we export an instance of global variables instead of the constructor.\r\n */\r\nexport default (new GlobalVariables)",
     "static": true,
     "longname": "C:/Users/Bar/Documents/GitHub/Maslow-Create/src/js/globalvariables.js",
     "access": "public",
@@ -1589,25 +1589,6 @@
   {
     "__docId__": 99,
     "kind": "member",
-    "name": "cancelLastDisplayWorker",
-    "memberof": "src/js/globalvariables.js~GlobalVariables",
-    "static": false,
-    "longname": "src/js/globalvariables.js~GlobalVariables#cancelLastDisplayWorker",
-    "access": "public",
-    "description": "The function to call to cancel the processing of the prevous display value.",
-    "lineNumber": 165,
-    "type": {
-      "nullable": null,
-      "types": [
-        "function"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 100,
-    "kind": "member",
     "name": "displayedPath",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
     "static": false,
@@ -1625,7 +1606,7 @@
     }
   },
   {
-    "__docId__": 101,
+    "__docId__": 100,
     "kind": "member",
     "name": "availablePaths",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1644,7 +1625,7 @@
     }
   },
   {
-    "__docId__": 102,
+    "__docId__": 101,
     "kind": "member",
     "name": "displayGrid",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1663,7 +1644,7 @@
     }
   },
   {
-    "__docId__": 103,
+    "__docId__": 102,
     "kind": "member",
     "name": "displayAxis",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1682,7 +1663,7 @@
     }
   },
   {
-    "__docId__": 104,
+    "__docId__": 103,
     "kind": "member",
     "name": "displayTriangles",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1701,7 +1682,7 @@
     }
   },
   {
-    "__docId__": 105,
+    "__docId__": 104,
     "kind": "member",
     "name": "displayEdges",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1720,7 +1701,7 @@
     }
   },
   {
-    "__docId__": 106,
+    "__docId__": 105,
     "kind": "member",
     "name": "limitedEvaluate",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1739,7 +1720,7 @@
     }
   },
   {
-    "__docId__": 107,
+    "__docId__": 106,
     "kind": "method",
     "name": "widthToPixels",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1769,7 +1750,7 @@
     }
   },
   {
-    "__docId__": 108,
+    "__docId__": 107,
     "kind": "method",
     "name": "pixelsToWidth",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1799,7 +1780,7 @@
     }
   },
   {
-    "__docId__": 109,
+    "__docId__": 108,
     "kind": "method",
     "name": "heightToPixels",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1829,7 +1810,7 @@
     }
   },
   {
-    "__docId__": 110,
+    "__docId__": 109,
     "kind": "method",
     "name": "writeToDisplay",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1855,7 +1836,23 @@
     "return": null
   },
   {
-    "__docId__": 116,
+    "__docId__": 114,
+    "kind": "member",
+    "name": "cancelLastDisplayWorker",
+    "memberof": "src/js/globalvariables.js~GlobalVariables",
+    "static": false,
+    "longname": "src/js/globalvariables.js~GlobalVariables#cancelLastDisplayWorker",
+    "access": "public",
+    "description": "A function which cancels the worker processing display when called",
+    "lineNumber": 277,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 115,
     "kind": "method",
     "name": "pixelsToHeight",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1865,7 +1862,7 @@
     "longname": "src/js/globalvariables.js~GlobalVariables#pixelsToHeight",
     "access": "public",
     "description": "A function to generate a 0-1 value from pixels for location on screen depending on screen height",
-    "lineNumber": 280,
+    "lineNumber": 283,
     "params": [
       {
         "nullable": null,
@@ -1885,7 +1882,7 @@
     }
   },
   {
-    "__docId__": 117,
+    "__docId__": 116,
     "kind": "method",
     "name": "generateUniqueID",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1895,7 +1892,7 @@
     "longname": "src/js/globalvariables.js~GlobalVariables#generateUniqueID",
     "access": "public",
     "description": "A function to generate a unique ID value. Currently uses random which does not gurintee that it will be unique.",
-    "lineNumber": 288,
+    "lineNumber": 291,
     "params": [],
     "return": {
       "types": [
@@ -1904,7 +1901,7 @@
     }
   },
   {
-    "__docId__": 118,
+    "__docId__": 117,
     "kind": "method",
     "name": "distBetweenPoints",
     "memberof": "src/js/globalvariables.js~GlobalVariables",
@@ -1914,7 +1911,7 @@
     "longname": "src/js/globalvariables.js~GlobalVariables#distBetweenPoints",
     "access": "public",
     "description": "Computes the distance between two points on a plane. This is a duplicate of the one in utils which should probably be deleted.",
-    "lineNumber": 299,
+    "lineNumber": 302,
     "params": [
       {
         "nullable": null,
@@ -1964,7 +1961,7 @@
     }
   },
   {
-    "__docId__": 119,
+    "__docId__": 118,
     "kind": "variable",
     "name": "globalVariables",
     "memberof": "src/js/globalvariables.js",
@@ -1975,7 +1972,7 @@
     "importPath": "canvas-template/src/js/globalvariables.js",
     "importStyle": "globalVariables",
     "description": "Because we want global variables to be the same every time it is imported we export an instance of global variables instead of the constructor.",
-    "lineNumber": 313,
+    "lineNumber": 316,
     "type": {
       "types": [
         "src/js/globalvariables.js~GlobalVariables"
@@ -1983,7 +1980,7 @@
     }
   },
   {
-    "__docId__": 120,
+    "__docId__": 119,
     "kind": "file",
     "name": "src/js/initialPopup.js",
     "content": "",
@@ -1994,7 +1991,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 121,
+    "__docId__": 120,
     "kind": "file",
     "name": "src/js/licenseOptions.js",
     "content": "\r\n/**\r\n * This class defines the available default licenses when creating a new project\r\n */ \r\nconst licenses = {\r\n    \"CC0\": `Creative Commons Legal Code\r\n\r\nCC0 1.0 Universal\r\n\r\n    CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE\r\n    LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN\r\n    ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS\r\n    INFORMATION ON AN \"AS-IS\" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES\r\n    REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS\r\n    PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM\r\n    THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED\r\n    HEREUNDER.\r\n\r\nStatement of Purpose\r\n\r\nThe laws of most jurisdictions throughout the world automatically confer\r\nexclusive Copyright and Related Rights (defined below) upon the creator\r\nand subsequent owner(s) (each and all, an \"owner\") of an original work of\r\nauthorship and/or a database (each, a \"Work\").\r\n\r\nCertain owners wish to permanently relinquish those rights to a Work for\r\nthe purpose of contributing to a commons of creative, cultural and\r\nscientific works (\"Commons\") that the public can reliably and without fear\r\nof later claims of infringement build upon, modify, incorporate in other\r\nworks, reuse and redistribute as freely as possible in any form whatsoever\r\nand for any purposes, including without limitation commercial purposes.\r\nThese owners may contribute to the Commons to promote the ideal of a free\r\nculture and the further production of creative, cultural and scientific\r\nworks, or to gain reputation or greater distribution for their Work in\r\npart through the use and efforts of others.\r\n\r\nFor these and/or other purposes and motivations, and without any\r\nexpectation of additional consideration or compensation, the person\r\nassociating CC0 with a Work (the \"Affirmer\"), to the extent that he or she\r\nis an owner of Copyright and Related Rights in the Work, voluntarily\r\nelects to apply CC0 to the Work and publicly distribute the Work under its\r\nterms, with knowledge of his or her Copyright and Related Rights in the\r\nWork and the meaning and intended legal effect of CC0 on those rights.\r\n\r\n1. Copyright and Related Rights. A Work made available under CC0 may be\r\nprotected by copyright and related or neighboring rights (\"Copyright and\r\nRelated Rights\"). Copyright and Related Rights include, but are not\r\nlimited to, the following:\r\n\r\n  i. the right to reproduce, adapt, distribute, perform, display,\r\n     communicate, and translate a Work;\r\n ii. moral rights retained by the original author(s) and/or performer(s);\r\niii. publicity and privacy rights pertaining to a person's image or\r\n     likeness depicted in a Work;\r\n iv. rights protecting against unfair competition in regards to a Work,\r\n     subject to the limitations in paragraph 4(a), below;\r\n  v. rights protecting the extraction, dissemination, use and reuse of data\r\n     in a Work;\r\n vi. database rights (such as those arising under Directive 96/9/EC of the\r\n     European Parliament and of the Council of 11 March 1996 on the legal\r\n     protection of databases, and under any national implementation\r\n     thereof, including any amended or successor version of such\r\n     directive); and\r\nvii. other similar, equivalent or corresponding rights throughout the\r\n     world based on applicable law or treaty, and any national\r\n     implementations thereof.\r\n\r\n2. Waiver. To the greatest extent permitted by, but not in contravention\r\nof, applicable law, Affirmer hereby overtly, fully, permanently,\r\nirrevocably and unconditionally waives, abandons, and surrenders all of\r\nAffirmer's Copyright and Related Rights and associated claims and causes\r\nof action, whether now known or unknown (including existing as well as\r\nfuture claims and causes of action), in the Work (i) in all territories\r\nworldwide, (ii) for the maximum duration provided by applicable law or\r\ntreaty (including future time extensions), (iii) in any current or future\r\nmedium and for any number of copies, and (iv) for any purpose whatsoever,\r\nincluding without limitation commercial, advertising or promotional\r\npurposes (the \"Waiver\"). Affirmer makes the Waiver for the benefit of each\r\nmember of the public at large and to the detriment of Affirmer's heirs and\r\nsuccessors, fully intending that such Waiver shall not be subject to\r\nrevocation, rescission, cancellation, termination, or any other legal or\r\nequitable action to disrupt the quiet enjoyment of the Work by the public\r\nas contemplated by Affirmer's express Statement of Purpose.\r\n\r\n3. Public License Fallback. Should any part of the Waiver for any reason\r\nbe judged legally invalid or ineffective under applicable law, then the\r\nWaiver shall be preserved to the maximum extent permitted taking into\r\naccount Affirmer's express Statement of Purpose. In addition, to the\r\nextent the Waiver is so judged Affirmer hereby grants to each affected\r\nperson a royalty-free, non transferable, non sublicensable, non exclusive,\r\nirrevocable and unconditional license to exercise Affirmer's Copyright and\r\nRelated Rights in the Work (i) in all territories worldwide, (ii) for the\r\nmaximum duration provided by applicable law or treaty (including future\r\ntime extensions), (iii) in any current or future medium and for any number\r\nof copies, and (iv) for any purpose whatsoever, including without\r\nlimitation commercial, advertising or promotional purposes (the\r\n\"License\"). The License shall be deemed effective as of the date CC0 was\r\napplied by Affirmer to the Work. Should any part of the License for any\r\nreason be judged legally invalid or ineffective under applicable law, such\r\npartial invalidity or ineffectiveness shall not invalidate the remainder\r\nof the License, and in such case Affirmer hereby affirms that he or she\r\nwill not (i) exercise any of his or her remaining Copyright and Related\r\nRights in the Work or (ii) assert any associated claims and causes of\r\naction with respect to the Work, in either case contrary to Affirmer's\r\nexpress Statement of Purpose.\r\n\r\n4. Limitations and Disclaimers.\r\n\r\n a. No trademark or patent rights held by Affirmer are waived, abandoned,\r\n    surrendered, licensed or otherwise affected by this document.\r\n b. Affirmer offers the Work as-is and makes no representations or\r\n    warranties of any kind concerning the Work, express, implied,\r\n    statutory or otherwise, including without limitation warranties of\r\n    title, merchantability, fitness for a particular purpose, non\r\n    infringement, or the absence of latent or other defects, accuracy, or\r\n    the present or absence of errors, whether or not discoverable, all to\r\n    the greatest extent permissible under applicable law.\r\n c. Affirmer disclaims responsibility for clearing rights of other persons\r\n    that may apply to the Work or any use thereof, including without\r\n    limitation any person's Copyright and Related Rights in the Work.\r\n    Further, Affirmer disclaims responsibility for obtaining any necessary\r\n    consents, permissions or other rights required for any use of the\r\n    Work.\r\n d. Affirmer understands and acknowledges that Creative Commons is not a\r\n    party to this document and has no duty or obligation with respect to\r\n    this CC0 or use of the Work.`,\r\n    \"CC-BY\": `Attribution 4.0 International\r\n\r\n=======================================================================\r\n\r\nCreative Commons Corporation (\"Creative Commons\") is not a law firm and\r\ndoes not provide legal services or legal advice. Distribution of\r\nCreative Commons public licenses does not create a lawyer-client or\r\nother relationship. Creative Commons makes its licenses and related\r\ninformation available on an \"as-is\" basis. Creative Commons gives no\r\nwarranties regarding its licenses, any material licensed under their\r\nterms and conditions, or any related information. Creative Commons\r\ndisclaims all liability for damages resulting from their use to the\r\nfullest extent possible.\r\n\r\nUsing Creative Commons Public Licenses\r\n\r\nCreative Commons public licenses provide a standard set of terms and\r\nconditions that creators and other rights holders may use to share\r\noriginal works of authorship and other material subject to copyright\r\nand certain other rights specified in the public license below. The\r\nfollowing considerations are for informational purposes only, are not\r\nexhaustive, and do not form part of our licenses.\r\n\r\n     Considerations for licensors: Our public licenses are\r\n     intended for use by those authorized to give the public\r\n     permission to use material in ways otherwise restricted by\r\n     copyright and certain other rights. Our licenses are\r\n     irrevocable. Licensors should read and understand the terms\r\n     and conditions of the license they choose before applying it.\r\n     Licensors should also secure all rights necessary before\r\n     applying our licenses so that the public can reuse the\r\n     material as expected. Licensors should clearly mark any\r\n     material not subject to the license. This includes other CC-\r\n     licensed material, or material used under an exception or\r\n     limitation to copyright. More considerations for licensors:\r\n\twiki.creativecommons.org/Considerations_for_licensors\r\n\r\n     Considerations for the public: By using one of our public\r\n     licenses, a licensor grants the public permission to use the\r\n     licensed material under specified terms and conditions. If\r\n     the licensor's permission is not necessary for any reason--for\r\n     example, because of any applicable exception or limitation to\r\n     copyright--then that use is not regulated by the license. Our\r\n     licenses grant only permissions under copyright and certain\r\n     other rights that a licensor has authority to grant. Use of\r\n     the licensed material may still be restricted for other\r\n     reasons, including because others have copyright or other\r\n     rights in the material. A licensor may make special requests,\r\n     such as asking that all changes be marked or described.\r\n     Although not required by our licenses, you are encouraged to\r\n     respect those requests where reasonable. More_considerations\r\n     for the public:\r\n\twiki.creativecommons.org/Considerations_for_licensees\r\n\r\n=======================================================================\r\n\r\nCreative Commons Attribution 4.0 International Public License\r\n\r\nBy exercising the Licensed Rights (defined below), You accept and agree\r\nto be bound by the terms and conditions of this Creative Commons\r\nAttribution 4.0 International Public License (\"Public License\"). To the\r\nextent this Public License may be interpreted as a contract, You are\r\ngranted the Licensed Rights in consideration of Your acceptance of\r\nthese terms and conditions, and the Licensor grants You such rights in\r\nconsideration of benefits the Licensor receives from making the\r\nLicensed Material available under these terms and conditions.\r\n\r\n\r\nSection 1 -- Definitions.\r\n\r\n  a. Adapted Material means material subject to Copyright and Similar\r\n     Rights that is derived from or based upon the Licensed Material\r\n     and in which the Licensed Material is translated, altered,\r\n     arranged, transformed, or otherwise modified in a manner requiring\r\n     permission under the Copyright and Similar Rights held by the\r\n     Licensor. For purposes of this Public License, where the Licensed\r\n     Material is a musical work, performance, or sound recording,\r\n     Adapted Material is always produced where the Licensed Material is\r\n     synched in timed relation with a moving image.\r\n\r\n  b. Adapter's License means the license You apply to Your Copyright\r\n     and Similar Rights in Your contributions to Adapted Material in\r\n     accordance with the terms and conditions of this Public License.\r\n\r\n  c. Copyright and Similar Rights means copyright and/or similar rights\r\n     closely related to copyright including, without limitation,\r\n     performance, broadcast, sound recording, and Sui Generis Database\r\n     Rights, without regard to how the rights are labeled or\r\n     categorized. For purposes of this Public License, the rights\r\n     specified in Section 2(b)(1)-(2) are not Copyright and Similar\r\n     Rights.\r\n\r\n  d. Effective Technological Measures means those measures that, in the\r\n     absence of proper authority, may not be circumvented under laws\r\n     fulfilling obligations under Article 11 of the WIPO Copyright\r\n     Treaty adopted on December 20, 1996, and/or similar international\r\n     agreements.\r\n\r\n  e. Exceptions and Limitations means fair use, fair dealing, and/or\r\n     any other exception or limitation to Copyright and Similar Rights\r\n     that applies to Your use of the Licensed Material.\r\n\r\n  f. Licensed Material means the artistic or literary work, database,\r\n     or other material to which the Licensor applied this Public\r\n     License.\r\n\r\n  g. Licensed Rights means the rights granted to You subject to the\r\n     terms and conditions of this Public License, which are limited to\r\n     all Copyright and Similar Rights that apply to Your use of the\r\n     Licensed Material and that the Licensor has authority to license.\r\n\r\n  h. Licensor means the individual(s) or entity(ies) granting rights\r\n     under this Public License.\r\n\r\n  i. Share means to provide material to the public by any means or\r\n     process that requires permission under the Licensed Rights, such\r\n     as reproduction, public display, public performance, distribution,\r\n     dissemination, communication, or importation, and to make material\r\n     available to the public including in ways that members of the\r\n     public may access the material from a place and at a time\r\n     individually chosen by them.\r\n\r\n  j. Sui Generis Database Rights means rights other than copyright\r\n     resulting from Directive 96/9/EC of the European Parliament and of\r\n     the Council of 11 March 1996 on the legal protection of databases,\r\n     as amended and/or succeeded, as well as other essentially\r\n     equivalent rights anywhere in the world.\r\n\r\n  k. You means the individual or entity exercising the Licensed Rights\r\n     under this Public License. Your has a corresponding meaning.\r\n\r\n\r\nSection 2 -- Scope.\r\n\r\n  a. License grant.\r\n\r\n       1. Subject to the terms and conditions of this Public License,\r\n          the Licensor hereby grants You a worldwide, royalty-free,\r\n          non-sublicensable, non-exclusive, irrevocable license to\r\n          exercise the Licensed Rights in the Licensed Material to:\r\n\r\n            a. reproduce and Share the Licensed Material, in whole or\r\n               in part; and\r\n\r\n            b. produce, reproduce, and Share Adapted Material.\r\n\r\n       2. Exceptions and Limitations. For the avoidance of doubt, where\r\n          Exceptions and Limitations apply to Your use, this Public\r\n          License does not apply, and You do not need to comply with\r\n          its terms and conditions.\r\n\r\n       3. Term. The term of this Public License is specified in Section\r\n          6(a).\r\n\r\n       4. Media and formats; technical modifications allowed. The\r\n          Licensor authorizes You to exercise the Licensed Rights in\r\n          all media and formats whether now known or hereafter created,\r\n          and to make technical modifications necessary to do so. The\r\n          Licensor waives and/or agrees not to assert any right or\r\n          authority to forbid You from making technical modifications\r\n          necessary to exercise the Licensed Rights, including\r\n          technical modifications necessary to circumvent Effective\r\n          Technological Measures. For purposes of this Public License,\r\n          simply making modifications authorized by this Section 2(a)\r\n          (4) never produces Adapted Material.\r\n\r\n       5. Downstream recipients.\r\n\r\n            a. Offer from the Licensor -- Licensed Material. Every\r\n               recipient of the Licensed Material automatically\r\n               receives an offer from the Licensor to exercise the\r\n               Licensed Rights under the terms and conditions of this\r\n               Public License.\r\n\r\n            b. No downstream restrictions. You may not offer or impose\r\n               any additional or different terms or conditions on, or\r\n               apply any Effective Technological Measures to, the\r\n               Licensed Material if doing so restricts exercise of the\r\n               Licensed Rights by any recipient of the Licensed\r\n               Material.\r\n\r\n       6. No endorsement. Nothing in this Public License constitutes or\r\n          may be construed as permission to assert or imply that You\r\n          are, or that Your use of the Licensed Material is, connected\r\n          with, or sponsored, endorsed, or granted official status by,\r\n          the Licensor or others designated to receive attribution as\r\n          provided in Section 3(a)(1)(A)(i).\r\n\r\n  b. Other rights.\r\n\r\n       1. Moral rights, such as the right of integrity, are not\r\n          licensed under this Public License, nor are publicity,\r\n          privacy, and/or other similar personality rights; however, to\r\n          the extent possible, the Licensor waives and/or agrees not to\r\n          assert any such rights held by the Licensor to the limited\r\n          extent necessary to allow You to exercise the Licensed\r\n          Rights, but not otherwise.\r\n\r\n       2. Patent and trademark rights are not licensed under this\r\n          Public License.\r\n\r\n       3. To the extent possible, the Licensor waives any right to\r\n          collect royalties from You for the exercise of the Licensed\r\n          Rights, whether directly or through a collecting society\r\n          under any voluntary or waivable statutory or compulsory\r\n          licensing scheme. In all other cases the Licensor expressly\r\n          reserves any right to collect such royalties.\r\n\r\n\r\nSection 3 -- License Conditions.\r\n\r\nYour exercise of the Licensed Rights is expressly made subject to the\r\nfollowing conditions.\r\n\r\n  a. Attribution.\r\n\r\n       1. If You Share the Licensed Material (including in modified\r\n          form), You must:\r\n\r\n            a. retain the following if it is supplied by the Licensor\r\n               with the Licensed Material:\r\n\r\n                 i. identification of the creator(s) of the Licensed\r\n                    Material and any others designated to receive\r\n                    attribution, in any reasonable manner requested by\r\n                    the Licensor (including by pseudonym if\r\n                    designated);\r\n\r\n                ii. a copyright notice;\r\n\r\n               iii. a notice that refers to this Public License;\r\n\r\n                iv. a notice that refers to the disclaimer of\r\n                    warranties;\r\n\r\n                 v. a URI or hyperlink to the Licensed Material to the\r\n                    extent reasonably practicable;\r\n\r\n            b. indicate if You modified the Licensed Material and\r\n               retain an indication of any previous modifications; and\r\n\r\n            c. indicate the Licensed Material is licensed under this\r\n               Public License, and include the text of, or the URI or\r\n               hyperlink to, this Public License.\r\n\r\n       2. You may satisfy the conditions in Section 3(a)(1) in any\r\n          reasonable manner based on the medium, means, and context in\r\n          which You Share the Licensed Material. For example, it may be\r\n          reasonable to satisfy the conditions by providing a URI or\r\n          hyperlink to a resource that includes the required\r\n          information.\r\n\r\n       3. If requested by the Licensor, You must remove any of the\r\n          information required by Section 3(a)(1)(A) to the extent\r\n          reasonably practicable.\r\n\r\n       4. If You Share Adapted Material You produce, the Adapter's\r\n          License You apply must not prevent recipients of the Adapted\r\n          Material from complying with this Public License.\r\n\r\n\r\nSection 4 -- Sui Generis Database Rights.\r\n\r\nWhere the Licensed Rights include Sui Generis Database Rights that\r\napply to Your use of the Licensed Material:\r\n\r\n  a. for the avoidance of doubt, Section 2(a)(1) grants You the right\r\n     to extract, reuse, reproduce, and Share all or a substantial\r\n     portion of the contents of the database;\r\n\r\n  b. if You include all or a substantial portion of the database\r\n     contents in a database in which You have Sui Generis Database\r\n     Rights, then the database in which You have Sui Generis Database\r\n     Rights (but not its individual contents) is Adapted Material; and\r\n\r\n  c. You must comply with the conditions in Section 3(a) if You Share\r\n     all or a substantial portion of the contents of the database.\r\n\r\nFor the avoidance of doubt, this Section 4 supplements and does not\r\nreplace Your obligations under this Public License where the Licensed\r\nRights include other Copyright and Similar Rights.\r\n\r\n\r\nSection 5 -- Disclaimer of Warranties and Limitation of Liability.\r\n\r\n  a. UNLESS OTHERWISE SEPARATELY UNDERTAKEN BY THE LICENSOR, TO THE\r\n     EXTENT POSSIBLE, THE LICENSOR OFFERS THE LICENSED MATERIAL AS-IS\r\n     AND AS-AVAILABLE, AND MAKES NO REPRESENTATIONS OR WARRANTIES OF\r\n     ANY KIND CONCERNING THE LICENSED MATERIAL, WHETHER EXPRESS,\r\n     IMPLIED, STATUTORY, OR OTHER. THIS INCLUDES, WITHOUT LIMITATION,\r\n     WARRANTIES OF TITLE, MERCHANTABILITY, FITNESS FOR A PARTICULAR\r\n     PURPOSE, NON-INFRINGEMENT, ABSENCE OF LATENT OR OTHER DEFECTS,\r\n     ACCURACY, OR THE PRESENCE OR ABSENCE OF ERRORS, WHETHER OR NOT\r\n     KNOWN OR DISCOVERABLE. WHERE DISCLAIMERS OF WARRANTIES ARE NOT\r\n     ALLOWED IN FULL OR IN PART, THIS DISCLAIMER MAY NOT APPLY TO YOU.\r\n\r\n  b. TO THE EXTENT POSSIBLE, IN NO EVENT WILL THE LICENSOR BE LIABLE\r\n     TO YOU ON ANY LEGAL THEORY (INCLUDING, WITHOUT LIMITATION,\r\n     NEGLIGENCE) OR OTHERWISE FOR ANY DIRECT, SPECIAL, INDIRECT,\r\n     INCIDENTAL, CONSEQUENTIAL, PUNITIVE, EXEMPLARY, OR OTHER LOSSES,\r\n     COSTS, EXPENSES, OR DAMAGES ARISING OUT OF THIS PUBLIC LICENSE OR\r\n     USE OF THE LICENSED MATERIAL, EVEN IF THE LICENSOR HAS BEEN\r\n     ADVISED OF THE POSSIBILITY OF SUCH LOSSES, COSTS, EXPENSES, OR\r\n     DAMAGES. WHERE A LIMITATION OF LIABILITY IS NOT ALLOWED IN FULL OR\r\n     IN PART, THIS LIMITATION MAY NOT APPLY TO YOU.\r\n\r\n  c. The disclaimer of warranties and limitation of liability provided\r\n     above shall be interpreted in a manner that, to the extent\r\n     possible, most closely approximates an absolute disclaimer and\r\n     waiver of all liability.\r\n\r\n\r\nSection 6 -- Term and Termination.\r\n\r\n  a. This Public License applies for the term of the Copyright and\r\n     Similar Rights licensed here. However, if You fail to comply with\r\n     this Public License, then Your rights under this Public License\r\n     terminate automatically.\r\n\r\n  b. Where Your right to use the Licensed Material has terminated under\r\n     Section 6(a), it reinstates:\r\n\r\n       1. automatically as of the date the violation is cured, provided\r\n          it is cured within 30 days of Your discovery of the\r\n          violation; or\r\n\r\n       2. upon express reinstatement by the Licensor.\r\n\r\n     For the avoidance of doubt, this Section 6(b) does not affect any\r\n     right the Licensor may have to seek remedies for Your violations\r\n     of this Public License.\r\n\r\n  c. For the avoidance of doubt, the Licensor may also offer the\r\n     Licensed Material under separate terms or conditions or stop\r\n     distributing the Licensed Material at any time; however, doing so\r\n     will not terminate this Public License.\r\n\r\n  d. Sections 1, 5, 6, 7, and 8 survive termination of this Public\r\n     License.\r\n\r\n\r\nSection 7 -- Other Terms and Conditions.\r\n\r\n  a. The Licensor shall not be bound by any additional or different\r\n     terms or conditions communicated by You unless expressly agreed.\r\n\r\n  b. Any arrangements, understandings, or agreements regarding the\r\n     Licensed Material not stated herein are separate from and\r\n     independent of the terms and conditions of this Public License.\r\n\r\n\r\nSection 8 -- Interpretation.\r\n\r\n  a. For the avoidance of doubt, this Public License does not, and\r\n     shall not be interpreted to, reduce, limit, restrict, or impose\r\n     conditions on any use of the Licensed Material that could lawfully\r\n     be made without permission under this Public License.\r\n\r\n  b. To the extent possible, if any provision of this Public License is\r\n     deemed unenforceable, it shall be automatically reformed to the\r\n     minimum extent necessary to make it enforceable. If the provision\r\n     cannot be reformed, it shall be severed from this Public License\r\n     without affecting the enforceability of the remaining terms and\r\n     conditions.\r\n\r\n  c. No term or condition of this Public License will be waived and no\r\n     failure to comply consented to unless expressly agreed to by the\r\n     Licensor.\r\n\r\n  d. Nothing in this Public License constitutes or may be interpreted\r\n     as a limitation upon, or waiver of, any privileges and immunities\r\n     that apply to the Licensor or You, including from the legal\r\n     processes of any jurisdiction or authority.\r\n\r\n\r\n=======================================================================\r\n\r\nCreative Commons is not a party to its public\r\nlicenses. Notwithstanding, Creative Commons may elect to apply one of\r\nits public licenses to material it publishes and in those instances\r\nwill be considered the “Licensor.” The text of the Creative Commons\r\npublic licenses is dedicated to the public domain under the CC0 Public\r\nDomain Dedication. Except for the limited purpose of indicating that\r\nmaterial is shared under a Creative Commons public license or as\r\notherwise permitted by the Creative Commons policies published at\r\ncreativecommons.org/policies, Creative Commons does not authorize the\r\nuse of the trademark \"Creative Commons\" or any other trademark or logo\r\nof Creative Commons without its prior written consent including,\r\nwithout limitation, in connection with any unauthorized modifications\r\nto any of its public licenses or any other arrangements,\r\nunderstandings, or agreements concerning use of licensed material. For\r\nthe avoidance of doubt, this paragraph does not form part of the\r\npublic licenses.\r\n\r\nCreative Commons may be contacted at creativecommons.org.`\r\n}\r\n\r\nexport { licenses }",
@@ -2005,7 +2002,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 122,
+    "__docId__": 121,
     "kind": "variable",
     "name": "licenses",
     "memberof": "src/js/licenseOptions.js",
@@ -2024,7 +2021,7 @@
     }
   },
   {
-    "__docId__": 123,
+    "__docId__": 122,
     "kind": "file",
     "name": "src/js/molecules/assembly.js",
     "content": "import Atom from '../prototypes/atom.js'\r\nimport { addOrDeletePorts } from '../alwaysOneFreeInput.js'\r\nimport GlobalVariables from '../globalvariables.js'\r\n\r\n/**\r\n * This class creates the Assembly atom instance.\r\n */\r\nexport default class Assembly extends Atom{\r\n    /**\r\n    * Creates a new assembly atom.\r\n    * @param {object} values - An object of values. Each of these values will be applied to the resulting atom.\r\n    */\r\n    constructor(values){\r\n        super(values)\r\n        \r\n        this.addIO('output', 'geometry', this, 'geometry', '')\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Assembly'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Assembly'\r\n        /**\r\n         * A list of all of the inputs to this molecule. May be loaded when the molecule is created.\r\n         * @type {array}\r\n         */\r\n        this.ioValues = []\r\n        /**\r\n         * A flag to determine if cutaway geometry is removed....not used anymore?\r\n         * @type {boolean}\r\n         */\r\n        this.removeCutawayGeometry = true\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Assembles multiple shapes together into one. Shapes higher in the inputs list will cut into shapes lower on the input list where they overlap.\"\r\n        \r\n        this.setValues(values)\r\n        \r\n        //This loads any inputs which this atom had when last saved.\r\n        if (typeof this.ioValues !== 'undefined'){\r\n            this.ioValues.forEach(ioValue => { //for each saved value\r\n                this.addIO('input', ioValue.name, this, 'geometry', '')\r\n            })\r\n        }\r\n    }\r\n    \r\n    \r\n    /**\r\n     * Add or delete ports as needed in addition to the normal begin propogation stuff\r\n     */ \r\n    beginPropagation(){\r\n        \r\n        addOrDeletePorts(this)  //Add or remove ports as needed\r\n        \r\n        super.beginPropagation()\r\n    }\r\n\r\n    /**\r\n     * Draw the assembly icon\r\n     */ \r\n    draw(){\r\n\r\n        super.draw() //Super call to draw the rest\r\n\r\n        const xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        const yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#949294'\r\n        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels + radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)\r\n        //GlobalVariables.c.fill()\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels - radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/2)\r\n\r\n        //GlobalVariables.c.fill()\r\n        GlobalVariables.c.lineWidth = 1\r\n        GlobalVariables.c.lineJoin = \"round\"\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n\r\n    }\r\n\r\n    /**\r\n    * Super class the default update value function. This function computes creates an array of all of the input values and then passes that array to a worker thread to create the assembly.\r\n    */ \r\n    updateValue(){\r\n        if(this.inputs.every(x => x.ready)){\r\n            try{\r\n                var inputValues = []\r\n                this.inputs.forEach( io => {\r\n                    if(io.connectors.length > 0 && io.type == 'input'){\r\n                        inputValues.push(io.getValue())\r\n                    }\r\n                })\r\n                \r\n                const values = { key: \"assembly\", paths: inputValues, writePath: this.path }\r\n                this.basicThreadValueProcessing(values)\r\n                this.clearAlert()\r\n            }catch(err){this.setAlert(err)}\r\n            \r\n            //Delete or add ports as needed\r\n            addOrDeletePorts(this)\r\n        }\r\n    }\r\n    \r\n    /**\r\n    * Super class the default serialize function to save the inputs since this atom has variable numbers of inputs.\r\n    */ \r\n    serialize(savedObject){\r\n        var thisAsObject = super.serialize(savedObject)\r\n        \r\n        var ioValues = []\r\n        this.inputs.forEach(io => {\r\n            if (io.connectors.length > 0){\r\n                var saveIO = {\r\n                    name: io.name,\r\n                    ioValue: 10\r\n                }\r\n                ioValues.push(saveIO)\r\n            }\r\n        })\r\n        \r\n        thisAsObject.ioValues = ioValues\r\n        \r\n        return thisAsObject\r\n    }\r\n}",
@@ -2035,7 +2032,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 124,
+    "__docId__": 123,
     "kind": "class",
     "name": "Assembly",
     "memberof": "src/js/molecules/assembly.js",
@@ -2053,7 +2050,7 @@
     ]
   },
   {
-    "__docId__": 125,
+    "__docId__": 124,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2078,7 +2075,7 @@
     ]
   },
   {
-    "__docId__": 126,
+    "__docId__": 125,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2097,7 +2094,7 @@
     }
   },
   {
-    "__docId__": 127,
+    "__docId__": 126,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2116,7 +2113,7 @@
     }
   },
   {
-    "__docId__": 128,
+    "__docId__": 127,
     "kind": "member",
     "name": "ioValues",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2135,7 +2132,7 @@
     }
   },
   {
-    "__docId__": 129,
+    "__docId__": 128,
     "kind": "member",
     "name": "removeCutawayGeometry",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2154,7 +2151,7 @@
     }
   },
   {
-    "__docId__": 130,
+    "__docId__": 129,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2173,7 +2170,7 @@
     }
   },
   {
-    "__docId__": 131,
+    "__docId__": 130,
     "kind": "method",
     "name": "beginPropagation",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2188,7 +2185,7 @@
     "return": null
   },
   {
-    "__docId__": 132,
+    "__docId__": 131,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2203,7 +2200,7 @@
     "return": null
   },
   {
-    "__docId__": 133,
+    "__docId__": 132,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2218,7 +2215,7 @@
     "return": null
   },
   {
-    "__docId__": 134,
+    "__docId__": 133,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/molecules/assembly.js~Assembly",
@@ -2244,7 +2241,7 @@
     }
   },
   {
-    "__docId__": 135,
+    "__docId__": 134,
     "kind": "file",
     "name": "src/js/molecules/BOM.js",
     "content": "import Atom from '../prototypes/atom.js'\r\nimport GlobalVariables from '../globalvariables.js'\r\nimport {BOMEntry} from '../BOM.js'\r\n\r\n/**\r\n * The addBOMTag molecule type adds a tag containing information about a bill of materials item to the input geometry. The input geometry is not modified in any other way\r\n */\r\nexport default class AddBOMTag extends Atom{\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super(values)\r\n        \r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Add BOM Tag'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.type = 'addBOMTag'\r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Add BOM Tag'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Adds a Bill Of Materials tag which appears in molecules containing this atom and in the GitHub project bill of materials.\"\r\n        \r\n        /**\r\n         * The BOM item object created by this atom\r\n         * @type {string}\r\n         */\r\n        this.BOMitem = new BOMEntry()\r\n        /** \r\n         * This atom's radius as displayed on the screen is 1/65 width\r\n         * @type {number}\r\n         */\r\n        this.radius = 1/65\r\n        /**\r\n         * This atom's height as drawn on the screen\r\n         */\r\n        this.height\r\n        \r\n        this.addIO('input', 'geometry', this, 'geometry', null, false, true)\r\n        this.addIO('output', 'geometry', this, 'geometry', null)\r\n        \r\n        this.setValues(values)\r\n    }\r\n    \r\n    /**\r\n     * Set the value to be the BOMitem\r\n     */ \r\n    updateValue(){\r\n        if(this.inputs.every(x => x.ready)){\r\n            try{\r\n                var inputPath = this.findIOValue('geometry')\r\n                const values = {key: \"tag\", tag: JSON.stringify(this.BOMitem), readPath: inputPath, writePath: this.path }\r\n                this.basicThreadValueProcessing(values)\r\n                this.clearAlert()\r\n            }catch(err){this.setAlert(err)}\r\n        }\r\n    }\r\n        \r\n    /**\r\n     * Updates the side bar to display the BOM item information\r\n     */ \r\n    updateSidebar(){\r\n        var valueList = super.updateSidebar() //call the super function\r\n        this.createBOM(valueList)\r\n    }\r\n    \r\n    /**\r\n     * Draw the constant which is more rectangular than the regular shape.\r\n     */ \r\n    draw() {\r\n        \r\n        super.draw(\"rect\") \r\n\r\n        let pixelsX = GlobalVariables.widthToPixels(this.x)\r\n        let pixelsY = GlobalVariables.heightToPixels(this.y)\r\n        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        /**\r\n        * Relates height to radius\r\n        * @type {number}\r\n        */\r\n        this.height = pixelsRadius/1.3\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#484848'\r\n        GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`\r\n        GlobalVariables.c.fillText(String.fromCharCode(0x0024,0x0024,0x0024), pixelsX- pixelsRadius/2, pixelsY +this.height/3)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n    }\r\n    \r\n    /**\r\n     * Creates an editable UI represntation of the bom list. \r\n     * @param {Object} list - list is an object to which the generated HTML element will be apended\r\n     */ \r\n    createBOM(list){\r\n        \r\n        list.appendChild(document.createElement('br'))\r\n        list.appendChild(document.createElement('br'))\r\n        \r\n        var div = document.createElement('h3')\r\n        div.setAttribute('style','text-align:center;')\r\n        list.appendChild(div)\r\n        var valueText = document.createTextNode('Bill Of Materials Entry')\r\n        div.appendChild(valueText)\r\n        \r\n        var x = document.createElement('HR')\r\n        list.appendChild(x)\r\n        \r\n        this.createEditableValueListItem(list,this.BOMitem,'BOMitemName', 'Item', false, () => this.updateValue())\r\n        this.createEditableValueListItem(list,this.BOMitem,'numberNeeded', 'Number', true, () => this.updateValue())\r\n        this.createEditableValueListItem(list,this.BOMitem,'costUSD', 'Price', true, () => this.updateValue())\r\n        this.createEditableValueListItem(list,this.BOMitem,'source', 'Source', false,() => this.updateValue())\r\n        x = document.createElement('HR')\r\n        list.appendChild(x)\r\n    }\r\n    \r\n    /**\r\n     * Add the bom item to the saved object\r\n     */\r\n    serialize(values){\r\n        //Save the readme text to the serial stream\r\n        var valuesObj = super.serialize(values)\r\n        \r\n        valuesObj.BOMitem = Object.assign({}, this.BOMitem) //Makes a shallow copy to prevent issues when copy pasting\r\n        \r\n        return valuesObj\r\n        \r\n    }\r\n}",
@@ -2255,7 +2252,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 136,
+    "__docId__": 135,
     "kind": "class",
     "name": "AddBOMTag",
     "memberof": "src/js/molecules/BOM.js",
@@ -2273,7 +2270,7 @@
     ]
   },
   {
-    "__docId__": 137,
+    "__docId__": 136,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2298,7 +2295,7 @@
     ]
   },
   {
-    "__docId__": 138,
+    "__docId__": 137,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2317,7 +2314,7 @@
     }
   },
   {
-    "__docId__": 139,
+    "__docId__": 138,
     "kind": "member",
     "name": "type",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2336,7 +2333,7 @@
     }
   },
   {
-    "__docId__": 140,
+    "__docId__": 139,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2355,7 +2352,7 @@
     }
   },
   {
-    "__docId__": 141,
+    "__docId__": 140,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2374,7 +2371,7 @@
     }
   },
   {
-    "__docId__": 142,
+    "__docId__": 141,
     "kind": "member",
     "name": "BOMitem",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2393,7 +2390,7 @@
     }
   },
   {
-    "__docId__": 143,
+    "__docId__": 142,
     "kind": "member",
     "name": "radius",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2412,7 +2409,7 @@
     }
   },
   {
-    "__docId__": 144,
+    "__docId__": 143,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2427,7 +2424,7 @@
     "return": null
   },
   {
-    "__docId__": 145,
+    "__docId__": 144,
     "kind": "method",
     "name": "updateSidebar",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2442,7 +2439,7 @@
     "return": null
   },
   {
-    "__docId__": 146,
+    "__docId__": 145,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2457,7 +2454,7 @@
     "return": null
   },
   {
-    "__docId__": 147,
+    "__docId__": 146,
     "kind": "member",
     "name": "height",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2476,7 +2473,7 @@
     }
   },
   {
-    "__docId__": 148,
+    "__docId__": 147,
     "kind": "method",
     "name": "createBOM",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2502,7 +2499,7 @@
     "return": null
   },
   {
-    "__docId__": 149,
+    "__docId__": 148,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/molecules/BOM.js~AddBOMTag",
@@ -2528,7 +2525,7 @@
     }
   },
   {
-    "__docId__": 150,
+    "__docId__": 149,
     "kind": "file",
     "name": "src/js/molecules/box.js",
     "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class is used for selecting multiple atoms. Probably shouldn't be done like this.\r\n */\r\nexport default class Box extends Atom {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super (values)\r\n        \r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.type = 'box'\r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Box'\r\n        /**\r\n         * This atom's value\r\n         * @type {object}\r\n         */\r\n        this.value = null\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Box'\r\n        /**\r\n         * This atom's height\r\n         * @type {number}\r\n         */\r\n        this.height = 16\r\n        /**\r\n         * This atom's radius\r\n         * @type {number}\r\n         */\r\n        this.radius = 1/75\r\n\r\n        /**\r\n         * Mouse x position when moving\r\n         * @type {number}\r\n         */\r\n        this.endX\r\n        /**\r\n         * Mouse y position when moving\r\n         * @type {number}\r\n         */\r\n        this.endY\r\n        \r\n        /**\r\n         * Value to save for start position of box\r\n         * @type {number}\r\n         */\r\n        this.startX\r\n        /**\r\n         * Value to save for start position of box\r\n         * @type {number}\r\n         */\r\n        this.startY\r\n\r\n        this.setValues(values)\r\n    }\r\n    \r\n    /**\r\n     * Draw the select box shape on the screen.\r\n     */ \r\n    draw() {\r\n\r\n        const xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        const yInPixels = GlobalVariables.heightToPixels(this.y)\r\n       \r\n        //if(GlobalVariables.ctrlDown){\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#80808080'\r\n        GlobalVariables.c.rect(\r\n            xInPixels, \r\n            yInPixels, \r\n            this.endX - xInPixels, \r\n            this.endY - yInPixels)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n        //}\r\n        \r\n    }\r\n\r\n    /**\r\n     * When mouse moves and Ctrl is down updates value for box width and height\r\n     */ \r\n    clickMove(x,y){\r\n        // if(GlobalVariables.ctrlDown){\r\n        /**\r\n         * Sets new box end to click target\r\n         * @type {number}\r\n         */ \r\n        this.endX = x\r\n        /**\r\n         * Sets new box end to click target\r\n         * @type {number}\r\n         */\r\n        this.endY= y\r\n        //}\r\n    }\r\n    /**\r\n     * Clears the drawing of box when clickUp and updates values for atom selection\r\n     */ \r\n    clickUp(x,y){  \r\n        const xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        const yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        /**\r\n         * Sets start value to molecule position\r\n         * @type {number}\r\n         */\r\n        this.startX = xInPixels\r\n        /**\r\n         * Sets end value to molecule position\r\n         * @type {number}\r\n         */\r\n        this.startY = yInPixels\r\n        \r\n        this.deleteNode(false, false)\r\n        this.parent.nodesOnTheScreen.forEach(atom => {\r\n            atom.selectBox(this.startX, this.startY, x, y)\r\n        })\r\n    }\r\n\r\n}\r\n\r\n    ",
@@ -2539,7 +2536,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 151,
+    "__docId__": 150,
     "kind": "class",
     "name": "Box",
     "memberof": "src/js/molecules/box.js",
@@ -2557,7 +2554,7 @@
     ]
   },
   {
-    "__docId__": 152,
+    "__docId__": 151,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2582,7 +2579,7 @@
     ]
   },
   {
-    "__docId__": 153,
+    "__docId__": 152,
     "kind": "member",
     "name": "type",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2601,7 +2598,7 @@
     }
   },
   {
-    "__docId__": 154,
+    "__docId__": 153,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2620,7 +2617,7 @@
     }
   },
   {
-    "__docId__": 155,
+    "__docId__": 154,
     "kind": "member",
     "name": "value",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2639,7 +2636,7 @@
     }
   },
   {
-    "__docId__": 156,
+    "__docId__": 155,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2658,7 +2655,7 @@
     }
   },
   {
-    "__docId__": 157,
+    "__docId__": 156,
     "kind": "member",
     "name": "height",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2677,7 +2674,7 @@
     }
   },
   {
-    "__docId__": 158,
+    "__docId__": 157,
     "kind": "member",
     "name": "radius",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2696,7 +2693,7 @@
     }
   },
   {
-    "__docId__": 159,
+    "__docId__": 158,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2711,7 +2708,7 @@
     "return": null
   },
   {
-    "__docId__": 160,
+    "__docId__": 159,
     "kind": "method",
     "name": "clickMove",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2739,7 +2736,7 @@
     "return": null
   },
   {
-    "__docId__": 161,
+    "__docId__": 160,
     "kind": "member",
     "name": "endX",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2758,7 +2755,7 @@
     }
   },
   {
-    "__docId__": 162,
+    "__docId__": 161,
     "kind": "member",
     "name": "endY",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2777,7 +2774,7 @@
     }
   },
   {
-    "__docId__": 163,
+    "__docId__": 162,
     "kind": "method",
     "name": "clickUp",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2805,7 +2802,7 @@
     "return": null
   },
   {
-    "__docId__": 164,
+    "__docId__": 163,
     "kind": "member",
     "name": "startX",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2824,7 +2821,7 @@
     }
   },
   {
-    "__docId__": 165,
+    "__docId__": 164,
     "kind": "member",
     "name": "startY",
     "memberof": "src/js/molecules/box.js~Box",
@@ -2843,7 +2840,7 @@
     }
   },
   {
-    "__docId__": 166,
+    "__docId__": 165,
     "kind": "file",
     "name": "src/js/molecules/circle.js",
     "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables.js'\r\n\r\n/**\r\n * This class creates the circle atom.\r\n */\r\nexport default class Circle extends Atom {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        \r\n        super(values)\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Circle'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Circle'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Creates a new circle.\"\r\n        \r\n        this.addIO('input', 'diameter', this, 'number', 10)\r\n        this.addIO('output', 'geometry', this, 'geometry', '')\r\n        \r\n        this.setValues(values)\r\n    }\r\n\r\n    /**\r\n     * Starts propagation from this atom if it is not waiting for anything up stream.\r\n     */ \r\n    beginPropagation(force = false){\r\n        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles\r\n        if(!GlobalVariables.availablePaths.includes(this.path)||force){\r\n            //Triggers inputs with nothing connected to begin propagation\r\n            this.inputs.forEach(input => {\r\n                input.beginPropagation()\r\n            })\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Draw the circle atom & icon.\r\n     */ \r\n    draw(){\r\n\r\n        super.draw() //Super call to draw the rest\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#949294'\r\n        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), \r\n            GlobalVariables.heightToPixels(this.y), \r\n            GlobalVariables.widthToPixels(this.radius/2), 0, Math.PI * 2, false)\r\n        //GlobalVariables.c.fill()\r\n        GlobalVariables.c.stroke() \r\n        GlobalVariables.c.closePath() \r\n    }\r\n    \r\n    /**\r\n     * Super class the default update value function. This function computes the number of points to use for the circle and then calls the worker thread to create the circle.\r\n     */ \r\n    updateValue(){\r\n        try{\r\n            var diameter = this.findIOValue('diameter')\r\n            \r\n            const numberOfSegments = Math.min(Math.max(parseInt(Math.PI / (Math.acos(1 - GlobalVariables.circleSegmentSize/(diameter/2)))),6), 100)\r\n            \r\n            const values = {key: \"circle\", diameter: diameter, numSegments:numberOfSegments, writePath: this.path }\r\n            this.basicThreadValueProcessing(values)\r\n        }catch(err){this.setAlert(err)}\r\n    }\r\n}",
@@ -2854,7 +2851,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 167,
+    "__docId__": 166,
     "kind": "class",
     "name": "Circle",
     "memberof": "src/js/molecules/circle.js",
@@ -2872,7 +2869,7 @@
     ]
   },
   {
-    "__docId__": 168,
+    "__docId__": 167,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -2897,7 +2894,7 @@
     ]
   },
   {
-    "__docId__": 169,
+    "__docId__": 168,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -2916,7 +2913,7 @@
     }
   },
   {
-    "__docId__": 170,
+    "__docId__": 169,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -2935,7 +2932,7 @@
     }
   },
   {
-    "__docId__": 171,
+    "__docId__": 170,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -2954,7 +2951,7 @@
     }
   },
   {
-    "__docId__": 172,
+    "__docId__": 171,
     "kind": "method",
     "name": "beginPropagation",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -2979,7 +2976,7 @@
     "return": null
   },
   {
-    "__docId__": 173,
+    "__docId__": 172,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -2994,7 +2991,7 @@
     "return": null
   },
   {
-    "__docId__": 174,
+    "__docId__": 173,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/circle.js~Circle",
@@ -3009,7 +3006,7 @@
     "return": null
   },
   {
-    "__docId__": 175,
+    "__docId__": 174,
     "kind": "file",
     "name": "src/js/molecules/code.js",
     "content": "import Atom from '../prototypes/atom.js'\r\nimport CodeMirror from 'codemirror'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * The Code molecule type adds support for executing arbirary jsxcad code.\r\n */\r\nexport default class Code extends Atom {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        \r\n        super(values)\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = \"Code\"\r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.atomType = \"Code\"\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Defines a JSxCAD code block.\"\r\n        /**\r\n         * The code contained within the atom stored as a string.\r\n         * @type {string}\r\n         */\r\n        this.code = \"//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \\n\\n\\nfunction main(Input1, Input2){\\n  return Sphere(40)        //return must be geometry;\\n}\\n\\nreturn main(Input1, Input2)\"\r\n        \r\n        this.addIO(\"output\", \"geometry\", this, \"geometry\", \"\")\r\n        \r\n        this.setValues(values)\r\n        \r\n        this.parseInputs(false)\r\n    }\r\n\r\n    /**\r\n     * Draw the code atom which has a code icon.\r\n     */ \r\n    draw(){\r\n\r\n        super.draw() //Super call to draw the rest\r\n        \r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#949294'\r\n        GlobalVariables.c.font = `${GlobalVariables.widthToPixels(this.radius)}px Work Sans Bold`\r\n        GlobalVariables.c.fillText('</>', GlobalVariables.widthToPixels(this.x - (this.radius/1.5)), GlobalVariables.heightToPixels(this.y + (this.radius*1.5)))\r\n    }\r\n    \r\n    /**\r\n     * Grab the code as a text string and execute it. \r\n     */ \r\n    updateValue(){\r\n        try{\r\n            this.parseInputs()\r\n            \r\n            var argumentsArray = {}\r\n            this.inputs.forEach(input => {\r\n                argumentsArray[input.name] = input.value\r\n            })\r\n            \r\n            const values = { key: \"code\", code: this.code, paths: argumentsArray, writePath: this.path }\r\n            this.basicThreadValueProcessing(values)\r\n            \r\n        }catch(err){this.setAlert(err)}\r\n    }\r\n    \r\n    /**\r\n     * This function reads the string of inputs the user specifies and adds them to the atom.\r\n     */ \r\n    parseInputs(ready = true){\r\n        //Parse this.code for the line \"\\nmain(input1, input2....) and add those as inputs if needed\r\n        var variables = /\\(\\s*([^)]+?)\\s*\\)/.exec(this.code)\r\n        if (variables[1]) {\r\n            variables = variables[1].split(/\\s*,\\s*/)\r\n        }\r\n        \r\n        //Add any inputs which are needed\r\n        for (var variable in variables){\r\n            if(!this.inputs.some(input => input.Name === variables[variable])){\r\n                this.addIO('input', variables[variable], this, 'geometry', null, ready)\r\n            }\r\n        }\r\n        \r\n        //Remove any inputs which are not needed\r\n        for (var input in this.inputs){\r\n            if( !variables.includes(this.inputs[input].name) ){\r\n                this.removeIO('input', this.inputs[input].name, this)\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Edit the atom's code when it is double clicked\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    doubleClick(x,y){\r\n        //returns true if something was done with the click\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        var clickProcessed = false\r\n        \r\n        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)\r\n        \r\n        if (distFromClick < this.radius){\r\n            this.editCode()\r\n            clickProcessed = true\r\n        }\r\n        \r\n        return clickProcessed \r\n    }\r\n    \r\n    /**\r\n     * Callled to trigger editing the code atom\r\n     */ \r\n    editCode(){\r\n        //Remove everything in the popup now\r\n        const popup = document.getElementById('projects-popup')\r\n        while (popup.firstChild) {\r\n            popup.removeChild(popup.firstChild)\r\n        }\r\n        \r\n        popup.classList.remove('off')\r\n\r\n        //Add a title\r\n        var codeMirror = CodeMirror(popup, {\r\n            value: this.code,\r\n            mode:  \"javascript\",\r\n            lineNumbers: true,\r\n            gutter: true,\r\n            lineWrapping: true\r\n        })\r\n        \r\n        var form = document.createElement(\"form\")\r\n        popup.appendChild(form)\r\n        var button = document.createElement(\"button\")\r\n        button.setAttribute(\"type\", \"button\")\r\n        button.appendChild(document.createTextNode(\"Save Code\"))\r\n        button.addEventListener(\"click\", () => {\r\n            this.code = codeMirror.getDoc().getValue('\\n')\r\n            this.updateValue()\r\n            popup.classList.add('off')\r\n        })\r\n        form.appendChild(button)\r\n    }\r\n    \r\n    /**\r\n     * Add a button to open the code editor to the side bar\r\n     */ \r\n    updateSidebar(){\r\n        var valueList =  super.updateSidebar() \r\n        \r\n        this.createButton(valueList,this,\"Edit Code\",() => {\r\n            this.editCode()\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Save the input code to be loaded next time\r\n     */ \r\n    serialize(values){\r\n        //Save the readme text to the serial stream\r\n        var valuesObj = super.serialize(values)\r\n        \r\n        valuesObj.code = this.code\r\n        \r\n        return valuesObj\r\n        \r\n    }\r\n}",
@@ -3020,7 +3017,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 176,
+    "__docId__": 175,
     "kind": "class",
     "name": "Code",
     "memberof": "src/js/molecules/code.js",
@@ -3038,7 +3035,7 @@
     ]
   },
   {
-    "__docId__": 177,
+    "__docId__": 176,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3063,7 +3060,7 @@
     ]
   },
   {
-    "__docId__": 178,
+    "__docId__": 177,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3082,7 +3079,7 @@
     }
   },
   {
-    "__docId__": 179,
+    "__docId__": 178,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3101,7 +3098,7 @@
     }
   },
   {
-    "__docId__": 180,
+    "__docId__": 179,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3120,7 +3117,7 @@
     }
   },
   {
-    "__docId__": 181,
+    "__docId__": 180,
     "kind": "member",
     "name": "code",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3139,7 +3136,7 @@
     }
   },
   {
-    "__docId__": 182,
+    "__docId__": 181,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3154,7 +3151,7 @@
     "return": null
   },
   {
-    "__docId__": 183,
+    "__docId__": 182,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3169,7 +3166,7 @@
     "return": null
   },
   {
-    "__docId__": 184,
+    "__docId__": 183,
     "kind": "method",
     "name": "parseInputs",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3194,7 +3191,7 @@
     "return": null
   },
   {
-    "__docId__": 185,
+    "__docId__": 184,
     "kind": "method",
     "name": "doubleClick",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3234,7 +3231,7 @@
     }
   },
   {
-    "__docId__": 186,
+    "__docId__": 185,
     "kind": "method",
     "name": "editCode",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3249,7 +3246,7 @@
     "return": null
   },
   {
-    "__docId__": 188,
+    "__docId__": 187,
     "kind": "method",
     "name": "updateSidebar",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3264,7 +3261,7 @@
     "return": null
   },
   {
-    "__docId__": 189,
+    "__docId__": 188,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/molecules/code.js~Code",
@@ -3290,7 +3287,7 @@
     }
   },
   {
-    "__docId__": 190,
+    "__docId__": 189,
     "kind": "file",
     "name": "src/js/molecules/color.js",
     "content": "import Atom from '../prototypes/atom'\r\n\r\nimport GlobalVariables from '../globalvariables.js'\r\n\r\n/**\r\n * This class creates the color atom which can be used to give a part a color.\r\n */\r\nexport default class Color extends Atom {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        \r\n        super(values)\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Color'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Color'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Changes the color of the shape.\"\r\n        \r\n        /**\r\n         * The color options to choose from\r\n         * @type {array}\r\n         */\r\n        this.colorOptions = ['Powder blue','White','Red','Steel Blue','Yellow','Brown','Cyan', \"Green\", \"Pink\", \"Blue\", \"Silver\", \"Black\", \"Keep Out\"]\r\n        \r\n        /**\r\n         * The index of the currently selected color option.\r\n         * @type {number}\r\n         */\r\n        this.selectedColorIndex = 0\r\n        \r\n        this.addIO('input', 'geometry', this, 'geometry', null, false, true)\r\n        this.addIO('output', 'geometry', this, 'geometry', null)\r\n        \r\n        this.setValues(values)\r\n    }\r\n\r\n    /**\r\n     * Draw the circle atom & icon.\r\n     */ \r\n    draw(){\r\n\r\n        super.draw() //Super call to draw the rest\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#0000FF'\r\n        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x - this.radius/4), \r\n            GlobalVariables.heightToPixels(this.y + this.radius/2), \r\n            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       \r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#FF0000'\r\n        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x + this.radius/4), \r\n            GlobalVariables.heightToPixels(this.y + this.radius/2), \r\n            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       \r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath() \r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#FFFF00'\r\n        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), \r\n            GlobalVariables.heightToPixels(this.y - this.radius), \r\n            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       \r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath() \r\n    }\r\n    \r\n    /**\r\n     * Applies a color tag to the object in a worker thread.\r\n     */ \r\n    updateValue(){\r\n        try{\r\n            var inputPath = this.findIOValue('geometry')\r\n            const values = {key: \"color\", color: this.colorOptions[this.selectedColorIndex], readPath: inputPath, writePath: this.path }\r\n            this.basicThreadValueProcessing(values)\r\n            this.clearAlert()\r\n        }catch(err){this.setAlert(err)}\r\n    }\r\n    \r\n    /**\r\n     * Updates the value of the selected color and then the value.\r\n     */ \r\n    changeColor(index){\r\n        this.selectedColorIndex = index\r\n        this.updateValue()\r\n    }\r\n    \r\n    /**\r\n     * Create a drop down to choose the color.\r\n     */ \r\n    updateSidebar(){\r\n        const list = super.updateSidebar()\r\n        const dropdown= document.createElement('div')\r\n        list.appendChild(dropdown)\r\n        this.createDropDown(dropdown, this, this.colorOptions, this.selectedColorIndex, \"Color\", (index)=>{this.changeColor(index)})\r\n    }\r\n    \r\n    /**\r\n     * Add the color choice to the object which is saved for this molecule\r\n     */\r\n    serialize(){\r\n        var superSerialObject = super.serialize(null)\r\n        \r\n        //Write the current color selection to the serialized object\r\n        superSerialObject.selectedColorIndex = this.selectedColorIndex\r\n        \r\n        return superSerialObject\r\n    }\r\n}",
@@ -3301,7 +3298,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 191,
+    "__docId__": 190,
     "kind": "class",
     "name": "Color",
     "memberof": "src/js/molecules/color.js",
@@ -3319,7 +3316,7 @@
     ]
   },
   {
-    "__docId__": 192,
+    "__docId__": 191,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3344,7 +3341,7 @@
     ]
   },
   {
-    "__docId__": 193,
+    "__docId__": 192,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3363,7 +3360,7 @@
     }
   },
   {
-    "__docId__": 194,
+    "__docId__": 193,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3382,7 +3379,7 @@
     }
   },
   {
-    "__docId__": 195,
+    "__docId__": 194,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3401,7 +3398,7 @@
     }
   },
   {
-    "__docId__": 196,
+    "__docId__": 195,
     "kind": "member",
     "name": "colorOptions",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3420,7 +3417,7 @@
     }
   },
   {
-    "__docId__": 197,
+    "__docId__": 196,
     "kind": "member",
     "name": "selectedColorIndex",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3439,7 +3436,7 @@
     }
   },
   {
-    "__docId__": 198,
+    "__docId__": 197,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3454,7 +3451,7 @@
     "return": null
   },
   {
-    "__docId__": 199,
+    "__docId__": 198,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3469,7 +3466,7 @@
     "return": null
   },
   {
-    "__docId__": 200,
+    "__docId__": 199,
     "kind": "method",
     "name": "changeColor",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3491,7 +3488,7 @@
     "return": null
   },
   {
-    "__docId__": 202,
+    "__docId__": 201,
     "kind": "method",
     "name": "updateSidebar",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3506,7 +3503,7 @@
     "return": null
   },
   {
-    "__docId__": 203,
+    "__docId__": 202,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/molecules/color.js~Color",
@@ -3525,7 +3522,7 @@
     }
   },
   {
-    "__docId__": 204,
+    "__docId__": 203,
     "kind": "file",
     "name": "src/js/molecules/constant.js",
     "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables.js'\r\n\r\n/**\r\n * This class creates the constant atom instance which can be used to define a numerical constant.\r\n */\r\nexport default class Constant extends Atom{\r\n    \r\n    /**\r\n     * Creates a new constant atom.\r\n     * @param {object} values - An object of values. Each of these values will be applied to the resulting atom.\r\n     */ \r\n    constructor(values){\r\n        super(values)\r\n        \r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.type = 'constant'\r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Constant'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Constant'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Defines a mathematical constant.\"\r\n        /**\r\n         * This atom's height as drawn on the screen\r\n         */\r\n        this.height = 16\r\n        /**\r\n         * A flag to indicate if this constant should be evolved by genetic algorithms\r\n         * @type {boolean}\r\n         */\r\n        this.evolve = false\r\n        /**\r\n         * Minimum value to be used when evolving constant\r\n         * @type {float}\r\n         */\r\n        this.min = 0\r\n        /**\r\n         * Maximum value to be used when evolving constant\r\n         * @type {float}\r\n         */\r\n        this.max = 20\r\n        \r\n        /**\r\n         * The default value for the constant\r\n         * @type {float}\r\n         */\r\n        this.value = 10\r\n        \r\n        this.setValues(values)\r\n        \r\n        this.addIO('output', 'number', this, 'number', 10)\r\n        \r\n        this.decreaseToProcessCountByOne()  //Since there is nothing upstream this needs to be removed from the list here\r\n        \r\n        //This is done wrong. We should not be saving the value in the io values\r\n        if (typeof this.ioValues == 'object') {\r\n            this.value = this.ioValues[0].ioValue\r\n            this.output.value = this.value\r\n        }\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Draw the Bill of material atom which has a BOM icon.\r\n     */ \r\n    draw() {\r\n        \r\n        super.draw(\"rect\")\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Set's the output value and shows the atom output on the 3D view.\r\n     */ \r\n    updateValue(){\r\n        this.value = this.output.getValue()  //We read from the output because it is set by the sidebar for confusing reasons\r\n        this.displayAndPropogate()\r\n    }\r\n    \r\n    /**\r\n     * Starts propagation from this atom if it is not waiting for anything up stream.\r\n     */ \r\n    beginPropagation(){\r\n        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles\r\n        if(!GlobalVariables.availablePaths.includes(this.path)){\r\n            //Triggers inputs with nothing connected to begin propagation\r\n            this.inputs.forEach(input => {\r\n                input.beginPropagation()\r\n            })\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */\r\n    loadTree(){\r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Add entries for name and value to the side bar. Note: I think that should happen automatically and this function can be deleted. Please test that future self.\r\n     */ \r\n    updateSidebar(){\r\n        //updates the sidebar to display information about this node\r\n        \r\n        var valueList = super.updateSidebar() //call the super function\r\n        this.createEditableValueListItem(valueList,this,'name', 'Name', false)\r\n        this.createEditableValueListItem(valueList,this.output,'value', 'Value', true)\r\n        \r\n        this.createCheckbox(valueList,\"Evolve\",this.evolve,(event)=>{\r\n            if(event.target.checked){\r\n                this.evolve = true\r\n                this.updateSidebar()\r\n            } else{\r\n                this.evolve = false\r\n                this.updateSidebar()\r\n            }\r\n        })\r\n        \r\n        if(this.evolve){\r\n            this.createEditableValueListItem(valueList,this,'min', 'Min', true)\r\n            this.createEditableValueListItem(valueList,this,'max', 'Max', true)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Used to walk back out the tree generating a list of constants...used for evolving\r\n     */ \r\n    walkBackForConstants(callback){\r\n        //If this constant can evolve then add it to the target list\r\n        if(this.evolve){\r\n            callback(this)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Add the value to be saved to the object saved for this molecule.\r\n     */ \r\n    serialize(values){\r\n        //Save the IO value to the serial stream\r\n        var valuesObj = super.serialize(values)\r\n        \r\n        valuesObj.ioValues = [{\r\n            name: 'number',\r\n            ioValue: this.output.getValue()\r\n        }]\r\n        \r\n        valuesObj.evolve = this.evolve\r\n        valuesObj.min = this.min\r\n        valuesObj.max = this.max\r\n        \r\n        return valuesObj\r\n        \r\n    }\r\n    \r\n}",
@@ -3536,7 +3533,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 205,
+    "__docId__": 204,
     "kind": "class",
     "name": "Constant",
     "memberof": "src/js/molecules/constant.js",
@@ -3554,7 +3551,7 @@
     ]
   },
   {
-    "__docId__": 206,
+    "__docId__": 205,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3579,7 +3576,7 @@
     ]
   },
   {
-    "__docId__": 207,
+    "__docId__": 206,
     "kind": "member",
     "name": "type",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3598,7 +3595,7 @@
     }
   },
   {
-    "__docId__": 208,
+    "__docId__": 207,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3617,7 +3614,7 @@
     }
   },
   {
-    "__docId__": 209,
+    "__docId__": 208,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3636,7 +3633,7 @@
     }
   },
   {
-    "__docId__": 210,
+    "__docId__": 209,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3655,7 +3652,7 @@
     }
   },
   {
-    "__docId__": 211,
+    "__docId__": 210,
     "kind": "member",
     "name": "height",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3671,7 +3668,7 @@
     }
   },
   {
-    "__docId__": 212,
+    "__docId__": 211,
     "kind": "member",
     "name": "evolve",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3690,7 +3687,7 @@
     }
   },
   {
-    "__docId__": 213,
+    "__docId__": 212,
     "kind": "member",
     "name": "min",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3709,7 +3706,7 @@
     }
   },
   {
-    "__docId__": 214,
+    "__docId__": 213,
     "kind": "member",
     "name": "max",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3728,7 +3725,7 @@
     }
   },
   {
-    "__docId__": 215,
+    "__docId__": 214,
     "kind": "member",
     "name": "value",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3747,7 +3744,7 @@
     }
   },
   {
-    "__docId__": 217,
+    "__docId__": 216,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3762,7 +3759,7 @@
     "return": null
   },
   {
-    "__docId__": 218,
+    "__docId__": 217,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3777,7 +3774,7 @@
     "return": null
   },
   {
-    "__docId__": 220,
+    "__docId__": 219,
     "kind": "method",
     "name": "beginPropagation",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3792,7 +3789,7 @@
     "return": null
   },
   {
-    "__docId__": 221,
+    "__docId__": 220,
     "kind": "method",
     "name": "loadTree",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3811,7 +3808,7 @@
     }
   },
   {
-    "__docId__": 222,
+    "__docId__": 221,
     "kind": "method",
     "name": "updateSidebar",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3826,7 +3823,7 @@
     "return": null
   },
   {
-    "__docId__": 225,
+    "__docId__": 224,
     "kind": "method",
     "name": "walkBackForConstants",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3848,7 +3845,7 @@
     "return": null
   },
   {
-    "__docId__": 226,
+    "__docId__": 225,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/molecules/constant.js~Constant",
@@ -3874,7 +3871,7 @@
     }
   },
   {
-    "__docId__": 227,
+    "__docId__": 226,
     "kind": "file",
     "name": "src/js/molecules/cutlayout.js",
     "content": "import Atom from '../prototypes/atom.js'\r\nimport GlobalVariables from '../globalvariables.js'\r\n//import GlobalVariables from '../globalvariables.js'\r\n\r\n/**\r\n * The Cut Layout atom extracts a copy of each shape on the cutlist and places them optimally on a cut sheet.\r\n */\r\nexport default class CutLayout extends Atom{\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super(values)\r\n        \r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Cut Layout'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.type = 'cutLayout'\r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Cut Layout'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Extracts all of the parts tagged for layout and lays them out on a sheet to cut.\"\r\n        \r\n        this.addIO('input', 'geometry', this, 'geometry', null)\r\n\r\n        this.addIO('input', 'Spacing', this, 'number', 5)\r\n        //this.addIO('input', 'Sheet Width', this, 'number', 50)\r\n        //this.addIO('input', 'Sheet Length', this, 'number', 50)\r\n        this.addIO('output', 'geometry', this, 'geometry', '')\r\n        \r\n        this.setValues(values)\r\n    }\r\n\r\n    /**\r\n     * Draw the cutlayout icon\r\n     */ \r\n    draw(){\r\n\r\n        super.draw() //Super call to draw the rest\r\n\r\n        const xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        const yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        const radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#949294'\r\n        GlobalVariables.c.moveTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels + radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/2, yInPixels + radiusInPixels/2)\r\n        //GlobalVariables.c.fill()\r\n        GlobalVariables.c.setLineDash([3, 3])\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/1.7)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels - radiusInPixels/2)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels/4, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/2, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels/4, yInPixels - radiusInPixels/1.7)\r\n\r\n        //GlobalVariables.c.fill()\r\n        GlobalVariables.c.lineWidth = 1\r\n        GlobalVariables.c.lineJoin = \"round\"\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.setLineDash([])\r\n        GlobalVariables.c.closePath()\r\n\r\n    }\r\n    /**\r\n    * Pass the input geometry to a worker function to compute the translation.\r\n    */ \r\n    updateValue(){\r\n        try{\r\n            const values = [this.findIOValue('geometry'), this.findIOValue('Spacing')]\r\n            \r\n            this.basicThreadValueProcessing(values, \"layout\")\r\n        }catch(err){\r\n            this.setAlert(err)\r\n        }\r\n    }\r\n}\r\n",
@@ -3885,7 +3882,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 228,
+    "__docId__": 227,
     "kind": "class",
     "name": "CutLayout",
     "memberof": "src/js/molecules/cutlayout.js",
@@ -3903,7 +3900,7 @@
     ]
   },
   {
-    "__docId__": 229,
+    "__docId__": 228,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -3928,7 +3925,7 @@
     ]
   },
   {
-    "__docId__": 230,
+    "__docId__": 229,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -3947,7 +3944,7 @@
     }
   },
   {
-    "__docId__": 231,
+    "__docId__": 230,
     "kind": "member",
     "name": "type",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -3966,7 +3963,7 @@
     }
   },
   {
-    "__docId__": 232,
+    "__docId__": 231,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -3985,7 +3982,7 @@
     }
   },
   {
-    "__docId__": 233,
+    "__docId__": 232,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -4004,7 +4001,7 @@
     }
   },
   {
-    "__docId__": 234,
+    "__docId__": 233,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -4019,7 +4016,7 @@
     "return": null
   },
   {
-    "__docId__": 235,
+    "__docId__": 234,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/cutlayout.js~CutLayout",
@@ -4034,7 +4031,7 @@
     "return": null
   },
   {
-    "__docId__": 236,
+    "__docId__": 235,
     "kind": "file",
     "name": "src/js/molecules/cutlist.js",
     "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables.js'\r\n\r\n/**\r\n * This class creates the Add To Cutlist atom.\r\n */\r\nexport default class CutList extends Atom{\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super(values)\r\n        \r\n        this.addIO('input', 'geometry', this, 'geometry', '', false, true)\r\n        this.addIO('output', 'geometry', this, 'geometry', '')\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Add To Cutlist'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'cutList'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Adds a part to the cut list so that it will be included in the cut layout.\"\r\n        \r\n        this.setValues(values)\r\n        /** \r\n         * This atom's radius as displayed on the screen is 1/65 width\r\n         * @type {number}\r\n         */\r\n        this.radius = 1/65\r\n        /**\r\n         * This atom's height as drawn on the screen\r\n         */\r\n        this.height\r\n    }\r\n    /**\r\n     * Draw the constant which is more rectangular than the regular shape.\r\n     */ \r\n    draw() {\r\n        \r\n        super.draw(\"rect\")\r\n        \r\n        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)\r\n        /**\r\n        * Relates height to radius\r\n        * @type {number}\r\n        */\r\n        this.height = pixelsRadius/1.3\r\n        \r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#484848'\r\n        GlobalVariables.c.font = `${pixelsRadius}px Work Sans Bold`\r\n        GlobalVariables.c.fillText(String.fromCharCode(0x2702)+' -', GlobalVariables.widthToPixels(this.x- this.radius/1.5), GlobalVariables.heightToPixels(this.y)+this.height/2)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n    }\r\n    \r\n    /**\r\n     * Add a tag to the input geometry. The substance is not changed.\r\n     */ \r\n    updateValue(){\r\n        try{\r\n            var inputPath = this.findIOValue('geometry')\r\n            const values = {key: \"tag\", tag: \"cutlist\", readPath: inputPath, writePath: this.path }\r\n            this.basicThreadValueProcessing(values)\r\n        }catch(err){this.setAlert(err)}\r\n    }\r\n}",
@@ -4045,7 +4042,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 237,
+    "__docId__": 236,
     "kind": "class",
     "name": "CutList",
     "memberof": "src/js/molecules/cutlist.js",
@@ -4063,7 +4060,7 @@
     ]
   },
   {
-    "__docId__": 238,
+    "__docId__": 237,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4088,7 +4085,7 @@
     ]
   },
   {
-    "__docId__": 239,
+    "__docId__": 238,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4107,7 +4104,7 @@
     }
   },
   {
-    "__docId__": 240,
+    "__docId__": 239,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4126,7 +4123,7 @@
     }
   },
   {
-    "__docId__": 241,
+    "__docId__": 240,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4145,7 +4142,7 @@
     }
   },
   {
-    "__docId__": 242,
+    "__docId__": 241,
     "kind": "member",
     "name": "radius",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4164,7 +4161,7 @@
     }
   },
   {
-    "__docId__": 243,
+    "__docId__": 242,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4179,7 +4176,7 @@
     "return": null
   },
   {
-    "__docId__": 244,
+    "__docId__": 243,
     "kind": "member",
     "name": "height",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4198,7 +4195,7 @@
     }
   },
   {
-    "__docId__": 245,
+    "__docId__": 244,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/cutlist.js~CutList",
@@ -4213,7 +4210,7 @@
     "return": null
   },
   {
-    "__docId__": 246,
+    "__docId__": 245,
     "kind": "file",
     "name": "src/js/molecules/difference.js",
     "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class creates the Difference atom.\r\n */ \r\nexport default class Difference extends Atom{\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor (values){\r\n        \r\n        super(values)\r\n        \r\n        this.addIO('input', 'geometry2', this, 'geometry', '')\r\n        this.addIO('input', 'geometry1', this, 'geometry', '')\r\n        this.addIO('output', 'geometry', this, 'geometry', '')\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Difference'\r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Difference'\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Subtracts shape two from shape one.\"\r\n        \r\n        this.setValues(values)\r\n    }\r\n\r\n\r\n    /**\r\n     * Draw the code atom which has a code icon.\r\n     */ \r\n    draw(){\r\n\r\n        super.draw() //Super call to draw the rest\r\n         \r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#949294'\r\n        GlobalVariables.c.arc(GlobalVariables.widthToPixels(this.x), \r\n            GlobalVariables.heightToPixels(this.y), \r\n            GlobalVariables.widthToPixels(this.radius/3), 0, Math.PI * 2, false)       \r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.stroke() \r\n        GlobalVariables.c.closePath() \r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#949294'\r\n        GlobalVariables.c.rect(GlobalVariables.widthToPixels(this.x- this.radius/2), \r\n            GlobalVariables.heightToPixels(this.y- this.radius*2), \r\n            GlobalVariables.widthToPixels(this.radius), \r\n            GlobalVariables.widthToPixels(this.radius))       \r\n        //GlobalVariables.c.fill()\r\n        GlobalVariables.c.stroke() \r\n        GlobalVariables.c.closePath()  \r\n\r\n    }\r\n    /**\r\n     * Pass the input values to the worker thread to do the actual processing.\r\n     */ \r\n    updateValue(){\r\n        try{\r\n            const path1 = this.findIOValue('geometry1')\r\n            const path2 = this.findIOValue('geometry2')\r\n            const values = { key: \"difference\",readPath1: path1, readPath2: path2, writePath: this.path }\r\n            \r\n            this.basicThreadValueProcessing(values)\r\n        }catch(err){this.setAlert(err)}\r\n    }\r\n}",
@@ -4224,7 +4221,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 247,
+    "__docId__": 246,
     "kind": "class",
     "name": "Difference",
     "memberof": "src/js/molecules/difference.js",
@@ -4242,7 +4239,7 @@
     ]
   },
   {
-    "__docId__": 248,
+    "__docId__": 247,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/difference.js~Difference",
@@ -4267,7 +4264,7 @@
     ]
   },
   {
-    "__docId__": 249,
+    "__docId__": 248,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/difference.js~Difference",
@@ -4286,7 +4283,7 @@
     }
   },
   {
-    "__docId__": 250,
+    "__docId__": 249,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/difference.js~Difference",
@@ -4305,7 +4302,7 @@
     }
   },
   {
-    "__docId__": 251,
+    "__docId__": 250,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/difference.js~Difference",
@@ -4324,7 +4321,7 @@
     }
   },
   {
-    "__docId__": 252,
+    "__docId__": 251,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/difference.js~Difference",
@@ -4339,7 +4336,7 @@
     "return": null
   },
   {
-    "__docId__": 253,
+    "__docId__": 252,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/molecules/difference.js~Difference",
@@ -4354,10 +4351,10 @@
     "return": null
   },
   {
-    "__docId__": 254,
+    "__docId__": 253,
     "kind": "file",
     "name": "src/js/molecules/equation.js",
-    "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class creates the Equation atom.\r\n */\r\nexport default class Equation extends Atom {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super(values)\r\n        \r\n        this.addIO('output', 'result', this, 'number', 0)\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Equation'\r\n        \r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Equation'\r\n        \r\n        /**\r\n         * Evaluate the equation adding and removing inputs as needed\r\n         */ \r\n        this.value = 0\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Defines a mathematical equation. Edit the output field to add or remove inputs.\"\r\n        \r\n        /**\r\n         * This atom's height as drawn on the screen\r\n         */\r\n        this.height\r\n        /**\r\n         * The index number of the currently selected option\r\n         * @type {number}\r\n         */\r\n        this.currentEquation = \"x + y\"\r\n        \r\n        this.setValues(values)\r\n        this.addAndRemoveInputs()\r\n        this.setValues(values) //Set values again to load input values which were saved\r\n        \r\n        \r\n    }\r\n    \r\n    /**\r\n     * Draw the Bill of material atom which has a BOM icon.\r\n     */ \r\n    draw() {\r\n        \r\n        super.draw(\"rect\")\r\n        \r\n        let pixelsX = GlobalVariables.widthToPixels(this.x)\r\n        let pixelsY = GlobalVariables.heightToPixels(this.y)\r\n        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)\r\n        /**\r\n        * Relates height to radius\r\n        * @type {number}\r\n        */\r\n        this.height = pixelsRadius\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#484848'\r\n        GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`\r\n        \r\n        GlobalVariables.c.fillText('X + Y', pixelsX - pixelsRadius/1.2, pixelsY+this.height/3)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Add and remove inputs as needed from the atom\r\n     */ \r\n    addAndRemoveInputs(){\r\n        //Find all the letters in this equation\r\n        var re = /[a-zA-Z]/g\r\n        const variables = this.currentEquation.match(re)\r\n        \r\n        //Remove any inputs which are not needed\r\n        const deleteExtraInputs = () => {\r\n            this.inputs.forEach( input => {\r\n                if( !variables.includes(input.name) ){\r\n                    this.removeIO('input', input.name, this)\r\n                    deleteExtraInputs() //This needs to be called recursively to make sure all the inputs are deleted\r\n                }\r\n            })\r\n        }\r\n        deleteExtraInputs()\r\n        \r\n        //Add any inputs which are needed\r\n        for (var variable in variables){\r\n            if(!this.inputs.some(input => input.Name === variables[variable])){\r\n                this.addIO('input', variables[variable], this, 'number', 1)\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Evaluate the equation\r\n     */ \r\n    evaluateEquation(){\r\n        //Substitute numbers into the string\r\n        var substitutedEquation = this.currentEquation\r\n        \r\n        //Find all the letters in this equation\r\n        var re = /[a-zA-Z]/g\r\n        const variables = this.currentEquation.match(re)\r\n        for (var variable in variables){\r\n            for (var i= 0; i<this.inputs.length; i++){\r\n                if (this.inputs[i].name == variables[variable]) {\r\n                    substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))\r\n                }\r\n            }\r\n        }\r\n        return GlobalVariables.limitedEvaluate(substitutedEquation)\r\n    }\r\n    \r\n    /**\r\n     * Evaluate the equation adding and removing inputs as needed\r\n     */ \r\n    updateValue(){\r\n        try{\r\n            \r\n            this.addAndRemoveInputs()\r\n            \r\n            if(this.inputs.every(x => x.ready)){\r\n                \r\n                this.decreaseToProcessCountByOne()\r\n                \r\n                //Evaluate the equation\r\n                this.value = this.evaluateEquation()\r\n                \r\n                this.output.setValue(this.value)\r\n                this.output.ready = true\r\n            }\r\n            \r\n            //Updates the inputs\r\n            if(this.selected){\r\n                this.updateSidebar()\r\n            }\r\n        }catch(err){\r\n            console.warn(err)\r\n            this.setAlert(err)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.inputs.forEach(input => {\r\n            input.loadTree()\r\n        })\r\n        \r\n        this.value = this.evaluateEquation()\r\n        this.output.value = this.value\r\n        \r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Add the equation choice to the object which is saved for this molecule\r\n     */\r\n    serialize(){\r\n        var superSerialObject = super.serialize(null)\r\n        \r\n        //Write the current equation to the serialized object\r\n        superSerialObject.currentEquation = this.currentEquation\r\n        \r\n        return superSerialObject\r\n    }\r\n    \r\n    /**\r\n     * Add a dropdown to choose the equation type to the sidebar.\r\n     */\r\n    updateSidebar(){\r\n        //Update the side bar to make it possible to change the molecule name\r\n        \r\n        var valueList = super.updateSidebar()\r\n        \r\n        this.createEditableValueListItem(valueList,this,\"currentEquation\", \"output=\", false, (newEquation)=>{this.setEquation(newEquation)})\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Set the current equation to be a new value.\r\n     */\r\n    setEquation(newEquation){\r\n        this.currentEquation = newEquation.trim() //remove leading and trailing whitespace\r\n        this.updateValue()\r\n    }\r\n}",
+    "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class creates the Equation atom.\r\n */\r\nexport default class Equation extends Atom {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super(values)\r\n        \r\n        this.addIO('output', 'result', this, 'number', 0)\r\n        \r\n        /**\r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Equation'\r\n        \r\n        /**\r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Equation'\r\n        \r\n        /**\r\n         * Evaluate the equation adding and removing inputs as needed\r\n         */ \r\n        this.value = 0\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Defines a mathematical equation. Edit the output field to add or remove inputs.\"\r\n        \r\n        /**\r\n         * This atom's height as drawn on the screen\r\n         */\r\n        this.height\r\n        /**\r\n         * The index number of the currently selected option\r\n         * @type {number}\r\n         */\r\n        this.currentEquation = \"x + y\"\r\n        \r\n        this.setValues(values)\r\n        this.addAndRemoveInputs()\r\n        this.setValues(values) //Set values again to load input values which were saved\r\n        \r\n        \r\n    }\r\n    \r\n    /**\r\n     * Draw the Bill of material atom which has a BOM icon.\r\n     */ \r\n    draw() {\r\n        \r\n        super.draw(\"rect\")\r\n        \r\n        let pixelsX = GlobalVariables.widthToPixels(this.x)\r\n        let pixelsY = GlobalVariables.heightToPixels(this.y)\r\n        let pixelsRadius = GlobalVariables.widthToPixels(this.radius)\r\n        /**\r\n        * Relates height to radius\r\n        * @type {number}\r\n        */\r\n        this.height = pixelsRadius\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = '#484848'\r\n        GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`\r\n        \r\n        GlobalVariables.c.fillText('X + Y', pixelsX - pixelsRadius/1.2, pixelsY+this.height/3)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Add and remove inputs as needed from the atom\r\n     */ \r\n    addAndRemoveInputs(){\r\n        //Find all the letters in this equation\r\n        var re = /[a-zA-Z]/g\r\n        const variables = this.currentEquation.match(re)\r\n        \r\n        //Remove any inputs which are not needed\r\n        const deleteExtraInputs = () => {\r\n            this.inputs.forEach( input => {\r\n                if( !variables.includes(input.name) ){\r\n                    this.removeIO('input', input.name, this)\r\n                    deleteExtraInputs() //This needs to be called recursively to make sure all the inputs are deleted\r\n                }\r\n            })\r\n        }\r\n        deleteExtraInputs()\r\n        \r\n        //Add any inputs which are needed\r\n        for (var variable in variables){\r\n            if(!this.inputs.some(input => input.Name === variables[variable])){\r\n                this.addIO('input', variables[variable], this, 'number', 1)\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Evaluate the equation\r\n     */ \r\n    evaluateEquation(){\r\n        //Substitute numbers into the string\r\n        var substitutedEquation = this.currentEquation\r\n        this.name = this.currentEquation\r\n        \r\n        //Find all the letters in this equation\r\n        var re = /[a-zA-Z]/g\r\n        const variables = this.currentEquation.match(re)\r\n        for (var variable in variables){\r\n            for (var i= 0; i<this.inputs.length; i++){\r\n                if (this.inputs[i].name == variables[variable]) {\r\n                    substitutedEquation = substitutedEquation.replace(this.inputs[i].name, this.findIOValue(this.inputs[i].name))\r\n                }\r\n            }\r\n        }\r\n        return GlobalVariables.limitedEvaluate(substitutedEquation)\r\n    }\r\n    \r\n    /**\r\n     * Evaluate the equation adding and removing inputs as needed\r\n     */ \r\n    updateValue(){\r\n        try{\r\n            \r\n            this.addAndRemoveInputs()\r\n            \r\n            if(this.inputs.every(x => x.ready)){\r\n                \r\n                this.decreaseToProcessCountByOne()\r\n                \r\n                //Evaluate the equation\r\n                this.value = this.evaluateEquation()\r\n                \r\n                this.output.setValue(this.value)\r\n                this.output.ready = true\r\n            }\r\n            \r\n            //Updates the inputs\r\n            if(this.selected){\r\n                this.updateSidebar()\r\n            }\r\n        }catch(err){\r\n            console.warn(err)\r\n            this.setAlert(err)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.inputs.forEach(input => {\r\n            input.loadTree()\r\n        })\r\n        \r\n        this.value = this.evaluateEquation()\r\n        this.output.value = this.value\r\n        \r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Add the equation choice to the object which is saved for this molecule\r\n     */\r\n    serialize(){\r\n        var superSerialObject = super.serialize(null)\r\n        \r\n        //Write the current equation to the serialized object\r\n        superSerialObject.currentEquation = this.currentEquation\r\n        \r\n        return superSerialObject\r\n    }\r\n    \r\n    /**\r\n     * Add a dropdown to choose the equation type to the sidebar.\r\n     */\r\n    updateSidebar(){\r\n        //Update the side bar to make it possible to change the molecule name\r\n        \r\n        var valueList = super.updateSidebar()\r\n        \r\n        this.createEditableValueListItem(valueList,this,\"currentEquation\", \"output=\", false, (newEquation)=>{this.setEquation(newEquation)})\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Set the current equation to be a new value.\r\n     */\r\n    setEquation(newEquation){\r\n        this.currentEquation = newEquation.trim() //remove leading and trailing whitespace\r\n        this.updateValue()\r\n    }\r\n}",
     "static": true,
     "longname": "C:/Users/Bar/Documents/GitHub/Maslow-Create/src/js/molecules/equation.js",
     "access": "public",
@@ -4365,7 +4362,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 255,
+    "__docId__": 254,
     "kind": "class",
     "name": "Equation",
     "memberof": "src/js/molecules/equation.js",
@@ -4383,7 +4380,7 @@
     ]
   },
   {
-    "__docId__": 256,
+    "__docId__": 255,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4408,7 +4405,7 @@
     ]
   },
   {
-    "__docId__": 257,
+    "__docId__": 256,
     "kind": "member",
     "name": "name",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4427,7 +4424,7 @@
     }
   },
   {
-    "__docId__": 258,
+    "__docId__": 257,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4446,7 +4443,7 @@
     }
   },
   {
-    "__docId__": 259,
+    "__docId__": 258,
     "kind": "member",
     "name": "value",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4462,7 +4459,7 @@
     }
   },
   {
-    "__docId__": 260,
+    "__docId__": 259,
     "kind": "member",
     "name": "description",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4481,7 +4478,7 @@
     }
   },
   {
-    "__docId__": 261,
+    "__docId__": 260,
     "kind": "member",
     "name": "currentEquation",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4500,7 +4497,7 @@
     }
   },
   {
-    "__docId__": 262,
+    "__docId__": 261,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4515,7 +4512,7 @@
     "return": null
   },
   {
-    "__docId__": 263,
+    "__docId__": 262,
     "kind": "member",
     "name": "height",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4534,7 +4531,7 @@
     }
   },
   {
-    "__docId__": 264,
+    "__docId__": 263,
     "kind": "method",
     "name": "addAndRemoveInputs",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4549,7 +4546,7 @@
     "return": null
   },
   {
-    "__docId__": 265,
+    "__docId__": 264,
     "kind": "method",
     "name": "evaluateEquation",
     "memberof": "src/js/molecules/equation.js~Equation",
@@ -4578,7 +4575,7 @@
     "longname": "src/js/molecules/equation.js~Equation#updateValue",
     "access": "public",
     "description": "Evaluate the equation adding and removing inputs as needed",
-    "lineNumber": 133,
+    "lineNumber": 134,
     "params": [],
     "return": null
   },
@@ -4593,7 +4590,7 @@
     "longname": "src/js/molecules/equation.js~Equation#loadTree",
     "access": "public",
     "description": "Sets all the input and output values to match their associated atoms.",
-    "lineNumber": 162,
+    "lineNumber": 163,
     "params": [],
     "return": {
       "types": [
@@ -4612,7 +4609,7 @@
     "longname": "src/js/molecules/equation.js~Equation#serialize",
     "access": "public",
     "description": "Add the equation choice to the object which is saved for this molecule",
-    "lineNumber": 176,
+    "lineNumber": 177,
     "params": [],
     "return": {
       "types": [
@@ -4631,7 +4628,7 @@
     "longname": "src/js/molecules/equation.js~Equation#updateSidebar",
     "access": "public",
     "description": "Add a dropdown to choose the equation type to the sidebar.",
-    "lineNumber": 188,
+    "lineNumber": 189,
     "params": [],
     "return": null
   },
@@ -4646,7 +4643,7 @@
     "longname": "src/js/molecules/equation.js~Equation#setEquation",
     "access": "public",
     "description": "Set the current equation to be a new value.",
-    "lineNumber": 200,
+    "lineNumber": 201,
     "params": [
       {
         "name": "newEquation",
@@ -6095,7 +6092,7 @@
     "__docId__": 369,
     "kind": "file",
     "name": "src/js/molecules/input.js",
-    "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class creates the input atom.\r\n */\r\nexport default class Input extends Atom {\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super (values)\r\n        \r\n        /** \r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Input' + GlobalVariables.generateUniqueID()\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Adds an input to the parent molecule. If the parent molecule is the top level of the project then the input will be available when the project is shared or imported into another project. Name is editable\"\r\n        /** \r\n         * The value the input is set to, defaults to 10. Is this still used or are we using the value of the attachmentPoint now?\r\n         * @type {number}\r\n         */\r\n        this.value = 10\r\n        /** \r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Input'\r\n        /** \r\n         * This atom's height for drawing\r\n         * @type {number}\r\n         */\r\n        this.height\r\n        \r\n        /** \r\n         * This atom's old name, used during name changes\r\n         * @type {string}\r\n         */\r\n        this.oldName = this.name\r\n        \r\n        this.addIO('output', 'number or geometry', this, 'number or geometry', 10)\r\n        \r\n        //Add a new input to the current molecule\r\n        if (typeof this.parent !== 'undefined') {\r\n            this.parent.addIO('input', this.name, this.parent, 'number or geometry', 10)\r\n        }\r\n        \r\n        this.setValues(values)\r\n    }\r\n    \r\n    /**\r\n     * Updates the side bar to let the user change the atom value. Note that the parent molecule input is set, not this atom's input by changes.\r\n     */ \r\n    updateSidebar(){\r\n        //updates the sidebar to display information about this node\r\n        \r\n        var valueList =  super.updateSidebar() //call the super function\r\n        \r\n        this.createEditableValueListItem(valueList,this,'name', 'Name', false)\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Draws the atom on the screen.\r\n     */ \r\n    draw() {\r\n\r\n        // //Snap the inputs to the far right side\r\n        /**\r\n        * The x position of the atom\r\n        * @type {number}\r\n        */\r\n        this.x = this.radius\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n        /**\r\n        * Relates height to radius\r\n        * @type {number}\r\n        */\r\n        this.height = radiusInPixels*1.3\r\n        //Check if the name has been updated\r\n        if(this.name != this.oldName){this.updateParentName()}\r\n        \r\n        //Set colors\r\n        if(this.processing){\r\n            GlobalVariables.c.fillStyle = 'blue'\r\n        }\r\n        else if(this.selected){\r\n            GlobalVariables.c.fillStyle = this.selectedColor\r\n            GlobalVariables.c.strokeStyle = this.defaultColor\r\n            /**\r\n             * This background color\r\n             * @type {string}\r\n             */\r\n            this.color = this.selectedColor\r\n            /**\r\n             * This atoms accent color\r\n             * @type {string}\r\n             */\r\n            this.strokeColor = this.defaultColor\r\n        }\r\n        else{\r\n            GlobalVariables.c.fillStyle = this.defaultColor\r\n            GlobalVariables.c.strokeStyle = this.selectedColor\r\n            this.color = this.defaultColor\r\n            this.strokeColor = this.selectedColor\r\n        }\r\n        \r\n        this.inputs.forEach(input => {\r\n            input.draw()\r\n        })\r\n        if(this.output){\r\n            this.output.draw()\r\n        }\r\n        if(this.showHover){\r\n            GlobalVariables.c.textAlign = 'start' \r\n            GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)\r\n        }\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels + this.height/2)\r\n        GlobalVariables.c.lineTo(xInPixels, yInPixels + this.height/2)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels, yInPixels - this.height/2)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels, yInPixels - this.height/2)\r\n        GlobalVariables.c.lineWidth = 1\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n        GlobalVariables.c.stroke()\r\n        \r\n       \r\n    }\r\n    \r\n    /**\r\n     * Remove the input from the parent molecule, then delete the atom normally.\r\n     */ \r\n    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false) {\r\n        //Remove this input from the parent molecule\r\n        if (typeof this.parent !== 'undefined') {\r\n            this.parent.removeIO('input', this.name, this.parent, silent)\r\n        }\r\n        \r\n        super.deleteNode(backgroundClickAfter, deletePath, silent)\r\n    }\r\n    \r\n    /**\r\n     * Called when the name has changed to updated the name of the parent molecule IO\r\n     */ \r\n    updateParentName(){\r\n        //Run through the parent molecule and find the input with the same name\r\n        this.parent.inputs.forEach(child => {\r\n            if (child.name == this.oldName){\r\n                child.name = this.name\r\n            }\r\n        })\r\n        this.oldName = this.name\r\n    }\r\n    \r\n    /**\r\n     * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates.\r\n     */ \r\n    updateValue(){\r\n        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list\r\n            if(input.name == this.name){        //If we have found the matching input\r\n                this.decreaseToProcessCountByOne()\r\n                \r\n                this.value = input.getValue()\r\n                \r\n                this.output.waitOnComingInformation()         //Lock all of the dependents\r\n                \r\n                this.output.setValue(this.value)\r\n            }\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list\r\n            if(input.name == this.name){\r\n                input.loadTree()\r\n                this.value = input.value\r\n                this.output.value = input.value\r\n            }\r\n        })\r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Returns the current value being output\r\n     */ \r\n    getOutput(){\r\n        return this.output.getValue()\r\n    }\r\n    \r\n}",
+    "content": "import Atom from '../prototypes/atom'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class creates the input atom.\r\n */\r\nexport default class Input extends Atom {\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        super (values)\r\n        \r\n        /** \r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'Input' + GlobalVariables.generateUniqueID()\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"Adds an input to the parent molecule. If the parent molecule is the top level of the project then the input will be available when the project is shared or imported into another project. Name is editable\"\r\n        /** \r\n         * The value the input is set to, defaults to 10. Is this still used or are we using the value of the attachmentPoint now?\r\n         * @type {number}\r\n         */\r\n        this.value = 10\r\n        /** \r\n         * This atom's type\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Input'\r\n        /** \r\n         * This atom's height for drawing\r\n         * @type {number}\r\n         */\r\n        this.height\r\n        \r\n        /** \r\n         * This atom's old name, used during name changes\r\n         * @type {string}\r\n         */\r\n        this.oldName = this.name\r\n        \r\n        this.addIO('output', 'number or geometry', this, 'number or geometry', 10)\r\n        \r\n        //Add a new input to the current molecule\r\n        if (typeof this.parent !== 'undefined') {\r\n            this.parent.addIO('input', this.name, this.parent, 'number or geometry', 10)\r\n        }\r\n        \r\n        this.setValues(values)\r\n    }\r\n    \r\n    /**\r\n     * Updates the side bar to let the user change the atom value. Note that the parent molecule input is set, not this atom's input by changes.\r\n     */ \r\n    updateSidebar(){\r\n        //updates the sidebar to display information about this node\r\n        \r\n        var valueList =  super.updateSidebar() //call the super function\r\n        \r\n        this.createEditableValueListItem(valueList,this,'name', 'Name', false)\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Draws the atom on the screen.\r\n     */ \r\n    draw() {\r\n        \r\n        // //Snap the inputs to the far right side\r\n        /**\r\n        * The x position of the atom\r\n        * @type {number}\r\n        */\r\n        this.x = this.radius\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n        /**\r\n        * Relates height to radius\r\n        * @type {number}\r\n        */\r\n        this.height = radiusInPixels*1.3\r\n        //Check if the name has been updated\r\n        if(this.name != this.oldName){this.updateParentName()}\r\n        \r\n        //Set colors\r\n        if(this.processing){\r\n            GlobalVariables.c.fillStyle = 'blue'\r\n        }\r\n        else if(this.selected){\r\n            GlobalVariables.c.fillStyle = this.selectedColor\r\n            GlobalVariables.c.strokeStyle = this.defaultColor\r\n            /**\r\n             * This background color\r\n             * @type {string}\r\n             */\r\n            this.color = this.selectedColor\r\n            /**\r\n             * This atoms accent color\r\n             * @type {string}\r\n             */\r\n            this.strokeColor = this.defaultColor\r\n        }\r\n        else{\r\n            GlobalVariables.c.fillStyle = this.defaultColor\r\n            GlobalVariables.c.strokeStyle = this.selectedColor\r\n            this.color = this.defaultColor\r\n            this.strokeColor = this.selectedColor\r\n        }\r\n        \r\n        this.inputs.forEach(input => {\r\n            input.draw()\r\n        })\r\n        if(this.output){\r\n            this.output.draw()\r\n        }\r\n        \r\n        GlobalVariables.c.textAlign = 'start' \r\n        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels -radiusInPixels)\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.moveTo(xInPixels - radiusInPixels, yInPixels + this.height/2)\r\n        GlobalVariables.c.lineTo(xInPixels, yInPixels + this.height/2)\r\n        GlobalVariables.c.lineTo(xInPixels + radiusInPixels, yInPixels)\r\n        GlobalVariables.c.lineTo(xInPixels, yInPixels - this.height/2)\r\n        GlobalVariables.c.lineTo(xInPixels - radiusInPixels, yInPixels - this.height/2)\r\n        GlobalVariables.c.lineWidth = 1\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.closePath()\r\n        GlobalVariables.c.stroke()\r\n        \r\n       \r\n    }\r\n    \r\n    /**\r\n     * Remove the input from the parent molecule, then delete the atom normally.\r\n     */ \r\n    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false) {\r\n        //Remove this input from the parent molecule\r\n        if (typeof this.parent !== 'undefined') {\r\n            this.parent.removeIO('input', this.name, this.parent, silent)\r\n        }\r\n        \r\n        super.deleteNode(backgroundClickAfter, deletePath, silent)\r\n    }\r\n    \r\n    /**\r\n     * Called when the name has changed to updated the name of the parent molecule IO\r\n     */ \r\n    updateParentName(){\r\n        //Run through the parent molecule and find the input with the same name\r\n        this.parent.inputs.forEach(child => {\r\n            if (child.name == this.oldName){\r\n                child.name = this.name\r\n            }\r\n        })\r\n        this.oldName = this.name\r\n    }\r\n    \r\n    /**\r\n     * Grabs the new value from the parent molecule's input, sets this atoms value, then propagates.\r\n     */ \r\n    updateValue(){\r\n        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list\r\n            if(input.name == this.name){        //If we have found the matching input\r\n                this.decreaseToProcessCountByOne()\r\n                \r\n                this.value = input.getValue()\r\n                \r\n                this.output.waitOnComingInformation()         //Lock all of the dependents\r\n                \r\n                this.output.setValue(this.value)\r\n            }\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.parent.inputs.forEach(input => { //Grab the value for this input from the parent's inputs list\r\n            if(input.name == this.name){\r\n                input.loadTree()\r\n                this.value = input.value\r\n                this.output.value = input.value\r\n            }\r\n        })\r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Returns the current value being output\r\n     */ \r\n    getOutput(){\r\n        return this.output.getValue()\r\n    }\r\n    \r\n}",
     "static": true,
     "longname": "C:/Users/Bar/Documents/GitHub/Maslow-Create/src/js/molecules/input.js",
     "access": "public",
@@ -6357,7 +6354,7 @@
     "longname": "src/js/molecules/input.js~Input#deleteNode",
     "access": "public",
     "description": "Remove the input from the parent molecule, then delete the atom normally.",
-    "lineNumber": 144,
+    "lineNumber": 143,
     "params": [
       {
         "name": "backgroundClickAfter",
@@ -6400,7 +6397,7 @@
     "longname": "src/js/molecules/input.js~Input#updateParentName",
     "access": "public",
     "description": "Called when the name has changed to updated the name of the parent molecule IO",
-    "lineNumber": 156,
+    "lineNumber": 155,
     "params": [],
     "return": null
   },
@@ -6415,7 +6412,7 @@
     "longname": "src/js/molecules/input.js~Input#updateValue",
     "access": "public",
     "description": "Grabs the new value from the parent molecule's input, sets this atoms value, then propagates.",
-    "lineNumber": 169,
+    "lineNumber": 168,
     "params": [],
     "return": null
   },
@@ -6430,7 +6427,7 @@
     "longname": "src/js/molecules/input.js~Input#loadTree",
     "access": "public",
     "description": "Sets all the input and output values to match their associated atoms.",
-    "lineNumber": 186,
+    "lineNumber": 185,
     "params": [],
     "return": {
       "types": [
@@ -6449,7 +6446,7 @@
     "longname": "src/js/molecules/input.js~Input#getOutput",
     "access": "public",
     "description": "Returns the current value being output",
-    "lineNumber": 200,
+    "lineNumber": 199,
     "params": [],
     "return": {
       "types": [

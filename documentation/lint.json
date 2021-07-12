@@ -134,23 +134,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 275,
+        "lineNumber": 278,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 276,
+        "lineNumber": 279,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 277,
+        "lineNumber": 280,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 278,
+        "lineNumber": 281,
         "line": "    */\r"
       },
       {
-        "lineNumber": 279,
+        "lineNumber": 282,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
