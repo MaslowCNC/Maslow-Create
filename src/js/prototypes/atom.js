@@ -332,7 +332,7 @@ export default class Atom {
     setAlert(message){
         this.color = 'orange'
         this.alertMessage = String(message)
-
+        console.warn(message);
     }
     
     /**

@@ -246,7 +246,7 @@ class GlobalVariables{
         
         // Cancel the last write to display if there is one active because this one will replace it
         if(this.displayProcessing){
-            this.cancelLastDisplayWorker()
+            //this.cancelLastDisplayWorker()
             this.displayProcessing = false
         }
         
