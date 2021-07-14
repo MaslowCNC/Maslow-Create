@@ -6743,58 +6743,6 @@ const toEcmascript = async (
         program: generateUpdateCode(entry),
       };
     }
-
-    /*
-    out.push(parse(`info('define ${id}');`, parseOptions));
-    const meta = await read(`meta/def/${path}/${id}`);
-
-    // Now that we have the sha, we can predict if it can be read from cache.
-    const meta = await read(`meta/def/${path}/${id}`);
-    if (meta && meta.sha === sha) {
-      const readCode = strip(
-        parse(`await loadGeometry('data/def/${path}/${id}')`, parseOptions)
-      );
-      const readExpression = readCode.body[0].expression;
-      const init = readExpression;
-      const cacheLoadCode = {
-        ...declaration,
-        declarations: [{ ...declarator, init }],
-      };
-      out.push(cacheLoadCode);
-      const replayRecordedNotes = parse(
-        `await replayRecordedNotes('${path}', '${id}')`,
-        parseOptions
-      );
-      out.push(replayRecordedNotes);
-      entry.code = cacheLoadCode;
-      entry.program = generate({
-        type: 'Program',
-        body: [cacheLoadCode, replayRecordedNotes],
-      });
-      entry.isComputed = true;
-    } else {
-      out.push(
-        parse(
-          `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
-          parseOptions
-        )
-      );
-      // FIX: Let's not hard-code card declarations.
-      const patched = { ...declaration, declarations: [declarator] };
-      out.push(patched);
-      // Only cache Shapes.
-      out.push(
-        parse(
-          `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
-          parseOptions
-        )
-      );
-      out.push(
-        parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions)
-      );
-    }
-    out.push(parse(`Object.freeze(${id});`, parseOptions));
-*/
   };
 
   for (let nth = 0; nth < body.length; nth++) {

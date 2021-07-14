@@ -130,12 +130,13 @@ const agent = async ({
     text: 'Evaluation Started'
   });
   const {
-    script,
+    offscreenCanvas,
+    id,
     path,
     workspace,
-    view,
-    offscreenCanvas,
-    sha = 'master'
+    script,
+    sha = 'master',
+    view
   } = message;
 
   if (workspace) {
@@ -146,10 +147,20 @@ const agent = async ({
 
   try {
     switch (op) {
-      case 'touchFile':
-        await sys.touch(path, {
-          workspace
-        });
+      case 'sys/attach':
+        self.id = id;
+        return;
+
+      case 'sys/touch':
+        if (id === undefined || id !== self.id) {
+          // Don't respond to touches from ourself.
+          await sys.touch(path, {
+            workspace,
+            clear: true,
+            broadcast: false
+          });
+        }
+
         return;
 
       case 'staticView':

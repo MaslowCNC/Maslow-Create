@@ -1904,12 +1904,12 @@ const loft = (closed, geometry, ...geometries) => {
   return rewrite(geometry, op);
 };
 
-const minkowskiDifference$1 = (a, b) => {
+const minkowskiDifference$1 = ({ tags }, a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return a;
   }
   return taggedGraph(
-    {},
+    { tags },
     fromSurfaceMeshLazy(
       minkowskiDifferenceOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
@@ -1928,12 +1928,9 @@ const minkowskiDifference = (geometry, offset) => {
     switch (geometry.type) {
       case 'graph': {
         const differences = [];
-        for (const { graph } of getNonVoidGraphs(offset)) {
+        for (const otherGeometry of getNonVoidGraphs(offset)) {
           differences.push(
-            taggedGraph(
-              { tags },
-              minkowskiDifference$1(geometry.graph, graph)
-            )
+            minkowskiDifference$1({ tags }, geometry, otherGeometry)
           );
         }
         return taggedGroup({}, ...differences);
@@ -1961,12 +1958,12 @@ const minkowskiDifference = (geometry, offset) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const minkowskiShell$1 = (a, b) => {
+const minkowskiShell$1 = ({ tags }, a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return a;
   }
   return taggedGraph(
-    {},
+    { tags },
     fromSurfaceMeshLazy(
       minkowskiShellOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
@@ -1985,10 +1982,8 @@ const minkowskiShell = (geometry, offset) => {
     switch (geometry.type) {
       case 'graph': {
         const sums = [];
-        for (const { graph } of getNonVoidGraphs(offset)) {
-          sums.push(
-            taggedGraph({ tags }, minkowskiShell$1(geometry.graph, graph))
-          );
+        for (const otherGeometry of getNonVoidGraphs(offset)) {
+          sums.push(minkowskiShell$1({ tags }, geometry, otherGeometry));
         }
         return taggedGroup({}, ...sums);
       }
@@ -2015,12 +2010,12 @@ const minkowskiShell = (geometry, offset) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const minkowskiSum$1 = (a, b) => {
+const minkowskiSum$1 = ({ tags }, a, b) => {
   if (a.graph.isEmpty || b.graph.isEmpty) {
     return a;
   }
   return taggedGraph(
-    {},
+    { tags },
     fromSurfaceMeshLazy(
       minkowskiSumOfSurfaceMeshes(
         toSurfaceMesh(a.graph),
@@ -2039,10 +2034,8 @@ const minkowskiSum = (geometry, offset) => {
     switch (geometry.type) {
       case 'graph': {
         const sums = [];
-        for (const { graph } of getNonVoidGraphs(offset)) {
-          sums.push(
-            taggedGraph({ tags }, minkowskiSum$1(geometry.graph, graph))
-          );
+        for (const otherGeometry of getNonVoidGraphs(offset)) {
+          sums.push(minkowskiSum$1({ tags }, geometry, otherGeometry));
         }
         return taggedGroup({}, ...sums);
       }
