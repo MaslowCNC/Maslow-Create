@@ -32,16 +32,39 @@ export default class Color extends Atom {
         this.description = "Changes the color of the shape."
         
         /**
-         * The color options to choose from
-         * @type {array}
-         */
-        this.colorOptions = ['Powder blue','White','Red','Steel Blue','Yellow','Brown','Cyan', "Green", "Pink", "Blue", "Silver", "Black", "Keep Out"]
-        
-        /**
          * The index of the currently selected color option.
          * @type {number}
          */
         this.selectedColorIndex = 0
+        
+        /**
+         * The color options to choose from
+         * @type {array}
+         */
+        this.colorOptions = {
+            'Red': '#FF9065',
+            'Orange': '#FFB458',
+            'Yellow': '#FFD600',
+            'Olive': '#C7DF66',
+            'Teal': '#71D1C2',
+            'Light Blue': '#75DBF2',
+            'Green': '#A3CE5B',
+            'Lavender ': '#CCABED',
+            'Brown': '#CFAB7C',
+            'Pink': '#FFB09D',
+            'Sand': '#E2C66C',
+            'Clay': '#C4D3AC',
+            'Blue': '#91C8D5',
+            'Light Green': '#96E1BB',
+            'Purple': '#ACAFDD',
+            'Light Purple': '#DFB1E8',
+            'Tan': '#F5D3B6',
+            'Mauve ': '#DBADA9',
+            'Grey': '#BABABA',
+            'Black': '#3C3C3C',
+            'White': '#FFFCF7',
+            'Keep Out': 'Keep Out'
+        }
         
         this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
@@ -87,7 +110,7 @@ export default class Color extends Atom {
     updateValue(){
         try{
             var inputPath = this.findIOValue('geometry')
-            const values = {key: "color", color: this.colorOptions[this.selectedColorIndex], readPath: inputPath, writePath: this.path }
+            const values = {key: "color", color: this.colorOptions[Object.keys(this.colorOptions)[this.selectedColorIndex]], readPath: inputPath, writePath: this.path }
             this.basicThreadValueProcessing(values)
             this.clearAlert()
         }catch(err){this.setAlert(err)}
@@ -108,7 +131,7 @@ export default class Color extends Atom {
         const list = super.updateSidebar()
         const dropdown= document.createElement('div')
         list.appendChild(dropdown)
-        this.createDropDown(dropdown, this, this.colorOptions, this.selectedColorIndex, "Color", (index)=>{this.changeColor(index)})
+        this.createDropDown(dropdown, this, Object.keys(this.colorOptions), this.selectedColorIndex, "Color", (index)=>{this.changeColor(index)})
     }
     
     /**
