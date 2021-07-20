@@ -32,6 +32,12 @@ export default class Color extends Atom {
         this.description = "Changes the color of the shape."
         
         /**
+         * The index of the currently selected color option.
+         * @type {number}
+         */
+        this.selectedColorIndex = 0
+        
+        /**
          * The color options to choose from
          * @type {array}
          */
@@ -59,12 +65,6 @@ export default class Color extends Atom {
             'White': '#FFFCF7',
             'Keep Out': 'Keep Out'
         }
-        
-        /**
-         * The index of the currently selected color option.
-         * @type {number}
-         */
-        this.selectedColorIndex = 0
         
         this.addIO('input', 'geometry', this, 'geometry', null, false, true)
         this.addIO('output', 'geometry', this, 'geometry', null)
