@@ -1115,6 +1115,9 @@ export default function GitHubModule(){
             if(!GlobalVariables.fork){
                 document.getElementById("pull_top").style.display = "none"
             }
+            else{
+                document.getElementById("pull_top").style.display = "inline"
+            }
         })
         
     }
