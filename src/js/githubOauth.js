@@ -248,16 +248,21 @@ export default function GitHubModule(){
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber){
+    this.loadProjectsBySearch = async function(tabName, ev, searchString, sorting, pageNumber, clear = true){
+        
+        console.log("Load by search ran: " + tabName)
+        
         if(ev.key == "Enter"){
             //Remove projects shown now
-            while (this.projectsSpaceDiv.firstChild) {
-                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+            if(clear){
+                while (this.projectsSpaceDiv.firstChild) {
+                    this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+                }
             }
             // add initial projects to div
 
             //New project div
-            if (currentUser !== null){
+            if (currentUser !== null && clear){
                 var browseDiv = document.createElement("div")
                 browseDiv.setAttribute("class", "browseDiv")
                 this.projectsSpaceDiv.appendChild(browseDiv)
@@ -320,7 +325,7 @@ export default function GitHubModule(){
                 affiliation: 'owner',
             })
             
-            octokit.search.repos({
+            return octokit.search.repos({
                 q: query,
                 sort: sortMethod,
                 per_page: 50,
@@ -465,9 +470,10 @@ export default function GitHubModule(){
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
         
-        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
-        //A bit of a hack to make your projects appear first on the list
-        setTimeout(() => {this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)}, 1000)
+        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, true)
+        .then( () => {
+            this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page, false)
+        })
     }
     
     /** 
