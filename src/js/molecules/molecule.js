@@ -260,6 +260,7 @@ export default class Molecule extends Atom{
      */ 
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
+        console.log(this.name + " writing to path " + this.path)
         if(this.simplify){
             try{
                 this.processing = true
@@ -271,8 +272,14 @@ export default class Molecule extends Atom{
             }catch(err){this.setAlert(err)}
         }
         else{
-            this.path = this.readOutputAtomPath()
-            this.pushPropogation()
+            try{
+                this.processing = true
+                const values = {key: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
+                window.ask(values).then( () => {
+                    this.processing = false
+                    this.pushPropogation()
+                })
+            }catch(err){this.setAlert(err)}
         }
     }
     
@@ -335,17 +342,6 @@ export default class Molecule extends Atom{
      */
     setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
-        if(this.simplify){
-            this.inputPath = this.path
-            this.generatePath() //Resets the molecule path to be something unique
-        }
-        else{  //Changes the path back to be the output atom
-            this.nodesOnTheScreen.forEach(atom => {
-                if(atom.atomType == "Output"){
-                    this.path = atom.loadTree()
-                }
-            })
-        }
         this.propogate()
     }
     
@@ -680,7 +676,7 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(atom => {
             //If we have found this molecule's output atom use it to update the path here
             if(atom.atomType == "Output"){
-                this.path = atom.loadTree()
+                atom.loadTree()
             }
             //If we have found an atom with nothing connected to it
             if(atom.output){

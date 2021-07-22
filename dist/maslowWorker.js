@@ -267,6 +267,11 @@ const agent = async ({
             }
             return 1;
             break;
+        case "copy":
+            const shape2Copy = await maslowRead(message.readPath);
+            await api.saveGeometry(message.writePath, shape2Copy);
+            return 1;
+            break;
         case "tag":
             const shape2tag = await maslowRead(message.readPath);
             const taggedShape = shape2tag.as(message.tag);
@@ -379,6 +384,7 @@ const agent = async ({
             return 1
             break;
         case "display":
+            console.log("Displaying path: " + message.readPath);
             const geometryToDisplay = await maslowRead(message.readPath);
             const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{triangles: message.triangles, outline: message.outline, wireframe: message.wireframe }));
             return threejsGeometry;
