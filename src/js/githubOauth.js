@@ -467,7 +467,7 @@ export default function GitHubModule(){
         
         this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
         //A bit of a hack to make your projects appear first on the list
-        setTimeout(() => {this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)}, 1000);
+        setTimeout(() => {this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)}, 1000)
     }
     
     /** 
