@@ -74,9 +74,9 @@ export default function GitHubModule(){
         OAuth.popup('github').then(github => {
         
             /** 
-         * Oktokit object to access github
-         * @type {object}
-         */   
+             * Oktokit object to access github
+             * @type {object}
+             */
             octokit = new Octokit({
                 auth: github.access_token
             })
@@ -640,116 +640,16 @@ export default function GitHubModule(){
      */
     this.makePullRequest = function(){
       
-        //Open the github page for the current project in a new tab
+        //Open the github page for making a pull request to the current project in a new tab
         octokit.repos.get({
             owner: currentUser,
             repo: currentRepoName
         }).then(result => {
-            let parent= result.data.parent.owner.login
-            let fullName= result.data.full_name
-            let fullParentName= result.data.parent.full_name
-            let defaultBranch = result.data.default_branch
-            let parentDefaultBranch = result.data.parent.default_branch
-
-            //Remove everything in the popup now
-            while (popup.firstChild) {
-                popup.removeChild(popup.firstChild)
-            }
-                    
-            popup.classList.remove('off')
-
-            var subButtonDiv = document.createElement('div')
-            subButtonDiv.setAttribute("class", "form")
-
-            //Close button (Mac style)
-            if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
-                var closeButton = document.createElement("button")
-                closeButton.setAttribute("class", "closeButton")
-                closeButton.addEventListener("click", () => {
-                    popup.classList.add('off')
-                })
-                popup.appendChild(closeButton)
-            }
-                    
-            //Add a title
-
-            var title = document.createElement("H3")
-            title.appendChild(document.createTextNode("OPEN A PULL REQUEST"))
-            subButtonDiv.setAttribute('style','color:white;')
-            subButtonDiv.appendChild(title)
-            subButtonDiv.appendChild(document.createElement("br"))
-
-            var mergeTitles = document.createElement("div")
-            mergeTitles.setAttribute("class","pull-title")
-            var base = document.createElement("p")
-            base.appendChild(document.createTextNode(fullParentName + " : " + parentDefaultBranch))
-            var arrow = document.createElement("p")
-            arrow.innerHTML="&#8592;"
-            mergeTitles.appendChild(arrow)
-            var head = document.createElement("p")
-            head.appendChild(document.createTextNode(fullName + " : " + defaultBranch))
-            mergeTitles.appendChild(base)
-            mergeTitles.appendChild(arrow)
-            mergeTitles.appendChild(head)
-
-            subButtonDiv.appendChild(mergeTitles)
-                    
-            var form = document.createElement("form")
-            subButtonDiv.appendChild(form)
-            var titleDiv = document.createElement("div")
-            titleDiv.setAttribute("class","pullDiv")
-            var titleLabel = document.createElement("label")
-            titleLabel.appendChild(document.createTextNode("Title"))
-
-            //Create the title field
-            var titleInput = document.createElement("input")
-            titleInput.setAttribute("id","pull-title")
-            titleInput.setAttribute("type","text")
-            titleInput.setAttribute("placeholder","Pull Request Title")
-            titleDiv.appendChild(titleLabel)
-            titleDiv.appendChild(titleInput)
-
-            var bodyDiv = document.createElement("div")
-            bodyDiv.setAttribute("class","pullDiv")
-            var bodyLabel = document.createElement("label")
-            bodyLabel.appendChild(document.createTextNode("Message"))
-
-            var bodyInput = document.createElement("textarea")
-            bodyInput.setAttribute("id","pull-message")
-            bodyInput.setAttribute("type","text")
-            bodyInput.setAttribute("placeholder","Pull Request Message")
-            bodyDiv.appendChild(bodyLabel)
-            bodyDiv.appendChild(bodyInput)
-                    
-            var button = document.createElement("button")
-            button.setAttribute("type", "button")
-            button.setAttribute("style", "border:2px solid white;")
-            button.appendChild(document.createTextNode("Create pull request"))
-                    
-            button.addEventListener("click", () => {
-                var pullTitle= document.getElementById("pull-title").value
-                var pullMessage= document.getElementById("pull-message").value
-                octokit.pulls.create({
-                    owner: parent,
-                    repo: currentRepoName,
-                    title: pullTitle, //input from popup,
-                    body: pullMessage, //input from popup,
-                    head: currentUser+ ":" + "master",
-                    base: "master"
-                }).then(result => {
-                    var url = result.data.html_url
-                    window.open(url)
-                }).then(() =>{
-                    popup.classList.add('off')
-                })
-            })
-            form.appendChild(titleDiv)
-            form.appendChild(bodyDiv)
-            form.appendChild(button)
-            popup.appendChild(subButtonDiv)
-
+            
+            const webString = "https://github.com/" + result.data.parent.full_name + "/compare/" + result.data.parent.default_branch + "..." + result.data.owner.login + ":" + result.data.default_branch
+            
+            window.open(webString)
         })
-        
     }
     
     /** 
