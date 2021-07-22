@@ -522,7 +522,7 @@ body {
     cursor: pointer;
 }
 .menu-item-mine{
-  background-color:#e6e6ff
+  background-color:#2ea44f
 }
 
 .menu-item:hover,
@@ -530,7 +530,7 @@ body {
 .menu-item-mine:hover{
     color: #000;
     font-weight: 500;
-    background-color: #e8e6e6e8;
+    background-color: #82c288;
 }
 
 .menu_list{

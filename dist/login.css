@@ -525,11 +525,11 @@ animation-delay: 0s;
 }
 
 .project:hover{
-    background-color: #ffffff;
+    background-color: #82c288;
 }
 
 .mine{
-    background-color : #e6e6ff;
+    background-color : #2ea44f;
 }
 
 /* width */
