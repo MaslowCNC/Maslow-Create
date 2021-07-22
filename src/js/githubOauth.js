@@ -250,8 +250,6 @@ export default function GitHubModule(){
      */
     this.loadProjectsBySearch = async function(tabName, ev, searchString, sorting, pageNumber, clear = true){
         
-        console.log("Load by search ran: " + tabName)
-        
         if(ev.key == "Enter"){
             //Remove projects shown now
             if(clear){
@@ -471,9 +469,9 @@ export default function GitHubModule(){
         document.getElementById('menuInput').focus()
         
         this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, true)
-        .then( () => {
-            this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page, false)
-        })
+            .then( () => {
+                this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page, false)
+            })
     }
     
     /** 
