@@ -390,6 +390,7 @@ const agent = async ({
             return threejsGeometry;
             break;
         }
+        await resolvePending();
     }
     catch(err){
         console.warn(err);
