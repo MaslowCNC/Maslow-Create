@@ -30,6 +30,7 @@ import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
 import Group            from './molecules/group.js'
+import UploadSVG        from './molecules/uploadSVG.js'
 import GitHubModule     from './githubOauth'
 
 /**
@@ -94,6 +95,7 @@ class GlobalVariables{
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
             //nest:               {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
+            uploadSVG:          {creator: UploadSVG, atomType: 'UploadSVG', atomCategory: 'Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
 
             output:             {creator: Output, atomType: 'Output'}

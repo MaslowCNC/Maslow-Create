@@ -1332,4 +1332,20 @@ export default function GitHubModule(){
             })
         })
     }
+    
+    /** 
+     * Upload a file to github
+     */
+    this.uploadAFile = async function(filePath, data){
+        console.log("Uploading a file to github")
+        console.log(filePath)
+        console.log(data)
+    }
+    
+    /** 
+     * Delete a file from github
+     */
+    this.deleteAFile = async function(filePath){
+        console.log("Deleting a file from github")
+    }
 }

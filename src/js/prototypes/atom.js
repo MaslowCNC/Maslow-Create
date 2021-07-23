@@ -1013,6 +1013,45 @@ export default class Atom {
     }
     
     /**
+     * Creates file upload button. Used in the sidebar.
+     * @param {object} list - The HTML object to attach the new item to.
+     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.
+     * @param {string} buttonText - The text on the button.
+     * @param {object} functionToCall - The function to call when the button is pressed.
+     */ 
+    createFileUpload(list,parent,buttonText,functionToCall){
+        var listElement = document.createElement('LI')
+        list.appendChild(listElement)
+        
+        
+        //Div which contains the entire element
+        var div = document.createElement('div')
+        listElement.appendChild(div)
+        div.setAttribute('class', 'runSideBarDiv')
+        
+        
+        //Right div which is button
+        var valueTextDiv = document.createElement('div')
+        div.appendChild(valueTextDiv)
+        var button = document.createElement('input');
+        button.type = "file";
+        var buttonTextNode = document.createTextNode(buttonText)
+        button.setAttribute('class', ' browseButton')
+        console.log("Button id: ");
+        console.log(buttonText.replace(/\s+/g, "") + "-button");
+        button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")
+        button.appendChild(buttonTextNode)
+        valueTextDiv.appendChild(button)
+        valueTextDiv.setAttribute('class', 'sidebar-subitem')
+        
+        button.addEventListener(
+            'change',
+            functionToCall,
+            false
+        )
+    }
+    
+    /**
      * Creates button. Used in the sidebar.
      * @param {object} list - The HTML object to attach the new item to.
      * @param {string} buttonText - The text on the button.
