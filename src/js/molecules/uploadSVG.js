@@ -63,6 +63,13 @@ export default class UploadSVG extends Atom {
      */ 
     updateValue(){
         
+        console.log("Update Value ran")
+        console.log(this.fileName)
+        
+        GlobalVariables.gitHub.getAFile(this.fileName).then(result => {
+            console.log("Read in upload SVG")
+            console.log(result)
+        })
         
         
     }
@@ -80,9 +87,6 @@ export default class UploadSVG extends Atom {
      */ 
     uploadSvg(){
         
-        console.log("File uploaded function ran");
-        
-        
         var x = document.getElementById("UploadSVG-button")
         if ('files' in x){
             if(x.files.length > 0){
@@ -94,9 +98,12 @@ export default class UploadSVG extends Atom {
                 
                 const reader = new FileReader()
                 reader.addEventListener('load', (event) => {
-                    GlobalVariables.gitHub.uploadAFile(this.fileName, event.target.result)
+                    GlobalVariables.gitHub.uploadAFile(this.fileName, event.target.result).then(result => {
+                        console.log("Done in svg.js")
+                        this.updateValue()
+                    })
                 })
-                reader.readAsDataURL(file)
+                reader.readAsText(file)
             }
         }
         

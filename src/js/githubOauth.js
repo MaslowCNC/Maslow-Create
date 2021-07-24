@@ -1334,12 +1334,40 @@ export default function GitHubModule(){
     }
     
     /** 
-     * Upload a file to github
+     * Upload a file to github. Calback is called after the file is uploaded.
      */
-    this.uploadAFile = async function(filePath, data){
+    this.uploadAFile = async function(filePath, data, callback = false){
         console.log("Uploading a file to github")
-        console.log(filePath)
-        console.log(data)
+        
+        const toSend = {}
+        toSend[filePath] = data
+        
+        await this.createCommit(octokit,{
+            owner: currentUser,
+            repo: currentRepoName,
+            changes: {
+                files: toSend,
+                commit: 'Upload file'
+            }
+        })
+    }
+    
+    /** 
+     * Get a file from github. Calback is called after the retrieved.
+     */
+    this.getAFile = async function(filePath){
+        let repoInfo = 
+        octokit.repos.getContents({
+            owner: currentUser,
+            repo: currentRepoName,
+            path: filePath
+        }).then(result => {
+            //content will be base64 encoded
+            let rawFile = atob(result.data.content)
+            console.log("Read from github: ")
+            console.log(rawFile)
+            return rawFile
+        })
     }
     
     /** 
