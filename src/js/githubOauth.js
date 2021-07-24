@@ -1371,6 +1371,17 @@ export default function GitHubModule(){
     }
     
     /** 
+     * Get a link to the raw version of a file on GitHub
+     */
+    this.getAFileRawPath = function(filePath){
+        const rawPath = "https://raw.githubusercontent.com/" + currentUser + "/" + currentRepoName + "/main/" + filePath
+        
+        console.log("Generated path: ")
+        console.log(rawPath)
+        return rawPath
+    }
+    
+    /** 
      * Delete a file from github
      */
     this.deleteAFile = async function(filePath){

@@ -66,18 +66,16 @@ export default class UploadSVG extends Atom {
         console.log("Update Value ran")
         console.log(this.fileName)
         
-        GlobalVariables.gitHub.getAFile(this.fileName).then(result => {
-            console.log("Read in upload SVG")
-            console.log(result)
+        const rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
+        console.log("Read in upload SVG")
+        console.log(rawPath)
+        
+        try{
+            var inputPath = this.findIOValue('geometry')
+            const values = { key: "fromSVG", svgPath:rawPath, writePath: this.path }
             
-            try{
-                var inputPath = this.findIOValue('geometry')
-                const values = { key: "fromSVG", svgString:result, writePath: this.path }
-                
-                this.basicThreadValueProcessing(values)
-            }catch(err){this.setAlert(err)}
-            
-        })
+            this.basicThreadValueProcessing(values)
+        }catch(err){this.setAlert(err)}
         
         
     }

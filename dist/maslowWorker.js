@@ -374,7 +374,7 @@ const agent = async ({
             console.log("In worker SVG");
             console.log(message);
             
-            const shapeFromSVG = await api.readSvg("https://raw.githubusercontent.com/BarbourSmith/A-project-with-a-license-/main/atom.svg");
+            const shapeFromSVG = await api.readSvg(message.svgPath);
             await api.saveGeometry(message.writePath, shapeFromSVG);
             return true;
             break;
