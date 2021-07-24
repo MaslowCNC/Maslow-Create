@@ -1356,18 +1356,18 @@ export default function GitHubModule(){
      * Get a file from github. Calback is called after the retrieved.
      */
     this.getAFile = async function(filePath){
-        let repoInfo = 
-        octokit.repos.getContents({
+        
+        const result = await octokit.repos.getContents({
             owner: currentUser,
             repo: currentRepoName,
             path: filePath
-        }).then(result => {
-            //content will be base64 encoded
-            let rawFile = atob(result.data.content)
-            console.log("Read from github: ")
-            console.log(rawFile)
-            return rawFile
         })
+        
+        //content will be base64 encoded
+        console.log("In github: ")
+        console.log(result)
+        let rawFile = atob(result.data.content)
+        return rawFile
     }
     
     /** 
