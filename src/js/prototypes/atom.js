@@ -1037,8 +1037,6 @@ export default class Atom {
         button.type = "file";
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute('class', ' browseButton')
-        console.log("Button id: ");
-        console.log(buttonText.replace(/\s+/g, "") + "-button");
         button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")
         button.appendChild(buttonTextNode)
         valueTextDiv.appendChild(button)

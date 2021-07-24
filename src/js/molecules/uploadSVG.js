@@ -98,9 +98,13 @@ export default class UploadSVG extends Atom {
             if(x.files.length > 0){
                 const file = x.files[0]
                 
-                //Delete the old file here if this is a re-upload
+                //Delete the prevous file if this one is a new one
+                if(this.fileName != x.files[0].name){
+                    GlobalVariables.gitHub.deleteAFile(this.fileName)
+                }
                 
                 this.fileName = x.files[0].name
+                this.name = this.fileName
                 
                 const reader = new FileReader()
                 reader.addEventListener('load', (event) => {
@@ -112,13 +116,18 @@ export default class UploadSVG extends Atom {
                 reader.readAsText(file)
             }
         }
-        
-        //Change the saved name
-        
-        //Upload the file to github
-        
-        //Run updateValue to import the file from GitHub
-        
     }
     
+    /**
+     * Add the file name to the object which is saved for this molecule
+     */
+    serialize(){
+        var superSerialObject = super.serialize(null)
+        
+        //Write the current equation to the serialized object
+        superSerialObject.fileName = this.fileName
+        superSerialObject.name = this.name
+        
+        return superSerialObject
+    }
 }

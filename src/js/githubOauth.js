@@ -1385,6 +1385,6 @@ export default function GitHubModule(){
      * Delete a file from github
      */
     this.deleteAFile = async function(filePath){
-        console.log("Deleting a file from github")
+        console.log("Deleting " + filePath + " from github")
     }
 }
