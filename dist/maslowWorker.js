@@ -370,10 +370,6 @@ const agent = async ({
             return false;
             break;
         case "fromSVG":
-            
-            console.log("In worker SVG");
-            console.log(message);
-            
             const shapeFromSVG = await api.readSvg(message.svgPath);
             await api.saveGeometry(message.writePath, shapeFromSVG);
             return true;

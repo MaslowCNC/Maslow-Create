@@ -1337,7 +1337,6 @@ export default function GitHubModule(){
      * Upload a file to github. Calback is called after the file is uploaded.
      */
     this.uploadAFile = async function(filePath, data, callback = false){
-        console.log("Uploading a file to github")
         
         const toSend = {}
         toSend[filePath] = data
@@ -1364,8 +1363,6 @@ export default function GitHubModule(){
         })
         
         //content will be base64 encoded
-        console.log("In github: ")
-        console.log(result)
         let rawFile = atob(result.data.content)
         return rawFile
     }
@@ -1375,9 +1372,6 @@ export default function GitHubModule(){
      */
     this.getAFileRawPath = function(filePath){
         const rawPath = "https://raw.githubusercontent.com/" + currentUser + "/" + currentRepoName + "/main/" + filePath
-        
-        console.log("Generated path: ")
-        console.log(rawPath)
         return rawPath
     }
     
@@ -1385,6 +1379,38 @@ export default function GitHubModule(){
      * Delete a file from github
      */
     this.deleteAFile = async function(filePath){
-        console.log("Deleting " + filePath + " from github")
+        
+        let response = await octokit.repos.get({ owner:currentUser, repo: currentRepoName})
+        let base = response.data.default_branch
+        
+        let fileInfo = await octokit.repos.getContents({
+            owner: currentUser,
+            repo: currentRepoName,
+            path: filePath
+        })
+        
+        let fileSha = fileInfo.data.sha
+            
+        let deletedFileResult = await octokit.repos.deleteFile({
+          owner: currentUser,
+          repo: currentRepoName,
+          path: filePath,
+          message: "Delete file",
+          sha:fileSha,
+        })
+                
+        console.log("Delete file returns: ")
+        console.log(deletedFileResult)
+                
+        let returnFromUpdateRef = await octokit.git.updateRef({
+            owner: currentUser,
+            repo: currentRepoName,
+            sha: deletedFileResult.data.commit.sha,
+            ref: "heads/" + base,
+            force: true
+        })
+        
+        console.log("Return from update ref: ")
+        console.log( returnFromUpdateRef)
     }
 }
