@@ -369,6 +369,11 @@ const agent = async ({
             await api.saveGeometry(message.writePath, fromJson);
             return false;
             break;
+        case "fromSVG":
+            const shapeFromSVG = await api.readSvg(message.svgPath);
+            await api.saveGeometry(message.writePath, shapeFromSVG);
+            return true;
+            break;
         case "getPathsList":
             const listedFiles = await listFiles();
             const inThisProject = listedFiles.filter((path) => path.startsWith(message.prefacePath));

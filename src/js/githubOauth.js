@@ -8,7 +8,7 @@ import { OAuth } from 'oauthio-web'
  * This function works like a class to sandbox interaction with GitHub.
  */
 export default function GitHubModule(){
-    const Octokit = require('@octokit/rest')
+    const { Octokit } = require("@octokit/rest")
     /** 
      * The octokit instance which allows authenticated interaction with GitHub.
      * @type {object}
@@ -927,10 +927,19 @@ export default function GitHubModule(){
             repo,
             base_tree: treeSha,
             tree: Object.keys(changes.files).map(path => {
-                return {
-                    path,
-                    mode: '100644',
-                    content: changes.files[path]
+                if(changes.files[path] != null){
+                    return {
+                        path,
+                        mode: '100644',
+                        content: changes.files[path]
+                    }
+                }
+                else{
+                    return {
+                        path,
+                        mode: '100644',
+                        sha: null
+                    }
                 }
             })
         })
@@ -1332,4 +1341,45 @@ export default function GitHubModule(){
             })
         })
     }
+    
+    /** 
+     * Upload or remove files from github. Files with null content will be deleted.
+     * @param {object} files A dictionary with paths as keys and the content as the answer.
+     */
+    this.uploadAFile = async function(files){
+        
+        await this.createCommit(octokit,{
+            owner: currentUser,
+            repo: currentRepoName,
+            changes: {
+                files: files,
+                commit: 'Upload file'
+            }
+        })
+    }
+    
+    /** 
+     * Get a file from github. Calback is called after the retrieved.
+     */
+    this.getAFile = async function(filePath){
+        
+        const result = await octokit.repos.getContents({
+            owner: currentUser,
+            repo: currentRepoName,
+            path: filePath
+        })
+        
+        //content will be base64 encoded
+        let rawFile = atob(result.data.content)
+        return rawFile
+    }
+    
+    /** 
+     * Get a link to the raw version of a file on GitHub
+     */
+    this.getAFileRawPath = function(filePath){
+        const rawPath = "https://raw.githubusercontent.com/" + currentUser + "/" + currentRepoName + "/main/" + filePath
+        return rawPath
+    }
+    
 }
