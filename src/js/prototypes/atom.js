@@ -1033,8 +1033,8 @@ export default class Atom {
         //Right div which is button
         var valueTextDiv = document.createElement('div')
         div.appendChild(valueTextDiv)
-        var button = document.createElement('input');
-        button.type = "file";
+        var button = document.createElement('input')
+        button.type = "file"
         var buttonTextNode = document.createTextNode(buttonText)
         button.setAttribute('class', ' browseButton')
         button.setAttribute('id', buttonText.replace(/\s+/g, "") + "-button")

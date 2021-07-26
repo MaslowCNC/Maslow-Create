@@ -1,6 +1,5 @@
 import Atom from '../prototypes/atom.js'
 import GlobalVariables from '../globalvariables.js'
-import saveAs from '../lib/FileSaver.js'
 
 /**
  * This class creates an atom which supports uploading a .svg file
@@ -66,7 +65,6 @@ export default class UploadSVG extends Atom {
         const rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
         
         try{
-            var inputPath = this.findIOValue('geometry')
             const values = { key: "fromSVG", svgPath:rawPath, writePath: this.path }
             
             this.basicThreadValueProcessing(values)
@@ -109,7 +107,7 @@ export default class UploadSVG extends Atom {
                     
                     toSend[this.fileName] = event.target.result
                     
-                    GlobalVariables.gitHub.uploadAFile(toSend).then(result => {
+                    GlobalVariables.gitHub.uploadAFile(toSend).then(() => {
                         this.updateValue()
                     })
                 })
