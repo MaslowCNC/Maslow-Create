@@ -2,9 +2,9 @@ import Atom from '../prototypes/atom'
 import GlobalVariables from '../globalvariables'
 
 /**
- * This class creates the translate atom.
+ * This class creates the move atom.
  */
-export default class Translate extends Atom{
+export default class Move extends Atom{
     
     /**
      * The constructor function.
@@ -23,12 +23,12 @@ export default class Translate extends Atom{
          * This atom's name
          * @type {string}
          */
-        this.name = 'Translate'
+        this.name = 'Move'
         /**
          * This atom's type
          * @type {string}
          */
-        this.atomType = 'Translate'
+        this.atomType = 'Move'
         /** 
          * A description of this atom
          * @type {string}
@@ -39,7 +39,7 @@ export default class Translate extends Atom{
     }
     
     /**
-     * Draw the translate icon.
+     * Draw the move icon.
      */ 
     draw(){
 
@@ -74,7 +74,7 @@ export default class Translate extends Atom{
                 var x = this.findIOValue('xDist')
                 var y = this.findIOValue('yDist')
                 var z = this.findIOValue('zDist')
-                const values = { key: "translate", x:x, y:y, z:z, readPath: inputPath, writePath: this.path }
+                const values = { key: "move", x:x, y:y, z:z, readPath: inputPath, writePath: this.path }
                 
                 this.basicThreadValueProcessing(values)
             }catch(err){this.setAlert(err)}

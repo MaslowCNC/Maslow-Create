@@ -169,7 +169,7 @@ const agent = async ({
             await api.saveGeometry(message.writePath, extrudedShape);
             return 1;
             break;
-         case "translate":
+         case "move":
             const aShape2Translate = await maslowRead(message.readPath);
             const translatedShape = aShape2Translate.move(message.x, message.y, message.z);
             await api.saveGeometry(message.writePath, translatedShape);
