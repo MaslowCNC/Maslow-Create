@@ -95,7 +95,14 @@ export default class UploadSVG extends Atom {
                 
                 //Delete the previous file if this one is a new one
                 if(this.fileName != x.files[0].name){
-                    toSend[this.fileName] = null
+                    //Make sure the file to delete actually exists before deleting it
+                    let rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
+                    var http = new XMLHttpRequest()
+                    http.open('HEAD', rawPath, false)
+                    http.send()
+                    if ( http.status!=404){
+                        toSend[this.fileName] = null
+                    }
                 }
                 
                 this.fileName = x.files[0].name
@@ -109,6 +116,8 @@ export default class UploadSVG extends Atom {
                     
                     GlobalVariables.gitHub.uploadAFile(toSend).then(() => {
                         this.updateValue()
+                        //Save the project to keep it in sync with the files uploaded to github
+                        setTimeout(() => {GlobalVariables.gitHub.saveProject()}, 10000)
                     })
                 })
                 reader.readAsText(file)

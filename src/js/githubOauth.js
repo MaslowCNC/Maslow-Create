@@ -1348,8 +1348,6 @@ export default function GitHubModule(){
      */
     this.uploadAFile = async function(files){
         
-        
-        
         await this.createCommit(octokit,{
             owner: currentUser,
             repo: currentRepoName,
