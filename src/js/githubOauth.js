@@ -8,7 +8,7 @@ import { OAuth } from 'oauthio-web'
  * This function works like a class to sandbox interaction with GitHub.
  */
 export default function GitHubModule(){
-    const Octokit = require('@octokit/rest')
+    const { Octokit } = require("@octokit/rest")
     /** 
      * The octokit instance which allows authenticated interaction with GitHub.
      * @type {object}
