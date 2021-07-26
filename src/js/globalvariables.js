@@ -7,7 +7,7 @@ import Color            from './molecules/color.js'
 import CutLayout        from './molecules/cutlayout.js'
 import Rectangle        from './molecules/rectangle.js'
 import ShrinkWrap       from './molecules/shrinkwrap.js'
-import Translate        from './molecules/translate.js'
+import Move             from './molecules/move.js'
 import Tag              from './molecules/tag.js'
 import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
@@ -88,7 +88,8 @@ class GlobalVariables{
             
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
-            translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
+            move:               {creator: Move, atomType: 'Move', atomCategory: 'Actions'},
+            translate:          {creator: Move, atomType: 'Translate', atomCategory: 'none'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
 
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
