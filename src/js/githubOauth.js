@@ -927,10 +927,19 @@ export default function GitHubModule(){
             repo,
             base_tree: treeSha,
             tree: Object.keys(changes.files).map(path => {
-                return {
-                    path,
-                    mode: '100644',
-                    content: changes.files[path]
+                if(changes.files[path] != null){
+                    return {
+                        path,
+                        mode: '100644',
+                        content: changes.files[path]
+                    }
+                }
+                else{
+                    return {
+                        path,
+                        mode: '100644',
+                        sha: null
+                    }
                 }
             })
         })
@@ -1334,18 +1343,18 @@ export default function GitHubModule(){
     }
     
     /** 
-     * Upload a file to github. Calback is called after the file is uploaded.
+     * Upload or remove files from github. Files with null content will be deleted.
+     * @param {object} files A dictionary with paths as keys and the content as the answer.
      */
-    this.uploadAFile = async function(filePath, data, callback = false){
+    this.uploadAFile = async function(files){
         
-        const toSend = {}
-        toSend[filePath] = data
+        
         
         await this.createCommit(octokit,{
             owner: currentUser,
             repo: currentRepoName,
             changes: {
-                files: toSend,
+                files: files,
                 commit: 'Upload file'
             }
         })
@@ -1375,42 +1384,4 @@ export default function GitHubModule(){
         return rawPath
     }
     
-    /** 
-     * Delete a file from github
-     */
-    this.deleteAFile = async function(filePath){
-        
-        let response = await octokit.repos.get({ owner:currentUser, repo: currentRepoName})
-        let base = response.data.default_branch
-        
-        let fileInfo = await octokit.repos.getContents({
-            owner: currentUser,
-            repo: currentRepoName,
-            path: filePath
-        })
-        
-        let fileSha = fileInfo.data.sha
-            
-        let deletedFileResult = await octokit.repos.deleteFile({
-          owner: currentUser,
-          repo: currentRepoName,
-          path: filePath,
-          message: "Delete file",
-          sha:fileSha,
-        })
-                
-        console.log("Delete file returns: ")
-        console.log(deletedFileResult)
-                
-        let returnFromUpdateRef = await octokit.git.updateRef({
-            owner: currentUser,
-            repo: currentRepoName,
-            sha: deletedFileResult.data.commit.sha,
-            ref: "heads/" + base,
-            force: true
-        })
-        
-        console.log("Return from update ref: ")
-        console.log( returnFromUpdateRef)
-    }
 }

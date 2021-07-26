@@ -63,12 +63,7 @@ export default class UploadSVG extends Atom {
      */ 
     updateValue(){
         
-        console.log("Update Value ran")
-        console.log(this.fileName)
-        
         const rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
-        console.log("Read in upload SVG")
-        console.log(rawPath)
         
         try{
             var inputPath = this.findIOValue('geometry')
@@ -98,9 +93,11 @@ export default class UploadSVG extends Atom {
             if(x.files.length > 0){
                 const file = x.files[0]
                 
-                //Delete the prevous file if this one is a new one
+                const toSend = {}
+                
+                //Delete the previous file if this one is a new one
                 if(this.fileName != x.files[0].name){
-                    GlobalVariables.gitHub.deleteAFile(this.fileName)
+                    toSend[this.fileName] = null
                 }
                 
                 this.fileName = x.files[0].name
@@ -108,8 +105,11 @@ export default class UploadSVG extends Atom {
                 
                 const reader = new FileReader()
                 reader.addEventListener('load', (event) => {
-                    GlobalVariables.gitHub.uploadAFile(this.fileName, event.target.result).then(result => {
-                        console.log("Done in svg.js")
+                    
+                    
+                    toSend[this.fileName] = event.target.result
+                    
+                    GlobalVariables.gitHub.uploadAFile(toSend).then(result => {
                         this.updateValue()
                     })
                 })
