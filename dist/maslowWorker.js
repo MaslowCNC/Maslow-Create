@@ -289,7 +289,7 @@ const agent = async ({
             break;
         case "layout":
             const shape2Layout = await maslowRead(message.readPath);
-            const laidoutShape = shape2Layout.pack();
+            const laidoutShape = shape2Layout.get('cutlist').pack();
             await api.saveGeometry(message.writePath, laidoutShape);
             return 1;
             break;
