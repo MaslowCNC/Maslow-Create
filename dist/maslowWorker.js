@@ -269,13 +269,29 @@ const agent = async ({
             break;
         case "tag":
             const shape2tag = await maslowRead(message.readPath);
-            const taggedShape = shape2tag.as(message.tag);
+            const taggedShape = shape2tag.tag(message.tag);
             await api.saveGeometry(message.writePath, taggedShape);
+            return 1;
+            break;
+        case "item":
+            const shape2item = await maslowRead(message.readPath);
+            const itemShape = shape2item.as(message.tag);
+            await api.saveGeometry(message.writePath, itemShape);
             return 1;
             break;
         case "listTags":
             const shape2ListTags = await maslowRead(message.readPath);
             return shape2ListTags.tags();
+            break;
+        case "listItems":
+            const shape2ListItems = await maslowRead(message.readPath);
+            return [];//shape2ListItems.get('*');
+            break;
+        case "layout":
+            const shape2Layout = await maslowRead(message.readPath);
+            const laidoutShape = shape2Layout.pack();
+            await api.saveGeometry(message.writePath, laidoutShape);
+            return 1;
             break;
         case "extractTag":
             const shape2extractFrom = await maslowRead(message.readPath);

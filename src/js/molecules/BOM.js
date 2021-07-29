@@ -62,7 +62,7 @@ export default class AddBOMTag extends Atom{
         if(this.inputs.every(x => x.ready)){
             try{
                 var inputPath = this.findIOValue('geometry')
-                const values = {key: "tag", tag: JSON.stringify(this.BOMitem), readPath: inputPath, writePath: this.path }
+                const values = {key: "item", tag: JSON.stringify(this.BOMitem), readPath: inputPath, writePath: this.path }
                 this.basicThreadValueProcessing(values)
                 this.clearAlert()
             }catch(err){this.setAlert(err)}
