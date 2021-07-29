@@ -2465,10 +2465,10 @@ const fromDxf = async (data) => {
     const { handle, layer } = entity;
     let tags = [];
     if (handle !== undefined) {
-      tags.push(`user/dxf/handle:${handle}`);
+      tags.push(`user:dxf:handle:${handle}`);
     }
     if (layer !== undefined) {
-      tags.push(`user/dxf/layer:${layer}`);
+      tags.push(`user:dxf:layer:${layer}`);
       if (dxf.tables && dxf.tables.layer && dxf.tables.layer.layers) {
         const color = dxf.tables.layer.layers[layer].color;
         if (color !== undefined) {

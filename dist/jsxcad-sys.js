@@ -273,8 +273,16 @@ const createConversation = ({ agent, say }) => {
     say,
   };
 
-  conversation.waitToFinish = () =>
-    new Promise((resolve, reject) => conversation.waiters.push(resolve));
+  conversation.waitToFinish = () => {
+    if (conversation.openQuestions.size === 0) {
+      return true;
+    } else {
+      const promise = new Promise((resolve, reject) =>
+        conversation.waiters.push(resolve)
+      );
+      return !promise;
+    }
+  };
 
   conversation.ask = (question, transfer) => {
     const { id, openQuestions, say } = conversation;
@@ -316,20 +324,21 @@ const createConversation = ({ agent, say }) => {
         }
       }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({
-        ask,
-        message: question,
-        type: 'question',
-        tell,
-      });
       try {
+        const answer = await agent({
+          ask,
+          message: question,
+          type: 'question',
+          tell,
+        });
         say({ id, answer });
-      } catch (e) {
-        console.log(`QQ/say/error: ${e.stack}`);
-        throw e;
+      } catch (error) {
+        say({ id, answer: 'error', error });
       }
     } else if (message.hasOwnProperty('statement')) {
       await agent({ ask, message: statement, type: 'statement', tell });
+    } else if (message.hasOwnProperty('error')) {
+      throw error;
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -3912,22 +3921,30 @@ const askService = (spec, question, transfer) => {
     terminated = true;
   };
   const flow = async () => {
-    const service = await acquireService(spec);
-    if (service.released) {
-      return Promise.reject(Error('Terminated'));
+    let service;
+    try {
+      service = await acquireService(spec);
+      if (service.released) {
+        return Promise.reject(Error('Terminated'));
+      }
+      terminate = () => {
+        service.terminate();
+        return Promise.reject(Error('Terminated'));
+      };
+      if (terminated) {
+        terminate();
+      }
+      const answer = await service.ask(question, transfer);
+      return answer;
+    } catch (error) {
+      throw error;
+    } finally {
+      if (service) {
+        await service.waitToFinish();
+        service.finished = true;
+        service.release();
+      }
     }
-    terminate = () => {
-      service.terminate();
-      return Promise.reject(Error('Terminated'));
-    };
-    if (terminated) {
-      terminate();
-    }
-    const answer = service.ask(question, transfer);
-    await service.waitToFinish();
-    service.finished = true;
-    service.release();
-    return answer;
   };
   const promise = flow();
   // Avoid a race in which the service might be terminated before
