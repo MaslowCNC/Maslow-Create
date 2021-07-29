@@ -5,9 +5,9 @@ import * as mathApi from './jsxcad-api-v1-math.js';
 import { emit, hash, addOnEmitHandler, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
+import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
-import { readStl } from './jsxcad-api-v1-stl.js';
 import { readSvg } from './jsxcad-api-v1-svg.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
@@ -75,10 +75,13 @@ const evaluate = async (ecmascript, { api, path }) => {
     `{ ${Object.keys(api).join(', ')} }`,
     `return async () => { ${ecmascript} };`
   );
-  const module = await builder(api);
   try {
+    const module = await builder(api);
     pushModule(path);
-    await module();
+    const result = await module();
+    return result;
+  } catch (error) {
+    throw error;
   } finally {
     popModule();
   }
@@ -110,14 +113,19 @@ const execute = async (
         if (outstandingDependencies.length === 0) {
           console.log(`Scheduling: ${id}`);
           pending.delete(id);
-          evaluate(updates[id].program)
-            .then(() => {
+          const task = async () => {
+            try {
+              await evaluate(updates[id].program);
               console.log(`Completed ${id}`);
               delete updates[id];
               unprocessed.delete(id);
-            })
-            .catch((error) => somethingFailed(error)) // FIX: Deadlock?
-            .finally(() => somethingHappened());
+            } catch (error) {
+              somethingFailed(error); // FIX: Deadlock?
+            } finally {
+              somethingHappened();
+            }
+          };
+          task();
         }
       }
     };
@@ -132,7 +140,12 @@ const execute = async (
         await somethingHappens;
       }
     }
-    return replay(ecmascript, { path });
+    try {
+      const result = await replay(ecmascript, { path });
+      return result;
+    } catch (error) {
+      throw error;
+    }
   } catch (error) {
     throw error;
   }
@@ -143,55 +156,58 @@ const DYNAMIC_MODULES = new Map();
 const registerDynamicModule = (bare, path) =>
   DYNAMIC_MODULES.set(bare, path);
 
-const buildImportModule = (baseApi) => async (name) => {
-  console.log(`QQ/importModule/0`);
-  const internalModule = DYNAMIC_MODULES.get(name);
-  if (internalModule !== undefined) {
-    const module = await import(internalModule);
-    return module;
-  }
-  console.log(`QQ/importModule/1`);
-  let script;
-  if (script === undefined) {
-    const path = `source/${name}`;
-    const sources = [];
-    sources.push(name);
-    script = await read(path, { sources });
-  }
-  console.log(`QQ/importModule/2`);
-  if (script === undefined) {
-    throw Error(`Cannot import module ${name}`);
-  }
-  console.log(`QQ/importModule/3`);
-  const scriptText =
-    typeof script === 'string'
-      ? script
-      : new TextDecoder('utf8').decode(script);
-  console.log(`QQ/importModule/4`);
-  const path = name;
-  const topLevel = new Map();
-  const onError = (error) => console.log(error.stack);
-  const api = { ...baseApi, sha: 'master' };
-  console.log(`QQ/importModule/5`);
-  const evaluate$1 = (script) => evaluate(script, { api, path });
-  console.log(`QQ/importModule/6`);
+const CACHED_MODULES = new Map();
 
-  return execute(scriptText, { evaluate: evaluate$1, path, topLevel, onError });
-  /*
-  const ecmascript = await toEcmascript(scriptText, { path: name });
-  const builder = new Function(
-    `{ ${Object.keys(api).join(', ')} }`,
-    `return async () => { ${ecmascript} };`
-  );
-  const module = await builder(api);
+const buildImportModule = (baseApi) => async (name) => {
   try {
-    pushModule(name);
-    const exports = await module();
-    return exports;
-  } finally {
-    popModule();
+    const cachedModule = CACHED_MODULES.get(name);
+    if (cachedModule !== undefined) {
+      return cachedModule;
+    }
+    console.log(`QQ/importModule/0`);
+    const internalModule = DYNAMIC_MODULES.get(name);
+    if (internalModule !== undefined) {
+      const module = await import(internalModule);
+      CACHED_MODULES.set(name, module);
+      return module;
+    }
+    console.log(`QQ/importModule/1`);
+    let script;
+    if (script === undefined) {
+      const path = `source/${name}`;
+      const sources = [];
+      sources.push(name);
+      script = await read(path, { sources });
+    }
+    console.log(`QQ/importModule/2`);
+    if (script === undefined) {
+      throw Error(`Cannot import module ${name}`);
+    }
+    console.log(`QQ/importModule/3`);
+    const scriptText =
+      typeof script === 'string'
+        ? script
+        : new TextDecoder('utf8').decode(script);
+    console.log(`QQ/importModule/4`);
+    const path = name;
+    const topLevel = new Map();
+    const api = { ...baseApi, sha: 'master' };
+    console.log(`QQ/importModule/5`);
+    const evaluate$1 = (script) => evaluate(script, { api, path });
+    const replay = (script) => evaluate(script, { api, path });
+    console.log(`QQ/importModule/6`);
+
+    const builtModule = await execute(scriptText, {
+      evaluate: evaluate$1,
+      replay,
+      path,
+      topLevel,
+    });
+    CACHED_MODULES.set(name, builtModule);
+    return builtModule;
+  } catch (error) {
+    throw error;
   }
-*/
 };
 
 /*
@@ -221,6 +237,7 @@ const api = {
   readStl,
   readObj,
   readOff,
+  stl,
   toSvg,
 };
 

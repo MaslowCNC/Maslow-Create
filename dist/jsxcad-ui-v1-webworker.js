@@ -220,7 +220,7 @@ const agent = async ({
             status: 'failure'
           });
           await resolveNotebook();
-          return false;
+          throw error;
         }
 
       default:
@@ -228,6 +228,7 @@ const agent = async ({
     }
   } catch (error) {
     sys.info(error.stack);
+    throw error;
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
