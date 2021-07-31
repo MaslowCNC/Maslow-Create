@@ -4201,7 +4201,7 @@ const readFile = async (options, path) => {
     // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
-  if (file.data === undefined || useCache === false) {
+  if (file.data === undefined || useCache === false|| true) {
     file.data = await fetchPersistent(path, true);
   }
   if (workspace !== originalWorkspace) {
