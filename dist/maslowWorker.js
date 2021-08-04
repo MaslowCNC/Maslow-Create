@@ -319,8 +319,9 @@ const agent = async ({
             break;
         case "svg":
             const geometryToSvg = await maslowRead(message.readPath);
-            
-            const svgString = await toSvg(geometryToSvg.toKeptGeometry());
+            const svgShapeHeight = geometryToSvg.size().height;
+            const rotatedShapeSVG = geometryToSvg.rotateY(-.625).rotateZ(.25).move(0, svgShapeHeight/-3, 2*svgShapeHeight);
+            const svgString = await toSvg(rotatedShapeSVG.toKeptGeometry());
             return svgString;
             break;
         case "outline":
