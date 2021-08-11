@@ -156,6 +156,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "canvas-template/src/js/molecules/move.js~move",
+    "class/src/js/molecules/move.js~Move.html",
+    "<span>Move</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/move.js</span>",
+    "class"
+  ],
+  [
     "canvas-template/src/js/molecules/nest.js~nest",
     "class/src/js/molecules/nest.js~Nest.html",
     "<span>Nest</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/nest.js</span>",
@@ -216,9 +222,9 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "canvas-template/src/js/molecules/translate.js~translate",
-    "class/src/js/molecules/translate.js~Translate.html",
-    "<span>Translate</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/translate.js</span>",
+    "canvas-template/src/js/molecules/uploadsvg.js~uploadsvg",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html",
+    "<span>UploadSVG</span> <span class=\"search-result-import-path\">canvas-template/src/js/molecules/uploadSVG.js</span>",
     "class"
   ],
   [
@@ -2460,6 +2466,48 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/move.js",
+    "file/src/js/molecules/move.js.html",
+    "src/js/molecules/move.js",
+    "file"
+  ],
+  [
+    "src/js/molecules/move.js~move#atomtype",
+    "class/src/js/molecules/move.js~Move.html#instance-member-atomType",
+    "src/js/molecules/move.js~Move#atomType",
+    "member"
+  ],
+  [
+    "src/js/molecules/move.js~move#constructor",
+    "class/src/js/molecules/move.js~Move.html#instance-constructor-constructor",
+    "src/js/molecules/move.js~Move#constructor",
+    "method"
+  ],
+  [
+    "src/js/molecules/move.js~move#description",
+    "class/src/js/molecules/move.js~Move.html#instance-member-description",
+    "src/js/molecules/move.js~Move#description",
+    "member"
+  ],
+  [
+    "src/js/molecules/move.js~move#draw",
+    "class/src/js/molecules/move.js~Move.html#instance-method-draw",
+    "src/js/molecules/move.js~Move#draw",
+    "method"
+  ],
+  [
+    "src/js/molecules/move.js~move#name",
+    "class/src/js/molecules/move.js~Move.html#instance-member-name",
+    "src/js/molecules/move.js~Move#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/move.js~move#updatevalue",
+    "class/src/js/molecules/move.js~Move.html#instance-method-updateValue",
+    "src/js/molecules/move.js~Move#updateValue",
+    "method"
+  ],
+  [
     "src/js/molecules/nest.js",
     "file/src/js/molecules/nest.js.html",
     "src/js/molecules/nest.js",
@@ -3156,45 +3204,69 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/translate.js",
-    "file/src/js/molecules/translate.js.html",
-    "src/js/molecules/translate.js",
+    "src/js/molecules/uploadsvg.js",
+    "file/src/js/molecules/uploadSVG.js.html",
+    "src/js/molecules/uploadSVG.js",
     "file"
   ],
   [
-    "src/js/molecules/translate.js~translate#atomtype",
-    "class/src/js/molecules/translate.js~Translate.html#instance-member-atomType",
-    "src/js/molecules/translate.js~Translate#atomType",
+    "src/js/molecules/uploadsvg.js~uploadsvg#atomtype",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-member-atomType",
+    "src/js/molecules/uploadSVG.js~UploadSVG#atomType",
     "member"
   ],
   [
-    "src/js/molecules/translate.js~translate#constructor",
-    "class/src/js/molecules/translate.js~Translate.html#instance-constructor-constructor",
-    "src/js/molecules/translate.js~Translate#constructor",
+    "src/js/molecules/uploadsvg.js~uploadsvg#constructor",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-constructor-constructor",
+    "src/js/molecules/uploadSVG.js~UploadSVG#constructor",
     "method"
   ],
   [
-    "src/js/molecules/translate.js~translate#description",
-    "class/src/js/molecules/translate.js~Translate.html#instance-member-description",
-    "src/js/molecules/translate.js~Translate#description",
+    "src/js/molecules/uploadsvg.js~uploadsvg#description",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-member-description",
+    "src/js/molecules/uploadSVG.js~UploadSVG#description",
     "member"
   ],
   [
-    "src/js/molecules/translate.js~translate#draw",
-    "class/src/js/molecules/translate.js~Translate.html#instance-method-draw",
-    "src/js/molecules/translate.js~Translate#draw",
+    "src/js/molecules/uploadsvg.js~uploadsvg#draw",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-method-draw",
+    "src/js/molecules/uploadSVG.js~UploadSVG#draw",
     "method"
   ],
   [
-    "src/js/molecules/translate.js~translate#name",
-    "class/src/js/molecules/translate.js~Translate.html#instance-member-name",
-    "src/js/molecules/translate.js~Translate#name",
+    "src/js/molecules/uploadsvg.js~uploadsvg#filename",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-member-fileName",
+    "src/js/molecules/uploadSVG.js~UploadSVG#fileName",
     "member"
   ],
   [
-    "src/js/molecules/translate.js~translate#updatevalue",
-    "class/src/js/molecules/translate.js~Translate.html#instance-method-updateValue",
-    "src/js/molecules/translate.js~Translate#updateValue",
+    "src/js/molecules/uploadsvg.js~uploadsvg#name",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-member-name",
+    "src/js/molecules/uploadSVG.js~UploadSVG#name",
+    "member"
+  ],
+  [
+    "src/js/molecules/uploadsvg.js~uploadsvg#serialize",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-method-serialize",
+    "src/js/molecules/uploadSVG.js~UploadSVG#serialize",
+    "method"
+  ],
+  [
+    "src/js/molecules/uploadsvg.js~uploadsvg#updatesidebar",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-method-updateSidebar",
+    "src/js/molecules/uploadSVG.js~UploadSVG#updateSidebar",
+    "method"
+  ],
+  [
+    "src/js/molecules/uploadsvg.js~uploadsvg#updatevalue",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-method-updateValue",
+    "src/js/molecules/uploadSVG.js~UploadSVG#updateValue",
+    "method"
+  ],
+  [
+    "src/js/molecules/uploadsvg.js~uploadsvg#uploadsvg",
+    "class/src/js/molecules/uploadSVG.js~UploadSVG.html#instance-method-uploadSvg",
+    "src/js/molecules/uploadSVG.js~UploadSVG#uploadSvg",
     "method"
   ],
   [
@@ -3297,6 +3369,12 @@ window.esdocSearchIndex = [
     "src/js/prototypes/atom.js~atom#createeditablevaluelistitem",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-createEditableValueListItem",
     "src/js/prototypes/atom.js~Atom#createEditableValueListItem",
+    "method"
+  ],
+  [
+    "src/js/prototypes/atom.js~atom#createfileupload",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-createFileUpload",
+    "src/js/prototypes/atom.js~Atom#createFileUpload",
     "method"
   ],
   [

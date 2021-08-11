@@ -169,7 +169,7 @@ const agent = async ({
             await api.saveGeometry(message.writePath, extrudedShape);
             return 1;
             break;
-         case "translate":
+         case "move":
             const aShape2Translate = await maslowRead(message.readPath);
             const translatedShape = aShape2Translate.move(message.x, message.y, message.z);
             await api.saveGeometry(message.writePath, translatedShape);
@@ -319,8 +319,9 @@ const agent = async ({
             break;
         case "svg":
             const geometryToSvg = await maslowRead(message.readPath);
-            
-            const svgString = await toSvg(geometryToSvg.toKeptGeometry());
+            const svgShapeHeight = geometryToSvg.size().height;
+            const rotatedShapeSVG = geometryToSvg.rotateY(-.625).rotateZ(.25).move(0, svgShapeHeight/-3, 2*svgShapeHeight);
+            const svgString = await toSvg(rotatedShapeSVG.toKeptGeometry());
             return svgString;
             break;
         case "outline":
@@ -368,6 +369,11 @@ const agent = async ({
             const fromJson = api.Shape.fromGeometry(JSON.parse(message.json))
             await api.saveGeometry(message.writePath, fromJson);
             return false;
+            break;
+        case "fromSVG":
+            const shapeFromSVG = await api.readSvg(message.svgPath);
+            await api.saveGeometry(message.writePath, shapeFromSVG);
+            return true;
             break;
         case "getPathsList":
             const listedFiles = await listFiles();

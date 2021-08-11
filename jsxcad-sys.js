@@ -273,8 +273,16 @@ const createConversation = ({ agent, say }) => {
     say,
   };
 
-  conversation.waitToFinish = () =>
-    new Promise((resolve, reject) => conversation.waiters.push(resolve));
+  conversation.waitToFinish = () => {
+    if (conversation.openQuestions.size === 0) {
+      return true;
+    } else {
+      const promise = new Promise((resolve, reject) =>
+        conversation.waiters.push(resolve)
+      );
+      return !promise;
+    }
+  };
 
   conversation.ask = (question, transfer) => {
     const { id, openQuestions, say } = conversation;
@@ -316,20 +324,21 @@ const createConversation = ({ agent, say }) => {
         }
       }
     } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({
-        ask,
-        message: question,
-        type: 'question',
-        tell,
-      });
       try {
+        const answer = await agent({
+          ask,
+          message: question,
+          type: 'question',
+          tell,
+        });
         say({ id, answer });
-      } catch (e) {
-        console.log(`QQ/say/error: ${e.stack}`);
-        throw e;
+      } catch (error) {
+        say({ id, answer: 'error', error });
       }
     } else if (message.hasOwnProperty('statement')) {
       await agent({ ask, message: statement, type: 'statement', tell });
+    } else if (message.hasOwnProperty('error')) {
+      throw error;
     } else {
       throw Error(
         `Expected { answer } or { question } but received ${JSON.stringify(
@@ -442,6 +451,7 @@ const createService = (spec, worker) => {
       }
     };
     service.terminate = () => service.release(true);
+    service.tell({ op: 'sys/attach', id: service.id });
     return service;
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
@@ -3833,7 +3843,155 @@ function dirname(path) {
   return root + dir;
 }
 
-const touch = async (path, { workspace, doClear = true } = {}) => {
+let activeServiceLimit = 5;
+let idleServiceLimit = 5;
+const activeServices = new Set();
+const idleServices = [];
+const pending$1 = [];
+const watchers = new Set();
+
+// TODO: Consider different specifications.
+
+const acquireService = async (spec) => {
+  if (idleServices.length > 0) {
+    // Recycle an existing worker.
+    // FIX: We might have multiple paths to consider in the future.
+    // For now, just assume that the path is correct.
+    const service = idleServices.pop();
+    activeServices.add(service);
+    if (service.released) {
+      throw Error('die');
+    }
+    return service;
+  } else if (activeServices.size < activeServiceLimit) {
+    // Create a new service.
+    const service = createService({ ...spec, release: releaseService });
+    activeServices.add(service);
+    if (service.released) {
+      throw Error('die');
+    }
+    return service;
+  } else {
+    // Wait for a service to become available.
+    return new Promise((resolve, reject) => pending$1.push({ spec, resolve }));
+  }
+};
+
+const releaseService = (spec, service, terminate = false) => {
+  service.poolReleased = true;
+  activeServices.delete(service);
+  const worker = service.releaseWorker();
+  if (worker) {
+    if (terminate || idleServices.length >= idleServiceLimit) {
+      worker.terminate();
+    } else {
+      idleServices.push(
+        createService({ ...spec, release: releaseService }, worker)
+      );
+    }
+  }
+  if (pending$1.length > 0 && activeServices.size < activeServiceLimit) {
+    const request = pending$1.shift();
+    request.resolve(acquireService(request.spec));
+  }
+  for (const watcher of watchers) {
+    watcher();
+  }
+};
+
+const getServicePoolInfo = () => ({
+  activeServices: [...activeServices],
+  activeServiceCount: activeServices.size,
+  activeServiceLimit,
+  idleServices: [...idleServices],
+  idleServiceLimit,
+  idleServiceCount: idleServices.length,
+  pendingCount: pending$1.length,
+});
+
+const terminateActiveServices = () => {
+  for (const { terminate } of activeServices) {
+    terminate();
+  }
+};
+
+const askService = (spec, question, transfer) => {
+  let terminated;
+  let terminate = () => {
+    terminated = true;
+  };
+  const flow = async () => {
+    let service;
+    try {
+      service = await acquireService(spec);
+      if (service.released) {
+        return Promise.reject(Error('Terminated'));
+      }
+      terminate = () => {
+        service.terminate();
+        return Promise.reject(Error('Terminated'));
+      };
+      if (terminated) {
+        terminate();
+      }
+      const answer = await service.ask(question, transfer);
+      return answer;
+    } catch (error) {
+      throw error;
+    } finally {
+      if (service) {
+        await service.waitToFinish();
+        service.finished = true;
+        service.release();
+      }
+    }
+  };
+  const promise = flow();
+  // Avoid a race in which the service might be terminated before
+  // acquireService returns.
+  promise.terminate = () => terminate();
+  return promise;
+};
+
+const askServices = async (question) => {
+  for (const { ask } of [...idleServices, ...activeServices]) {
+    await ask(question);
+  }
+};
+
+const tellServices = (statement) => {
+  for (const { tell } of [...idleServices, ...activeServices]) {
+    tell(statement);
+  }
+};
+
+const waitServices = () => {
+  return new Promise((resolve, reject) => {
+    let watcher;
+    watcher = () => {
+      unwatchServices(watcher);
+      resolve();
+    };
+    watchServices(watcher);
+  });
+};
+
+const watchServices = (watcher) => {
+  watchers.add(watcher);
+  return watcher;
+};
+
+const unwatchServices = (watcher) => {
+  watchers.delete(watcher);
+  return watcher;
+};
+
+/* global self */
+
+const touch = async (
+  path,
+  { workspace, clear = true, broadcast = true } = {}
+) => {
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
     // Switch to the source filesystem, if necessary.
@@ -3841,7 +3999,8 @@ const touch = async (path, { workspace, doClear = true } = {}) => {
   }
   const file = await getFile({}, path);
   if (file !== undefined) {
-    if (doClear) {
+    if (clear) {
+      // This will force a reload of the data.
       file.data = undefined;
     }
 
@@ -3849,6 +4008,19 @@ const touch = async (path, { workspace, doClear = true } = {}) => {
       await watcher({}, file);
     }
   }
+
+  if (isWebWorker) {
+    console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
+    if (broadcast) {
+      addPending(
+        await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
+      );
+    }
+  } else {
+    console.log(`QQ/sys/touch/browser: ${path}`);
+    tellServices({ op: 'sys/touch', path, workspace });
+  }
+
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalWorkspace });
@@ -3859,8 +4031,6 @@ const touch = async (path, { workspace, doClear = true } = {}) => {
 
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
-
-// FIX Convert data by representation.
 
 const writeFile = async (options, path, data) => {
   data = await data;
@@ -3877,12 +4047,17 @@ const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
+  if (path.startsWith('meta/def')) {
+    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
+  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
-  for (const watcher of file.watchers) {
-    await watcher(options, file);
+  if (isWebWorker) {
+    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
+  } else {
+    console.log(`QQ/write/cache/browser path ${path}`);
   }
 
   const base = getBase();
@@ -3891,27 +4066,38 @@ const writeFile = async (options, path, data) => {
     if (isNode) {
       try {
         await promises$3.mkdir(dirname(persistentPath), { recursive: true });
-      } catch (error) {}
+      } catch (error) {
+        throw error;
+      }
       try {
         if (doSerialize) {
           data = serialize(data);
         }
         await promises$3.writeFile(persistentPath, data);
-        await touch(persistentPath, { workspace, doClear: false });
-      } catch (error) {}
+      } catch (error) {
+        throw error;
+      }
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
-      if (isWebWorker) {
-        addPending(
-          await self.ask({ op: 'touchFile', path, workspace: workspace })
-        );
-      }
     }
+
+    if (isWebWorker) {
+      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/write/persistent/browser path ${path}`);
+    }
+
+    // Let everyone know the file has changed.
+    await touch(path, { workspace, clear: false });
   }
 
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalWorkspace });
+  }
+
+  for (const watcher of file.watchers) {
+    await watcher(options, file);
   }
 
   return true;
@@ -4021,6 +4207,7 @@ const readFile = async (options, path) => {
     sources = [],
     workspace = getFilesystem(),
     useCache = true,
+    forceNoCache = false,
     decode,
   } = options;
   let originalWorkspace = getFilesystem();
@@ -4033,8 +4220,20 @@ const readFile = async (options, path) => {
     // info(`Read ${path}`);
   }
   const file = await getFile(options, path);
-  if (file.data === undefined || useCache === false) {
+  if (file.data === undefined || useCache === false || forceNoCache) {
+    if (isWebWorker) {
+      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/persistent/browser path ${path}`);
+    }
     file.data = await fetchPersistent(path, true);
+  } else {
+    console.log(`QQ/read/cache: ${path}`);
+    if (isWebWorker) {
+      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
+    } else {
+      console.log(`QQ/read/cache/browser path ${path}`);
+    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
@@ -4060,6 +4259,7 @@ const readFile = async (options, path) => {
     }
   }
   info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
+
   return file.data;
 };
 
@@ -4118,7 +4318,7 @@ const BOOTED = 'booted';
 
 let status = UNBOOTED;
 
-const pending$1 = [];
+const pending = [];
 
 // Execute tasks to complete before using system.
 const boot = async () => {
@@ -4129,7 +4329,7 @@ const boot = async () => {
   if (status === BOOTING) {
     // Wait for the system to boot.
     return new Promise((resolve, reject) => {
-      pending$1.push(resolve);
+      pending.push(resolve);
     });
   }
   // Initiate boot.
@@ -4140,8 +4340,8 @@ const boot = async () => {
   // Complete boot.
   status = BOOTED;
   // Release the pending clients.
-  while (pending$1.length > 0) {
-    pending$1.pop()();
+  while (pending.length > 0) {
+    pending.pop()();
   }
 };
 
@@ -4264,141 +4464,6 @@ const deleteFile = async (options, path) => {
   const deleter = await getFileDeleter();
   await deleter(path);
   await deleteFile$1(options, path);
-};
-
-let activeServiceLimit = 5;
-let idleServiceLimit = 5;
-const activeServices = new Set();
-const idleServices = [];
-const pending = [];
-const watchers = new Set();
-
-// TODO: Consider different specifications.
-
-const acquireService = async (spec) => {
-  if (idleServices.length > 0) {
-    // Recycle an existing worker.
-    // FIX: We might have multiple paths to consider in the future.
-    // For now, just assume that the path is correct.
-    const service = idleServices.pop();
-    activeServices.add(service);
-    if (service.released) {
-      throw Error('die');
-    }
-    return service;
-  } else if (activeServices.size < activeServiceLimit) {
-    // Create a new service.
-    const service = createService({ ...spec, release: releaseService });
-    activeServices.add(service);
-    if (service.released) {
-      throw Error('die');
-    }
-    return service;
-  } else {
-    // Wait for a service to become available.
-    return new Promise((resolve, reject) => pending.push({ spec, resolve }));
-  }
-};
-
-const releaseService = (spec, service, terminate = false) => {
-  service.poolReleased = true;
-  activeServices.delete(service);
-  const worker = service.releaseWorker();
-  if (worker) {
-    if (terminate || idleServices.length >= idleServiceLimit) {
-      worker.terminate();
-    } else {
-      idleServices.push(
-        createService({ ...spec, release: releaseService }, worker)
-      );
-    }
-  }
-  if (pending.length > 0 && activeServices.size < activeServiceLimit) {
-    const request = pending.shift();
-    request.resolve(acquireService(request.spec));
-  }
-  for (const watcher of watchers) {
-    watcher();
-  }
-};
-
-const getServicePoolInfo = () => ({
-  activeServices: [...activeServices],
-  activeServiceCount: activeServices.size,
-  activeServiceLimit,
-  idleServices: [...idleServices],
-  idleServiceLimit,
-  idleServiceCount: idleServices.length,
-  pendingCount: pending.length,
-});
-
-const terminateActiveServices = () => {
-  for (const { terminate } of activeServices) {
-    terminate();
-  }
-};
-
-const askService = (spec, question, transfer) => {
-  let terminated;
-  let terminate = () => {
-    terminated = true;
-  };
-  const flow = async () => {
-    const service = await acquireService(spec);
-    if (service.released) {
-      return Promise.reject(Error('Terminated'));
-    }
-    terminate = () => {
-      service.terminate();
-      throw Error('Terminated');
-    };
-    if (terminated) {
-      terminate();
-    }
-    const answer = service.ask(question, transfer);
-    await service.waitToFinish();
-    service.finished = true;
-    service.release();
-    return answer;
-  };
-  const promise = flow();
-  // Avoid a race in which the service might be terminated before
-  // acquireService returns.
-  promise.terminate = () => terminate();
-  return promise;
-};
-
-const askServices = async (question) => {
-  for (const { ask } of [...idleServices, ...activeServices]) {
-    await ask(question);
-  }
-};
-
-const tellServices = (question) => {
-  for (const { tell } of [...idleServices, ...activeServices]) {
-    tell(question);
-  }
-};
-
-const waitServices = () => {
-  return new Promise((resolve, reject) => {
-    let watcher;
-    watcher = () => {
-      unwatchServices(watcher);
-      resolve();
-    };
-    watchServices(watcher);
-  });
-};
-
-const watchServices = (watcher) => {
-  watchers.add(watcher);
-  return watcher;
-};
-
-const unwatchServices = (watcher) => {
-  watchers.delete(watcher);
-  return watcher;
 };
 
 const sleep = (ms = 0) =>

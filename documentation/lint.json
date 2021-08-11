@@ -37,23 +37,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 221,
+        "lineNumber": 224,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 222,
+        "lineNumber": 225,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen width\r"
       },
       {
-        "lineNumber": 223,
+        "lineNumber": 226,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 224,
+        "lineNumber": 227,
         "line": "    */\r"
       },
       {
-        "lineNumber": 225,
+        "lineNumber": 228,
         "line": "    pixelsToWidth(pixels){\r"
       }
     ],
@@ -69,23 +69,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 229,
+        "lineNumber": 232,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 230,
+        "lineNumber": 233,
         "line": "    * A function to generate a pixel value for 0-1 location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 231,
+        "lineNumber": 234,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 232,
+        "lineNumber": 235,
         "line": "    */\r"
       },
       {
-        "lineNumber": 233,
+        "lineNumber": 236,
         "line": "    heightToPixels(height){\r"
       }
     ],
@@ -101,23 +101,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 238,
+        "lineNumber": 241,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 239,
+        "lineNumber": 242,
         "line": "    * A function which reads from a path and displays the geometry it contains\r"
       },
       {
-        "lineNumber": 240,
+        "lineNumber": 243,
         "line": "    * @param {string} The path to read from\r"
       },
       {
-        "lineNumber": 241,
+        "lineNumber": 244,
         "line": "    */\r"
       },
       {
-        "lineNumber": 242,
+        "lineNumber": 245,
         "line": "    writeToDisplay(path, resetView = false){\r"
       }
     ],
@@ -134,23 +134,23 @@
     "filePath": "src/js/globalvariables.js",
     "lines": [
       {
-        "lineNumber": 278,
+        "lineNumber": 281,
         "line": "    /** \r"
       },
       {
-        "lineNumber": 279,
+        "lineNumber": 282,
         "line": "    * A function to generate a 0-1 value from pixels for location on screen depending on screen height\r"
       },
       {
-        "lineNumber": 280,
+        "lineNumber": 283,
         "line": "    * @param {number} width 0-1 \r"
       },
       {
-        "lineNumber": 281,
+        "lineNumber": 284,
         "line": "    */\r"
       },
       {
-        "lineNumber": 282,
+        "lineNumber": 285,
         "line": "    pixelsToHeight(pixels){\r"
       }
     ],
@@ -443,35 +443,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 1014,
+        "lineNumber": 1051,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 1015,
+        "lineNumber": 1052,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 1016,
+        "lineNumber": 1053,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 1017,
+        "lineNumber": 1054,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 1018,
+        "lineNumber": 1055,
         "line": "     * @param {boolean} - Flag to see if checkbox is checked\r"
       },
       {
-        "lineNumber": 1019,
+        "lineNumber": 1056,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 1020,
+        "lineNumber": 1057,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 1021,
+        "lineNumber": 1058,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],

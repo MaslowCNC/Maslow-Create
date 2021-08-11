@@ -1,7 +1,7 @@
 {
-  "coverage": "99.66%",
-  "expectCount": 599,
-  "actualCount": 597,
+  "coverage": "99.67%",
+  "expectCount": 611,
+  "actualCount": 609,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 16,
@@ -136,6 +136,11 @@
         339
       ]
     },
+    "src/js/molecules/move.js": {
+      "expectCount": 7,
+      "actualCount": 7,
+      "undocumentLines": []
+    },
     "src/js/molecules/nest.js": {
       "expectCount": 20,
       "actualCount": 20,
@@ -186,9 +191,9 @@
       "actualCount": 8,
       "undocumentLines": []
     },
-    "src/js/molecules/translate.js": {
-      "expectCount": 7,
-      "actualCount": 7,
+    "src/js/molecules/uploadSVG.js": {
+      "expectCount": 11,
+      "actualCount": 11,
       "undocumentLines": []
     },
     "src/js/NewMenu.js": {
@@ -197,8 +202,8 @@
       "undocumentLines": []
     },
     "src/js/prototypes/atom.js": {
-      "expectCount": 59,
-      "actualCount": 59,
+      "expectCount": 60,
+      "actualCount": 60,
       "undocumentLines": []
     },
     "src/js/prototypes/attachmentpoint.js": {

@@ -1,6 +1,5 @@
-import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
-import { readOrWatch, read } from './jsxcad-sys.js';
-import { Shape } from './jsxcad-api-shape.js';
+import { orbitDisplay } from './jsxcad-ui-threejs.js';
+import { read } from './jsxcad-sys.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2716,7 +2715,7 @@ marked_1.use({
   },
 });
 
-const toDomElement = async (notebook = [], { onClickView } = {}) => {
+const toDomElement = (notebook = [], { onClickView } = {}) => {
   const definitions = {};
 
   const showOrbitView = async (event, note) => {
@@ -2768,8 +2767,7 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { data, path, url, view, openView } = note;
-      const { width, height, target, up, position, withAxes, withGrid } = view;
+      const { url, openView } = note;
       const image = document.createElement('img');
       image.style.height = `${21 * 13}px`;
       image.style.padding = '0px';
@@ -2779,26 +2777,8 @@ const toDomElement = async (notebook = [], { onClickView } = {}) => {
         'url(https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif) no-repeat center;';
       image.classList.add('note', 'view');
 
-      const updateImage = async (data) => {
-        const url = await dataUrl(Shape.fromGeometry(data), {
-          width,
-          height,
-          target,
-          up,
-          position,
-          withAxes,
-          withGrid,
-          definitions,
-        });
-        image.src = url;
-      };
-
       if (url) {
         image.src = url;
-      } else if (data) {
-        await updateImage(data);
-      } else if (path) {
-        readOrWatch(path).then(updateImage);
       }
 
       image.addEventListener('click', (event) => {

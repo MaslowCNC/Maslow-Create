@@ -59,6 +59,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/input.js~Input.html">Input</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/intersection.js~Intersection.html">Intersection</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/molecule.js~Molecule.html">Molecule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/move.js~Move.html">Move</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/nest.js~Nest.html">Nest</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/output.js~Output.html">Output</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/readme.js~Readme.html">Readme</a></span></span></li>
@@ -69,7 +70,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/stl.js~Stl.html">Stl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/svg.js~Svg.html">Svg</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/tag.js~Tag.html">Tag</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/translate.js~Translate.html">Translate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/molecules/uploadSVG.js~UploadSVG.html">UploadSVG</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#js-prototypes">js/prototypes</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/atom.js~Atom.html">Atom</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/attachmentpoint.js~AttachmentPoint.html">AttachmentPoint</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/js/prototypes/connector.js~Connector.html">Connector</a></span></span></li>
@@ -112,16 +113,39 @@ export default class Color extends Atom {
         this.description = &quot;Changes the color of the shape.&quot;
         
         /**
-         * The color options to choose from
-         * @type {array}
-         */
-        this.colorOptions = [&apos;Powder blue&apos;,&apos;White&apos;,&apos;Red&apos;,&apos;Steel Blue&apos;,&apos;Yellow&apos;,&apos;Brown&apos;,&apos;Cyan&apos;, &quot;Green&quot;, &quot;Pink&quot;, &quot;Blue&quot;, &quot;Silver&quot;, &quot;Black&quot;, &quot;Keep Out&quot;]
-        
-        /**
          * The index of the currently selected color option.
          * @type {number}
          */
         this.selectedColorIndex = 0
+        
+        /**
+         * The color options to choose from
+         * @type {array}
+         */
+        this.colorOptions = {
+            &apos;Red&apos;: &apos;#FF9065&apos;,
+            &apos;Orange&apos;: &apos;#FFB458&apos;,
+            &apos;Yellow&apos;: &apos;#FFD600&apos;,
+            &apos;Olive&apos;: &apos;#C7DF66&apos;,
+            &apos;Teal&apos;: &apos;#71D1C2&apos;,
+            &apos;Light Blue&apos;: &apos;#75DBF2&apos;,
+            &apos;Green&apos;: &apos;#A3CE5B&apos;,
+            &apos;Lavender &apos;: &apos;#CCABED&apos;,
+            &apos;Brown&apos;: &apos;#CFAB7C&apos;,
+            &apos;Pink&apos;: &apos;#FFB09D&apos;,
+            &apos;Sand&apos;: &apos;#E2C66C&apos;,
+            &apos;Clay&apos;: &apos;#C4D3AC&apos;,
+            &apos;Blue&apos;: &apos;#91C8D5&apos;,
+            &apos;Light Green&apos;: &apos;#96E1BB&apos;,
+            &apos;Purple&apos;: &apos;#ACAFDD&apos;,
+            &apos;Light Purple&apos;: &apos;#DFB1E8&apos;,
+            &apos;Tan&apos;: &apos;#F5D3B6&apos;,
+            &apos;Mauve &apos;: &apos;#DBADA9&apos;,
+            &apos;Grey&apos;: &apos;#BABABA&apos;,
+            &apos;Black&apos;: &apos;#3C3C3C&apos;,
+            &apos;White&apos;: &apos;#FFFCF7&apos;,
+            &apos;Keep Out&apos;: &apos;Keep Out&apos;
+        }
         
         this.addIO(&apos;input&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null, false, true)
         this.addIO(&apos;output&apos;, &apos;geometry&apos;, this, &apos;geometry&apos;, null)
@@ -167,7 +191,7 @@ export default class Color extends Atom {
     updateValue(){
         try{
             var inputPath = this.findIOValue(&apos;geometry&apos;)
-            const values = {key: &quot;color&quot;, color: this.colorOptions[this.selectedColorIndex], readPath: inputPath, writePath: this.path }
+            const values = {key: &quot;color&quot;, color: this.colorOptions[Object.keys(this.colorOptions)[this.selectedColorIndex]], readPath: inputPath, writePath: this.path }
             this.basicThreadValueProcessing(values)
             this.clearAlert()
         }catch(err){this.setAlert(err)}
@@ -188,7 +212,7 @@ export default class Color extends Atom {
         const list = super.updateSidebar()
         const dropdown= document.createElement(&apos;div&apos;)
         list.appendChild(dropdown)
-        this.createDropDown(dropdown, this, this.colorOptions, this.selectedColorIndex, &quot;Color&quot;, (index)=&gt;{this.changeColor(index)})
+        this.createDropDown(dropdown, this, Object.keys(this.colorOptions), this.selectedColorIndex, &quot;Color&quot;, (index)=&gt;{this.changeColor(index)})
     }
     
     /**

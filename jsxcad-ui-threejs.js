@@ -50780,7 +50780,7 @@ const buildMeshMaterial = async (definitions, tags) => {
       return new MeshPhysicalMaterial(parameters);
     } else if (color) {
       await merge(
-        toThreejsMaterialFromTags(['material/color'], definitions),
+        toThreejsMaterialFromTags(['material:color'], definitions),
         parameters
       );
       parameters.emissive = parameters.color;
@@ -50982,6 +50982,31 @@ const buildMeshes = async ({
     case 'sketch':
       layer = SKETCH_LAYER;
       break;
+    case 'segments': {
+      const { segments } = geometry;
+      const dataset = {};
+      const bufferGeometry = new BufferGeometry();
+      const material = new LineBasicMaterial({
+        color: new Color(setColor(definitions, tags, {}, [0, 0, 0]).color),
+      });
+      const positions = [];
+      for (const segment of segments) {
+        const [start, end] = segment;
+        const [aX = 0, aY = 0, aZ = 0] = start;
+        const [bX = 0, bY = 0, bZ = 0] = end;
+        positions.push(aX, aY, aZ, bX, bY, bZ);
+      }
+      bufferGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      dataset.mesh = new LineSegments(bufferGeometry, material);
+      dataset.mesh.layers.set(layer);
+      dataset.name = toName(geometry);
+      scene.add(dataset.mesh);
+      datasets.push(dataset);
+      break;
+    }
     case 'paths': {
       let transparent = false;
       let opacity = 1;
