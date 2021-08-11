@@ -335,7 +335,7 @@ const mdMethod = function (string, ...placeholders) {
 Shape.prototype.md = mdMethod;
 
 const add =
-  (shape, ...shapes) =>
+  (...shapes) =>
   (shape) =>
     Shape.fromGeometry(
       union(shape.toGeometry(), ...shapes.map((shape) => shape.toGeometry()))
@@ -512,7 +512,7 @@ Shape.registerMethod('colors', colors);
 
 const cloudSolid = () => (shape) => {
   const points = shape.toPoints();
-  return Shape.fromGeometry(taggedGraph({}, fromPointsToGraph(points)));
+  return Shape.fromGeometry(fromPointsToGraph({}, points));
 };
 
 Shape.registerMethod('cloudSolid', cloudSolid);
@@ -536,6 +536,32 @@ Shape.registerMethod('cut', cut);
 const cutFrom = (other) => (shape) => other.cut(shape);
 Shape.registerMethod('cutFrom', cutFrom);
 
+const tag =
+  (...tags) =>
+  (shape) =>
+    Shape.fromGeometry(
+      rewriteTags(
+        tags.map((tag) => `user:${tag}`),
+        [],
+        shape.toGeometry()
+      )
+    );
+
+Shape.registerMethod('tag', tag);
+
+const qualifyTag = (tag, namespace = 'user') => {
+  if (tag.includes(':')) {
+    return tag;
+  }
+  if (tag === '*') {
+    return 'tagpath:*';
+  }
+  return `${namespace}:${tag}`;
+};
+
+const qualifyTagPath = (path, namespace = 'user') =>
+  path.split('/').map((tag) => qualifyTag(tag, namespace));
+
 const selectToKeep = (matchTags, geometryTags) => {
   if (geometryTags === undefined) {
     return false;
@@ -552,7 +578,7 @@ const selectToDrop = (matchTags, geometryTags) =>
   !selectToKeep(matchTags, geometryTags);
 
 const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map((tag) => `user:${tag}`);
+  const matchTags = tags.map((tag) => qualifyTag(tag, 'user'));
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.
@@ -2545,32 +2571,6 @@ const fuse = () => (shape) => {
   return fromGeometry(union(empty({ tags: geometry.tags }), geometry));
 };
 Shape.registerMethod('fuse', fuse);
-
-const tag =
-  (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(
-      rewriteTags(
-        tags.map((tag) => `user:${tag}`),
-        [],
-        shape.toGeometry()
-      )
-    );
-
-Shape.registerMethod('tag', tag);
-
-const qualifyTag = (tag, namespace = 'user') => {
-  if (tag.includes(':')) {
-    return tag;
-  }
-  if (tag === '*') {
-    return 'tagpath:*';
-  }
-  return `${namespace}:${tag}`;
-};
-
-const qualifyTagPath = (path, namespace = 'user') =>
-  path.split('/').map((tag) => qualifyTag(tag, namespace));
 
 const get =
   (path, ...ops) =>

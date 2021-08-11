@@ -501,13 +501,18 @@ const toCgalTransformFromJsTransform = (
   }
 };
 
-const composeTransforms = (a, b) =>
-  toJsTransformFromCgalTransform(
-    getCgal().Transformation__compose(
-      toCgalTransformFromJsTransform(a),
-      toCgalTransformFromJsTransform(b)
-    )
-  );
+const composeTransforms = (a, b) => {
+  try {
+    return toJsTransformFromCgalTransform(
+      getCgal().Transformation__compose(
+        toCgalTransformFromJsTransform(a),
+        toCgalTransformFromJsTransform(b)
+      )
+    );
+  } catch (error) {
+    throw error;
+  }
+};
 
 const invertTransform = (a) =>
   toJsTransformFromCgalTransform(

@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { emit, hash, addOnEmitHandler, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
+import { addOnEmitHandler, emit, hash, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -23,17 +23,18 @@ const recordNote = (note) => {
 };
 
 const beginRecordingNotes = (path, id, sourceLocation) => {
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
-
+  notes = [];
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
-  notes = [];
+  const setContext = { recording: { path, id } };
+  emit({ hash: hash(setContext), setContext });
+  emit({ beginNotes: { path, id } });
 };
 
 const saveRecordedNotes = (path, id) => {
+  emit({ endNotes: { path, id } });
   let notesToSave = notes;
   notes = undefined;
   recording = false;
@@ -41,8 +42,8 @@ const saveRecordedNotes = (path, id) => {
 };
 
 const replayRecordedNotes = async (path, id) => {
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
+  // const setContext = { recording: { path, id } };
+  // emit({ hash: hash(setContext), setContext });
 
   const notes = await read(`data/note/${path}/${id}`);
 
@@ -94,13 +95,13 @@ const execute = async (
   try {
     console.log(`QQ/execute/0`);
     const updates = {};
-    const ecmascript = await toEcmascript(script, {
+    await toEcmascript(script, {
       path,
-      topLevel,
       updates,
     });
     const pending = new Set(Object.keys(updates));
     const unprocessed = new Set(Object.keys(updates));
+    const processed = new Set();
     let somethingHappened;
     let somethingFailed;
     const schedule = () => {
@@ -108,7 +109,7 @@ const execute = async (
       for (const id of [...pending]) {
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => updates[dependency]
+          (dependency) => updates[dependency] && !processed.has(dependency)
         );
         if (outstandingDependencies.length === 0) {
           console.log(`Scheduling: ${id}`);
@@ -119,6 +120,7 @@ const execute = async (
               console.log(`Completed ${id}`);
               delete updates[id];
               unprocessed.delete(id);
+              processed.add(id);
             } catch (error) {
               somethingFailed(error); // FIX: Deadlock?
             } finally {
@@ -139,6 +141,16 @@ const execute = async (
         // Wait for something to happen.
         await somethingHappens;
       }
+    }
+    // Execute the script in the context of the resolved updates.
+    const ecmascript = await toEcmascript(script, {
+      path,
+      topLevel,
+      updates,
+    });
+    // These should all be resolved already.
+    if (Object.keys(updates).length !== 0) {
+      throw Error('Unresolved updates');
     }
     try {
       const result = await replay(ecmascript, { path });
