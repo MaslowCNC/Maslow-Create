@@ -73,21 +73,6 @@ var hashSum = sum;
 
 self.window = {};
 
-const resolveNotebook = async () => {
-  // Update the notebook.
-  const notebook = sys.getEmitted(); // Resolve any promises.
-
-  for (const note of notebook) {
-    if (note.download) {
-      for (const entry of note.download.entries) {
-        entry.data = await entry.data;
-      }
-    }
-  }
-
-  await sys.resolvePending();
-};
-
 const say = message => {
   // console.log(`QQ/webworker/say: ${JSON.stringify(message)}`);
   postMessage(message);
@@ -130,12 +115,13 @@ const agent = async ({
     text: 'Evaluation Started'
   });
   const {
-    script,
+    offscreenCanvas,
+    id,
     path,
     workspace,
-    view,
-    offscreenCanvas,
-    sha = 'master'
+    script,
+    sha = 'master',
+    view
   } = message;
 
   if (workspace) {
@@ -146,10 +132,20 @@ const agent = async ({
 
   try {
     switch (op) {
-      case 'touchFile':
-        await sys.touch(path, {
-          workspace
-        });
+      case 'sys/attach':
+        self.id = id;
+        return;
+
+      case 'sys/touch':
+        if (id === undefined || id !== self.id) {
+          // Don't respond to touches from ourself.
+          await sys.touch(path, {
+            workspace,
+            clear: true,
+            broadcast: false
+          });
+        }
+
         return;
 
       case 'staticView':
@@ -193,8 +189,7 @@ const agent = async ({
             op: 'evaluate',
             status: 'success'
           }); // Wait for any pending operations.
-
-          await resolveNotebook(); // Finally answer the top level question.
+          // Finally answer the top level question.
 
           return true;
         } catch (error) {
@@ -208,8 +203,9 @@ const agent = async ({
             op: 'evaluate',
             status: 'failure'
           });
-          await resolveNotebook();
-          return false;
+          throw error;
+        } finally {
+          await sys.resolvePending();
         }
 
       default:
@@ -217,6 +213,7 @@ const agent = async ({
     }
   } catch (error) {
     sys.info(error.stack);
+    throw error;
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.

@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@octokit/rest": "16.25.0",
+    "@octokit/rest": "^16.43.2",
     "codemirror": "^5.58.2",
     "coveralls": "^3.0.4",
     "esm": "^3.2.22",

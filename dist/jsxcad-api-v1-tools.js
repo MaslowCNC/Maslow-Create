@@ -1,11 +1,10 @@
-import { Peg, Shape } from './jsxcad-api-shape.js';
+import { Shape, xy } from './jsxcad-api-shape.js';
 import { taggedGroup, outline, translate } from './jsxcad-geometry.js';
 import { getDefinitions } from './jsxcad-sys.js';
 import { seq } from './jsxcad-api-v1-math.js';
 import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
 const Z = 2;
-const z = Peg('z', [0, 0, 0], [0, 1, 0], [-1, 0, 0]);
 
 const carve = (block, tool = {}, ...shapes) => {
   const { grbl = {} } = tool;
@@ -18,7 +17,7 @@ const carve = (block, tool = {}, ...shapes) => {
   // Use sectionProfile when it is fixed.
   return negative
     .section(
-      ...seq((l) => z.z(l), {
+      ...seq((l) => xy.z(l), {
         from: min[Z],
         upto: max[Z],
         by: effectiveCutDepth,
@@ -43,7 +42,7 @@ const mill = (tool = {}, negative) => {
   // Use sectionProfile when it is fixed.
   return negative
     .section(
-      ...seq((l) => z.z(l), {
+      ...seq((l) => xy.z(l), {
         from: min[Z],
         upto: max[Z],
         by: effectiveCutDepth,
@@ -68,7 +67,7 @@ const engrave = (paths, depth = 0.5) => {
   const effectiveCutDepth = depth / cuts;
   const toolpaths = [];
   for (let cut = 1; cut <= cuts; cut++) {
-    for (const path of outline(paths.toGeometry())) {
+    for (const path of outline({}, paths.toGeometry())) {
       toolpaths.push(translate([0, 0, cut * -effectiveCutDepth], path));
     }
   }

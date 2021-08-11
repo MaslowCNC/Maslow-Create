@@ -87,8 +87,7 @@ export default class Readme extends Atom{
      * Provides this molecules contribution to the global Readme
      */ 
     requestReadme(){
-        var readBox = `<h3 style="font-size:20px;"><strong>${this.parent.name}:</strong></h3>`.concat(this.readmeText)
-        return [readBox]
+        return [this.readmeText]
     }
     
     /**

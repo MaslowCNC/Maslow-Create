@@ -7,7 +7,7 @@ import Color            from './molecules/color.js'
 import CutLayout        from './molecules/cutlayout.js'
 import Rectangle        from './molecules/rectangle.js'
 import ShrinkWrap       from './molecules/shrinkwrap.js'
-import Translate        from './molecules/translate.js'
+import Move             from './molecules/move.js'
 import Tag              from './molecules/tag.js'
 import RegularPolygon   from './molecules/regularpolygon.js'
 import Extrude          from './molecules/extrude.js'
@@ -30,6 +30,7 @@ import Output           from './molecules/output.js'
 import Gcode            from './molecules/gcode.js'
 import Code             from './molecules/code.js'
 import Group            from './molecules/group.js'
+import UploadSVG        from './molecules/uploadSVG.js'
 import GitHubModule     from './githubOauth'
 
 /**
@@ -87,13 +88,15 @@ class GlobalVariables{
             
             rotate:             {creator: Rotate, atomType: 'Rotate', atomCategory: 'Actions'},
             extrude:            {creator: Extrude, atomType: 'Extrude', atomCategory: 'Actions'},
-            translate:          {creator: Translate, atomType: 'Translate', atomCategory: 'Actions'},
+            move:               {creator: Move, atomType: 'Move', atomCategory: 'Actions'},
+            translate:          {creator: Move, atomType: 'Translate', atomCategory: 'none'},
             GeneticAlgorithm:   {creator: GeneticAlgorithm, atomType: 'GeneticAlgorithm', atomCategory: 'Actions'},
 
             stl:                {creator: Stl, atomType: 'Stl', atomCategory: 'Export'},
             svg:                {creator: Svg, atomType: 'Svg', atomCategory: 'Export'},
             //nest:               {creator: Nest, atomType: 'Nest', atomCategory: 'Export'},
             gcode:              {creator: Gcode, atomType: 'Gcode', atomCategory: 'Export'},
+            uploadSVG:          {creator: UploadSVG, atomType: 'UploadSVG', atomCategory: 'Export'},
             githubmolecule:     {creator: GitHubMolecule, atomType: 'GitHubMolecule', atomCategory: 'Inputs'},
 
             output:             {creator: Output, atomType: 'Output'}
@@ -246,7 +249,7 @@ class GlobalVariables{
         
         // Cancel the last write to display if there is one active because this one will replace it
         if(this.displayProcessing){
-            this.cancelLastDisplayWorker()
+            //this.cancelLastDisplayWorker()
             this.displayProcessing = false
         }
         

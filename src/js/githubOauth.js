@@ -8,7 +8,7 @@ import { OAuth } from 'oauthio-web'
  * This function works like a class to sandbox interaction with GitHub.
  */
 export default function GitHubModule(){
-    const Octokit = require('@octokit/rest')
+    const { Octokit } = require("@octokit/rest")
     /** 
      * The octokit instance which allows authenticated interaction with GitHub.
      * @type {object}
@@ -74,9 +74,9 @@ export default function GitHubModule(){
         OAuth.popup('github').then(github => {
         
             /** 
-         * Oktokit object to access github
-         * @type {object}
-         */   
+             * Oktokit object to access github
+             * @type {object}
+             */
             octokit = new Octokit({
                 auth: github.access_token
             })
@@ -195,7 +195,7 @@ export default function GitHubModule(){
         searchBar.addEventListener('keydown', (e) => {
             
             this.loadProjectsBySearch("yoursButton",e, searchBar.value, "updated")
-            //this.loadProjectsBySearch("githubButton",e, searchBar.value, "stars") // updated just sorts content by most recently updated
+            this.loadProjectsBySearch("githubButton",e, searchBar.value, "stars") // updated just sorts content by most recently updated
         })
         
 
@@ -248,16 +248,19 @@ export default function GitHubModule(){
     /** 
      * Search for the name of a project and then return results which match that search.
      */
-    this.loadProjectsBySearch = function(tabName, ev, searchString, sorting, pageNumber){
+    this.loadProjectsBySearch = async function(tabName, ev, searchString, sorting, pageNumber, clear = true){
+        
         if(ev.key == "Enter"){
             //Remove projects shown now
-            while (this.projectsSpaceDiv.firstChild) {
-                this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+            if(clear){
+                while (this.projectsSpaceDiv.firstChild) {
+                    this.projectsSpaceDiv.removeChild(this.projectsSpaceDiv.firstChild)
+                }
             }
             // add initial projects to div
 
             //New project div
-            if (currentUser !== null){
+            if (currentUser !== null && clear){
                 var browseDiv = document.createElement("div")
                 browseDiv.setAttribute("class", "browseDiv")
                 this.projectsSpaceDiv.appendChild(browseDiv)
@@ -320,7 +323,7 @@ export default function GitHubModule(){
                 affiliation: 'owner',
             })
             
-            octokit.search.repos({
+            return octokit.search.repos({
                 q: query,
                 sort: sortMethod,
                 per_page: 50,
@@ -435,7 +438,7 @@ export default function GitHubModule(){
 
         this.projectsSpaceDiv.appendChild(project) 
 
-        document.getElementById(projectName).addEventListener('click', () => {
+        project.addEventListener('click', () => {
             this.projectClicked(projectName, id, owned)
         })
     }
@@ -465,8 +468,10 @@ export default function GitHubModule(){
         //Click on the search bar so that when you start typing it shows updateCommands
         document.getElementById('menuInput').focus()
         
-        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page)
-        //this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page)
+        this.loadProjectsBySearch("yoursButton", {key: "Enter"}, document.getElementById("project_search").value, "updated", page, true)
+            .then( () => {
+                this.loadProjectsBySearch("githubButton", {key: "Enter"}, document.getElementById("project_search").value, "stars", page, false)
+            })
     }
     
     /** 
@@ -639,116 +644,16 @@ export default function GitHubModule(){
      */
     this.makePullRequest = function(){
       
-        //Open the github page for the current project in a new tab
+        //Open the github page for making a pull request to the current project in a new tab
         octokit.repos.get({
             owner: currentUser,
             repo: currentRepoName
         }).then(result => {
-            let parent= result.data.parent.owner.login
-            let fullName= result.data.full_name
-            let fullParentName= result.data.parent.full_name
-            let defaultBranch = result.data.default_branch
-            let parentDefaultBranch = result.data.parent.default_branch
-
-            //Remove everything in the popup now
-            while (popup.firstChild) {
-                popup.removeChild(popup.firstChild)
-            }
-                    
-            popup.classList.remove('off')
-
-            var subButtonDiv = document.createElement('div')
-            subButtonDiv.setAttribute("class", "form")
-
-            //Close button (Mac style)
-            if(GlobalVariables.topLevelMolecule && GlobalVariables.topLevelMolecule.name != "Maslow Create"){ //Only offer a close button if there is a project to go back to
-                var closeButton = document.createElement("button")
-                closeButton.setAttribute("class", "closeButton")
-                closeButton.addEventListener("click", () => {
-                    popup.classList.add('off')
-                })
-                popup.appendChild(closeButton)
-            }
-                    
-            //Add a title
-
-            var title = document.createElement("H3")
-            title.appendChild(document.createTextNode("OPEN A PULL REQUEST"))
-            subButtonDiv.setAttribute('style','color:white;')
-            subButtonDiv.appendChild(title)
-            subButtonDiv.appendChild(document.createElement("br"))
-
-            var mergeTitles = document.createElement("div")
-            mergeTitles.setAttribute("class","pull-title")
-            var base = document.createElement("p")
-            base.appendChild(document.createTextNode(fullParentName + " : " + parentDefaultBranch))
-            var arrow = document.createElement("p")
-            arrow.innerHTML="&#8592;"
-            mergeTitles.appendChild(arrow)
-            var head = document.createElement("p")
-            head.appendChild(document.createTextNode(fullName + " : " + defaultBranch))
-            mergeTitles.appendChild(base)
-            mergeTitles.appendChild(arrow)
-            mergeTitles.appendChild(head)
-
-            subButtonDiv.appendChild(mergeTitles)
-                    
-            var form = document.createElement("form")
-            subButtonDiv.appendChild(form)
-            var titleDiv = document.createElement("div")
-            titleDiv.setAttribute("class","pullDiv")
-            var titleLabel = document.createElement("label")
-            titleLabel.appendChild(document.createTextNode("Title"))
-
-            //Create the title field
-            var titleInput = document.createElement("input")
-            titleInput.setAttribute("id","pull-title")
-            titleInput.setAttribute("type","text")
-            titleInput.setAttribute("placeholder","Pull Request Title")
-            titleDiv.appendChild(titleLabel)
-            titleDiv.appendChild(titleInput)
-
-            var bodyDiv = document.createElement("div")
-            bodyDiv.setAttribute("class","pullDiv")
-            var bodyLabel = document.createElement("label")
-            bodyLabel.appendChild(document.createTextNode("Message"))
-
-            var bodyInput = document.createElement("textarea")
-            bodyInput.setAttribute("id","pull-message")
-            bodyInput.setAttribute("type","text")
-            bodyInput.setAttribute("placeholder","Pull Request Message")
-            bodyDiv.appendChild(bodyLabel)
-            bodyDiv.appendChild(bodyInput)
-                    
-            var button = document.createElement("button")
-            button.setAttribute("type", "button")
-            button.setAttribute("style", "border:2px solid white;")
-            button.appendChild(document.createTextNode("Create pull request"))
-                    
-            button.addEventListener("click", () => {
-                var pullTitle= document.getElementById("pull-title").value
-                var pullMessage= document.getElementById("pull-message").value
-                octokit.pulls.create({
-                    owner: parent,
-                    repo: currentRepoName,
-                    title: pullTitle, //input from popup,
-                    body: pullMessage, //input from popup,
-                    head: currentUser+ ":" + "master",
-                    base: "master"
-                }).then(result => {
-                    var url = result.data.html_url
-                    window.open(url)
-                }).then(() =>{
-                    popup.classList.add('off')
-                })
-            })
-            form.appendChild(titleDiv)
-            form.appendChild(bodyDiv)
-            form.appendChild(button)
-            popup.appendChild(subButtonDiv)
-
+            
+            const webString = "https://github.com/" + result.data.parent.full_name + "/compare/" + result.data.parent.default_branch + "..." + result.data.owner.login + ":" + result.data.default_branch
+            
+            window.open(webString)
         })
-        
     }
     
     /** 
@@ -1022,10 +927,19 @@ export default function GitHubModule(){
             repo,
             base_tree: treeSha,
             tree: Object.keys(changes.files).map(path => {
-                return {
-                    path,
-                    mode: '100644',
-                    content: changes.files[path]
+                if(changes.files[path] != null){
+                    return {
+                        path,
+                        mode: '100644',
+                        content: changes.files[path]
+                    }
+                }
+                else{
+                    return {
+                        path,
+                        mode: '100644',
+                        sha: null
+                    }
                 }
             })
         })
@@ -1113,6 +1027,9 @@ export default function GitHubModule(){
             GlobalVariables.fork = result.data.fork
             if(!GlobalVariables.fork){
                 document.getElementById("pull_top").style.display = "none"
+            }
+            else{
+                document.getElementById("pull_top").style.display = "inline"
             }
         })
         
@@ -1424,4 +1341,45 @@ export default function GitHubModule(){
             })
         })
     }
+    
+    /** 
+     * Upload or remove files from github. Files with null content will be deleted.
+     * @param {object} files A dictionary with paths as keys and the content as the answer.
+     */
+    this.uploadAFile = async function(files){
+        
+        await this.createCommit(octokit,{
+            owner: currentUser,
+            repo: currentRepoName,
+            changes: {
+                files: files,
+                commit: 'Upload file'
+            }
+        })
+    }
+    
+    /** 
+     * Get a file from github. Calback is called after the retrieved.
+     */
+    this.getAFile = async function(filePath){
+        
+        const result = await octokit.repos.getContents({
+            owner: currentUser,
+            repo: currentRepoName,
+            path: filePath
+        })
+        
+        //content will be base64 encoded
+        let rawFile = atob(result.data.content)
+        return rawFile
+    }
+    
+    /** 
+     * Get a link to the raw version of a file on GitHub
+     */
+    this.getAFileRawPath = function(filePath){
+        const rawPath = "https://raw.githubusercontent.com/" + currentUser + "/" + currentRepoName + "/main/" + filePath
+        return rawPath
+    }
+    
 }
