@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { read, emit, getModule, generateUniqueId, write, getPendingErrorHandler, addPending } from './jsxcad-sys.js';
+import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 const readStl = async (
@@ -80,18 +80,23 @@ function sum (o) {
 var hashSum = sum;
 
 const prepareStl = (shape, name, options = {}) => {
+  const { path } = getSourceLocation();
   const { op = (s) => s } = options;
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const path = `stl/${getModule()}/${generateUniqueId()}`;
-    const op = toStl(entry, options)
-      .then((data) => write(path, data))
-      .catch(getPendingErrorHandler());
-    addPending(op);
+    const stlPath = `stl/${path}/${generateUniqueId()}`;
+    const op = async () => {
+      try {
+        await write(stlPath, await toStl(entry, options));
+      } catch (error) {
+        getPendingErrorHandler()(error);
+      }
+    };
+    addPending(op());
     entries.push({
       // data: op,
-      path,
+      path: stlPath,
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
     });
@@ -117,5 +122,4 @@ const api = {
   stl,
 };
 
-export default api;
-export { readStl, stl };
+export { api as default, readStl, stl };

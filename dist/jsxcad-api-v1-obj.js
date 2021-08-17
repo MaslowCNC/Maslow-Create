@@ -20,5 +20,4 @@ const api = {
   readObj,
 };
 
-export default api;
-export { fromObj, readObj };
+export { api as default, fromObj, readObj };

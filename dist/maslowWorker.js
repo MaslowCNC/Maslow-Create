@@ -1,5 +1,5 @@
 import api from './jsxcad-api.js';
-import { setPendingErrorHandler, emit, log, boot, createConversation, setupFilesystem, clearEmitted, addOnEmitHandler, pushModule, popModule, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions, listFiles} from './jsxcad-sys.js';
+import { setPendingErrorHandler, emit, log, boot, createConversation, setupFilesystem, clearEmitted, addOnEmitHandler, resolvePending, removeOnEmitHandler, getEmitted, writeFile, readFile, deleteFile, touch, getDefinitions, listFiles} from './jsxcad-sys.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';

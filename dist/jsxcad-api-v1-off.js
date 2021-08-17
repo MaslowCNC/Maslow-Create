@@ -20,5 +20,4 @@ const api = {
   readOff,
 };
 
-export default api;
-export { fromOff, readOff };
+export { api as default, fromOff, readOff };

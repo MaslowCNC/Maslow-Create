@@ -12,5 +12,4 @@ const loadLDrawPart = async (part) =>
 
 const api = { loadLDrawPart, readLDraw };
 
-export default api;
-export { loadLDrawPart, readLDraw };
+export { api as default, loadLDrawPart, readLDraw };
