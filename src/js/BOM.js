@@ -50,9 +50,10 @@ export class BOMEntry {
  */ 
 export const extractBomTags = function(path, functionToPlace){
     //Extract all of the tags
-    window.ask({key: "listTags", readPath: path }).then( tags => {
+    window.ask({op: "listItems", readPath: path }).then( items => {
         // Filter for only bomItems
-        var bomItems = tags.filter(item => {
+        
+        var bomItems = items.filter(item => {
             return item.substring(2, 13) == "BOMitemName"
         })
         
