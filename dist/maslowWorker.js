@@ -164,6 +164,16 @@ const agent = async ({ ask, message }) => {
         const shape2ListTags = await maslowRead(message.readPath);
         return shape2ListTags.tags();
         break;
+    case "item":
+        const shape2item = await maslowRead(message.readPath);
+        const itemShape = shape2item.as(message.tag);
+        await api.saveGeometry(message.writePath, itemShape);
+        return 1;
+        break;
+    case "listItems":
+        const shape2ListItems = await maslowRead(message.readPath);
+        return [];//shape2ListItems.get('*');
+        break;
     case "extractTag":
         const shape2extractFrom = await maslowRead(message.readPath);
         const extractedShape = shape2extractFrom.keep(message.tag).noVoid();//.toDisjointGeometry();
