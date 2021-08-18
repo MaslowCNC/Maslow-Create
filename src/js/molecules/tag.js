@@ -69,7 +69,7 @@ export default class Tag extends Atom{
         try{
             var inputPath = this.findIOValue('geometry')
             const tag =  this.findIOValue('tag')
-            const values = {key: "tag", tag: tag, readPath: inputPath, writePath: this.path }
+            const values = {op: "tag", tag: tag, readPath: inputPath, writePath: this.path }
             this.basicThreadValueProcessing(values, "tag")
         }catch(err){this.setAlert(err)}
     }

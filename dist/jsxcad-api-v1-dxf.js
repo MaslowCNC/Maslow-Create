@@ -46,5 +46,4 @@ Shape.prototype.writeDxf = writeDxfMethod;
 
 const api = { readDxf, writeDxf };
 
-export default api;
-export { readDxf, writeDxf };
+export { api as default, readDxf, writeDxf };

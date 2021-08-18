@@ -71,7 +71,7 @@ export default class CutList extends Atom{
     updateValue(){
         try{
             var inputPath = this.findIOValue('geometry')
-            const values = {key: "tag", tag: "cutlist", readPath: inputPath, writePath: this.path }
+            const values = {op: "tag", tag: "cutlist", readPath: inputPath, writePath: this.path }
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }

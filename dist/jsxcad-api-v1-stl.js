@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { read, emit, addPending, writeFile, getModule, generateUniqueId, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 const readStl = async (
@@ -80,52 +80,46 @@ function sum (o) {
 var hashSum = sum;
 
 const prepareStl = (shape, name, options = {}) => {
-  const { prepareStl = (s) => s } = options;
+  const { path } = getSourceLocation();
+  const { op = (s) => s } = options;
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(prepareStl(shape).toDisjointGeometry())) {
-    const path = `stl/${getModule()}/${generateUniqueId()}`;
-    const op = toStl(entry, options)
-      .then((data) => write(path, data))
-      .catch(getPendingErrorHandler());
-    addPending(op);
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+    const stlPath = `stl/${path}/${generateUniqueId()}`;
+    const op = async () => {
+      try {
+        await write(stlPath, await toStl(entry, options));
+      } catch (error) {
+        getPendingErrorHandler()(error);
+      }
+    };
+    addPending(op());
     entries.push({
       // data: op,
-      path,
+      path: stlPath,
       filename: `${name}_${index++}.stl`,
       type: 'application/sla',
     });
+    // Produce a view of what will be downloaded.
+    Shape.fromGeometry(entry).view(options.view);
   }
   return entries;
 };
 
-const downloadStlMethod = function (name, options) {
-  const entries = prepareStl(this, name, options);
+const stl = (name, options) => (shape) => {
+  const entries = prepareStl(shape, name, options);
   const download = { entries };
   // We should be saving the stl data in the filesystem.
-  const hash$1 = hashSum({ name }) + hash(this.toGeometry());
+  const hash$1 = hashSum({ name }) + hash(shape.toGeometry());
   emit({ download, hash: hash$1 });
-  return this;
-};
-Shape.prototype.downloadStl = downloadStlMethod;
-Shape.prototype.stl = downloadStlMethod;
-
-const writeStl = (shape, name, options = {}) => {
-  for (const { data, filename } of prepareStl(shape, name, {})) {
-    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
-  }
   return shape;
 };
 
-const method = function (...args) {
-  return writeStl(this, ...args);
-};
-Shape.prototype.writeStl = method;
+Shape.registerMethod('stl', stl);
 
 const api = {
   readStl,
-  writeStl,
+  stl,
 };
 
-export default api;
-export { readStl, writeStl };
+export { api as default, readStl, stl };

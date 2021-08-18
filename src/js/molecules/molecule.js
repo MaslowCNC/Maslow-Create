@@ -264,7 +264,7 @@ export default class Molecule extends Atom{
         if(this.simplify){
             try{
                 this.processing = true
-                const values = {key: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
+                const values = {op: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
                 window.ask(values).then( () => {
                     this.processing = false
                     this.pushPropogation()
@@ -640,7 +640,7 @@ export default class Molecule extends Atom{
                 this.loadTree()  //Walks back up the tree from this molecule loading input values from any connected atoms
                 
                 const splits = this.path.split('/')
-                const values = {key: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
+                const values = {op: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
                 window.ask(values).then( answer => {
                     
                     GlobalVariables.availablePaths = answer

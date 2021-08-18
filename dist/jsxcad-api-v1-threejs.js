@@ -38,4 +38,4 @@ Shape.prototype.writeThreejsPage = writeThreejsPageMethod;
 
 const api = { writeThreejsPage };
 
-export default api;
+export { api as default };

@@ -110,7 +110,7 @@ export default class Group extends Atom{
                     }
                 })
                 
-                const values = { key: "group",paths: inputValues, writePath: this.path }
+                const values = { op: "group",paths: inputValues, writePath: this.path }
                 
                 this.basicThreadValueProcessing(values, "group")
                 this.clearAlert()

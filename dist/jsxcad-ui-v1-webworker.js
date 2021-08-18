@@ -73,21 +73,6 @@ var hashSum = sum;
 
 self.window = {};
 
-const resolveNotebook = async () => {
-  // Update the notebook.
-  const notebook = sys.getEmitted(); // Resolve any promises.
-
-  for (const note of notebook) {
-    if (note.download) {
-      for (const entry of note.download.entries) {
-        entry.data = await entry.data;
-      }
-    }
-  }
-
-  await sys.resolvePending();
-};
-
 const say = message => {
   // console.log(`QQ/webworker/say: ${JSON.stringify(message)}`);
   postMessage(message);
@@ -204,8 +189,7 @@ const agent = async ({
             op: 'evaluate',
             status: 'success'
           }); // Wait for any pending operations.
-
-          await resolveNotebook(); // Finally answer the top level question.
+          // Finally answer the top level question.
 
           return true;
         } catch (error) {
@@ -219,8 +203,9 @@ const agent = async ({
             op: 'evaluate',
             status: 'failure'
           });
-          await resolveNotebook();
-          return false;
+          throw error;
+        } finally {
+          await sys.resolvePending();
         }
 
       default:
@@ -228,6 +213,7 @@ const agent = async ({
     }
   } catch (error) {
     sys.info(error.stack);
+    throw error;
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
@@ -264,22 +250,18 @@ const bootstrap = async () => {
       op: 'note',
       note
     });
-  });
+  }); // Handle any messages that came in while we were booting up.
+
+  if (messageBootQueue.length > 0) {
+    do {
+      hear(messageBootQueue.shift());
+    } while (messageBootQueue.length > 0);
+  } // The boot queue must be empty at this point.
+
 
   onmessage = ({
     data
-  }) => hear(data); // Now that we're ready, drain the buffer.
-
-
-  if (self.messageBootQueue !== undefined) {
-    while (self.messageBootQueue.length > 0) {
-      hear(self.messageBootQueue.shift());
-    }
-  }
-
-  while (messageBootQueue.length > 0) {
-    hear(messageBootQueue.shift());
-  }
+  }) => hear(data);
 
   if (onmessage === undefined) throw Error('die');
 };

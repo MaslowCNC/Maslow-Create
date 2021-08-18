@@ -110,7 +110,7 @@ export default class Color extends Atom {
     updateValue(){
         try{
             var inputPath = this.findIOValue('geometry')
-            const values = {key: "color", color: this.colorOptions[Object.keys(this.colorOptions)[this.selectedColorIndex]], readPath: inputPath, writePath: this.path }
+            const values = {op: "color", color: this.colorOptions[Object.keys(this.colorOptions)[this.selectedColorIndex]], readPath: inputPath, writePath: this.path }
             this.basicThreadValueProcessing(values)
             this.clearAlert()
         }catch(err){this.setAlert(err)}

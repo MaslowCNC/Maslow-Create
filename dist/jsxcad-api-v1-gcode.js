@@ -86,6 +86,7 @@ const prepareGcode = (shape, name, tool, options = {}) => {
       // CHECK: Is this a reasonable mime type?
       type: 'application/x-gcode',
     });
+    Shape.fromGeometry(entry).view(options.view);
   }
   return entries;
 };
@@ -98,7 +99,6 @@ const downloadGcodeMethod = function (name, tool, options = {}) {
   emit({ download, hash: hash$1 });
   return this;
 };
-Shape.prototype.downloadGcode = downloadGcodeMethod;
 Shape.prototype.gcode = downloadGcodeMethod;
 
 const writeGcode = (shape, name, tool, options = {}) => {
@@ -115,5 +115,4 @@ Shape.prototype.writeGcode = writeGcodeMethod;
 
 const api = { writeGcode };
 
-export default api;
-export { writeGcode };
+export { api as default, writeGcode };

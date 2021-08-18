@@ -2465,10 +2465,10 @@ const fromDxf = async (data) => {
     const { handle, layer } = entity;
     let tags = [];
     if (handle !== undefined) {
-      tags.push(`user/dxf/handle:${handle}`);
+      tags.push(`user:dxf:handle:${handle}`);
     }
     if (layer !== undefined) {
-      tags.push(`user/dxf/layer:${layer}`);
+      tags.push(`user:dxf:layer:${layer}`);
       if (dxf.tables && dxf.tables.layer && dxf.tables.layer.layers) {
         const color = dxf.tables.layer.layers[layer].color;
         if (color !== undefined) {
@@ -2516,7 +2516,45 @@ const fromDxf = async (data) => {
   return { type: 'assembly', content: assembly };
 };
 
-class LineType
+class DatabaseObject {
+    constructor(subclass = null)
+    {
+        /* Handle should be assigned externally by document instance */
+        this.handle = null;
+        this.ownerHandle = null;
+        this.subclassMarkers = [];
+        if (subclass) {
+            if (Array.isArray(subclass)) {
+                for (const sc of subclass) {
+                    this.subclassMarkers.push(sc);
+                }
+            } else {
+                this.subclassMarkers.push(subclass);
+            }
+        }
+    }
+
+    toDxfString()
+    {
+        let s = "";
+        if (this.handle) {
+            s += `5\n${this.handle.toString(16)}\n`;
+        } else {
+            console.warn("No handle assigned to entity", this);
+        }
+        if (this.ownerHandle) {
+            s += `330\n${this.ownerHandle.toString(16)}\n`;
+        }
+        for (const marker of this.subclassMarkers) {
+            s += `100\n${marker}\n`;
+        }
+        return s
+    }
+}
+
+var DatabaseObject_1 = DatabaseObject;
+
+class LineType extends DatabaseObject_1
 {
     /**
      * @param {string} name
@@ -2525,6 +2563,7 @@ class LineType
      */
     constructor(name, description, elements)
     {
+        super(["AcDbSymbolTableRecord", "AcDbLinetypeTableRecord"]);
         this.name = name;
         this.description = description;
         this.elements = elements;
@@ -2536,16 +2575,18 @@ class LineType
     toDxfString()
     {
         let s = '0\nLTYPE\n';
-        s += '72\n65\n';
-        s += '70\n64\n';
+        s += super.toDxfString();
         s += `2\n${this.name}\n`;
         s += `3\n${this.description}\n`;
+        s += '70\n0\n';
+        s += '72\n65\n';
         s += `73\n${this.elements.length}\n`;
         s += `40\n${this.getElementsSum()}\n`;
-
-        for (let i = 0; i < this.elements.length; ++i)
+        for (const element of this.elements)
         {
-            s += `49\n${this.elements[i]}\n`;
+            s += `49\n${element}\n`;
+            /* Complex linetype element type, mandatory for AutoCAD */
+            s += '74\n0\n';
         }
 
         return s;
@@ -2565,10 +2606,11 @@ class LineType
 
 var LineType_1 = LineType;
 
-class Layer
+class Layer extends DatabaseObject_1
 {
-    constructor(name, colorNumber, lineTypeName)
+    constructor(name, colorNumber, lineTypeName = null)
     {
+        super(["AcDbSymbolTableRecord", "AcDbLayerTableRecord"]);
         this.name = name;
         this.colorNumber = colorNumber;
         this.lineTypeName = lineTypeName;
@@ -2579,7 +2621,7 @@ class Layer
     toDxfString()
     {
         let s = '0\nLAYER\n';
-        s += '70\n64\n';
+        s += super.toDxfString();
         s += `2\n${this.name}\n`;
         if (this.trueColor !== -1)
         {
@@ -2589,8 +2631,15 @@ class Layer
         {
             s += `62\n${this.colorNumber}\n`;
         }
-        s += `6\n${this.lineTypeName}\n`;
-        return s;        
+        s += '70\n0\n';
+        if (this.lineTypeName) {
+            s += `6\n${this.lineTypeName}\n`;
+        }
+        /* Hard-pointer handle to PlotStyleName object; seems mandatory, but any value seems OK,
+         * including 0.
+         */
+        s += "390\n1\n";
+        return s;
     }
 
     setTrueColor(color)
@@ -2624,10 +2673,232 @@ class Layer
 
 var Layer_1 = Layer;
 
-class Line
+class Table extends DatabaseObject_1 {
+    constructor(name) {
+        super("AcDbSymbolTable");
+        this.name = name;
+        this.elements = [];
+    }
+
+    add(element) {
+        this.elements.push(element);
+    }
+
+    toDxfString()
+    {
+        let s = "0\nTABLE\n";
+        s += `2\n${this.name}\n`;
+        s += super.toDxfString();
+        s += `70\n${this.elements.length}\n`;
+        for (const element of this.elements) {
+            s += element.toDxfString();
+        }
+        s += "0\nENDTAB\n";
+        return s
+    }
+}
+
+var Table_1 = Table;
+
+class DimStyleTable extends Table_1 {
+    constructor(name) {
+        super(name);
+        this.subclassMarkers.push("AcDbDimStyleTable");
+    }
+
+    toDxfString()
+    {
+        let s = "0\nTABLE\n";
+        s += `2\n${this.name}\n`;
+        s += DatabaseObject_1.prototype.toDxfString.call(this);
+        s += `70\n${this.elements.length}\n`;
+        /* DIMTOL */
+        s += "71\n1\n";
+        for (const element of this.elements) {
+            s += element.toDxfString();
+        }
+        s += "0\nENDTAB\n";
+        return s
+    }
+}
+
+var DimStyleTable_1 = DimStyleTable;
+
+class TextStyle extends DatabaseObject_1 {
+    constructor(name) {
+        super(["AcDbSymbolTableRecord", "AcDbTextStyleTableRecord"]);
+        this.name = name;
+    }
+
+    toDxfString()
+    {
+        let s = "0\nSTYLE\n";
+        s += super.toDxfString();
+        s += `2\n${this.name}\n`;
+        /* No flags set */
+        s += "70\n0\n";
+        s += "40\n0\n";
+        s += "41\n1\n";
+        s += "50\n0\n";
+        s += "71\n0\n";
+        s += "42\n1\n";
+        s += `3\n${this.name}\n`;
+        s += "4\n\n";
+        return s
+    }
+}
+
+var TextStyle_1 = TextStyle;
+
+class Viewport extends DatabaseObject_1 {
+    constructor(name, height)
+    {
+        super(["AcDbSymbolTableRecord", "AcDbViewportTableRecord"]);
+        this.name = name;
+        this.height = height;
+    }
+
+    toDxfString()
+    {
+        let s = "0\nVPORT\n";
+        s += super.toDxfString();
+        s += `2\n${this.name}\n`;
+        s += `40\n${this.height}\n`;
+        /* No flags set */
+        s += "70\n0\n";
+        return s
+    }
+}
+
+var Viewport_1 = Viewport;
+
+class AppId extends DatabaseObject_1 {
+    constructor(name) {
+        super(["AcDbSymbolTableRecord", "AcDbRegAppTableRecord"]);
+        this.name = name;
+    }
+
+    toDxfString()
+    {
+        let s = "0\nAPPID\n";
+        s += super.toDxfString();
+        s += `2\n${this.name}\n`;
+        /* No flags set */
+        s += "70\n0\n";
+        return s
+    }
+}
+
+var AppId_1 = AppId;
+
+class Block extends DatabaseObject_1 {
+    constructor(name)
+    {
+        super(["AcDbEntity", "AcDbBlockBegin"]);
+        this.name = name;
+        this.end = new DatabaseObject_1(["AcDbEntity","AcDbBlockEnd"]);
+        this.recordHandle = null;
+    }
+
+    /* Internal method to set handle value for block end separator entity. */
+    setEndHandle(handle) {
+        this.end.handle = handle;
+    }
+
+    /* Internal method to set handle value for block record in block records table. */
+    setRecordHandle(handle) {
+        this.recordHandle = handle;
+    }
+
+    //XXX need some API to add content
+
+    toDxfString()
+    {
+        let s = "0\nBLOCK\n";
+        s += super.toDxfString();
+        s += `2\n${this.name}\n`;
+        /* No flags set */
+        s += "70\n0\n";
+        /* Block top left corner */
+        s += "10\n0\n";
+        s += "20\n0\n";
+        s += "30\n0\n";
+        s += `3\n${this.name}\n`;
+        /* xref path name - nothing */
+        s += "1\n\n";
+
+        //XXX dump content here
+
+        s += "0\nENDBLK\n";
+        s += this.end.toDxfString();
+        return s
+    }
+}
+
+var Block_1 = Block;
+
+class BlockRecord extends DatabaseObject_1 {
+    constructor(name) {
+        super(["AcDbSymbolTableRecord", "AcDbBlockTableRecord"]);
+        this.name = name;
+    }
+
+    toDxfString()
+    {
+        let s = "0\nBLOCK_RECORD\n";
+        s += super.toDxfString();
+        s += `2\n${this.name}\n`;
+        /* No flags set */
+        s += "70\n0\n";
+        /* Block explodability */
+        s += "280\n1\n";
+        /* Block scalability */
+        s += "281\n0\n";
+        return s
+    }
+}
+
+var BlockRecord_1 = BlockRecord;
+
+class Dictionary extends DatabaseObject_1 {
+    constructor()
+    {
+        super("AcDbDictionary");
+        this.children = {};
+    }
+
+    addChildDictionary(name, dictionary) {
+        if (!this.handle) {
+            throw new Error("Handle must be set before adding children")
+        }
+        dictionary.ownerHandle = this.handle;
+        this.children[name] = dictionary;
+    }
+
+    toDxfString()
+    {
+        let s = "0\nDICTIONARY\n";
+        s += super.toDxfString();
+        /* Duplicate record cloning flag - keep existing */
+        s += "281\n1\n";
+        for (const [name, item] of Object.entries(this.children)) {
+            s += `3\n${name}\n`;
+            s += `350\n${item.handle.toString(16)}\n`;
+        }
+        for (const item of Object.values(this.children)) {
+            s += item.toDxfString();
+        }
+        return s
+    }
+}
+
+var Dictionary_1 = Dictionary;
+
+class Line extends DatabaseObject_1
 {
     constructor(x1, y1, x2, y2)
     {
+        super(["AcDbEntity", "AcDbLine"]);
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -2638,6 +2909,7 @@ class Line
     {
         //https://www.autodesk.com/techpubs/autocad/acadr14/dxf/line_al_u05_c.htm
         let s = `0\nLINE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `10\n${this.x1}\n20\n${this.y1}\n30\n0\n`;
         s += `11\n${this.x2}\n21\n${this.y2}\n31\n0\n`;
@@ -2647,7 +2919,7 @@ class Line
 
 var Line_1 = Line;
 
-class Arc
+class Arc extends DatabaseObject_1
 {
     /**
      * @param {number} x1 - Center x
@@ -2658,6 +2930,7 @@ class Arc
      */
     constructor(x1, y1, r, startAngle, endAngle)
     {
+        super(["AcDbEntity", "AcDbArc"]);
         this.x1 = x1;
         this.y1 = y1;
         this.r = r;
@@ -2669,6 +2942,7 @@ class Arc
     {
         //https://www.autodesk.com/techpubs/autocad/acadr14/dxf/line_al_u05_c.htm
         let s = `0\nARC\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `10\n${this.x1}\n20\n${this.y1}\n30\n0\n`;
         s += `40\n${this.r}\n50\n${this.startAngle}\n51\n${this.endAngle}\n`;
@@ -2678,7 +2952,7 @@ class Arc
 
 var Arc_1 = Arc;
 
-class Circle
+class Circle extends DatabaseObject_1
 {
     /**
      * @param {number} x1 - Center x
@@ -2687,6 +2961,7 @@ class Circle
      */
     constructor(x1, y1, r)
     {
+        super(["AcDbEntity", "AcDbCircle"]);
         this.x1 = x1;
         this.y1 = y1;
         this.r = r;
@@ -2696,6 +2971,7 @@ class Circle
     {
         //https://www.autodesk.com/techpubs/autocad/acadr14/dxf/circle_al_u05_c.htm
         let s = `0\nCIRCLE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `10\n${this.x1}\n20\n${this.y1}\n30\n0\n`;
         s += `40\n${this.r}\n`;
@@ -2708,7 +2984,7 @@ var Circle_1 = Circle;
 const H_ALIGN_CODES = ['left', 'center', 'right'];
 const V_ALIGN_CODES = ['baseline','bottom', 'middle', 'top'];
 
-class Text
+class Text extends DatabaseObject_1
 {
     /**
      * @param {number} x1 - x
@@ -2721,6 +2997,7 @@ class Text
      */
     constructor(x1, y1, height, rotation, value, horizontalAlignment = 'left', verticalAlignment = 'baseline')
     {
+        super(["AcDbEntity", "AcDbText"]);
         this.x1 = x1;
         this.y1 = y1;
         this.height = height;
@@ -2734,14 +3011,21 @@ class Text
     {
         //https://www.autodesk.com/techpubs/autocad/acadr14/dxf/text_al_u05_c.htm
         let s = `0\nTEXT\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
-        s += `1\n${this.value}\n`;
         s += `10\n${this.x1}\n20\n${this.y1}\n30\n0\n`;
-        s += `40\n${this.height}\n50\n${this.rotation}\n`;
-        if (H_ALIGN_CODES.includes(this.hAlign, 1) || V_ALIGN_CODES.includes(this.vAlign, 1)){
+        s += `40\n${this.height}\n`;
+        s += `1\n${this.value}\n`;
+        s += `50\n${this.rotation}\n`;
+        if (H_ALIGN_CODES.includes(this.hAlign, 1) || V_ALIGN_CODES.includes(this.vAlign, 1)) {
+            s += `72\n${Math.max(H_ALIGN_CODES.indexOf(this.hAlign), 0)}\n`;
             s += `11\n${this.x1}\n21\n${this.y1}\n31\n0\n`;
-            s += `72\n${Math.max(H_ALIGN_CODES.indexOf(this.hAlign),0)}\n`;
-            s += `73\n${Math.max(V_ALIGN_CODES.indexOf(this.vAlign),0)}\n`;
+            /* AutoCAD needs this one more time, yes, exactly here. */
+            s += "100\nAcDbText\n";
+            s += `73\n${Math.max(V_ALIGN_CODES.indexOf(this.vAlign), 0)}\n`;
+        } else {
+            /* AutoCAD needs this one more time. */
+            s += "100\nAcDbText\n";
         }
         return s;
     }
@@ -2749,7 +3033,7 @@ class Text
 
 var Text_1 = Text;
 
-class Polyline
+class Polyline extends DatabaseObject_1
 {
     /**
      * @param {array} points - Array of points like [ [x1, y1], [x2, y2, bulge]... ]
@@ -2759,6 +3043,7 @@ class Polyline
      */
     constructor(points, closed = false, startWidth = 0, endWidth = 0)
     {
+        super(["AcDbEntity", "AcDbPolyline"]);
         this.points = points;
         this.closed = closed;
         this.startWidth = startWidth;
@@ -2767,41 +3052,45 @@ class Polyline
 
     toDxfString()
     {
-        //https://www.autodesk.com/techpubs/autocad/acad2000/dxf/polyline_dxf_06.htm
-        //https://www.autodesk.com/techpubs/autocad/acad2000/dxf/vertex_dxf_06.htm
-        let s = `0\nPOLYLINE\n`;
+        let s = `0\nLWPOLYLINE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
-        s += `66\n1\n70\n${this.closed ? 1 : 0}\n`;
-        if (this.startWidth !== 0 || this.endWidth !== 0) {
-            s += `40\n${this.startWidth}\n41\n${this.endWidth}\n`;
-        }
+        s += "6\nByLayer\n";
+        s += "62\n256\n";
+        s += "370\n-1\n";
+        s += `70\n${this.closed ? 1 : 0}\n`;
+        s += `90\n${this.points.length}\n`;
 
-        for (let i = 0; i < this.points.length; ++i)
-        {
-            s += `0\nVERTEX\n`;
-            s += `8\n${this.layer.name}\n`;
-            s += `70\n0\n`;
-            s += `10\n${this.points[i][0]}\n20\n${this.points[i][1]}\n`;
-            if (this.points[i][2] !== undefined) {
-                s += `42\n${this.points[i][2]}\n`;
+        for (const p of this.points) {
+            s += `10\n${p[0]}\n20\n${p[1]}\n`;
+            if (this.startWidth !== 0 || this.endWidth !== 0) {
+                s += `40\n${this.startWidth}\n41\n${this.endWidth}\n`;
+            }
+            if (p[2] !== undefined) {
+                s += `42\n${p[2]}\n`;
             }
         }
-        
-        s += `0\nSEQEND\n`;
+
         return s;
     }
 }
 
 var Polyline_1 = Polyline;
 
-class Polyline3d
+class Polyline3d extends DatabaseObject_1
 {
     /**
      * @param {array} points - Array of points like [ [x1, y1, z1], [x2, y2, z2]... ]
      */
     constructor(points)
     {
+        super(["AcDbEntity", "AcDbPolyline3D"]);
         this.points = points;
+        this.pointHandles = null;
+    }
+
+    assignVertexHandles(handleProvider) {
+        this.pointHandles = this.points.map(() => handleProvider());
     }
 
     toDxfString()
@@ -2809,12 +3098,16 @@ class Polyline3d
         //https://www.autodesk.com/techpubs/autocad/acad2000/dxf/polyline_dxf_06.htm
         //https://www.autodesk.com/techpubs/autocad/acad2000/dxf/vertex_dxf_06.htm
         let s = `0\nPOLYLINE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `66\n1\n70\n8\n`;
 
         for (let i = 0; i < this.points.length; ++i)
         {
             s += `0\nVERTEX\n`;
+            s += "100\nAcDbEntity\n";
+            s += "100\nAcDbVertex\n";
+            s += `5\n${this.pointHandles[i].toString(16)}\n`;
             s += `8\n${this.layer.name}\n`;
             s += `70\n0\n`;
             s += `10\n${this.points[i][0]}\n20\n${this.points[i][1]}\n30\n${this.points[i][2]}\n`;
@@ -2827,10 +3120,11 @@ class Polyline3d
 
 var Polyline3d_1 = Polyline3d;
 
-class Face
+class Face extends DatabaseObject_1
 {
     constructor(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
     {
+        super(["AcDbEntity", "AcDbFace"]);
         this.x1 = x1;
         this.y1 = y1;
         this.z1 = z1;
@@ -2849,6 +3143,7 @@ class Face
     {
         //https://www.autodesk.com/techpubs/autocad/acadr14/dxf/3dface_al_u05_c.htm
         let s = `0\n3DFACE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `10\n${this.x1}\n20\n${this.y1}\n30\n${this.z1}\n`;
         s += `11\n${this.x2}\n21\n${this.y2}\n31\n${this.z2}\n`;
@@ -2860,10 +3155,11 @@ class Face
 
 var Face_1 = Face;
 
-class Point
+class Point extends DatabaseObject_1
 {
     constructor(x, y)
     {
+        super(["AcDbEntity", "AcDbEntity"]);
         this.x = x;
         this.y = y;
     }
@@ -2872,6 +3168,7 @@ class Point
     {
         //https://www.autodesk.com/techpubs/autocad/acadr14/dxf/point_al_u05_c.htm
         let s = `0\nPOINT\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `10\n${this.x}\n20\n${this.y}\n30\n0\n`;
         return s;
@@ -2880,7 +3177,7 @@ class Point
 
 var Point_1 = Point;
 
-class Spline
+class Spline extends DatabaseObject_1
 {
     /**
      * Creates a spline. See https://www.autodesk.com/techpubs/autocad/acad2000/dxf/spline_dxf_06.htm
@@ -2892,6 +3189,7 @@ class Spline
      */
     constructor(controlPoints, degree = 3, knots = null, weights = null, fitPoints = [])
     {
+        super(["AcDbEntity", "AcDbSpline"]);
         if (controlPoints.length < degree + 1) {
             throw new Error(`For degree ${degree} spline, expected at least ${degree + 1} control points, but received only ${controlPoints.length}`);
         }
@@ -2952,8 +3250,8 @@ class Spline
     toDxfString() {
         // https://www.autodesk.com/techpubs/autocad/acad2000/dxf/spline_dxf_06.htm
         let s = `0\nSPLINE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
-        s += `100\nAcDbSpline\n`;
         s += `210\n0.0\n220\n0.0\n230\n1.0\n`;
 
         s += `70\n${this.type}\n`;
@@ -2987,7 +3285,7 @@ class Spline
 
 var Spline_1 = Spline;
 
-class Ellipse {
+class Ellipse extends DatabaseObject_1 {
     /**
      * Creates an ellipse.
      * @param {number} x1 - Center x
@@ -2999,6 +3297,7 @@ class Ellipse {
      * @param {number} endAngle - End angle
      */
     constructor(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle, endAngle) {
+        super(["AcDbEntity", "AcDbEllipse"]);
         this.x1 = x1;
         this.y1 = y1;
         this.majorAxisX = majorAxisX;
@@ -3011,6 +3310,7 @@ class Ellipse {
     toDxfString() {
         // https://www.autodesk.com/techpubs/autocad/acadr14/dxf/ellipse_al_u05_c.htm
         let s = `0\nELLIPSE\n`;
+        s += super.toDxfString();
         s += `8\n${this.layer.name}\n`;
         s += `10\n${this.x1}\n`;
         s += `20\n${this.y1}\n`;
@@ -3035,21 +3335,25 @@ class Drawing
         this.activeLayer = null;
         this.lineTypes = {};
         this.headers = {};
+        this.tables = {};
+        this.blocks = {};
+        this.handleCount = 0;
+
+        this.ltypeTableHandle = this._generateHandle();
+        this.layerTableHandle = this._generateHandle();
+        this.blockRecordTableHandle = this._generateHandle();
+
+        this.dictionary = new Dictionary_1();
+        this._assignHandle(this.dictionary);
 
         this.setUnits('Unitless');
 
-        for (let i = 0; i < Drawing.LINE_TYPES.length; ++i)
-        {
-            this.addLineType(Drawing.LINE_TYPES[i].name,
-                             Drawing.LINE_TYPES[i].description,
-                             Drawing.LINE_TYPES[i].elements);
+        for (const lineType of Drawing.LINE_TYPES) {
+            this.addLineType(lineType.name, lineType.description, lineType.elements);
         }
 
-        for (let i = 0; i < Drawing.LAYERS.length; ++i)
-        {
-            this.addLayer(Drawing.LAYERS[i].name,
-                          Drawing.LAYERS[i].colorNumber,
-                          Drawing.LAYERS[i].lineTypeName);
+        for (const layer of Drawing.LAYERS) {
+            this.addLayer(layer.name, layer.colorNumber, layer.lineTypeName);
         }
 
         this.setActiveLayer('0');
@@ -3063,13 +3367,13 @@ class Drawing
      */
     addLineType(name, description, elements)
     {
-        this.lineTypes[name] = new LineType_1(name, description, elements);
+        this.lineTypes[name] = this._assignHandle(new LineType_1(name, description, elements));
         return this;
     }
 
     addLayer(name, colorNumber, lineTypeName)
     {
-        this.layers[name] = new Layer_1(name, colorNumber, lineTypeName);
+        this.layers[name] = this._assignHandle(new Layer_1(name, colorNumber, lineTypeName));
         return this;
     }
 
@@ -3079,24 +3383,61 @@ class Drawing
         return this;
     }
 
+    addTable(name) {
+        const table = new Table_1(name);
+        this._assignHandle(table);
+        this.tables[name] = table;
+        return table
+    }
+
+    addBlock(name) {
+        const block = new Block_1(name);
+        this._assignHandle(block);
+        block.setEndHandle(this._generateHandle());
+        block.setRecordHandle(this._generateHandle());
+        this.blocks[name] = block;
+        return block
+    }
+
     drawLine(x1, y1, x2, y2)
     {
-        this.activeLayer.addShape(new Line_1(x1, y1, x2, y2));
+        this.activeLayer.addShape(this._assignHandle(new Line_1(x1, y1, x2, y2)));
         return this;
     }
 
     drawPoint(x, y)
     {
-        this.activeLayer.addShape(new Point_1(x, y));
+        this.activeLayer.addShape(this._assignHandle(new Point_1(x, y)));
         return this;
     }
 
-    drawRect(x1, y1, x2, y2)
-    {
-        this.activeLayer.addShape(new Line_1(x1, y1, x2, y1));
-        this.activeLayer.addShape(new Line_1(x1, y2, x2, y2));
-        this.activeLayer.addShape(new Line_1(x1, y1, x1, y2));
-        this.activeLayer.addShape(new Line_1(x2, y1, x2, y2));
+    drawRect(x1, y1, x2, y2, cornerLength, cornerBulge) {
+        const w = x2 - x1;
+        const h = y2 - y1;
+        cornerBulge = cornerBulge || 0;
+        let p = null;
+        if (!cornerLength) {
+            p = new Polyline_1([
+                [x1, y1],
+                [x1, y1 + h],
+                [x1 + w, y1 + h],
+                [x1 + w, y1]
+            ], true);
+        } else {
+            p = new Polyline_1([
+                [x1 + w - cornerLength, y1, cornerBulge],  // 1
+                [x1 + w, y1 + cornerLength], // 2
+                [x1 + w, y1 + h - cornerLength, cornerBulge], // 3
+                [x1 + w - cornerLength, y1 + h], // 4
+                [x1 + cornerLength, y1 + h, cornerBulge], // 5
+                [x1, y1 + h - cornerLength], // 6
+                [x1, y1 + cornerLength, cornerBulge], // 7
+                [x1 + cornerLength, y1], // 8
+            ], true);
+        }
+
+        this._assignHandle(p);
+        this.activeLayer.addShape(p);
         return this;
     }
 
@@ -3109,7 +3450,7 @@ class Drawing
      */
     drawArc(x1, y1, r, startAngle, endAngle)
     {
-        this.activeLayer.addShape(new Arc_1(x1, y1, r, startAngle, endAngle));
+        this.activeLayer.addShape(this._assignHandle(new Arc_1(x1, y1, r, startAngle, endAngle)));
         return this;
     }
 
@@ -3120,7 +3461,7 @@ class Drawing
      */
     drawCircle(x1, y1, r)
     {
-        this.activeLayer.addShape(new Circle_1(x1, y1, r));
+        this.activeLayer.addShape(this._assignHandle(new Circle_1(x1, y1, r)));
         return this;
     }
 
@@ -3133,9 +3474,11 @@ class Drawing
      * @param {string} [horizontalAlignment="left"] left | center | right
      * @param {string} [verticalAlignment="baseline"] baseline | bottom | middle | top
      */
-    drawText(x1, y1, height, rotation, value, horizontalAlignment = 'left', verticalAlignment = 'baseline')
+    drawText(x1, y1, height, rotation, value, horizontalAlignment = 'left',
+             verticalAlignment = 'baseline')
     {
-        this.activeLayer.addShape(new Text_1(x1, y1, height, rotation, value, horizontalAlignment, verticalAlignment));
+        this.activeLayer.addShape(this._assignHandle(
+            new Text_1(x1, y1, height, rotation, value, horizontalAlignment, verticalAlignment)));
         return this;
     }
 
@@ -3147,7 +3490,9 @@ class Drawing
      */
     drawPolyline(points, closed = false, startWidth = 0, endWidth = 0)
     {
-        this.activeLayer.addShape(new Polyline_1(points, closed, startWidth, endWidth));
+        const p = new Polyline_1(points, closed, startWidth, endWidth);
+        this._assignHandle(p);
+        this.activeLayer.addShape(p);
         return this;
     }
 
@@ -3161,7 +3506,10 @@ class Drawing
                 throw "Require 3D coordinate"
             }
         });
-        this.activeLayer.addShape(new Polyline3d_1(points));
+        const p = new Polyline3d_1(points);
+        this._assignHandle(p);
+        p.assignVertexHandles(this._generateHandle.bind(this));
+        this.activeLayer.addShape(p);
         return this;
     }
 
@@ -3183,8 +3531,10 @@ class Drawing
      * @param {[number]} weights - Control point weights. If provided, must be one weight for each control point. Default is null
      * @param {[Array]} fitPoints - Array of fit points like [ [x1, y1], [x2, y2]... ]
      */
-    drawSpline(controlPoints, degree = 3, knots = null, weights = null, fitPoints = []) {
-        this.activeLayer.addShape(new Spline_1(controlPoints, degree, knots, weights, fitPoints));
+    drawSpline(controlPoints, degree = 3, knots = null, weights = null, fitPoints = [])
+    {
+        this.activeLayer.addShape(this._assignHandle(
+            new Spline_1(controlPoints, degree, knots, weights, fitPoints)));
         return this;
     }
 
@@ -3198,8 +3548,10 @@ class Drawing
     * @param {number} startAngle - Start angle
     * @param {number} endAngle - End angle
     */
-    drawEllipse(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle = 0, endAngle = 2 * Math.PI) {
-        this.activeLayer.addShape(new Ellipse_1(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle, endAngle));
+    drawEllipse(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle = 0, endAngle = 2 * Math.PI)
+    {
+        this.activeLayer.addShape(this._assignHandle(
+            new Ellipse_1(x1, y1, majorAxisX, majorAxisY, axisRatio, startAngle, endAngle)));
         return this;
     }
 
@@ -3219,38 +3571,36 @@ class Drawing
      */
     drawFace(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
     {
-        this.activeLayer.addShape(new Face_1(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4));
+        this.activeLayer.addShape(this._assignHandle(
+            new Face_1(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)));
         return this;
+    }
+
+    _generateHandle()
+    {
+        return ++this.handleCount
+    }
+
+    _assignHandle(entity)
+    {
+        entity.handle = this._generateHandle();
+        return entity
     }
 
     _getDxfLtypeTable()
     {
-        let s = '0\nTABLE\n'; //start table
-        s += '2\nLTYPE\n';    //name table as LTYPE table
-
-        for (let lineTypeName in this.lineTypes)
-        {
-            s += this.lineTypes[lineTypeName].toDxfString();
-        }
-
-        s += '0\nENDTAB\n'; //end table
-
-        return s;
+        const t = new Table_1("LTYPE");
+        t.handle = this.ltypeTableHandle;
+        Object.values(this.lineTypes).forEach(v => t.add(v));
+        return t.toDxfString()
     }
 
     _getDxfLayerTable()
     {
-        let s = '0\nTABLE\n'; //start table
-        s += '2\nLAYER\n'; //name table as LAYER table
-
-        for (let layerName in this.layers)
-        {
-            s += this.layers[layerName].toDxfString();
-        }
-
-        s += '0\nENDTAB\n';
-
-        return s;
+        const t = new Table_1("LAYER");
+        t.handle = this.layerTableHandle;
+        Object.values(this.layers).forEach(v => t.add(v));
+        return t.toDxfString()
     }
 
      /**
@@ -3285,6 +3635,62 @@ class Drawing
         return this;
     }
 
+    /** Generate additional DXF metadata which are required to successfully open resulted document
+     * in AutoDesk products. Call this method before serializing the drawing to get the most
+     * compatible result.
+     */
+    generateAutocadExtras() {
+        if (!this.headers["ACADVER"]) {
+            /* AutoCAD 2007 version. */
+            this.header("ACADVER", [[1, "AC1021"]]);
+        }
+
+        if (!this.lineTypes["ByBlock"]) {
+            this.addLineType("ByBlock", "", []);
+        }
+        if (!this.lineTypes["ByLayer"]) {
+            this.addLineType("ByLayer", "", []);
+        }
+
+        let vpTable = this.tables["VPORT"];
+        if (!vpTable) {
+            vpTable = this.addTable("VPORT");
+        }
+        let styleTable = this.tables["STYLE"];
+        if (!styleTable) {
+            styleTable = this.addTable("STYLE");
+        }
+        if (!this.tables["VIEW"]) {
+            this.addTable("VIEW");
+        }
+        if (!this.tables["UCS"]) {
+            this.addTable("UCS");
+        }
+        let appIdTable = this.tables["APPID"];
+        if (!appIdTable) {
+            appIdTable = this.addTable("APPID");
+        }
+        if (!this.tables["DIMSTYLE"]) {
+            const t = new DimStyleTable_1("DIMSTYLE");
+            this._assignHandle(t);
+            this.tables["DIMSTYLE"] = t;
+        }
+
+        vpTable.add(this._assignHandle(new Viewport_1("*ACTIVE", 1000)));
+
+        /* Non-default text alignment is not applied without this entry. */
+        styleTable.add(this._assignHandle(new TextStyle_1("standard")));
+
+        appIdTable.add(this._assignHandle(new AppId_1("ACAD")));
+
+        this.addBlock("*Model_Space");
+        this.addBlock("*Paper_Space");
+
+        const d = new Dictionary_1();
+        this._assignHandle(d);
+        this.dictionary.addChildDictionary("ACAD_GROUP", d);
+    }
+
     toDxfString()
     {
         let s = '';
@@ -3294,10 +3700,19 @@ class Drawing
         //name section as HEADER section
         s += '2\nHEADER\n';
 
+        s += this._getHeader("HANDSEED", [[5, (this.handleCount + 1).toString(16)]]);
         for (let header in this.headers) {
             s += this._getHeader(header, this.headers[header]);
         }
 
+        //end section
+        s += '0\nENDSEC\n';
+
+
+        //start section
+        s += '0\nSECTION\n';
+        // Empty CLASSES section for compatibility
+        s += '2\nCLASSES\n';
         //end section
         s += '0\nENDSEC\n';
 
@@ -3310,6 +3725,32 @@ class Drawing
         s += this._getDxfLtypeTable();
         s += this._getDxfLayerTable();
 
+        for (const table of Object.values(this.tables)) {
+            s += table.toDxfString();
+        }
+
+        let blockRecordTable = new Table_1("BLOCK_RECORD");
+        blockRecordTable.handle = this.blockRecordTableHandle;
+        Object.values(this.blocks).forEach(b => {
+            const rec = new BlockRecord_1(b.name);
+            rec.handle = b.recordHandle;
+            blockRecordTable.add(rec);
+        });
+        s += blockRecordTable.toDxfString();
+
+        //end section
+        s += '0\nENDSEC\n';
+
+
+        //start section
+        s += '0\nSECTION\n';
+        //name section as BLOCKS section
+        s += '2\nBLOCKS\n';
+
+        for (const block of  Object.values(this.blocks)) {
+            s += block.toDxfString();
+        }
+
         //end section
         s += '0\nENDSEC\n';
 
@@ -3318,18 +3759,22 @@ class Drawing
         s += '0\nSECTION\n';
         s += '2\nENTITIES\n';
 
-        for (let layerName in this.layers)
-        {
-            let layer = this.layers[layerName];
+        for (const layer of Object.values(this.layers)) {
             s += layer.shapesToDxf();
-            // let shapes = layer.getShapes();
         }
 
         s += '0\nENDSEC\n';
 
 
+        //OBJECTS section
+        s += '0\nSECTION\n';
+        s += '2\nOBJECTS\n';
+        s += this.dictionary.toDxfString();
+        s += '0\nENDSEC\n';
+
+
         //close file
-        s += '0\nEOF';
+        s += '0\nEOF\n';
 
         return s;
     }
