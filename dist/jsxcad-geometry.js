@@ -601,7 +601,7 @@ const differenceImpl = (geometry, ...geometries) => {
               fill$1(
                 fromPaths(
                   { tags: pathsGeometry.tags },
-                  pathsGeometry.map((path) => ({ points: path }))
+                  pathsGeometry.paths.map((path) => ({ points: path }))
                 )
               )
             );
@@ -2169,9 +2169,9 @@ const outline$1 = ({ tags }, geometry) => {
 // but ideally outline would be idempotent and rewrite shapes as their outlines,
 // unless already outlined, and handle the withOutline case within this.
 const outline = (geometry, tagsOverride) => {
-  const disjointGeometry = toDisjointGeometry(geometry);
+  const concreteGeometry = toConcreteGeometry(geometry);
   const outlines = [];
-  for (let graphGeometry of getNonVoidGraphs(disjointGeometry)) {
+  for (let graphGeometry of getNonVoidGraphs(concreteGeometry)) {
     let tags = graphGeometry.tags;
     if (tagsOverride) {
       tags = tagsOverride;
@@ -2179,11 +2179,17 @@ const outline = (geometry, tagsOverride) => {
     outlines.push(outline$1({ tags }, graphGeometry));
   }
   // Turn paths into wires.
-  for (let { tags = [], paths } of getNonVoidPaths(disjointGeometry)) {
+  for (let { tags = [], paths } of getNonVoidPaths(concreteGeometry)) {
     if (tagsOverride) {
       tags = tagsOverride;
     }
-    outlines.push(taggedPaths({ tags: [...tags, 'path/Wire'] }, paths));
+    const segments = [];
+    for (const path of paths) {
+      for (const edge of getEdges(path)) {
+        segments.push(edge);
+      }
+    }
+    outlines.push(taggedSegments({ tags }, segments));
   }
   return outlines;
 };

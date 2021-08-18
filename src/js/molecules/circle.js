@@ -75,7 +75,7 @@ export default class Circle extends Atom {
             
             const numberOfSegments = Math.min(Math.max(parseInt(Math.PI / (Math.acos(1 - GlobalVariables.circleSegmentSize/(diameter/2)))),6), 100)
             
-            const values = {key: "circle", diameter: diameter, numSegments:numberOfSegments, writePath: this.path }
+            const values = {op: "circle", diameter: diameter, numSegments:numberOfSegments, writePath: this.path }
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }

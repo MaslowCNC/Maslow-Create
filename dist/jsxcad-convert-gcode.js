@@ -1,4 +1,4 @@
-import { outline, toDisjointGeometry, getPathEdges } from './jsxcad-geometry.js';
+import { outline, toDisjointGeometry } from './jsxcad-geometry.js';
 
 function sortKD(ids, coords, nodeSize, left, right, depth) {
     if (right - left <= nodeSize) return;
@@ -363,28 +363,27 @@ const toGcode = async (
     const seen = new Set();
     let pendingEdges = 0;
     const points = [];
-    for (const { paths } of outline(toDisjointGeometry(geometry))) {
-      for (const path of paths) {
-        for (const edge of getPathEdges(path)) {
-          // Deduplicate edges.
-          {
-            const forward = JSON.stringify(edge);
-            if (seen.has(forward)) {
-              continue;
-            } else {
-              seen.add(forward);
-            }
-            const backward = JSON.stringify([...edge].reverse());
-            if (seen.has(backward)) {
-              continue;
-            } else {
-              seen.add(backward);
-            }
+    for (const { segments } of outline(toDisjointGeometry(geometry))) {
+      for (const edge of segments) {
+        // CHECK: Do outline segments have duplicates still?
+        // Deduplicate edges.
+        {
+          const forward = JSON.stringify(edge);
+          if (seen.has(forward)) {
+            continue;
+          } else {
+            seen.add(forward);
           }
-          points.push([edge[0], edge]);
-          points.push([edge[1], edge]);
-          pendingEdges += 1;
+          const backward = JSON.stringify([...edge].reverse());
+          if (seen.has(backward)) {
+            continue;
+          } else {
+            seen.add(backward);
+          }
         }
+        points.push([edge[0], edge]);
+        points.push([edge[1], edge]);
+        pendingEdges += 1;
       }
     }
 
@@ -425,36 +424,6 @@ const toGcode = async (
       }
     }
   }
-
-  /*
-  // FIX: Should handle points as well as paths.
-  for (const { paths } of outline(toDisjointGeometry(geometry))) {
-    toolChange(tool.grbl);
-    if (doPlan) {
-      const todo = new Set();
-      for (const path of paths) {
-        for (let [start, end] of getEdges(path)) {
-          todo.add([start, end]);
-        }
-      }
-      while (todo.size > 0) {
-        // Find the cheapest segment to cut.
-        const costs = [...todo].map(computeCost).sort();
-        const [, start, end, entry] = costs[0];
-        todo.delete(entry);
-        jump(...start); // jump to the start x, y
-        cut(...start); // may need to drill down to the start z
-        cut(...end); // cut across
-      }
-    } else {
-      for (const [start, end] of paths) {
-        jump(...start); // jump to the start x, y
-        cut(...start); // may need to drill down to the start z
-        cut(...end); // cut across
-      }
-    }
-  }
-*/
 
   park();
 
