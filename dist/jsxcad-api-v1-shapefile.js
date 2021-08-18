@@ -29,5 +29,4 @@ const readShapefile = async (shpPath, dbfPath) => {
 
 const api = { readShapefile };
 
-export default api;
-export { readShapefile };
+export { api as default, readShapefile };

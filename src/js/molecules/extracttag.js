@@ -74,7 +74,7 @@ export default class ExtractTag extends Atom{
             try{
                 var inputPath = this.findIOValue('geometry')
                 const tag =  this.findIOValue('tag')
-                const values = {key: "extractTag", tag: tag, readPath: inputPath, writePath: this.path }
+                const values = {op: "extractTag", tag: tag, readPath: inputPath, writePath: this.path }
                 this.basicThreadValueProcessing(values)
                 this.clearAlert()
             }catch(err){this.setAlert(err)}

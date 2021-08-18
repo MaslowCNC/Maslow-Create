@@ -501,13 +501,18 @@ const toCgalTransformFromJsTransform = (
   }
 };
 
-const composeTransforms = (a, b) =>
-  toJsTransformFromCgalTransform(
-    getCgal().Transformation__compose(
-      toCgalTransformFromJsTransform(a),
-      toCgalTransformFromJsTransform(b)
-    )
-  );
+const composeTransforms = (a, b) => {
+  try {
+    return toJsTransformFromCgalTransform(
+      getCgal().Transformation__compose(
+        toCgalTransformFromJsTransform(a),
+        toCgalTransformFromJsTransform(b)
+      )
+    );
+  } catch (error) {
+    throw error;
+  }
+};
 
 const invertTransform = (a) =>
   toJsTransformFromCgalTransform(
@@ -1118,12 +1123,17 @@ const fromPolygonsToSurfaceMesh = (jsPolygons) => {
   return surfaceMesh;
 };
 
-const fromSurfaceMeshEmitBoundingBox = (mesh, transform, emit) =>
-  getCgal().Surface_mesh__bbox(
-    mesh,
-    toCgalTransformFromJsTransform(transform),
-    emit
-  );
+const fromSurfaceMeshEmitBoundingBox = (mesh, transform, emit) => {
+  try {
+    return getCgal().Surface_mesh__bbox(
+      mesh,
+      toCgalTransformFromJsTransform(transform),
+      emit
+    );
+  } catch (error) {
+    throw error;
+  }
+};
 
 const fromSurfaceMeshToGraph = (mesh) => {
   const c = getCgal();

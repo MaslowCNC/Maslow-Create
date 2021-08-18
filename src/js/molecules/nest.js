@@ -163,7 +163,7 @@ export default class Nest extends Atom {
         
         const computeValue = async (values, key) => {
             try{
-                return await GlobalVariables.ask({values: values, key: key})
+                return await GlobalVariables.ask({values: values, op: key})
             }
             catch(err){
                 this.setAlert(err)

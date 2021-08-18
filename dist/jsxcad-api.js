@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { emit, hash, addOnEmitHandler, addPending, write, read, pushModule, popModule, getControlValue, getModule } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, hash, clearEmitted, getSourceLocation, getControlValue, popSourceLocation, pushSourceLocation } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -23,14 +23,11 @@ const recordNote = (note) => {
 };
 
 const beginRecordingNotes = (path, id, sourceLocation) => {
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
-
+  notes = [];
   if (handler === undefined) {
     handler = addOnEmitHandler(recordNote);
   }
   recording = true;
-  notes = [];
 };
 
 const saveRecordedNotes = (path, id) => {
@@ -41,9 +38,6 @@ const saveRecordedNotes = (path, id) => {
 };
 
 const replayRecordedNotes = async (path, id) => {
-  const setContext = { recording: { path, id } };
-  emit({ hash: hash(setContext), setContext });
-
   const notes = await read(`data/note/${path}/${id}`);
 
   if (notes === undefined) {
@@ -57,8 +51,8 @@ const replayRecordedNotes = async (path, id) => {
   }
 };
 
-const emitSourceLocation = ({ line, column }) => {
-  const setContext = { sourceLocation: { line, column } };
+const emitSourceLocation = ({ path, id }) => {
+  const setContext = { sourceLocation: { path, id } };
   emit({ hash: hash(setContext), setContext });
 };
 
@@ -71,46 +65,58 @@ var notesApi = /*#__PURE__*/Object.freeze({
 });
 
 const evaluate = async (ecmascript, { api, path }) => {
-  const builder = new Function(
-    `{ ${Object.keys(api).join(', ')} }`,
-    `return async () => { ${ecmascript} };`
-  );
   try {
+    const builder = new Function(
+      `{ ${Object.keys(api).join(', ')} }`,
+      `return async () => { ${ecmascript} };`
+    );
     const module = await builder(api);
-    pushModule(path);
     const result = await module();
     return result;
   } catch (error) {
     throw error;
-  } finally {
-    popModule();
   }
 };
 
 const execute = async (
   script,
-  { evaluate, replay, path, topLevel = {} }
+  {
+    evaluate,
+    replay,
+    path,
+    topLevel = new Map(),
+    parallelUpdateLimit = Infinity,
+    clearUpdateEmits = false,
+  }
 ) => {
   try {
-    console.log(`QQ/execute/0`);
     const updates = {};
-    const ecmascript = await toEcmascript(script, {
+    await toEcmascript(script, {
       path,
-      topLevel,
+      topLevel: new Map(),
       updates,
     });
     const pending = new Set(Object.keys(updates));
     const unprocessed = new Set(Object.keys(updates));
+    const processed = new Set();
     let somethingHappened;
     let somethingFailed;
+    let parallelUpdates = 0;
     const schedule = () => {
       console.log(`Updates remaining ${[...pending].join(', ')}`);
       for (const id of [...pending]) {
+        if (parallelUpdates >= parallelUpdateLimit) {
+          break;
+        }
         const entry = updates[id];
         const outstandingDependencies = entry.dependencies.filter(
-          (dependency) => updates[dependency]
+          (dependency) =>
+            updates[dependency] &&
+            !processed.has(dependency) &&
+            dependency !== id
         );
         if (outstandingDependencies.length === 0) {
+          parallelUpdates++;
           console.log(`Scheduling: ${id}`);
           pending.delete(id);
           const task = async () => {
@@ -119,13 +125,15 @@ const execute = async (
               console.log(`Completed ${id}`);
               delete updates[id];
               unprocessed.delete(id);
+              processed.add(id);
+              parallelUpdates--;
             } catch (error) {
               somethingFailed(error); // FIX: Deadlock?
             } finally {
               somethingHappened();
             }
           };
-          task();
+          addPending(task());
         }
       }
     };
@@ -139,6 +147,19 @@ const execute = async (
         // Wait for something to happen.
         await somethingHappens;
       }
+    }
+    if (clearUpdateEmits) {
+      clearEmitted();
+    }
+    // Execute the script in the context of the resolved updates.
+    const ecmascript = await toEcmascript(script, {
+      path,
+      topLevel,
+      updates,
+    });
+    // These should all be resolved already.
+    if (Object.keys(updates).length !== 0) {
+      throw Error('Unresolved updates');
     }
     try {
       const result = await replay(ecmascript, { path });
@@ -158,57 +179,54 @@ const registerDynamicModule = (bare, path) =>
 
 const CACHED_MODULES = new Map();
 
-const buildImportModule = (baseApi) => async (name) => {
-  try {
-    const cachedModule = CACHED_MODULES.get(name);
-    if (cachedModule !== undefined) {
-      return cachedModule;
-    }
-    console.log(`QQ/importModule/0`);
-    const internalModule = DYNAMIC_MODULES.get(name);
-    if (internalModule !== undefined) {
-      const module = await import(internalModule);
-      CACHED_MODULES.set(name, module);
-      return module;
-    }
-    console.log(`QQ/importModule/1`);
-    let script;
-    if (script === undefined) {
-      const path = `source/${name}`;
-      const sources = [];
-      sources.push(name);
-      script = await read(path, { sources });
-    }
-    console.log(`QQ/importModule/2`);
-    if (script === undefined) {
-      throw Error(`Cannot import module ${name}`);
-    }
-    console.log(`QQ/importModule/3`);
-    const scriptText =
-      typeof script === 'string'
-        ? script
-        : new TextDecoder('utf8').decode(script);
-    console.log(`QQ/importModule/4`);
-    const path = name;
-    const topLevel = new Map();
-    const api = { ...baseApi, sha: 'master' };
-    console.log(`QQ/importModule/5`);
-    const evaluate$1 = (script) => evaluate(script, { api, path });
-    const replay = (script) => evaluate(script, { api, path });
-    console.log(`QQ/importModule/6`);
+const buildImportModule =
+  (baseApi) =>
+  async (name, { clearUpdateEmits = false } = {}) => {
+    try {
+      const cachedModule = CACHED_MODULES.get(name);
+      if (cachedModule !== undefined) {
+        return cachedModule;
+      }
+      const internalModule = DYNAMIC_MODULES.get(name);
+      if (internalModule !== undefined) {
+        const module = await import(internalModule);
+        CACHED_MODULES.set(name, module);
+        return module;
+      }
+      let script;
+      if (script === undefined) {
+        const path = `source/${name}`;
+        const sources = [];
+        sources.push(name);
+        script = await read(path, { sources });
+      }
+      if (script === undefined) {
+        throw Error(`Cannot import module ${name}`);
+      }
+      const scriptText =
+        typeof script === 'string'
+          ? script
+          : new TextDecoder('utf8').decode(script);
+      const path = name;
+      const topLevel = new Map();
+      const api = { ...baseApi, sha: 'master' };
+      const evaluate$1 = (script) => evaluate(script, { api, path });
+      const replay = (script) => evaluate(script, { api, path });
 
-    const builtModule = await execute(scriptText, {
-      evaluate: evaluate$1,
-      replay,
-      path,
-      topLevel,
-    });
-    CACHED_MODULES.set(name, builtModule);
-    return builtModule;
-  } catch (error) {
-    throw error;
-  }
-};
+      const builtModule = await execute(scriptText, {
+        evaluate: evaluate$1,
+        replay,
+        path,
+        topLevel,
+        parallelUpdateLimit: 1,
+        clearUpdateEmits,
+      });
+      CACHED_MODULES.set(name, builtModule);
+      return builtModule;
+    } catch (error) {
+      throw error;
+    }
+  };
 
 /*
   Options
@@ -217,12 +235,13 @@ const buildImportModule = (baseApi) => async (name) => {
 */
 
 const control = (label, value, type, options) => {
+  const { path } = getSourceLocation();
   const control = {
     type,
     label,
-    value: getControlValue(getModule(), label, value),
+    value: getControlValue(path, label, value),
     options,
-    path: getModule(),
+    path,
   };
   emit({ control, hash: hash(control) });
   return value;
@@ -233,6 +252,8 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
+  popSourceLocation,
+  pushSourceLocation,
   readSvg,
   readStl,
   readObj,
@@ -267,5 +288,4 @@ registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export default api;
-export { evaluate, execute };
+export { api as default, evaluate, execute };

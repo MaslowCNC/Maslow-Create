@@ -6506,6 +6506,8 @@ base.MethodDefinition = base.Property = function (node, st, c) {
   c(node.value, st, "Expression");
 };
 
+// FIX: ArrowFunction parameters can be picked up as dependencies.
+
 const parseOptions = {
   allowAwaitOutsideFunction: true,
   allowReturnOutsideFunction: true,
@@ -6529,11 +6531,13 @@ const strip = (ast) => {
   }
 };
 
-const collectDependencies = (declarator) => {
-  const dependencies = [];
+const collectDependencies = (declarator, sideEffectors) => {
+  const dependencies = [...sideEffectors];
 
   const Identifier = (node, state, c) => {
-    dependencies.push(node.name);
+    if (!dependencies.includes(node.name)) {
+      dependencies.push(node.name);
+    }
   };
 
   recursive(declarator, undefined, { Identifier });
@@ -6548,51 +6552,72 @@ const fromIdToSha = (id, { topLevel }) => {
   }
 };
 
-const generateCacheLoadCode = ({ isNotCacheable, code, path, id }) => {
-  if (isNotCacheable) {
-    return [code];
+const generateCacheLoadCode = async ({
+  isNotCacheable,
+  code,
+  path,
+  id,
+  doReplay = false,
+}) => {
+  const loadCode = [];
+  if (!isNotCacheable) {
+    const meta = await read(`meta/def/${path}/${id}`);
+    if (meta && meta.type === 'Shape') {
+      loadCode.push(
+        parse(
+          `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
+          parseOptions
+        ),
+        parse(`Object.freeze(${id});`, parseOptions)
+      );
+      if (doReplay) {
+        loadCode.push(
+          parse(
+            `pushSourceLocation({ path: '${path}', id: '${id}' });`,
+            parseOptions
+          )
+        );
+        loadCode.push(
+          parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
+        );
+        loadCode.push(
+          parse(
+            `popSourceLocation({ path: '${path}', id: '${id}' });`,
+            parseOptions
+          )
+        );
+      }
+      return loadCode;
+    }
   }
-  return [
-    parse(
-      `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
-      parseOptions
-    ),
-    parse(`Object.freeze(${id});`, parseOptions),
-  ];
-};
-
-const generateReplayCode = ({ isNotCacheable, code, path, id }) => {
-  if (isNotCacheable) {
-    return [code];
-  }
-  const cacheLoadCode = generateCacheLoadCode({
-    isNotCacheable,
-    code,
-    path,
-    id,
-  });
-  const replayRecordedNotes = parse(
-    `await replayRecordedNotes('${path}', '${id}')`,
-    parseOptions
+  // Otherwise recompute it.
+  loadCode.push(
+    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
   );
-  return [...cacheLoadCode, replayRecordedNotes];
+  loadCode.push(...code);
+  loadCode.push(
+    parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
+  );
+  return loadCode;
 };
 
-const generateUpdateCode = (
+const generateUpdateCode = async (
   { isNotCacheable, code, dependencies, path, id },
   { declaration, sha, topLevel, state }
 ) => {
   if (isNotCacheable) {
     return `
 try {
-${generate(code)}
+pushSourceLocation({ path: '${path}', id: '${id}' });
+${code.map((statement) => generate(statement)).join('\n')}
+popSourceLocation({ path: '${path}', id: '${id}' });
 } catch (error) { throw error; }
 `;
   }
 
   const body = [];
   const seen = new Set();
-  const walk = (dependencies) => {
+  const walk = async (dependencies) => {
     for (const dependency of dependencies) {
       if (seen.has(dependency)) {
         continue;
@@ -6602,27 +6627,33 @@ ${generate(code)}
       if (entry === undefined) {
         continue;
       }
-      walk(entry.dependencies);
-      body.push(...generateCacheLoadCode(entry));
+      await walk(entry.dependencies);
+      body.push(...(await generateCacheLoadCode(entry)));
     }
   };
-  walk(dependencies);
+  await walk(dependencies);
   body.push(parse(`info('define ${id}');`, parseOptions));
   body.push(
     parse(
-      `beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} })`,
+      `pushSourceLocation({ path: '${path}', id: '${id}' }); beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
       parseOptions
     )
   );
-  body.push(code);
+  body.push(...code);
   // Only cache Shapes.
   body.push(
     parse(
-      `${id} instanceof Shape && await saveGeometry('data/def/${path}/${id}', ${id}) && await write('meta/def/${path}/${id}', { sha: '${sha}' });`,
+      `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });
+       if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
       parseOptions
     )
   );
-  body.push(parse(`await saveRecordedNotes('${path}', '${id}')`, parseOptions));
+  body.push(
+    parse(
+      `await saveRecordedNotes('${path}', '${id}'); popSourceLocation({ path: '${path}', id: '${id}' });`,
+      parseOptions
+    )
+  );
   const program = { type: 'Program', body };
   return `
 try {
@@ -6667,6 +6698,8 @@ const declareVariable = async (
     out,
     doExport = false,
     isImport = false,
+    sideEffectors,
+    hasSideEffects = false,
     topLevel,
     sourceLocation,
   } = {}
@@ -6675,13 +6708,22 @@ const declareVariable = async (
 
   const id = declarator.id.name;
 
-  const code = {
-    type: 'VariableDeclaration',
-    kind: declaration.kind,
-    declarations: [strip(declarator)],
-  };
+  if (hasSideEffects && !sideEffectors.includes(id)) {
+    sideEffectors.push(id);
+  }
 
-  const dependencies = collectDependencies(declarator);
+  const code = parse(
+    `
+      ${generate({
+        type: 'VariableDeclaration',
+        kind: declaration.kind,
+        declarations: [strip(declarator)],
+      })}
+    `,
+    parseOptions
+  ).body;
+
+  const dependencies = collectDependencies(declarator, sideEffectors);
   const dependencyShas = dependencies.map((dependency) =>
     fromIdToSha(dependency, { topLevel })
   );
@@ -6695,6 +6737,7 @@ const declareVariable = async (
     definition,
     dependencies,
     sha,
+    hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
   };
 
@@ -6712,7 +6755,10 @@ const declareVariable = async (
     if (declarator.init.type === 'ArrowFunctionExpression') {
       // We can't cache functions.
       entry.isNotCacheable = true;
-    } else if (declarator.init.type === 'Literal') {
+    } else if (
+      declarator.init.type === 'Literal' ||
+      declarator.init.type === 'ObjectExpression'
+    ) {
       // Not much point in caching literals.
       entry.isNotCacheable = true;
     } else if (
@@ -6728,33 +6774,50 @@ const declareVariable = async (
     }
   }
 
-  out.push(...generateReplayCode(entry));
+  out.push(...(await generateCacheLoadCode({ ...entry, doReplay: true })));
 
   if (!entry.isNotCacheable) {
     const meta = await read(`meta/def/${path}/${id}`);
     if (!meta || meta.sha !== sha) {
-      updates[`${path}/${id}`] = {
+      updates[id] = {
         dependencies,
-        program: generateUpdateCode(entry, { declaration, sha, topLevel }),
+        program: await generateUpdateCode(entry, {
+          declaration,
+          sha,
+          topLevel,
+        }),
       };
     }
   }
 };
 
-const processStatement = async (
-  entry,
-  {
-    out,
-    updates,
-    exportNames,
-    path,
-    controls,
-    topLevel,
-    nextTopLevelExpressionId,
-    isImport,
-    sourceLocation,
-  }
-) => {
+// FIX: Replace path with directory?
+const resolveModulePath = (module, { path }) => {
+  const op = () => {
+    console.log(`QQ/resolveModulePath: ${module} ${path}`);
+    if (module.startsWith('./')) {
+      const subpath = path.split('/');
+      subpath.pop();
+      return `${[...subpath, module.substring(2)].join('/')}`;
+    } else if (module.startsWith('../')) {
+      const subpath = path.split('/');
+      const end = subpath.pop();
+      subpath.pop();
+      subpath.push(end);
+      return resolveModulePath(`./${module.substring(3)}`, {
+        path: subpath.join('/'),
+      });
+    } else {
+      return module;
+    }
+  };
+
+  const result = op();
+  console.log(`QQ/resolveModulePath/result: ${result}`);
+  return result;
+};
+
+const processStatement = async (entry, options) => {
   if (entry.type === 'ImportDeclaration') {
     // Rewrite
     //   import { foo } from 'bar';
@@ -6765,19 +6828,15 @@ const processStatement = async (
     //
     // FIX: Handle other variations.
     const { specifiers, source } = entry;
+    const modulePath = resolveModulePath(source.value, options);
 
     if (specifiers.length === 0) {
       processProgram(
-        parse(`await importModule('${source.value}');`, parseOptions),
+        parse(`await importModule('${modulePath}');`, parseOptions),
         {
-          out,
-          updates,
-          exportNames,
-          path,
-          controls,
-          topLevel,
-          nextTopLevelExpressionId,
+          ...options,
           isImport: true,
+          hasSideEffects: true,
           sourceLocation: entry.loc,
         }
       );
@@ -6787,58 +6846,28 @@ const processStatement = async (
           case 'ImportDefaultSpecifier':
             processProgram(
               parse(
-                `const ${local.name} = (await importModule('${source.value}')).default;`,
+                `const ${local.name} = (await importModule('${modulePath}')).default;`,
                 parseOptions
               ),
-              {
-                out,
-                updates,
-                exportNames,
-                path,
-                controls,
-                topLevel,
-                nextTopLevelExpressionId,
-                isImport: true,
-                sourceLocation: entry.loc,
-              }
+              { ...options, isImport: true, sourceLocation: entry.loc }
             );
             break;
           case 'ImportSpecifier':
             if (local.name !== imported.name) {
               processProgram(
                 parse(
-                  `const ${local.name} = (await importModule('${source.value}')).${imported.name};`,
+                  `const ${local.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                {
-                  out,
-                  updates,
-                  exportNames,
-                  path,
-                  controls,
-                  topLevel,
-                  nextTopLevelExpressionId,
-                  isImport: true,
-                  sourceLocation: entry.loc,
-                }
+                { ...options, isImport: true, sourceLocation: entry.loc }
               );
             } else {
               processProgram(
                 parse(
-                  `const ${imported.name} = (await importModule('${source.value}')).${imported.name};`,
+                  `const ${imported.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                {
-                  out,
-                  updates,
-                  exportNames,
-                  path,
-                  controls,
-                  topLevel,
-                  nextTopLevelExpressionId,
-                  isImport: true,
-                  sourceLocation: entry.loc,
-                }
+                { ...options, isImport: true, sourceLocation: entry.loc }
               );
             }
             break;
@@ -6847,17 +6876,7 @@ const processStatement = async (
     }
   } else if (entry.type === 'VariableDeclaration') {
     for (const declarator of entry.declarations) {
-      await declareVariable(entry, declarator, {
-        out,
-        updates,
-        exportNames,
-        path,
-        controls,
-        topLevel,
-        nextTopLevelExpressionId,
-        isImport,
-        sourceLocation,
-      });
+      await declareVariable(entry, declarator, options);
     }
   } else if (entry.type === 'ExportNamedDeclaration') {
     // Note the names and replace the export with the declaration.
@@ -6865,19 +6884,13 @@ const processStatement = async (
     if (declaration.type === 'VariableDeclaration') {
       for (const declarator of declaration.declarations) {
         await declareVariable(entry.declaration, declarator, {
-          updates,
+          ...options,
           doExport: true,
-          exportNames,
-          path,
-          controls,
-          out,
-          topLevel,
-          nextTopLevelExpressionId,
-          sourceLocation,
         });
       }
     }
   } else if (entry.type === 'ExpressionStatement') {
+    const { nextTopLevelExpressionId } = options;
     // This is an ugly way of turning top level expressions into declarations.
     const declaration = parse(
       `const $${nextTopLevelExpressionId()} = ${generate(entry)}`,
@@ -6885,47 +6898,18 @@ const processStatement = async (
     ).body[0];
     const declarator = declaration.declarations[0];
     await declareVariable(declaration, declarator, {
-      out,
-      updates,
-      exportNames,
-      path,
-      controls,
-      topLevel,
-      nextTopLevelExpressionId,
-      isImport,
+      ...options,
       sourceLocation: entry.loc,
     });
   } else {
+    const { out } = options;
     out.push(entry);
   }
 };
 
-const processProgram = async (
-  program,
-  {
-    out,
-    updates,
-    exportNames,
-    path,
-    controls,
-    isImport,
-    topLevel,
-    nextTopLevelExpressionId,
-    sourceLocation,
-  }
-) => {
+const processProgram = async (program, options) => {
   for (const statement of program.body) {
-    await processStatement(statement, {
-      out,
-      updates,
-      exportNames,
-      path,
-      controls,
-      isImport,
-      topLevel,
-      nextTopLevelExpressionId,
-      sourceLocation,
-    });
+    await processStatement(statement, options);
   }
 };
 
@@ -6941,7 +6925,7 @@ const processProgram = async (
 
 const toEcmascript = async (
   script,
-  { path = '', topLevel = new Map(), updates = [] } = {}
+  { path = '', topLevel = new Map(), updates = {} } = {}
 ) => {
   let ast = parse(script, parseOptions);
 
@@ -6951,6 +6935,7 @@ const toEcmascript = async (
   const exportNames = [];
 
   const out = [];
+  const sideEffectors = [];
 
   // Start by loading the controls
   const controls = (await read(`control/${path}`)) || {};
@@ -6963,6 +6948,7 @@ const toEcmascript = async (
     path,
     topLevel,
     nextTopLevelExpressionId,
+    sideEffectors,
   });
 
   // Return the exports as an object.

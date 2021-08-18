@@ -19,5 +19,4 @@ var api = /*#__PURE__*/Object.freeze({
 	yard: yard
 });
 
-export default api;
-export { cm, foot, inch, m, mil, mm, thou, yard };
+export { cm, api as default, foot, inch, m, mil, mm, thou, yard };
