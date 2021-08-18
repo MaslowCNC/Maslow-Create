@@ -260,7 +260,6 @@ export default class Molecule extends Atom{
      */ 
     propogate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        console.log(this.name + " writing to path " + this.path)
         if(this.simplify){
             try{
                 this.processing = true
