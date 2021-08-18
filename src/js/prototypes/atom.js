@@ -581,7 +581,7 @@ export default class Atom {
         this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list
         
         if(deletePath){
-            this.basicThreadValueProcessing({key: "deletePath", path: this.path }) //Delete the cached geometry
+            this.basicThreadValueProcessing({op: "deletePath", path: this.path }) //Delete the cached geometry
         }
         
         if(backgroundClickAfter){

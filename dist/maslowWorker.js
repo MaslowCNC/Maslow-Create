@@ -272,6 +272,7 @@ const agent = async ({ ask, message }) => {
         return 1
         break;
     case "display":
+        console.log("Displaying path: " + message.readPath);
         const geometryToDisplay = await maslowRead(message.readPath);
         const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{triangles: message.triangles, outline: message.outline, wireframe: message.wireframe }));
         return threejsGeometry;
