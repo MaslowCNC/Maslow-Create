@@ -19,7 +19,7 @@ const say = (message) => postMessage(message);
 
 
 const returnEmptyGeometryText = () => {
-    return api.Hershey(20)('No Geometry').align('xy');
+    return api.Hershey('No Geometry', 20).align('xy');
 }
 
 const maslowRead = async (path) => {
