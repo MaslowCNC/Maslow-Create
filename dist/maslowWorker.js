@@ -6,6 +6,7 @@ import {
   read,
   setupFilesystem,
   touch,
+  listFiles,
 } from './jsxcad-sys.js';
 
 
@@ -166,13 +167,13 @@ const agent = async ({ ask, message }) => {
         break;
     case "item":
         const shape2item = await maslowRead(message.readPath);
-        const itemShape = shape2item.as(message.tag);
+        const itemShape = shape2item.asPart(message.tag);
         await api.saveGeometry(message.writePath, itemShape);
         return 1;
         break;
     case "listItems":
         const shape2ListItems = await maslowRead(message.readPath);
-        return [];//shape2ListItems.get('*');
+        return shape2ListItems.bom();
         break;
     case "extractTag":
         const shape2extractFrom = await maslowRead(message.readPath);
