@@ -53,8 +53,6 @@ export const extractBomTags = function(path, functionToPlace){
     window.ask({op: "listItems", readPath: path }).then( items => {
         // Filter for only bomItems
         
-        console.log(items)
-        
         var bomItems = items.filter(item => {
             return item.substring(2, 13) == "BOMitemName"
         })
