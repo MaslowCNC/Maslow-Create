@@ -5,6 +5,7 @@ import {
   createConversation,
   read,
   setupFilesystem,
+  getFilesystem,
   touch,
   listFiles,
 } from './jsxcad-sys.js';
@@ -20,10 +21,6 @@ const say = (message) => postMessage(message);
 
 
 const returnEmptyGeometryText = () => {
-    console.log("Paths: ");
-    listFiles().then( files => {
-        console.log(files);
-    })
     return api.Hershey('No Geometry', 20).align('xy');
 }
 
@@ -39,12 +36,21 @@ const maslowRead = async (path) => {
 
 const agent = async ({ ask, message }) => {
   try {
-    console.log(`worker/message: ${JSON.stringify(message)}`);
     const { id, op, path, value, workspace } = message;
     if (workspace) {
       setupFilesystem({ fileBase: workspace });
     }
+    console.log("Op: " + op);
     switch(op) {
+      case 'sys/attach':
+        self.id = id;
+        return;
+      case 'sys/touch':
+        if (id === undefined || id !== self.id) {
+          // Don't respond to touches from ourself.
+          await touch(path, { workspace, clear: true, broadcast: false });
+        }
+        return;
       case "rectangle":
         const aSquare = api.Box(message.x, message.y);
         await api.saveGeometry(message.writePath, aSquare);
@@ -197,7 +203,6 @@ const agent = async ({ ask, message }) => {
             if ( !isNaN(Number(message.paths[key]))) { //Check to see if input can be parsed as a number
                 inputs[key] = message.paths[key];
             } else {
-                console.log(key);
                 inputs[key] = await maslowRead(message.paths[key]);
             }
         }
@@ -248,8 +253,6 @@ const agent = async ({ ask, message }) => {
         break;
     case "gcode":
         
-        console.log("Gcode generation ran");
-        
         const geometryToGcode = await maslowRead(message.readPath);
         
         const shapeHeight = geometryToGcode.size().height;
@@ -292,7 +295,6 @@ const agent = async ({ ask, message }) => {
         return 1
         break;
     case "display":
-        console.log("Displaying path: " + message.readPath);
         const geometryToDisplay = await maslowRead(message.readPath);
         const threejsGeometry = toThreejsGeometry(toDisplayGeometry(geometryToDisplay.toKeptGeometry(),{triangles: message.triangles, outline: message.outline, wireframe: message.wireframe }));
         return threejsGeometry;

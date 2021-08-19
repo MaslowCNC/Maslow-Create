@@ -34,16 +34,10 @@ window.bootstrap = async () => {
   }
   
   window.ask = (question) => {
+    question.workspace = 'maslow';
     const result = askService(serviceSpec, question);
     return result;
   };
-  
-  const wa = askService(serviceSpec, {
-    op: 'write',
-    path: 'test',
-    value: 1,
-    workspace: 'test',
-  });
 };
 
 document.onreadystatechange = () => {
