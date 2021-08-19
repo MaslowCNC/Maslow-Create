@@ -79,7 +79,7 @@ export default class Svg extends Atom {
     updateValue(){
         try{
             var inputPath = this.findIOValue('geometry')
-            const values = { key: "outline", readPath: inputPath, writePath: this.path }
+            const values = { op: "outline", readPath: inputPath, writePath: this.path }
             
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
@@ -98,7 +98,7 @@ export default class Svg extends Atom {
      */ 
     downloadSvg(){
         try{
-            const values = {key: "svgOutline", readPath: this.path}
+            const values = {op: "svgOutline", readPath: this.path}
             window.ask(values).then( answer => {
                 
                 //var enc = new TextDecoder("utf-8");

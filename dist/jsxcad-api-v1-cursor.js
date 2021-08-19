@@ -120,5 +120,4 @@ Cursor.fromOrigin = fromOrigin;
 
 Cursor.signature = 'Cursor.fromOrigin() -> Cursor';
 
-export default Cursor;
-export { Cursor };
+export { Cursor, Cursor as default };

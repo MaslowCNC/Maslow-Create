@@ -258,28 +258,23 @@ export default class Molecule extends Atom{
     /**
      * Called when this molecules value changes
      */ 
-    propogate(){
+    propagate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        if(this.simplify){
-            try{
-                this.processing = true
-                const values = {key: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
-                window.ask(values).then( () => {
-                    this.processing = false
-                    this.pushPropogation()
-                })
-            }catch(err){this.setAlert(err)}
-        }
-        else{
-            this.path = this.readOutputAtomPath()
-            this.pushPropogation()
-        }
+        try{
+            this.processing = true
+            const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
+            window.ask(values).then( () => {
+                this.processing = false
+                this.pushPropagation()
+            })
+        }catch(err){this.setAlert(err)}
     }
     
     /**
      * Called when this molecules value changes
      */ 
-    pushPropogation(){
+    pushPropagation(){
+        //Only propagate up if 
         if(this != GlobalVariables.currentMolecule){
             this.output.setValue(this.path)
             this.output.ready = true
@@ -335,18 +330,7 @@ export default class Molecule extends Atom{
      */
     setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
-        if(this.simplify){
-            this.inputPath = this.path
-            this.generatePath() //Resets the molecule path to be something unique
-        }
-        else{  //Changes the path back to be the output atom
-            this.nodesOnTheScreen.forEach(atom => {
-                if(atom.atomType == "Output"){
-                    this.path = atom.loadTree()
-                }
-            })
-        }
-        this.propogate()
+        this.propagate()
     }
     
     /**
@@ -355,8 +339,8 @@ export default class Molecule extends Atom{
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = super.initializeSideBar() 
-
+        var valueList = super.initializeSideBar()
+        
         if(!this.topLevel){
             this.createEditableValueListItem(valueList,this,'name','Name', false)
         }
@@ -549,7 +533,7 @@ export default class Molecule extends Atom{
             
             //Push any changes up to the next level if there are any changes waiting in the output
             if(this.awaitingPropagationFlag == true){
-                this.propogate()
+                this.propagate()
                 this.awaitingPropagationFlag = false
             }
         }
@@ -644,7 +628,7 @@ export default class Molecule extends Atom{
                 this.loadTree()  //Walks back up the tree from this molecule loading input values from any connected atoms
                 
                 const splits = this.path.split('/')
-                const values = {key: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
+                const values = {op: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
                 window.ask(values).then( answer => {
                     
                     GlobalVariables.availablePaths = answer
@@ -680,7 +664,7 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(atom => {
             //If we have found this molecule's output atom use it to update the path here
             if(atom.atomType == "Output"){
-                this.path = atom.loadTree()
+                atom.loadTree()
             }
             //If we have found an atom with nothing connected to it
             if(atom.output){

@@ -80,7 +80,7 @@ export default class Gcode extends Atom {
             var speed = this.findIOValue('speed')
             var tabs = this.findIOValue('tabs')
             var safeHeight = this.findIOValue('safe height')
-            const values = {key: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
+            const values = {op: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
             this.gcodeString = this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }
@@ -104,7 +104,7 @@ export default class Gcode extends Atom {
             var speed = this.findIOValue('speed')
             var tabs = this.findIOValue('tabs')
             var safeHeight = this.findIOValue('safe height')
-            const values = {key: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
+            const values = {op: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
             window.ask(values).then( returnedAnswer => {
                 const blob = new Blob([returnedAnswer])
                 saveAs(blob, GlobalVariables.currentMolecule.name+'.nc')

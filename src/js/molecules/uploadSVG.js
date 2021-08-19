@@ -65,7 +65,7 @@ export default class UploadSVG extends Atom {
         const rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
         
         try{
-            const values = { key: "fromSVG", svgPath:rawPath, writePath: this.path }
+            const values = { op: "fromSVG", svgPath:rawPath, writePath: this.path }
             
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}

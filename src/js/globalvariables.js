@@ -254,7 +254,7 @@ class GlobalVariables{
         }
         
         var returned = window.ask({ evaluate: "md`hello`", 
-            key: "display", 
+            op: "display", 
             readPath: path, 
             triangles: this.displayTriangles, 
             outline: this.displayEdges, 

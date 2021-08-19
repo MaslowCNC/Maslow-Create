@@ -74,7 +74,7 @@ export default class Move extends Atom{
                 var x = this.findIOValue('xDist')
                 var y = this.findIOValue('yDist')
                 var z = this.findIOValue('zDist')
-                const values = { key: "move", x:x, y:y, z:z, readPath: inputPath, writePath: this.path }
+                const values = { op: "move", x:x, y:y, z:z, readPath: inputPath, writePath: this.path }
                 
                 this.basicThreadValueProcessing(values)
             }catch(err){this.setAlert(err)}

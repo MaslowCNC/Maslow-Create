@@ -71,7 +71,7 @@ export default class GitHubMolecule extends Molecule {
             const projectData = await GlobalVariables.gitHub.getProjectDataByID(id)
             if(projectData){
                 this.name = json.name
-                const values = {key: "fromJSON", writePath: this.path, json: projectData}
+                const values = {op: "fromJSON", writePath: this.path, json: projectData}
                 window.ask(values)
                 this.nodesOnTheScreen.forEach( atom => {
                     if(atom.atomType == "Output"){
