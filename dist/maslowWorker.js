@@ -20,6 +20,10 @@ const say = (message) => postMessage(message);
 
 
 const returnEmptyGeometryText = () => {
+    console.log("Paths: ");
+    listFiles().then( files => {
+        console.log(files);
+    })
     return api.Hershey('No Geometry', 20).align('xy');
 }
 
@@ -159,6 +163,11 @@ const agent = async ({ ask, message }) => {
         const shape2tag = await maslowRead(message.readPath);
         const taggedShape = shape2tag.as(message.tag);
         await api.saveGeometry(message.writePath, taggedShape);
+        return 1;
+        break;
+    case "copy":
+        const shape2copy = await maslowRead(message.readPath);
+        await api.saveGeometry(message.writePath, shape2copy);
         return 1;
         break;
     case "listTags":
