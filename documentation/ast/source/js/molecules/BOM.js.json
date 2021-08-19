@@ -2509,7 +2509,7 @@
                                             "key": {
                                               "type": "Identifier",
                                               "start": 2033,
-                                              "end": 2036,
+                                              "end": 2035,
                                               "loc": {
                                                 "start": {
                                                   "line": 65,
@@ -2517,20 +2517,20 @@
                                                 },
                                                 "end": {
                                                   "line": 65,
-                                                  "column": 35
+                                                  "column": 34
                                                 },
-                                                "identifierName": "key"
+                                                "identifierName": "op"
                                               },
-                                              "name": "key"
+                                              "name": "op"
                                             },
                                             "value": {
                                               "type": "StringLiteral",
-                                              "start": 2038,
+                                              "start": 2037,
                                               "end": 2043,
                                               "loc": {
                                                 "start": {
                                                   "line": 65,
-                                                  "column": 37
+                                                  "column": 36
                                                 },
                                                 "end": {
                                                   "line": 65,
@@ -2538,10 +2538,10 @@
                                                 }
                                               },
                                               "extra": {
-                                                "rawValue": "tag",
-                                                "raw": "\"tag\""
+                                                "rawValue": "item",
+                                                "raw": "\"item\""
                                               },
-                                              "value": "tag"
+                                              "value": "item"
                                             }
                                           },
                                           {
@@ -13012,9 +13012,9 @@
         "postfix": false,
         "binop": null
       },
-      "value": "key",
+      "value": "op",
       "start": 2033,
-      "end": 2036,
+      "end": 2035,
       "loc": {
         "start": {
           "line": 65,
@@ -13022,7 +13022,7 @@
         },
         "end": {
           "line": 65,
-          "column": 35
+          "column": 34
         }
       }
     },
@@ -13039,16 +13039,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 2036,
-      "end": 2037,
+      "start": 2035,
+      "end": 2036,
       "loc": {
         "start": {
           "line": 65,
-          "column": 35
+          "column": 34
         },
         "end": {
           "line": 65,
-          "column": 36
+          "column": 35
         }
       }
     },
@@ -13065,13 +13065,13 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "tag",
-      "start": 2038,
+      "value": "item",
+      "start": 2037,
       "end": 2043,
       "loc": {
         "start": {
           "line": 65,
-          "column": 37
+          "column": 36
         },
         "end": {
           "line": 65,

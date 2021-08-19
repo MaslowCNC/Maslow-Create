@@ -51523,17 +51523,6 @@ const staticDisplay = async (
   return { canvas: displayCanvas, renderer };
 };
 
-/*
-export const toCanvasFromWebglCanvas = (canvas, webglCanvas) => {
-  const { width, height } = webglCanvas;
-  outCanvas.width = width;
-  outCanvas.height = height;
-  const outContext = outCanvas.getContext('2d');
-  outContext.drawImage(webglCanvas, 0, 0, width, height);
-  return outCanvas;
-};
-*/
-
 const UP = [0, 0.0001, 1];
 
 const staticView = async (
@@ -51561,10 +51550,6 @@ const staticView = async (
     },
     { offsetWidth: width, offsetHeight: height }
   );
-  // const canvas = toCanvasFromWebglContext(renderer.getContext());
-  // canvas.style = `width: ${width}px; height: ${height}px`;
-  // const canvas = renderer.domElement;
-  // renderer.forceContextLoss();
   return rendererCanvas;
 };
 

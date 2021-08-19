@@ -1,7 +1,7 @@
-import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, bend as bend$1, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
-import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { emit, log as log$1, getModule, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
+import { closePath, concatenatePath, assemble as assemble$1, eachPoint, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedPoints, fromPolygonsToGraph, registerReifier, union, taggedGroup, taggedItem, bend as bend$1, visit, intersection, allTags, fromPointsToGraph, difference, rewrite, taggedPlan, translatePaths, getLeafs, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, fill as fill$1, empty, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, toDisjointGeometry, projectToPlane as projectToPlane$1, push as push$1, remesh as remesh$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, test as test$1, twist as twist$1, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, fromPathsToGraph, translatePath } from './jsxcad-geometry.js';
+import { getSourceLocation, emit, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
+import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { add as add$1, scale as scale$1, subtract, abs, negate, normalize, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -50,11 +50,14 @@ class Shape {
   }
 
   flip() {
-    return fromGeometry(flip(toConcreteGeometry(this)), this.context);
+    return fromGeometry(
+      flip(toConcreteGeometry(this.toGeometry())),
+      this.context
+    );
   }
 
   toDisplayGeometry(options) {
-    return toDisplayGeometry(toGeometry(this), options);
+    return toDisplayGeometry(toGeometry$1(this), options);
   }
 
   toKeptGeometry(options = {}) {
@@ -62,15 +65,15 @@ class Shape {
   }
 
   toConcreteGeometry(options = {}) {
-    return toConcreteGeometry(toGeometry(this));
+    return toConcreteGeometry(toGeometry$1(this));
   }
 
   toDisjointGeometry(options = {}) {
-    return toConcreteGeometry(toGeometry(this));
+    return toConcreteGeometry(toGeometry$1(this));
   }
 
   toTransformedGeometry(options = {}) {
-    return toTransformedGeometry(toGeometry(this));
+    return toTransformedGeometry(toGeometry$1(this));
   }
 
   getContext(symbol) {
@@ -113,12 +116,15 @@ const isSingleOpenPath = ({ paths }) =>
 Shape.method = {};
 
 const registerShapeMethod = (name, op) => {
-  /*
-  // FIX: See if we can switch these to dispatching via define?
+  const path = getSourceLocation()?.path;
   if (Shape.prototype.hasOwnProperty(name)) {
-    throw Error(`Method ${name} is already in use.`);
+    const { origin } = Shape.prototype[name];
+    if (origin !== path) {
+      throw Error(
+        `Method ${name} is already defined in ${origin} (this is ${path}).`
+      );
+    }
   }
-*/
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
   // Make the operation application available e.g., s.grow(1)
@@ -127,6 +133,7 @@ const registerShapeMethod = (name, op) => {
       return op(...args)(this);
     },
   };
+  method.origin = path;
   Shape.prototype[name] = method;
   return method;
 };
@@ -156,13 +163,16 @@ Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
   fromGeometry(fromPolygonsToGraph({}, polygons), context);
-Shape.registerMethod = registerShapeMethod;
-// Let's consider 'method' instead of 'registerMethod'.
+// Deprecated.
 Shape.method = registerShapeMethod;
+// Deprecated
 Shape.reifier = (name, op) => registerReifier(name, op);
+// Let's make the registration functions more explicit.
+Shape.registerMethod = registerShapeMethod;
+Shape.registerReifier = (name, op) => registerReifier(name, op);
 
 const fromGeometry = Shape.fromGeometry;
-const toGeometry = (shape) => shape.toGeometry();
+const toGeometry$1 = (shape) => shape.toGeometry();
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -343,14 +353,22 @@ const add =
 
 Shape.registerMethod('add', add);
 
+const toGeometry = (to, from) => {
+  if (to instanceof Function) {
+    return to(from).toGeometry();
+  } else {
+    return to.toGeometry();
+  }
+};
+
 const and =
-  (...shapes) =>
+  (...args) =>
   (shape) =>
     Shape.fromGeometry(
       taggedGroup(
         {},
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...args.map((arg) => toGeometry(arg, shape))
       )
     );
 
@@ -438,6 +456,14 @@ const as =
 
 Shape.registerMethod('as', as);
 
+// Constructs an item, as a part, from the designator.
+const asPart = (partName) => (shape) =>
+  Shape.fromGeometry(
+    taggedItem({ tags: [`part:${partName}`] }, shape.toGeometry())
+  );
+
+Shape.registerMethod('asPart', asPart);
+
 const isDefined$1 = (value) => value;
 
 const Group = (...shapes) =>
@@ -471,6 +497,31 @@ const bend =
     Shape.fromGeometry(bend$1(shape.toGeometry(), degreesPerMm));
 
 Shape.registerMethod('bend', bend);
+
+const billOfMaterials = () => (shape) => {
+  const billOfMaterials = [];
+  const walk = (geometry, descend, path) => {
+    if (geometry.type === 'item') {
+      let isPart = false;
+      for (const tag of geometry.tags) {
+        if (tag.startsWith('part:')) {
+          billOfMaterials.push(tag.substring(5));
+          isPart = true;
+        }
+      }
+      if (isPart) {
+        // Don't descend through parts to find sub-parts.
+        return;
+      }
+    }
+    descend();
+  };
+  visit(shape.toGeometry(), walk);
+  return billOfMaterials;
+};
+
+Shape.registerMethod('billOfMaterials', billOfMaterials);
+Shape.registerMethod('bom', billOfMaterials);
 
 const clip =
   (...shapes) =>
@@ -527,13 +578,21 @@ const cut =
     Shape.fromGeometry(
       difference(
         shape.toGeometry(),
-        ...shapes.map((shape) => shape.toGeometry())
+        ...shapes.map((other) => toGeometry(other, shape))
       )
     );
 
 Shape.registerMethod('cut', cut);
 
-const cutFrom = (other) => (shape) => other.cut(shape);
+const toShape = (to, from) => {
+  if (to instanceof Function) {
+    return to(from);
+  } else {
+    return to;
+  }
+};
+
+const cutFrom = (other) => (shape) => toShape(other, shape).cut(shape);
 Shape.registerMethod('cutFrom', cutFrom);
 
 const tag =
@@ -633,27 +692,25 @@ const drop =
 
 Shape.registerMethod('drop', drop);
 
-const updatePlan = (shape, ...updates) => {
-  const geometry = shape.toTransformedGeometry();
-  if (geometry.type !== 'plan') {
-    throw Error(`Shape is not a plan`);
-  }
-  return Shape.fromGeometry(
-    taggedPlan(
-      { tags: geometry.tags },
-      {
-        ...geometry.plan,
-        history: [...(geometry.plan.history || []), ...updates],
-      }
-    )
-  );
-};
+const updatePlan =
+  (...updates) =>
+  (shape) => {
+    const geometry = shape.toTransformedGeometry();
+    if (geometry.type !== 'plan') {
+      throw Error(`Shape is not a plan`);
+    }
+    return Shape.fromGeometry(
+      taggedPlan(
+        { tags: geometry.tags },
+        {
+          ...geometry.plan,
+          history: [...(geometry.plan.history || []), ...updates],
+        }
+      )
+    );
+  };
 
-const updatePlanMethod = function (...updates) {
-  return updatePlan(this, ...updates);
-};
-
-Shape.prototype.updatePlan = updatePlanMethod;
+Shape.registerMethod('updatePlan', updatePlan);
 
 const hasAngle =
   (start = 0, end = 0) =>
@@ -742,10 +799,12 @@ Shape.registerMethod('hasTop', hasTop);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
-  for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
-    const result = op(geometry.plan.history[nth]);
-    if (result !== undefined) {
-      return result;
+  if (geometry.plan.history) {
+    for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
+      const result = op(geometry.plan.history[nth]);
+      if (result !== undefined) {
+        return result;
+      }
     }
   }
   return otherwise;
@@ -2277,11 +2336,9 @@ const toPaths = (letters) => {
     .outline();
 };
 
-const ofSize = (size) => (text) => toPaths(text).scale(size);
+const ofSize = (text, size) => toPaths(text).scale(size);
 
-const Hershey = (size) => ofSize(size);
-Hershey.ofSize = ofSize;
-Hershey.toPaths = toPaths;
+const Hershey = ofSize;
 
 const MIN = 0;
 const MAX = 1;
@@ -2320,11 +2377,10 @@ const buildLayoutGeometry = ({
   const size = [pageWidth, pageLength];
   const r = (v) => Math.floor(v * 100) / 100;
   const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
-  const font = Hershey(fontHeight);
   const title = [];
-  title.push(font(`${r(pageWidth)} x ${r(pageLength)}`));
+  title.push(Hershey(`${r(pageWidth)} x ${r(pageLength)}`, fontHeight));
   for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(font(itemNames[nth]).y((nth + 1) * fontHeight));
+    title.push(Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
   }
   const visualization = Box(
     Math.max(pageWidth, margin),
@@ -2566,6 +2622,35 @@ Shape.registerMethod('fill', fill);
 const withFill = () => (shape) => shape.group(shape.fill());
 Shape.registerMethod('withFill', withFill);
 
+const assemble = (...shapes) => {
+  shapes = shapes.filter((shape) => shape !== undefined);
+  switch (shapes.length) {
+    case 0: {
+      return Shape.fromGeometry(assemble$1());
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(assemble$1(...shapes.map(toGeometry$1)));
+    }
+  }
+};
+
+const fit =
+  (...shapes) =>
+  (shape) =>
+    assemble(...shapes, shape);
+
+Shape.registerMethod('fit', fit);
+
+const fitTo =
+  (...shapes) =>
+  (shape) =>
+    assemble(shape, ...shapes);
+
+Shape.registerMethod('fitTo', fitTo);
+
 const fuse = () => (shape) => {
   const geometry = shape.toGeometry();
   return fromGeometry(union(empty({ tags: geometry.tags }), geometry));
@@ -2581,17 +2666,19 @@ const get =
     const picks = [];
     const walk = (geometry, descend, path) => {
       if (geometry.type === 'item') {
-        if (path.length > 0) {
+        if (path.length >= 1) {
           if (
             path[0] === 'tagpath:*' ||
             (geometry.tags && geometry.tags.includes(path[0]))
           ) {
-            if (path.length > 1) {
+            if (path.length >= 2) {
               return descend(path.slice(1));
             } else {
               picks.push(Shape.fromGeometry(geometry).op(...ops));
             }
           }
+        } else {
+          throw Error('Path exhausted');
         }
       } else {
         return descend(path);
@@ -2602,6 +2689,7 @@ const get =
   };
 
 Shape.registerMethod('get', get);
+Shape.registerMethod('g', get);
 
 const grow = (amount) => (shape) =>
   Shape.fromGeometry(grow$1(shape.toGeometry(), amount));
@@ -2631,44 +2719,6 @@ Shape.registerMethod('inline', inline);
 const withInline = () => (shape) => shape.with(inline());
 
 Shape.registerMethod('withInline', withInline);
-
-const inFn =
-  (path, ...ops) =>
-  (shape) => {
-    const walk = (geometry, descend, walk, path) => {
-      if (geometry.type === 'item') {
-        if (path.length > 0) {
-          if (
-            path[0] === 'tagpath:*' ||
-            (geometry.tags && geometry.tags.includes(path[0]))
-          ) {
-            if (path.length > 1) {
-              return descend({}, path.slice(1));
-            } else {
-              // This is a target.
-              const global = geometry.matrix;
-              const local = invertTransform(global);
-              const target = Shape.fromGeometry(geometry);
-              // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-              return target
-                .transform(local)
-                .op(...ops)
-                .transform(global)
-                .toGeometry();
-            }
-          }
-        }
-      } else {
-        return descend(path);
-      }
-    };
-
-    return Shape.fromGeometry(
-      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
-    );
-  };
-
-Shape.registerMethod('in', inFn);
 
 const inset =
   (initial = 1, step, limit) =>
@@ -2846,6 +2896,11 @@ const notAs =
 
 Shape.registerMethod('notAs', notAs);
 
+const nth = (n) => (shape) => each()(shape)[n];
+
+Shape.registerMethod('nth', nth);
+Shape.registerMethod('n', nth);
+
 const offset =
   (initial = 1, step, limit) =>
   (shape) =>
@@ -2854,6 +2909,48 @@ const offset =
     );
 
 Shape.registerMethod('offset', offset);
+
+const on =
+  (path, ...ops) =>
+  (shape) => {
+    const walk = (geometry, descend, walk, path) => {
+      if (geometry.type === 'item') {
+        if (path.length >= 1) {
+          if (
+            path[0] === 'tagpath:*' ||
+            (geometry.tags && geometry.tags.includes(path[0]))
+          ) {
+            if (path.length >= 2) {
+              return descend({}, path.slice(1));
+            } else {
+              // This is a target.
+              const global = geometry.matrix;
+              const local = invertTransform(global);
+              const target = Shape.fromGeometry(geometry);
+              // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+              return target
+                .transform(local)
+                .op(...ops)
+                .transform(global)
+                .toGeometry();
+            }
+          } else {
+            return geometry;
+          }
+        } else {
+          // We ran out of path without finding anything, which should be impossible.
+          throw Error('Path exhausted');
+        }
+      }
+      return descend({}, path);
+    };
+
+    return Shape.fromGeometry(
+      rewrite(shape.toGeometry(), walk, qualifyTagPath(path, 'item'))
+    );
+  };
+
+Shape.registerMethod('on', on);
 
 const op =
   (...fns) =>
@@ -3180,10 +3277,10 @@ const baseView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView = (x) => x,
+    op = (x) => x,
     inline,
-    width = 1024,
-    height = 512,
+    width = 512,
+    height = 256,
     position = [100, -100, 100],
     withAxes = false,
     withGrid = false,
@@ -3193,14 +3290,19 @@ const baseView =
       width = size;
       height = size / 2;
     }
-    const viewShape = prepareView(shape);
+    const viewShape = op(shape);
+    const sourceLocation = getSourceLocation();
+    if (!sourceLocation) {
+      console.log('No sourceLocation');
+    }
+    const { path } = sourceLocation;
     for (const entry of ensurePages(
       viewShape.toDisplayGeometry({ skin, outline, wireframe })
     )) {
-      const path = `view/${getModule()}/${generateUniqueId()}`;
-      addPending(write$1(path, entry));
+      const viewPath = `view/${path}/${generateUniqueId()}`;
+      addPending(write$1(viewPath, entry));
       const view = { width, height, position, inline, withAxes, withGrid };
-      emit({ hash: generateUniqueId(), path, view });
+      emit({ hash: generateUniqueId(), path: viewPath, view });
     }
     return shape;
   };
@@ -3211,7 +3313,7 @@ const topView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -3225,7 +3327,7 @@ const topView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -3242,7 +3344,7 @@ const gridView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -3256,7 +3358,7 @@ const gridView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -3273,7 +3375,7 @@ const frontView =
     skin = true,
     outline = true,
     wireframe = false,
-    prepareView,
+    op,
     path,
     width = 1024,
     height = 512,
@@ -3287,7 +3389,7 @@ const frontView =
       skin,
       outline,
       wireframe,
-      prepareView,
+      op,
       path,
       width,
       height,
@@ -3339,7 +3441,6 @@ const weld =
     }
     const welds = [];
     const arrangements = arrangePolygonsWithHoles(unwelded);
-    console.log(`QQ/arrangements: ${JSON.stringify(arrangements)}`);
     for (const { polygonsWithHoles } of arrangements) {
       // Keep the planar grouping.
       const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
@@ -3356,20 +3457,7 @@ const Weld = (first, ...rest) => first.weld(...rest);
 
 Shape.prototype.Weld = Shape.shapeMethod(Weld);
 
-const assemble = (...shapes) => {
-  shapes = shapes.filter((shape) => shape !== undefined);
-  switch (shapes.length) {
-    case 0: {
-      return Shape.fromGeometry(assemble$1());
-    }
-    case 1: {
-      return shapes[0];
-    }
-    default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
-    }
-  }
-};
+// DEPRECATE
 
 const withFn =
   (...shapes) =>
@@ -4034,4 +4122,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, at, bend, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fuse, get, grow, inFn, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, ofPlan, offset, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };
+export { Alpha, Arc, Assembly, Box, ChainedHull, Cone, Empty, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Wave, Weld, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, defGrblConstantLaser, defGrblDynamicLaser, defGrblPlotter, defGrblSpindle, defRgbColor, defThreejsMaterial, defTool, define, drop, each, ensurePages, ex, extrude, extrudeToPlane, fill, fit, fitTo, fuse, get, grow, inline, inset, keep, loadGeometry, loft, log, loop, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, noVoid, notAs, nth, ofPlan, offset, on, op, orient, outline, pack, play, projectToPlane, push, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, section, sectionProfile, separate, size, sketch, smooth, tag, tags, test, tint, tool, twist, view, voidFn, weld, withFill, withFn, withInset, withOp, x, xy, xz, y, yz, z };

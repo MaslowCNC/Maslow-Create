@@ -157,5 +157,4 @@ const readPngAsContours = async (
 
 const api = { readPng, readPngAsContours };
 
-export default api;
-export { readPng, readPngAsContours };
+export { api as default, readPng, readPngAsContours };

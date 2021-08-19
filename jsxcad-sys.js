@@ -616,11 +616,49 @@ function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
+/**
+ * https://bugs.webkit.org/show_bug.cgi?id=226547
+ * Safari has a horrible bug where IDB requests can hang while the browser is starting up.
+ * The only solution is to keep nudging it until it's awake.
+ * This probably creates garbage, but garbage is better than totally failing.
+ */
+
+function idbReady() {
+  var isSafari = !navigator.userAgentData && /Safari\//.test(navigator.userAgent) && !/Chrom(e|ium)\//.test(navigator.userAgent); // No point putting other browsers or older versions of Safari through this mess.
+
+  if (!isSafari || !indexedDB.databases) return Promise.resolve();
+  var intervalId;
+  return new Promise(function (resolve) {
+    var tryIdb = function tryIdb() {
+      return indexedDB.databases().finally(resolve);
+    };
+
+    intervalId = setInterval(tryIdb, 100);
+    tryIdb();
+  }).finally(function () {
+    return clearInterval(intervalId);
+  });
+}
+
+var cjsCompat$1 = idbReady;
+
 var cjsCompat = createCommonjsModule(function (module, exports) {
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+
+
+
+function _interopDefaultLegacy(e) {
+  return e && _typeof(e) === 'object' && 'default' in e ? e : {
+    'default': e
+  };
+}
+
+var safariFix__default = /*#__PURE__*/_interopDefaultLegacy(cjsCompat$1);
 
 function promisifyRequest(request) {
   return new Promise(function (resolve, reject) {
@@ -637,13 +675,15 @@ function promisifyRequest(request) {
 }
 
 function createStore(dbName, storeName) {
-  var request = indexedDB.open(dbName);
+  var dbp = safariFix__default['default']().then(function () {
+    var request = indexedDB.open(dbName);
 
-  request.onupgradeneeded = function () {
-    return request.result.createObjectStore(storeName);
-  };
+    request.onupgradeneeded = function () {
+      return request.result.createObjectStore(storeName);
+    };
 
-  var dbp = promisifyRequest(request);
+    return promisifyRequest(request);
+  });
   return function (txMode, callback) {
     return dbp.then(function (db) {
       return callback(db.transaction(storeName, txMode).objectStore(storeName));
@@ -3757,17 +3797,36 @@ function sum (o) {
 
 var hashSum = sum;
 
-const modules = [];
+const sourceLocations = [];
 
-const getModule = () => modules[modules.length - 1];
+const getSourceLocation = () =>
+  sourceLocations[sourceLocations.length - 1];
 
-const popModule = () => modules.pop();
+const popSourceLocation = (sourceLocation) => {
+  if (sourceLocations.length === 0) {
+    throw Error(`Expected current sourceLocation but there was none.`);
+  }
+  const endSourceLocation = getSourceLocation();
+  if (
+    sourceLocation.path !== endSourceLocation.path ||
+    sourceLocation.id !== endSourceLocation.id
+  ) {
+    throw Error(
+      `Expected sourceLocation ${JSON.stringify(
+        sourceLocation
+      )} but found ${JSON.stringify(endSourceLocation)}`
+    );
+  }
+  emit({ endSourceLocation });
+  sourceLocations.pop();
+};
 
-const pushModule = (module) => modules.push(module);
+const pushSourceLocation = (sourceLocation) => {
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
 
 const emitted = [];
-
-let context;
 
 let startTime = new Date();
 
@@ -3776,25 +3835,18 @@ const elapsed = () => new Date() - startTime;
 const clearEmitted = () => {
   startTime = new Date();
   emitted.length = 0;
-  context = undefined;
+  sourceLocations.length = 0;
 };
 
 const onEmitHandlers = new Set();
 
 const emit = (value) => {
-  if (value.module === undefined) {
-    value.module = getModule();
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
   }
-  if (value.setContext) {
-    context = value.setContext;
-  }
-  if (context) {
-    value.context = context;
-  }
-  const index = emitted.length;
   emitted.push(value);
   for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value, index);
+    onEmitHandler(value);
   }
 };
 
@@ -3808,6 +3860,7 @@ const addOnEmitHandler = (handler) => {
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
 const info = (text) => {
+  console.log(text);
   const entry = { info: text };
   const hash = hashSum(entry);
   emit({ info: text, hash });
@@ -4027,8 +4080,6 @@ const touch = async (
   }
 };
 
-/* global self */
-
 const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
@@ -4047,18 +4098,9 @@ const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: workspace });
   }
 
-  if (path.startsWith('meta/def')) {
-    console.log(`QQ/write/META: ${path} ${JSON.stringify(data)}`);
-  }
   info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
-
-  if (isWebWorker) {
-    console.log(`QQ/write/cache/webworker id ${self.id} path ${path}`);
-  } else {
-    console.log(`QQ/write/cache/browser path ${path}`);
-  }
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
@@ -4079,12 +4121,6 @@ const writeFile = async (options, path, data) => {
       }
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
-    }
-
-    if (isWebWorker) {
-      console.log(`QQ/write/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/write/persistent/browser path ${path}`);
     }
 
     // Let everyone know the file has changed.
@@ -4221,19 +4257,7 @@ const readFile = async (options, path) => {
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false || forceNoCache) {
-    if (isWebWorker) {
-      console.log(`QQ/read/persistent/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/persistent/browser path ${path}`);
-    }
     file.data = await fetchPersistent(path, true);
-  } else {
-    console.log(`QQ/read/cache: ${path}`);
-    if (isWebWorker) {
-      console.log(`QQ/read/cache/webworker id ${self.id} path ${path}`);
-    } else {
-      console.log(`QQ/read/cache/browser path ${path}`);
-    }
   }
   if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
@@ -4489,4 +4513,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getModule, getPendingErrorHandler, getServicePoolInfo, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popModule, pushModule, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popSourceLocation, pushSourceLocation, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

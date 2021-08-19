@@ -164,7 +164,7 @@ export default class RegularPolygon extends Atom {
     updateValue(){
         try{
             
-            const values = {key: &quot;circle&quot;, diameter: this.findIOValue(&apos;diameter&apos;), numSegments:this.findIOValue(&apos;number of sides&apos;), writePath: this.path }
+            const values = {op: &quot;circle&quot;, diameter: this.findIOValue(&apos;diameter&apos;), numSegments:this.findIOValue(&apos;number of sides&apos;), writePath: this.path }
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}
     }  

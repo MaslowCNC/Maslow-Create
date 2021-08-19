@@ -162,5 +162,4 @@ Shape.prototype.writeSvg = writeSvgMethod;
 
 const api = { SvgPath, readSvg, readSvgPath, writeSvg };
 
-export default api;
-export { SvgPath, readSvg, readSvgPath, writeSvg };
+export { SvgPath, api as default, readSvg, readSvgPath, writeSvg };

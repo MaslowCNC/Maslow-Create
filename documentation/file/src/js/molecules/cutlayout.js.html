@@ -167,7 +167,7 @@ export default class CutLayout extends Atom{
     */ 
     updateValue(){
         try{
-            const values = [this.findIOValue(&apos;geometry&apos;), this.findIOValue(&apos;Spacing&apos;)]
+            const values = {key: &quot;layout&quot;, spacing: this.findIOValue(&apos;Spacing&apos;), readPath: this.findIOValue(&apos;geometry&apos;), writePath: this.path }
             
             this.basicThreadValueProcessing(values, &quot;layout&quot;)
         }catch(err){

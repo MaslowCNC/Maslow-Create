@@ -192,7 +192,7 @@ export default class Assembly extends Atom{
                     }
                 })
                 
-                const values = { key: &quot;assembly&quot;, paths: inputValues, writePath: this.path }
+                const values = { op: &quot;assembly&quot;, paths: inputValues, writePath: this.path }
                 this.basicThreadValueProcessing(values)
                 this.clearAlert()
             }catch(err){this.setAlert(err)}

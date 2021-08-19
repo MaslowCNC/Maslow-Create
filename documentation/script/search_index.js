@@ -2310,12 +2310,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#inputpath",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-inputPath",
-    "src/js/molecules/molecule.js~Molecule#inputPath",
-    "member"
-  ],
-  [
     "src/js/molecules/molecule.js~molecule#inputs",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-inputs",
     "src/js/molecules/molecule.js~Molecule#inputs",
@@ -2340,12 +2334,6 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#path",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-path",
-    "src/js/molecules/molecule.js~Molecule#path",
-    "member"
-  ],
-  [
     "src/js/molecules/molecule.js~molecule#placeatom",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-method-placeAtom",
     "src/js/molecules/molecule.js~Molecule#placeAtom",
@@ -2364,15 +2352,15 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#propogate",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-propogate",
-    "src/js/molecules/molecule.js~Molecule#propogate",
+    "src/js/molecules/molecule.js~molecule#propagate",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-propagate",
+    "src/js/molecules/molecule.js~Molecule#propagate",
     "method"
   ],
   [
-    "src/js/molecules/molecule.js~molecule#pushpropogation",
-    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-pushPropogation",
-    "src/js/molecules/molecule.js~Molecule#pushPropogation",
+    "src/js/molecules/molecule.js~molecule#pushpropagation",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-method-pushPropagation",
+    "src/js/molecules/molecule.js~Molecule#pushPropagation",
     "method"
   ],
   [
@@ -3414,9 +3402,9 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/js/prototypes/atom.js~atom#displayandpropogate",
-    "class/src/js/prototypes/atom.js~Atom.html#instance-method-displayAndPropogate",
-    "src/js/prototypes/atom.js~Atom#displayAndPropogate",
+    "src/js/prototypes/atom.js~atom#displayandpropagate",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-method-displayAndPropagate",
+    "src/js/prototypes/atom.js~Atom#displayAndPropagate",
     "method"
   ],
   [

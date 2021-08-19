@@ -153,7 +153,7 @@ export default class Extrude extends Atom{
         try{
             var inputPath = this.findIOValue(&apos;geometry&apos;)
             var extrudeDistance = this.findIOValue(&apos;height&apos;)
-            const values = { key: &quot;extrude&quot;, distance:extrudeDistance, readPath: inputPath, writePath: this.path }
+            const values = { op: &quot;extrude&quot;, distance:extrudeDistance, readPath: inputPath, writePath: this.path }
             
             this.basicThreadValueProcessing(values, &quot;extrude&quot;)
         }catch(err){this.setAlert(err)}

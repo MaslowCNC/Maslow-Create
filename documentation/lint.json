@@ -166,27 +166,27 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 607,
+        "lineNumber": 591,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 608,
+        "lineNumber": 592,
         "line": "     * Load the children of this from a JSON representation\r"
       },
       {
-        "lineNumber": 609,
+        "lineNumber": 593,
         "line": "     * @param {object} json - A json representation of the molecule\r"
       },
       {
-        "lineNumber": 610,
+        "lineNumber": 594,
         "line": "     * @param {object} values - An array of values to apply to this molecule before deserializing it's contents. Used by githubmolecules to set top level correctly\r"
       },
       {
-        "lineNumber": 611,
+        "lineNumber": 595,
         "line": "     */\r"
       },
       {
-        "lineNumber": 612,
+        "lineNumber": 596,
         "line": "    deserialize(json, values = {}, forceBeginPropagation = false){\r"
       }
     ],
@@ -205,35 +205,35 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 696,
+        "lineNumber": 680,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 697,
+        "lineNumber": 681,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 698,
+        "lineNumber": 682,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 699,
+        "lineNumber": 683,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 700,
+        "lineNumber": 684,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 701,
+        "lineNumber": 685,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 702,
+        "lineNumber": 686,
         "line": "     */\r"
       },
       {
-        "lineNumber": 703,
+        "lineNumber": 687,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],

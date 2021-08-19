@@ -33,5 +33,4 @@ const readDst = async (path) => {
 
 const api = { readDst };
 
-export default api;
-export { readDst };
+export { api as default, readDst };

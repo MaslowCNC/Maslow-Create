@@ -153,7 +153,7 @@ export default class Difference extends Atom{
         try{
             const path1 = this.findIOValue(&apos;geometry1&apos;)
             const path2 = this.findIOValue(&apos;geometry2&apos;)
-            const values = { key: &quot;difference&quot;,readPath1: path1, readPath2: path2, writePath: this.path }
+            const values = { op: &quot;difference&quot;,readPath1: path1, readPath2: path2, writePath: this.path }
             
             this.basicThreadValueProcessing(values)
         }catch(err){this.setAlert(err)}

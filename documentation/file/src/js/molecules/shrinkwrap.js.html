@@ -187,7 +187,7 @@ export default class ShrinkWrap extends Atom{
                     }
                 })
                 
-                const values = { key: &quot;hull&quot;, paths: inputsList, writePath: this.path }
+                const values = { op: &quot;hull&quot;, paths: inputsList, writePath: this.path }
                 this.basicThreadValueProcessing(values)
             }catch(err){this.setAlert(err)}
             

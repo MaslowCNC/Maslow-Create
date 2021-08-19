@@ -48,5 +48,4 @@ Armature.signature = 'Armature() -> armature';
 
 const api = { Armature };
 
-export default api;
-export { Armature };
+export { Armature, api as default };
