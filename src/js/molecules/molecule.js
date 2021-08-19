@@ -258,34 +258,23 @@ export default class Molecule extends Atom{
     /**
      * Called when this molecules value changes
      */ 
-    propogate(){
+    propagate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        if(this.simplify){
-            try{
-                this.processing = true
-                const values = {op: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path}
-                window.ask(values).then( () => {
-                    this.processing = false
-                    this.pushPropogation()
-                })
-            }catch(err){this.setAlert(err)}
-        }
-        else{
-            try{
-                this.processing = true
-                const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
-                window.ask(values).then( () => {
-                    this.processing = false
-                    this.pushPropogation()
-                })
-            }catch(err){this.setAlert(err)}
-        }
+        try{
+            this.processing = true
+            const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
+            window.ask(values).then( () => {
+                this.processing = false
+                this.pushPropagation()
+            })
+        }catch(err){this.setAlert(err)}
     }
     
     /**
      * Called when this molecules value changes
      */ 
-    pushPropogation(){
+    pushPropagation(){
+        //Only propagate up if 
         if(this != GlobalVariables.currentMolecule){
             this.output.setValue(this.path)
             this.output.ready = true
@@ -341,7 +330,7 @@ export default class Molecule extends Atom{
      */
     setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
-        this.propogate()
+        this.propagate()
     }
     
     /**
@@ -350,8 +339,8 @@ export default class Molecule extends Atom{
     updateSidebar(){
         //Update the side bar to make it possible to change the molecule name
         
-        var valueList = super.initializeSideBar() 
-
+        var valueList = super.initializeSideBar()
+        
         if(!this.topLevel){
             this.createEditableValueListItem(valueList,this,'name','Name', false)
         }
@@ -544,7 +533,7 @@ export default class Molecule extends Atom{
             
             //Push any changes up to the next level if there are any changes waiting in the output
             if(this.awaitingPropagationFlag == true){
-                this.propogate()
+                this.propagate()
                 this.awaitingPropagationFlag = false
             }
         }
