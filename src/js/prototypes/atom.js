@@ -672,7 +672,7 @@ export default class Atom {
     /**
      * Displays the atom in 3D and sets the output.
      */ 
-    displayAndPropogate(){
+    displayAndPropagate(){
         //If this has an output write to it
         if(this.output){
             this.output.setValue(this.path)
@@ -719,7 +719,7 @@ export default class Atom {
             
             window.ask(toAsk).then(result => {
                 if (result != -1 ){
-                    this.displayAndPropogate()
+                    this.displayAndPropagate()
                 }else{
                     this.setAlert("Unable to compute")
                 }
