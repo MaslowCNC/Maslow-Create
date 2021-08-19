@@ -273,7 +273,7 @@ export default class Molecule extends Atom{
         else{
             try{
                 this.processing = true
-                const values = {key: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
+                const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
                 window.ask(values).then( () => {
                     this.processing = false
                     this.pushPropogation()
