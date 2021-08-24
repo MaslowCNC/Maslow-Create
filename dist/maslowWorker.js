@@ -287,8 +287,7 @@ const agent = async ({ ask, message }) => {
         break;
     case "getPathsList":
         const listedFiles = await listFiles();
-        const inThisProject = listedFiles.filter((path) => path.startsWith(message.prefacePath));
-        return inThisProject
+        return listedFiles
         break;
     case "deletePath":
         deleteFile({}, message.path);
