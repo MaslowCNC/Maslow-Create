@@ -167,7 +167,7 @@ const agent = async ({ ask, message }) => {
         break;
     case "tag":
         const shape2tag = await maslowRead(message.readPath);
-        const taggedShape = shape2tag.as(message.tag);
+        const taggedShape = shape2tag.tag(message.tag);
         await api.saveGeometry(message.writePath, taggedShape);
         return 1;
         break;
@@ -287,8 +287,7 @@ const agent = async ({ ask, message }) => {
         break;
     case "getPathsList":
         const listedFiles = await listFiles();
-        const inThisProject = listedFiles.filter((path) => path.startsWith(message.prefacePath));
-        return inThisProject
+        return listedFiles
         break;
     case "deletePath":
         deleteFile({}, message.path);

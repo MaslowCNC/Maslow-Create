@@ -319,9 +319,9 @@ export default function GitHubModule(){
             }
             
             //Figure out how many repos this user has, search will throw an error if they have 0;
-            octokit.repos.list({
-                affiliation: 'owner',
-            })
+            // octokit.repos.list({
+                // affiliation: 'owner',
+            // })
             
             return octokit.search.repos({
                 q: query,
@@ -801,7 +801,7 @@ export default function GitHubModule(){
             // }
             
             const passBOMOn = (bomItems) => {
-                const values = {key: "svg", readPath: GlobalVariables.topLevelMolecule.path}
+                const values = {op: "svg", readPath: GlobalVariables.topLevelMolecule.path}
                 window.ask(values).then( answer => {
                     this.progressSave(10)
                     
@@ -835,7 +835,7 @@ export default function GitHubModule(){
                     var finalSVG = decoder.decode(contentSvg)
                     
                     
-                    const askJsonVals = {key: "getJSON", readPath: GlobalVariables.topLevelMolecule.path}
+                    const askJsonVals = {op: "getJSON", readPath: GlobalVariables.topLevelMolecule.path}
                     window.ask(askJsonVals).then( JSONData => {
                         
                         this.createCommit(octokit,{
@@ -1001,7 +1001,7 @@ export default function GitHubModule(){
         
         GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule
         
-        octokit.repos.getContents({
+        octokit.repos.getContent({
             owner: currentUser,
             repo: projectName,
             path: 'project.maslowcreate'
@@ -1087,7 +1087,7 @@ export default function GitHubModule(){
         const repoName = repo.data.name
         const description = repo.data.description
         //Get the file contents
-        let result = await octokit.repos.getContents({
+        let result = await octokit.repos.getContent({
             owner: user,
             repo: repoName,
             path: 'project.maslowcreate'
@@ -1121,7 +1121,7 @@ export default function GitHubModule(){
         const repoName = repo.data.name
         
         try{
-            let jsonData = await octokit.repos.getContents({
+            let jsonData = await octokit.repos.getContent({
                 owner: user,
                 repo: repoName,
                 path: 'data.json'
@@ -1171,7 +1171,7 @@ export default function GitHubModule(){
                 var content = window.btoa(JSON.stringify(molecule.serialize({molecules: []}), null, 4)) //Convert the passed molecule object to a JSON string and then convert it to base64 encoding
                 
                 //Get the SHA for the file
-                octokit.repos.getContents({
+                octokit.repos.getContent({
                     owner: currentUser,
                     repo: repoName,
                     path: path
@@ -1363,7 +1363,7 @@ export default function GitHubModule(){
      */
     this.getAFile = async function(filePath){
         
-        const result = await octokit.repos.getContents({
+        const result = await octokit.repos.getContent({
             owner: currentUser,
             repo: currentRepoName,
             path: filePath

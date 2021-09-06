@@ -79,7 +79,7 @@ export default class GitHubMolecule extends Molecule {
                         atom.inputs[0].setValue(this.path)
                     }
                 })
-                this.propogate()
+                this.propagate()
             }
             let aPromise = new Promise((resolve) => {
                 resolve()
