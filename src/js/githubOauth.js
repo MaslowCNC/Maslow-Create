@@ -319,9 +319,9 @@ export default function GitHubModule(){
             }
             
             //Figure out how many repos this user has, search will throw an error if they have 0;
-            octokit.repos.list({
-                affiliation: 'owner',
-            })
+            // octokit.repos.list({
+                // affiliation: 'owner',
+            // })
             
             return octokit.search.repos({
                 q: query,
@@ -835,7 +835,7 @@ export default function GitHubModule(){
                     var finalSVG = decoder.decode(contentSvg)
                     
                     
-                    const askJsonVals = {key: "getJSON", readPath: GlobalVariables.topLevelMolecule.path}
+                    const askJsonVals = {op: "getJSON", readPath: GlobalVariables.topLevelMolecule.path}
                     window.ask(askJsonVals).then( JSONData => {
                         
                         this.createCommit(octokit,{
@@ -1001,7 +1001,7 @@ export default function GitHubModule(){
         
         GlobalVariables.currentMolecule = GlobalVariables.topLevelMolecule
         
-        octokit.repos.getContents({
+        octokit.repos.getContent({
             owner: currentUser,
             repo: projectName,
             path: 'project.maslowcreate'
