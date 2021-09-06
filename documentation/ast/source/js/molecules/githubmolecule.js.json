@@ -3487,9 +3487,9 @@
                                             "line": 82,
                                             "column": 30
                                           },
-                                          "identifierName": "propogate"
+                                          "identifierName": "propagate"
                                         },
-                                        "name": "propogate"
+                                        "name": "propagate"
                                       },
                                       "computed": false
                                     },
@@ -17043,7 +17043,7 @@
         "postfix": false,
         "binop": null
       },
-      "value": "propogate",
+      "value": "propagate",
       "start": 2974,
       "end": 2983,
       "loc": {

@@ -38,6 +38,12 @@ window.bootstrap = async () => {
     const result = askService(serviceSpec, question);
     return result;
   };
+  
+  //Launch run mode if it is queued
+  if(window.askSetupCallback){
+      window.askSetupCallback();
+  }
+  
 };
 
 document.onreadystatechange = () => {
