@@ -801,7 +801,7 @@ export default function GitHubModule(){
             // }
             
             const passBOMOn = (bomItems) => {
-                const values = {key: "svg", readPath: GlobalVariables.topLevelMolecule.path}
+                const values = {op: "svg", readPath: GlobalVariables.topLevelMolecule.path}
                 window.ask(values).then( answer => {
                     this.progressSave(10)
                     
