@@ -73,13 +73,6 @@ export default class GitHubMolecule extends Molecule {
                 this.name = json.name
                 const values = {op: "fromJSON", writePath: this.path, json: projectData}
                 window.ask(values)
-                this.nodesOnTheScreen.forEach( atom => {
-                    if(atom.atomType == "Output"){
-                        atom.path = this.path
-                        atom.inputs[0].setValue(this.path)
-                    }
-                })
-                this.propagate()
             }
             let aPromise = new Promise((resolve) => {
                 resolve()
@@ -131,12 +124,12 @@ export default class GitHubMolecule extends Molecule {
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(force = false){
-        
-        //Tell every atom inside this molecule to begin Propagation
-        super.beginPropagation(force)
-        
         //Trigger the inputs to this github molecule if needed
         if(!GlobalVariables.availablePaths.includes(this.path) || force){
+            
+            //Tell every atom inside this molecule to begin Propagation
+            super.beginPropagation(force)
+            
             //Triggers inputs with nothing connected to begin propagation
             this.inputs.forEach(input => {
                 input.beginPropagation(force)
