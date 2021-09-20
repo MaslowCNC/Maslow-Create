@@ -775,7 +775,7 @@ export default function GitHubModule(){
             jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
             const projectContent = window.btoa(JSON.stringify(jsonRepOfProject, null, 4))
             
-            octokit.repos.createFile({
+            octokit.repos.createOrUpdateFileContents({
                 owner: currentUser,
                 repo: currentRepoName,
                 path: &quot;project.maslowcreate&quot;,
@@ -784,7 +784,7 @@ export default function GitHubModule(){
             }).then(() =&gt; {
                 //Then create the BOM file
                 var content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
-                octokit.repos.createFile({
+                octokit.repos.createOrUpdateFileContents({
                     owner: currentUser,
                     repo: currentRepoName,
                     path: &quot;BillOfMaterials.md&quot;,
@@ -793,35 +793,35 @@ export default function GitHubModule(){
                 }).then(() =&gt; {
                     //Then create the README file
                     content = window.btoa(readmeHeader) // create a file with just the word &quot;init&quot; in it and base64 encode it
-                    octokit.repos.createFile({
+                    octokit.repos.createOrUpdateFileContents({
                         owner: currentUser,
                         repo: currentRepoName,
                         path: &quot;README.md&quot;,
                         message: &quot;initialize README&quot;, 
                         content: content
                     }).then(() =&gt; {
-                        octokit.repos.createFile({
+                        octokit.repos.createOrUpdateFileContents({
                             owner: currentUser,
                             repo: currentRepoName,
                             path: &quot;project.svg&quot;,
                             message: &quot;SVG Picture&quot;, 
                             content: &quot;&quot;
                         }).then(()=&gt;{
-                            octokit.repos.createFile({
+                            octokit.repos.createOrUpdateFileContents({
                                 owner: currentUser,
                                 repo: currentRepoName,
                                 path: &quot;.gitattributes&quot;,
                                 message: &quot;Create gitattributes&quot;, 
                                 content: window.btoa(&quot;data binary&quot;)
                             }).then(()=&gt;{
-                                octokit.repos.createFile({ 
+                                octokit.repos.createOrUpdateFileContents({ 
                                     owner: currentUser,
                                     repo: currentRepoName,
                                     path: &quot;data.json&quot;,
                                     message: &quot;Data file&quot;, 
                                     content: &quot;&quot;
                                 }).then(()=&gt;{
-                                    octokit.repos.createFile({ 
+                                    octokit.repos.createOrUpdateFileContents({ 
                                         owner: currentUser,
                                         repo: currentRepoName,
                                         path: &quot;LICENSE.txt&quot;,
@@ -838,7 +838,7 @@ export default function GitHubModule(){
             })
             
             //Update the project topics
-            octokit.repos.replaceTopics({
+            octokit.repos.replaceAllTopics({
                 owner: currentUser,
                 repo: currentRepoName,
                 names: [&quot;maslowcreate&quot;, &quot;maslowcreate-project&quot;],
@@ -1236,7 +1236,7 @@ export default function GitHubModule(){
             var id       = result.data.id
             var path     = &quot;project.maslowcreate&quot;
             var content  = window.btoa(&quot;init&quot;) // create a file with just the word &quot;init&quot; in it and base64 encode it
-            octokit.repos.createFile({
+            octokit.repos.createOrUpdateFileContents({
                 owner: currentUser,
                 repo: repoName,
                 path: path,
