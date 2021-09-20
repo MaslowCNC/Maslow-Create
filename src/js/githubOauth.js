@@ -694,7 +694,7 @@ export default function GitHubModule(){
             jsonRepOfProject.circleSegmentSize = GlobalVariables.circleSegmentSize
             const projectContent = window.btoa(JSON.stringify(jsonRepOfProject, null, 4))
             
-            octokit.repos.createFile({
+            octokit.repos.createOrUpdateFileContents({
                 owner: currentUser,
                 repo: currentRepoName,
                 path: "project.maslowcreate",
@@ -703,7 +703,7 @@ export default function GitHubModule(){
             }).then(() => {
                 //Then create the BOM file
                 var content = window.btoa(bomHeader) // create a file with just the header in it and base64 encode it
-                octokit.repos.createFile({
+                octokit.repos.createOrUpdateFileContents({
                     owner: currentUser,
                     repo: currentRepoName,
                     path: "BillOfMaterials.md",
@@ -712,35 +712,35 @@ export default function GitHubModule(){
                 }).then(() => {
                     //Then create the README file
                     content = window.btoa(readmeHeader) // create a file with just the word "init" in it and base64 encode it
-                    octokit.repos.createFile({
+                    octokit.repos.createOrUpdateFileContents({
                         owner: currentUser,
                         repo: currentRepoName,
                         path: "README.md",
                         message: "initialize README", 
                         content: content
                     }).then(() => {
-                        octokit.repos.createFile({
+                        octokit.repos.createOrUpdateFileContents({
                             owner: currentUser,
                             repo: currentRepoName,
                             path: "project.svg",
                             message: "SVG Picture", 
                             content: ""
                         }).then(()=>{
-                            octokit.repos.createFile({
+                            octokit.repos.createOrUpdateFileContents({
                                 owner: currentUser,
                                 repo: currentRepoName,
                                 path: ".gitattributes",
                                 message: "Create gitattributes", 
                                 content: window.btoa("data binary")
                             }).then(()=>{
-                                octokit.repos.createFile({ 
+                                octokit.repos.createOrUpdateFileContents({ 
                                     owner: currentUser,
                                     repo: currentRepoName,
                                     path: "data.json",
                                     message: "Data file", 
                                     content: ""
                                 }).then(()=>{
-                                    octokit.repos.createFile({ 
+                                    octokit.repos.createOrUpdateFileContents({ 
                                         owner: currentUser,
                                         repo: currentRepoName,
                                         path: "LICENSE.txt",
@@ -757,7 +757,7 @@ export default function GitHubModule(){
             })
             
             //Update the project topics
-            octokit.repos.replaceTopics({
+            octokit.repos.replaceAllTopics({
                 owner: currentUser,
                 repo: currentRepoName,
                 names: ["maslowcreate", "maslowcreate-project"],
@@ -1155,7 +1155,7 @@ export default function GitHubModule(){
             var id       = result.data.id
             var path     = "project.maslowcreate"
             var content  = window.btoa("init") // create a file with just the word "init" in it and base64 encode it
-            octokit.repos.createFile({
+            octokit.repos.createOrUpdateFileContents({
                 owner: currentUser,
                 repo: repoName,
                 path: path,
