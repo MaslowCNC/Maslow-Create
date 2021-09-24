@@ -320,7 +320,7 @@ export default function GitHubModule(){
             
             //Figure out how many repos this user has, search will throw an error if they have 0;
             // octokit.repos.list({
-                // affiliation: 'owner',
+            // affiliation: 'owner',
             // })
             
             return octokit.search.repos({
