@@ -731,17 +731,18 @@ export default class Molecule extends Atom{
                         //Make this molecule spawn with all of it's parent's inputs
                         if(atom.atomType == 'Molecule'){ //Not GitHubMolecule
                             atom.copyInputsFromParent()
+                            
+                            //Make begin propagation from an atom when it is placed. This is used when copy and pasting molecules.
+                            if(promise != null){
+                                promise.then( ()=> {
+                                    atom.beginPropagation()
+                                })
+                            }
+                            else{
+                                atom.beginPropagation()
+                            }
+                            
                         }
-                        
-                        //Make begin propagation from an atom when it is placed
-                        // if(promise != null){
-                        // promise.then( ()=> {
-                        // atom.beginPropagation()
-                        // })
-                        // }
-                        // else{
-                        // atom.beginPropagation()
-                        // }
                         
                         //Fake a click on the newly placed atom
                         const downEvt = new MouseEvent('mousedown', {

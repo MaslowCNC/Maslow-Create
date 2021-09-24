@@ -249,7 +249,7 @@ window.addEventListener('keydown', e => {
                 GlobalVariables.atomsSelected.forEach(item => {
                     let newAtomID = GlobalVariables.generateUniqueID()
                     item.uniqueID = newAtomID
-                    GlobalVariables.currentMolecule.placeAtom(item, true)    
+                    GlobalVariables.currentMolecule.placeAtom(item, true)
                 })   
             }
             //Save project
