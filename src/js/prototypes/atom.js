@@ -128,10 +128,10 @@ export default class Atom {
          */
         this.path = ""
         /** 
-         * The path which contains the geometry represented by this atom
-         * @type {string}
+         * A function which can be called to cancel the processing being done for this atom.
+         * @type {function}
          */
-        this.cancelProcessing = () => {console.log("Nothing to cancel")}
+        this.cancelProcessing = () => {console.warn("Nothing to cancel")}
 
         for(var key in values) {
             /** 
@@ -725,8 +725,6 @@ export default class Atom {
             const gotBack = window.ask(toAsk)
             
             gotBack.then(result => {
-                console.log(".then ran");
-                console.log(result)
                 if (result != -1 ){
                     this.displayAndPropagate()
                 }else{
