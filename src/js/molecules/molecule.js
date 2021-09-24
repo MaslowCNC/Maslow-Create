@@ -298,11 +298,6 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(node => {
             node.beginPropagation(force)
         })
-        
-        //Generate the simplified path if needed
-        if(this.simplify){
-            this.generatePath()
-        }
     }
     
     /**
