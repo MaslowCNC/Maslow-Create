@@ -10441,7 +10441,7 @@
     "__docId__": 630,
     "kind": "file",
     "name": "src/js/prototypes/atom.js",
-    "content": "import AttachmentPoint from './attachmentpoint'\r\nimport GlobalVariables from '../globalvariables'\r\nimport showdown  from 'showdown'\r\n\r\n/**\r\n * This class is the prototype for all atoms.\r\n */\r\nexport default class Atom {\r\n\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        //Setup default values\r\n        /** \r\n         * An array of all of the input attachment points connected to this atom\r\n         * @type {array}\r\n         */\r\n        this.inputs = []\r\n        /** \r\n         * This atom's output attachment point if it has one\r\n         * @type {object}\r\n         */\r\n        this.output = null\r\n        /** \r\n         * This atom's unique ID. Often overwritten later when loading\r\n         * @type {number}\r\n         */\r\n        this.uniqueID = GlobalVariables.generateUniqueID()\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"none\"\r\n        /** \r\n         * The X cordinate of this atom\r\n         * @type {number}\r\n         */\r\n        this.x = 0\r\n        /** \r\n         * The Y cordinate of this atom\r\n         * @type {number}\r\n         */\r\n        this.y = 0\r\n        /** \r\n         * This atom's radius as displayed on the screen is 1/72 width\r\n         * @type {number}\r\n         */\r\n        this.radius = 1/75\r\n        /** \r\n         * This atom's default color (ie when not selected or processing)\r\n         * @type {string}\r\n         */\r\n        this.defaultColor = '#F3EFEF'\r\n        /** \r\n         * This atom's color when selected\r\n         * @type {string}\r\n         */\r\n        /** \r\n         * The color to use for strokes when selected\r\n         * @type {string}\r\n         */\r\n        this.selectedColor = '#484848'\r\n        /** \r\n         * The color currently used for strokes\r\n         * @type {string}\r\n         */\r\n        this.strokeColor = '#484848'\r\n        /** \r\n         * A flag to indicate if this atom is curently selected\r\n         * @type {boolean}\r\n         */\r\n        this.selected = false\r\n        /** \r\n         * This atom's curent color\r\n         * @type {string}\r\n         */\r\n        this.color = '#F3EFEF'\r\n        /** \r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'name'\r\n        /** \r\n         * This atom's parent, usually the molecule which contains this atom\r\n         * @type {object}\r\n         */\r\n        this.parentMolecule = null\r\n        /** \r\n         * This atom's value...Is can this be done away with? Are we basically storing the value in the output now?\r\n         * @type {object}\r\n         */\r\n        this.value = null\r\n        /** \r\n         * A flag to indicate if this atom is currently being draged on the screen.\r\n         * @type {boolean}\r\n         */\r\n        this.isMoving = false\r\n        /** \r\n         * A flag to indicate if we are hovering over this atom.\r\n         * @type {boolean}\r\n         */\r\n        this.showHover = false\r\n        /** \r\n         * The X cordinate of this atom now\r\n         * @type {number}\r\n         */\r\n        this.x = 0\r\n        /** \r\n         * The Y cordinate of this atom now\r\n         * @type {number}\r\n         */\r\n        this.y = 0\r\n        /** \r\n         * A warning message displayed next to the atom. Put text in here to have a warning automatically show up. Cleared each time the output is regenerated.\r\n         * @type {string}\r\n         */\r\n        this.alertMessage = ''\r\n        /** \r\n         * A flag to indicate if the atom is currently computing a new output. Turns the molecule blue.\r\n         * @type {boolean}\r\n         */\r\n        this.processing = false\r\n        /** \r\n         * The path which contains the geometry represented by this atom\r\n         * @type {string}\r\n         */\r\n        this.path = \"\"\r\n\r\n        for(var key in values) {\r\n            /** \r\n             * Assign each of the values in values as this.value\r\n             */\r\n            this[key] = values[key]\r\n        }\r\n        \r\n        this.generatePath()\r\n    }\r\n    \r\n    /**\r\n     * Generates the path for this atom from it's location in the graph\r\n     */ \r\n    generatePath(){\r\n        let levelToInspect = this\r\n        let topPath = \"\"\r\n        while(!levelToInspect.topLevel){\r\n            topPath = \"/\" + levelToInspect.uniqueID + topPath\r\n            levelToInspect = levelToInspect.parent\r\n        }\r\n        \r\n        this.path =\"atoms/\" + levelToInspect.uniqueID + topPath + this.atomType\r\n    }\r\n    \r\n    /**\r\n     * Applies each of the passed values to this as this.x\r\n     * @param {object} values - A list of values to set\r\n     */ \r\n    setValues(values){\r\n        //Assign the object to have the passed in values\r\n        \r\n        for(var key in values) {\r\n            this[key] = values[key]\r\n        }\r\n        \r\n        this.generatePath()\r\n        \r\n        if (typeof this.ioValues !== 'undefined') {\r\n            this.ioValues.forEach(ioValue => { //for each saved value\r\n                this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value\r\n                    if(ioValue.name == io.name && io.type == 'input'){\r\n                        io.value = ioValue.ioValue\r\n                    }\r\n                })\r\n            })\r\n        }\r\n    }\r\n   \r\n    /**\r\n     * Draws the atom on the screen\r\n     */ \r\n    draw(drawType) {\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        this.inputs.forEach(child => {\r\n            child.draw()       \r\n        })\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.font = '10px Work Sans'\r\n\r\n        if(this.processing){\r\n            GlobalVariables.c.fillStyle = 'blue'\r\n        }\r\n        else if(this.selected){\r\n            GlobalVariables.c.fillStyle = this.selectedColor\r\n            GlobalVariables.c.strokeStyle = this.selectedColor\r\n            this.color = this.selectedColor\r\n            this.strokeColor = this.defaultColor\r\n        }\r\n        else{\r\n            GlobalVariables.c.fillStyle = this.defaultColor\r\n            GlobalVariables.c.strokeStyle = this.selectedColor\r\n            this.color = this.defaultColor\r\n            this.strokeColor = this.selectedColor\r\n        }\r\n\r\n        GlobalVariables.c.beginPath()\r\n        if (drawType == \"rect\"){\r\n            GlobalVariables.c.rect(xInPixels - radiusInPixels, yInPixels - this.height/2, 2* radiusInPixels, this.height)\r\n        }\r\n        else{\r\n            GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)\r\n        }\r\n        GlobalVariables.c.textAlign = 'start' \r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.strokeStyle = this.strokeColor\r\n        GlobalVariables.c.fillStyle = \"white\"\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.textAlign = 'start'\r\n        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.strokeStyle = this.strokeColor\r\n        GlobalVariables.c.lineWidth = 1\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n\r\n        if (this.showHover){\r\n           \r\n            if (this.alertMessage.length > 0){\r\n                this.color = \"red\"\r\n\r\n                //Draw Alert block  \r\n                GlobalVariables.c.beginPath()\r\n                const padding = 10\r\n                GlobalVariables.c.fillStyle = 'red'\r\n                GlobalVariables.c.rect(\r\n                    xInPixels + radiusInPixels - padding/2, \r\n                    yInPixels - radiusInPixels + padding/2, \r\n                    GlobalVariables.c.measureText(this.alertMessage.toUpperCase()).width + padding, \r\n                    - (parseInt(GlobalVariables.c.font) + padding))\r\n                GlobalVariables.c.fill()\r\n                GlobalVariables.c.strokeStyle = 'black'\r\n                GlobalVariables.c.lineWidth = 1\r\n                GlobalVariables.c.stroke()\r\n                GlobalVariables.c.closePath()\r\n\r\n                GlobalVariables.c.beginPath()\r\n                GlobalVariables.c.fillStyle = 'black'\r\n                GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), xInPixels + radiusInPixels, yInPixels - radiusInPixels) \r\n                GlobalVariables.c.closePath()\r\n                \r\n            } \r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Adds a new attachment point to this atom\r\n     * @param {boolean} type - The type of the IO (input or output)\r\n     * @param {string} name - The name of the new attachment point\r\n     * @param {object} target - The attom to attach the new attachment point to. Should we force this to always be this one?\r\n     * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array\r\n     * @param {object} defaultValue - The default value to be used when the value is not yet set\r\n     */ \r\n    addIO(type, name, target, valueType, defaultValue, ready, primary = false){\r\n        \r\n        if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name\r\n            //compute the baseline offset from parent node\r\n            var offset\r\n            if (type == 'input'){\r\n                offset = -1* target.scaledRadius\r\n            }\r\n            else{\r\n                offset = target.scaledRadius\r\n            }\r\n            var newAp = new AttachmentPoint({\r\n                parentMolecule: target,\r\n                defaultOffsetX: offset,\r\n                defaultOffsetY: 0,\r\n                type: type,\r\n                valueType: valueType,\r\n                name: name,\r\n                primary: primary,\r\n                value: defaultValue,\r\n                defaultValue: defaultValue,\r\n                uniqueID: GlobalVariables.generateUniqueID(),\r\n                atomType: 'AttachmentPoint',\r\n                ready: true\r\n            })\r\n            \r\n            if(type == 'input'){\r\n                target.inputs.push(newAp)\r\n            }else{\r\n                target.output = newAp\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Removes an attachment point from an atom.\r\n     * @param {boolean} type - The type of the IO (input or output).\r\n     * @param {string} name - The name of the new attachment point.\r\n     * @param {object} target - The attom which the attachment point is attached to. Should \r\n     * @param {object} silent - Should any connected atoms be informed of the change\r\n     */ \r\n    removeIO(type, name, target, silent = false){\r\n        //Remove the target IO attachment point\r\n        target.inputs.forEach(input => {\r\n            if(input.name == name && input.type == type){\r\n                target.inputs.splice(target.inputs.indexOf(input),1)\r\n                input.deleteSelf(silent)\r\n            }\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Set an alert to display next to the atom.\r\n     * @param {string} message - The message to display.\r\n     */ \r\n    setAlert(message){\r\n        this.color = 'orange'\r\n        this.alertMessage = String(message)\r\n        console.warn(message)\r\n    }\r\n    \r\n    /**\r\n     * Clears the alert message attached to this atom.\r\n     */ \r\n    clearAlert(){\r\n        this.color = this.defaultColor\r\n        this.alertMessage = ''\r\n    }\r\n\r\n    /**\r\n     * Delineates bounds for selection box.\r\n     */ \r\n    selectBox(x,y,xEnd,yEnd){\r\n        let xIn = Math.min(x, xEnd)\r\n        let xOut = Math.max(x, xEnd)\r\n        let yIn = Math.min(y, yEnd)\r\n        let yOut = Math.max(y, yEnd)\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        if(xInPixels >= xIn && xInPixels <= xOut){\r\n            if(yInPixels >= yIn && yInPixels <= yOut){\r\n                //this.isMoving = true\r\n                this.selected = true\r\n            }\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed\r\n     */ \r\n    clickDown(x,y, clickProcessed){\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        //If none of the inputs processed the click see if the atom should, if not clicked, then deselected\r\n        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){\r\n            this.isMoving = true\r\n            this.selected = true\r\n            this.updateSidebar()\r\n            this.sendToRender()\r\n            clickProcessed = true\r\n        }\r\n        //Deselect this if it wasn't clicked on, unless control is held\r\n        else if (!GlobalVariables.ctrlDown){\r\n            this.selected = false\r\n        }         \r\n        //Returns true if something was done with the click\r\n        this.inputs.forEach(child => {\r\n            if(child.clickDown(x,y, clickProcessed) == true){\r\n                clickProcessed = true\r\n            }\r\n        })\r\n        if(this.output){\r\n            if(this.output.clickDown(x,y, clickProcessed) == true){\r\n                clickProcessed = true\r\n            }\r\n        }\r\n           \r\n        return clickProcessed \r\n    }\r\n\r\n    /**\r\n     * Set the atom's response to a mouse double click. By default this isn't to do anything other than mark the double click as handled.\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    doubleClick(x,y){\r\n        //returns true if something was done with the click\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        var clickProcessed = false\r\n        \r\n        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)\r\n        \r\n        if (distFromClick < xInPixels){\r\n            clickProcessed = true\r\n        }\r\n        \r\n        return clickProcessed \r\n    }\r\n\r\n    /**\r\n     * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    clickUp(x,y){\r\n        this.isMoving = false\r\n        \r\n        this.inputs.forEach(child => {\r\n            child.clickUp(x,y)     \r\n        })\r\n        if(this.output){\r\n            this.output.clickUp(x,y)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Set the atom's response to a mouse click and drag. Moves the atom around the screen.\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    clickMove(x,y){\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n        if (this.isMoving == true){\r\n            this.x = GlobalVariables.pixelsToWidth(x)\r\n            this.y = GlobalVariables.pixelsToHeight(y)\r\n        }\r\n        \r\n        this.inputs.forEach(child => {\r\n            child.clickMove(x,y)       \r\n        })\r\n        if(this.output){\r\n            this.output.clickMove(x,y)\r\n        }\r\n        \r\n        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)\r\n        \r\n        //If we are close to the attachment point move it to it's hover location to make it accessible\r\n        if (distFromClick < radiusInPixels ){\r\n            this.showHover = true\r\n        }  \r\n        else { this.showHover = false}\r\n    }\r\n    \r\n    /**\r\n     * Set the atom's response to a key press. Is used to delete the atom if it is selected.\r\n     * @param {string} key - The key which has been pressed.\r\n     */ \r\n    keyPress(key){ \r\n\r\n      \r\n        this.inputs.forEach(child => {\r\n            child.keyPress(key)\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.\r\n     */ \r\n    updateSidebar(){\r\n        //updates the sidebar to display information about this node\r\n        \r\n        var valueList = this.initializeSideBar()\r\n        \r\n        //Add options to set all of the inputs\r\n        this.inputs.forEach(input => {\r\n            if(input.type == 'input' && input.valueType != 'geometry' && input.connectors.length == 0){\r\n                if(input.valueType == 'number'){\r\n                    this.createEditableValueListItem(valueList,input,'value', input.name, true)\r\n                }\r\n                else{\r\n                    this.createEditableValueListItem(valueList,input,'value', input.name, false)\r\n                }\r\n            }\r\n        })\r\n        \r\n        //Add a delete button if we are using the touch interface\r\n        if(GlobalVariables.touchInterface){\r\n            this.createButton(valueList,this,\"Delete\",()=>{this.deleteNode()})\r\n        }\r\n        \r\n        return valueList\r\n    }\r\n    \r\n    /**\r\n     * Initialized the sidebar with a title and create the HTML object.\r\n     */ \r\n    initializeSideBar(){\r\n\r\n        //remove everything in the sideBar now\r\n        let sideBar = document.querySelector('.sideBar')\r\n        //Updates sidebar values before erasing\r\n        var editables = document.querySelectorAll(\".editing-item\")\r\n        editables.forEach(function(value) {\r\n            value.blur()\r\n        })\r\n\r\n        while (sideBar.firstChild) { \r\n            sideBar.removeChild(sideBar.firstChild)\r\n        }\r\n\r\n        //adds the name of the molecule to sideBar\r\n        var name2 = document.createElement('p')\r\n        name2.textContent = this.name\r\n        sideBar.appendChild(name2)\r\n        name2.setAttribute('class','molecule_title')\r\n        \r\n        //adds the name of the molecule to sideBar\r\n        var description = document.createElement('p')\r\n        description.textContent = this.description\r\n        sideBar.appendChild(description)\r\n        description.setAttribute('class','atom_description')\r\n        \r\n\r\n        //add the name as of project title \r\n        if (this.atomType == 'Molecule' ){\r\n            let headerBar_title = document.querySelector('#headerBar_title')\r\n            if(headerBar_title){\r\n                while (headerBar_title.firstChild) {\r\n                    headerBar_title.removeChild(headerBar_title.firstChild)\r\n                }\r\n               \r\n                var name1 = document.createElement('p')\r\n                name1.textContent = \"- \" + GlobalVariables.topLevelMolecule.name\r\n                headerBar_title.appendChild(name1)\r\n            }\r\n        }\r\n\r\n        //Create a list element\r\n        var valueList = document.createElement('ul')\r\n        sideBar.appendChild(valueList)\r\n        valueList.setAttribute('class', 'sidebar-list')\r\n\r\n        \r\n        return valueList\r\n\r\n    }\r\n\r\n    /**\r\n     * Delete this atom. Silent prevents it from telling its neighbors\r\n     */ \r\n    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false){\r\n        //deletes this node and all of it's inputs\r\n        \r\n        this.inputs.forEach(input => { //disable the inputs before deleting\r\n            input.ready = false\r\n        })\r\n        \r\n        const inputsCopy = [...this.inputs]//Make a copy of the inputs list to delete all of them\r\n        inputsCopy.forEach(input => {\r\n            input.deleteSelf(silent)\r\n        })\r\n        if(this.output){\r\n            this.output.deleteSelf(silent)\r\n        }\r\n        \r\n        this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list\r\n        \r\n        if(deletePath){\r\n            this.basicThreadValueProcessing({op: \"deletePath\", path: this.path }) //Delete the cached geometry\r\n        }\r\n        \r\n        if(backgroundClickAfter){\r\n            GlobalVariables.currentMolecule.backgroundClick()\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Runs with each frame to draw the atom.\r\n     */ \r\n    update() {\r\n        \r\n        this.inputs.forEach(child => {\r\n            child.update()     \r\n        })\r\n        if(this.output){\r\n            this.output.update()\r\n        }\r\n        \r\n        this.draw()\r\n    }\r\n\r\n    /**\r\n     * Create an object containing the information about this atom that we want to save. \r\n     */ \r\n    serialize(){\r\n        \r\n        var ioValues = []\r\n        this.inputs.forEach(io => {\r\n            if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){\r\n                var saveIO = {\r\n                    name: io.name,\r\n                    ioValue: io.getValue()\r\n                }\r\n                ioValues.push(saveIO)\r\n            }\r\n        })\r\n        \r\n        var object = {\r\n            atomType: this.atomType,\r\n            name: this.name,\r\n            x: this.x,\r\n            y: this.y,\r\n            uniqueID: this.uniqueID,\r\n            ioValues: ioValues\r\n        }\r\n        \r\n        return object\r\n    }\r\n    \r\n    /**\r\n     * Return any contribution from this atom to the README file\r\n     */ \r\n    requestReadme(){\r\n        //request any contributions from this atom to the readme\r\n        \r\n        return []\r\n    }\r\n    \r\n    /**\r\n     * Set's the output value and shows the atom output on the 3D view.\r\n     */ \r\n    decreaseToProcessCountByOne(){\r\n        \r\n        GlobalVariables.topLevelMolecule.census()\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Token update value function to give each atom one by default\r\n     */ \r\n    updateValue(){\r\n    \r\n    }\r\n    \r\n    /**\r\n     * Used to walk back out the tree generating a list of constants...used for evolve\r\n     */ \r\n    walkBackForConstants(callback){\r\n        //Pass the call further up the chain\r\n        this.inputs.forEach(input => {\r\n            input.connectors.forEach(connector => {\r\n                connector.walkBackForConstants(callback)\r\n            })\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Displays the atom in 3D and sets the output.\r\n     */ \r\n    displayAndPropagate(){\r\n        //If this has an output write to it\r\n        if(this.output){\r\n            this.output.setValue(this.path)\r\n            this.output.ready = true\r\n        }\r\n        \r\n        //If this atom is selected, send the updated value to the renderer\r\n        if (this.selected){\r\n            this.sendToRender()\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Sets the atom to wait on coming information. Basically a pass through, but used for molecules\r\n     */ \r\n    waitOnComingInformation(){\r\n        if(this.output){\r\n            this.output.waitOnComingInformation()\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Calls a worker thread to compute the atom's value.\r\n     */ \r\n    basicThreadValueProcessing(toAsk){\r\n        //If the inputs are all ready\r\n        var go = true\r\n        this.inputs.forEach(input => {\r\n            if(!input.ready){\r\n                go = false\r\n            }\r\n        })\r\n        if(go){     //Then we update the value\r\n            this.processing = true\r\n            this.decreaseToProcessCountByOne()\r\n            \r\n            if(this.output){  //If this atom has an output\r\n                this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.\r\n            }\r\n            \r\n            this.clearAlert()\r\n            \r\n            //toAsk.evaluate = \"md`hello`\" //This is needed to make JSxCAD worker happy. Should probably be removed someday\r\n            \r\n            window.ask(toAsk).then(result => {\r\n                if (result != -1 ){\r\n                    this.displayAndPropagate()\r\n                }else{\r\n                    this.setAlert(\"Unable to compute\")\r\n                }\r\n                this.processing = false\r\n            })\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Starts propagation from this atom if it is not waiting for anything up stream.\r\n     */ \r\n    beginPropagation(){\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Returns an array of length two indicating that this is one atom and if it is waiting to be computed\r\n     */ \r\n    census(){\r\n        var waiting = 0\r\n        this.inputs.forEach(input => {\r\n            if(input.ready != true){\r\n                waiting = 1\r\n            }\r\n        })\r\n        return [1,waiting]\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.inputs.forEach(input => {\r\n            input.loadTree()\r\n        })\r\n        if(this.output){\r\n            this.output.value = this.path\r\n        }\r\n        return this.path\r\n    }\r\n    \r\n    /**\r\n     * Send the value of this atom to the 3D display.\r\n     */ \r\n    sendToRender(){\r\n        //Send code to JSxCAD to render\r\n        try{\r\n            GlobalVariables.writeToDisplay(this.path)\r\n        }\r\n        catch(err){\r\n            this.setAlert(err)\r\n        }\r\n\r\n    }\r\n    \r\n    /**\r\n     * Find the value of an input for with a given name.\r\n     * @param {string} ioName - The name of the target attachment point.\r\n     */ \r\n    findIOValue(ioName){\r\n        ioName = ioName.split('~').join('')\r\n        var ioValue = null\r\n        \r\n        this.inputs.forEach(child => {\r\n            if(child.name == ioName && child.type == 'input'){\r\n                ioValue = child.getValue()\r\n            }\r\n        })\r\n        \r\n        return ioValue\r\n    }\r\n    \r\n    /**\r\n     * Dump the stored copies of any geometry in this atom to free up ram....probably can be deleted\r\n     */ \r\n    // dumpBuffer(){\r\n    // this.inputs.forEach(input => {\r\n    // input.dumpBuffer()\r\n    // })\r\n    // if(this.output){\r\n    // this.output.dumpBuffer()\r\n    // }\r\n    // this.value = null\r\n    // }\r\n    \r\n    /**\r\n     * Creates an editable HTML item to set the value of an object element. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} object - The object with the element we are editing.\r\n     * @param {string} key - The key of the element to edit.\r\n     * @param {string} label - The label to display next to the editable value.\r\n     * @param {boolean} resultShouldBeNumber - A flag to indicate if the input should be converted to a number.\r\n     * @param {object} callBack - Optional. A function to call with the new value when the value changes.\r\n     */ \r\n    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){\r\n\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'sidebar-item sidebar-editable-div')\r\n        \r\n        //Left div which displays the label\r\n        var labelDiv = document.createElement('label')\r\n        div.appendChild(labelDiv)\r\n        var labelText = document.createTextNode(label + ':')\r\n        labelDiv.appendChild(labelText)\r\n        labelDiv.setAttribute('class', 'sidebar-subitem label-item')\r\n        \r\n        \r\n        //Right div which is editable and displays the value\r\n        var valueTextDiv = document.createElement('span')\r\n        labelDiv.appendChild(valueTextDiv)\r\n        var valueText = document.createTextNode(object[key])\r\n        valueTextDiv.appendChild(valueText)\r\n        valueTextDiv.setAttribute('contenteditable', 'true')\r\n        valueTextDiv.setAttribute('class', 'editing-item')\r\n        var thisID = label+GlobalVariables.generateUniqueID()\r\n        valueTextDiv.setAttribute('id', thisID)\r\n        \r\n        \r\n        document.getElementById(thisID).addEventListener('focusout',() =>{\r\n            var valueInBox = document.getElementById(thisID).textContent.trim()\r\n            if(resultShouldBeNumber){\r\n                valueInBox = GlobalVariables.limitedEvaluate(valueInBox)\r\n            }\r\n            \r\n            //If the target is an attachmentPoint then call the setter function\r\n            if(object instanceof AttachmentPoint){\r\n                object.setValue(valueInBox)\r\n            }\r\n            else{\r\n                object[key] = valueInBox\r\n                callBack(valueInBox)\r\n            }\r\n        })\r\n        \r\n        //prevent the return key from being used when editing a value\r\n        document.getElementById(thisID).addEventListener('keypress', function(evt) {\r\n            if (evt.which === 13) {\r\n                evt.preventDefault() \r\n                document.getElementById(thisID).blur() //shift focus away if someone presses enter\r\n            }\r\n        })\r\n\r\n    }\r\n    \r\n    /**\r\n     * Creates an non-editable HTML item to set the value of an object element. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} object - The object with the element we are displaying.\r\n     * @param {string} key - The key of the element to display.\r\n     * @param {string} label - The label to display next to the displayed value.\r\n     */ \r\n    createNonEditableValueListItem(list,object,key, label){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'sidebar-item sidebar-editable-div')\r\n        \r\n        //Left div which displays the label\r\n        var labelDiv = document.createElement('div')\r\n        div.appendChild(labelDiv)\r\n        var labelText = document.createTextNode(label + ':')\r\n        labelDiv.appendChild(labelText)\r\n        labelDiv.setAttribute('class', 'sidebar-subitem label-item')\r\n        \r\n        \r\n        //Right div which is editable and displays the value\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var valueText = document.createTextNode(object[key])\r\n        valueTextDiv.appendChild(valueText)\r\n        valueTextDiv.setAttribute('contenteditable', 'false')\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem noediting-item')\r\n        var thisID = label+GlobalVariables.generateUniqueID()\r\n        valueTextDiv.setAttribute('id', thisID)\r\n        \r\n\r\n    }\r\n    \r\n    /**\r\n     * Creates a html representation of the passed text. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {string} texxt - The text used to generate the markdown html.\r\n     */ \r\n    createMarkdownListItem(list, text){\r\n        \r\n        var converter = new showdown.Converter()\r\n        //var text      = '# hello, markdown!'\r\n        var html      = converter.makeHtml(text)\r\n        \r\n        var markdownTextDiv = document.createElement('div')\r\n        markdownTextDiv.innerHTML = html\r\n        \r\n        //var valueText = document.createTextNode(text)\r\n        //valueTextDiv.appendChild(valueText)\r\n        list.appendChild(markdownTextDiv)       \r\n    }\r\n    \r\n    /**\r\n     * Creates dropdown with multiple options to select. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r\n     * @param {array} options - A list of options to display in the drop down.\r\n     * @param {number} selectedOption - The zero referenced index of the selected option.\r\n     * @param {string} description - A description of what the dropdown does.\r\n     * @param {object} Callback function\r\n     */ \r\n    createDropDown(list,parent,options,selectedOption, description, callback){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'sidebar-item')\r\n        \r\n        //Left div which displays the label\r\n        var labelDiv = document.createElement('div')\r\n        div.appendChild(labelDiv)\r\n        var labelText = document.createTextNode(description)\r\n        labelDiv.appendChild(labelText)\r\n        labelDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        \r\n        //Right div which is editable and displays the value\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var dropDown = document.createElement('select')\r\n        options.forEach(option => {\r\n            var op = new Option()\r\n            op.value = options.findIndex(thisOption => thisOption === option)\r\n            op.text = option\r\n            dropDown.options.add(op)\r\n        })\r\n        valueTextDiv.appendChild(dropDown)\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        dropDown.selectedIndex = selectedOption //display the current selection\r\n        \r\n        dropDown.addEventListener(\r\n            'change',\r\n            function() { callback(dropDown.value) },\r\n            false\r\n        )\r\n    }\r\n    \r\n    /**\r\n     * Creates button. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r\n     * @param {string} buttonText - The text on the button.\r\n     * @param {object} functionToCall - The function to call when the button is pressed.\r\n     */ \r\n    createButton(list,parent,buttonText,functionToCall){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'runSideBarDiv')\r\n        \r\n        \r\n        //Right div which is button\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var button = document.createElement('button')\r\n        var buttonTextNode = document.createTextNode(buttonText)\r\n        button.setAttribute('class', ' browseButton')\r\n        button.setAttribute('id', buttonText.replace(/\\s+/g, \"\") + \"-button\")\r\n        button.appendChild(buttonTextNode)\r\n        valueTextDiv.appendChild(button)\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        button.addEventListener(\r\n            'mousedown',\r\n            function() { functionToCall() } ,\r\n            false\r\n        )\r\n    }\r\n    \r\n    /**\r\n     * Creates file upload button. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r\n     * @param {string} buttonText - The text on the button.\r\n     * @param {object} functionToCall - The function to call when the button is pressed.\r\n     */ \r\n    createFileUpload(list,parent,buttonText,functionToCall){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'runSideBarDiv')\r\n        \r\n        \r\n        //Right div which is button\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var button = document.createElement('input')\r\n        button.type = \"file\"\r\n        var buttonTextNode = document.createTextNode(buttonText)\r\n        button.setAttribute('class', ' browseButton')\r\n        button.setAttribute('id', buttonText.replace(/\\s+/g, \"\") + \"-button\")\r\n        button.appendChild(buttonTextNode)\r\n        valueTextDiv.appendChild(button)\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        button.addEventListener(\r\n            'change',\r\n            functionToCall,\r\n            false\r\n        )\r\n    }\r\n    \r\n    /**\r\n     * Creates button. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {string} buttonText - The text on the button.\r\n     * @param {boolean} - Flag to see if checkbox is checked\r\n     * @param {object} functionToCall - The function to call when the button is pressed.\r\n     */ \r\n    createCheckbox(sideBar,text,isChecked,callback){\r\n        var gridDiv = document.createElement('div')\r\n        sideBar.appendChild(gridDiv)\r\n        gridDiv.setAttribute('id', text + \"-parent\")\r\n        gridDiv.setAttribute('class', \"sidebar-checkbox\")\r\n        var gridCheck = document.createElement('input')\r\n        gridDiv.appendChild(gridCheck)\r\n        gridCheck.setAttribute('type', 'checkbox')\r\n        gridCheck.setAttribute('id', text)\r\n        \r\n        if (isChecked){\r\n            gridCheck.setAttribute('checked', 'true')\r\n        }\r\n        \r\n\r\n        var gridCheckLabel = document.createElement('label')\r\n        gridDiv.appendChild(gridCheckLabel)\r\n        gridCheckLabel.setAttribute('for', 'gridCheck')\r\n        gridCheckLabel.setAttribute('style', 'margin-right:1em;')\r\n        gridCheckLabel.textContent = text\r\n\r\n        gridCheck.addEventListener('change', event => {\r\n            callback(event)\r\n        })\r\n    }\r\n}",
+    "content": "import AttachmentPoint from './attachmentpoint'\r\nimport GlobalVariables from '../globalvariables'\r\nimport showdown  from 'showdown'\r\n\r\n/**\r\n * This class is the prototype for all atoms.\r\n */\r\nexport default class Atom {\r\n\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        //Setup default values\r\n        /** \r\n         * An array of all of the input attachment points connected to this atom\r\n         * @type {array}\r\n         */\r\n        this.inputs = []\r\n        /** \r\n         * This atom's output attachment point if it has one\r\n         * @type {object}\r\n         */\r\n        this.output = null\r\n        /** \r\n         * This atom's unique ID. Often overwritten later when loading\r\n         * @type {number}\r\n         */\r\n        this.uniqueID = GlobalVariables.generateUniqueID()\r\n        /** \r\n         * A description of this atom\r\n         * @type {string}\r\n         */\r\n        this.description = \"none\"\r\n        /** \r\n         * The X cordinate of this atom\r\n         * @type {number}\r\n         */\r\n        this.x = 0\r\n        /** \r\n         * The Y cordinate of this atom\r\n         * @type {number}\r\n         */\r\n        this.y = 0\r\n        /** \r\n         * This atom's radius as displayed on the screen is 1/72 width\r\n         * @type {number}\r\n         */\r\n        this.radius = 1/75\r\n        /** \r\n         * This atom's default color (ie when not selected or processing)\r\n         * @type {string}\r\n         */\r\n        this.defaultColor = '#F3EFEF'\r\n        /** \r\n         * This atom's color when selected\r\n         * @type {string}\r\n         */\r\n        /** \r\n         * The color to use for strokes when selected\r\n         * @type {string}\r\n         */\r\n        this.selectedColor = '#484848'\r\n        /** \r\n         * The color currently used for strokes\r\n         * @type {string}\r\n         */\r\n        this.strokeColor = '#484848'\r\n        /** \r\n         * A flag to indicate if this atom is curently selected\r\n         * @type {boolean}\r\n         */\r\n        this.selected = false\r\n        /** \r\n         * This atom's curent color\r\n         * @type {string}\r\n         */\r\n        this.color = '#F3EFEF'\r\n        /** \r\n         * This atom's name\r\n         * @type {string}\r\n         */\r\n        this.name = 'name'\r\n        /** \r\n         * This atom's parent, usually the molecule which contains this atom\r\n         * @type {object}\r\n         */\r\n        this.parentMolecule = null\r\n        /** \r\n         * This atom's value...Is can this be done away with? Are we basically storing the value in the output now?\r\n         * @type {object}\r\n         */\r\n        this.value = null\r\n        /** \r\n         * A flag to indicate if this atom is currently being draged on the screen.\r\n         * @type {boolean}\r\n         */\r\n        this.isMoving = false\r\n        /** \r\n         * A flag to indicate if we are hovering over this atom.\r\n         * @type {boolean}\r\n         */\r\n        this.showHover = false\r\n        /** \r\n         * The X cordinate of this atom now\r\n         * @type {number}\r\n         */\r\n        this.x = 0\r\n        /** \r\n         * The Y cordinate of this atom now\r\n         * @type {number}\r\n         */\r\n        this.y = 0\r\n        /** \r\n         * A warning message displayed next to the atom. Put text in here to have a warning automatically show up. Cleared each time the output is regenerated.\r\n         * @type {string}\r\n         */\r\n        this.alertMessage = ''\r\n        /** \r\n         * A flag to indicate if the atom is currently computing a new output. Turns the molecule blue.\r\n         * @type {boolean}\r\n         */\r\n        this.processing = false\r\n        /** \r\n         * The path which contains the geometry represented by this atom\r\n         * @type {string}\r\n         */\r\n        this.path = \"\"\r\n        /** \r\n         * A function which can be called to cancel the processing being done for this atom.\r\n         * @type {function}\r\n         */\r\n        this.cancelProcessing = () => {console.warn(\"Nothing to cancel\")}\r\n\r\n        for(var key in values) {\r\n            /** \r\n             * Assign each of the values in values as this.value\r\n             */\r\n            this[key] = values[key]\r\n        }\r\n        \r\n        this.generatePath()\r\n    }\r\n    \r\n    /**\r\n     * Generates the path for this atom from it's location in the graph\r\n     */ \r\n    generatePath(){\r\n        let levelToInspect = this\r\n        let topPath = \"\"\r\n        while(!levelToInspect.topLevel){\r\n            topPath = \"/\" + levelToInspect.uniqueID + topPath\r\n            levelToInspect = levelToInspect.parent\r\n        }\r\n        \r\n        this.path =\"atoms/\" + levelToInspect.uniqueID + topPath + this.atomType\r\n    }\r\n    \r\n    /**\r\n     * Applies each of the passed values to this as this.x\r\n     * @param {object} values - A list of values to set\r\n     */ \r\n    setValues(values){\r\n        //Assign the object to have the passed in values\r\n        \r\n        for(var key in values) {\r\n            this[key] = values[key]\r\n        }\r\n        \r\n        this.generatePath()\r\n        \r\n        if (typeof this.ioValues !== 'undefined') {\r\n            this.ioValues.forEach(ioValue => { //for each saved value\r\n                this.inputs.forEach(io => {  //Find the matching IO and set it to be the saved value\r\n                    if(ioValue.name == io.name && io.type == 'input'){\r\n                        io.value = ioValue.ioValue\r\n                    }\r\n                })\r\n            })\r\n        }\r\n    }\r\n   \r\n    /**\r\n     * Draws the atom on the screen\r\n     */ \r\n    draw(drawType) {\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        this.inputs.forEach(child => {\r\n            child.draw()       \r\n        })\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.font = '10px Work Sans'\r\n\r\n        if(this.processing){\r\n            GlobalVariables.c.fillStyle = 'blue'\r\n        }\r\n        else if(this.selected){\r\n            GlobalVariables.c.fillStyle = this.selectedColor\r\n            GlobalVariables.c.strokeStyle = this.selectedColor\r\n            this.color = this.selectedColor\r\n            this.strokeColor = this.defaultColor\r\n        }\r\n        else{\r\n            GlobalVariables.c.fillStyle = this.defaultColor\r\n            GlobalVariables.c.strokeStyle = this.selectedColor\r\n            this.color = this.defaultColor\r\n            this.strokeColor = this.selectedColor\r\n        }\r\n\r\n        GlobalVariables.c.beginPath()\r\n        if (drawType == \"rect\"){\r\n            GlobalVariables.c.rect(xInPixels - radiusInPixels, yInPixels - this.height/2, 2* radiusInPixels, this.height)\r\n        }\r\n        else{\r\n            GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)\r\n        }\r\n        GlobalVariables.c.textAlign = 'start' \r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.strokeStyle = this.strokeColor\r\n        GlobalVariables.c.fillStyle = \"white\"\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.textAlign = 'start'\r\n        GlobalVariables.c.fillText(this.name, xInPixels + radiusInPixels, yInPixels - radiusInPixels)\r\n        GlobalVariables.c.fill()\r\n        GlobalVariables.c.strokeStyle = this.strokeColor\r\n        GlobalVariables.c.lineWidth = 1\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.closePath()\r\n\r\n        if (this.showHover){\r\n           \r\n            if (this.alertMessage.length > 0){\r\n                this.color = \"red\"\r\n\r\n                //Draw Alert block  \r\n                GlobalVariables.c.beginPath()\r\n                const padding = 10\r\n                GlobalVariables.c.fillStyle = 'red'\r\n                GlobalVariables.c.rect(\r\n                    xInPixels + radiusInPixels - padding/2, \r\n                    yInPixels - radiusInPixels + padding/2, \r\n                    GlobalVariables.c.measureText(this.alertMessage.toUpperCase()).width + padding, \r\n                    - (parseInt(GlobalVariables.c.font) + padding))\r\n                GlobalVariables.c.fill()\r\n                GlobalVariables.c.strokeStyle = 'black'\r\n                GlobalVariables.c.lineWidth = 1\r\n                GlobalVariables.c.stroke()\r\n                GlobalVariables.c.closePath()\r\n\r\n                GlobalVariables.c.beginPath()\r\n                GlobalVariables.c.fillStyle = 'black'\r\n                GlobalVariables.c.fillText(this.alertMessage.toUpperCase(), xInPixels + radiusInPixels, yInPixels - radiusInPixels) \r\n                GlobalVariables.c.closePath()\r\n                \r\n            } \r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Adds a new attachment point to this atom\r\n     * @param {boolean} type - The type of the IO (input or output)\r\n     * @param {string} name - The name of the new attachment point\r\n     * @param {object} target - The attom to attach the new attachment point to. Should we force this to always be this one?\r\n     * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array\r\n     * @param {object} defaultValue - The default value to be used when the value is not yet set\r\n     */ \r\n    addIO(type, name, target, valueType, defaultValue, ready, primary = false){\r\n        \r\n        if(target.inputs.find(o => (o.name === name && o.type === type))== undefined){ //Check to make sure there isn't already an IO with the same type and name\r\n            //compute the baseline offset from parent node\r\n            var offset\r\n            if (type == 'input'){\r\n                offset = -1* target.scaledRadius\r\n            }\r\n            else{\r\n                offset = target.scaledRadius\r\n            }\r\n            var newAp = new AttachmentPoint({\r\n                parentMolecule: target,\r\n                defaultOffsetX: offset,\r\n                defaultOffsetY: 0,\r\n                type: type,\r\n                valueType: valueType,\r\n                name: name,\r\n                primary: primary,\r\n                value: defaultValue,\r\n                defaultValue: defaultValue,\r\n                uniqueID: GlobalVariables.generateUniqueID(),\r\n                atomType: 'AttachmentPoint',\r\n                ready: true\r\n            })\r\n            \r\n            if(type == 'input'){\r\n                target.inputs.push(newAp)\r\n            }else{\r\n                target.output = newAp\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Removes an attachment point from an atom.\r\n     * @param {boolean} type - The type of the IO (input or output).\r\n     * @param {string} name - The name of the new attachment point.\r\n     * @param {object} target - The attom which the attachment point is attached to. Should \r\n     * @param {object} silent - Should any connected atoms be informed of the change\r\n     */ \r\n    removeIO(type, name, target, silent = false){\r\n        //Remove the target IO attachment point\r\n        target.inputs.forEach(input => {\r\n            if(input.name == name && input.type == type){\r\n                target.inputs.splice(target.inputs.indexOf(input),1)\r\n                input.deleteSelf(silent)\r\n            }\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Set an alert to display next to the atom.\r\n     * @param {string} message - The message to display.\r\n     */ \r\n    setAlert(message){\r\n        this.color = 'orange'\r\n        this.alertMessage = String(message)\r\n        console.warn(message)\r\n    }\r\n    \r\n    /**\r\n     * Clears the alert message attached to this atom.\r\n     */ \r\n    clearAlert(){\r\n        this.color = this.defaultColor\r\n        this.alertMessage = ''\r\n    }\r\n\r\n    /**\r\n     * Delineates bounds for selection box.\r\n     */ \r\n    selectBox(x,y,xEnd,yEnd){\r\n        let xIn = Math.min(x, xEnd)\r\n        let xOut = Math.max(x, xEnd)\r\n        let yIn = Math.min(y, yEnd)\r\n        let yOut = Math.max(y, yEnd)\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        if(xInPixels >= xIn && xInPixels <= xOut){\r\n            if(yInPixels >= yIn && yInPixels <= yOut){\r\n                //this.isMoving = true\r\n                this.selected = true\r\n            }\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D\r\n     * @param {number} x - The X coordinate of the click\r\n     * @param {number} y - The Y coordinate of the click\r\n     * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed\r\n     */ \r\n    clickDown(x,y, clickProcessed){\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        //If none of the inputs processed the click see if the atom should, if not clicked, then deselected\r\n        if(!clickProcessed && GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels) < radiusInPixels){\r\n            this.isMoving = true\r\n            this.selected = true\r\n            this.updateSidebar()\r\n            this.sendToRender()\r\n            clickProcessed = true\r\n        }\r\n        //Deselect this if it wasn't clicked on, unless control is held\r\n        else if (!GlobalVariables.ctrlDown){\r\n            this.selected = false\r\n        }         \r\n        //Returns true if something was done with the click\r\n        this.inputs.forEach(child => {\r\n            if(child.clickDown(x,y, clickProcessed) == true){\r\n                clickProcessed = true\r\n            }\r\n        })\r\n        if(this.output){\r\n            if(this.output.clickDown(x,y, clickProcessed) == true){\r\n                clickProcessed = true\r\n            }\r\n        }\r\n           \r\n        return clickProcessed \r\n    }\r\n\r\n    /**\r\n     * Set the atom's response to a mouse double click. By default this isn't to do anything other than mark the double click as handled.\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    doubleClick(x,y){\r\n        //returns true if something was done with the click\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        var clickProcessed = false\r\n        \r\n        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)\r\n        \r\n        if (distFromClick < xInPixels){\r\n            clickProcessed = true\r\n        }\r\n        \r\n        return clickProcessed \r\n    }\r\n\r\n    /**\r\n     * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    clickUp(x,y){\r\n        this.isMoving = false\r\n        \r\n        this.inputs.forEach(child => {\r\n            child.clickUp(x,y)     \r\n        })\r\n        if(this.output){\r\n            this.output.clickUp(x,y)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Set the atom's response to a mouse click and drag. Moves the atom around the screen.\r\n     * @param {number} x - The X cordinate of the click\r\n     * @param {number} y - The Y cordinate of the click\r\n     */ \r\n    clickMove(x,y){\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n        if (this.isMoving == true){\r\n            this.x = GlobalVariables.pixelsToWidth(x)\r\n            this.y = GlobalVariables.pixelsToHeight(y)\r\n        }\r\n        \r\n        this.inputs.forEach(child => {\r\n            child.clickMove(x,y)       \r\n        })\r\n        if(this.output){\r\n            this.output.clickMove(x,y)\r\n        }\r\n        \r\n        var distFromClick = GlobalVariables.distBetweenPoints(x, xInPixels, y, yInPixels)\r\n        \r\n        //If we are close to the attachment point move it to it's hover location to make it accessible\r\n        if (distFromClick < radiusInPixels ){\r\n            this.showHover = true\r\n        }  \r\n        else { this.showHover = false}\r\n    }\r\n    \r\n    /**\r\n     * Set the atom's response to a key press. Is used to delete the atom if it is selected.\r\n     * @param {string} key - The key which has been pressed.\r\n     */ \r\n    keyPress(key){ \r\n\r\n      \r\n        this.inputs.forEach(child => {\r\n            child.keyPress(key)\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.\r\n     */ \r\n    updateSidebar(){\r\n        //updates the sidebar to display information about this node\r\n        \r\n        var valueList = this.initializeSideBar()\r\n        \r\n        //Add options to set all of the inputs\r\n        this.inputs.forEach(input => {\r\n            if(input.type == 'input' && input.valueType != 'geometry' && input.connectors.length == 0){\r\n                if(input.valueType == 'number'){\r\n                    this.createEditableValueListItem(valueList,input,'value', input.name, true)\r\n                }\r\n                else{\r\n                    this.createEditableValueListItem(valueList,input,'value', input.name, false)\r\n                }\r\n            }\r\n        })\r\n        \r\n        //Add a delete button if we are using the touch interface\r\n        if(GlobalVariables.touchInterface){\r\n            this.createButton(valueList,this,\"Delete\",()=>{this.deleteNode()})\r\n        }\r\n        \r\n        return valueList\r\n    }\r\n    \r\n    /**\r\n     * Initialized the sidebar with a title and create the HTML object.\r\n     */ \r\n    initializeSideBar(){\r\n\r\n        //remove everything in the sideBar now\r\n        let sideBar = document.querySelector('.sideBar')\r\n        //Updates sidebar values before erasing\r\n        var editables = document.querySelectorAll(\".editing-item\")\r\n        editables.forEach(function(value) {\r\n            value.blur()\r\n        })\r\n\r\n        while (sideBar.firstChild) { \r\n            sideBar.removeChild(sideBar.firstChild)\r\n        }\r\n\r\n        //adds the name of the molecule to sideBar\r\n        var name2 = document.createElement('p')\r\n        name2.textContent = this.name\r\n        sideBar.appendChild(name2)\r\n        name2.setAttribute('class','molecule_title')\r\n        \r\n        //adds the name of the molecule to sideBar\r\n        var description = document.createElement('p')\r\n        description.textContent = this.description\r\n        sideBar.appendChild(description)\r\n        description.setAttribute('class','atom_description')\r\n        \r\n\r\n        //add the name as of project title \r\n        if (this.atomType == 'Molecule' ){\r\n            let headerBar_title = document.querySelector('#headerBar_title')\r\n            if(headerBar_title){\r\n                while (headerBar_title.firstChild) {\r\n                    headerBar_title.removeChild(headerBar_title.firstChild)\r\n                }\r\n               \r\n                var name1 = document.createElement('p')\r\n                name1.textContent = \"- \" + GlobalVariables.topLevelMolecule.name\r\n                headerBar_title.appendChild(name1)\r\n            }\r\n        }\r\n\r\n        //Create a list element\r\n        var valueList = document.createElement('ul')\r\n        sideBar.appendChild(valueList)\r\n        valueList.setAttribute('class', 'sidebar-list')\r\n\r\n        \r\n        return valueList\r\n\r\n    }\r\n\r\n    /**\r\n     * Delete this atom. Silent prevents it from telling its neighbors\r\n     */ \r\n    deleteNode(backgroundClickAfter = true, deletePath = true, silent = false){\r\n        //deletes this node and all of it's inputs\r\n        \r\n        this.inputs.forEach(input => { //disable the inputs before deleting\r\n            input.ready = false\r\n        })\r\n        \r\n        const inputsCopy = [...this.inputs]//Make a copy of the inputs list to delete all of them\r\n        inputsCopy.forEach(input => {\r\n            input.deleteSelf(silent)\r\n        })\r\n        if(this.output){\r\n            this.output.deleteSelf(silent)\r\n        }\r\n        \r\n        this.parent.nodesOnTheScreen.splice(this.parent.nodesOnTheScreen.indexOf(this),1) //remove this node from the list\r\n        \r\n        if(deletePath){\r\n            this.basicThreadValueProcessing({op: \"deletePath\", path: this.path }) //Delete the cached geometry\r\n        }\r\n        \r\n        if(backgroundClickAfter){\r\n            GlobalVariables.currentMolecule.backgroundClick()\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Runs with each frame to draw the atom.\r\n     */ \r\n    update() {\r\n        \r\n        this.inputs.forEach(child => {\r\n            child.update()     \r\n        })\r\n        if(this.output){\r\n            this.output.update()\r\n        }\r\n        \r\n        this.draw()\r\n    }\r\n\r\n    /**\r\n     * Create an object containing the information about this atom that we want to save. \r\n     */ \r\n    serialize(){\r\n        \r\n        var ioValues = []\r\n        this.inputs.forEach(io => {\r\n            if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){\r\n                var saveIO = {\r\n                    name: io.name,\r\n                    ioValue: io.getValue()\r\n                }\r\n                ioValues.push(saveIO)\r\n            }\r\n        })\r\n        \r\n        var object = {\r\n            atomType: this.atomType,\r\n            name: this.name,\r\n            x: this.x,\r\n            y: this.y,\r\n            uniqueID: this.uniqueID,\r\n            ioValues: ioValues\r\n        }\r\n        \r\n        return object\r\n    }\r\n    \r\n    /**\r\n     * Return any contribution from this atom to the README file\r\n     */ \r\n    requestReadme(){\r\n        //request any contributions from this atom to the readme\r\n        \r\n        return []\r\n    }\r\n    \r\n    /**\r\n     * Set's the output value and shows the atom output on the 3D view.\r\n     */ \r\n    decreaseToProcessCountByOne(){\r\n        \r\n        GlobalVariables.topLevelMolecule.census()\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Token update value function to give each atom one by default\r\n     */ \r\n    updateValue(){\r\n    \r\n    }\r\n    \r\n    /**\r\n     * Used to walk back out the tree generating a list of constants...used for evolve\r\n     */ \r\n    walkBackForConstants(callback){\r\n        //Pass the call further up the chain\r\n        this.inputs.forEach(input => {\r\n            input.connectors.forEach(connector => {\r\n                connector.walkBackForConstants(callback)\r\n            })\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Displays the atom in 3D and sets the output.\r\n     */ \r\n    displayAndPropagate(){\r\n        //If this has an output write to it\r\n        if(this.output){\r\n            this.output.setValue(this.path)\r\n            this.output.ready = true\r\n        }\r\n        \r\n        //If this atom is selected, send the updated value to the renderer\r\n        if (this.selected){\r\n            this.sendToRender()\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Sets the atom to wait on coming information. Basically a pass through, but used for molecules\r\n     */ \r\n    waitOnComingInformation(){\r\n        if(this.output){\r\n            this.output.waitOnComingInformation()\r\n        }\r\n        \r\n        if(this.processing){\r\n            console.warn(\"Processing \"+ this.name + \" Canceled\")\r\n            this.cancelProcessing()\r\n            this.processing = false\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Calls a worker thread to compute the atom's value.\r\n     */ \r\n    basicThreadValueProcessing(toAsk){\r\n        //If the inputs are all ready\r\n        var go = true\r\n        this.inputs.forEach(input => {\r\n            if(!input.ready){\r\n                go = false\r\n            }\r\n        })\r\n        if(go){     //Then we update the value\r\n            \r\n            this.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. It also cancels anything processing if this atom was doing a calculation already.\r\n            \r\n            this.processing = true\r\n            this.decreaseToProcessCountByOne()\r\n            \r\n            \r\n            this.clearAlert()\r\n            \r\n            //toAsk.evaluate = \"md`hello`\" //This is needed to make JSxCAD worker happy. Should probably be removed someday\r\n            \r\n            const gotBack = window.ask(toAsk)\r\n            \r\n            gotBack.then(result => {\r\n                if (result != -1 ){\r\n                    this.displayAndPropagate()\r\n                }else{\r\n                    this.setAlert(\"Unable to compute\")\r\n                }\r\n                this.processing = false\r\n            })\r\n            \r\n            this.cancelProcessing = gotBack.terminate //This can be called to interupt the computation\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Starts propagation from this atom if it is not waiting for anything up stream.\r\n     */ \r\n    beginPropagation(){\r\n        \r\n    }\r\n    \r\n    /**\r\n     * Returns an array of length two indicating that this is one atom and if it is waiting to be computed\r\n     */ \r\n    census(){\r\n        var waiting = 0\r\n        this.inputs.forEach(input => {\r\n            if(input.ready != true){\r\n                waiting = 1\r\n            }\r\n        })\r\n        return [1,waiting]\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.inputs.forEach(input => {\r\n            input.loadTree()\r\n        })\r\n        if(this.output){\r\n            this.output.value = this.path\r\n        }\r\n        return this.path\r\n    }\r\n    \r\n    /**\r\n     * Send the value of this atom to the 3D display.\r\n     */ \r\n    sendToRender(){\r\n        //Send code to JSxCAD to render\r\n        try{\r\n            GlobalVariables.writeToDisplay(this.path)\r\n        }\r\n        catch(err){\r\n            this.setAlert(err)\r\n        }\r\n\r\n    }\r\n    \r\n    /**\r\n     * Find the value of an input for with a given name.\r\n     * @param {string} ioName - The name of the target attachment point.\r\n     */ \r\n    findIOValue(ioName){\r\n        ioName = ioName.split('~').join('')\r\n        var ioValue = null\r\n        \r\n        this.inputs.forEach(child => {\r\n            if(child.name == ioName && child.type == 'input'){\r\n                ioValue = child.getValue()\r\n            }\r\n        })\r\n        \r\n        return ioValue\r\n    }\r\n    \r\n    /**\r\n     * Dump the stored copies of any geometry in this atom to free up ram....probably can be deleted\r\n     */ \r\n    // dumpBuffer(){\r\n    // this.inputs.forEach(input => {\r\n    // input.dumpBuffer()\r\n    // })\r\n    // if(this.output){\r\n    // this.output.dumpBuffer()\r\n    // }\r\n    // this.value = null\r\n    // }\r\n    \r\n    /**\r\n     * Creates an editable HTML item to set the value of an object element. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} object - The object with the element we are editing.\r\n     * @param {string} key - The key of the element to edit.\r\n     * @param {string} label - The label to display next to the editable value.\r\n     * @param {boolean} resultShouldBeNumber - A flag to indicate if the input should be converted to a number.\r\n     * @param {object} callBack - Optional. A function to call with the new value when the value changes.\r\n     */ \r\n    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){\r\n\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'sidebar-item sidebar-editable-div')\r\n        \r\n        //Left div which displays the label\r\n        var labelDiv = document.createElement('label')\r\n        div.appendChild(labelDiv)\r\n        var labelText = document.createTextNode(label + ':')\r\n        labelDiv.appendChild(labelText)\r\n        labelDiv.setAttribute('class', 'sidebar-subitem label-item')\r\n        \r\n        \r\n        //Right div which is editable and displays the value\r\n        var valueTextDiv = document.createElement('span')\r\n        labelDiv.appendChild(valueTextDiv)\r\n        var valueText = document.createTextNode(object[key])\r\n        valueTextDiv.appendChild(valueText)\r\n        valueTextDiv.setAttribute('contenteditable', 'true')\r\n        valueTextDiv.setAttribute('class', 'editing-item')\r\n        var thisID = label+GlobalVariables.generateUniqueID()\r\n        valueTextDiv.setAttribute('id', thisID)\r\n        \r\n        \r\n        document.getElementById(thisID).addEventListener('focusout',() =>{\r\n            var valueInBox = document.getElementById(thisID).textContent.trim()\r\n            if(resultShouldBeNumber){\r\n                valueInBox = GlobalVariables.limitedEvaluate(valueInBox)\r\n            }\r\n            \r\n            //If the target is an attachmentPoint then call the setter function\r\n            if(object instanceof AttachmentPoint){\r\n                object.setValue(valueInBox)\r\n            }\r\n            else{\r\n                object[key] = valueInBox\r\n                callBack(valueInBox)\r\n            }\r\n        })\r\n        \r\n        //prevent the return key from being used when editing a value\r\n        document.getElementById(thisID).addEventListener('keypress', function(evt) {\r\n            if (evt.which === 13) {\r\n                evt.preventDefault() \r\n                document.getElementById(thisID).blur() //shift focus away if someone presses enter\r\n            }\r\n        })\r\n\r\n    }\r\n    \r\n    /**\r\n     * Creates an non-editable HTML item to set the value of an object element. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} object - The object with the element we are displaying.\r\n     * @param {string} key - The key of the element to display.\r\n     * @param {string} label - The label to display next to the displayed value.\r\n     */ \r\n    createNonEditableValueListItem(list,object,key, label){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'sidebar-item sidebar-editable-div')\r\n        \r\n        //Left div which displays the label\r\n        var labelDiv = document.createElement('div')\r\n        div.appendChild(labelDiv)\r\n        var labelText = document.createTextNode(label + ':')\r\n        labelDiv.appendChild(labelText)\r\n        labelDiv.setAttribute('class', 'sidebar-subitem label-item')\r\n        \r\n        \r\n        //Right div which is editable and displays the value\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var valueText = document.createTextNode(object[key])\r\n        valueTextDiv.appendChild(valueText)\r\n        valueTextDiv.setAttribute('contenteditable', 'false')\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem noediting-item')\r\n        var thisID = label+GlobalVariables.generateUniqueID()\r\n        valueTextDiv.setAttribute('id', thisID)\r\n        \r\n\r\n    }\r\n    \r\n    /**\r\n     * Creates a html representation of the passed text. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {string} texxt - The text used to generate the markdown html.\r\n     */ \r\n    createMarkdownListItem(list, text){\r\n        \r\n        var converter = new showdown.Converter()\r\n        //var text      = '# hello, markdown!'\r\n        var html      = converter.makeHtml(text)\r\n        \r\n        var markdownTextDiv = document.createElement('div')\r\n        markdownTextDiv.innerHTML = html\r\n        \r\n        //var valueText = document.createTextNode(text)\r\n        //valueTextDiv.appendChild(valueText)\r\n        list.appendChild(markdownTextDiv)       \r\n    }\r\n    \r\n    /**\r\n     * Creates dropdown with multiple options to select. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r\n     * @param {array} options - A list of options to display in the drop down.\r\n     * @param {number} selectedOption - The zero referenced index of the selected option.\r\n     * @param {string} description - A description of what the dropdown does.\r\n     * @param {object} Callback function\r\n     */ \r\n    createDropDown(list,parent,options,selectedOption, description, callback){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'sidebar-item')\r\n        \r\n        //Left div which displays the label\r\n        var labelDiv = document.createElement('div')\r\n        div.appendChild(labelDiv)\r\n        var labelText = document.createTextNode(description)\r\n        labelDiv.appendChild(labelText)\r\n        labelDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        \r\n        //Right div which is editable and displays the value\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var dropDown = document.createElement('select')\r\n        options.forEach(option => {\r\n            var op = new Option()\r\n            op.value = options.findIndex(thisOption => thisOption === option)\r\n            op.text = option\r\n            dropDown.options.add(op)\r\n        })\r\n        valueTextDiv.appendChild(dropDown)\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        dropDown.selectedIndex = selectedOption //display the current selection\r\n        \r\n        dropDown.addEventListener(\r\n            'change',\r\n            function() { callback(dropDown.value) },\r\n            false\r\n        )\r\n    }\r\n    \r\n    /**\r\n     * Creates button. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r\n     * @param {string} buttonText - The text on the button.\r\n     * @param {object} functionToCall - The function to call when the button is pressed.\r\n     */ \r\n    createButton(list,parent,buttonText,functionToCall){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'runSideBarDiv')\r\n        \r\n        \r\n        //Right div which is button\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var button = document.createElement('button')\r\n        var buttonTextNode = document.createTextNode(buttonText)\r\n        button.setAttribute('class', ' browseButton')\r\n        button.setAttribute('id', buttonText.replace(/\\s+/g, \"\") + \"-button\")\r\n        button.appendChild(buttonTextNode)\r\n        valueTextDiv.appendChild(button)\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        button.addEventListener(\r\n            'mousedown',\r\n            function() { functionToCall() } ,\r\n            false\r\n        )\r\n    }\r\n    \r\n    /**\r\n     * Creates file upload button. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r\n     * @param {string} buttonText - The text on the button.\r\n     * @param {object} functionToCall - The function to call when the button is pressed.\r\n     */ \r\n    createFileUpload(list,parent,buttonText,functionToCall){\r\n        var listElement = document.createElement('LI')\r\n        list.appendChild(listElement)\r\n        \r\n        \r\n        //Div which contains the entire element\r\n        var div = document.createElement('div')\r\n        listElement.appendChild(div)\r\n        div.setAttribute('class', 'runSideBarDiv')\r\n        \r\n        \r\n        //Right div which is button\r\n        var valueTextDiv = document.createElement('div')\r\n        div.appendChild(valueTextDiv)\r\n        var button = document.createElement('input')\r\n        button.type = \"file\"\r\n        var buttonTextNode = document.createTextNode(buttonText)\r\n        button.setAttribute('class', ' browseButton')\r\n        button.setAttribute('id', buttonText.replace(/\\s+/g, \"\") + \"-button\")\r\n        button.appendChild(buttonTextNode)\r\n        valueTextDiv.appendChild(button)\r\n        valueTextDiv.setAttribute('class', 'sidebar-subitem')\r\n        \r\n        button.addEventListener(\r\n            'change',\r\n            functionToCall,\r\n            false\r\n        )\r\n    }\r\n    \r\n    /**\r\n     * Creates button. Used in the sidebar.\r\n     * @param {object} list - The HTML object to attach the new item to.\r\n     * @param {string} buttonText - The text on the button.\r\n     * @param {boolean} - Flag to see if checkbox is checked\r\n     * @param {object} functionToCall - The function to call when the button is pressed.\r\n     */ \r\n    createCheckbox(sideBar,text,isChecked,callback){\r\n        var gridDiv = document.createElement('div')\r\n        sideBar.appendChild(gridDiv)\r\n        gridDiv.setAttribute('id', text + \"-parent\")\r\n        gridDiv.setAttribute('class', \"sidebar-checkbox\")\r\n        var gridCheck = document.createElement('input')\r\n        gridDiv.appendChild(gridCheck)\r\n        gridCheck.setAttribute('type', 'checkbox')\r\n        gridCheck.setAttribute('id', text)\r\n        \r\n        if (isChecked){\r\n            gridCheck.setAttribute('checked', 'true')\r\n        }\r\n        \r\n\r\n        var gridCheckLabel = document.createElement('label')\r\n        gridDiv.appendChild(gridCheckLabel)\r\n        gridCheckLabel.setAttribute('for', 'gridCheck')\r\n        gridCheckLabel.setAttribute('style', 'margin-right:1em;')\r\n        gridCheckLabel.textContent = text\r\n\r\n        gridCheck.addEventListener('change', event => {\r\n            callback(event)\r\n        })\r\n    }\r\n}",
     "static": true,
     "longname": "C:/Users/Bar/Documents/GitHub/Maslow-Create/src/js/prototypes/atom.js",
     "access": "public",
@@ -10871,13 +10871,32 @@
   {
     "__docId__": 655,
     "kind": "member",
+    "name": "cancelProcessing",
+    "memberof": "src/js/prototypes/atom.js~Atom",
+    "static": false,
+    "longname": "src/js/prototypes/atom.js~Atom#cancelProcessing",
+    "access": "public",
+    "description": "A function which can be called to cancel the processing being done for this atom.",
+    "lineNumber": 134,
+    "type": {
+      "nullable": null,
+      "types": [
+        "function"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 656,
+    "kind": "member",
     "name": "[key]",
     "memberof": "src/js/prototypes/atom.js~Atom",
     "static": false,
     "longname": "src/js/prototypes/atom.js~Atom#[key]",
     "access": "public",
     "description": "Assign each of the values in values as this.value",
-    "lineNumber": 135,
+    "lineNumber": 140,
     "type": {
       "types": [
         "*"
@@ -10885,7 +10904,7 @@
     }
   },
   {
-    "__docId__": 656,
+    "__docId__": 657,
     "kind": "method",
     "name": "generatePath",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -10895,12 +10914,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#generatePath",
     "access": "public",
     "description": "Generates the path for this atom from it's location in the graph",
-    "lineNumber": 144,
+    "lineNumber": 149,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 658,
+    "__docId__": 659,
     "kind": "method",
     "name": "setValues",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -10910,7 +10929,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#setValues",
     "access": "public",
     "description": "Applies each of the passed values to this as this.x",
-    "lineNumber": 159,
+    "lineNumber": 164,
     "params": [
       {
         "nullable": null,
@@ -10926,7 +10945,7 @@
     "return": null
   },
   {
-    "__docId__": 660,
+    "__docId__": 661,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -10936,7 +10955,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#draw",
     "access": "public",
     "description": "Draws the atom on the screen",
-    "lineNumber": 182,
+    "lineNumber": 187,
     "params": [
       {
         "name": "drawType",
@@ -10948,7 +10967,7 @@
     "return": null
   },
   {
-    "__docId__": 666,
+    "__docId__": 667,
     "kind": "method",
     "name": "addIO",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -10958,7 +10977,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#addIO",
     "access": "public",
     "description": "Adds a new attachment point to this atom",
-    "lineNumber": 271,
+    "lineNumber": 276,
     "params": [
       {
         "nullable": null,
@@ -11014,7 +11033,7 @@
     "return": null
   },
   {
-    "__docId__": 667,
+    "__docId__": 668,
     "kind": "method",
     "name": "removeIO",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11024,7 +11043,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#removeIO",
     "access": "public",
     "description": "Removes an attachment point from an atom.",
-    "lineNumber": 312,
+    "lineNumber": 317,
     "params": [
       {
         "nullable": null,
@@ -11070,7 +11089,7 @@
     "return": null
   },
   {
-    "__docId__": 668,
+    "__docId__": 669,
     "kind": "method",
     "name": "setAlert",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11080,7 +11099,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#setAlert",
     "access": "public",
     "description": "Set an alert to display next to the atom.",
-    "lineNumber": 326,
+    "lineNumber": 331,
     "params": [
       {
         "nullable": null,
@@ -11096,7 +11115,7 @@
     "return": null
   },
   {
-    "__docId__": 671,
+    "__docId__": 672,
     "kind": "method",
     "name": "clearAlert",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11106,12 +11125,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#clearAlert",
     "access": "public",
     "description": "Clears the alert message attached to this atom.",
-    "lineNumber": 335,
+    "lineNumber": 340,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 674,
+    "__docId__": 675,
     "kind": "method",
     "name": "selectBox",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11121,7 +11140,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#selectBox",
     "access": "public",
     "description": "Delineates bounds for selection box.",
-    "lineNumber": 343,
+    "lineNumber": 348,
     "params": [
       {
         "name": "x",
@@ -11151,7 +11170,7 @@
     "return": null
   },
   {
-    "__docId__": 676,
+    "__docId__": 677,
     "kind": "method",
     "name": "clickDown",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11161,7 +11180,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#clickDown",
     "access": "public",
     "description": "Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D",
-    "lineNumber": 364,
+    "lineNumber": 369,
     "params": [
       {
         "nullable": null,
@@ -11171,7 +11190,7 @@
         "spread": false,
         "optional": false,
         "name": "x",
-        "description": "The X cordinate of the click"
+        "description": "The X coordinate of the click"
       },
       {
         "nullable": null,
@@ -11181,7 +11200,7 @@
         "spread": false,
         "optional": false,
         "name": "y",
-        "description": "The Y cordinate of the click"
+        "description": "The Y coordinate of the click"
       },
       {
         "nullable": null,
@@ -11201,7 +11220,7 @@
     }
   },
   {
-    "__docId__": 680,
+    "__docId__": 681,
     "kind": "method",
     "name": "doubleClick",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11211,7 +11230,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#doubleClick",
     "access": "public",
     "description": "Set the atom's response to a mouse double click. By default this isn't to do anything other than mark the double click as handled.",
-    "lineNumber": 401,
+    "lineNumber": 406,
     "params": [
       {
         "nullable": null,
@@ -11241,7 +11260,7 @@
     }
   },
   {
-    "__docId__": 681,
+    "__docId__": 682,
     "kind": "method",
     "name": "clickUp",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11251,7 +11270,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#clickUp",
     "access": "public",
     "description": "Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.",
-    "lineNumber": 421,
+    "lineNumber": 426,
     "params": [
       {
         "nullable": null,
@@ -11277,7 +11296,7 @@
     "return": null
   },
   {
-    "__docId__": 683,
+    "__docId__": 684,
     "kind": "method",
     "name": "clickMove",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11287,7 +11306,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#clickMove",
     "access": "public",
     "description": "Set the atom's response to a mouse click and drag. Moves the atom around the screen.",
-    "lineNumber": 437,
+    "lineNumber": 442,
     "params": [
       {
         "nullable": null,
@@ -11313,7 +11332,7 @@
     "return": null
   },
   {
-    "__docId__": 688,
+    "__docId__": 689,
     "kind": "method",
     "name": "keyPress",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11323,7 +11342,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#keyPress",
     "access": "public",
     "description": "Set the atom's response to a key press. Is used to delete the atom if it is selected.",
-    "lineNumber": 467,
+    "lineNumber": 472,
     "params": [
       {
         "nullable": null,
@@ -11339,7 +11358,7 @@
     "return": null
   },
   {
-    "__docId__": 689,
+    "__docId__": 690,
     "kind": "method",
     "name": "updateSidebar",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11349,26 +11368,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#updateSidebar",
     "access": "public",
     "description": "Updates the side bar to display information about the atom. By default this is just add a title and to let you edit any unconnected inputs.",
-    "lineNumber": 478,
-    "params": [],
-    "return": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 690,
-    "kind": "method",
-    "name": "initializeSideBar",
-    "memberof": "src/js/prototypes/atom.js~Atom",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/js/prototypes/atom.js~Atom#initializeSideBar",
-    "access": "public",
-    "description": "Initialized the sidebar with a title and create the HTML object.",
-    "lineNumber": 506,
+    "lineNumber": 483,
     "params": [],
     "return": {
       "types": [
@@ -11379,6 +11379,25 @@
   {
     "__docId__": 691,
     "kind": "method",
+    "name": "initializeSideBar",
+    "memberof": "src/js/prototypes/atom.js~Atom",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/js/prototypes/atom.js~Atom#initializeSideBar",
+    "access": "public",
+    "description": "Initialized the sidebar with a title and create the HTML object.",
+    "lineNumber": 511,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 692,
+    "kind": "method",
     "name": "deleteNode",
     "memberof": "src/js/prototypes/atom.js~Atom",
     "generator": false,
@@ -11387,7 +11406,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#deleteNode",
     "access": "public",
     "description": "Delete this atom. Silent prevents it from telling its neighbors",
-    "lineNumber": 560,
+    "lineNumber": 565,
     "params": [
       {
         "name": "backgroundClickAfter",
@@ -11420,7 +11439,7 @@
     "return": null
   },
   {
-    "__docId__": 692,
+    "__docId__": 693,
     "kind": "method",
     "name": "update",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11430,12 +11449,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#update",
     "access": "public",
     "description": "Runs with each frame to draw the atom.",
-    "lineNumber": 589,
+    "lineNumber": 594,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 693,
+    "__docId__": 694,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11445,7 +11464,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#serialize",
     "access": "public",
     "description": "Create an object containing the information about this atom that we want to save. ",
-    "lineNumber": 604,
+    "lineNumber": 609,
     "params": [],
     "return": {
       "types": [
@@ -11454,7 +11473,7 @@
     }
   },
   {
-    "__docId__": 694,
+    "__docId__": 695,
     "kind": "method",
     "name": "requestReadme",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11464,7 +11483,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#requestReadme",
     "access": "public",
     "description": "Return any contribution from this atom to the README file",
-    "lineNumber": 632,
+    "lineNumber": 637,
     "params": [],
     "return": {
       "types": [
@@ -11473,7 +11492,7 @@
     }
   },
   {
-    "__docId__": 695,
+    "__docId__": 696,
     "kind": "method",
     "name": "decreaseToProcessCountByOne",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11483,12 +11502,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#decreaseToProcessCountByOne",
     "access": "public",
     "description": "Set's the output value and shows the atom output on the 3D view.",
-    "lineNumber": 641,
+    "lineNumber": 646,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 696,
+    "__docId__": 697,
     "kind": "method",
     "name": "updateValue",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11498,12 +11517,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#updateValue",
     "access": "public",
     "description": "Token update value function to give each atom one by default",
-    "lineNumber": 650,
+    "lineNumber": 655,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 697,
+    "__docId__": 698,
     "kind": "method",
     "name": "walkBackForConstants",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11513,7 +11532,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#walkBackForConstants",
     "access": "public",
     "description": "Used to walk back out the tree generating a list of constants...used for evolve",
-    "lineNumber": 657,
+    "lineNumber": 662,
     "params": [
       {
         "name": "callback",
@@ -11525,7 +11544,7 @@
     "return": null
   },
   {
-    "__docId__": 698,
+    "__docId__": 699,
     "kind": "method",
     "name": "displayAndPropagate",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11535,12 +11554,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#displayAndPropagate",
     "access": "public",
     "description": "Displays the atom in 3D and sets the output.",
-    "lineNumber": 669,
+    "lineNumber": 674,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 699,
+    "__docId__": 700,
     "kind": "method",
     "name": "waitOnComingInformation",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11550,12 +11569,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#waitOnComingInformation",
     "access": "public",
     "description": "Sets the atom to wait on coming information. Basically a pass through, but used for molecules",
-    "lineNumber": 685,
+    "lineNumber": 690,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 700,
+    "__docId__": 702,
     "kind": "method",
     "name": "basicThreadValueProcessing",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11565,7 +11584,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#basicThreadValueProcessing",
     "access": "public",
     "description": "Calls a worker thread to compute the atom's value.",
-    "lineNumber": 694,
+    "lineNumber": 705,
     "params": [
       {
         "name": "toAsk",
@@ -11577,7 +11596,7 @@
     "return": null
   },
   {
-    "__docId__": 703,
+    "__docId__": 706,
     "kind": "method",
     "name": "beginPropagation",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11587,12 +11606,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#beginPropagation",
     "access": "public",
     "description": "Starts propagation from this atom if it is not waiting for anything up stream.",
-    "lineNumber": 728,
+    "lineNumber": 743,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 704,
+    "__docId__": 707,
     "kind": "method",
     "name": "census",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11602,7 +11621,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#census",
     "access": "public",
     "description": "Returns an array of length two indicating that this is one atom and if it is waiting to be computed",
-    "lineNumber": 735,
+    "lineNumber": 750,
     "params": [],
     "return": {
       "types": [
@@ -11611,7 +11630,7 @@
     }
   },
   {
-    "__docId__": 705,
+    "__docId__": 708,
     "kind": "method",
     "name": "loadTree",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11621,7 +11640,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#loadTree",
     "access": "public",
     "description": "Sets all the input and output values to match their associated atoms.",
-    "lineNumber": 748,
+    "lineNumber": 763,
     "params": [],
     "return": {
       "types": [
@@ -11630,7 +11649,7 @@
     }
   },
   {
-    "__docId__": 706,
+    "__docId__": 709,
     "kind": "method",
     "name": "sendToRender",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11640,12 +11659,12 @@
     "longname": "src/js/prototypes/atom.js~Atom#sendToRender",
     "access": "public",
     "description": "Send the value of this atom to the 3D display.",
-    "lineNumber": 761,
+    "lineNumber": 776,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 707,
+    "__docId__": 710,
     "kind": "method",
     "name": "findIOValue",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11655,7 +11674,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#findIOValue",
     "access": "public",
     "description": "Find the value of an input for with a given name.",
-    "lineNumber": 776,
+    "lineNumber": 791,
     "params": [
       {
         "nullable": null,
@@ -11675,7 +11694,7 @@
     }
   },
   {
-    "__docId__": 708,
+    "__docId__": 711,
     "kind": "method",
     "name": "createEditableValueListItem",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11685,7 +11704,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createEditableValueListItem",
     "access": "public",
     "description": "Creates an editable HTML item to set the value of an object element. Used in the sidebar.",
-    "lineNumber": 811,
+    "lineNumber": 826,
     "params": [
       {
         "nullable": null,
@@ -11751,7 +11770,7 @@
     "return": null
   },
   {
-    "__docId__": 709,
+    "__docId__": 712,
     "kind": "method",
     "name": "createNonEditableValueListItem",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11761,7 +11780,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createNonEditableValueListItem",
     "access": "public",
     "description": "Creates an non-editable HTML item to set the value of an object element. Used in the sidebar.",
-    "lineNumber": 874,
+    "lineNumber": 889,
     "params": [
       {
         "nullable": null,
@@ -11807,7 +11826,7 @@
     "return": null
   },
   {
-    "__docId__": 710,
+    "__docId__": 713,
     "kind": "method",
     "name": "createMarkdownListItem",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11817,7 +11836,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createMarkdownListItem",
     "access": "public",
     "description": "Creates a html representation of the passed text. Used in the sidebar.",
-    "lineNumber": 910,
+    "lineNumber": 925,
     "params": [
       {
         "nullable": null,
@@ -11843,7 +11862,7 @@
     "return": null
   },
   {
-    "__docId__": 711,
+    "__docId__": 714,
     "kind": "method",
     "name": "createDropDown",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11853,7 +11872,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createDropDown",
     "access": "public",
     "description": "Creates dropdown with multiple options to select. Used in the sidebar.",
-    "lineNumber": 933,
+    "lineNumber": 948,
     "params": [
       {
         "nullable": null,
@@ -11919,7 +11938,7 @@
     "return": null
   },
   {
-    "__docId__": 712,
+    "__docId__": 715,
     "kind": "method",
     "name": "createButton",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11929,7 +11948,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createButton",
     "access": "public",
     "description": "Creates button. Used in the sidebar.",
-    "lineNumber": 980,
+    "lineNumber": 995,
     "params": [
       {
         "nullable": null,
@@ -11975,7 +11994,7 @@
     "return": null
   },
   {
-    "__docId__": 713,
+    "__docId__": 716,
     "kind": "method",
     "name": "createFileUpload",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -11985,7 +12004,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createFileUpload",
     "access": "public",
     "description": "Creates file upload button. Used in the sidebar.",
-    "lineNumber": 1016,
+    "lineNumber": 1031,
     "params": [
       {
         "nullable": null,
@@ -12031,7 +12050,7 @@
     "return": null
   },
   {
-    "__docId__": 714,
+    "__docId__": 717,
     "kind": "method",
     "name": "createCheckbox",
     "memberof": "src/js/prototypes/atom.js~Atom",
@@ -12041,7 +12060,7 @@
     "longname": "src/js/prototypes/atom.js~Atom#createCheckbox",
     "access": "public",
     "description": "Creates button. Used in the sidebar.",
-    "lineNumber": 1053,
+    "lineNumber": 1068,
     "params": [
       {
         "nullable": null,
@@ -12087,7 +12106,7 @@
     "return": null
   },
   {
-    "__docId__": 715,
+    "__docId__": 718,
     "kind": "file",
     "name": "src/js/prototypes/attachmentpoint.js",
     "content": "import Connector from './connector'\r\nimport GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * This class creates a new attachmentPoint which are the input and output blobs on Atoms\r\n */\r\nexport default class AttachmentPoint {\r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        \r\n        /** \r\n         * This atom's default radius (non hover)\r\n         * @type {number}\r\n         */\r\n        this.defaultRadius = 1/60\r\n        /** \r\n         * A flag to indicate if this attachmet point is currently expanded.\r\n         * @type {boolean}\r\n         */\r\n        this.expandedRadius = false\r\n        /** \r\n         * This atom's current radius as displayed.\r\n         * @type {number}\r\n         */\r\n        this.radius = 1/60\r\n        /** \r\n         * When the mouse is hovering where should the AP move in X\r\n         * @type {number}\r\n         */\r\n        this.hoverOffsetX = 0\r\n        /** \r\n         * When the mouse is hovering where should the AP move in Y\r\n         * @type {number}\r\n         */\r\n        this.hoverOffsetY = 0\r\n        /** \r\n         * The attachment points X position\r\n         * @type {number}\r\n         */\r\n        this.x = 0\r\n        /** \r\n         * The attachment point's Y position\r\n         * @type {number}\r\n         */\r\n        this.y = 0\r\n        /** \r\n         * A unique identifying number for this attachment point\r\n         * @type {number}\r\n         */\r\n        this.uniqueID = 0\r\n        /** \r\n         * The default offset position in X referenced to the center of the parent atom.\r\n         * @type {number}\r\n         */\r\n        this.defaultOffsetX = 0\r\n        /** \r\n         * The default offset position in Y referenced to the center of the parent atom.\r\n         * @type {number}\r\n         */\r\n        this.defaultOffsetY = 0\r\n        /** \r\n         * The current offset position in X referenced to the center of the parent atom.\r\n         * @type {number}\r\n         */\r\n        this.offsetX = 0\r\n        /** \r\n         * The current offset position in Y referenced to the center of the parent atom.\r\n         * @type {number}\r\n         */\r\n        this.offsetY = 0\r\n        /** \r\n         * A flag to determine if the hover text is shown next to the attachment point.\r\n         * @type {boolean}\r\n         */\r\n        this.showHoverText = true\r\n        /** \r\n         * The attachment point type.\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'AttachmentPoint'\r\n        \r\n        /** \r\n         * The attachment point value type. Options are number, geometry, array.\r\n         * @type {string}\r\n         */\r\n        this.valueType = 'number'\r\n        /** \r\n         * The attachment point type. Options are input, output.\r\n         * @type {string}\r\n         */\r\n        this.type = 'output'\r\n        \r\n        /** \r\n         * This is a flag to indicate if the attachment point is of the primary type.\r\n         * Primary type inputs are of the form geometry.translate(input2, input3, input4) for example\r\n         * This value is useful for importing molecules into other formats.\r\n         * @type {boolean}\r\n         */\r\n        this.primary = false\r\n        \r\n        /** \r\n         * The attachment point current value.\r\n         * @type {number}\r\n         */\r\n        this.value = 10\r\n        \r\n        /**\r\n         * The default value to be used by the ap when nothing is attached\r\n         * @type {string}\r\n         */\r\n        this.defaultValue = 10\r\n        \r\n        /** \r\n         * A flag to indicate if the attachment point is currently ready. Used to order initilization when program is loaded.\r\n         * @type {string}\r\n         */\r\n        this.ready = true\r\n        /** \r\n         * A list of all of the connectors attached to this attachmet point\r\n         * @type {object}\r\n         */\r\n        this.connectors = []\r\n        \r\n        this.offsetX = this.defaultOffsetX\r\n        this.offsetY = this.defaultOffsetY\r\n        \r\n        for(var key in values) {\r\n            /**\r\n             * Assign values in values as this.x\r\n             */\r\n            this[key] = values[key]\r\n        }\r\n        this.clickMove(0,0) //trigger a refresh to get all the current values\r\n    }\r\n    \r\n    /**\r\n     * Draws the attachment point on the screen. Called with each frame.\r\n     */ \r\n    draw() {\r\n       \r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n        let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)\r\n        let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)\r\n        let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)\r\n\r\n        this.defaultRadius = radiusInPixels\r\n        radiusInPixels = parentRadiusInPixels/2.7\r\n\r\n        if (this.expandedRadius){\r\n            radiusInPixels = parentRadiusInPixels/2.4\r\n        }\r\n        if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){\r\n            /**\r\n             * The x coordinate of the attachment point.\r\n             */\r\n            xInPixels = parentXInPixels - parentRadiusInPixels\r\n            /**\r\n             * The y coordinate of the attachment point.\r\n             */\r\n            yInPixels = parentYInPixels\r\n        }    \r\n        else if(this.parentMolecule.inputs.length < 2 && this.type == 'output'){\r\n            xInPixels = parentXInPixels + parentRadiusInPixels\r\n            yInPixels = parentYInPixels\r\n        }                 \r\n\r\n        var txt = this.name\r\n        var textWidth = GlobalVariables.c.measureText(txt).width\r\n        GlobalVariables.c.font = '10px Work Sans'\r\n\r\n        var bubbleColor = '#C300FF'\r\n        var scaleRadiusDown = radiusInPixels*.7\r\n        var halfRadius = radiusInPixels *.5\r\n\r\n        \r\n        if (this.showHoverText){\r\n            if(this.type == 'input'){\r\n \r\n                GlobalVariables.c.globalCompositeOperation='destination-over'\r\n                GlobalVariables.c.beginPath()\r\n\r\n                if (this.name === 'geometry'){\r\n                    GlobalVariables.c.fillStyle = this.parentMolecule.selectedColor   \r\n                }\r\n                else{\r\n                    GlobalVariables.c.fillStyle = bubbleColor\r\n                }\r\n            \r\n                //Draws bubble shape\r\n                GlobalVariables.c.rect(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels - radiusInPixels, textWidth + radiusInPixels + halfRadius , radiusInPixels*2)   \r\n                GlobalVariables.c.arc(xInPixels - textWidth - radiusInPixels - halfRadius, yInPixels, radiusInPixels, 0, Math.PI * 2, false)\r\n\r\n                //Bubble text\r\n                GlobalVariables.c.fill()\r\n                GlobalVariables.c.globalCompositeOperation='source-over'\r\n                GlobalVariables.c.beginPath()\r\n                GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor\r\n                GlobalVariables.c.textAlign = 'end'\r\n                GlobalVariables.c.fillText(this.name, xInPixels - (radiusInPixels + 3), yInPixels+2)\r\n                GlobalVariables.c.fill()\r\n                GlobalVariables.c.closePath()\r\n            }\r\n            else{\r\n\r\n                GlobalVariables.c.beginPath()\r\n                    \r\n                if (this.name === 'geometry'){\r\n                    GlobalVariables.c.fillStyle = this.parentMolecule.selectedColor   \r\n                }\r\n                else{\r\n                    GlobalVariables.c.fillStyle = bubbleColor\r\n                }\r\n\r\n                GlobalVariables.c.rect(xInPixels, yInPixels - scaleRadiusDown, textWidth + radiusInPixels + halfRadius, scaleRadiusDown*2)\r\n                GlobalVariables.c.arc(xInPixels + textWidth + radiusInPixels + halfRadius, yInPixels, scaleRadiusDown, 0, Math.PI * 2, false)\r\n                GlobalVariables.c.fill()\r\n                GlobalVariables.c.closePath()\r\n                GlobalVariables.c.beginPath()\r\n                GlobalVariables.c.fillStyle = this.parentMolecule.defaultColor\r\n                GlobalVariables.c.textAlign = 'start' \r\n                GlobalVariables.c.fillText(this.name, (xInPixels + halfRadius) + (radiusInPixels + 3), yInPixels+2)\r\n                GlobalVariables.c.fill()\r\n                GlobalVariables.c.closePath()\r\n            }\r\n\r\n        }\r\n \r\n        GlobalVariables.c.beginPath()\r\n        if(this.ready){\r\n            GlobalVariables.c.fillStyle = this.parentMolecule.color\r\n        }else{\r\n            GlobalVariables.c.fillStyle = '#6ba4ff'\r\n        }\r\n        GlobalVariables.c.strokeStyle = this.parentMolecule.strokeColor\r\n        GlobalVariables.c.lineWidth = 1\r\n\r\n        GlobalVariables.c.arc(xInPixels, yInPixels, radiusInPixels, 0, Math.PI * 2, false)\r\n        if(this.showHoverText == true){\r\n            GlobalVariables.c.fill()\r\n            GlobalVariables.c.stroke()\r\n        }\r\n        GlobalVariables.c.closePath()  \r\n\r\n        if (!this.expandedRadius){ \r\n            if (this.type == 'output'){     \r\n                this.offsetX = this.parentMolecule.radius  \r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.\r\n     * @param {number} x - The x cordinate of the click\r\n     * @param {number} y - The y cordinate of the click\r\n     * @param {boolean} clickProcessed - Has the click already been handled\r\n     */ \r\n    clickDown(x,y, clickProcessed){\r\n\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n\r\n        if(GlobalVariables.distBetweenPoints (xInPixels, x, yInPixels, y) < this.defaultRadius && !clickProcessed){\r\n            if(this.type == 'output'){                  //begin to extend a connector from this if it is an output\r\n                new Connector({\r\n                    parentMolecule: this.parentMolecule, \r\n                    attachmentPoint1: this,\r\n                    atomType: 'Connector',\r\n                    isMoving: true\r\n                })\r\n            }\r\n            if(this.type == 'input'){ //connectors can only be selected by clicking on an input\r\n                this.connectors.forEach(connector => {     //select any connectors attached to this node\r\n                    connector.selected = true\r\n                })\r\n            }\r\n            \r\n            return true //indicate that the click was handled by this object\r\n        }\r\n        else{\r\n            if(this.type == 'input'){ //connectors can only be selected by clicking on an input\r\n                this.connectors.forEach(connector => {      //unselect any connectors attached to this node\r\n                    connector.selected = false\r\n                })\r\n            }\r\n            return false //indicate that the click was not handled by this object\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Handles mouse click up. If the click is inside the AP and a connector is currently extending, then a connection is made\r\n     * @param {number} x - The x cordinate of the click\r\n     * @param {number} y - The y cordinate of the click\r\n     */ \r\n    clickUp(x,y){\r\n        this.connectors.forEach(connector => {\r\n            connector.clickUp(x, y)\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Handles mouse click and move to expand the AP. Could this be done with a call to expand out?\r\n     * @param {number} x - The x cordinate of the click\r\n     * @param {number} y - The y cordinate of the click\r\n     */ \r\n    clickMove(x,y){\r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n        \r\n        let parentXInPixels = GlobalVariables.widthToPixels(this.parentMolecule.x)\r\n        let parentYInPixels = GlobalVariables.heightToPixels(this.parentMolecule.y)\r\n        let parentRadiusInPixels = GlobalVariables.widthToPixels(this.parentMolecule.radius)\r\n       \r\n        //expand if touched by mouse \r\n        var distFromClick =  Math.abs(GlobalVariables.distBetweenPoints(parentXInPixels, x, parentYInPixels, y))\r\n        //If we are close to the attachment point move it to it's hover location to make it accessible\r\n        if (distFromClick < parentRadiusInPixels*2.7 && this.type == 'input'){       \r\n            this.expandOut(distFromClick)\r\n            this.showHoverText = true     \r\n        }         \r\n        else if( distFromClick < parentRadiusInPixels *1.5 && this.type == 'output'){       \r\n            this.showHoverText = true\r\n        }\r\n        else{\r\n            this.reset()\r\n            this.expandedRadius = false\r\n        }\r\n        //Expand it if you are close enough to make connection\r\n        if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels ){\r\n            this.expandedRadius = true\r\n        }  \r\n        else{\r\n            this.expandedRadius = false\r\n        }\r\n        \r\n        this.connectors.forEach(connector => {\r\n            connector.clickMove(x, y)       \r\n        })\r\n    }\r\n    \r\n    /**\r\n     * I'm not sure what this does. Can it be deleted?\r\n     */ \r\n    reset(){\r\n\r\n        if (this.type == 'input'){\r\n            this.offsetX = -1* this.parentMolecule.radius\r\n            this.offsetY = this.defaultOffsetY\r\n        }\r\n        this.showHoverText = false\r\n    }\r\n    \r\n    /**\r\n     * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.\r\n     * @param {number} cursorDistance - The distance the cursor is from the attachment point.\r\n     */ \r\n    expandOut(cursorDistance){\r\n\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        const inputList = this.parentMolecule.inputs.filter(input => input.type == 'input')\r\n        const attachmentPointNumber = inputList.indexOf(this) \r\n        const anglePerIO = (Math.PI) / (inputList.length + 1)\r\n        // angle correction so that it centers menu adjusting to however many attachment points there are \r\n        const angleCorrection = -Math.PI/2 - anglePerIO\r\n        this.hoverOffsetY = 12 * this.parentMolecule.radius * (Math.sin((attachmentPointNumber * anglePerIO) - angleCorrection))\r\n        this.hoverOffsetX = 4 * this.parentMolecule.radius * (Math.cos((attachmentPointNumber * anglePerIO) - angleCorrection))\r\n        cursorDistance = Math.max( cursorDistance, radiusInPixels*2) //maxes cursor distance so we can hover over each attachment without expansion movement\r\n        //this.offset uses radius in pixels before translating to pixels because that's also the value that limits cursor distance\r\n        this.offsetX = GlobalVariables.widthToPixels(radiusInPixels * 1.2 * this.hoverOffsetX * this.parentMolecule.radius * GlobalVariables.pixelsToWidth((radiusInPixels*3)/cursorDistance))  \r\n        this.offsetY = GlobalVariables.heightToPixels( radiusInPixels* 2.1 * this.hoverOffsetY * this.parentMolecule.radius* GlobalVariables.pixelsToHeight((radiusInPixels*3)/cursorDistance))\r\n    \r\n\r\n    }\r\n    \r\n    /**\r\n     * Just passes a key press to the attached connectors. No impact on the connector.\r\n     * @param {string} key - The key which was pressed\r\n     */ \r\n    keyPress(key){\r\n        this.connectors.forEach(connector => {\r\n            connector.keyPress(key)       \r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Delete any connectors attached to this ap\r\n     */ \r\n    deleteSelf(silent = false){\r\n        //remove any connectors which were attached to this attachment point\r\n        var connectorsList = [...this.connectors] //Make a copy of the list so that we can delete elements without having issues with forEach as we remove things from the list\r\n        connectorsList.forEach( connector => {\r\n            connector.deleteSelf(silent)\r\n        })\r\n    }\r\n    \r\n    /**\r\n     * Delete a target connector which is passed in. The default option is to delete all of the connectors.\r\n     */ \r\n    deleteConnector(connector = \"all\"){\r\n        try{\r\n            const connectorIndex = this.connectors.indexOf(connector)\r\n            if(connectorIndex != -1){\r\n                this.connectors.splice(connectorIndex,1) //Remove the target connector\r\n            }\r\n            else{\r\n                this.connectors = [] //Remove all of the connectors\r\n            }\r\n        }\r\n        catch(err){\r\n            console.warn(\"Error deleting connector: \")\r\n            console.warn(err)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Can be called to see if the target coordinates are within this ap. Returns true/false.\r\n     * @param {number} x - The x coordinate of the target\r\n     * @param {number} y - The y coordinate of the target\r\n     */ \r\n    wasConnectionMade(x,y){\r\n        \r\n        let xInPixels = GlobalVariables.widthToPixels(this.x)\r\n        let yInPixels = GlobalVariables.heightToPixels(this.y)\r\n        let radiusInPixels = GlobalVariables.widthToPixels(this.radius)\r\n\r\n        //this function returns itself if the coordinates passed in are within itself\r\n        if (GlobalVariables.distBetweenPoints(xInPixels, x, yInPixels, y) < radiusInPixels && this.type == 'input'){  //If we have released the mouse here and this is an input...\r\n        \r\n            if(this.connectors.length > 0){ //Don't accept a second connection to an input\r\n                return false\r\n            }\r\n            else{\r\n                return true\r\n            }\r\n        }\r\n        else{\r\n            return false\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Attaches a new connector to this ap\r\n     * @param {object} connector - The connector to attach\r\n     */ \r\n    attach(connector){\r\n        this.connectors.push(connector)\r\n    }\r\n    \r\n    /**\r\n     * Starts propagation from this attachmentPoint if it is not waiting for anything up stream.\r\n     */ \r\n    beginPropagation(){\r\n        \r\n        //If nothing is connected it is a starting point\r\n        if(this.connectors.length == 0){\r\n            this.setValue(this.value)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Passes a lock command to the parent molecule, or to the attached connector depending on input/output.\r\n     */ \r\n    waitOnComingInformation(){\r\n        if(this.type == 'output'){\r\n            this.connectors.forEach(connector => {\r\n                connector.waitOnComingInformation()\r\n            })\r\n        }\r\n        else{  //If this is an input\r\n            this.ready = false\r\n            this.parentMolecule.waitOnComingInformation(this.name)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Restores the ap to it's default value.\r\n     */ \r\n    setDefault(){\r\n        this.setValue(this.defaultValue)\r\n    }\r\n    \r\n    /**\r\n     * Updates the default value for the ap.\r\n     */ \r\n    updateDefault(newDefault){\r\n        var oldDefault = this.defaultValue\r\n        this.defaultValue = newDefault\r\n        \r\n        if(this.connectors.length == 0 && this.value == oldDefault){    //Update the value to be the default if there is nothing attached\r\n            this.value = this.defaultValue\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Reads and returns the current value of the ap.\r\n     */ \r\n    getValue(){\r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Sets the current value of the ap. Force forces an update even if the value hasn't changed.\r\n     */ \r\n    setValue(newValue){\r\n        this.value = newValue\r\n        this.ready = true\r\n        //propagate the change to linked elements if this is an output\r\n        if (this.type == 'output'){\r\n            this.connectors.forEach(connector => {     //select any connectors attached to this node\r\n                connector.propogate()\r\n            })\r\n        }\r\n        //if this is an input attachment point\r\n        else{\r\n            this.parentMolecule.updateValue(this.name)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        this.connectors.forEach(connector => {\r\n            this.value = connector.loadTree()\r\n        })\r\n        return this.value\r\n    }\r\n    \r\n    /**\r\n     * Computes the curent position and then draws the ap on the screen.\r\n     */ \r\n    update() { \r\n        this.x = this.parentMolecule.x + this.offsetX\r\n        this.y = this.parentMolecule.y + this.offsetY\r\n        this.draw()\r\n       \r\n        this.connectors.forEach(connector => {  //update any connectors attached to this node\r\n            connector.update()       \r\n        })\r\n    }\r\n}",
@@ -12098,7 +12117,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 716,
+    "__docId__": 719,
     "kind": "class",
     "name": "AttachmentPoint",
     "memberof": "src/js/prototypes/attachmentpoint.js",
@@ -12113,7 +12132,7 @@
     "interface": false
   },
   {
-    "__docId__": 717,
+    "__docId__": 720,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12138,7 +12157,7 @@
     ]
   },
   {
-    "__docId__": 718,
+    "__docId__": 721,
     "kind": "member",
     "name": "defaultRadius",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12157,7 +12176,7 @@
     }
   },
   {
-    "__docId__": 719,
+    "__docId__": 722,
     "kind": "member",
     "name": "expandedRadius",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12176,7 +12195,7 @@
     }
   },
   {
-    "__docId__": 720,
+    "__docId__": 723,
     "kind": "member",
     "name": "radius",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12195,7 +12214,7 @@
     }
   },
   {
-    "__docId__": 721,
+    "__docId__": 724,
     "kind": "member",
     "name": "hoverOffsetX",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12214,7 +12233,7 @@
     }
   },
   {
-    "__docId__": 722,
+    "__docId__": 725,
     "kind": "member",
     "name": "hoverOffsetY",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12233,7 +12252,7 @@
     }
   },
   {
-    "__docId__": 723,
+    "__docId__": 726,
     "kind": "member",
     "name": "x",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12252,7 +12271,7 @@
     }
   },
   {
-    "__docId__": 724,
+    "__docId__": 727,
     "kind": "member",
     "name": "y",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12271,7 +12290,7 @@
     }
   },
   {
-    "__docId__": 725,
+    "__docId__": 728,
     "kind": "member",
     "name": "uniqueID",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12290,7 +12309,7 @@
     }
   },
   {
-    "__docId__": 726,
+    "__docId__": 729,
     "kind": "member",
     "name": "defaultOffsetX",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12309,7 +12328,7 @@
     }
   },
   {
-    "__docId__": 727,
+    "__docId__": 730,
     "kind": "member",
     "name": "defaultOffsetY",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12328,7 +12347,7 @@
     }
   },
   {
-    "__docId__": 728,
+    "__docId__": 731,
     "kind": "member",
     "name": "offsetX",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12347,7 +12366,7 @@
     }
   },
   {
-    "__docId__": 729,
+    "__docId__": 732,
     "kind": "member",
     "name": "offsetY",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12366,7 +12385,7 @@
     }
   },
   {
-    "__docId__": 730,
+    "__docId__": 733,
     "kind": "member",
     "name": "showHoverText",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12385,7 +12404,7 @@
     }
   },
   {
-    "__docId__": 731,
+    "__docId__": 734,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12404,7 +12423,7 @@
     }
   },
   {
-    "__docId__": 732,
+    "__docId__": 735,
     "kind": "member",
     "name": "valueType",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12423,7 +12442,7 @@
     }
   },
   {
-    "__docId__": 733,
+    "__docId__": 736,
     "kind": "member",
     "name": "type",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12442,7 +12461,7 @@
     }
   },
   {
-    "__docId__": 734,
+    "__docId__": 737,
     "kind": "member",
     "name": "primary",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12461,7 +12480,7 @@
     }
   },
   {
-    "__docId__": 735,
+    "__docId__": 738,
     "kind": "member",
     "name": "value",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12480,7 +12499,7 @@
     }
   },
   {
-    "__docId__": 736,
+    "__docId__": 739,
     "kind": "member",
     "name": "defaultValue",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12499,7 +12518,7 @@
     }
   },
   {
-    "__docId__": 737,
+    "__docId__": 740,
     "kind": "member",
     "name": "ready",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12518,7 +12537,7 @@
     }
   },
   {
-    "__docId__": 738,
+    "__docId__": 741,
     "kind": "member",
     "name": "connectors",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12537,7 +12556,7 @@
     }
   },
   {
-    "__docId__": 741,
+    "__docId__": 744,
     "kind": "member",
     "name": "[key]",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12553,7 +12572,7 @@
     }
   },
   {
-    "__docId__": 742,
+    "__docId__": 745,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12568,7 +12587,7 @@
     "return": null
   },
   {
-    "__docId__": 745,
+    "__docId__": 748,
     "kind": "method",
     "name": "clickDown",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12618,7 +12637,7 @@
     }
   },
   {
-    "__docId__": 746,
+    "__docId__": 749,
     "kind": "method",
     "name": "clickUp",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12654,7 +12673,7 @@
     "return": null
   },
   {
-    "__docId__": 747,
+    "__docId__": 750,
     "kind": "method",
     "name": "clickMove",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12690,7 +12709,7 @@
     "return": null
   },
   {
-    "__docId__": 753,
+    "__docId__": 756,
     "kind": "method",
     "name": "reset",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12705,7 +12724,7 @@
     "return": null
   },
   {
-    "__docId__": 757,
+    "__docId__": 760,
     "kind": "method",
     "name": "expandOut",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12731,7 +12750,7 @@
     "return": null
   },
   {
-    "__docId__": 762,
+    "__docId__": 765,
     "kind": "method",
     "name": "keyPress",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12757,7 +12776,7 @@
     "return": null
   },
   {
-    "__docId__": 763,
+    "__docId__": 766,
     "kind": "method",
     "name": "deleteSelf",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12782,7 +12801,7 @@
     "return": null
   },
   {
-    "__docId__": 764,
+    "__docId__": 767,
     "kind": "method",
     "name": "deleteConnector",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12807,7 +12826,7 @@
     "return": null
   },
   {
-    "__docId__": 766,
+    "__docId__": 769,
     "kind": "method",
     "name": "wasConnectionMade",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12847,7 +12866,7 @@
     }
   },
   {
-    "__docId__": 767,
+    "__docId__": 770,
     "kind": "method",
     "name": "attach",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12873,7 +12892,7 @@
     "return": null
   },
   {
-    "__docId__": 768,
+    "__docId__": 771,
     "kind": "method",
     "name": "beginPropagation",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12888,7 +12907,7 @@
     "return": null
   },
   {
-    "__docId__": 769,
+    "__docId__": 772,
     "kind": "method",
     "name": "waitOnComingInformation",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12903,7 +12922,7 @@
     "return": null
   },
   {
-    "__docId__": 771,
+    "__docId__": 774,
     "kind": "method",
     "name": "setDefault",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12918,7 +12937,7 @@
     "return": null
   },
   {
-    "__docId__": 772,
+    "__docId__": 775,
     "kind": "method",
     "name": "updateDefault",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12940,7 +12959,7 @@
     "return": null
   },
   {
-    "__docId__": 775,
+    "__docId__": 778,
     "kind": "method",
     "name": "getValue",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12959,7 +12978,7 @@
     }
   },
   {
-    "__docId__": 776,
+    "__docId__": 779,
     "kind": "method",
     "name": "setValue",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -12981,7 +13000,7 @@
     "return": null
   },
   {
-    "__docId__": 779,
+    "__docId__": 782,
     "kind": "method",
     "name": "loadTree",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -13000,7 +13019,7 @@
     }
   },
   {
-    "__docId__": 781,
+    "__docId__": 784,
     "kind": "method",
     "name": "update",
     "memberof": "src/js/prototypes/attachmentpoint.js~AttachmentPoint",
@@ -13015,7 +13034,7 @@
     "return": null
   },
   {
-    "__docId__": 784,
+    "__docId__": 787,
     "kind": "file",
     "name": "src/js/prototypes/connector.js",
     "content": "import GlobalVariables from '../globalvariables'\r\n\r\n/**\r\n * The connector class defines how an output can be connected to an input. It appears on the screen as a black line extending from an output to an input.\r\n */\r\nexport default class Connector {\r\n    \r\n    /**\r\n     * The constructor function.\r\n     * @param {object} values An array of values passed in which will be assigned to the class as this.x\r\n     */ \r\n    constructor(values){\r\n        \r\n        /** \r\n         * True if the connector is currently being created and is in the process of extending\r\n         * @type {boolean}\r\n         */\r\n        this.isMoving = false\r\n        /** \r\n         * The connectors current color\r\n         * @type {string}\r\n         */\r\n        this.color = 'black'\r\n        /** \r\n         * The type of this connector\r\n         * @type {string}\r\n         */\r\n        this.atomType = 'Connector'\r\n        /** \r\n         * True if this connector has been selected\r\n         * @type {boolean}\r\n         */\r\n        this.selected = false\r\n        /** \r\n         * The first attachment point this connector is connected to (an ouput)\r\n         * @type {object}\r\n         */\r\n        this.attachmentPoint1 = null\r\n        /** \r\n         * The second attachment point this connector is connected to (an input)\r\n         * @type {object}\r\n         */\r\n        this.attachmentPoint2 = null\r\n        \r\n        for(var key in values) {\r\n            /**\r\n             * Assign each of the values in values as this.key\r\n             */\r\n            this[key] = values[key]\r\n        }\r\n        \r\n        /** \r\n         * The starting X cordinate for the connector. Should really be referenced to attachmentPoint1.\r\n         * @type {number}\r\n         */\r\n        this.startX = this.attachmentPoint1.parentMolecule.outputX\r\n        /** \r\n         * The starting Y cordinate for the connector. Should really be referenced to attachmentPoint1.\r\n         * @type {number}\r\n         */\r\n        this.startY = this.attachmentPoint1.parentMolecule.y\r\n        \r\n        \r\n        this.attachmentPoint1.connectors.push(this)   //Give input and output references to the connector\r\n        if(this.attachmentPoint2 != null){\r\n            this.attachmentPoint2.connectors.push(this)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Draw the connector as a bezier curve on the screen\r\n     */ \r\n    draw(){\r\n        let startXInPixels = GlobalVariables.widthToPixels(this.startX)\r\n        let startYInPixels = GlobalVariables.heightToPixels(this.startY)\r\n        let endXInPixels = GlobalVariables.widthToPixels(this.endX)\r\n        let endYInPixels = GlobalVariables.heightToPixels(this.endY)\r\n\r\n        GlobalVariables.c.beginPath()\r\n        GlobalVariables.c.fillStyle = this.color\r\n        GlobalVariables.c.strokeStyle = this.color\r\n        GlobalVariables.c.globalCompositeOperation = 'destination-over' //draw under other elements;\r\n        if(this.selected){\r\n            GlobalVariables.c.lineWidth = 3\r\n        }\r\n        else{\r\n            GlobalVariables.c.lineWidth = 1\r\n        }\r\n        GlobalVariables.c.moveTo(startXInPixels, startYInPixels)\r\n        GlobalVariables.c.bezierCurveTo(startXInPixels + 100, startYInPixels, endXInPixels - 100, endYInPixels, endXInPixels, endYInPixels)\r\n        GlobalVariables.c.stroke()\r\n        GlobalVariables.c.globalCompositeOperation = 'source-over' //switch back to drawing on top\r\n    }\r\n    \r\n    /**\r\n     * clickUp checks to see if the mouse button has been released over an input attachment point. If it has then the connector is created there. If not, then the connector is deleted.\r\n     * @param {number} x - The x cordinate of the click\r\n     * @param {number} y - The y cordinate of the click\r\n     */ \r\n    clickUp(x,y){\r\n        if(this.isMoving){  //we only want to attach the connector which is currently moving\r\n            var attachmentMade = false\r\n            GlobalVariables.currentMolecule.nodesOnTheScreen.forEach(molecule => {                      //For every molecule on the screen  \r\n                molecule.inputs.forEach(attachmentPoint => {                                    //For each of their attachment points\r\n                    if(attachmentPoint.wasConnectionMade(x,y) && !attachmentMade){    //Check to make sure we haven't already attached somewhere else\r\n                        attachmentMade = true\r\n                        this.attachmentPoint2 = attachmentPoint\r\n                        attachmentPoint.attach(this)\r\n                        this.propogate()\r\n                    }\r\n                })\r\n            })\r\n            if (!attachmentMade){\r\n                this.deleteSelf()\r\n            }\r\n            this.isMoving = false\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * clickMove runs while the connector is being created. As long as the mouse is pressed down, the end of the connector stays attached to the mouse.\r\n     * @param {number} x - The x cordinate of the click\r\n     * @param {number} y - The y cordinate of the click\r\n     */ \r\n    clickMove(x,y){\r\n        if (this.isMoving == true){\r\n            /**\r\n             * The s cordinate of the end of the connector.\r\n             */\r\n            this.endX = GlobalVariables.pixelsToWidth(x)\r\n            /**\r\n             * The y cordinate of the end of the connector.\r\n             */\r\n            this.endY = GlobalVariables.pixelsToHeight(y)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Called when any key is pressed. If the key is delete or backspace and the connector is selected then the connector is deleted.\r\n     * @param {string} key - The key which was pressed\r\n     */ \r\n    keyPress(key){\r\n        if(this.selected){\r\n            if (['Delete', 'Backspace'].includes(key)){\r\n                this.deleteSelf()\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Deletes the connector by calling its attachmentPoints to tell them to delete their references to this connector.\r\n     */ \r\n    deleteSelf(silent = false){\r\n        //Remove this connector from the output it is attached to\r\n        this.attachmentPoint1.deleteConnector(this)\r\n        \r\n        //Free up the input to which this was attached\r\n        if(this.attachmentPoint2 != null){\r\n            this.attachmentPoint2.deleteConnector(this)\r\n            if(!silent){\r\n                this.attachmentPoint2.setDefault()\r\n            }\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Generates an object used to save the connector.\r\n     */ \r\n    serialize(){\r\n        if ( this.attachmentPoint2 != null){\r\n            var object = {\r\n                ap1Name: this.attachmentPoint1.name,\r\n                ap2Name: this.attachmentPoint2.name,\r\n                ap2Primary: this.attachmentPoint2.primary,\r\n                ap1ID: this.attachmentPoint1.parentMolecule.uniqueID,\r\n                ap2ID: this.attachmentPoint2.parentMolecule.uniqueID\r\n            }\r\n            return object\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Passes a lock call to the connected input.\r\n     */ \r\n    waitOnComingInformation(){\r\n        this.attachmentPoint2.waitOnComingInformation()\r\n    }\r\n    \r\n    /**\r\n     * Pass the value of the attached output to the attached input\r\n     */ \r\n    propogate(){\r\n        //takes the input and passes it to the output\r\n        if(this.attachmentPoint1.ready){\r\n            this.attachmentPoint2.setValue(this.attachmentPoint1.getValue())\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Used to walk back out the tree generating a list of constants...used for evolve\r\n     */ \r\n    walkBackForConstants(callback){\r\n        this.attachmentPoint1.parentMolecule.walkBackForConstants(callback)\r\n    }\r\n    \r\n    /**\r\n     * Sets all the input and output values to match their associated atoms.\r\n     */ \r\n    loadTree(){\r\n        return this.attachmentPoint1.parentMolecule.loadTree()\r\n    }\r\n    \r\n    /**\r\n     * Commputes the connectors position and draw it to the screen.\r\n     */ \r\n    update() {\r\n        this.startX = this.attachmentPoint1.x\r\n        this.startY = this.attachmentPoint1.y\r\n        if (this.attachmentPoint2){  //check to see if the attachment point is defined\r\n            this.endX = this.attachmentPoint2.x\r\n            this.endY = this.attachmentPoint2.y\r\n        }\r\n        this.draw()\r\n    }\r\n\r\n}",
@@ -13026,7 +13045,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 785,
+    "__docId__": 788,
     "kind": "class",
     "name": "Connector",
     "memberof": "src/js/prototypes/connector.js",
@@ -13041,7 +13060,7 @@
     "interface": false
   },
   {
-    "__docId__": 786,
+    "__docId__": 789,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13066,7 +13085,7 @@
     ]
   },
   {
-    "__docId__": 787,
+    "__docId__": 790,
     "kind": "member",
     "name": "isMoving",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13085,7 +13104,7 @@
     }
   },
   {
-    "__docId__": 788,
+    "__docId__": 791,
     "kind": "member",
     "name": "color",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13104,7 +13123,7 @@
     }
   },
   {
-    "__docId__": 789,
+    "__docId__": 792,
     "kind": "member",
     "name": "atomType",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13123,7 +13142,7 @@
     }
   },
   {
-    "__docId__": 790,
+    "__docId__": 793,
     "kind": "member",
     "name": "selected",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13142,7 +13161,7 @@
     }
   },
   {
-    "__docId__": 791,
+    "__docId__": 794,
     "kind": "member",
     "name": "attachmentPoint1",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13161,7 +13180,7 @@
     }
   },
   {
-    "__docId__": 792,
+    "__docId__": 795,
     "kind": "member",
     "name": "attachmentPoint2",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13180,7 +13199,7 @@
     }
   },
   {
-    "__docId__": 793,
+    "__docId__": 796,
     "kind": "member",
     "name": "[key]",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13196,7 +13215,7 @@
     }
   },
   {
-    "__docId__": 794,
+    "__docId__": 797,
     "kind": "member",
     "name": "startX",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13215,7 +13234,7 @@
     }
   },
   {
-    "__docId__": 795,
+    "__docId__": 798,
     "kind": "member",
     "name": "startY",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13234,7 +13253,7 @@
     }
   },
   {
-    "__docId__": 796,
+    "__docId__": 799,
     "kind": "method",
     "name": "draw",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13249,7 +13268,7 @@
     "return": null
   },
   {
-    "__docId__": 797,
+    "__docId__": 800,
     "kind": "method",
     "name": "clickUp",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13285,7 +13304,7 @@
     "return": null
   },
   {
-    "__docId__": 800,
+    "__docId__": 803,
     "kind": "method",
     "name": "clickMove",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13321,7 +13340,7 @@
     "return": null
   },
   {
-    "__docId__": 801,
+    "__docId__": 804,
     "kind": "member",
     "name": "endX",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13337,7 +13356,7 @@
     }
   },
   {
-    "__docId__": 802,
+    "__docId__": 805,
     "kind": "member",
     "name": "endY",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13353,7 +13372,7 @@
     }
   },
   {
-    "__docId__": 803,
+    "__docId__": 806,
     "kind": "method",
     "name": "keyPress",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13379,7 +13398,7 @@
     "return": null
   },
   {
-    "__docId__": 804,
+    "__docId__": 807,
     "kind": "method",
     "name": "deleteSelf",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13404,7 +13423,7 @@
     "return": null
   },
   {
-    "__docId__": 805,
+    "__docId__": 808,
     "kind": "method",
     "name": "serialize",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13423,7 +13442,7 @@
     }
   },
   {
-    "__docId__": 806,
+    "__docId__": 809,
     "kind": "method",
     "name": "waitOnComingInformation",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13438,7 +13457,7 @@
     "return": null
   },
   {
-    "__docId__": 807,
+    "__docId__": 810,
     "kind": "method",
     "name": "propogate",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13453,7 +13472,7 @@
     "return": null
   },
   {
-    "__docId__": 808,
+    "__docId__": 811,
     "kind": "method",
     "name": "walkBackForConstants",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13475,7 +13494,7 @@
     "return": null
   },
   {
-    "__docId__": 809,
+    "__docId__": 812,
     "kind": "method",
     "name": "loadTree",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13494,7 +13513,7 @@
     }
   },
   {
-    "__docId__": 810,
+    "__docId__": 813,
     "kind": "method",
     "name": "update",
     "memberof": "src/js/prototypes/connector.js~Connector",
@@ -13509,7 +13528,7 @@
     "return": null
   },
   {
-    "__docId__": 815,
+    "__docId__": 818,
     "kind": "file",
     "name": "src/utils.js",
     "content": "/**\r\n * Returns a randome integer within a range.\r\n * @param {number} min - The minimum possible value.\r\n * @param {number} max - The maximum possible value.\r\n */ \r\nfunction randomIntFromRange(min, max) {\r\n    return Math.floor(Math.random() * (max - min + 1) + min)\r\n}\r\n\r\n/**\r\n * Selects a random color from an array. Where is this used? Can this be deleted?\r\n * @param {array} colors - An array of possible colors.\r\n */ \r\nfunction randomColor(colors) {\r\n    return colors[Math.floor(Math.random() * colors.length)]\r\n}\r\n\r\n/**\r\n * Compute the distance between two points on a plane.\r\n * @param {number} x1 - The x cordinate of the first point.\r\n * @param {number} y1 - The y cordinate of the first point.\r\n * @param {number} x2 - The x cordinate of the second point.\r\n * @param {number} y2 - The y cordinate of the second point.\r\n */ \r\nfunction distance(x1, y1, x2, y2) {\r\n    const xDist = x2 - x1\r\n    const yDist = y2 - y1\r\n\r\n    return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2))\r\n}\r\n\r\nmodule.exports = { randomIntFromRange, randomColor, distance }\r\n",
@@ -13520,7 +13539,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 816,
+    "__docId__": 819,
     "kind": "function",
     "name": "randomIntFromRange",
     "memberof": "src/utils.js",
@@ -13564,7 +13583,7 @@
     "ignore": true
   },
   {
-    "__docId__": 817,
+    "__docId__": 820,
     "kind": "function",
     "name": "randomColor",
     "memberof": "src/utils.js",
@@ -13598,7 +13617,7 @@
     "ignore": true
   },
   {
-    "__docId__": 818,
+    "__docId__": 821,
     "kind": "function",
     "name": "distance",
     "memberof": "src/utils.js",

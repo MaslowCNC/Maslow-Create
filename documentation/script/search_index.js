@@ -3294,6 +3294,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/prototypes/atom.js~atom#cancelprocessing",
+    "class/src/js/prototypes/atom.js~Atom.html#instance-member-cancelProcessing",
+    "src/js/prototypes/atom.js~Atom#cancelProcessing",
+    "member"
+  ],
+  [
     "src/js/prototypes/atom.js~atom#census",
     "class/src/js/prototypes/atom.js~Atom.html#instance-method-census",
     "src/js/prototypes/atom.js~Atom#census",
