@@ -127,6 +127,11 @@ export default class Atom {
          * @type {string}
          */
         this.path = ""
+        /** 
+         * A function which can be called to cancel the processing being done for this atom.
+         * @type {function}
+         */
+        this.cancelProcessing = () => {console.warn("Nothing to cancel")}
 
         for(var key in values) {
             /** 
@@ -357,8 +362,8 @@ export default class Atom {
 
     /**
      * Set the atom's response to a mouse click. This usually means selecting the atom and displaying it's contents in 3D
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
+     * @param {number} x - The X coordinate of the click
+     * @param {number} y - The Y coordinate of the click
      * @param {boolean} clickProcessed - A flag to indicate if the click has already been processed
      */ 
     clickDown(x,y, clickProcessed){
@@ -686,6 +691,12 @@ export default class Atom {
         if(this.output){
             this.output.waitOnComingInformation()
         }
+        
+        if(this.processing){
+            console.warn("Processing "+ this.name + " Canceled")
+            this.cancelProcessing()
+            this.processing = false
+        }
     }
     
     /**
@@ -700,18 +711,20 @@ export default class Atom {
             }
         })
         if(go){     //Then we update the value
+            
+            this.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. It also cancels anything processing if this atom was doing a calculation already.
+            
             this.processing = true
             this.decreaseToProcessCountByOne()
             
-            if(this.output){  //If this atom has an output
-                this.output.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one.
-            }
             
             this.clearAlert()
             
             //toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
             
-            window.ask(toAsk).then(result => {
+            const gotBack = window.ask(toAsk)
+            
+            gotBack.then(result => {
                 if (result != -1 ){
                     this.displayAndPropagate()
                 }else{
@@ -719,6 +732,8 @@ export default class Atom {
                 }
                 this.processing = false
             })
+            
+            this.cancelProcessing = gotBack.terminate //This can be called to interupt the computation
         }
     }
     
