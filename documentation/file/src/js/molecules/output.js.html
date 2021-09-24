@@ -96,7 +96,7 @@ export default class Output extends Atom {
         
         //Add a new output to the current molecule
         if (typeof this.parent !== &apos;undefined&apos;) {
-            this.parent.addIO(&apos;output&apos;, &apos;Geometry&apos;, this.parent, &apos;geometry&apos;, &apos;&apos;)
+            this.parent.addIO(&apos;output&apos;, &apos;Geometry&apos;, this.parent, &apos;geometry&apos;, this.parent.path)
         }
         
         /**

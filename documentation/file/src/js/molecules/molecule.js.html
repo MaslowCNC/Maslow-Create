@@ -379,11 +379,6 @@ export default class Molecule extends Atom{
         this.nodesOnTheScreen.forEach(node =&gt; {
             node.beginPropagation(force)
         })
-        
-        //Generate the simplified path if needed
-        if(this.simplify){
-            this.generatePath()
-        }
     }
     
     /**
@@ -817,17 +812,18 @@ export default class Molecule extends Atom{
                         //Make this molecule spawn with all of it&apos;s parent&apos;s inputs
                         if(atom.atomType == &apos;Molecule&apos;){ //Not GitHubMolecule
                             atom.copyInputsFromParent()
+                            
+                            //Make begin propagation from an atom when it is placed. This is used when copy and pasting molecules.
+                            if(promise != null){
+                                promise.then( ()=&gt; {
+                                    atom.beginPropagation()
+                                })
+                            }
+                            else{
+                                atom.beginPropagation()
+                            }
+                            
                         }
-                        
-                        //Make begin propagation from an atom when it is placed
-                        // if(promise != null){
-                        // promise.then( ()=&gt; {
-                        // atom.beginPropagation()
-                        // })
-                        // }
-                        // else{
-                        // atom.beginPropagation()
-                        // }
                         
                         //Fake a click on the newly placed atom
                         const downEvt = new MouseEvent(&apos;mousedown&apos;, {
