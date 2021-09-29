@@ -171,6 +171,7 @@ export default class Input extends Atom {
                 this.decreaseToProcessCountByOne()
                 
                 this.value = input.getValue()
+                this.path  = this.value
                 
                 this.output.waitOnComingInformation()         //Lock all of the dependents
                 
