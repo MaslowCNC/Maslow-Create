@@ -184,9 +184,24 @@ class KDBush {
     }
 }
 
+const TOOL_TYPES = ['dynamicLaser', 'constantLaser', 'plotter', 'spindle'];
+
 const X = 0;
 const Y = 1;
 const Z = 2;
+
+/*
+
+We support grbl tools at the moment, which have the following structure:
+
+{
+  jumpZ // a height that is safe for lateral rapid movement.
+  cutSpeed // the spindle speed to use when cutting
+  feedRate // the rate to advance the tool while cutting
+  type // 'dynamicLaser', 'constantLaser', 'plotter', 'spindle'
+}
+
+*/
 
 // FIX: This is actually GRBL.
 const toGcode = async (
@@ -194,155 +209,160 @@ const toGcode = async (
   tool,
   { definitions, doPlan = true } = {}
 ) => {
+  if (!tool) {
+    throw Error('Tool not defined: Expected { grbl: {} }');
+  }
+  if (!tool.grbl) {
+    throw Error('Non GRBL tool not supported: Expected { grbl: {} }');
+  }
+  if (!TOOL_TYPES.includes(tool.grbl.type)) {
+    throw Error(
+      `Tool type ${
+        tool.grbl.type
+      } not supported: Expected { grbl: { type: [${TOOL_TYPES.join(', ')}] } }`
+    );
+  }
+  if (!tool.grbl.feedRate) {
+    throw Error(
+      `Tool feedRate not defined: Expected { grbl: { feedRate: <integer> } }`
+    );
+  }
+
   // const topZ = 0;
   const codes = [];
-  const _ = undefined;
 
   // CHECK: Perhaps this should be a more direct modeling of the GRBL state?
   const state = {
     // Where is the tool
-    position: [0, 0, 0],
+    x: 0,
+    y: 0,
+    z: 0,
     // How 'fast' the tool is running (rpm or power).
-    speed: undefined,
-    laserMode: false,
-    jumped: false,
+    s: 0,
+    f: 0,
   };
 
   const emit = (code) => codes.push(code);
 
-  // Runs each axis at maximum velocity until matches, so may make dog-legs.
-  const rapid = (
-    x = state.position[X],
-    y = state.position[Y],
-    z = state.position[Z],
-    f = state.tool.feedRate
-  ) => {
-    if (
-      x === state.position[X] &&
-      y === state.position[Y] &&
-      z === state.position[Z]
-    ) {
+  const value = (v) => {
+    let s = v.toFixed(3);
+    // This could be more efficient.
+    while (s.includes('.') && (s.endsWith('0') || s.endsWith('.'))) {
+      s = s.substring(0, s.length - 1);
+    }
+    return s;
+  };
+
+  const pX = (x = state.x) => {
+    if (x !== state.x) {
+      return ` X${value(x)}`;
+    } else {
+      return '';
+    }
+  };
+
+  const pY = (y = state.y) => {
+    if (y !== state.y) {
+      return ` Y${value(y)}`;
+    } else {
+      return '';
+    }
+  };
+
+  const pZ = (z = state.z) => {
+    if (z !== state.z) {
+      return ` Z${value(z)}`;
+    } else {
+      return '';
+    }
+  };
+
+  // Rapid Linear Motion
+  const cG0 = ({
+    x = state.x,
+    y = state.y,
+    z = state.z,
+    f = state.f,
+    s = state.s,
+  } = {}) => {
+    const code = `G0${pX(x)}${pY(y)}${pZ(z)}`;
+    if (code === 'G0') {
       return;
     }
-    emit(`G0 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)}`);
-    state.position = [x, y, z];
+    emit(code);
+    state.x = x;
+    state.y = y;
+    state.z = z;
   };
 
-  // Straight motion at set speed.
-  const cut = (
-    x = state.position[X],
-    y = state.position[Y],
-    z = state.position[Z],
-    f = state.tool.feedRate,
-    d = state.tool.drillRate || state.tool.feedRate,
-    s = state.tool.cutSpeed
-  ) => {
-    if (state.jumped && state.tool.warmupDuration) {
-      // CHECK: Will we need this on every jump?
-      setSpeed(state.tool.warmupSpeed);
-      emit(`G1 F1`);
-      emit(`G4 P${state.tool.warmupDuration.toFixed(3)}`);
-    }
-    state.jumped = false;
-    setSpeed(s);
-    if (
-      x === state.position[X] &&
-      y === state.position[Y] &&
-      z === state.position[Z]
-    ) {
+  // Cut
+  const cG1 = ({
+    x = state.x,
+    y = state.y,
+    z = state.z,
+    f = state.f,
+    s = state.s,
+  } = {}) => {
+    const code = `G1${pX(x)}${pY(y)}${pZ(z)}`;
+    if (code === 'G1') {
       return;
     }
-    if (z !== state.position[Z]) {
-      // Use drillRate instead of feedRate.
-      f = d;
-    }
-    emit(
-      `G1 X${x.toFixed(3)} Y${y.toFixed(3)} Z${z.toFixed(3)} F${f.toFixed(3)}`
-    );
-    state.position = [x, y, z];
+    emit(code);
+    state.x = x;
+    state.y = y;
+    state.z = z;
   };
 
-  const setSpeed = (value) => {
-    if (state.speed !== value) {
-      if (Math.sign(state.speed || 0) !== Math.sign(value)) {
-        if (value === 0) {
-          emit('M5');
-        } else if (value < 0) {
-          // Reverse
-          emit('M4');
-        } else {
-          // Forward
-          emit('M3');
-        }
-      }
-      emit(`S${Math.abs(value).toFixed(3)}`);
-      state.speed = value;
+  const cS = ({ s = state.s } = {}) => {
+    if (s !== state.s) {
+      emit(`S${value(s)}`);
+      state.s = s;
     }
   };
 
-  const toolChange = (tool) => {
-    if (state.tool && state.tool.type !== tool.type) {
-      throw Error(
-        `Unsupported tool type change: ${state.tool.type} to ${tool.type}`
-      );
+  const cF = ({ f = state.f } = {}) => {
+    if (f !== state.f) {
+      emit(`F${value(f)}`);
+      state.f = f;
     }
-    if (state.tool && state.tool.diameter !== tool.diameter) {
-      throw Error(
-        `Unsupported tool diameter change: ${state.tool.diameter} to ${tool.diameter}`
-      );
-    }
-    // Accept tool change.
-    state.tool = tool;
-    switch (state.tool.type) {
-      case 'dynamicLaser':
-      case 'constantLaser':
-      case 'plotter':
-      case 'spindle':
-        break;
-      default:
-        throw Error(`Unknown tool: ${state.tool.type}`);
-    }
-  };
-
-  const stop = () => {
-    emit('M5');
   };
 
   /*
-  const pause = () => {
+  // Pause
+  const cPause = () => {
     emit('M0');
   };
+*/
 
-  const dwell = (seconds) => {
-    emit(`G4 P${seconds * 1000}`);
+  const cut = ({ x, y, z }) => {
+    cG1({ x, y, z });
   };
-  */
 
-  const jump = (x, y) => {
-    if (x === state.position[X] && y === state.position[Y]) {
-      // Already there.
+  // Rapidly lift tool to a clear height and move to the x, y coordinate.
+  const jump = ({ x, y }) => {
+    if (x === state.x && y === state.y) {
       return;
     }
+    cG0({ z: state.tool.jumpZ });
+    cG0({ x, y });
+  };
 
-    const speed = state.tool.jumpSpeed || 0;
-    const jumpRate = state.tool.jumpRate || state.tool.feedRate;
-    if (speed !== 0) {
-      // For some tools (some lasers) it is better to keep the beam on (at reduced power)
-      // while jumping.
-      setSpeed(speed);
-      cut(_, _, state.tool.jumpZ, jumpRate, speed); // up
-      cut(x, y, _, jumpRate, speed); // across
-      // cut(_, _, topZ, jumpRate, speed); // down
-    } else {
-      rapid(_, _, state.tool.jumpZ); // up
-      rapid(x, y, _); // across
-      // rapid(_, _, topZ); // down
-      state.jumped = true;
+  const stop = () => {
+    if (state.m !== 5 && state.tool.cutSpeed) {
+      emit('M5');
+      state.m = 5;
+    }
+  };
+
+  const start = () => {
+    if (state.m !== 3 && state.tool.cutSpeed) {
+      emit('M3');
+      state.m = 3;
     }
   };
 
   const park = () => {
-    jump(0, 0);
+    jump({ x: 0, y: 0 });
     stop();
   };
 
@@ -351,13 +371,17 @@ const toGcode = async (
   useMetric();
 
   const computeDistance = ([x, y, z]) => {
-    const dX = x - state.position[X];
-    const dY = y - state.position[Y];
+    const dX = x - state.x;
+    const dY = y - state.y;
     const cost = Math.sqrt(dX * dX + dY * dY) - z * 1000000;
     return cost;
   };
 
-  toolChange(tool.grbl);
+  state.tool = tool.grbl;
+
+  cF({ f: state.tool.feedRate });
+  cS({ s: state.tool.cutSpeed });
+  start();
 
   {
     const seen = new Set();
@@ -394,7 +418,7 @@ const toGcode = async (
     );
 
     while (pendingEdges > 0) {
-      const [x, y] = state.position;
+      const { x, y } = state;
       for (let range = 1; range < Infinity; range *= 2) {
         let bestStart;
         let bestEdge;
@@ -417,9 +441,9 @@ const toGcode = async (
         pendingEdges -= 1;
         bestEdge.planned = true;
         const bestEnd = bestEdge[0] === bestStart ? bestEdge[1] : bestEdge[0];
-        jump(...bestStart); // jump to the start x, y
-        cut(...bestStart); // may need to drill down to the start z
-        cut(...bestEnd); // cut across
+        jump({ x: bestStart[X], y: bestStart[Y] }); // jump to the start x, y
+        cut({ x: bestStart[X], y: bestStart[Y], z: bestStart[Z] }); // may need to drill down to the start z
+        cut({ x: bestEnd[X], y: bestEnd[Y], z: bestEnd[Z] }); // cut across
         break;
       }
     }

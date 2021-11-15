@@ -51151,7 +51151,7 @@ const buildMeshes = async ({
       );
       applyBoxUV(bufferGeometry);
       const material = await buildMeshMaterial(definitions, tags);
-      if (tags.includes('compose/non-positive')) {
+      if (tags.includes('type:void')) {
         material.transparent = true;
         material.depthWrite = false;
         material.opacity *= 0.5;

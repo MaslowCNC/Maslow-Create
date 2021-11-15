@@ -6515,6 +6515,16 @@ const parseOptions = {
   locations: true,
 };
 
+const add = (array, item) => {
+  if (array.indexOf(item) === -1) {
+    array.push(item);
+  }
+  return array;
+};
+
+const escape = (text) =>
+  text ? `\`${text.replace(/(['"`$])/g, '\\$1')}\`` : text;
+
 const strip = (ast) => {
   if (ast instanceof Array) {
     return ast.map(strip);
@@ -6552,69 +6562,10 @@ const fromIdToSha = (id, { topLevel }) => {
   }
 };
 
-const generateCacheLoadCode = async ({
-  isNotCacheable,
-  code,
-  path,
-  id,
-  doReplay = false,
-}) => {
-  const loadCode = [];
-  if (!isNotCacheable) {
-    const meta = await read(`meta/def/${path}/${id}`);
-    if (meta && meta.type === 'Shape') {
-      loadCode.push(
-        parse(
-          `const ${id} = await loadGeometry('data/def/${path}/${id}')`,
-          parseOptions
-        ),
-        parse(`Object.freeze(${id});`, parseOptions)
-      );
-      if (doReplay) {
-        loadCode.push(
-          parse(
-            `pushSourceLocation({ path: '${path}', id: '${id}' });`,
-            parseOptions
-          )
-        );
-        loadCode.push(
-          parse(`await replayRecordedNotes('${path}', '${id}')`, parseOptions)
-        );
-        loadCode.push(
-          parse(
-            `popSourceLocation({ path: '${path}', id: '${id}' });`,
-            parseOptions
-          )
-        );
-      }
-      return loadCode;
-    }
-  }
-  // Otherwise recompute it.
-  loadCode.push(
-    parse(`pushSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
-  loadCode.push(...code);
-  loadCode.push(
-    parse(`popSourceLocation({ path: '${path}', id: '${id}' });`, parseOptions)
-  );
-  return loadCode;
-};
-
-const generateUpdateCode = async (
-  { isNotCacheable, code, dependencies, path, id },
-  { declaration, sha, topLevel, state }
+const generateCode = async (
+  { path, id, dependencies, imports },
+  { topLevel, exportNames }
 ) => {
-  if (isNotCacheable) {
-    return `
-try {
-pushSourceLocation({ path: '${path}', id: '${id}' });
-${code.map((statement) => generate(statement)).join('\n')}
-popSourceLocation({ path: '${path}', id: '${id}' });
-} catch (error) { throw error; }
-`;
-  }
-
   const body = [];
   const seen = new Set();
   const walk = async (dependencies) => {
@@ -6628,36 +6579,32 @@ popSourceLocation({ path: '${path}', id: '${id}' });
         continue;
       }
       await walk(entry.dependencies);
-      body.push(...(await generateCacheLoadCode(entry)));
+      if (entry.importSource) {
+        add(imports, entry.importSource);
+      }
+      const { path, id, code, text, sha } = entry;
+      if (code) {
+        body.push(
+          parse(
+            `const ${id} = await $run(async () => { ${generate({
+              type: 'Program',
+              body: code,
+            })}; return ${id}; }, { path: '${path}', id: '${id}', text: ${escape(
+              text
+            )}, sha: '${sha}' });`,
+            parseOptions
+          )
+        );
+      }
     }
   };
-  await walk(dependencies);
-  body.push(parse(`info('define ${id}');`, parseOptions));
-  body.push(
-    parse(
-      `pushSourceLocation({ path: '${path}', id: '${id}' }); beginRecordingNotes('${path}', '${id}', { line: ${declaration.loc.start.line}, column: ${declaration.loc.start.column} });`,
-      parseOptions
-    )
-  );
-  body.push(...code);
-  // Only cache Shapes.
-  body.push(
-    parse(
-      `await write('meta/def/${path}/${id}', { sha: '${sha}', type: ${id} instanceof Shape ? 'Shape' : 'Object' });
-       if (${id} instanceof Shape) { await saveGeometry('data/def/${path}/${id}', ${id}); }`,
-      parseOptions
-    )
-  );
-  body.push(
-    parse(
-      `await saveRecordedNotes('${path}', '${id}'); popSourceLocation({ path: '${path}', id: '${id}' });`,
-      parseOptions
-    )
-  );
-  const program = { type: 'Program', body };
+  await walk([id, ...dependencies]);
+  if (exportNames) {
+    body.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
+  }
   return `
 try {
-${generate(program)}
+${generate({ type: 'Program', body })}
 } catch (error) { throw error; }
 `;
 };
@@ -6693,15 +6640,19 @@ const declareVariable = async (
   {
     path,
     updates,
+    replays,
     controls,
     exportNames,
+    lines,
     out,
     doExport = false,
-    isImport = false,
     sideEffectors,
     hasSideEffects = false,
     topLevel,
     sourceLocation,
+    emitSourceLocation,
+    importSource,
+    imports,
   } = {}
 ) => {
   fixControlCalls(declarator, controls);
@@ -6739,7 +6690,16 @@ const declareVariable = async (
     sha,
     hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
+    emitSourceLocation,
+    importSource,
+    imports: [],
   };
+
+  if (lines) {
+    entry.text = lines
+      .slice(entry.sourceLocation.start.line - 1, entry.sourceLocation.end.line)
+      .join('\n');
+  }
 
   topLevel.set(id, entry);
 
@@ -6768,33 +6728,53 @@ const declareVariable = async (
     ) {
       // We've already patched this.
       entry.isNotCacheable = true;
-    } else if (isImport) {
-      // We need to import from modules during replay.
+    } else if (importSource) {
       entry.isNotCacheable = true;
     }
   }
 
-  out.push(...(await generateCacheLoadCode({ ...entry, doReplay: true })));
+  updates[id] = {
+    dependencies,
+    imports: entry.imports,
+    program: await generateCode(entry, { topLevel }),
+  };
 
-  if (!entry.isNotCacheable) {
-    const meta = await read(`meta/def/${path}/${id}`);
-    if (!meta || meta.sha !== sha) {
-      updates[id] = {
-        dependencies,
-        program: await generateUpdateCode(entry, {
-          declaration,
-          sha,
-          topLevel,
-        }),
-      };
-    }
+  /*
+  const meta = await read(`meta/def/${path}/${id}`);
+  if (!meta || meta.sha !== sha || entry.isNotCacheable) {
+    updates[id] = {
+      dependencies,
+      imports: entry.imports,
+      program: await generateUpdateCode(entry, {
+        declaration,
+        sha,
+        topLevel,
+      }),
+    };
+    // Don't replay it if it's being updated.
+    return;
   }
+
+  const replayProgram = await generateReplayCode(
+    entry,
+  );
+  if (replayProgram.length > 0) {
+    replays[id] = {
+      dependencies,
+      imports: entry.imports,
+      program: `
+try {
+${generate({ type: 'Program', body: replayProgram })}
+} catch (error) { throw error; }
+`,
+    };
+  }
+*/
 };
 
 // FIX: Replace path with directory?
 const resolveModulePath = (module, { path }) => {
   const op = () => {
-    console.log(`QQ/resolveModulePath: ${module} ${path}`);
     if (module.startsWith('./')) {
       const subpath = path.split('/');
       subpath.pop();
@@ -6813,7 +6793,6 @@ const resolveModulePath = (module, { path }) => {
   };
 
   const result = op();
-  console.log(`QQ/resolveModulePath/result: ${result}`);
   return result;
 };
 
@@ -6835,9 +6814,10 @@ const processStatement = async (entry, options) => {
         parse(`await importModule('${modulePath}');`, parseOptions),
         {
           ...options,
-          isImport: true,
+          importSource: modulePath,
           hasSideEffects: true,
           sourceLocation: entry.loc,
+          emitSourceLocation: false,
         }
       );
     } else {
@@ -6849,7 +6829,12 @@ const processStatement = async (entry, options) => {
                 `const ${local.name} = (await importModule('${modulePath}')).default;`,
                 parseOptions
               ),
-              { ...options, isImport: true, sourceLocation: entry.loc }
+              {
+                ...options,
+                importSource: modulePath,
+                sourceLocation: entry.loc,
+                emitSourceLocation: false,
+              }
             );
             break;
           case 'ImportSpecifier':
@@ -6859,7 +6844,12 @@ const processStatement = async (entry, options) => {
                   `const ${local.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                { ...options, isImport: true, sourceLocation: entry.loc }
+                {
+                  ...options,
+                  importSource: modulePath,
+                  sourceLocation: entry.loc,
+                  emitSourceLocation: false,
+                }
               );
             } else {
               processProgram(
@@ -6867,7 +6857,12 @@ const processStatement = async (entry, options) => {
                   `const ${imported.name} = (await importModule('${modulePath}')).${imported.name};`,
                   parseOptions
                 ),
-                { ...options, isImport: true, sourceLocation: entry.loc }
+                {
+                  ...options,
+                  importSource: modulePath,
+                  sourceLocation: entry.loc,
+                  emitSourceLocation: false,
+                }
               );
             }
             break;
@@ -6913,54 +6908,64 @@ const processProgram = async (program, options) => {
   }
 };
 
-/**
- * Convert a module to executable ecmascript function.
- * The conversion includes caching constant variables for reuse, and tree pruning.
- *
- * @param {string} script
- * @param {object} options
- * @param {string} options.path - The path to the script for producing relative paths.
- * @param {function(path:string} options.import - A method for resolving imports.
- */
-
 const toEcmascript = async (
   script,
-  { path = '', topLevel = new Map(), updates = {} } = {}
+  {
+    path = '',
+    topLevel = new Map(),
+    updates = {},
+    replays = {},
+    exports = [],
+    imports = new Map(),
+    indirectImports = new Map(),
+    noLines = false,
+  } = {}
 ) => {
-  let ast = parse(script, parseOptions);
+  const lines = noLines ? undefined : script.split('\n');
+  const ast = parse(script, parseOptions);
 
   let topLevelExpressionCount = 0;
   const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
 
-  const exportNames = [];
-
   const out = [];
+  const exportNames = [];
   const sideEffectors = [];
 
   // Start by loading the controls
   const controls = (await read(`control/${path}`)) || {};
 
   await processProgram(ast, {
+    lines,
     out,
     updates,
+    replays,
     exportNames,
     controls,
     path,
     topLevel,
     nextTopLevelExpressionId,
     sideEffectors,
+    exports,
+    imports,
+    indirectImports,
   });
 
   // Return the exports as an object.
-  out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
-
-  const result = `
-try {
-${generate(parse(out.map(generate).join('\n'), parseOptions))}
-} catch (error) { throw error; }
-`;
-
-  return result;
+  if (exportNames.length > 0) {
+    exports.push(
+      await generateCode(
+        {
+          isNotCacheable: true,
+          dependencies: [...exportNames, ...sideEffectors],
+          id: '$exports',
+          path,
+          emitSourceLocation: false, // FIX: Hack for source location.
+          imports: [],
+        },
+        { topLevel, exportNames }
+      )
+    );
+  }
 };
 
 export { toEcmascript };

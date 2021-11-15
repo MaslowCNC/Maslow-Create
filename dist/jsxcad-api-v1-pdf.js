@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { emit, getDefinitions, getPendingErrorHandler, addPending } from './jsxcad-sys.js';
+import { emit, getPendingErrorHandler, addPending } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 
@@ -75,10 +75,7 @@ const preparePdf = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const op = toPdf(entry, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
+    const op = toPdf(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
       data: op,

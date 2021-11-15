@@ -1,6 +1,5 @@
 import { Shape, xy } from './jsxcad-api-shape.js';
 import { taggedGroup, outline, translate } from './jsxcad-geometry.js';
-import { getDefinitions } from './jsxcad-sys.js';
 import { seq } from './jsxcad-api-v1-math.js';
 import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
@@ -58,11 +57,7 @@ function millMethod(tool = {}, negative) {
 Shape.prototype.mill = millMethod;
 
 const engrave = (paths, depth = 0.5) => {
-  const { cutDepth = 0.2 } = toToolFromTags(
-    'grbl',
-    paths.toGeometry().tags,
-    getDefinitions()
-  );
+  const { cutDepth = 0.2 } = toToolFromTags('grbl', paths.toGeometry().tags);
   const cuts = Math.ceil(depth / cutDepth);
   const effectiveCutDepth = depth / cuts;
   const toolpaths = [];

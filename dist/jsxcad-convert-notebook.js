@@ -75,10 +75,14 @@ var base64Arraybuffer = createCommonjsModule(function (module, exports) {
 base64Arraybuffer.encode;
 base64Arraybuffer.decode;
 
-const encodeNotebook = async (notebook, { workspace } = {}) => {
+const encodeNotebook = async (notebook, { workspace, module } = {}) => {
   const encoded = [];
   const seen = new Set();
   for (const note of notebook) {
+    if (module && note.sourceLocation && note.sourceLocation.path !== module) {
+      // Skip notes for other modules.
+      continue;
+    }
     if (seen.has(note.hash)) {
       // Deduplicate the notes.
       continue;
@@ -94,7 +98,10 @@ const encodeNotebook = async (notebook, { workspace } = {}) => {
     if (note.download) {
       const encodedEntries = [];
       for (const entry of note.download.entries) {
-        const data = await entry.data;
+        let data = await entry.data;
+        if (entry.path && !data) {
+          data = await read(entry.path, { workspace });
+        }
         if (data) {
           const encodedEntry = {
             ...entry,
@@ -118,8 +125,10 @@ const toHtml = async (
     view,
     title = 'JSxCAD Viewer',
     modulePath = 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6',
+    module,
   } = {}
 ) => {
+  const encodedNotebook = await encodeNotebook(notebook, { module });
   const html = `
 <html>
  <head>
@@ -194,7 +203,7 @@ const toHtml = async (
     import { dataUrl } from '${modulePath}/jsxcad-ui-threejs.js';
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
-    const notebook = ${JSON.stringify(await encodeNotebook(notebook), null, 2)};
+    const notebook = ${JSON.stringify(encodedNotebook, null, 2)};
 
     const prepareViews = async (notebook) => {
       // Prepare the view urls in the browser.
@@ -228,7 +237,7 @@ const toHtml = async (
  </body>
 </html>
 `;
-  return new TextEncoder('utf8').encode(html);
+  return { html: new TextEncoder('utf8').encode(html), encodedNotebook };
 };
 
 export { toHtml };
