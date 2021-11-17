@@ -200,13 +200,11 @@ export default class Molecule extends Atom{
      * Pushes serialized atoms into array if selected
      */
     copy(){
-        console.log("Copying")
         this.nodesOnTheScreen.forEach(atom => {
             if(atom.selected){
                 GlobalVariables.atomsSelected.push(atom.serialize({x: .03, y: .03}))
             }
         })
-        console.log("Done copying")
     }
     
     /**
