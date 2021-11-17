@@ -623,12 +623,10 @@ export default class Atom {
             atomType: this.atomType,
             name: this.name,
             x: this.x + offset.x,
-            y: this.y + offset.y,
+            y: this.y - offset.y,
             uniqueID: this.uniqueID,
             ioValues: ioValues
         }
-        console.log("Serialized to: ")
-        console.log(object)
         return object
     }
     

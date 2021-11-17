@@ -203,7 +203,7 @@ export default class Molecule extends Atom{
         console.log("Copying")
         this.nodesOnTheScreen.forEach(atom => {
             if(atom.selected){
-                GlobalVariables.atomsSelected.push(atom.serialize({x: 10, y: 10}))
+                GlobalVariables.atomsSelected.push(atom.serialize({x: .03, y: .03}))
             }
         })
         console.log("Done copying")
@@ -560,7 +560,7 @@ export default class Molecule extends Atom{
     /**
      * Generates and returns a object represntation of this molecule and all of its children.
      */
-    serialize(){
+    serialize(offset = {x: 0, y: 0}){
         
         var allAtoms = [] //An array of all the atoms contained in this molecule
         var allConnectors = [] //An array of all the connectors contained in this molecule
@@ -576,7 +576,7 @@ export default class Molecule extends Atom{
             }
         })
         
-        var thisAsObject = super.serialize()    //Do the atom serialization to create an object, then add all the bits of this one to it
+        var thisAsObject = super.serialize(offset)    //Do the atom serialization to create an object, then add all the bits of this one to it
         thisAsObject.topLevel = this.topLevel
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
