@@ -606,8 +606,8 @@ export default class Atom {
     /**
      * Create an object containing the information about this atom that we want to save. 
      */ 
-    serialize(){
-        
+    serialize(offset = {x: 0, y: 0}){
+        //Offsets are used to make copy and pasted atoms move over a little bit
         var ioValues = []
         this.inputs.forEach(io => {
             if (typeof io.getValue() == 'number' || typeof io.getValue() == 'string'){
@@ -622,12 +622,11 @@ export default class Atom {
         var object = {
             atomType: this.atomType,
             name: this.name,
-            x: this.x,
-            y: this.y,
+            x: this.x + offset.x,
+            y: this.y - offset.y,
             uniqueID: this.uniqueID,
             ioValues: ioValues
         }
-        
         return object
     }
     
