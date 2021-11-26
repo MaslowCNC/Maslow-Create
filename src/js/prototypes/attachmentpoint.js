@@ -155,10 +155,12 @@ export default class AttachmentPoint {
             radiusInPixels = parentRadiusInPixels/2.4
         }
         if(this.parentMolecule.inputs.length < 2 && this.type == 'input'){
+            //This prevents single attachment points from expanding out
             /**
              * The x coordinate of the attachment point.
              */
             xInPixels = parentXInPixels - parentRadiusInPixels
+            this.x = this.parentMolecule.x - this.parentMolecule.radius //This makes sure it says it is where it actually is
             /**
              * The y coordinate of the attachment point.
              */
@@ -255,8 +257,8 @@ export default class AttachmentPoint {
     
     /**
      * Handles mouse click down. If the click is inside the AP it's connectors are selected if it is an input.
-     * @param {number} x - The x cordinate of the click
-     * @param {number} y - The y cordinate of the click
+     * @param {number} x - The x coordinate of the click
+     * @param {number} y - The y coordinate of the click
      * @param {boolean} clickProcessed - Has the click already been handled
      */ 
     clickDown(x,y, clickProcessed){
@@ -293,8 +295,8 @@ export default class AttachmentPoint {
 
     /**
      * Handles mouse click up. If the click is inside the AP and a connector is currently extending, then a connection is made
-     * @param {number} x - The x cordinate of the click
-     * @param {number} y - The y cordinate of the click
+     * @param {number} x - The x coordinate of the click
+     * @param {number} y - The y coordinate of the click
      */ 
     clickUp(x,y){
         this.connectors.forEach(connector => {
@@ -304,8 +306,8 @@ export default class AttachmentPoint {
     
     /**
      * Handles mouse click and move to expand the AP. Could this be done with a call to expand out?
-     * @param {number} x - The x cordinate of the click
-     * @param {number} y - The y cordinate of the click
+     * @param {number} x - The x coordinate of the click
+     * @param {number} y - The y coordinate of the click
      */ 
     clickMove(x,y){
         let xInPixels = GlobalVariables.widthToPixels(this.x)
