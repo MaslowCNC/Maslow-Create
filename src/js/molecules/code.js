@@ -34,7 +34,7 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \n\n\nfunction main(Input1, Input2){\n  return Sphere(40)        //return must be geometry;\n}\n\nreturn main(Input1, Input2)"
+        this.code = "//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \n\n\nfunction main(Input1, Input2){\n  return Orb(40)        //return must be geometry;\n}\n\nreturn main(Input1, Input2)"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
