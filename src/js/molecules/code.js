@@ -3,7 +3,7 @@ import CodeMirror from 'codemirror'
 import GlobalVariables from '../globalvariables'
 
 /**
- * The Code molecule type adds support for executing arbirary jsxcad code.
+ * The Code molecule type adds support for executing arbitrary jsxcad code.
  */
 export default class Code extends Atom {
     

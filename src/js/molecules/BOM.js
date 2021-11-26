@@ -97,14 +97,14 @@ export default class AddBOMTag extends Atom{
         GlobalVariables.c.beginPath()
         GlobalVariables.c.fillStyle = '#484848'
         GlobalVariables.c.font = `${pixelsRadius/1.5}px Work Sans Bold`
-        GlobalVariables.c.fillText(String.fromCharCode(0x0024,0x0024,0x0024), pixelsX- pixelsRadius/2, pixelsY +this.height/3)
+        GlobalVariables.c.fillText(String.fromCharCode(0x0024,0x0024,0x0024), pixelsX - pixelsRadius/2, pixelsY +this.height/3)
         GlobalVariables.c.fill()
         GlobalVariables.c.closePath()
     }
     
     /**
-     * Creates an editable UI represntation of the bom list. 
-     * @param {Object} list - list is an object to which the generated HTML element will be apended
+     * Creates an editable UI representation of the bom list. 
+     * @param {Object} list - list is an object to which the generated HTML element will be appended
      */ 
     createBOM(list){
         
