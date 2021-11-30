@@ -263,7 +263,7 @@ export default class Molecule extends Atom{
         try{
             this.processing = true
             const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
-            const {answer, terminate} = window.ask(values)
+            const {answer} = window.ask(values)
             answer.then( () => {
                 this.processing = false
                 this.pushPropagation()
@@ -625,12 +625,12 @@ export default class Molecule extends Atom{
                 
                 const splits = this.path.split('/')
                 const values = {op: "getPathsList", prefacePath: splits[0]+'/'+splits[1]}
-                const {answer, terminate} = window.ask(values).
+                const {answer} = window.ask(values)
                 answer.then( answer => {
-                    
+                
                     GlobalVariables.availablePaths = answer
                     this.beginPropagation(forceBeginPropagation)
-                    
+                
                 })
                 this.backgroundClick()
             }
