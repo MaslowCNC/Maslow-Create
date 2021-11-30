@@ -508,7 +508,7 @@ const toCgalTransformFromJsTransform = (
     }
     return cgalTransform;
   } catch (e) {
-    console.log('Malformed transform');
+    console.log(`Malformed transform: ${JSON.stringify(jsTransform)}`);
     throw e;
   }
 };
@@ -534,8 +534,16 @@ const invertTransform = (a) =>
 const fromExactToCgalTransform = (...exact) =>
   getCgal().Transformation__from_exact(() => exact.shift());
 
-const fromApproximateToCgalTransform = (...approximate) =>
-  getCgal().Transformation__from_approximate(() => approximate.shift());
+const fromApproximateToCgalTransform = (...approximate) => {
+  try {
+    return getCgal().Transformation__from_approximate(() =>
+      approximate.shift()
+    );
+  } catch (error) {
+    console.log(JSON.stringify(approximate));
+    throw error;
+  }
+};
 
 const fromIdentityToCgalTransform = () =>
   toJsTransformFromCgalTransform(getCgal().Transformation__identity());
@@ -1280,7 +1288,7 @@ const fromSurfaceMeshToLazyGraph = (mesh) => {
 
 const fromSurfaceMeshToPolygons = (
   mesh,
-  transform,
+  transform = identityMatrix,
   triangulate = false
 ) => {
   const c = getCgal();

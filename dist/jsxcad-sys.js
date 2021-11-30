@@ -3973,9 +3973,10 @@ const terminateActiveServices = (contextFilter = (context) => true) => {
 
 const askService = (spec, question, transfer, context) => {
   let terminated;
-  let terminate = () => {
+  let doTerminate = () => {
     terminated = true;
   };
+  const terminate = () => doTerminate();
   const flow = async () => {
     let service;
     try {
@@ -3983,7 +3984,7 @@ const askService = (spec, question, transfer, context) => {
       if (service.released) {
         return Promise.reject(Error('Terminated'));
       }
-      terminate = () => {
+      doTerminate = () => {
         service.terminate();
         return Promise.reject(Error('Terminated'));
       };
@@ -4002,11 +4003,10 @@ const askService = (spec, question, transfer, context) => {
       }
     }
   };
-  const promise = flow();
+  const answer = flow();
   // Avoid a race in which the service might be terminated before
   // acquireService returns.
-  promise.terminate = () => terminate();
-  return promise;
+  return { answer, terminate };
 };
 
 const askServices = async (question) => {
@@ -4061,14 +4061,12 @@ const touch = async (
   }
 
   if (isWebWorker) {
-    console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
       addPending(
         await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
       );
     }
   } else {
-    console.log(`QQ/sys/touch/browser: ${path}`);
     tellServices({ op: 'sys/touch', path, workspace });
   }
 };
@@ -4267,7 +4265,7 @@ const readOrWatch = async (path, options = {}) => {
   const watch = new Promise((resolve) => {
     resolveWatch = resolve;
   });
-  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  const watcher = await watchFile(path, (file) => resolveWatch(path), options);
   await watch;
   await unwatchFile(path, watcher);
   return read(path, options);

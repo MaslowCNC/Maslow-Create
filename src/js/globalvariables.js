@@ -253,7 +253,7 @@ class GlobalVariables{
             this.displayProcessing = false
         }
         
-        var returned = window.ask({ evaluate: "md`hello`", 
+        const {answer, terminate} = window.ask({ evaluate: "md`hello`", 
             op: "display", 
             readPath: path, 
             triangles: this.displayTriangles, 
@@ -261,7 +261,7 @@ class GlobalVariables{
             wireframe: false 
         })
         
-        returned.then( result => {
+        answer.then( result => {
             
             this.displayProcessing = false
             document.getElementById('viewerContext').style.filter="sepia(0%)"
@@ -277,7 +277,7 @@ class GlobalVariables{
         /** 
         * A function which cancels the worker processing display when called
         */
-        this.cancelLastDisplayWorker = returned.terminate
+        this.cancelLastDisplayWorker = terminate
     }
     /** 
     * A function to generate a 0-1 value from pixels for location on screen depending on screen height

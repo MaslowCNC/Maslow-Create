@@ -719,11 +719,8 @@ export default class Atom {
             
             this.clearAlert()
             
-            //toAsk.evaluate = "md`hello`" //This is needed to make JSxCAD worker happy. Should probably be removed someday
-            
-            const gotBack = window.ask(toAsk)
-            
-            gotBack.then(result => {
+            const {answer, terminate} = window.ask(toAsk)
+            answer.then(result => {
                 if (result != -1 ){
                     this.displayAndPropagate()
                 }else{
@@ -732,7 +729,7 @@ export default class Atom {
                 this.processing = false
             })
             
-            this.cancelProcessing = gotBack.terminate //This can be called to interupt the computation
+            this.cancelProcessing = terminate //This can be called to interrupt the computation
         }
     }
     
