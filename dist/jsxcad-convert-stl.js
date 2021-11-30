@@ -1,4 +1,4 @@
-import { taggedPaths, fromPolygonsToGraph, toDisjointGeometry, getNonVoidGraphs, toTrianglesFromGraph } from './jsxcad-geometry.js';
+import { taggedPaths, fromPolygonsToGraph, toTriangleArray } from './jsxcad-geometry.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse$1(str) {
@@ -239,18 +239,15 @@ const compareTriangles = (t1, t2) => {
 };
 
 const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
-  const keptGeometry = toDisjointGeometry(await geometry);
   const triangles = [];
-  for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
-    for (const [a, b, c] of toTrianglesFromGraph({}, graphGeometry).triangles) {
-      triangles.push(
-        orderVertices([
-          roundVertex(a, tolerance),
-          roundVertex(b, tolerance),
-          roundVertex(c, tolerance),
-        ])
-      );
-    }
+  for (const [a, b, c] of toTriangleArray(await geometry)) {
+    triangles.push(
+      orderVertices([
+        roundVertex(a, tolerance),
+        roundVertex(b, tolerance),
+        roundVertex(c, tolerance),
+      ])
+    );
   }
   triangles.sort(compareTriangles);
   const output = `solid JSxCAD\n${convertToFacets(

@@ -1,6 +1,5 @@
-import { Shape, xy } from './jsxcad-api-shape.js';
+import { Shape, seq, xy } from './jsxcad-api-shape.js';
 import { taggedGroup, outline, translate } from './jsxcad-geometry.js';
-import { seq } from './jsxcad-api-v1-math.js';
 import { toToolFromTags } from './jsxcad-algorithm-tool.js';
 
 const Z = 2;
