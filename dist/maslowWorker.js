@@ -192,7 +192,7 @@ const agent = async ({ ask, message }) => {
         break;
     case "extractTag":
         const shape2extractFrom = await maslowRead(message.readPath);
-        const extractedShape = shape2extractFrom.keep(message.tag).noVoid();//.toDisjointGeometry();
+        const extractedShape = shape2extractFrom.get('user:'+message.tag);
         await api.saveGeometry(message.writePath, extractedShape);
         return 1;
         break;
