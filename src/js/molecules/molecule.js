@@ -433,7 +433,7 @@ export default class Molecule extends Atom{
         rangeLabel.appendChild(rangeValueLabel)
 
         var rangeValue = document.createElement('p')
-        rangeValue.textContent = rangeElement.value
+        rangeValue.textContent = parseFloat(rangeElement.value).toFixed(5).toString()
         rangeLabel.appendChild(rangeValue)
 
 
