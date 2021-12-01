@@ -91,7 +91,8 @@ export default class Stl extends Atom {
     downloadStl(){
         try{
             const values = {op: "stl", readPath: this.findIOValue('geometry')}
-            window.ask(values).then( returnedAnswer => {
+            const {answer} = window.ask(values)
+            answer.then( returnedAnswer => {
                 const blob = new Blob([returnedAnswer])
                 saveAs(blob, GlobalVariables.currentMolecule.name+'.stl')
             })
