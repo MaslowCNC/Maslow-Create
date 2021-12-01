@@ -802,7 +802,7 @@ export default function GitHubModule(){
             
             const passBOMOn = (bomItems) => {
                 const values = {op: "svg", readPath: GlobalVariables.topLevelMolecule.path}
-                var {answer} = window.ask(values)
+                const {answer} = window.ask(values)
                 answer.then( answer => {
                     this.progressSave(10)
                     
@@ -837,8 +837,8 @@ export default function GitHubModule(){
                     
                     
                     const askJsonVals = {op: "getJSON", readPath: GlobalVariables.topLevelMolecule.path}
-                    var {answer} = window.ask(askJsonVals)
-                    answer.then( JSONData => {
+                    const  {answer: answer2} = window.ask(askJsonVals)
+                    answer2.then( JSONData => {
                         
                         this.createCommit(octokit,{
                             owner: saveUser,
