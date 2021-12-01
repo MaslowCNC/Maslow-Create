@@ -84,6 +84,16 @@ export default class Molecule extends Atom{
          * @type {number}
          */
         this.awaitingPropagationFlag = false
+        /**
+         * A list of available units.
+         * @type {object}
+         */
+        this.units = {"MM": 1, "Inches": 25.4}
+        /**
+         * The index of the currently selected unit.
+         * @type {array}
+         */
+        this.unitsIndex = 0
         
         this.setValues(values)
         
@@ -144,8 +154,8 @@ export default class Molecule extends Atom{
     
     /**
      * Set the atom's response to a mouse click up. If the atom is moving this makes it stop moving.
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
+     * @param {number} x - The X coordinate of the click
+     * @param {number} y - The Y coordinate of the click
      */ 
     clickUp(x,y){
         super.clickUp(x,y)
@@ -156,8 +166,8 @@ export default class Molecule extends Atom{
 
     /**
      * Handle double clicks by replacing the molecule currently on the screen with this one, esentially diving into it.
-     * @param {number} x - The x cordinate of the click
-     * @param {number} y - The y cordinate of the click
+     * @param {number} x - The x coordinate of the click
+     * @param {number} y - The y coordinate of the click
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
@@ -329,6 +339,11 @@ export default class Molecule extends Atom{
         this.propagate()
     }
     
+    changeUnits(newUnitsIndex){
+        this.unitsIndex = newUnitsIndex
+        this.updateSidebar()
+    }
+
     /**
      * Updates the side bar to display options like 'go to parent' and 'load a different project'. What is displayed depends on if this atom is the top level, and if we are using run mode.
      */ 
@@ -341,8 +356,13 @@ export default class Molecule extends Atom{
             this.createEditableValueListItem(valueList,this,'name','Name', false)
         }
         else if(this.topLevel){
-            //If we are the top level molecule 
+            //If we are the top level molecule
+
             this.createSegmentSlider(valueList)
+
+            const dropdown = document.createElement('div')
+            valueList.appendChild(dropdown)
+            this.createDropDown(dropdown, this, Object.keys(this.units), this.unitsIndex, "Units", (index)=>{this.changeUnits(index)})
         }
         
         //Display the percent loaded while loading
@@ -387,6 +407,9 @@ export default class Molecule extends Atom{
      * Creates segment length slider and passes value to Global Variables
      */ 
     createSegmentSlider(valueList){
+
+        const unitsScalor = this.units[Object.keys(this.units)[this.unitsIndex]]
+
         //Creates value slider
         var rangeElement = document.createElement('input')
         //Div which contains the entire element
@@ -398,9 +421,9 @@ export default class Molecule extends Atom{
         div.appendChild(rangeLabel)
         rangeLabel.appendChild(rangeElement)
         rangeElement.setAttribute('type', 'range')
-        rangeElement.setAttribute('min', '.001')
-        rangeElement.setAttribute('max', '1')
-        rangeElement.setAttribute('step', '.05')
+        rangeElement.setAttribute('min', '' + .001/unitsScalor)
+        rangeElement.setAttribute('max', '' + 1/unitsScalor)
+        rangeElement.setAttribute('step', '' + .05/unitsScalor)
         rangeElement.setAttribute('class', 'slider')
         rangeElement.setAttribute('value', GlobalVariables.circleSegmentSize)
             
@@ -588,7 +611,7 @@ export default class Molecule extends Atom{
     /**
      * Load the children of this from a JSON representation
      * @param {object} json - A json representation of the molecule
-     * @param {object} values - An array of values to apply to this molecule before deserializing it's contents. Used by githubmolecules to set top level correctly
+     * @param {object} values - An array of values to apply to this molecule before de-serializing it's contents. Used by githubmolecules to set top level correctly
      */
     deserialize(json, values = {}, forceBeginPropagation = false){
         //Find the target molecule in the list
