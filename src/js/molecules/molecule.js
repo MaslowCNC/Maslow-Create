@@ -580,7 +580,7 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Generates and returns a object represntation of this molecule and all of its children.
+     * Generates and returns a object representation of this molecule and all of its children.
      */
     serialize(offset = {x: 0, y: 0}){
         
@@ -604,6 +604,7 @@ export default class Molecule extends Atom{
         thisAsObject.allConnectors = allConnectors
         thisAsObject.fileTypeVersion = 1
         thisAsObject.simplify= this.simplify
+        thisAsObject.unitsIndex = this.unitsIndex
         
         return thisAsObject
     }
