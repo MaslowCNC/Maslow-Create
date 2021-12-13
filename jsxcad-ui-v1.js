@@ -1,5 +1,5 @@
-import { read as read$1, log, boot, setupFilesystem, listFilesystems, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, listFiles, deleteFile, terminateActiveServices, clearEmitted, write as write$1, resolvePending, getServicePoolInfo, sleep as sleep$1, askService, readOrWatch, ask, touch } from './jsxcad-sys.js';
-import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
+import { read as read$1, log, boot, setupFilesystem, listFilesystems, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, listFiles, deleteFile, terminateActiveServices, clearEmitted, write as write$1, resolvePending, getServicePoolInfo, sleep as sleep$1, askService, ask, touch, readOrWatch } from './jsxcad-sys.js';
+import { getNotebookControlData, toDomElement } from './jsxcad-ui-notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { execute } from './jsxcad-api.js';
@@ -4314,6 +4314,67 @@ function getBasePlacement(placement) {
   return placement.split('-')[0];
 }
 
+// import { isHTMLElement } from './instanceOf';
+function getBoundingClientRect(element, // eslint-disable-next-line unused-imports/no-unused-vars
+includeScale) {
+
+  var rect = element.getBoundingClientRect();
+  var scaleX = 1;
+  var scaleY = 1; // FIXME:
+  // `offsetWidth` returns an integer while `getBoundingClientRect`
+  // returns a float. This results in `scaleX` or `scaleY` being
+  // non-1 when it should be for elements that aren't a full pixel in
+  // width or height.
+  // if (isHTMLElement(element) && includeScale) {
+  //   const offsetHeight = element.offsetHeight;
+  //   const offsetWidth = element.offsetWidth;
+  //   // Do not attempt to divide by 0, otherwise we get `Infinity` as scale
+  //   // Fallback to 1 in case both values are `0`
+  //   if (offsetWidth > 0) {
+  //     scaleX = rect.width / offsetWidth || 1;
+  //   }
+  //   if (offsetHeight > 0) {
+  //     scaleY = rect.height / offsetHeight || 1;
+  //   }
+  // }
+
+  return {
+    width: rect.width / scaleX,
+    height: rect.height / scaleY,
+    top: rect.top / scaleY,
+    right: rect.right / scaleX,
+    bottom: rect.bottom / scaleY,
+    left: rect.left / scaleX,
+    x: rect.left / scaleX,
+    y: rect.top / scaleY
+  };
+}
+
+// means it doesn't take into account transforms.
+
+function getLayoutRect(element) {
+  var clientRect = getBoundingClientRect(element); // Use the clientRect sizes if it's not been transformed.
+  // Fixes https://github.com/popperjs/popper-core/issues/1223
+
+  var width = element.offsetWidth;
+  var height = element.offsetHeight;
+
+  if (Math.abs(clientRect.width - width) <= 1) {
+    width = clientRect.width;
+  }
+
+  if (Math.abs(clientRect.height - height) <= 1) {
+    height = clientRect.height;
+  }
+
+  return {
+    x: element.offsetLeft,
+    y: element.offsetTop,
+    width: width,
+    height: height
+  };
+}
+
 function getWindow(node) {
   if (node == null) {
     return window;
@@ -4345,59 +4406,6 @@ function isShadowRoot(node) {
 
   var OwnElement = getWindow(node).ShadowRoot;
   return node instanceof OwnElement || node instanceof ShadowRoot;
-}
-
-var round$1 = Math.round;
-function getBoundingClientRect(element, includeScale) {
-  if (includeScale === void 0) {
-    includeScale = false;
-  }
-
-  var rect = element.getBoundingClientRect();
-  var scaleX = 1;
-  var scaleY = 1;
-
-  if (isHTMLElement(element) && includeScale) {
-    // Fallback to 1 in case both values are `0`
-    scaleX = rect.width / element.offsetWidth || 1;
-    scaleY = rect.height / element.offsetHeight || 1;
-  }
-
-  return {
-    width: round$1(rect.width / scaleX),
-    height: round$1(rect.height / scaleY),
-    top: round$1(rect.top / scaleY),
-    right: round$1(rect.right / scaleX),
-    bottom: round$1(rect.bottom / scaleY),
-    left: round$1(rect.left / scaleX),
-    x: round$1(rect.left / scaleX),
-    y: round$1(rect.top / scaleY)
-  };
-}
-
-// means it doesn't take into account transforms.
-
-function getLayoutRect(element) {
-  var clientRect = getBoundingClientRect(element); // Use the clientRect sizes if it's not been transformed.
-  // Fixes https://github.com/popperjs/popper-core/issues/1223
-
-  var width = element.offsetWidth;
-  var height = element.offsetHeight;
-
-  if (Math.abs(clientRect.width - width) <= 1) {
-    width = clientRect.width;
-  }
-
-  if (Math.abs(clientRect.height - height) <= 1) {
-    height = clientRect.height;
-  }
-
-  return {
-    x: element.offsetLeft,
-    y: element.offsetTop,
-    width: width,
-    height: height
-  };
 }
 
 function contains$1(parent, child) {
@@ -4639,6 +4647,10 @@ var arrow$1 = {
   requiresIfExists: ['preventOverflow']
 };
 
+function getVariation(placement) {
+  return placement.split('-')[1];
+}
+
 var unsetSides = {
   top: 'auto',
   right: 'auto',
@@ -4665,6 +4677,7 @@ function mapToStyles(_ref2) {
   var popper = _ref2.popper,
       popperRect = _ref2.popperRect,
       placement = _ref2.placement,
+      variation = _ref2.variation,
       offsets = _ref2.offsets,
       position = _ref2.position,
       gpuAcceleration = _ref2.gpuAcceleration,
@@ -4691,7 +4704,7 @@ function mapToStyles(_ref2) {
     if (offsetParent === getWindow(popper)) {
       offsetParent = getDocumentElement(popper);
 
-      if (getComputedStyle$1(offsetParent).position !== 'static') {
+      if (getComputedStyle$1(offsetParent).position !== 'static' && position === 'absolute') {
         heightProp = 'scrollHeight';
         widthProp = 'scrollWidth';
       }
@@ -4700,14 +4713,14 @@ function mapToStyles(_ref2) {
 
     offsetParent = offsetParent;
 
-    if (placement === top) {
+    if (placement === top || (placement === left || placement === right) && variation === end) {
       sideY = bottom; // $FlowFixMe[prop-missing]
 
       y -= offsetParent[heightProp] - popperRect.height;
       y *= gpuAcceleration ? 1 : -1;
     }
 
-    if (placement === left) {
+    if (placement === left || (placement === top || placement === bottom) && variation === end) {
       sideX = right; // $FlowFixMe[prop-missing]
 
       x -= offsetParent[widthProp] - popperRect.width;
@@ -4722,7 +4735,7 @@ function mapToStyles(_ref2) {
   if (gpuAcceleration) {
     var _Object$assign;
 
-    return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) < 2 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
+    return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) <= 1 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
   }
 
   return Object.assign({}, commonStyles, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
@@ -4750,6 +4763,7 @@ function computeStyles(_ref4) {
 
   var commonStyles = {
     placement: getBasePlacement(state.placement),
+    variation: getVariation(state.placement),
     popper: state.elements.popper,
     popperRect: state.rects.popper,
     gpuAcceleration: gpuAcceleration
@@ -5052,10 +5066,6 @@ function getClippingRect(element, boundary, rootBoundary) {
   return clippingRect;
 }
 
-function getVariation(placement) {
-  return placement.split('-')[1];
-}
-
 function computeOffsets(_ref) {
   var reference = _ref.reference,
       element = _ref.element,
@@ -5141,11 +5151,10 @@ function detectOverflow(state, options) {
       padding = _options$padding === void 0 ? 0 : _options$padding;
   var paddingObject = mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
   var altContext = elementContext === popper ? reference : popper;
-  var referenceElement = state.elements.reference;
   var popperRect = state.rects.popper;
   var element = state.elements[altBoundary ? altContext : elementContext];
   var clippingClientRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
-  var referenceClientRect = getBoundingClientRect(referenceElement);
+  var referenceClientRect = getBoundingClientRect(state.elements.reference);
   var popperOffsets = computeOffsets({
     reference: referenceClientRect,
     element: popperRect,
@@ -5641,9 +5650,9 @@ function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
   }
 
   var isOffsetParentAnElement = isHTMLElement(offsetParent);
-  var offsetParentIsScaled = isHTMLElement(offsetParent) && isElementScaled(offsetParent);
+  isHTMLElement(offsetParent) && isElementScaled(offsetParent);
   var documentElement = getDocumentElement(offsetParent);
-  var rect = getBoundingClientRect(elementOrVirtualElement, offsetParentIsScaled);
+  var rect = getBoundingClientRect(elementOrVirtualElement);
   var scroll = {
     scrollLeft: 0,
     scrollTop: 0
@@ -5660,7 +5669,7 @@ function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
     }
 
     if (isHTMLElement(offsetParent)) {
-      offsets = getBoundingClientRect(offsetParent, true);
+      offsets = getBoundingClientRect(offsetParent);
       offsets.x += offsetParent.clientLeft;
       offsets.y += offsetParent.clientTop;
     } else if (documentElement) {
@@ -5750,7 +5759,10 @@ var MISSING_DEPENDENCY_ERROR = 'Popper: modifier "%s" requires "%s", but "%s" mo
 var VALID_PROPERTIES = ['name', 'enabled', 'phase', 'fn', 'effect', 'requires', 'options'];
 function validateModifiers(modifiers) {
   modifiers.forEach(function (modifier) {
-    Object.keys(modifier).forEach(function (key) {
+    [].concat(Object.keys(modifier), VALID_PROPERTIES) // IE11-compatible replacement for `new Set(iterable)`
+    .filter(function (value, index, self) {
+      return self.indexOf(value) === index;
+    }).forEach(function (key) {
       switch (key) {
         case 'name':
           if (typeof modifier.name !== 'string') {
@@ -5763,6 +5775,8 @@ function validateModifiers(modifiers) {
           if (typeof modifier.enabled !== 'boolean') {
             console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"enabled"', '"boolean"', "\"" + String(modifier.enabled) + "\""));
           }
+
+          break;
 
         case 'phase':
           if (modifierPhases.indexOf(modifier.phase) < 0) {
@@ -5779,14 +5793,14 @@ function validateModifiers(modifiers) {
           break;
 
         case 'effect':
-          if (typeof modifier.effect !== 'function') {
+          if (modifier.effect != null && typeof modifier.effect !== 'function') {
             console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"effect"', '"function"', "\"" + String(modifier.fn) + "\""));
           }
 
           break;
 
         case 'requires':
-          if (!Array.isArray(modifier.requires)) {
+          if (modifier.requires != null && !Array.isArray(modifier.requires)) {
             console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"requires"', '"array"', "\"" + String(modifier.requires) + "\""));
           }
 
@@ -5896,7 +5910,8 @@ function popperGenerator(generatorOptions) {
     var isDestroyed = false;
     var instance = {
       state: state,
-      setOptions: function setOptions(options) {
+      setOptions: function setOptions(setOptionsAction) {
+        var options = typeof setOptionsAction === 'function' ? setOptionsAction(state.options) : setOptionsAction;
         cleanupModifierEffects();
         state.options = Object.assign({}, defaultOptions, state.options, options);
         state.scrollParents = {
@@ -7259,6 +7274,9 @@ function usePopperMarginModifiers() {
       name: 'popoverArrowMargins',
       enabled: true,
       phase: 'main',
+      fn: function fn() {
+        return undefined;
+      },
       requiresIfExists: ['arrow'],
       effect: function effect(_ref2) {
         var state = _ref2.state;
@@ -10313,6 +10331,8 @@ exports.buildDom = function buildDom(arr, parent, refs) {
                 el[n] = val;
             } else if (n === "ref") {
                 if (refs) refs[val] = el;
+            } else if (n === "style") {
+                if (typeof val == "string") el.style.cssText = val;
             } else if (val != null) {
                 el.setAttribute(n, val);
             }
@@ -10404,7 +10424,34 @@ exports.hasCssString = function(id, doc) {
     }
 };
 
-exports.importCssString = function importCssString(cssText, id, target) {
+var strictCSP;
+var cssCache = [];
+exports.useStrictCSP = function(value) {
+    strictCSP = value;
+    if (value == false) insertPendingStyles();
+    else if (!cssCache) cssCache = [];
+};
+
+function insertPendingStyles() {
+    var cache = cssCache;
+    cssCache = null;
+    cache && cache.forEach(function(item) {
+        importCssString(item[0], item[1]);
+    });
+}
+
+function importCssString(cssText, id, target) {
+    if (typeof document == "undefined")
+        return;
+    if (cssCache) {
+        if (target) {
+            insertPendingStyles();
+        } else if (target === false) {
+            return cssCache.push([cssText, id]);
+        }
+    }
+    if (strictCSP) return;
+
     var container = target;
     if (!target || !target.getRootNode) {
         container = document;
@@ -10429,7 +10476,8 @@ exports.importCssString = function importCssString(cssText, id, target) {
     if (container == doc)
         container = exports.getDocumentHead(doc);
     container.insertBefore(style, container.firstChild);
-};
+}
+exports.importCssString = importCssString;
 
 exports.importCssStylsheet = function(uri, doc) {
     exports.buildDom(["link", {rel: "stylesheet", href: uri}], exports.getDocumentHead(doc));
@@ -10471,10 +10519,6 @@ exports.scrollbarWidth = function(document) {
     return noScrollbar-withScrollbar;
 };
 
-if (typeof document == "undefined") {
-    exports.importCssString = function() {};
-}
-
 exports.computedStyle = function(element, style) {
     return window.getComputedStyle(element, "") || {};
 };
@@ -10490,6 +10534,8 @@ exports.HAS_CSS_TRANSFORMS = false;
 exports.HI_DPI = useragent.isWin
     ? typeof window !== "undefined" && window.devicePixelRatio >= 1.5
     : true;
+
+if (useragent.isChromeOS) exports.HI_DPI = false;
 
 if (typeof document !== "undefined") {
     var div = document.createElement("div");
@@ -12706,18 +12752,16 @@ function DragdropHandler(mouseHandler) {
 
     var editor = mouseHandler.editor;
 
-    var blankImage = dom.createElement("img");
-    blankImage.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-    if (useragent.isOpera)
-        blankImage.style.cssText = "width:1px;height:1px;position:fixed;top:0;left:0;z-index:2147483647;opacity:0;";
+    var dragImage = dom.createElement("div");
+    dragImage.style.cssText = "top:-100px;position:absolute;z-index:2147483647;opacity:0.5";
+    dragImage.textContent = "\xa0";
 
     var exports = ["dragWait", "dragWaitEnd", "startDrag", "dragReadyEnd", "onMouseDrag"];
 
-     exports.forEach(function(x) {
-         mouseHandler[x] = this[x];
+    exports.forEach(function(x) {
+        mouseHandler[x] = this[x];
     }, this);
     editor.on("mousedown", this.onMouseDown.bind(mouseHandler));
-
 
     var mouseTarget = editor.container;
     var dragSelectionMarker, x, y;
@@ -12742,14 +12786,12 @@ function DragdropHandler(mouseHandler) {
 
         var dataTransfer = e.dataTransfer;
         dataTransfer.effectAllowed = editor.getReadOnly() ? "copy" : "copyMove";
-        if (useragent.isOpera) {
-            editor.container.appendChild(blankImage);
-            blankImage.scrollTop = 0;
-        }
-        dataTransfer.setDragImage && dataTransfer.setDragImage(blankImage, 0, 0);
-        if (useragent.isOpera) {
-            editor.container.removeChild(blankImage);
-        }
+        editor.container.appendChild(dragImage);
+
+        dataTransfer.setDragImage && dataTransfer.setDragImage(dragImage, 0, 0);
+        setTimeout(function() {
+            editor.container.removeChild(dragImage);
+        });
         dataTransfer.clearData();
         dataTransfer.setData("Text", editor.session.getTextRange());
 
@@ -13685,12 +13727,13 @@ exports.AppConfig = AppConfig;
 
 });
 
-ace.define("ace/config",["require","exports","module","ace/lib/lang","ace/lib/oop","ace/lib/net","ace/lib/app_config"], function(require, exports, module) {
+ace.define("ace/config",["require","exports","module","ace/lib/lang","ace/lib/oop","ace/lib/net","ace/lib/dom","ace/lib/app_config"], function(require, exports, module) {
 "no use strict";
 
 var lang = require("./lib/lang");
 require("./lib/oop");
 var net = require("./lib/net");
+var dom = require("./lib/dom");
 var AppConfig = require("./lib/app_config").AppConfig;
 
 module.exports = exports = new AppConfig();
@@ -13708,13 +13751,13 @@ var options = {
     suffix: ".js",
     $moduleUrls: {},
     loadWorkerFromBlob: true,
-    sharedPopups: false
+    sharedPopups: false,
+    useStrictCSP: null
 };
 
 exports.get = function(key) {
     if (!options.hasOwnProperty(key))
         throw new Error("Unknown config key: " + key);
-
     return options[key];
 };
 
@@ -13723,6 +13766,8 @@ exports.set = function(key, value) {
         options[key] = value;
     else if (this.setDefaultValue("", key, value) == false)
         throw new Error("Unknown config key: " + key);
+    if (key == "useStrictCSP")
+        dom.useStrictCSP(value);
 };
 
 exports.all = function() {
@@ -13869,7 +13914,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.4.12";
+exports.version = "1.4.13";
 
 });
 
@@ -13943,6 +13988,7 @@ var MouseHandler = function(editor) {
 
 (function() {
     this.onMouseEvent = function(name, e) {
+        if (!this.editor.session) return;
         this.editor._emit(name, new MouseEvent(e, this.editor));
     };
 
@@ -13992,7 +14038,7 @@ var MouseHandler = function(editor) {
         var onCaptureEnd = function(e) {
             editor.off("beforeEndOperation", onOperationEnd);
             clearInterval(timerId);
-            onCaptureInterval();
+            if (editor.session) onCaptureInterval();
             self[self.state + "End"] && self[self.state + "End"](e);
             self.state = "";
             self.isMousePressed = renderer.$isMousePressed = false;
@@ -15397,7 +15443,6 @@ var Selection = function(session) {
     this.detach = function() {
         this.lead.detach();
         this.anchor.detach();
-        this.session = this.doc = null;
     };
 
     this.fromOrientedRange = function(range) {
@@ -15612,7 +15657,7 @@ var Tokenizer = function(rules) {
 
     this.removeCapturingGroups = function(src) {
         var r = src.replace(
-            /\\.|\[(?:\\.|[^\\\]])*|\(\?[:=!]|(\()/g,
+            /\\.|\[(?:\\.|[^\\\]])*|\(\?[:=!<]|(\()/g,
             function(x, y) {return y ? "(?:" : x;}
         );
         return r;
@@ -18525,21 +18570,38 @@ function Folding() {
         if (location == null) {
             range = new Range(0, 0, this.getLength(), 0);
             if (expandInner == null) expandInner = true;
-        } else if (typeof location == "number")
+        } else if (typeof location == "number") {
             range = new Range(location, 0, location, this.getLine(location).length);
-        else if ("row" in location)
+        } else if ("row" in location) {
             range = Range.fromPoints(location, location);
-        else
+        } else if (Array.isArray(location)) {
+            folds = [];
+            location.forEach(function(range) {
+                folds = folds.concat(this.unfold(range));
+            }, this);
+            return folds;
+        } else {
             range = location;
+        }
         
         folds = this.getFoldsInRangeList(range);
+        var outermostFolds = folds;
+        while (
+            folds.length == 1
+            && Range.comparePoints(folds[0].start, range.start) < 0 
+            && Range.comparePoints(folds[0].end, range.end) > 0
+        ) {
+            this.expandFolds(folds);
+            folds = this.getFoldsInRangeList(range);
+        }
+        
         if (expandInner != false) {
             this.removeFolds(folds);
         } else {
             this.expandFolds(folds);
         }
-        if (folds.length)
-            return folds;
+        if (outermostFolds.length)
+            return outermostFolds;
     };
     this.isRowFolded = function(docRow, startFoldRow) {
         return !!this.getFoldLine(docRow, startFoldRow);
@@ -19204,7 +19266,7 @@ EditSession.$uid = 0;
     oop.implement(this, EventEmitter);
     this.setDocument = function(doc) {
         if (this.doc)
-            this.doc.removeListener("change", this.$onChange);
+            this.doc.off("change", this.$onChange);
 
         this.doc = doc;
         doc.on("change", this.$onChange);
@@ -20730,6 +20792,9 @@ EditSession.$uid = 0;
         }
         this.$stopWorker();
         this.removeAllListeners();
+        if (this.doc) {
+            this.doc.off("change", this.$onChange);
+        }
         this.selection.detach();
     };
 
@@ -21120,7 +21185,7 @@ var Search = function() {
             var len = re.length;
             var forEachInLine = function(row, offset, callback) {
                 var startRow = backwards ? row - len + 1 : row;
-                if (startRow < 0) return;
+                if (startRow < 0 || startRow + len > session.getLength()) return;
                 var line = session.getLine(startRow);
                 var startIndex = line.search(re[0]);
                 if (!backwards && startIndex < offset || startIndex === -1) return;
@@ -21535,6 +21600,7 @@ function bindKey(win, mac) {
 }
 exports.commands = [{
     name: "showSettingsMenu",
+    description: "Show settings menu",
     bindKey: bindKey("Ctrl-,", "Command-,"),
     exec: function(editor) {
         config.loadModule("ace/ext/settings_menu", function(module) {
@@ -21545,6 +21611,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "goToNextError",
+    description: "Go to next error",
     bindKey: bindKey("Alt-E", "F4"),
     exec: function(editor) {
         config.loadModule("./ext/error_marker", function(module) {
@@ -21555,6 +21622,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "goToPreviousError",
+    description: "Go to previous error",
     bindKey: bindKey("Alt-Shift-E", "Shift-F4"),
     exec: function(editor) {
         config.loadModule("./ext/error_marker", function(module) {
@@ -21601,6 +21669,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "toggleFoldWidget",
+    description: "Toggle fold widget",
     bindKey: bindKey("F2", "F2"),
     exec: function(editor) { editor.session.toggleFoldWidget(); },
     multiSelectAction: "forEach",
@@ -21608,6 +21677,7 @@ exports.commands = [{
     readOnly: true
 }, {
     name: "toggleParentFoldWidget",
+    description: "Toggle parent fold widget",
     bindKey: bindKey("Alt-F2", "Alt-F2"),
     exec: function(editor) { editor.session.toggleFoldWidget(true); },
     multiSelectAction: "forEach",
@@ -22334,6 +22404,7 @@ exports.commands = [{
     scrollIntoView: "none"
 }, {
     name: "addLineAfter",
+    description: "Add new line after the current line",
     exec: function(editor) {
         editor.selection.clearSelection();
         editor.navigateLineEnd();
@@ -22343,6 +22414,7 @@ exports.commands = [{
     scrollIntoView: "cursor"
 }, {
     name: "addLineBefore",
+    description: "Add new line before the current line",
     exec: function(editor) {
         editor.selection.clearSelection();
         var cursor = editor.getCursorPosition();
@@ -23095,7 +23167,7 @@ Editor.$uid = 0;
         }
         var e = {text: text};
         this._signal("copy", e);
-        clipboard.lineMode = copyLine ? e.text : "";
+        clipboard.lineMode = copyLine ? e.text : false;
         return e.text;
     };
     this.onCopy = function() {
@@ -23115,7 +23187,7 @@ Editor.$uid = 0;
         this._signal("paste", e);
         var text = e.text;
 
-        var lineMode = text == clipboard.lineMode;
+        var lineMode = text === clipboard.lineMode;
         var session = this.session;
         if (!this.inMultiSelectMode || this.inVirtualSelectionMode) {
             if (lineMode)
@@ -26412,12 +26484,16 @@ var Cursor = function(parentEl) {
         for (var i = cursors.length; i--; )
             cursors[i].style.animationDuration = this.blinkInterval + "ms";
 
+        this.$isAnimating = true;
         setTimeout(function() {
-            dom.addCssClass(this.element, "ace_animate-blinking");
+            if (this.$isAnimating) {
+                dom.addCssClass(this.element, "ace_animate-blinking");
+            }
         }.bind(this));
     };
     
     this.$stopCssAnimation = function() {
+        this.$isAnimating = false;
         dom.removeCssClass(this.element, "ace_animate-blinking");
     };
 
@@ -26488,6 +26564,7 @@ var Cursor = function(parentEl) {
         this.$stopCssAnimation();
 
         if (this.smoothBlinking) {
+            this.$isSmoothBlinking = false;
             dom.removeCssClass(this.element, "ace_smooth-blinking");
         }
         
@@ -26499,8 +26576,11 @@ var Cursor = function(parentEl) {
         }
 
         if (this.smoothBlinking) {
-            setTimeout(function(){
-                dom.addCssClass(this.element, "ace_smooth-blinking");
+            this.$isSmoothBlinking = true;
+            setTimeout(function() {
+                if (this.$isSmoothBlinking) {
+                    dom.addCssClass(this.element, "ace_smooth-blinking");
+                }
             }.bind(this));
         }
         
@@ -27498,7 +27578,7 @@ margin: 0 10px;\
 var useragent = require("./lib/useragent");
 var HIDE_TEXTAREA = useragent.isIE;
 
-dom.importCssString(editorCss, "ace_editor.css");
+dom.importCssString(editorCss, "ace_editor.css", false);
 
 var VirtualRenderer = function(container, theme) {
     var _self = this;
@@ -27509,6 +27589,8 @@ var VirtualRenderer = function(container, theme) {
     if (dom.HI_DPI) dom.addCssClass(this.container, "ace_hidpi");
 
     this.setTheme(theme);
+    if (config.get("useStrictCSP") == null) 
+        config.set("useStrictCSP", false);
 
     this.$gutter = dom.createElement("div");
     this.$gutter.className = "ace_gutter";
@@ -27760,7 +27842,7 @@ var VirtualRenderer = function(container, theme) {
 
         if (this.resizing)
             this.resizing = 0;
-        this.scrollBarV.scrollLeft = this.scrollBarV.scrollTop = null;
+        this.scrollBarH.scrollLeft = this.scrollBarV.scrollTop = null;
     };
     
     this.$updateCachedSize = function(force, gutterWidth, width, height) {
@@ -28526,7 +28608,7 @@ var VirtualRenderer = function(container, theme) {
     };
     this.scrollTo = function(x, y) {
         this.session.setScrollTop(y);
-        this.session.setScrollLeft(y);
+        this.session.setScrollLeft(x);
     };
     this.scrollBy = function(deltaX, deltaY) {
         deltaY && this.session.setScrollTop(this.session.getScrollTop() + deltaY);
@@ -30580,7 +30662,7 @@ background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZ
 exports.$id = "ace/theme/textmate";
 
 var dom = require("../lib/dom");
-dom.importCssString(exports.cssText, exports.cssClass);
+dom.importCssString(exports.cssText, exports.cssClass, false);
 });
 
 ace.define("ace/line_widgets",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
@@ -30780,7 +30862,7 @@ function LineWidgets(session) {
             }
         }
         if (w.rowCount == null) {
-            w.rowCount = w.pixelHeight / renderer.layerConfig.lineHeight;
+            w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight);
         }
         
         var fold = this.session.getFoldAt(w.row, 0);
@@ -30869,7 +30951,7 @@ function LineWidgets(session) {
                 w.screenWidth = Math.ceil(w.w / config.characterWidth);
             }
             
-            var rowCount = w.h / config.lineHeight;
+            var rowCount = Math.ceil(w.h / config.lineHeight);
             if (w.coverLine) {
                 rowCount -= this.session.getRowLineCount(w.row);
                 if (rowCount < 0)
@@ -30893,7 +30975,7 @@ function LineWidgets(session) {
         var lineWidgets = this.session.lineWidgets;
         if (!lineWidgets)
             return;
-        var first = Math.min(this.firstRow, config.firstRow);
+        var first = Math.min(this.firstRow, config.firstRow, 0);
         var last = Math.max(this.lastRow, config.lastRow, lineWidgets.length);
         
         while (first > 0 && !lineWidgets[first])
@@ -31124,7 +31206,7 @@ dom.importCssString("\
         border-left-color: transparent!important;\
         top: -5px;\
     }\
-", "");
+", "error_marker.css", false);
 
 });
 
@@ -35936,7 +36018,7 @@ var Prism = (function (_self) {
 					//    at _.util.currentScript (http://localhost/components/prism-core.js:119:5)
 					//    at Global code (http://localhost/components/prism-core.js:606:1)
 
-					var src = (/at [^(\r\n]*\((.*):.+:.+\)$/i.exec(err.stack) || [])[1];
+					var src = (/at [^(\r\n]*\((.*):[^:]+:[^:]+\)$/i.exec(err.stack) || [])[1];
 					if (src) {
 						var scripts = document.getElementsByTagName('script');
 						for (var i in scripts) {
@@ -37927,7 +38009,7 @@ background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZ
 }";
 
     var dom = require("../lib/dom");
-    dom.importCssString(exports.cssText, exports.cssClass);
+    dom.importCssString(exports.cssText, exports.cssClass, false);
 });                (function() {
                     ace.require(["ace/theme/github"], function(m) {
                         if (module) {
@@ -37940,7 +38022,8 @@ background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZ
 var extLanguage_tools = {exports: {}};
 
 (function (module, exports) {
-ace.define("ace/snippets",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/lang","ace/range","ace/range_list","ace/keyboard/hash_handler","ace/tokenizer","ace/clipboard","ace/lib/dom","ace/editor"], function(require, exports, module) {
+ace.define("ace/snippets",["require","exports","module","ace/lib/dom","ace/lib/oop","ace/lib/event_emitter","ace/lib/lang","ace/range","ace/range_list","ace/keyboard/hash_handler","ace/tokenizer","ace/clipboard","ace/editor"], function(require, exports, module) {
+var dom = require("./lib/dom");
 var oop = require("./lib/oop");
 var EventEmitter = require("./lib/event_emitter").EventEmitter;
 var lang = require("./lib/lang");
@@ -38922,14 +39005,14 @@ var moveRelative = function(point, start) {
 };
 
 
-require("./lib/dom").importCssString("\
+dom.importCssString("\
 .ace_snippet-marker {\
     -moz-box-sizing: border-box;\
     box-sizing: border-box;\
     background: rgba(194, 193, 208, 0.09);\
     border: 1px dotted rgba(211, 208, 235, 0.62);\
     position: absolute;\
-}");
+}", "snippets.css", false);
 
 exports.snippetManager = new SnippetManager();
 
@@ -39280,7 +39363,7 @@ dom.importCssString("\
     line-height: 1.4;\
     background: #25282c;\
     color: #c1c1c1;\
-}", "autocompletion.css");
+}", "autocompletion.css", false);
 
 exports.AcePopup = AcePopup;
 exports.$singleLineEditor = $singleLineEditor;
@@ -39602,19 +39685,14 @@ var Autocomplete = function() {
             return this.openPopup(this.editor, "", keepPopupPosition);
         }
         var _id = this.gatherCompletionsId;
-        this.gatherCompletions(this.editor, function(err, results) {
-            var detachIfFinished = function() {
-                if (!results.finished) return;
-                return this.detach();
-            }.bind(this);
+        var detachIfFinished = function(results) {
+            if (!results.finished) return;
+            return this.detach();
+        }.bind(this);
 
+        var processResults = function(results) {
             var prefix = results.prefix;
-            var matches = results && results.matches;
-
-            if (!matches || !matches.length)
-                return detachIfFinished();
-            if (prefix.indexOf(results.prefix) !== 0 || _id != this.gatherCompletionsId)
-                return;
+            var matches = results.matches;
 
             this.completions = new FilteredList(matches);
 
@@ -39624,14 +39702,39 @@ var Autocomplete = function() {
             this.completions.setFilter(prefix);
             var filtered = this.completions.filtered;
             if (!filtered.length)
-                return detachIfFinished();
+                return detachIfFinished(results);
             if (filtered.length == 1 && filtered[0].value == prefix && !filtered[0].snippet)
-                return detachIfFinished();
+                return detachIfFinished(results);
             if (this.autoInsert && filtered.length == 1 && results.finished)
                 return this.insertMatch(filtered[0]);
 
             this.openPopup(this.editor, prefix, keepPopupPosition);
+        }.bind(this);
+
+        var isImmediate = true;
+        var immediateResults = null;
+        this.gatherCompletions(this.editor, function(err, results) {
+            var prefix = results.prefix;
+            var matches = results && results.matches;
+
+            if (!matches || !matches.length)
+                return detachIfFinished(results);
+            if (prefix.indexOf(results.prefix) !== 0 || _id != this.gatherCompletionsId)
+                return;
+            if (isImmediate) {
+                immediateResults = results;
+                return;
+            }
+
+            processResults(results);
         }.bind(this));
+        
+        isImmediate = false;
+        if (immediateResults) {
+            var results = immediateResults;
+            immediateResults = null;
+            processResults(results);
+        }
     };
 
     this.cancelContextMenu = function() {
@@ -40101,10 +40204,9 @@ const aceEditorLineWidgets = {
 
 const aceEditorSnippetManager = ace$3.require('ace/snippets').snippetManager;
 
-/* global requestAnimationFrame */
 const animationFrame = () => {
   return new Promise((resolve, reject) => {
-    requestAnimationFrame(resolve);
+    setTimeout(resolve, 1);
   });
 };
 
@@ -40359,7 +40461,6 @@ class JsEditorUi extends React$3.PureComponent {
     }
 
     const {
-      domElementByHash,
       widgets
     } = advice;
     editor.on('linkClick', ({
@@ -40387,120 +40488,96 @@ class JsEditorUi extends React$3.PureComponent {
 
     const widgetManager = session.widgetManager;
     const {
-      notebookDefinitions,
-      notebookNotes
+      notebookDefinitions
     } = this.props;
-    let openView = -1;
-
-    const onClickView = (event, note) => {
-      openView = note.nthView;
-    }; // let lastUpdate;
+    let marker;
+    let updating = false;
 
     const update = async () => {
-      // Make sure everything is rendered, first.
-      await animationFrame();
-      mermaid.init(undefined, '.mermaid');
-      console.log(`QQ/doUpdate`);
+      try {
+        if (updating) {
+          return;
+        }
 
-      if (advice) {
-        if (advice.definitions) {
-          for (const definition of widgets.keys()) {
-            if (!notebookDefinitions[definition] || !advice.definitions.get(definition)) {
+        updating = true; // Make sure everything is rendered, first.
+
+        await animationFrame();
+        mermaid.init(undefined, '.mermaid');
+        console.log(`QQ/doUpdate`);
+
+        if (advice) {
+          if (advice.definitions) {
+            for (const definition of widgets.keys()) {
+              if (!notebookDefinitions[definition] || !advice.definitions.get(definition)) {
+                const widget = widgets.get(definition);
+                widgetManager.removeLineWidget(widget);
+                widgets.delete(definition);
+                console.log(`QQ/delete widget for: ${definition}`);
+              }
+            }
+
+            for (const definition of Object.keys(notebookDefinitions)) {
+              const notebookDefinition = notebookDefinitions[definition];
               const widget = widgets.get(definition);
-              widgetManager.removeLineWidget(widget);
-              widgets.delete(definition);
-              console.log(`QQ/delete widget for: ${definition}`);
-            }
-          }
 
-          for (const definition of Object.keys(notebookDefinitions)) {
-            const notebookDefinition = notebookDefinitions[definition];
+              if (widget && widget.el !== notebookDefinition.domElement) {
+                widgetManager.removeLineWidget(widget);
+                widgets.delete(definition);
+              }
 
-            if (widgets.has(definition) && widgets.el !== notebookDefinition.domElement) {
-              widgetManager.removeLineWidget(widgets.get(definition));
-              widgets.delete(definition);
-            }
+              if (!widgets.has(definition)) {
+                const entry = advice.definitions.get(definition);
 
-            if (!widgets.has(definition)) {
-              const entry = advice.definitions.get(definition);
+                if (entry) {
+                  const {
+                    initSourceLocation
+                  } = entry;
+                  const {
+                    domElement
+                  } = notebookDefinition;
 
-              if (entry) {
-                const {
-                  initSourceLocation
-                } = entry;
-                const {
-                  domElement
-                } = notebookDefinition;
-                const widget = {
-                  row: initSourceLocation.end.line - 1,
-                  coverLine: false,
-                  fixedWidth: true,
-                  el: domElement
-                };
-                widgetManager.addLineWidget(widget);
-                widgets.set(definition, widget); // Display the hidden element.
+                  if (!domElement) {
+                    continue;
+                  }
 
-                domElement.style.visibility = '';
+                  const pixelHeight = domElement.offsetHeight;
+
+                  if (!pixelHeight) {
+                    continue;
+                  }
+
+                  const widget = {
+                    row: initSourceLocation.end.line - 1,
+                    coverLine: false,
+                    fixedWidth: true,
+                    el: domElement
+                  };
+                  const lineHeight = editor.renderer.layerConfig.lineHeight;
+                  const rowCount = Math.ceil(pixelHeight / lineHeight);
+                  domElement.style.height = `${rowCount * lineHeight}px`;
+                  domElement.style.zIndex = -1;
+                  widgetManager.addLineWidget(widget);
+
+                  if (widget.rowCount !== Math.floor(widget.rowCount)) {
+                    throw Error(`Widget height is not a whole number of rows`);
+                  }
+
+                  domElement.classList.add(`rowCount_${widget.rowCount}`, `lineHeight_${lineHeight}`, `pixelHeight_${pixelHeight}`); // Display the hidden element.
+
+                  domElement.style.visibility = '';
+                  widgets.set(definition, widget);
+                }
               }
             }
           }
         }
-      } // The widgets are created.
-      // lastUpdate = new Date();
-      // let context = {};
 
+        editor.resize();
 
-      const notesByDefinition = new Map();
-      const definitions = [];
-      let nthView = 0;
-
-      for (let hash of Object.keys(notebookNotes)) {
-        const note = notebookNotes[hash];
-
-        if (!note) {
-          continue;
-        } // console.log(JSON.stringify({ ...note, data: undefined }));
-
-
-        if (note.define) {
-          definitions.push(note);
-        }
-
-        if (note.info) {
-          // Filter out info.
-          continue;
-        }
-
-        if (note.view) {
-          note.nthView = nthView;
-          note.openView = nthView === openView;
-          nthView++;
-        }
-
-        if (note.context && note.context.recording) {
-          const definition = note.context.recording.id;
-
-          if (!notesByDefinition.has(definition)) {
-            notesByDefinition.set(definition, [...definitions]);
-          }
-
-          notesByDefinition.get(definition).push(note);
-
-          if (note.hash) {
-            if (!domElementByHash.has(note.hash)) {
-              console.log(`QQ/build dom for: ${definition}`);
-              const element = toDomElement([note, ...definitions], {
-                onClickView
-              });
-              domElementByHash.set(note.hash, element);
-            }
-
-            note.domElement = domElementByHash.get(note.hash);
-          }
-        }
+        if (marker) ;
+      } finally {
+        updating = false;
       }
-
-      editor.resize();
     };
 
     const finished = () => {
@@ -42565,7 +42642,7 @@ var Modal = /*#__PURE__*/React$3.forwardRef(function (_ref, ref) {
       return;
     }
 
-    onHide();
+    onHide == null ? void 0 : onHide();
   };
 
   var handleEscapeKeyDown = function handleEscapeKeyDown(e) {
@@ -42579,37 +42656,22 @@ var Modal = /*#__PURE__*/React$3.forwardRef(function (_ref, ref) {
     }
   };
 
-  var handleEnter = function handleEnter(node) {
+  var handleEnter = function handleEnter(node, isAppearing) {
     if (node) {
       node.style.display = 'block';
       updateDialogStyle(node);
     }
 
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    if (onEnter) onEnter.apply(void 0, [node].concat(args));
+    onEnter == null ? void 0 : onEnter(node, isAppearing);
   };
 
   var handleExit = function handleExit(node) {
-    if (removeStaticModalAnimationRef.current) {
-      removeStaticModalAnimationRef.current();
-    }
-
-    for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-      args[_key2 - 1] = arguments[_key2];
-    }
-
-    if (onExit) onExit.apply(void 0, [node].concat(args));
+    removeStaticModalAnimationRef.current == null ? void 0 : removeStaticModalAnimationRef.current();
+    onExit == null ? void 0 : onExit(node);
   };
 
-  var handleEntering = function handleEntering(node) {
-    for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-      args[_key3 - 1] = arguments[_key3];
-    }
-
-    if (onEntering) onEntering.apply(void 0, [node].concat(args)); // FIXME: This should work even when animation is disabled.
+  var handleEntering = function handleEntering(node, isAppearing) {
+    onEntering == null ? void 0 : onEntering(node, isAppearing); // FIXME: This should work even when animation is disabled.
 
     addEventListener(window, 'resize', handleWindowResize);
   };
@@ -42617,11 +42679,7 @@ var Modal = /*#__PURE__*/React$3.forwardRef(function (_ref, ref) {
   var handleExited = function handleExited(node) {
     if (node) node.style.display = ''; // RHL removes it sometimes
 
-    for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-      args[_key4 - 1] = arguments[_key4];
-    }
-
-    if (onExited) onExited.apply(void 0, args); // FIXME: This should work even when animation is disabled.
+    onExited == null ? void 0 : onExited(node); // FIXME: This should work even when animation is disabled.
 
     removeEventListener(window, 'resize', handleWindowResize);
   };
@@ -46355,6 +46413,77 @@ class Ui extends E {
 
     clock();
 
+    const onClickPrint = (event, filename, path, data, type) => {
+      let url = 'http://192.168.31.235:88/';
+
+      const done = async () => {
+        if (path && !data) {
+          data = await readOrWatch(path);
+        }
+
+        let response, error;
+
+        try {
+          response = await fetch(url, {
+            mode: 'cors',
+            method: 'post',
+            body: data
+          });
+        } catch (e) {
+          error = e;
+        }
+
+        const done = () => this.setState({
+          modal: undefined
+        });
+
+        this.setState({
+          modal: v$1(Modal, {
+            show: true,
+            onHide: done
+          }, v$1(Modal.Header, {
+            closeButton: true
+          }, v$1(Modal.Title, null, "Print")), v$1(Modal.Body, null, error ? `Error: ${error}` : response.ok ? 'Printed successfully' : `Printed failed: ${response.status}`), v$1(Modal.Footer, null, v$1(Button, {
+            variant: "primary",
+            onClick: done
+          }, "Close")))
+        });
+      };
+
+      const cancel = () => {
+        this.setState({
+          modal: undefined
+        });
+      };
+
+      this.setState({
+        modal: v$1(Modal, {
+          show: true,
+          onHide: cancel
+        }, v$1(Modal.Header, {
+          closeButton: true
+        }, v$1(Modal.Title, null, "Print")), v$1(Modal.Body, null, v$1(FormImpl.Control, {
+          name: "url",
+          value: url,
+          onChange: event => {
+            url = event.target.value;
+          }
+        })), v$1(Modal.Footer, null, v$1(Button, {
+          variant: "primary",
+          onClick: done
+        }, "Print")))
+      });
+    };
+
+    const onClickView = (event, note) => {
+      if (jsEditorAdvice.orbitView) {
+        jsEditorAdvice.orbitView.openView = false;
+      }
+
+      jsEditorAdvice.orbitView = note;
+      jsEditorAdvice.orbitView.openView = true;
+    };
+
     const fileUpdater = async () => {
       const {
         workspace
@@ -46384,9 +46513,10 @@ class Ui extends E {
         entry,
         id,
         identifier,
-        note,
+        notes,
         options,
         path,
+        sourceLocation,
         workspace
       } = message;
 
@@ -46409,40 +46539,8 @@ class Ui extends E {
         case 'log':
           return log(entry);
 
-        case 'note':
+        case 'notes':
           {
-            if (note.info) {
-              // Copy out info.
-              const now = new Date();
-              const {
-                logElement,
-                logStartDate,
-                logLastDate
-              } = this.state;
-
-              if (logElement) {
-                const div = document.createElement('div');
-                const total = (now - logStartDate) / 1000;
-                const elapsed = (now - logLastDate) / 1000;
-                div.textContent = `${total.toFixed(1)}s (${elapsed.toFixed(2)}): ${note.info}`;
-                logElement.prepend(div);
-              }
-
-              this.setState({
-                logLastDate: now
-              });
-              return;
-            }
-
-            if (note.view) {
-              console.log('view');
-            }
-
-            if (!note.sourceLocation || note.sourceLocation.path !== this.state.path) {
-              // This note is for a different module.
-              return;
-            }
-
             const {
               notebookNotes,
               notebookDefinitions
@@ -46450,114 +46548,134 @@ class Ui extends E {
             const {
               domElementByHash
             } = jsEditorAdvice;
-            const id = note.sourceLocation.id;
+            const {
+              id,
+              path
+            } = sourceLocation;
 
-            if (note.setContext) {
+            if (path !== this.state.path) {
+              // These notes are for a different module.
               return;
             }
 
-            if (note.beginSourceLocation) {
-              const domElement = document.createElement('div'); // Attach the domElement invisibly so that we can compute the size.
-              // Add it at the top so that it doesn't extend the bottom of the page.
-
-              document.body.prepend(domElement);
-              domElement.style.display = 'block';
-              domElement.style.visibility = 'hidden';
-              domElement.style.position = 'absolute';
-              notebookDefinitions[id] = {
-                notes: [],
-                domElement
-              }; // This starts the notes to update path/id.
-
-              return;
-            }
-
-            if (note.endSourceLocation) {
-              if (jsEditorAdvice.onUpdate) {
-                await jsEditorAdvice.onUpdate();
+            const ensureNotebookNote = note => {
+              if (!notebookNotes[note.hash]) {
+                notebookNotes[note.hash] = note;
               }
 
-              return;
-            }
+              return notebookNotes[note.hash];
+            };
 
-            if (!id) {
-              return;
-            }
+            const domElement = document.createElement('div'); // Attach the domElement invisibly so that we can compute the size.
+            // Add it at the top so that it doesn't extend the bottom of the page.
 
-            const def = notebookDefinitions[id];
+            document.body.prepend(domElement);
+            domElement.style.display = 'block';
+            domElement.style.visibility = 'hidden';
+            domElement.style.position = 'absolute';
+            let nthView = 0;
 
-            if (note.data === undefined && note.path) {
-              note.data = await readOrWatch(note.path);
-            }
+            for (const note of notes) {
+              if (note.hash === undefined) {
+                continue;
+              }
 
-            if (!notebookNotes[note.hash]) {
-              notebookNotes[note.hash] = note;
-            }
+              const entry = ensureNotebookNote(note);
 
-            if (!def) {
-              console.log('No def');
-            }
+              if (entry.view) {
+                nthView += 1;
 
-            def.notes.push(note.hash);
-            const entry = notebookNotes[note.hash];
-
-            if (domElementByHash.has(entry.hash)) {
-              console.log(`Re-appending ${entry.hash} to ${id}`);
-              def.domElement.appendChild(document.createTextNode(entry.hash));
-              def.domElement.appendChild(domElementByHash.get(entry.hash));
-              return;
-            } // We need to build the element.
-
-
-            if (entry.view && !entry.url) {
-              const {
-                workspace
-              } = this.state;
-              const {
-                path,
-                view
-              } = entry;
-              const {
-                width,
-                height
-              } = view;
-              const canvas = document.createElement('canvas');
-              canvas.width = width;
-              canvas.height = height;
-              const offscreenCanvas = canvas.transferControlToOffscreen();
-
-              const render = () => askToplevelQuestion({
-                op: 'staticView',
-                path,
-                workspace,
-                view,
-                offscreenCanvas
-              }, [offscreenCanvas]).then(url => {
-                // Is there a race condition here?
-                const element = domElementByHash.get(entry.hash);
-
-                if (element && element.firstChild) {
-                  element.firstChild.src = url;
+                if (entry.sourceLocation) {
+                  entry.sourceLocation.nthView = nthView;
                 }
-              }).catch(error => {
-                if (error.message === 'Terminated') {
-                  // Try again.
+
+                const {
+                  orbitView
+                } = jsEditorAdvice;
+                entry.openView = false;
+
+                if (orbitView) {
+                  if (orbitView.sourceLocation.id === id && orbitView.sourceLocation.nthView === nthView) {
+                    entry.openView = true;
+                  }
+                }
+              }
+
+              if (domElementByHash.has(entry.hash)) {
+                // Reuse the element we built earlier
+                console.log(`Re-appending ${entry.hash} to ${id}`);
+                domElement.appendChild(domElementByHash.get(entry.hash));
+              } else {
+                // We need to build the element.
+                if (entry.view && !entry.url) {
+                  const {
+                    workspace
+                  } = this.state;
+                  const {
+                    path,
+                    view
+                  } = entry;
+                  const {
+                    width,
+                    height
+                  } = view;
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const offscreenCanvas = canvas.transferControlToOffscreen();
+
+                  const render = async () => {
+                    try {
+                      const url = await askToplevelQuestion({
+                        op: 'staticView',
+                        path,
+                        workspace,
+                        view,
+                        offscreenCanvas
+                      }, [offscreenCanvas]);
+                      const element = domElementByHash.get(entry.hash);
+
+                      if (element && element.firstChild) {
+                        element.firstChild.src = url;
+                      }
+                    } catch (error) {
+                      if (error.message === 'Terminated') {
+                        // Try again.
+                        return render();
+                      } else {
+                        window.alert(error.stack);
+                      }
+                    }
+                  }; // Render the image asynchronously -- it won't affect layout.
+
+
                   render();
-                } else {
-                  window.alert(error.stack);
                 }
-              });
 
-              render();
+                const element = toDomElement([entry], {
+                  onClickView,
+                  onClickPrint
+                });
+                domElementByHash.set(entry.hash, element);
+                console.log(`Appending ${entry.hash} to ${id}`);
+                domElement.appendChild(element);
+                console.log(`Marking ${entry.hash} in ${id}`);
+              }
             }
 
-            const element = toDomElement([entry]);
-            domElementByHash.set(entry.hash, element);
-            console.log(`Appending ${entry.hash} to ${id}`);
-            def.domElement.appendChild(document.createTextNode(entry.hash));
-            def.domElement.appendChild(element);
-            console.log(`Marking ${entry.hash} in ${id}`);
+            await animationFrame();
+            notebookDefinitions[id] = {
+              notes,
+              domElement
+            };
+
+            if (jsEditorAdvice.onUpdate) {
+              await jsEditorAdvice.onUpdate();
+            }
           }
+          return;
+
+        case 'info':
           return;
 
         default:
@@ -47708,21 +47826,22 @@ class Ui extends E {
 }
 
 const setupUi = async sha => {
-  document.getElementById('loading').appendChild(document.createTextNode('Indexing Storage'));
+  const startPath = `https://gitcdn.link/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
+  document.getElementById('loading').appendChild(document.createTextNode('Indexing Storage. '));
   const filesystems = await listFilesystems();
 
   const decodeHash = () => {
     const hash = location.hash.substring(1);
     const [encodedWorkspace, encodedFile] = hash.split('@');
     const workspace = decodeURIComponent(encodedWorkspace) || 'JSxCAD';
-    const path = encodedFile ? decodeURIComponent(encodedFile) : `https://gitcdn.xyz/cdn/jsxcad/JSxCAD/${sha}/nb/start.nb`;
+    const path = encodedFile ? decodeURIComponent(encodedFile) : startPath;
     const file = `source/${path}`;
     return [path, file, workspace];
   };
 
   const [path, file, workspace] = decodeHash();
   let ui;
-  document.getElementById('loading').appendChild(document.createTextNode('Starting React'));
+  document.getElementById('loading').appendChild(document.createTextNode('Starting React. '));
   z(v$1(Ui, {
     ref: ref => {
       ui = ref;
@@ -47746,8 +47865,8 @@ const setupUi = async sha => {
   }), document.getElementById('top'));
   window.addEventListener('popstate', e => {
     const {
-      path = ''
-    } = e.state;
+      path = startPath
+    } = e.state || {};
     ui.loadJsEditor(path, {
       shouldUpdateUrl: false
     });
@@ -47766,7 +47885,7 @@ const installUi = async ({
   sha
 }) => {
   await boot();
-  document.getElementById('loading').appendChild(document.createTextNode('Booted'));
+  document.getElementById('loading').appendChild(document.createTextNode('Booted. '));
 
   if (workspace !== '') {
     await setupFilesystem({
@@ -47774,7 +47893,7 @@ const installUi = async ({
     });
   }
 
-  document.getElementById('loading').appendChild(document.createTextNode('Setup UI'));
+  document.getElementById('loading').appendChild(document.createTextNode('Setup UI. '));
   await setupUi(sha);
 };
 

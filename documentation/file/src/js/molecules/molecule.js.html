@@ -165,6 +165,16 @@ export default class Molecule extends Atom{
          * @type {number}
          */
         this.awaitingPropagationFlag = false
+        /**
+         * A list of available units.
+         * @type {object}
+         */
+        this.units = {&quot;MM&quot;: 1, &quot;Inches&quot;: 25.4}
+        /**
+         * The index of the currently selected unit.
+         * @type {array}
+         */
+        this.unitsIndex = 0
         
         this.setValues(values)
         
@@ -225,8 +235,8 @@ export default class Molecule extends Atom{
     
     /**
      * Set the atom&apos;s response to a mouse click up. If the atom is moving this makes it stop moving.
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
+     * @param {number} x - The X coordinate of the click
+     * @param {number} y - The Y coordinate of the click
      */ 
     clickUp(x,y){
         super.clickUp(x,y)
@@ -237,8 +247,8 @@ export default class Molecule extends Atom{
 
     /**
      * Handle double clicks by replacing the molecule currently on the screen with this one, esentially diving into it.
-     * @param {number} x - The x cordinate of the click
-     * @param {number} y - The y cordinate of the click
+     * @param {number} x - The x coordinate of the click
+     * @param {number} y - The y coordinate of the click
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
@@ -283,7 +293,7 @@ export default class Molecule extends Atom{
     copy(){
         this.nodesOnTheScreen.forEach(atom =&gt; {
             if(atom.selected){
-                GlobalVariables.atomsSelected.push(atom.serialize())
+                GlobalVariables.atomsSelected.push(atom.serialize({x: .03, y: .03}))
             }
         })
     }
@@ -344,7 +354,8 @@ export default class Molecule extends Atom{
         try{
             this.processing = true
             const values = {op: &quot;copy&quot;, readPath: this.readOutputAtomPath(), writePath: this.path}
-            window.ask(values).then( () =&gt; {
+            const {answer} = window.ask(values)
+            answer.then( () =&gt; {
                 this.processing = false
                 this.pushPropagation()
             })
@@ -409,6 +420,11 @@ export default class Molecule extends Atom{
         this.propagate()
     }
     
+    changeUnits(newUnitsIndex){
+        this.unitsIndex = newUnitsIndex
+        this.updateSidebar()
+    }
+
     /**
      * Updates the side bar to display options like &apos;go to parent&apos; and &apos;load a different project&apos;. What is displayed depends on if this atom is the top level, and if we are using run mode.
      */ 
@@ -421,8 +437,13 @@ export default class Molecule extends Atom{
             this.createEditableValueListItem(valueList,this,&apos;name&apos;,&apos;Name&apos;, false)
         }
         else if(this.topLevel){
-            //If we are the top level molecule 
+            //If we are the top level molecule
+
             this.createSegmentSlider(valueList)
+
+            const dropdown = document.createElement(&apos;div&apos;)
+            valueList.appendChild(dropdown)
+            this.createDropDown(dropdown, this, Object.keys(this.units), this.unitsIndex, &quot;Units&quot;, (index)=&gt;{this.changeUnits(index)})
         }
         
         //Display the percent loaded while loading
@@ -467,6 +488,9 @@ export default class Molecule extends Atom{
      * Creates segment length slider and passes value to Global Variables
      */ 
     createSegmentSlider(valueList){
+
+        const unitsScalor = this.units[Object.keys(this.units)[this.unitsIndex]]
+
         //Creates value slider
         var rangeElement = document.createElement(&apos;input&apos;)
         //Div which contains the entire element
@@ -478,9 +502,9 @@ export default class Molecule extends Atom{
         div.appendChild(rangeLabel)
         rangeLabel.appendChild(rangeElement)
         rangeElement.setAttribute(&apos;type&apos;, &apos;range&apos;)
-        rangeElement.setAttribute(&apos;min&apos;, &apos;.001&apos;)
-        rangeElement.setAttribute(&apos;max&apos;, &apos;1&apos;)
-        rangeElement.setAttribute(&apos;step&apos;, &apos;.05&apos;)
+        rangeElement.setAttribute(&apos;min&apos;, &apos;&apos; + .001/unitsScalor)
+        rangeElement.setAttribute(&apos;max&apos;, &apos;&apos; + 1/unitsScalor)
+        rangeElement.setAttribute(&apos;step&apos;, &apos;&apos; + .05/unitsScalor)
         rangeElement.setAttribute(&apos;class&apos;, &apos;slider&apos;)
         rangeElement.setAttribute(&apos;value&apos;, GlobalVariables.circleSegmentSize)
             
@@ -490,7 +514,7 @@ export default class Molecule extends Atom{
         rangeLabel.appendChild(rangeValueLabel)
 
         var rangeValue = document.createElement(&apos;p&apos;)
-        rangeValue.textContent = rangeElement.value
+        rangeValue.textContent = parseFloat(rangeElement.value).toFixed(5).toString()
         rangeLabel.appendChild(rangeValue)
 
 
@@ -637,9 +661,9 @@ export default class Molecule extends Atom{
     }
     
     /**
-     * Generates and returns a object represntation of this molecule and all of its children.
+     * Generates and returns a object representation of this molecule and all of its children.
      */
-    serialize(){
+    serialize(offset = {x: 0, y: 0}){
         
         var allAtoms = [] //An array of all the atoms contained in this molecule
         var allConnectors = [] //An array of all the connectors contained in this molecule
@@ -655,12 +679,13 @@ export default class Molecule extends Atom{
             }
         })
         
-        var thisAsObject = super.serialize()    //Do the atom serialization to create an object, then add all the bits of this one to it
+        var thisAsObject = super.serialize(offset)    //Do the atom serialization to create an object, then add all the bits of this one to it
         thisAsObject.topLevel = this.topLevel
         thisAsObject.allAtoms = allAtoms
         thisAsObject.allConnectors = allConnectors
         thisAsObject.fileTypeVersion = 1
         thisAsObject.simplify= this.simplify
+        thisAsObject.unitsIndex = this.unitsIndex
         
         return thisAsObject
     }
@@ -668,7 +693,7 @@ export default class Molecule extends Atom{
     /**
      * Load the children of this from a JSON representation
      * @param {object} json - A json representation of the molecule
-     * @param {object} values - An array of values to apply to this molecule before deserializing it&apos;s contents. Used by githubmolecules to set top level correctly
+     * @param {object} values - An array of values to apply to this molecule before de-serializing it&apos;s contents. Used by githubmolecules to set top level correctly
      */
     deserialize(json, values = {}, forceBeginPropagation = false){
         //Find the target molecule in the list
@@ -705,11 +730,12 @@ export default class Molecule extends Atom{
                 
                 const splits = this.path.split(&apos;/&apos;)
                 const values = {op: &quot;getPathsList&quot;, prefacePath: splits[0]+&apos;/&apos;+splits[1]}
-                window.ask(values).then( answer =&gt; {
-                    
+                const {answer} = window.ask(values)
+                answer.then( answer =&gt; {
+                
                     GlobalVariables.availablePaths = answer
                     this.beginPropagation(forceBeginPropagation)
-                    
+                
                 })
                 this.backgroundClick()
             }

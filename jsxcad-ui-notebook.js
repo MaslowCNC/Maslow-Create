@@ -1,5 +1,5 @@
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
-import { read } from './jsxcad-sys.js';
+import { readOrWatch } from './jsxcad-sys.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2693,14 +2693,35 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 
 });
 
-/* global Blob */
+/* global Blob, alert, fetch */
 
-const downloadFile = async (event, filename, path, data, type) => {
-  if (!data) {
-    data = await read(path);
+const downloadFile = async ({ filename, path, data, type, workspace }) => {
+  if (path && !data) {
+    data = await readOrWatch(path, { workspace });
   }
   const blob = new Blob([data], { type });
   FileSaver_min(blob, filename);
+};
+
+const sendFile = async ({ event, filename, path, data, type, workspace }) => {
+  if (path && !data) {
+    data = await readOrWatch(path, { workspace });
+  }
+  const url = 'http://192.168.31.235:88/';
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      method: 'post',
+      body: data,
+    });
+    if (response.ok) {
+      alert('Print ok');
+    } else {
+      alert(`Print failed: ${response.status}`);
+    }
+  } catch (error) {
+    alert(error);
+  }
 };
 
 marked_1.use({
@@ -2715,13 +2736,23 @@ marked_1.use({
   },
 });
 
-const toDomElement = (notebook = [], { onClickView } = {}) => {
+const toDomElement = (
+  notebook = [],
+  {
+    onClickView,
+    onClickMake = sendFile,
+    onClickDownload = downloadFile,
+    workspace,
+  } = {}
+) => {
   const definitions = {};
 
-  const showOrbitView = async (event, note) => {
-    const { data } = note;
-    const { target, up, position, withAxes, withGrid } = note.view;
-    const view = { target, up, position };
+  const showOrbitView = async ({ path, view, workspace }) => {
+    if (!path) {
+      return;
+    }
+    const data = await readOrWatch(path, { workspace });
+    const { target, up, position, withAxes, withGrid } = view;
     const div = document.createElement('div');
     div.classList.add('note', 'orbitView');
     const containers = window.document.getElementsByClassName(
@@ -2734,7 +2765,13 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
     }
     container.appendChild(div, container.firstChild);
     await orbitDisplay(
-      { view, geometry: data, withAxes, withGrid, definitions },
+      {
+        view: { target, up, position },
+        geometry: data,
+        withAxes,
+        withGrid,
+        definitions,
+      },
       div
     );
     const onKeyDown = async (event) => {
@@ -2752,9 +2789,6 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
 
   const container = document.createElement('div');
   container.classList.add('notebook');
-  container.style.padding = '0px';
-  container.style.border = '0px';
-  container.style.margin = '0px';
 
   for (const note of notebook) {
     if (note.define) {
@@ -2767,15 +2801,12 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
       Object.assign(entry, note.define.data);
     }
     if (note.view) {
-      const { url, openView, view } = note;
+      const { url, view, sourceLocation } = note;
       const { height, width } = view;
       const image = document.createElement('img');
       image.style.display = 'block';
       image.style.height = `${height}px`;
       image.style.width = `${width}px`;
-      image.style.padding = '0px';
-      image.style.border = '0px';
-      image.style.margin = '0px';
       image.style.background =
         'url(https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif) no-repeat center;';
       image.classList.add('note', 'view');
@@ -2785,13 +2816,25 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
       }
 
       image.addEventListener('click', (event) => {
-        showOrbitView(event, note);
-        onClickView(event, note);
+        if (onClickView) {
+          onClickView({
+            event,
+            path: note.path,
+            view: note.view,
+            workspace,
+            sourceLocation,
+          });
+        } else {
+          showOrbitView({
+            event,
+            path: note.path,
+            view: note.view,
+            workspace,
+            sourceLocation,
+          });
+        }
       });
       container.appendChild(image);
-      if (openView) {
-        showOrbitView(undefined, note);
-      }
     }
     if (note.md) {
       const markup = document.createElement('div');
@@ -2822,18 +2865,34 @@ const toDomElement = (notebook = [], { onClickView } = {}) => {
         if (base64Data) {
           data = base64Arraybuffer.decode(base64Data);
         }
-        const button = document.createElement('button');
-        button.classList.add('note', 'download');
-        button.style.height = `${21 * 1}px`;
-        button.style.padding = '0px';
-        button.style.border = '0px';
-        button.style.margin = '0px';
-        const text = document.createTextNode(`Download "${filename}"`);
-        button.appendChild(text);
-        button.addEventListener('click', (event) =>
-          downloadFile(event, filename, path, data, type)
-        );
-        container.appendChild(button);
+        {
+          const button = document.createElement('button');
+          button.classList.add('note', 'download');
+          // button.style.height = `${21 * 1}px`;
+          // button.style.padding = '0px';
+          // button.style.border = '0px';
+          // button.style.margin = '0px';
+          const text = document.createTextNode(`Download "${filename}"`);
+          button.appendChild(text);
+          button.addEventListener('click', (event) =>
+            onClickDownload({ event, filename, path, data, type, workspace })
+          );
+          container.appendChild(button);
+        }
+        if (filename.endsWith('gcode')) {
+          const button = document.createElement('button');
+          button.classList.add('note', 'print');
+          // button.style.height = `${21 * 1}px`;
+          // button.style.padding = '0px';
+          // button.style.border = '0px';
+          // button.style.margin = '0px';
+          const text = document.createTextNode(`Make "${filename}"`);
+          button.appendChild(text);
+          button.addEventListener('click', (event) =>
+            onClickMake({ event, filename, path, data, type, workspace })
+          );
+          container.appendChild(button);
+        }
       }
     }
     if (note.control) {

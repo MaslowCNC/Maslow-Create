@@ -131,7 +131,8 @@ export class BOMEntry {
  */ 
 export const extractBomTags = function(path, functionToPlace){
     //Extract all of the tags
-    window.ask({op: &quot;listItems&quot;, readPath: path }).then( items =&gt; {
+    const {answer} = window.ask({op: &quot;listItems&quot;, readPath: path })
+    answer.then( items =&gt; {
         // Filter for only bomItems
         
         var bomItems = items.filter(item =&gt; {

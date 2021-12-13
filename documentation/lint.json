@@ -166,27 +166,27 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 586,
+        "lineNumber": 611,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 587,
+        "lineNumber": 612,
         "line": "     * Load the children of this from a JSON representation\r"
       },
       {
-        "lineNumber": 588,
+        "lineNumber": 613,
         "line": "     * @param {object} json - A json representation of the molecule\r"
       },
       {
-        "lineNumber": 589,
-        "line": "     * @param {object} values - An array of values to apply to this molecule before deserializing it's contents. Used by githubmolecules to set top level correctly\r"
+        "lineNumber": 614,
+        "line": "     * @param {object} values - An array of values to apply to this molecule before de-serializing it's contents. Used by githubmolecules to set top level correctly\r"
       },
       {
-        "lineNumber": 590,
+        "lineNumber": 615,
         "line": "     */\r"
       },
       {
-        "lineNumber": 591,
+        "lineNumber": 616,
         "line": "    deserialize(json, values = {}, forceBeginPropagation = false){\r"
       }
     ],
@@ -205,35 +205,35 @@
     "filePath": "src/js/molecules/molecule.js",
     "lines": [
       {
-        "lineNumber": 675,
+        "lineNumber": 701,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 676,
+        "lineNumber": 702,
         "line": "     * Places a new atom inside the molecule\r"
       },
       {
-        "lineNumber": 677,
+        "lineNumber": 703,
         "line": "     * @param {object} newAtomObj - An object defining the new atom to be placed\r"
       },
       {
-        "lineNumber": 678,
+        "lineNumber": 704,
         "line": "     * @param {array} moleculeList - Only passed if we are placing an instance of Molecule.\r"
       },
       {
-        "lineNumber": 679,
+        "lineNumber": 705,
         "line": "     * @param {object} typesList - A dictionary of all of the available types with references to their constructors\r"
       },
       {
-        "lineNumber": 680,
+        "lineNumber": 706,
         "line": "     * @param {boolean} unlock - A flag to indicate if this atom should spawn in the unlocked state.\r"
       },
       {
-        "lineNumber": 681,
+        "lineNumber": 707,
         "line": "     */\r"
       },
       {
-        "lineNumber": 682,
+        "lineNumber": 708,
         "line": "    async placeAtom(newAtomObj, unlock){\r"
       }
     ],
@@ -343,27 +343,27 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 919,
+        "lineNumber": 915,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 920,
+        "lineNumber": 916,
         "line": "     * Creates a html representation of the passed text. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 921,
+        "lineNumber": 917,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 922,
+        "lineNumber": 918,
         "line": "     * @param {string} texxt - The text used to generate the markdown html.\r"
       },
       {
-        "lineNumber": 923,
+        "lineNumber": 919,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 924,
+        "lineNumber": 920,
         "line": "    createMarkdownListItem(list, text){\r"
       }
     ],
@@ -381,43 +381,43 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 938,
+        "lineNumber": 934,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 939,
+        "lineNumber": 935,
         "line": "     * Creates dropdown with multiple options to select. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 940,
+        "lineNumber": 936,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 941,
+        "lineNumber": 937,
         "line": "     * @param {object} parent - The parent which has the function to call on the change...this should really be done with a callback function.\r"
       },
       {
-        "lineNumber": 942,
+        "lineNumber": 938,
         "line": "     * @param {array} options - A list of options to display in the drop down.\r"
       },
       {
-        "lineNumber": 943,
+        "lineNumber": 939,
         "line": "     * @param {number} selectedOption - The zero referenced index of the selected option.\r"
       },
       {
-        "lineNumber": 944,
+        "lineNumber": 940,
         "line": "     * @param {string} description - A description of what the dropdown does.\r"
       },
       {
-        "lineNumber": 945,
+        "lineNumber": 941,
         "line": "     * @param {object} Callback function\r"
       },
       {
-        "lineNumber": 946,
+        "lineNumber": 942,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 947,
+        "lineNumber": 943,
         "line": "    createDropDown(list,parent,options,selectedOption, description, callback){\r"
       }
     ],
@@ -443,35 +443,35 @@
     "filePath": "src/js/prototypes/atom.js",
     "lines": [
       {
-        "lineNumber": 1060,
+        "lineNumber": 1056,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 1061,
+        "lineNumber": 1057,
         "line": "     * Creates button. Used in the sidebar.\r"
       },
       {
-        "lineNumber": 1062,
+        "lineNumber": 1058,
         "line": "     * @param {object} list - The HTML object to attach the new item to.\r"
       },
       {
-        "lineNumber": 1063,
+        "lineNumber": 1059,
         "line": "     * @param {string} buttonText - The text on the button.\r"
       },
       {
-        "lineNumber": 1064,
+        "lineNumber": 1060,
         "line": "     * @param {boolean} - Flag to see if checkbox is checked\r"
       },
       {
-        "lineNumber": 1065,
+        "lineNumber": 1061,
         "line": "     * @param {object} functionToCall - The function to call when the button is pressed.\r"
       },
       {
-        "lineNumber": 1066,
+        "lineNumber": 1062,
         "line": "     */ \r"
       },
       {
-        "lineNumber": 1067,
+        "lineNumber": 1063,
         "line": "    createCheckbox(sideBar,text,isChecked,callback){\r"
       }
     ],

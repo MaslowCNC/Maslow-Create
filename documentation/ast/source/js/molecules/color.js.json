@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 4881,
+  "end": 4877,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 4881,
+    "end": 4877,
     "loc": {
       "start": {
         "line": 1,
@@ -189,7 +189,7 @@
       {
         "type": "ExportDefaultDeclaration",
         "start": 186,
-        "end": 4881,
+        "end": 4877,
         "loc": {
           "start": {
             "line": 8,
@@ -203,7 +203,7 @@
         "declaration": {
           "type": "ClassDeclaration",
           "start": 201,
-          "end": 4881,
+          "end": 4877,
           "loc": {
             "start": {
               "line": 8,
@@ -252,7 +252,7 @@
           "body": {
             "type": "ClassBody",
             "start": 226,
-            "end": 4881,
+            "end": 4877,
             "loc": {
               "start": {
                 "line": 8,
@@ -9159,7 +9159,7 @@
               {
                 "type": "ClassMethod",
                 "start": 4608,
-                "end": 4878,
+                "end": 4874,
                 "loc": {
                   "start": {
                     "line": 140,
@@ -9199,7 +9199,7 @@
                 "body": {
                   "type": "BlockStatement",
                   "start": 4619,
-                  "end": 4878,
+                  "end": 4874,
                   "loc": {
                     "start": {
                       "line": 140,
@@ -9214,7 +9214,7 @@
                     {
                       "type": "VariableDeclaration",
                       "start": 4630,
-                      "end": 4675,
+                      "end": 4671,
                       "loc": {
                         "start": {
                           "line": 141,
@@ -9222,14 +9222,14 @@
                         },
                         "end": {
                           "line": 141,
-                          "column": 53
+                          "column": 49
                         }
                       },
                       "declarations": [
                         {
                           "type": "VariableDeclarator",
                           "start": 4634,
-                          "end": 4675,
+                          "end": 4671,
                           "loc": {
                             "start": {
                               "line": 141,
@@ -9237,7 +9237,7 @@
                             },
                             "end": {
                               "line": 141,
-                              "column": 53
+                              "column": 49
                             }
                           },
                           "id": {
@@ -9260,7 +9260,7 @@
                           "init": {
                             "type": "CallExpression",
                             "start": 4654,
-                            "end": 4675,
+                            "end": 4671,
                             "loc": {
                               "start": {
                                 "line": 141,
@@ -9268,7 +9268,7 @@
                               },
                               "end": {
                                 "line": 141,
-                                "column": 53
+                                "column": 49
                               }
                             },
                             "callee": {
@@ -9319,23 +9319,7 @@
                               },
                               "computed": false
                             },
-                            "arguments": [
-                              {
-                                "type": "NullLiteral",
-                                "start": 4670,
-                                "end": 4674,
-                                "loc": {
-                                  "start": {
-                                    "line": 141,
-                                    "column": 48
-                                  },
-                                  "end": {
-                                    "line": 141,
-                                    "column": 52
-                                  }
-                                }
-                              }
-                            ],
+                            "arguments": [],
                             "trailingComments": null
                           },
                           "trailingComments": null
@@ -9346,8 +9330,8 @@
                         {
                           "type": "CommentLine",
                           "value": "Write the current color selection to the serialized object",
-                          "start": 4695,
-                          "end": 4755,
+                          "start": 4691,
+                          "end": 4751,
                           "loc": {
                             "start": {
                               "line": 143,
@@ -9363,8 +9347,8 @@
                     },
                     {
                       "type": "ExpressionStatement",
-                      "start": 4765,
-                      "end": 4827,
+                      "start": 4761,
+                      "end": 4823,
                       "loc": {
                         "start": {
                           "line": 144,
@@ -9377,8 +9361,8 @@
                       },
                       "expression": {
                         "type": "AssignmentExpression",
-                        "start": 4765,
-                        "end": 4827,
+                        "start": 4761,
+                        "end": 4823,
                         "loc": {
                           "start": {
                             "line": 144,
@@ -9392,8 +9376,8 @@
                         "operator": "=",
                         "left": {
                           "type": "MemberExpression",
-                          "start": 4765,
-                          "end": 4801,
+                          "start": 4761,
+                          "end": 4797,
                           "loc": {
                             "start": {
                               "line": 144,
@@ -9406,8 +9390,8 @@
                           },
                           "object": {
                             "type": "Identifier",
-                            "start": 4765,
-                            "end": 4782,
+                            "start": 4761,
+                            "end": 4778,
                             "loc": {
                               "start": {
                                 "line": 144,
@@ -9424,8 +9408,8 @@
                           },
                           "property": {
                             "type": "Identifier",
-                            "start": 4783,
-                            "end": 4801,
+                            "start": 4779,
+                            "end": 4797,
                             "loc": {
                               "start": {
                                 "line": 144,
@@ -9444,8 +9428,8 @@
                         },
                         "right": {
                           "type": "MemberExpression",
-                          "start": 4804,
-                          "end": 4827,
+                          "start": 4800,
+                          "end": 4823,
                           "loc": {
                             "start": {
                               "line": 144,
@@ -9458,8 +9442,8 @@
                           },
                           "object": {
                             "type": "ThisExpression",
-                            "start": 4804,
-                            "end": 4808,
+                            "start": 4800,
+                            "end": 4804,
                             "loc": {
                               "start": {
                                 "line": 144,
@@ -9473,8 +9457,8 @@
                           },
                           "property": {
                             "type": "Identifier",
-                            "start": 4809,
-                            "end": 4827,
+                            "start": 4805,
+                            "end": 4823,
                             "loc": {
                               "start": {
                                 "line": 144,
@@ -9496,8 +9480,8 @@
                         {
                           "type": "CommentLine",
                           "value": "Write the current color selection to the serialized object",
-                          "start": 4695,
-                          "end": 4755,
+                          "start": 4691,
+                          "end": 4751,
                           "loc": {
                             "start": {
                               "line": 143,
@@ -9513,8 +9497,8 @@
                     },
                     {
                       "type": "ReturnStatement",
-                      "start": 4847,
-                      "end": 4871,
+                      "start": 4843,
+                      "end": 4867,
                       "loc": {
                         "start": {
                           "line": 146,
@@ -9527,8 +9511,8 @@
                       },
                       "argument": {
                         "type": "Identifier",
-                        "start": 4854,
-                        "end": 4871,
+                        "start": 4850,
+                        "end": 4867,
                         "loc": {
                           "start": {
                             "line": 146,
@@ -9821,8 +9805,8 @@
     {
       "type": "CommentLine",
       "value": "Write the current color selection to the serialized object",
-      "start": 4695,
-      "end": 4755,
+      "start": 4691,
+      "end": 4751,
       "loc": {
         "start": {
           "line": 143,
@@ -25840,34 +25824,6 @@
     },
     {
       "type": {
-        "label": "null",
-        "keyword": "null",
-        "beforeExpr": false,
-        "startsExpr": true,
-        "rightAssociative": false,
-        "isLoop": false,
-        "isAssign": false,
-        "prefix": false,
-        "postfix": false,
-        "binop": null,
-        "updateContext": null
-      },
-      "value": "null",
-      "start": 4670,
-      "end": 4674,
-      "loc": {
-        "start": {
-          "line": 141,
-          "column": 48
-        },
-        "end": {
-          "line": 141,
-          "column": 52
-        }
-      }
-    },
-    {
-      "type": {
         "label": ")",
         "beforeExpr": false,
         "startsExpr": false,
@@ -25878,24 +25834,24 @@
         "postfix": false,
         "binop": null
       },
-      "start": 4674,
-      "end": 4675,
+      "start": 4670,
+      "end": 4671,
       "loc": {
         "start": {
           "line": 141,
-          "column": 52
+          "column": 48
         },
         "end": {
           "line": 141,
-          "column": 53
+          "column": 49
         }
       }
     },
     {
       "type": "CommentLine",
       "value": "Write the current color selection to the serialized object",
-      "start": 4695,
-      "end": 4755,
+      "start": 4691,
+      "end": 4751,
       "loc": {
         "start": {
           "line": 143,
@@ -25920,8 +25876,8 @@
         "binop": null
       },
       "value": "superSerialObject",
-      "start": 4765,
-      "end": 4782,
+      "start": 4761,
+      "end": 4778,
       "loc": {
         "start": {
           "line": 144,
@@ -25946,8 +25902,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 4782,
-      "end": 4783,
+      "start": 4778,
+      "end": 4779,
       "loc": {
         "start": {
           "line": 144,
@@ -25972,8 +25928,8 @@
         "binop": null
       },
       "value": "selectedColorIndex",
-      "start": 4783,
-      "end": 4801,
+      "start": 4779,
+      "end": 4797,
       "loc": {
         "start": {
           "line": 144,
@@ -25999,8 +25955,8 @@
         "updateContext": null
       },
       "value": "=",
-      "start": 4802,
-      "end": 4803,
+      "start": 4798,
+      "end": 4799,
       "loc": {
         "start": {
           "line": 144,
@@ -26027,8 +25983,8 @@
         "updateContext": null
       },
       "value": "this",
-      "start": 4804,
-      "end": 4808,
+      "start": 4800,
+      "end": 4804,
       "loc": {
         "start": {
           "line": 144,
@@ -26053,8 +26009,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 4808,
-      "end": 4809,
+      "start": 4804,
+      "end": 4805,
       "loc": {
         "start": {
           "line": 144,
@@ -26079,8 +26035,8 @@
         "binop": null
       },
       "value": "selectedColorIndex",
-      "start": 4809,
-      "end": 4827,
+      "start": 4805,
+      "end": 4823,
       "loc": {
         "start": {
           "line": 144,
@@ -26107,8 +26063,8 @@
         "updateContext": null
       },
       "value": "return",
-      "start": 4847,
-      "end": 4853,
+      "start": 4843,
+      "end": 4849,
       "loc": {
         "start": {
           "line": 146,
@@ -26133,8 +26089,8 @@
         "binop": null
       },
       "value": "superSerialObject",
-      "start": 4854,
-      "end": 4871,
+      "start": 4850,
+      "end": 4867,
       "loc": {
         "start": {
           "line": 146,
@@ -26158,8 +26114,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 4877,
-      "end": 4878,
+      "start": 4873,
+      "end": 4874,
       "loc": {
         "start": {
           "line": 147,
@@ -26183,8 +26139,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 4880,
-      "end": 4881,
+      "start": 4876,
+      "end": 4877,
       "loc": {
         "start": {
           "line": 148,
@@ -26209,8 +26165,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 4881,
-      "end": 4881,
+      "start": 4877,
+      "end": 4877,
       "loc": {
         "start": {
           "line": 148,

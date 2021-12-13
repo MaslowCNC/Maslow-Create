@@ -219,7 +219,7 @@ export default class Color extends Atom {
      * Add the color choice to the object which is saved for this molecule
      */
     serialize(){
-        var superSerialObject = super.serialize(null)
+        var superSerialObject = super.serialize()
         
         //Write the current color selection to the serialized object
         superSerialObject.selectedColorIndex = this.selectedColorIndex

@@ -1,5 +1,5 @@
 import { min, max } from './jsxcad-math-vec3.js';
-import { toKeptGeometry, translate, measureBoundingBox } from './jsxcad-geometry.js';
+import { toTransformedGeometry, translate, measureBoundingBox } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -306,7 +306,9 @@ const pack = (
         [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
         maxPoint
       );
-      const transformed = toKeptGeometry(translate([xo, yo, -minZ], geometry));
+      const transformed = toTransformedGeometry(
+        translate([xo, yo, -minZ], geometry)
+      );
       packedGeometries.push(transformed);
     } else {
       unpackedGeometries.push(geometry);
