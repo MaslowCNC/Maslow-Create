@@ -1,4 +1,4 @@
-import { taggedPaths, fromPolygonsToGraph, toDisjointGeometry, getNonVoidGraphs, toTrianglesFromGraph } from './jsxcad-geometry.js';
+import { taggedPaths, fromPolygonsToGraph, toTriangleArray } from './jsxcad-geometry.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse$1(str) {
@@ -136,6 +136,10 @@ const fromStl = async (
   }
 };
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 const equals = ([aX, aY, aZ], [bX, bY, bZ]) =>
   aX === bX && aY === bY && aZ === bZ;
 const round = (value, tolerance) => Math.round(value / tolerance) * tolerance;
@@ -181,18 +185,71 @@ const convertToFacet = (polygon) => {
   }
 };
 
+// We sort the triangles to produce stable output.
+const orderVertices = (v) => {
+  let min = v[0];
+  for (let d = 1; d < 3; d++) {
+    const c = v[d];
+    const dX = min[X] - c[X];
+    if (dX < 0) {
+      continue;
+    } else if (dX === 0) {
+      const dY = min[Y] - c[Y];
+      if (dY < 0) {
+        continue;
+      } else if (dY === 0) {
+        const dZ = min[Z] - c[Z];
+        if (dZ < 0) {
+          continue;
+        }
+      }
+    }
+    min = c;
+  }
+  while (v[0] !== min) {
+    v.push(v.shift());
+  }
+  return v;
+};
+
+const compareTriangles = (t1, t2) => {
+  // The triangle vertices have been ordered such that the top is the minimal vertex.
+  for (let d = 0; d < 3; d++) {
+    const a = t1[d];
+    const b = t2[d];
+    const dX = a[X] - b[X];
+    if (dX < 0) {
+      return -1;
+    } else if (dX === 0) {
+      const dY = a[Y] - b[Y];
+      if (dY < 0) {
+        return -1;
+      } else if (dY === 0) {
+        const dZ = a[Z] - b[Z];
+        if (dZ < 0) {
+          return -1;
+        } else if (dZ === 0) {
+          continue;
+        }
+      }
+    }
+    return 1;
+  }
+  return 0;
+};
+
 const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
-  const keptGeometry = toDisjointGeometry(await geometry);
   const triangles = [];
-  for (const graphGeometry of getNonVoidGraphs(keptGeometry)) {
-    for (const [a, b, c] of toTrianglesFromGraph({}, graphGeometry).triangles) {
-      triangles.push([
+  for (const [a, b, c] of toTriangleArray(await geometry)) {
+    triangles.push(
+      orderVertices([
         roundVertex(a, tolerance),
         roundVertex(b, tolerance),
         roundVertex(c, tolerance),
-      ]);
-    }
+      ])
+    );
   }
+  triangles.sort(compareTriangles);
   const output = `solid JSxCAD\n${convertToFacets(
     triangles
   )}\nendsolid JSxCAD\n`;

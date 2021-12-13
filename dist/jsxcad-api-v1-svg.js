@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, emit, addPending, writeFile, getDefinitions, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -120,46 +120,42 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareSvg = (shape, name, options = {}) => {
+const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
+  const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
-    const op = toSvg(entry, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
-    addPending(op);
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+    const svgPath = `download/svg/${path}/${generateUniqueId()}`;
+    const render = async () => {
+      try {
+        await write(svgPath, await toSvg(entry, options));
+      } catch (error) {
+        getPendingErrorHandler()(error);
+      }
+    };
+    addPending(render());
     entries.push({
-      data: op,
+      path: svgPath,
       filename: `${name}_${index++}.svg`,
       type: 'image/svg+xml',
     });
+    Shape.fromGeometry(entry).gridView(name, options.view);
   }
   return entries;
 };
 
-const downloadSvgMethod = function (name, options = {}) {
-  const entries = prepareSvg(this, name, options);
-  const download = { entries };
-  const hash$1 = hashSum({ name, options }) + hash(this.toGeometry());
-  emit({ download, hash: hash$1 });
-  return this;
-};
-Shape.prototype.downloadSvg = downloadSvgMethod;
-Shape.prototype.svg = downloadSvgMethod;
+const svg =
+  (name, op, options = {}) =>
+  (shape) => {
+    const entries = prepareSvg(shape, name, op, options);
+    const download = { entries };
+    const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
+    emit({ download, hash: hash$1 });
+    return shape;
+  };
 
-const writeSvg = (shape, name, options = {}) => {
-  for (const { data, filename } of prepareSvg(shape, name, {})) {
-    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
-  }
-  return shape;
-};
+Shape.registerMethod('svg', svg);
 
-const writeSvgMethod = function (...args) {
-  return writeSvg(this, ...args);
-};
-Shape.prototype.writeSvg = writeSvgMethod;
+const api = { SvgPath, readSvg, readSvgPath, svg };
 
-const api = { SvgPath, readSvg, readSvgPath, writeSvg };
-
-export { SvgPath, api as default, readSvg, readSvgPath, writeSvg };
+export { SvgPath, api as default, readSvg, readSvgPath, svg };

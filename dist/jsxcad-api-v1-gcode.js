@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { emit, addPending, writeFile, getDefinitions, getPendingErrorHandler } from './jsxcad-sys.js';
+import { emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 
@@ -71,48 +71,50 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareGcode = (shape, name, tool, options = {}) => {
+const prepareGcode = (
+  shape,
+  name,
+  tool,
+  op = (s) => s,
+  options = {}
+) => {
+  const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toKeptGeometry())) {
-    const op = toGcode(entry, tool, {
-      definitions: getDefinitions(),
-      ...options,
-    }).catch(getPendingErrorHandler());
-    addPending(op);
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+    const gcodePath = `gcode/${path}/${generateUniqueId()}`;
+    const render = async () => {
+      try {
+        await write(gcodePath, await toGcode(entry, tool, options));
+      } catch (error) {
+        getPendingErrorHandler()(error);
+      }
+    };
+    addPending(render());
     entries.push({
-      data: op,
+      path: gcodePath,
       filename: `${name}_${index++}.gcode`,
-      // CHECK: Is this a reasonable mime type?
       type: 'application/x-gcode',
     });
-    Shape.fromGeometry(entry).view(options.view);
+    // Produce a view of what will be downloaded.
+    Shape.fromGeometry(entry).gridView(name, options.view);
   }
   return entries;
 };
 
-const downloadGcodeMethod = function (name, tool, options = {}) {
-  const entries = prepareGcode(this, name, tool, options);
-  const download = { entries };
-  const hash$1 =
-    hashSum({ name, tool, options }) + hash(this.toGeometry());
-  emit({ download, hash: hash$1 });
-  return this;
-};
-Shape.prototype.gcode = downloadGcodeMethod;
+const gcode =
+  (name, tool, op, options = {}) =>
+  (shape) => {
+    const entries = prepareGcode(shape, name, tool, op, options);
+    const download = { entries };
+    const hash$1 =
+      hashSum({ name, tool, options }) + hash(shape.toGeometry());
+    emit({ download, hash: hash$1 });
+    return shape;
+  };
 
-const writeGcode = (shape, name, tool, options = {}) => {
-  for (const { data, filename } of prepareGcode(shape, name, tool, options)) {
-    addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
-  }
-  return shape;
-};
+Shape.registerMethod('gcode', gcode);
 
-const writeGcodeMethod = function (...args) {
-  return writeGcode(this, ...args);
-};
-Shape.prototype.writeGcode = writeGcodeMethod;
+const api = { gcode };
 
-const api = { writeGcode };
-
-export { api as default, writeGcode };
+export { api as default, gcode };

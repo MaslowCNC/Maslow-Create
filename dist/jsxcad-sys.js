@@ -298,13 +298,19 @@ const createConversation = ({ agent, say }) => {
 
   conversation.hear = async (message) => {
     const { ask, history, openQuestions, tell, waiters } = conversation;
+    const { id, question, answer, error, statement } = message;
 
-    history.unshift(message);
-    while (history.length > 3) {
-      history.pop();
+    const payload = answer || question || statement;
+    if (payload instanceof Object && payload.sourceLocation) {
+      history.unshift({
+        op: payload.op,
+        sourceLocation: payload.sourceLocation,
+      });
+      while (history.length > 3) {
+        history.pop();
+      }
     }
 
-    const { id, question, answer, error, statement } = message;
     // Check hasOwnProperty to detect undefined values.
     if (message.hasOwnProperty('answer')) {
       const openQuestion = openQuestions.get(id);
@@ -491,8 +497,6 @@ var v8$1 = /*#__PURE__*/Object.freeze({
 // When base is undefined the persistent filesystem is disabled.
 let base;
 
-const getBase = () => base;
-
 const qualifyPath = (path = '', workspace) => {
   if (workspace !== undefined) {
     return `jsxcad/${workspace}/${path}`;
@@ -516,12 +520,17 @@ const setupFilesystem = ({ fileBase } = {}) => {
   }
 };
 
+const setupWorkspace = (workspace) =>
+  setupFilesystem({ filebase: workspace });
+
 const getFilesystem = () => {
   if (base !== undefined) {
     const [filesystem] = base.split('/');
     return filesystem;
   }
 };
+
+const getWorkspace = () => getFilesystem();
 
 const files = new Map();
 const fileCreationWatchers = new Set();
@@ -531,7 +540,7 @@ const getFile = async (options, unqualifiedPath) => {
   if (typeof unqualifiedPath !== 'string') {
     throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
   }
-  const path = qualifyPath(unqualifiedPath);
+  const path = qualifyPath(unqualifiedPath, options.workspace);
   let file = files.get(path);
   if (file === undefined) {
     file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
@@ -550,7 +559,7 @@ const listFiles$1 = (set) => {
 };
 
 const deleteFile$1 = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
+  const path = qualifyPath(unqualifiedPath, options.workspace);
   let file = files.get(path);
   if (file !== undefined) {
     files.delete(path);
@@ -589,16 +598,16 @@ const unwatchFileDeletion = async (thunk) => {
   return thunk;
 };
 
-const watchFile = async (path, thunk) => {
+const watchFile = async (path, thunk, options) => {
   if (thunk) {
-    (await getFile({}, path)).watchers.add(thunk);
+    (await getFile(options, path)).watchers.add(thunk);
     return thunk;
   }
 };
 
-const unwatchFile = async (path, thunk) => {
+const unwatchFile = async (path, thunk, options) => {
   if (thunk) {
-    return (await getFile({}, path)).watchers.delete(thunk);
+    return (await getFile(options, path)).watchers.delete(thunk);
   }
 };
 
@@ -915,7 +924,7 @@ cjsCompat.values;
 var localforage = createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
-    Version 1.9.0
+    Version 1.10.0
     https://localforage.github.io/localForage
     (c) 2013-2017 Mozilla, Apache License 2.0
 */
@@ -1561,7 +1570,16 @@ function _getConnection(dbInfo, upgradeNeeded) {
         };
 
         openreq.onsuccess = function () {
-            resolve(openreq.result);
+            var db = openreq.result;
+            db.onversionchange = function (e) {
+                // Triggered when the database is modified (e.g. adding an objectStore) or
+                // deleted (even when initiated by other sessions in different tabs).
+                // Closing the connection here prevents those operations from being blocked.
+                // If the database is accessed again later by this instance, the connection
+                // will be reopened or the database recreated as needed.
+                e.target.close();
+            };
+            resolve(db);
             _advanceReadiness(dbInfo);
         };
     });
@@ -2237,12 +2255,18 @@ function dropInstance(options, callback) {
                 var dropDBPromise = new Promise$1(function (resolve, reject) {
                     var req = idb.deleteDatabase(options.name);
 
-                    req.onerror = req.onblocked = function (err) {
+                    req.onerror = function () {
                         var db = req.result;
                         if (db) {
                             db.close();
                         }
-                        reject(err);
+                        reject(req.error);
+                    };
+
+                    req.onblocked = function () {
+                        // Closing all open connections in onversionchange handler should prevent this situation, but if
+                        // we do get here, it just means the request remains pending - eventually it will succeed or error
+                        console.warn('dropInstance blocked for database "' + options.name + '" until all open connections are closed');
                     };
 
                     req.onsuccess = function () {
@@ -3729,80 +3753,69 @@ const localForageDb = () => {
 const db = localForageDb;
 // export const db = idbKeyvalDb;
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
-
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
-
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
-
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
-  }
-  if (value === undefined) {
-    return fold(hash, 'undefined');
-  }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
-
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
+// import hashSum from 'hash-sum';
 
 const sourceLocations = [];
 
 const getSourceLocation = () =>
   sourceLocations[sourceLocations.length - 1];
 
-const popSourceLocation = (sourceLocation) => {
+const emitGroup = [];
+
+let startTime = new Date();
+
+const elapsed = () => new Date() - startTime;
+
+const clearEmitted = () => {
+  startTime = new Date();
+  sourceLocations.splice(0);
+};
+
+const saveEmitGroup = () => {
+  const savedSourceLocations = [...sourceLocations];
+  sourceLocations.splice(0);
+
+  const savedEmitGroup = [...emitGroup];
+  emitGroup.splice(0);
+
+  return { savedSourceLocations, savedEmitGroup };
+};
+
+const restoreEmitGroup = ({ savedSourceLocations, savedEmitGroup }) => {
+  sourceLocations.splice(0, sourceLocations.length, ...savedSourceLocations);
+  emitGroup.splice(0, emitGroup.length, ...savedEmitGroup);
+};
+
+const onEmitHandlers = new Set();
+
+const emit = (value) => {
+  if (value.sourceLocation === undefined) {
+    value.sourceLocation = getSourceLocation();
+  }
+  emitGroup.push(value);
+};
+
+const addOnEmitHandler = (handler) => {
+  onEmitHandlers.add(handler);
+  return handler;
+};
+
+const beginEmitGroup = (sourceLocation) => {
+  if (emitGroup.length !== 0) {
+    throw Error('emitGroup not empty');
+  }
+  sourceLocations.push(sourceLocation);
+  emit({ beginSourceLocation: sourceLocation });
+};
+
+const flushEmitGroup = () => {
+  for (const onEmitHandler of onEmitHandlers) {
+    onEmitHandler([...emitGroup]);
+  }
+  emitGroup.splice(0);
+};
+
+const finishEmitGroup = (sourceLocation) => {
   if (sourceLocations.length === 0) {
     throw Error(`Expected current sourceLocation but there was none.`);
   }
@@ -3819,51 +3832,18 @@ const popSourceLocation = (sourceLocation) => {
   }
   emit({ endSourceLocation });
   sourceLocations.pop();
-};
-
-const pushSourceLocation = (sourceLocation) => {
-  sourceLocations.push(sourceLocation);
-  emit({ beginSourceLocation: sourceLocation });
-};
-
-const emitted = [];
-
-let startTime = new Date();
-
-const elapsed = () => new Date() - startTime;
-
-const clearEmitted = () => {
-  startTime = new Date();
-  emitted.length = 0;
-  sourceLocations.length = 0;
-};
-
-const onEmitHandlers = new Set();
-
-const emit = (value) => {
-  if (value.sourceLocation === undefined) {
-    value.sourceLocation = getSourceLocation();
-  }
-  emitted.push(value);
-  for (const onEmitHandler of onEmitHandlers) {
-    onEmitHandler(value);
-  }
-};
-
-const getEmitted = () => [...emitted];
-
-const addOnEmitHandler = (handler) => {
-  onEmitHandlers.add(handler);
-  return handler;
+  flushEmitGroup();
 };
 
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
 const info = (text) => {
+  /*
   console.log(text);
   const entry = { info: text };
   const hash = hashSum(entry);
   emit({ info: text, hash });
+*/
 };
 
 var nodeFetch = _ => _;
@@ -3905,7 +3885,13 @@ const watchers = new Set();
 
 // TODO: Consider different specifications.
 
-const acquireService = async (spec) => {
+const notifyWatchers = () => {
+  for (const watcher of watchers) {
+    watcher();
+  }
+};
+
+const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
     // Recycle an existing worker.
     // FIX: We might have multiple paths to consider in the future.
@@ -3915,6 +3901,8 @@ const acquireService = async (spec) => {
     if (service.released) {
       throw Error('die');
     }
+    service.context = context;
+    notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
     // Create a new service.
@@ -3923,10 +3911,14 @@ const acquireService = async (spec) => {
     if (service.released) {
       throw Error('die');
     }
+    service.context = context;
+    notifyWatchers();
     return service;
   } else {
     // Wait for a service to become available.
-    return new Promise((resolve, reject) => pending$1.push({ spec, resolve }));
+    return new Promise((resolve, reject) =>
+      pending$1.push({ spec, resolve, context })
+    );
   }
 };
 
@@ -3944,12 +3936,10 @@ const releaseService = (spec, service, terminate = false) => {
     }
   }
   if (pending$1.length > 0 && activeServices.size < activeServiceLimit) {
-    const request = pending$1.shift();
-    request.resolve(acquireService(request.spec));
+    const { spec, resolve, context } = pending$1.shift();
+    resolve(acquireService(spec, context));
   }
-  for (const watcher of watchers) {
-    watcher();
-  }
+  notifyWatchers();
 };
 
 const getServicePoolInfo = () => ({
@@ -3962,25 +3952,39 @@ const getServicePoolInfo = () => ({
   pendingCount: pending$1.length,
 });
 
-const terminateActiveServices = () => {
-  for (const { terminate } of activeServices) {
-    terminate();
+const getActiveServices = (contextFilter = (context) => true) => {
+  const filteredServices = [];
+  for (const service of activeServices) {
+    const { context } = service;
+    if (contextFilter(context)) {
+      filteredServices.push(service);
+    }
+  }
+  return filteredServices;
+};
+
+const terminateActiveServices = (contextFilter = (context) => true) => {
+  for (const { terminate, context } of activeServices) {
+    if (contextFilter(context)) {
+      terminate();
+    }
   }
 };
 
-const askService = (spec, question, transfer) => {
+const askService = (spec, question, transfer, context) => {
   let terminated;
-  let terminate = () => {
+  let doTerminate = () => {
     terminated = true;
   };
+  const terminate = () => doTerminate();
   const flow = async () => {
     let service;
     try {
-      service = await acquireService(spec);
+      service = await acquireService(spec, context);
       if (service.released) {
         return Promise.reject(Error('Terminated'));
       }
-      terminate = () => {
+      doTerminate = () => {
         service.terminate();
         return Promise.reject(Error('Terminated'));
       };
@@ -3999,11 +4003,10 @@ const askService = (spec, question, transfer) => {
       }
     }
   };
-  const promise = flow();
+  const answer = flow();
   // Avoid a race in which the service might be terminated before
   // acquireService returns.
-  promise.terminate = () => terminate();
-  return promise;
+  return { answer, terminate };
 };
 
 const askServices = async (question) => {
@@ -4045,12 +4048,7 @@ const touch = async (
   path,
   { workspace, clear = true, broadcast = true } = {}
 ) => {
-  let originalWorkspace = getFilesystem();
-  if (workspace !== originalWorkspace) {
-    // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: workspace });
-  }
-  const file = await getFile({}, path);
+  const file = await getFile({ workspace }, path);
   if (file !== undefined) {
     if (clear) {
       // This will force a reload of the data.
@@ -4058,25 +4056,18 @@ const touch = async (
     }
 
     for (const watcher of file.watchers) {
-      await watcher({}, file);
+      await watcher({ workspace }, file);
     }
   }
 
   if (isWebWorker) {
-    console.log(`QQ/sys/touch/webworker: id ${self.id} path ${path}`);
     if (broadcast) {
       addPending(
         await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
       );
     }
   } else {
-    console.log(`QQ/sys/touch/browser: ${path}`);
     tellServices({ op: 'sys/touch', path, workspace });
-  }
-
-  if (workspace !== originalWorkspace) {
-    // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalWorkspace });
   }
 };
 
@@ -4091,20 +4082,11 @@ const writeFile = async (options, path, data) => {
     ephemeral,
     workspace = getFilesystem(),
   } = options;
-  let originalWorkspace = getFilesystem();
-  if (workspace !== originalWorkspace) {
-    info(`Write ${path} of ${workspace}`);
-    // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: workspace });
-  }
-
-  info(`Write ${path}`);
   const file = await getFile(options, path);
   file.data = data;
 
-  const base = getBase();
-  if (!ephemeral && base !== undefined) {
-    const persistentPath = qualifyPath(path);
+  if (!ephemeral && workspace !== undefined) {
+    const persistentPath = qualifyPath(path, workspace);
     if (isNode) {
       try {
         await promises$3.mkdir(dirname(persistentPath), { recursive: true });
@@ -4125,11 +4107,6 @@ const writeFile = async (options, path, data) => {
 
     // Let everyone know the file has changed.
     await touch(path, { workspace, clear: false });
-  }
-
-  if (workspace !== originalWorkspace) {
-    // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalWorkspace });
   }
 
   for (const watcher of file.watchers) {
@@ -4188,11 +4165,13 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
 };
 
 // Fetch from internal store.
-const fetchPersistent = async (path, doSerialize) => {
+const fetchPersistent = async (path, { workspace, doSerialize }) => {
   try {
-    const base = getBase();
-    if (base !== undefined) {
-      const fetchFile = await getFileFetcher(qualifyPath, doSerialize);
+    if (workspace) {
+      const fetchFile = await getFileFetcher(
+        (path) => qualifyPath(path, workspace),
+        doSerialize
+      );
       const data = await fetchFile(path);
       return data;
     }
@@ -4246,23 +4225,11 @@ const readFile = async (options, path) => {
     forceNoCache = false,
     decode,
   } = options;
-  let originalWorkspace = getFilesystem();
-  if (workspace !== originalWorkspace) {
-    log({ op: 'text', text: `Read ${path} of ${workspace}` });
-    // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: workspace });
-  } else {
-    log({ op: 'text', text: `Read ${path}` });
-    // info(`Read ${path}`);
-  }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false || forceNoCache) {
-    file.data = await fetchPersistent(path, true);
+    file.data = await fetchPersistent(path, { workspace, doSerialize: true });
   }
-  if (workspace !== originalWorkspace) {
-    // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalWorkspace });
-  }
+
   if (file.data === undefined && allowFetch && sources.length > 0) {
     let data = await fetchSources(sources);
     if (decode) {
@@ -4290,7 +4257,7 @@ const readFile = async (options, path) => {
 const read = async (path, options = {}) => readFile(options, path);
 
 const readOrWatch = async (path, options = {}) => {
-  const data = await read(path);
+  const data = await read(path, options);
   if (data !== undefined) {
     return data;
   }
@@ -4298,10 +4265,10 @@ const readOrWatch = async (path, options = {}) => {
   const watch = new Promise((resolve) => {
     resolveWatch = resolve;
   });
-  const watcher = await watchFile(path, (file) => resolveWatch(path));
+  const watcher = await watchFile(path, (file) => resolveWatch(path), options);
   await watch;
   await unwatchFile(path, watcher);
-  return read(path);
+  return read(path, options);
 };
 
 /* global self */
@@ -4369,15 +4336,73 @@ const boot = async () => {
   }
 };
 
-const getDefinitions = () => {
-  const definitions = {};
-  for (const note of getEmitted()) {
-    if (note.define) {
-      definitions[note.define.tag] = note.define.data;
+function pad (hash, len) {
+  while (hash.length < len) {
+    hash = '0' + hash;
+  }
+  return hash;
+}
+
+function fold (hash, text) {
+  var i;
+  var chr;
+  var len;
+  if (text.length === 0) {
+    return hash;
+  }
+  for (i = 0, len = text.length; i < len; i++) {
+    chr = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash < 0 ? hash * -2 : hash;
+}
+
+function foldObject (hash, o, seen) {
+  return Object.keys(o).sort().reduce(foldKey, hash);
+  function foldKey (hash, key) {
+    return foldValue(hash, o[key], key, seen);
+  }
+}
+
+function foldValue (input, value, key, seen) {
+  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
+  if (value === null) {
+    return fold(hash, 'null');
+  }
+  if (value === undefined) {
+    return fold(hash, 'undefined');
+  }
+  if (typeof value === 'object' || typeof value === 'function') {
+    if (seen.indexOf(value) !== -1) {
+      return fold(hash, '[Circular]' + key);
+    }
+    seen.push(value);
+
+    var objHash = foldObject(hash, value, seen);
+
+    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
+      return objHash;
+    }
+
+    try {
+      return fold(objHash, String(value.valueOf()))
+    } catch (err) {
+      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
     }
   }
-  return definitions;
-};
+  return fold(hash, value.toString());
+}
+
+function toString (o) {
+  return Object.prototype.toString.call(o);
+}
+
+function sum (o) {
+  return pad(foldValue(0, o, '', []).toString(16), 8);
+}
+
+var hashSum = sum;
 
 const hash = (item) => hashSum(item);
 
@@ -4466,15 +4491,15 @@ const listFiles = async ({ workspace } = {}) => {
 
 const { promises } = fs;
 
-const getFileDeleter = async () => {
+const getFileDeleter = async ({ workspace } = {}) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises.unlink(qualifyPath(path));
+      return promises.unlink(qualifyPath(path, workspace));
     };
   } else if (isBrowser) {
     return async (path) => {
-      await db().removeItem(qualifyPath(path));
+      await db().removeItem(qualifyPath(path, workspace));
     };
   } else {
     throw Error('die');
@@ -4485,7 +4510,7 @@ const deleteFile = async (options, path) => {
   if (isWebWorker) {
     return addPending(self.ask({ op: 'deleteFile', options, path }));
   }
-  const deleter = await getFileDeleter();
+  const deleter = await getFileDeleter(options);
   await deleter(path);
   await deleteFile$1(options, path);
 };
@@ -4495,17 +4520,12 @@ const sleep = (ms = 0) =>
     setTimeout(resolve, ms);
   });
 
-// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
-// optimize the gzip compression for this alphabet.
 let urlAlphabet =
-  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW';
-
+  'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
 let nanoid = (size = 21) => {
   let id = '';
-  // A compact alternative for `for (var i = 0; i < step; i++)`.
   let i = size;
   while (i--) {
-    // `| 0` is more compact and faster than `Math.floor()`.
     id += urlAlphabet[(Math.random() * 64) | 0];
   }
   return id
@@ -4513,4 +4533,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, generateUniqueId, getControlValue, getDefinitions, getEmitted, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, popSourceLocation, pushSourceLocation, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };

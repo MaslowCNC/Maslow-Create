@@ -375,7 +375,7 @@ canvas {
 
 body {
     font-family: 'Work Sans', sans-serif;
-    background: #3e3e3e;
+    background: #787776;
     overflow: hidden;
 }
 
@@ -658,7 +658,7 @@ input.menu_search:focus {
 
 .label-item{
   display:block;
-  font-size:1.1rem;
+  font-size:1.8rem;
   font-weight: 700;
   margin-left:0;
   margin-right: 5px;
