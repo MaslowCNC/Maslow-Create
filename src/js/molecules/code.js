@@ -101,8 +101,8 @@ export default class Code extends Atom {
     
     /**
      * Edit the atom's code when it is double clicked
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
+     * @param {number} x - The X coordinate of the click
+     * @param {number} y - The Y coordinate of the click
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
@@ -121,7 +121,7 @@ export default class Code extends Atom {
     }
     
     /**
-     * Callled to trigger editing the code atom
+     * Called to trigger editing the code atom
      */ 
     editCode(){
         //Remove everything in the popup now
