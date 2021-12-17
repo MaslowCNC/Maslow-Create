@@ -47,7 +47,7 @@ const agent = async ({ ask, message }) => {
         return;
       case 'sys/touch':
         if (id === undefined || id !== self.id) {
-          // Don't respond to touches from ourself.
+          // Don't respond to touches from ourselves.
           await touch(path, { workspace, clear: true, broadcast: false });
         }
         return;
