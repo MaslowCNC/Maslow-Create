@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, beginEmitGroup, resolvePending, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -69,6 +69,7 @@ const emitSourceText = (sourceText) =>
 const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
+    logInfo('api/core/$run', text);
     beginRecordingNotes();
     beginEmitGroup({ path, id });
     emitSourceText(text);
@@ -375,6 +376,7 @@ const control = (label, value, type, options) => {
 };
 
 const api = {
+  _: undefined,
   ...mathApi,
   ...shapeApi,
   ...notesApi,
