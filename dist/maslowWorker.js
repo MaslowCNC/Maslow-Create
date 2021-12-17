@@ -52,12 +52,12 @@ const agent = async ({ ask, message }) => {
         }
         return;
       case "rectangle":
-        const aSquare = api.Box(message.x, message.y);
+        const aSquare = api.Box(message.x, message.y).color("#bababa");
         await api.saveGeometry(message.writePath, aSquare);
         return 1;
         break;
       case "circle":
-        const aCircle = api.Arc(message.diameter).hasSides(message.numSegments);
+        const aCircle = api.Arc(message.diameter).hasSides(message.numSegments).color("#bababa");
         await api.saveGeometry(message.writePath, aCircle);
         return 1;
         break;
