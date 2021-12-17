@@ -1,5 +1,6 @@
 import * as sys from './jsxcad-sys.js';
 import baseApi, { evaluate } from './jsxcad-api.js';
+import { difference, write } from './jsxcad-geometry.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -110,6 +111,7 @@ const agent = async ({
     offscreenCanvas,
     id,
     path,
+    paths,
     workspace,
     script,
     sha = 'master',
@@ -124,6 +126,26 @@ const agent = async ({
 
   try {
     switch (op) {
+      case 'geometry/difference':
+        {
+          const geometries = [];
+
+          if (!workspace) {
+            console.log(`No Workspace`);
+          }
+
+          for (const path of paths) {
+            geometries.push(await sys.readOrWatch(path, {
+              workspace
+            }));
+          }
+
+          const geometry = difference(...geometries);
+          const path = `geometry/${sys.generateUniqueId()}`;
+          await write(geometry, path);
+          return path;
+        }
+
       case 'sys/attach':
         self.id = id;
         return;
@@ -140,7 +162,7 @@ const agent = async ({
 
         return;
 
-      case 'staticView':
+      case 'app/staticView':
         sys.info('Load Geometry');
         const geometry = await sys.readOrWatch(path, {
           workspace
@@ -160,7 +182,7 @@ const agent = async ({
         sys.info('Done');
         return dataURL;
 
-      case 'evaluate':
+      case 'app/evaluate':
         await sys.log({
           op: 'text',
           text: 'Evaluation Started'
