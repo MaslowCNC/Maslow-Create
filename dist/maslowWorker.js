@@ -6,7 +6,6 @@ import {
   read,
   setupFilesystem,
   getFilesystem,
-  touch,
   listFiles,
 } from './jsxcad-sys.js';
 
@@ -45,12 +44,6 @@ const agent = async ({ ask, message }) => {
       case 'sys/attach':
         self.id = id;
         return;
-      case 'sys/touch':
-        if (id === undefined || id !== self.id) {
-          // Don't respond to touches from ourselves.
-          await touch(path, { workspace, clear: true, broadcast: false });
-        }
-        return;
       case "rectangle":
         const aSquare = api.Box(message.x, message.y).color("#bababa");
         await api.saveGeometry(message.writePath, aSquare);
@@ -63,7 +56,7 @@ const agent = async ({ ask, message }) => {
         break;
       case "extrude":
         const aShape = await maslowRead(message.readPath);
-        const extrudedShape = aShape.ex(message.distance);
+        const extrudedShape = aShape.e(message.distance);
         await api.saveGeometry(message.writePath, extrudedShape);
         return 1;
         break;
@@ -312,10 +305,12 @@ const messageBootQueue = [];
 onmessage = ({ data }) => messageBootQueue.push(data);
 
 const bootstrap = async () => {
-  await boot();
+  
   const { ask, hear, tell } = createConversation({ agent, say });
   self.ask = ask;
   self.tell = tell;
+
+  await boot();
 
   // Handle any messages that came in while we were booting up.
   if (messageBootQueue.length > 0) {

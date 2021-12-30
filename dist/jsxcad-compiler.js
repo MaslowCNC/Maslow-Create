@@ -28040,38 +28040,6 @@ const declareVariable = async (
     imports: entry.imports,
     program: await generateCode(entry, { topLevel }),
   };
-
-  /*
-  const meta = await read(`meta/def/${path}/${id}`);
-  if (!meta || meta.sha !== sha || entry.isNotCacheable) {
-    updates[id] = {
-      dependencies,
-      imports: entry.imports,
-      program: await generateUpdateCode(entry, {
-        declaration,
-        sha,
-        topLevel,
-      }),
-    };
-    // Don't replay it if it's being updated.
-    return;
-  }
-
-  const replayProgram = await generateReplayCode(
-    entry,
-  );
-  if (replayProgram.length > 0) {
-    replays[id] = {
-      dependencies,
-      imports: entry.imports,
-      program: `
-try {
-${generate({ type: 'Program', body: replayProgram })}
-} catch (error) { throw error; }
-`,
-    };
-  }
-*/
 };
 
 // FIX: Replace path with directory?

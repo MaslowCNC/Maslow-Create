@@ -1,8 +1,8 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, difference, rewrite, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, visit, isNotVoid, eachPoint as eachPoint$1, extrude as extrude$1, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, loft as loft$1, realize, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, computeNormal, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, section as section$1, separate as separate$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, hasTypeVoid, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, assemble2, convexHullToGraph, distributedAssemble, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
-import { getSourceLocation, emit, logInfo, config, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
-export { elapsed, emit, info, read, write } from './jsxcad-sys.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedPaths, taggedGraph, openPath, taggedSegments, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, union, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, projectToPlane, computeCentroid, intersection, allTags, fromPointsToGraph, cut as cut$1, rewrite, visit, hasTypeVoid, hasTypeWire, translatePaths, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, eachPoint as eachPoint$1, computeNormal, extrude, extrudeToPlane as extrudeToPlane$1, faces as faces$1, fill as fill$1, empty, eachSegment, grow as grow$1, outline as outline$1, inset as inset$1, read, readNonblocking, loft as loft$1, realize, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, isVoid, offset as offset$1, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, twist as twist$1, withQuery, toPolygonsWithHoles, arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, alphaShape, rotateZPath, convexHullToGraph, fromFunctionToGraph, translatePath } from './jsxcad-geometry.js';
+import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, hash, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
+export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromTranslation, fromRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { scale as scale$1, subtract, add as add$1, abs, negate, squaredLength, normalize, cross, dot, distance } from './jsxcad-math-vec3.js';
+import { scale as scale$1, subtract, add as add$1, abs, squaredLength, normalize, cross, distance } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
@@ -105,8 +105,8 @@ class Shape {
     return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
   }
 
-  toCoordinate(value) {
-    return Shape.toCoordinate(value);
+  toCoordinate(x, y, z) {
+    return Shape.toCoordinate(this, x, y, z);
   }
 
   toShape(value) {
@@ -147,29 +147,19 @@ const registerShapeMethod = (name, op) => {
   }
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
+
   // Make the operation application available e.g., s.grow(1)
-  if (name === 'startTimer' || name === 'endTimer' || name === 'md') {
-    const { [name]: method } = {
-      [name]: function (...args) {
-        return op(...args)(this);
-      },
-    };
-    method.origin = path;
-    Shape.prototype[name] = method;
-    return method;
-  } else {
-    const { [name]: method } = {
-      [name]: function (...args) {
-        this.startTimer(name);
-        const result = op(...args)(this);
-        this.endTimer(name);
-        return result;
-      },
-    };
-    method.origin = path;
-    Shape.prototype[name] = method;
-    return method;
-  }
+  const { [name]: method } = {
+    [name]: function (...args) {
+      const timer = startTime(name);
+      const result = op(...args)(this);
+      endTime(timer);
+      return result;
+    },
+  };
+  method.origin = path;
+  Shape.prototype[name] = method;
+  return method;
 };
 
 const shapeMethod = (build) => {
@@ -293,7 +283,7 @@ Shape.toCoordinate = (shape, x = 0, y = 0, z = 0) => {
     }
     return [x, y, z];
   } else {
-    throw Error(`Unexpected coordinate value: ${x}`);
+    throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
   }
 };
 
@@ -334,7 +324,7 @@ Shape.toCoordinates = (shape, ...args) => {
       }
       coordinates.push([x, y, z]);
     } else {
-      throw Error(`Unexpected coordinate value: ${x}`);
+      throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
     }
   }
   return coordinates;
@@ -429,6 +419,10 @@ const hasTo =
   (shape) =>
     shape.updatePlan({ to: [x, y, z], top: undefined });
 const hasTop = (top) => (shape) => shape.updatePlan({ top });
+const hasUp =
+  (x = 0, y = 0, z = 0) =>
+  (shape) =>
+    shape.updatePlan({ up: [x, y, z], top: undefined });
 const hasZag = (zag) => (shape) => shape.updatePlan({ zag });
 
 // Let's consider migrating to a 'has' prefix for planning.
@@ -447,6 +441,7 @@ Shape.registerMethod('hasRadius', hasRadius);
 Shape.registerMethod('hasSides', hasSides);
 Shape.registerMethod('hasTo', hasTo);
 Shape.registerMethod('hasTop', hasTop);
+Shape.registerMethod('hasUp', hasUp);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
@@ -473,12 +468,9 @@ const find = (geometry, key, otherwise) =>
 const ofPlan = find;
 
 const getAngle = (geometry) => find(geometry, 'angle', {});
-const getAt = (geometry) => find(geometry, 'at', [0, 0, 0]);
 const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
 const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
-const getFrom = (geometry) => find(geometry, 'from', [0, 0, 0]);
 const getMatrix = (geometry) => geometry.matrix || identityMatrix;
-const getTo = (geometry) => find(geometry, 'to', [0, 0, 0]);
 
 const defaultZag = 0.01;
 
@@ -527,77 +519,9 @@ Shape.registerReifier = (name, op) => {
   return finishedOp;
 };
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
-
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
-
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
-
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
-  }
-  if (value === undefined) {
-    return fold(hash, 'undefined');
-  }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
-
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
-
 const define = (tag, data) => {
   const define = { tag, data };
-  emit({ define, hash: hashSum(define) });
+  emit({ define, hash: computeHash(define) });
   return data;
 };
 
@@ -679,7 +603,7 @@ const md = (strings, ...placeholders) => {
   const md = strings.reduce(
     (result, string, i) => result + placeholders[i - 1] + string
   );
-  emit({ md, hash: hashSum(md) });
+  emit({ md, hash: computeHash(md) });
   return md;
 };
 
@@ -695,7 +619,7 @@ const mdMethod =
       }
     }
     const md = strings.join('');
-    emit({ md, hash: hashSum(md) });
+    emit({ md, hash: computeHash(md) });
     return shape;
   };
 
@@ -762,6 +686,7 @@ const add =
     );
 
 Shape.registerMethod('add', add);
+Shape.registerMethod('join', add);
 
 const and =
   (...args) =>
@@ -779,46 +704,56 @@ Shape.registerMethod('and', and);
 const addTo = (other) => (shape) => other.add(shape);
 Shape.registerMethod('addTo', addTo);
 
-const X$5 = 0;
-const Y$5 = 1;
+const X$6 = 0;
+const Y$6 = 1;
 const Z$6 = 2;
+
+// Round to the nearest 0.001 mm
+
+const round = (v) => Math.round(v * 1000) / 1000;
+
+const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
 const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
   (shape) =>
     shape.size(({ max, min, center }, shape) => {
+      // This is producing very small deviations.
+      // FIX: Try a more principled approach.
+      max = roundCoordinate(max);
+      min = roundCoordinate(min);
+      center = roundCoordinate(center);
       const offset = [0, 0, 0];
-
       let index = 0;
       while (index < spec.length) {
         switch (spec[index++]) {
           case 'x': {
             switch (spec[index]) {
               case '>':
-                offset[X$5] = -min[X$5];
+                offset[X$6] = -min[X$6];
                 index += 1;
                 break;
               case '<':
-                offset[X$5] = -max[X$5];
+                offset[X$6] = -max[X$6];
                 index += 1;
                 break;
               default:
-                offset[X$5] = -center[X$5];
+                offset[X$6] = -center[X$6];
             }
             break;
           }
           case 'y': {
             switch (spec[index]) {
               case '>':
-                offset[Y$5] = -min[Y$5];
+                offset[Y$6] = -min[Y$6];
                 index += 1;
                 break;
               case '<':
-                offset[Y$5] = -max[Y$5];
+                offset[Y$6] = -max[Y$6];
                 index += 1;
                 break;
               default:
-                offset[Y$5] = -center[Y$5];
+                offset[Y$6] = -center[Y$6];
             }
             break;
           }
@@ -965,20 +900,13 @@ Shape.registerMethod('withCloudSolid', withCloudSolid);
 
 const cut =
   (...shapes) =>
-  (shape) => {
-    let options;
-    if (shapes.length >= 1 && shapes[0].constructor === Object) {
-      const { mode, check } = shapes.shift();
-      options = { mode, check };
-    }
-    return Shape.fromGeometry(
-      difference(
+  (shape) =>
+    Shape.fromGeometry(
+      cut$1(
         shape.toGeometry(),
-        options,
-        ...shape.toShapes(shapes).map((other) => other.toGeometry())
+        shape.toShapes(shapes).map((other) => other.toGeometry())
       )
     );
-  };
 
 Shape.registerMethod('cut', cut);
 
@@ -986,13 +914,28 @@ const cutFrom = (other) => (shape) =>
   Shape.toShape(other, shape).cut(shape);
 Shape.registerMethod('cutFrom', cutFrom);
 
-const cutOut =
+const cutout =
   (other, op = (clipped) => clipped.void()) =>
   (shape) => {
     other = Shape.toShape(other, shape);
     return shape.cut(other).and(op(shape.clip(other)));
   };
-Shape.registerMethod('cutOut', cutOut);
+Shape.registerMethod('cutout', cutout);
+
+const isDefined$1 = (value) => value;
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedGroup(
+      {},
+      ...Shape.toShapes(shapes.filter(isDefined$1)).map((shape) =>
+        shape.toGeometry()
+      )
+    )
+  );
+
+Shape.prototype.Group = Shape.shapeMethod(Group);
+Shape.Group = Group;
 
 const qualifyTag = (tag, namespace = 'user') => {
   if (tag.includes(':')) {
@@ -1054,147 +997,233 @@ const tag =
 
 Shape.registerMethod('tag', tag);
 
-const drop =
+const get =
   (...tags) =>
   (shape) => {
-    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
-    const isMatch = (tags, tag) => {
-      for (const matcher of matchers) {
-        for (tag of tags) {
-          if (matcher(tag)) {
-            return true;
-          }
+    const isMatch = oneOfTagMatcher(tags, 'item');
+    const picks = [];
+    const walk = (geometry, descend) => {
+      const { tags, type } = geometry;
+      if (type === 'group') {
+        return descend();
+      }
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          picks.push(Shape.fromGeometry(geometry));
+          break;
         }
       }
-      return false;
-    };
-    const op = (geometry, descend) => {
-      switch (geometry.type) {
-        case 'group':
-        case 'layout':
-          return descend();
-        default: {
-          // Should this pass through item boundaries?
-          const { tags = [] } = geometry;
-          if (isMatch(tags)) {
-            return Shape.fromGeometry(geometry).void().toGeometry();
-          } else if (geometry.type !== 'item') {
-            return descend();
-          }
-        }
+      if (type !== 'item') {
+        return descend();
       }
     };
-    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
+    const geometry = shape.toGeometry();
+    if (geometry.type === 'item') {
+      // FIX: Can we make this less magical?
+      // This allows constructions like s.get('a').get('b')
+      visit(geometry.content[0], walk);
+    } else {
+      visit(geometry, walk);
+    }
+    return Group(...picks);
   };
+
+const g = get;
+
+Shape.registerMethod('get', get);
+Shape.registerMethod('g', get);
+
+const voidFn = () => (shape) =>
+  Shape.fromGeometry(hasTypeVoid(shape.toGeometry()));
+
+Shape.registerMethod('void', voidFn);
+
+const drop = (tag) => (shape) => shape.on(get(tag), voidFn());
 
 Shape.registerMethod('drop', drop);
 
-const starts = new Map();
-const totals = new Map();
+const Edge = (source = 1, target = 0) =>
+  Shape.fromSegments([
+    Shape.toCoordinate(undefined, source),
+    Shape.toCoordinate(undefined, target),
+  ]);
 
-let timeoutId;
+Shape.prototype.Edge = Shape.shapeMethod(Edge);
 
-const startTimer = (name) => (shape) => {
-  starts.set(name, new Date());
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+const Face = (...points) =>
+  Shape.fromPolygons([
+    { points: points.map((point) => Shape.toCoordinate(undefined, point)) },
+  ]);
+
+Shape.prototype.Face = Shape.shapeMethod(Face);
+
+const Point = (...args) =>
+  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
+
+Shape.prototype.Point = Shape.shapeMethod(Point);
+
+const ofPointPaths = (points = [], paths = []) => {
+  const polygons = [];
+  for (const path of paths) {
+    polygons.push({ points: path.map((point) => points[point]) });
   }
-  timeoutId = setTimeout(() => {
-    timeoutId = null;
-    logInfo('api/shape/startTimer', name);
-  }, 1000);
-  return shape;
+  return Shape.fromPolygons(polygons);
 };
 
-Shape.registerMethod('startTimer', startTimer);
-
-const endTimer = (name) => (shape) => {
-  const start = starts.get(name);
-  const ms = start !== undefined ? new Date() - start : -1;
-  const total = totals.get(name) || { sum: 0, count: 0, history: [] };
-  total.sum += ms;
-  total.count += 1;
-  // total.history.push(ms);
-  totals.set(name, total);
-  if (total.sum >= 1000) {
-    const message = `${name}: ${(total.sum / 1000).toFixed(2)} [${(
-      total.sum /
-      (1000 * total.count)
-    ).toFixed(2)}]`;
-    logInfo('api/shape/endTimer', message);
-    if (config?.api?.shape?.endTimer?.md) {
-      shape = shape.md(message);
+const ofPolygons = (...polygons) => {
+  const out = [];
+  for (const polygon of polygons) {
+    if (polygon instanceof Array) {
+      out.push({ points: polygon });
+    } else if (polygon instanceof Shape) {
+      out.push({ points: polygon.toPoints() });
     }
   }
-  return shape;
+  return Shape.fromPolygons(out);
 };
 
-Shape.registerMethod('endTimer', endTimer);
+const Polyhedron = (...args) => ofPolygons(...args);
 
-const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
+Polyhedron.ofPointPaths = ofPointPaths;
 
-Shape.prototype.Empty = Shape.shapeMethod(Empty);
+Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
-const X$4 = 0;
-const Y$4 = 1;
+const X$5 = 0;
+const Y$5 = 1;
 const Z$5 = 2;
 
-Shape.registerReifier('Box', (geometry) => {
-  const corner1 = getCorner1(geometry);
-  const corner2 = getCorner2(geometry);
-  const left = corner1[X$4];
-  const right = corner2[X$4];
-  const front = corner1[Y$4];
-  const back = corner2[Y$4];
-  const top = corner2[Z$5];
-  const bottom = corner1[Z$5];
+const reifyBox = (geometry) => {
+  const build = () => {
+    const corner1 = getCorner1(geometry);
+    const corner2 = getCorner2(geometry);
 
-  if (left <= right || front <= back) {
-    return Empty();
-  }
+    const left = corner1[X$5];
+    const right = corner2[X$5];
 
-  const a = Shape.fromPath([
-    [left, back, bottom],
-    [right, back, bottom],
-    [right, front, bottom],
-    [left, front, bottom],
-  ]);
-  const b = a.fill();
-  const c = b.ex(top, bottom);
-  const d = c.orient2({
-    center: negate(getAt(geometry)),
-    from: getFrom(geometry),
-    at: getTo(geometry),
-  });
-  return d;
-});
+    const front = corner1[Y$5];
+    const back = corner2[Y$5];
+
+    const bottom = corner1[Z$5];
+    const top = corner2[Z$5];
+
+    if (top === bottom) {
+      if (left === right) {
+        if (front === back) {
+          return Point(bottom, left, front);
+        } else {
+          return Edge(Point(left, front, bottom), Point(right, back, top));
+        }
+      } else {
+        if (front === back) {
+          return Edge(Point(left, front, bottom), Point(right, back, top));
+        } else {
+          // left !== right && front !== back
+          return Face(
+            Point(left, back, bottom),
+            Point(left, front, bottom),
+            Point(right, front, top),
+            Point(right, back, top)
+          );
+        }
+      }
+    } else {
+      if (left === right) {
+        if (front === back) {
+          return Edge(Point(left, front, bottom), Point(right, back, top));
+        } else {
+          // top !== bottom && front !== back
+          return Face(
+            Point(right, back, top),
+            Point(right, front, top),
+            Point(right, front, bottom),
+            Point(left, back, bottom)
+          );
+        }
+      } else {
+        if (front === back) {
+          // top !== bottom && left !== right
+          return Face(
+            Point(left, back, top),
+            Point(right, front, top),
+            Point(right, front, bottom),
+            Point(left, back, bottom)
+          );
+        } else {
+          // top !== bottom && front !== back && left !== right
+          return Polyhedron(
+            Face(
+              Point(left, back, top),
+              Point(left, front, top),
+              Point(right, front, top),
+              Point(right, back, top)
+            ),
+            Face(
+              Point(left, back, bottom),
+              Point(left, front, bottom),
+              Point(right, front, bottom),
+              Point(right, back, bottom)
+            ),
+            Face(
+              Point(left, back, bottom),
+              Point(left, front, bottom),
+              Point(left, front, top),
+              Point(left, back, top)
+            ),
+            Face(
+              Point(right, back, bottom),
+              Point(right, front, bottom),
+              Point(right, front, top),
+              Point(right, back, top)
+            ),
+            Face(
+              Point(left, back, bottom),
+              Point(right, back, bottom),
+              Point(right, back, top),
+              Point(left, back, top)
+            ),
+            Face(
+              Point(left, front, bottom),
+              Point(right, front, bottom),
+              Point(right, front, top),
+              Point(left, front, top)
+            )
+          );
+        }
+      }
+    }
+  };
+
+  return build().tag(...geometry.tags);
+};
+
+Shape.registerReifier('Box', reifyBox);
 
 const Box = (x, y = x, z = 0) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {
     if (x[0] < x[1]) {
-      c1[X$4] = x[1];
-      c2[X$4] = x[0];
+      c1[X$5] = x[1];
+      c2[X$5] = x[0];
     } else {
-      c1[X$4] = x[0];
-      c2[X$4] = x[1];
+      c1[X$5] = x[0];
+      c2[X$5] = x[1];
     }
   } else {
-    c1[X$4] = x / 2;
-    c2[X$4] = x / -2;
+    c1[X$5] = x / 2;
+    c2[X$5] = x / -2;
   }
   if (y instanceof Array) {
     if (y[0] < y[1]) {
-      c1[Y$4] = y[1];
-      c2[Y$4] = y[0];
+      c1[Y$5] = y[1];
+      c2[Y$5] = y[0];
     } else {
-      c1[Y$4] = y[0];
-      c2[Y$4] = y[1];
+      c1[Y$5] = y[0];
+      c2[Y$5] = y[1];
     }
   } else {
-    c1[Y$4] = y / 2;
-    c2[Y$4] = y / -2;
+    c1[Y$5] = y / 2;
+    c2[Y$5] = y / -2;
   }
   if (z instanceof Array) {
     if (z[0] < z[1]) {
@@ -1214,21 +1243,6 @@ const Box = (x, y = x, z = 0) => {
 };
 
 Shape.prototype.Box = Shape.shapeMethod(Box);
-
-const isDefined$3 = (value) => value;
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedGroup(
-      {},
-      ...Shape.toShapes(shapes.filter(isDefined$3)).map((shape) =>
-        shape.toGeometry()
-      )
-    )
-  ).tag('editType:Group');
-
-Shape.prototype.Group = Shape.shapeMethod(Group);
-Shape.Group = Group;
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -2665,8 +2679,8 @@ const Hershey = ofSize;
 
 const MIN = 0;
 const MAX = 1;
-const X$3 = 0;
-const Y$3 = 1;
+const X$4 = 0;
+const Y$4 = 1;
 
 const getItemNames = (geometry) => {
   const names = new Set();
@@ -2740,15 +2754,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$3] * 2),
-        Math.abs(packSize[MIN][X$3] * 2)
+        Math.abs(packSize[MAX][X$4] * 2),
+        Math.abs(packSize[MIN][X$4] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$3] * 2),
-        Math.abs(packSize[MIN][Y$3] * 2)
+        Math.abs(packSize[MAX][Y$4] * 2),
+        Math.abs(packSize[MIN][Y$4] * 2)
       ) +
       pageMargin * 2;
     return Shape.fromGeometry(
@@ -2760,15 +2774,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$3] * 2),
-        Math.abs(packSize[MIN][X$3] * 2)
+        Math.abs(packSize[MAX][X$4] * 2),
+        Math.abs(packSize[MIN][X$4] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$3] * 2),
-        Math.abs(packSize[MIN][Y$3] * 2)
+        Math.abs(packSize[MAX][Y$4] * 2),
+        Math.abs(packSize[MIN][Y$4] * 2)
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
@@ -2793,8 +2807,8 @@ const Page = (
     if (packSize.length === 0) {
       throw Error('Packing failed');
     }
-    const pageWidth = Math.max(1, packSize[MAX][X$3] - packSize[MIN][X$3]);
-    const pageLength = Math.max(1, packSize[MAX][Y$3] - packSize[MIN][Y$3]);
+    const pageWidth = Math.max(1, packSize[MAX][X$4] - packSize[MIN][X$4]);
+    const pageLength = Math.max(1, packSize[MAX][Y$4] - packSize[MIN][Y$4]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of content.toDisjointGeometry().content[0].content) {
@@ -2831,8 +2845,8 @@ const Page = (
     }
     // FIX: Using content.size() loses the margin, which is a problem for repacking.
     // Probably page plans should be generated by pack and count toward the size.
-    const pageWidth = packSize[MAX][X$3] - packSize[MIN][X$3];
-    const pageLength = packSize[MAX][Y$3] - packSize[MIN][Y$3];
+    const pageWidth = packSize[MAX][X$4] - packSize[MIN][X$4];
+    const pageLength = packSize[MAX][Y$4] - packSize[MIN][Y$4];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of content.toDisjointGeometry().content[0].content) {
@@ -2884,12 +2898,16 @@ const fix =
 Shape.registerMethod('fix', fix);
 
 const each =
-  (op = (leafs, shape) => leafs) =>
-  (shape) =>
-    op(
-      getLeafs(shape.toGeometry()).map((leaf) => Shape.fromGeometry(leaf)),
-      shape
+  (
+    leafOp = (leaf) => leaf,
+    groupOp = (leafs, shape) => Shape.Group(...leafs)
+  ) =>
+  (shape) => {
+    const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
+      leafOp(Shape.fromGeometry(leaf))
     );
+    return groupOp(leafShapes, shape);
+  };
 Shape.registerMethod('each', each);
 
 const eachPoint = (operation) => (shape) =>
@@ -2902,10 +2920,10 @@ const edit = (editId) => (shape) =>
 
 Shape.registerMethod('edit', edit);
 
-const Point = (...args) =>
-  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
+const normal = () => (shape) =>
+  Shape.fromGeometry(computeNormal(shape.toGeometry()));
 
-Shape.prototype.Point = Shape.shapeMethod(Point);
+Shape.registerMethod('normal', normal);
 
 const extrudeAlong =
   (direction, ...extents) =>
@@ -2926,7 +2944,7 @@ const extrudeAlong =
       }
       extrusions.push(
         Shape.fromGeometry(
-          extrude$1(
+          extrude(
             shape.toGeometry(),
             height,
             depth,
@@ -2938,14 +2956,25 @@ const extrudeAlong =
     return Shape.Group(...extrusions);
   };
 
+const e = (...extents) => extrudeAlong(normal(), ...extents);
+
 Shape.registerMethod('extrudeAlong', extrudeAlong);
+Shape.registerMethod('e', e);
 
-const extrude = (...extents) => extrudeAlong(Point(0, 0, 1), ...extents);
+const extrudeX = (...extents) =>
+  extrudeAlong(Point(1, 0, 0), ...extents);
+const extrudeY = (...extents) =>
+  extrudeAlong(Point(0, 1, 0), ...extents);
+const extrudeZ = (...extents) =>
+  extrudeAlong(Point(0, 0, 1), ...extents);
 
-const ex = extrude;
+const ex = extrudeX;
+const ey = extrudeY;
+const ez = extrudeZ;
 
-Shape.registerMethod('extrude', extrude);
 Shape.registerMethod('ex', ex);
+Shape.registerMethod('ey', ey);
+Shape.registerMethod('ez', ez);
 
 const extrudeToPlane =
   (
@@ -2973,7 +3002,10 @@ Shape.registerMethod('faces', faces);
 const fill = () => (shape) =>
   Shape.fromGeometry(fill$1(shape.toGeometry()));
 
+const f = fill;
+
 Shape.registerMethod('fill', fill);
+Shape.registerMethod('f', f);
 
 const withFill = () => (shape) => shape.group(shape.fill());
 Shape.registerMethod('withFill', withFill);
@@ -3007,47 +3039,15 @@ const fitTo =
 
 Shape.registerMethod('fitTo', fitTo);
 
-const fuse = () => (shape) => {
-  const geometry = shape.toGeometry();
-  return fromGeometry(union(empty({ tags: geometry.tags }), geometry));
-};
-Shape.registerMethod('fuse', fuse);
-
-const get =
-  (...tags) =>
+const fuse =
+  ({ isPlanar } = {}) =>
   (shape) => {
-    const isMatch = oneOfTagMatcher(tags, 'item');
-    const picks = [];
-    const walk = (geometry, descend) => {
-      const { tags, type } = geometry;
-      if (type === 'group') {
-        return descend();
-      }
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
-          break;
-        }
-      }
-      if (type !== 'item') {
-        return descend();
-      }
-    };
     const geometry = shape.toGeometry();
-    if (geometry.type === 'item') {
-      // FIX: Can we make this less magical?
-      // This allows constructions like s.get('a').get('b')
-      visit(geometry.content[0], walk);
-    } else {
-      visit(geometry, walk);
-    }
-    return Group(...picks);
+    return fromGeometry(
+      union(empty({ tags: geometry.tags, isPlanar }), geometry)
+    );
   };
-
-const g = get;
-
-Shape.registerMethod('get', get);
-Shape.registerMethod('g', get);
+Shape.registerMethod('fuse', fuse);
 
 const noOp = (shape) => shape;
 const zero = (segment) => 0;
@@ -3159,42 +3159,7 @@ const withInset = (initial, step, limit) => (shape) =>
 Shape.registerMethod('inset', inset);
 Shape.registerMethod('withInset', withInset);
 
-const keep =
-  (...tags) =>
-  (shape) => {
-    const matchers = tags.map((tag) => tagMatcher(tag, 'user'));
-    const isMatch = (tags, tag) => {
-      for (const matcher of matchers) {
-        for (const tag of tags) {
-          if (matcher(tag)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-    const op = (geometry, descend) => {
-      switch (geometry.type) {
-        case 'group':
-        case 'layout':
-          return descend();
-        default: {
-          // Should this pass through item boundaries?
-          const { tags = [] } = geometry;
-          if (isMatch(tags)) {
-            if (geometry.type === 'item') {
-              return geometry;
-            } else {
-              return descend();
-            }
-          } else {
-            return Shape.fromGeometry(geometry).void().toGeometry();
-          }
-        }
-      }
-    };
-    return Shape.fromGeometry(rewrite(shape.toGeometry(), op));
-  };
+const keep = (tag) => (shape) => shape.on(getNot(tag), voidFn());
 
 Shape.registerMethod('keep', keep);
 
@@ -3204,11 +3169,20 @@ const loadGeometry = async (
   path,
   { otherwise = fromUndefined } = {}
 ) => {
+  logInfo('api/shape/loadGeometry', path);
   const data = await read(path);
   if (data === undefined) {
     return otherwise();
   } else {
     return Shape.fromGeometry(data);
+  }
+};
+
+const loadGeometryNonblocking = (path) => {
+  logInfo('api/shape/loadGeometryNonblocking', path);
+  const geometry = readNonblocking(path);
+  if (geometry) {
+    return Shape.fromGeometry(geometry);
   }
 };
 
@@ -3247,8 +3221,8 @@ const toText = (value) => {
 const log = (value, level) => {
   const text = toText(value);
   const log = { text, level };
-  const hash = hashSum(log);
-  emit({ log, hash });
+  const hash$1 = hash(log);
+  emit({ log, hash: hash$1 });
   return log$1({ op: 'text', text, level });
 };
 
@@ -3256,8 +3230,8 @@ const logOp = (shape, op) => {
   const text = String(op(shape));
   const level = 'serious';
   const log = { text, level };
-  const hash = hashSum(log);
-  emit({ log, hash });
+  const hash$1 = hash(log);
+  emit({ log, hash: hash$1 });
   return log$1({ op: 'text', text });
 };
 
@@ -3281,10 +3255,18 @@ const loop =
 
 Shape.registerMethod('loop', loop);
 
+const overlay = () => (shape) =>
+  Shape.fromGeometry(hasShowOverlay(shape.toGeometry()));
+
+Shape.registerMethod('overlay', overlay);
+
 const mask =
   (...args) =>
   (shape) =>
-    shape.and(...args.map((arg) => Shape.toShape(arg, shape).void()));
+    Group(
+      ...args.map((arg) => Shape.toShape(arg, shape).void()),
+      Shape.fromGeometry(hasTypeMasked(shape.toGeometry()))
+    );
 
 Shape.registerMethod('mask', mask);
 
@@ -3329,6 +3311,25 @@ Shape.registerMethod('xyz', xyz);
 
 Shape.registerMethod('move', move);
 
+const moveAlong =
+  (direction, ...offsets) =>
+  (shape) => {
+    direction = shape.toCoordinate(direction);
+    offsets = offsets.map((extent) => Shape.toValue(extent, shape));
+    offsets.sort((a, b) => a - b);
+    const moves = [];
+    while (offsets.length > 0) {
+      const offset = offsets.pop();
+      moves.push(shape.move(scale$1(offset, direction)));
+    }
+    return Shape.Group(...moves);
+  };
+
+const m = (...offsets) => moveAlong(normal(), ...offsets);
+
+Shape.registerMethod('m', m);
+Shape.registerMethod('moveAlong', moveAlong);
+
 // FIX: This is probably the wrong approach to moving to a particular location.
 const moveTo =
   (x = 0, y = 0, z = 0) =>
@@ -3360,11 +3361,6 @@ Shape.registerMethod('moveTo', moveTo);
 
 const noop = () => (shape) => shape;
 
-const normal = () => (shape) =>
-  Shape.fromGeometry(computeNormal(shape.toGeometry()));
-
-Shape.registerMethod('normal', normal);
-
 const noVoid = (tags, select) => (shape) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
@@ -3390,7 +3386,10 @@ Shape.registerMethod('notColor', notColor);
 const nth =
   (...ns) =>
   (shape) => {
-    const candidates = shape.each();
+    const candidates = shape.each(
+      (leaf) => leaf,
+      (leafs) => leafs
+    );
     return Group(...ns.map((n) => candidates[n]));
   };
 
@@ -3419,7 +3418,7 @@ const on =
     // FIX: This needs to walk through items.
     const leafs = getLeafs(selection.toGeometry());
     const walk = (geometry, descend) => {
-      if (geometry.type === 'item' && leafs.includes(geometry)) {
+      if (leafs.includes(geometry)) {
         // This is a target.
         const global = geometry.matrix;
         const local = invertTransform(global);
@@ -3451,8 +3450,8 @@ const withOp =
 Shape.registerMethod('op', op);
 Shape.registerMethod('withOp', withOp);
 
-const X$2 = 0;
-const Y$2 = 1;
+const X$3 = 0;
+const Y$3 = 1;
 const Z$4 = 2;
 
 // These are all absolute positions in the world.
@@ -3479,7 +3478,7 @@ const orient =
     if (squaredLength(x) === 0) {
       // u and z are parallel
       if (Math.abs(u[Z$4]) === 1) {
-        z[X$2] += 0.0001;
+        z[X$3] += 0.0001;
       } else {
         z[Z$4] += 0.0001;
       }
@@ -3489,16 +3488,16 @@ const orient =
     x = normalize(x);
     let y = cross(z, x);
     const lookAt = [
-      x[X$2],
-      x[Y$2],
+      x[X$3],
+      x[Y$3],
       x[Z$4],
       0,
-      y[X$2],
-      y[Y$2],
+      y[X$3],
+      y[Y$3],
       y[Z$4],
       0,
-      z[X$2],
-      z[Y$2],
+      z[X$3],
+      z[Y$3],
       z[Z$4],
       0,
       0,
@@ -3513,30 +3512,6 @@ const orient =
   };
 
 Shape.registerMethod('orient', orient);
-
-// Deprecated
-const orient2 =
-  ({
-    center = [0, 0, 0],
-    facing = [0, 0, 1],
-    at = [0, 0, 0],
-    from = [0, 0, 0],
-  }) =>
-  (shape) => {
-    const normalizedFacing = normalize(facing);
-    const normalizedAt = normalize(subtract(at, from));
-
-    const angle =
-      (Math.acos(dot(normalizedFacing, normalizedAt)) * 180) / Math.PI;
-    const axis = normalize(cross(normalizedFacing, normalizedAt));
-
-    return shape
-      .move(...negate(center))
-      .rotate(angle, axis)
-      .move(...from);
-  };
-
-Shape.registerMethod('orient2', orient2);
 
 const pack =
   ({
@@ -3670,12 +3645,20 @@ Shape.registerMethod('rz', rz);
 const rotateZ = rz;
 Shape.registerMethod('rotateZ', rz);
 
-const saveGeometry = async (path, shape) =>
-  Shape.fromGeometry(await write(shape.toGeometry(), path));
+const saveGeometry = async (path, shape) => {
+  logInfo('api/shape/saveGeometry', path);
+  return Shape.fromGeometry(await write(path, shape.toGeometry()));
+};
+
+const saveGeometryNonblocking = (path, shape) => {
+  logInfo('api/shape/saveGeometryNonblocking', path);
+  return Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
+};
 
 const scale =
   (x = 1, y = x, z = y) =>
   (shape) => {
+    [x = 1, y = x, z] = shape.toCoordinate(x, y, z);
     const negatives = (x < 0) + (y < 0) + (z < 0);
     if (negatives % 2) {
       // Compensate for inversion.
@@ -3686,6 +3669,36 @@ const scale =
   };
 
 Shape.registerMethod('scale', scale);
+
+const scaleX =
+  (...x) =>
+  (shape) =>
+    Shape.Group(...shape.toFlatValues(x).map((x) => scale(x, 1, 1)(shape)));
+
+const sx = scaleX;
+
+Shape.registerMethod('scaleX', scaleX);
+Shape.registerMethod('sx', sx);
+
+const scaleY =
+  (...y) =>
+  (shape) =>
+    Shape.Group(...shape.toFlatValues(y).map((y) => scale(1, y, 1)(shape)));
+
+const sy = scaleY;
+
+Shape.registerMethod('scaleY', scaleY);
+Shape.registerMethod('sy', sy);
+
+const scaleZ =
+  (...z) =>
+  (shape) =>
+    Shape.Group(...shape.toFlatValues(z).map((z) => scale(1, 1, z)(shape)));
+
+const sz = scaleZ;
+
+Shape.registerMethod('scaleZ', scaleZ);
+Shape.registerMethod('sz', sz);
 
 const scaleToFit =
   (x = 1, y = x, z = y) =>
@@ -3700,6 +3713,13 @@ const scaleToFit =
   };
 
 Shape.registerMethod('scaleToFit', scaleToFit);
+
+const simplify =
+  ({ ratio = 0.25, eps } = {}) =>
+  (shape) =>
+    Shape.fromGeometry(simplify$1(shape.toGeometry(), { ratio, eps }));
+
+Shape.registerMethod('simplify', simplify);
 
 const baseSection =
   ({ profile = false } = {}, orientations) =>
@@ -3755,13 +3775,39 @@ Shape.registerMethod('separate', separate);
 
 const EPSILON = 1e-5;
 
+const maybeApply = (value, shape) => {
+  if (value instanceof Function) {
+    return value(shape);
+  } else {
+    return value;
+  }
+};
+
+// This is getting a bit excessively magical.
 const seq =
-  (
-    op = (n) => n,
-    { from = 0, to = 1, upto, downto, by = 1, index = false } = {}
-  ) =>
+  (...args) =>
   (shape) => {
-    const numbers = [];
+    let op;
+    let groupOp;
+    let spec = {};
+    for (const arg of args) {
+      if (arg instanceof Function) {
+        if (!op) {
+          op = arg;
+        } else if (!groupOp) {
+          groupOp = arg;
+        }
+      } else if (arg instanceof Object) {
+        Object.assign(spec, arg);
+      }
+    }
+    if (!op) {
+      op = (n) => n;
+    }
+    if (!groupOp) {
+      groupOp = (...results) => results;
+    }
+    let { from = 0, to = 1, upto, downto, by = 1, index = false } = spec;
 
     from = Shape.toValue(from, shape);
     to = Shape.toValue(to, shape);
@@ -3787,11 +3833,22 @@ const seq =
       throw Error('seq: Expects by != 0');
     }
 
+    const results = [];
     for (let number = from, nth = 0; consider(number); number += by, nth++) {
-      numbers.push(index ? op(number, nth) : op(number));
+      results.push(
+        index
+          ? maybeApply(op(number, nth), shape)
+          : maybeApply(op(number), shape)
+      );
     }
-    return numbers;
+    return groupOp(...results);
   };
+
+Shape.registerMethod('seq', seq);
+
+const serialize = () => (shape) => serialize$1(shape.toGeometry());
+
+Shape.registerMethod('serialize', serialize);
 
 const smooth =
   (options = {}) =>
@@ -3800,8 +3857,8 @@ const smooth =
 
 Shape.registerMethod('smooth', smooth);
 
-const X$1 = 0;
-const Y$1 = 1;
+const X$2 = 0;
+const Y$2 = 1;
 const Z$3 = 2;
 
 const size =
@@ -3809,8 +3866,8 @@ const size =
   (shape) => {
     const geometry = shape.toConcreteGeometry();
     const [min, max] = measureBoundingBox(geometry);
-    const length = max[X$1] - min[X$1];
-    const width = max[Y$1] - min[Y$1];
+    const length = max[X$2] - min[X$2];
+    const width = max[Y$2] - min[Y$2];
     const height = max[Z$3] - min[Z$3];
     const center = scale$1(0.5, add$1(min, max));
     const radius = distance(center, max);
@@ -3840,7 +3897,7 @@ const table =
   (shape) => {
     const uniqueId = generateUniqueId;
     const open = { open: { type: 'table', rows, columns, uniqueId } };
-    emit({ open, hash: hashSum(open) });
+    emit({ open, hash: computeHash(open) });
     for (let cell of cells) {
       if (cell instanceof Function) {
         cell = cell(shape);
@@ -3850,7 +3907,7 @@ const table =
       }
     }
     const close = { close: { type: 'table', rows, columns, uniqueId } };
-    emit({ close, hash: hashSum(close) });
+    emit({ close, hash: computeHash(close) });
     return shape;
   };
 
@@ -4135,18 +4192,13 @@ const view =
 
 Shape.registerMethod('view', view);
 
-const voidFn = () => (shape) =>
-  Shape.fromGeometry(hasTypeVoid(shape.toGeometry()));
-
-Shape.registerMethod('void', voidFn);
-
 const voidIn = (other) => (shape) =>
   Shape.toShape(other, shape).fitTo(shape.void());
 
 Shape.registerMethod('voidIn', voidIn);
 
-const X = 0;
-const Y = 1;
+const X$1 = 0;
+const Y$1 = 1;
 const Z$1 = 2;
 
 const floor = (value, resolution) =>
@@ -4174,8 +4226,8 @@ const voxels =
     const max = ceilPoint(boxMax, resolution);
     const polygons = [];
     withQuery(geometry, ({ isInteriorPoint }) => {
-      for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-        for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
+      for (let x = min[X$1] - offset; x <= max[X$1] + offset; x += resolution) {
+        for (let y = min[Y$1] - offset; y <= max[Y$1] + offset; y += resolution) {
           for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
             const state = isInteriorPoint(x, y, z);
             if (state !== isInteriorPoint(x + resolution, y, z)) {
@@ -4224,17 +4276,17 @@ const Voxels = (...points) => {
     Shape.toCoordinate(undefined, point)
   )) {
     index.add(key(x, y, z));
-    max[X] = Math.max(x + 1, max[X]);
-    max[Y] = Math.max(y + 1, max[Y]);
+    max[X$1] = Math.max(x + 1, max[X$1]);
+    max[Y$1] = Math.max(y + 1, max[Y$1]);
     max[Z$1] = Math.max(z + 1, max[Z$1]);
-    min[X] = Math.min(x - 1, min[X]);
-    min[Y] = Math.min(y - 1, min[Y]);
+    min[X$1] = Math.min(x - 1, min[X$1]);
+    min[Y$1] = Math.min(y - 1, min[Y$1]);
     min[Z$1] = Math.min(z - 1, min[Z$1]);
   }
   const isInteriorPoint = (x, y, z) => index.has(key(x, y, z));
   const polygons = [];
-  for (let x = min[X]; x <= max[X]; x++) {
-    for (let y = min[Y]; y <= max[Y]; y++) {
+  for (let x = min[X$1]; x <= max[X$1]; x++) {
+    for (let y = min[Y$1]; y <= max[Y$1]; y++) {
       for (let z = min[Z$1]; z <= max[Z$1]; z++) {
         const state = isInteriorPoint(x, y, z);
         if (state !== isInteriorPoint(x + 1, y, z)) {
@@ -4367,79 +4419,176 @@ const Spiral = (
 
 Shape.prototype.Spiral = Shape.shapeMethod(Spiral);
 
+const X = 0;
+const Y = 1;
 const Z = 2;
 
-Shape.registerReifier('Arc', (geometry) => {
-  let { start = 0, end = 1 } = getAngle(geometry);
+const reifyArc =
+  (axis = Z) =>
+  (geometry) => {
+    let { start = 0, end = 1 } = getAngle(geometry);
 
-  while (start > end) {
-    start -= 1;
-  }
+    while (start > end) {
+      start -= 1;
+    }
 
-  const [scale, middle] = getScale(geometry);
-  const corner1 = getCorner1(geometry);
-  const corner2 = getCorner2(geometry);
-  const top = corner2[Z];
-  const bottom = corner1[Z];
-  const step = 1 / getSides(geometry, 32);
-  const steps = Math.ceil((end - start) / step);
-  const effectiveStep = (end - start) / steps;
+    const [scale, middle] = getScale(geometry);
+    const corner1 = getCorner1(geometry);
+    const corner2 = getCorner2(geometry);
 
-  // FIX: corner1 is not really right.
-  if (end - start === 1) {
-    return Spiral((a) => [[1]], {
-      from: start - 1 / 4,
-      upto: end - 1 / 4,
-      by: effectiveStep,
-    })
-      .scale(...scale)
-      .move(...middle)
-      .close()
-      .fill()
-      .ex(top, bottom)
-      .orient2({
-        at: getAt(geometry),
-        to: getTo(geometry),
+    const left = corner1[X];
+    const right = corner2[X];
+
+    const front = corner1[Y];
+    const back = corner2[Y];
+
+    const bottom = corner1[Z];
+    const top = corner2[Z];
+
+    const step = 1 / getSides(geometry, 32);
+    const steps = Math.ceil((end - start) / step);
+    const effectiveStep = (end - start) / steps;
+
+    let spiral;
+
+    if (end - start === 1) {
+      spiral = Spiral((a) => [[1]], {
+        from: start - 1 / 4,
+        upto: end - 1 / 4,
+        by: effectiveStep,
+      })
+        .close()
+        .fill();
+    } else {
+      spiral = Spiral((a) => [[1]], {
+        from: start - 1 / 4,
+        to: end - 1 / 4,
+        by: effectiveStep,
       });
-  } else {
-    return Spiral((a) => [[1]], {
-      from: start - 1 / 4,
-      to: end - 1 / 4,
-      by: effectiveStep,
-    })
-      .scale(...scale)
-      .move(...middle)
-      .op((s) => (top !== bottom ? s.close().fill().ex(top, bottom) : s))
-      .orient2({
-        center: negate(getAt(geometry)),
-        from: getFrom(geometry),
-        at: getTo(geometry),
-      });
-  }
-});
+    }
 
-const Arc = (x = 1, y = x, z = 0) =>
-  Shape.fromGeometry(taggedPlan({}, { type: 'Arc' })).hasDiameter(x, y, z);
+    switch (axis) {
+      case X: {
+        scale[X] = 1;
+        spiral = spiral
+          .ry(-1 / 4)
+          .scale(scale)
+          .move(middle);
+        if (left !== right) {
+          spiral = spiral.fill().ex(left - middle[X], right - middle[X]);
+        }
+        break;
+      }
+      case Y: {
+        scale[Y] = 1;
+        spiral = spiral
+          .rx(-1 / 4)
+          .scale(scale)
+          .move(middle);
+        if (front !== back) {
+          spiral = spiral.fill().ey(front - middle[Y], back - middle[Y]);
+        }
+        break;
+      }
+      case Z: {
+        scale[Z] = 1;
+        spiral = spiral.scale(scale).move(middle);
+        if (top !== bottom) {
+          spiral = spiral.fill().ez(top - middle[Z], bottom - middle[Z]);
+        }
+        break;
+      }
+    }
+
+    return spiral.tag(...geometry.tags);
+  };
+
+Shape.registerReifier('Arc', reifyArc(Z));
+Shape.registerReifier('ArcX', reifyArc(X));
+Shape.registerReifier('ArcY', reifyArc(Y));
+Shape.registerReifier('ArcZ', reifyArc(Z));
+
+const ArcOp =
+  (type) =>
+  (x = 1, y = x, z = 0) => {
+    const c1 = [0, 0, 0];
+    const c2 = [0, 0, 0];
+    if (x instanceof Array) {
+      if (x[0] < x[1]) {
+        c1[X] = x[1];
+        c2[X] = x[0];
+      } else {
+        c1[X] = x[0];
+        c2[X] = x[1];
+      }
+    } else {
+      c1[X] = x / 2;
+      c2[X] = x / -2;
+    }
+    if (y instanceof Array) {
+      if (y[0] < y[1]) {
+        c1[Y] = y[1];
+        c2[Y] = y[0];
+      } else {
+        c1[Y] = y[0];
+        c2[Y] = y[1];
+      }
+    } else {
+      c1[Y] = y / 2;
+      c2[Y] = y / -2;
+    }
+    if (z instanceof Array) {
+      if (z[0] < z[1]) {
+        c1[Z] = z[1];
+        c2[Z] = z[0];
+      } else {
+        c1[Z] = z[0];
+        c2[Z] = z[1];
+      }
+    } else {
+      c1[Z] = z / 2;
+      c2[Z] = z / -2;
+    }
+    return Shape.fromGeometry(taggedPlan({}, { type }))
+      .hasC1(...c1)
+      .hasC2(...c2);
+  };
+
+const Arc = ArcOp('Arc');
+const ArcX = ArcOp('ArcX');
+const ArcY = ArcOp('ArcY');
+const ArcZ = ArcOp('ArcZ');
 
 Shape.prototype.Arc = Shape.shapeMethod(Arc);
+Shape.prototype.ArcX = Shape.shapeMethod(ArcX);
+Shape.prototype.ArcY = Shape.shapeMethod(ArcY);
+Shape.prototype.ArcZ = Shape.shapeMethod(ArcZ);
 
-const isDefined$2 = (value) => value !== undefined;
+const isDefined = (value) => value !== undefined;
 
 const Assembly = (...shapes) =>
   Shape.fromGeometry(
-    assemble$1(...shapes.filter(isDefined$2).map((shape) => shape.toGeometry()))
+    assemble$1(...shapes.filter(isDefined).map((shape) => shape.toGeometry()))
   );
 
 Shape.prototype.Assembly = Shape.shapeMethod(Assembly);
 
-const isDefined$1 = (value) => value !== undefined;
-
-const Assembly2 = (...shapes) =>
-  Shape.fromGeometry(
-    assemble2(...shapes.filter(isDefined$1).map((shape) => shape.toGeometry()))
-  );
-
-Shape.prototype.Assembly2 = Shape.shapeMethod(Assembly2);
+const Cached = (name, thunk) => {
+  const op = (...args) => {
+    const path = `cached/${name}/${JSON.stringify(args)}`;
+    // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.
+    const cached = loadGeometryNonblocking(path);
+    if (cached) {
+      return cached;
+    }
+    // The read we scheduled last time produced undefined, so we fall through to here.
+    const shape = thunk(...args);
+    // This will schedule a write and throw, then wait for the write to complete, and retry.
+    saveGeometryNonblocking(path, shape);
+    return shape;
+  };
+  return op;
+};
 
 const Hull = (...shapes) => {
   const points = [];
@@ -4478,25 +4627,6 @@ const chainHullMethod = function (...shapes) {
 Shape.prototype.chainHull = chainHullMethod;
 Shape.prototype.ChainedHull = Shape.shapeMethod(ChainedHull);
 
-const isDefined = (value) => value !== undefined;
-
-const DistributedAssembly = async (...shapes) =>
-  Shape.fromGeometry(
-    await distributedAssemble(
-      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.DistributedAssembly = Shape.shapeMethod(DistributedAssembly);
-
-const Edge = (source, target) =>
-  Shape.fromSegments([
-    Shape.toCoordinate(undefined, source),
-    Shape.toCoordinate(undefined, target),
-  ]);
-
-Shape.prototype.Edge = Shape.shapeMethod(Edge);
-
 const Edges = (...segments) =>
   Shape.fromSegments(
     ...Shape.toNestedValues(segments).map(([source, target]) => [
@@ -4506,6 +4636,10 @@ const Edges = (...segments) =>
   );
 
 Shape.prototype.Edges = Shape.shapeMethod(Edges);
+
+const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
+
+Shape.prototype.Empty = Shape.shapeMethod(Empty);
 
 const Hexagon = (x, y, z) => Arc(x, y, z).hasSides(6);
 
@@ -4578,12 +4712,7 @@ Shape.registerReifier('Icosahedron', (geometry) => {
   const a = Shape.fromPolygons(buildRegularIcosahedron());
   const b = a.scale(...scale);
   const c = b.move(...middle);
-  const d = c.orient2({
-    center: negate(getAt(geometry)),
-    from: getFrom(geometry),
-    at: getTo(geometry),
-  });
-  return d;
+  return c;
 });
 
 const Icosahedron = (x = 1, y = x, z = x) =>
@@ -4600,29 +4729,8 @@ const Implicit = (op, options) =>
 
 Shape.prototype.Implicit = Shape.shapeMethod(Implicit);
 
-const fromVec3 = (...points) =>
-  Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
-
-const fromPoints = (...shapes) => {
-  const vec3List = [];
-  for (const shape of shapes) {
-    shape.eachPoint((vec3) => vec3List.push(vec3));
-  }
-  return fromVec3(...vec3List);
-};
-
-const Path = (...points) => fromPoints(...points);
-Path.fromVec3 = fromVec3;
-
-Shape.prototype.Path = Shape.shapeMethod(Path);
-
-const Line = (forward, backward = 0) => {
-  if (backward > forward) {
-    return Path(Point(forward), Point(backward));
-  } else {
-    return Path(Point(backward), Point(forward));
-  }
-};
+const Line = (forward, backward = 0) =>
+  Edge(Point(forward), Point(backward));
 
 Shape.prototype.Line = Shape.shapeMethod(Line);
 
@@ -4659,25 +4767,35 @@ const extrudeSphere =
   };
 
 Shape.registerMethod('extrudeSphere', extrudeSphere);
-Shape.registerMethod('sx', extrudeSphere);
 
 Shape.registerReifier('Orb', (geometry) => {
   const [scale, middle] = getScale(geometry);
   const sides = getSides(geometry, 16);
   return extrudeSphere(1, { sides: 2 + sides })(Arc(2).hasSides(sides * 2))
-    .scale(...scale)
-    .move(...middle)
-    .orient2({
-      center: negate(getAt(geometry)),
-      from: getFrom(geometry),
-      at: getTo(geometry),
-    });
+    .scale(scale)
+    .move(middle);
 });
 
 const Orb = (x = 1, y = x, z = x) =>
   Shape.fromGeometry(taggedPlan({}, { type: 'Orb' })).hasDiameter(x, y, z);
 
 Shape.prototype.Orb = Shape.shapeMethod(Orb);
+
+const fromVec3 = (...points) =>
+  Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+
+const fromPoints = (...shapes) => {
+  const vec3List = [];
+  for (const shape of shapes) {
+    shape.eachPoint((vec3) => vec3List.push(vec3));
+  }
+  return fromVec3(...vec3List);
+};
+
+const Path = (...points) => fromPoints(...points);
+Path.fromVec3 = fromVec3;
+
+Shape.prototype.Path = Shape.shapeMethod(Path);
 
 const Pentagon = (x, y, z) => Arc(x, y, z).hasSides(5);
 
@@ -4686,27 +4804,21 @@ Shape.prototype.Pentagon = Shape.shapeMethod(Pentagon);
 const Polygon = (...points) =>
   Shape.fromClosedPath(
     points.map((point) => Shape.toCoordinate(undefined, point))
-  );
+  ).fill();
 
 Shape.prototype.Polygon = Shape.shapeMethod(Polygon);
-
-const ofPointPaths = (points = [], paths = []) => {
-  const polygons = [];
-  for (const path of paths) {
-    polygons.push({ points: path.map((point) => points[point]) });
-  }
-  return Shape.fromPolygons(polygons);
-};
-
-const Polyhedron = (...args) => ofPointPaths(...args);
-
-Polyhedron.ofPointPaths = ofPointPaths;
-
-Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
 const Septagon = (x, y, z) => Arc(x, y, z).hasSides(7);
 
 Shape.prototype.Septagon = Shape.shapeMethod(Septagon);
+
+const SurfaceMesh = (
+  serializedSurfaceMesh,
+  { isClosed = true, matrix } = {}
+) =>
+  Shape.fromGeometry(
+    taggedGraph({ tags: [], matrix }, { serializedSurfaceMesh, isClosed })
+  );
 
 const Tetragon = (x, y, z) => Arc(x, y, z).hasSides(4);
 
@@ -4964,4 +5076,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, Assembly, Assembly2, Box, ChainedHull, DistributedAssembly, Edge, Edges, Empty, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, drop, each, eachPoint, edit, endTimer, ensurePages, ex, extrude, extrudeAlong, extrudeToPlane, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, orient2, outline, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, section, sectionProfile, separate, seq, size, sketch, smooth, startTimer, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainedHull, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Line, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, abstract, add, addTo, align, and, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutout, defRgbColor, defThreejsMaterial, defTool, define, drop, e, each, eachPoint, edit, ensurePages, ex, extrudeAlong, extrudeToPlane, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, keep, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, play, push, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, top, twist, untag, view, voidFn, voidIn, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

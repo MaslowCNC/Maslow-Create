@@ -1,6 +1,5 @@
 import * as sys from './jsxcad-sys.js';
 import baseApi, { evaluate } from './jsxcad-api.js';
-import { difference, write } from './jsxcad-geometry.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -108,10 +107,10 @@ const agent = async ({
     op
   } = message;
   const {
+    config,
     offscreenCanvas,
     id,
     path,
-    paths,
     workspace,
     script,
     sha = 'master',
@@ -126,60 +125,25 @@ const agent = async ({
 
   try {
     switch (op) {
-      case 'geometry/difference':
-        {
-          const geometries = [];
-
-          if (!workspace) {
-            console.log(`No Workspace`);
-          }
-
-          for (const path of paths) {
-            geometries.push(await sys.readOrWatch(path, {
-              workspace
-            }));
-          }
-
-          const geometry = difference(...geometries);
-          const path = `geometry/${sys.generateUniqueId()}`;
-          await write(geometry, path);
-          return path;
-        }
-
       case 'sys/attach':
         self.id = id;
-        return;
-
-      case 'sys/touch':
-        if (id === undefined || id !== self.id) {
-          // Don't respond to touches from ourself.
-          await sys.touch(path, {
-            workspace,
-            clear: true,
-            broadcast: false
-          });
-        }
-
+        sys.setConfig(config);
         return;
 
       case 'app/staticView':
-        sys.info('Load Geometry');
         const geometry = await sys.readOrWatch(path, {
           workspace
         });
         const {
           staticView
         } = await import('./jsxcad-ui-threejs.js');
-        sys.info('Render');
         await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
           canvas: offscreenCanvas
         });
-        sys.info('Convert to PNG');
         const blob = await offscreenCanvas.convertToBlob({
           type: 'image/png'
         });
         const dataURL = new FileReaderSync().readAsDataURL(blob);
-        sys.info('Done');
         return dataURL;
 
       case 'app/evaluate':
@@ -230,7 +194,7 @@ const agent = async ({
         throw Error(`Unknown operation ${op}`);
     }
   } catch (error) {
-    sys.info(error.stack);
+    console.log(error.stack);
     throw error;
   }
 }; // We need to start receiving messages immediately, but we're not ready to process them yet.
