@@ -3797,7 +3797,7 @@ const askService = (spec, question, transfer, context) => {
         return Promise.reject(Error('Terminated'));
       };
       if (terminated) {
-        terminate();
+        return terminate();
       }
       const answer = await service.ask(question, transfer);
       return answer;
