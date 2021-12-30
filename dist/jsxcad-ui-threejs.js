@@ -44337,30 +44337,35 @@ const updateUserData = (geometry, scene, userData) => {
         userData.groupChildId = parseInt(tag.substring(13));
       }
     }
+    userData.tags = geometry.tags;
   }
 };
 
 const buildMeshes = async ({
   geometry,
   scene,
-  layer = GEOMETRY_LAYER,
   render,
   definitions,
+  pageSize = [],
 }) => {
   if (geometry === undefined) {
     return;
   }
   const { tags = [] } = geometry;
+  const layer = tags.includes('show:overlay') ? SKETCH_LAYER : GEOMETRY_LAYER;
   let mesh;
   switch (geometry.type) {
+    case 'layout': {
+      const [width, length] = geometry.layout.size;
+      pageSize[0] = width;
+      pageSize[1] = length;
+      break;
+    }
+    case 'sketch':
     case 'displayGeometry':
     case 'group':
-    case 'layout':
     case 'item':
     case 'plan':
-      break;
-    case 'sketch':
-      layer = SKETCH_LAYER;
       break;
     case 'segments': {
       const { segments } = geometry;
@@ -44388,12 +44393,6 @@ const buildMeshes = async ({
     case 'paths': {
       let transparent = false;
       let opacity = 1;
-      if (tags && tags.includes('path/Toolpath')) {
-        // Put toolpaths in the sketch layer.
-        layer = SKETCH_LAYER;
-        opacity = 0.5;
-        transparent = true;
-      }
       const { paths } = geometry;
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
@@ -44588,8 +44587,10 @@ const moveToFit = ({
   fitOffset = 1.2,
   withGrid = false,
   gridLayer = GEOMETRY_LAYER,
+  pageSize = [],
 } = {}) => {
   const { fit = true } = view;
+  const [length = 100, width = 100] = pageSize;
 
   let box;
 
@@ -44600,6 +44601,16 @@ const moveToFit = ({
     if (object instanceof LineSegments || object instanceof Mesh) {
       const objectBox = new Box3();
       objectBox.setFromObject(object);
+      if (
+        !isFinite(objectBox.max.x) ||
+        !isFinite(objectBox.max.y) ||
+        !isFinite(objectBox.max.z) ||
+        !isFinite(objectBox.min.x) ||
+        !isFinite(objectBox.min.y) ||
+        !isFinite(objectBox.min.z)
+      ) {
+        return;
+      }
       if (box) {
         box = box.union(objectBox);
       } else {
@@ -44617,7 +44628,6 @@ const moveToFit = ({
     const x = Math.max(Math.abs(box.min.x), Math.abs(box.max.x));
     const y = Math.max(Math.abs(box.min.y), Math.abs(box.max.y));
     const length = Math.max(x, y);
-    // This is how large we want the smallest grid to be.
     const scale = Math.pow(10, Math.ceil(Math.log10(length)));
     const size = scale;
     {
@@ -44625,7 +44635,7 @@ const moveToFit = ({
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
-      grid.position.set(0, 0, -0.05);
+      grid.position.set(0, 0, -0.1);
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
@@ -44636,30 +44646,30 @@ const moveToFit = ({
       grid.material.transparent = true;
       grid.material.opacity = 0.5;
       grid.rotation.x = -Math.PI / 2;
-      grid.position.set(0, 0, -0.04);
+      grid.position.set(0, 0, -0.05);
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
       scene.add(grid);
     }
-    {
-      const plane = new Mesh(
-        new PlaneGeometry(50, 50),
-        new MeshStandardMaterial({
-          color: 0x00ff00,
-          // depthWrite: false,
-          transparent: true,
-          opacity: 0.25,
-        })
-      );
-      plane.castShadow = false;
-      plane.receiveShadow = true;
-      plane.position.set(0, 0, 0);
-      plane.layers.set(gridLayer);
-      plane.userData.tangible = false;
-      plane.userData.dressing = true;
-      scene.add(plane);
-    }
+  }
+  if (withGrid) {
+    const plane = new Mesh(
+      new PlaneGeometry(length, width),
+      new MeshStandardMaterial({
+        color: 0x00ff00,
+        // depthWrite: false,
+        transparent: true,
+        opacity: 0.25,
+      })
+    );
+    plane.castShadow = false;
+    plane.receiveShadow = true;
+    plane.position.set(0, 0, -0.05);
+    plane.layers.set(gridLayer);
+    plane.userData.tangible = false;
+    plane.userData.dressing = true;
+    scene.add(plane);
   }
 
   if (!fit) {
@@ -44876,11 +44886,14 @@ const orbitDisplay = async (
 
     view = { ...view, fit };
 
+    const pageSize = [];
+
     await buildMeshes({
       geometry,
       scene,
       render,
       definitions,
+      pageSize,
     });
 
     if (!moveToFitDone) {
@@ -44892,6 +44905,7 @@ const orbitDisplay = async (
         scene,
         withGrid,
         gridLayer,
+        pageSize,
       });
     }
 
@@ -44988,9 +45002,11 @@ const staticDisplay = async (
     renderer.render(scene, camera);
   };
 
-  await buildMeshes({ datasets, geometry, scene, definitions });
+  const pageSize = [];
 
-  moveToFit({ datasets, view, camera, scene, withGrid });
+  await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
+
+  moveToFit({ datasets, view, camera, scene, withGrid, pageSize });
 
   render();
 

@@ -15878,15 +15878,7 @@ const toFont = (options = {}, data) => {
         curveSegments: curveSegments,
       })
     )) {
-      group.push(
-        scale(
-          [factor, factor, factor],
-          fromPathsToGraph(
-            {},
-            paths.map((path) => ({ points: path }))
-          )
-        )
-      );
+      group.push(scale([factor, factor, factor], fromPathsToGraph({}, paths)));
     }
     return taggedGroup({}, ...group);
   };

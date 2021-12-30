@@ -1,4 +1,4 @@
-import { askService, touch } from './jsxcad-sys.js';
+import { askService } from './jsxcad-sys.js';
 
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 
@@ -6,9 +6,6 @@ window.bootstrap = async () => {
   const agent = async ({ ask, message }) => {
     const { id, op, path, workspace } = message;
     switch (op) {
-      case 'sys/touch':
-        await touch(path, { workspace, id, clear: true, broadcast: true });
-        return;
       case 'log':
         return;
       default:

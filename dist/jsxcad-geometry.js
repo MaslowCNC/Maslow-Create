@@ -1,8 +1,8 @@
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling, fromXRotation, fromYRotation } from './jsxcad-math-mat4.js';
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, cutClosedSurfaceMeshIncrementally, cutClosedSurfaceMeshSingly, cutClosedSurfaceMeshSinglyRecursive, arrangePathsIntoTriangles, fromPolygonsToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, differenceOfSurfaceMeshes, arrangePaths, disjointClosedSurfaceMeshes, serializeSurfaceMesh, bendSurfaceMesh, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, intersectionOfSurfaceMeshes, SurfaceMeshQuery, insetOfPolygonWithHoles, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, cutSurfaceMeshes, arrangePaths, fromPolygonsToSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, fromSurfaceMeshEmitBoundingBox, disjointSurfaceMeshes, serializeSurfaceMesh, bendSurfaceMesh, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, fromSurfaceMeshToGraph, fromPointsToConvexHullAsSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, intersectionOfSurfaceMeshes, SurfaceMeshQuery, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
-import { read as read$1, write as write$1, generateUniqueId, getWorkspace, deleteFile, info } from './jsxcad-sys.js';
-import { equals, transform as transform$4, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
+import { read as read$1, readNonblocking as readNonblocking$1, write as write$1, writeNonblocking as writeNonblocking$1, generateUniqueId, getWorkspace, remove } from './jsxcad-sys.js';
+import { transform as transform$4, equals, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
 import { canonicalize as canonicalize$7 } from './jsxcad-math-plane.js';
 import { canonicalize as canonicalize$6 } from './jsxcad-math-poly3.js';
 import { cacheRewriteTags, cache, cacheSection } from './jsxcad-cache.js';
@@ -196,16 +196,6 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
-const getClosedGraphs = (geometry) => {
-  const graphs = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'graph' && item.graph.isClosed) {
-      graphs.push(item);
-    }
-  });
-  return graphs;
-};
-
 const getGraphs = (geometry) => {
   const graphs = [];
   eachItem(geometry, (item) => {
@@ -285,218 +275,80 @@ const toSurfaceMesh = (graph) => {
   return surfaceMesh;
 };
 
-const cutVolumeIncrementally = (a, check, cuts) => {
-  if (a.graph.isEmpty) {
-    return a;
+const cut$1 = (targets, sources) => {
+  if (sources.length === 0) {
+    return targets;
   }
-  const result = fromSurfaceMeshLazy(
-    cutClosedSurfaceMeshIncrementally(
-      toSurfaceMesh(a.graph),
-      a.matrix,
-      check,
-      cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
-    )
-  );
-  return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
-};
-
-const cutVolumeSingly = (a, check, cuts) => {
-  if (a.graph.isEmpty) {
-    return a;
-  }
-  const result = fromSurfaceMeshLazy(
-    cutClosedSurfaceMeshSingly(
-      toSurfaceMesh(a.graph),
-      a.matrix,
-      check,
-      cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
-    )
+  targets = targets.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  sources = sources.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  // Reverse the sources to get the same cut order as disjoint.
+  const results = cutSurfaceMeshes(targets, sources.reverse());
+  const cutGeometries = results.map(({ matrix, mesh, tags }) =>
+    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
   );
   deletePendingSurfaceMeshes();
-  return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
+  return cutGeometries;
 };
 
-const cutVolumeSinglyRecursive = (a, check, cuts) => {
-  if (a.graph.isEmpty) {
-    return a;
-  }
-  const result = fromSurfaceMeshLazy(
-    cutClosedSurfaceMeshSinglyRecursive(
-      toSurfaceMesh(a.graph),
-      a.matrix,
-      check,
-      cuts.map(({ graph, matrix }) => ({ mesh: toSurfaceMesh(graph), matrix }))
-    )
-  );
-  return taggedGraph({ tags: a.tags, matrix: a.matrix }, result);
-};
+const rewriteType = (op) => (geometry) =>
+  rewrite(geometry, (geometry, descend) => descend(op(geometry)));
 
-// import { fromPolygons } from './fromPolygons.js';
-// import { toTriangles } from './toTriangles.js';
-
-// Convert an outline graph to a possibly closed surface.
-// export const fill = (graph) => fromPolygons(toTriangles(graph));
-
-const fill$1 = (geometry) => ({
-  ...geometry,
-  graph: { ...geometry.graph, isOutline: true },
-});
-
-const deduplicate = (path) => {
-  const unique = [];
-  let last = path[path.length - 1];
-  for (const point of path) {
-    if (last === null || point === null || !equals(point, last)) {
-      unique.push(point);
-    }
-    last = point;
-  }
-  return unique;
-};
-
-const flip$3 = (path) => {
-  if (path[0] === null) {
-    return [null, ...path.slice(1).reverse()];
+const addType = (type) => (geometry) => {
+  if (geometry.tags.includes(type)) {
+    return undefined;
   } else {
-    return path.slice().reverse();
+    return { tags: [...geometry.tags, type] };
   }
 };
 
-const X$3 = 0;
-const Y$3 = 1;
-
-/**
- * Measure the area of a path as though it were a polygon.
- * A negative area indicates a clockwise path, and a positive area indicates a counter-clock-wise path.
- * See: http://mathworld.wolfram.com/PolygonArea.html
- * @returns {Number} The area the path would have if it were a polygon.
- */
-const measureArea = (path) => {
-  let last = path.length - 1;
-  let current = path[0] === null ? 1 : 0;
-  let twiceArea = 0;
-  for (; current < path.length; last = current++) {
-    twiceArea +=
-      path[last][X$3] * path[current][Y$3] - path[last][Y$3] * path[current][X$3];
+const removeType = (type) => (geometry) => {
+  if (geometry.tags.includes(type)) {
+    return { tags: geometry.tags.filter((tag) => tag !== type) };
+  } else {
+    return undefined;
   }
-  return twiceArea / 2;
 };
 
-const isClockwise = (path) => measureArea(path) < 0;
+const hasNotType = (type) => rewriteType(removeType(type));
+const hasType = (type) => rewriteType(addType(type));
+const isNotType =
+  (type) =>
+  ({ tags }) =>
+    !tags.includes(type);
+const isType =
+  (type) =>
+  ({ tags }) =>
+    tags.includes(type);
 
-const clean = (path) => deduplicate(path);
+const typeMasked = 'type:masked';
+const hasNotTypeMasked = hasNotType(typeMasked);
+const hasTypeMasked = hasType(typeMasked);
+const isNotTypeMasked = isNotType(typeMasked);
+const isTypeMasked = isType(typeMasked);
 
-const orientCounterClockwise = (path) =>
-  isClockwise(path) ? flip$3(path) : path;
+const typeVoid = 'type:void';
+const hasNotTypeVoid = hasNotType(typeVoid);
+const hasTypeVoid = hasType(typeVoid);
+const isNotTypeVoid = isNotType(typeVoid);
+const isTypeVoid = isType(typeVoid);
 
-// This imposes a planar arrangement.
-const fromPaths = ({ tags }, paths, plane = [0, 0, 1, 0]) => {
-  if (plane[0] === 0 && plane[1] === 0 && plane[2] === 0 && plane[3] === 0) {
-    throw Error(`Zero plane`);
-  }
-  const orientedPolygons = [];
-  for (const { points } of arrangePathsIntoTriangles(plane, undefined, paths)) {
-    const exterior = orientCounterClockwise(points);
-    const cleaned = clean(exterior);
-    if (cleaned.length < 3) {
-      continue;
-    }
-    const orientedPolygon = { points: cleaned, plane };
-    orientedPolygons.push(orientedPolygon);
-  }
-  return taggedGraph(
-    { tags },
-    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(orientedPolygons))
-  );
-};
-
-const getFaceablePaths = (geometry) => {
-  const pathsets = [];
-  eachItem(geometry, (item) => {
-    if (item.type !== 'paths') {
-      return;
-    }
-    if (item.tags && item.tags.includes('paths/Wire')) {
-      return;
-    }
-    pathsets.push(item);
-  });
-  return pathsets;
-};
-
-const measureBoundingBox$3 = (geometry) => {
-  if (
-    geometry.cache === undefined ||
-    geometry.cache.boundingBox === undefined
-  ) {
-    if (geometry.cache === undefined) {
-      geometry.cache = {};
-    }
-    const { graph } = geometry;
-    fromSurfaceMeshEmitBoundingBox(
-      toSurfaceMesh(graph),
-      geometry.matrix,
-      (xMin, yMin, zMin, xMax, yMax, zMax) => {
-        geometry.cache.boundingBox = [
-          [xMin, yMin, zMin],
-          [xMax, yMax, zMax],
-        ];
-      }
-    );
-  }
-  return geometry.cache.boundingBox;
-};
-
-const iota$1 = 1e-5;
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
-
-// Requires a conservative gap.
-const doesNotOverlap$1 = (a, b) => {
-  if (a.graph.isEmpty || b.graph.isEmpty) {
-    return true;
-  }
-  const [minA, maxA] = measureBoundingBox$3(a);
-  const [minB, maxB] = measureBoundingBox$3(b);
-  if (maxA[X$2] <= minB[X$2] - iota$1 * 10) {
-    return true;
-  }
-  if (maxA[Y$2] <= minB[Y$2] - iota$1 * 10) {
-    return true;
-  }
-  if (maxA[Z$2] <= minB[Z$2] - iota$1 * 10) {
-    return true;
-  }
-  if (maxB[X$2] <= minA[X$2] - iota$1 * 10) {
-    return true;
-  }
-  if (maxB[Y$2] <= minA[Y$2] - iota$1 * 10) {
-    return true;
-  }
-  if (maxB[Z$2] <= minA[Z$2] - iota$1 * 10) {
-    return true;
-  }
-  return false;
-};
-
-const difference$1 = (a, b) => {
-  if (a.graph.isEmpty || b.graph.isEmpty) {
-    return a;
-  }
-  if (doesNotOverlap$1(a, b)) {
-    return a;
-  }
-  const result = fromSurfaceMeshLazy(
-    differenceOfSurfaceMeshes(
-      toSurfaceMesh(a.graph),
-      a.matrix,
-      toSurfaceMesh(b.graph),
-      b.matrix
-    )
-  );
-  return taggedGraph({ tags: a.tags }, result);
-};
+const typeWire = 'type:wire';
+const hasNotTypeWire = hasNotType(typeWire);
+const hasTypeWire = hasType(typeWire);
+const isNotTypeWire = isNotType(typeWire);
+const isTypeWire = isType(typeWire);
 
 const registry = new Map();
 
@@ -527,8 +379,8 @@ const reify = (geometry) => {
             );
           }
           const reified = reifier(geometry);
-          geometry.content.push(reified);
-          return descend();
+          // We can't share the reification since things like tags applied to the plan need to propagate separately.
+          return descend({ content: [reified] });
         }
         return geometry;
       }
@@ -728,7 +580,210 @@ const toTransformedGeometry = (geometry) => {
 const toConcreteGeometry = (geometry) =>
   toTransformedGeometry(reify(geometry));
 
-const difference = (geometry, options = {}, ...geometries) => {
+// Masked geometry is cut.
+const collectTargets = (out) => (geometry, descend) => {
+  if (geometry.type === 'graph' && !geometry.graph.isEmpty) {
+    out.push(geometry);
+  }
+  descend();
+};
+
+// Masked geometry doesn't cut.
+const collectRemoves = (out) => (geometry, descend) => {
+  if (
+    geometry.type === 'graph' &&
+    isNotTypeMasked(geometry) &&
+    !geometry.graph.isEmpty
+  ) {
+    out.push(geometry);
+  }
+  descend();
+};
+
+// An alternate disjunction that can be more efficient.
+const cut = (geometry, geometries) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const targetGraphs = [];
+  visit(concreteGeometry, collectTargets(targetGraphs));
+  if (targetGraphs.length === 0) {
+    return geometry;
+  }
+  const removeGraphs = [];
+  for (const geometry of geometries) {
+    visit(toConcreteGeometry(geometry), collectRemoves(removeGraphs));
+  }
+  const resultingGraphs = cut$1(targetGraphs, removeGraphs);
+  const map = new Map();
+  for (let nth = 0; nth < resultingGraphs.length; nth++) {
+    map.set(targetGraphs[nth], resultingGraphs[nth]);
+  }
+  const update = (geometry, descend) => {
+    const cut = map.get(geometry);
+    if (cut) {
+      return cut;
+    } else {
+      return descend();
+    }
+  };
+  return rewrite(concreteGeometry, update);
+};
+
+const fill$1 = (geometry) => ({
+  ...geometry,
+  graph: { ...geometry.graph, isOutline: false },
+});
+
+const deduplicate = (path) => {
+  const unique = [];
+  let last = path[path.length - 1];
+  for (const point of path) {
+    if (last === null || point === null || !equals(point, last)) {
+      unique.push(point);
+    }
+    last = point;
+  }
+  return unique;
+};
+
+const flip$3 = (path) => {
+  if (path[0] === null) {
+    return [null, ...path.slice(1).reverse()];
+  } else {
+    return path.slice().reverse();
+  }
+};
+
+const X$3 = 0;
+const Y$3 = 1;
+
+/**
+ * Measure the area of a path as though it were a polygon.
+ * A negative area indicates a clockwise path, and a positive area indicates a counter-clock-wise path.
+ * See: http://mathworld.wolfram.com/PolygonArea.html
+ * @returns {Number} The area the path would have if it were a polygon.
+ */
+const measureArea = (path) => {
+  let last = path.length - 1;
+  let current = path[0] === null ? 1 : 0;
+  let twiceArea = 0;
+  for (; current < path.length; last = current++) {
+    twiceArea +=
+      path[last][X$3] * path[current][Y$3] - path[last][Y$3] * path[current][X$3];
+  }
+  return twiceArea / 2;
+};
+
+const isClockwise = (path) => measureArea(path) < 0;
+
+const clean = (path) => deduplicate(path);
+
+const orientCounterClockwise = (path) =>
+  isClockwise(path) ? flip$3(path) : path;
+
+// This imposes a planar arrangement.
+const fromPaths = ({ tags }, paths, plane) => {
+  if (!plane) {
+    plane = fitPlaneToPoints(paths.flatMap((points) => points));
+  }
+  if (plane[0] === 0 && plane[1] === 0 && plane[2] === 0 && plane[3] === 0) {
+    throw Error(`Zero plane`);
+  }
+  const polygons = paths.map((path) => ({ points: path }));
+  const orientedPolygons = [];
+  for (const { points } of arrangePathsIntoTriangles(
+    plane,
+    undefined,
+    polygons
+  )) {
+    const exterior = orientCounterClockwise(points);
+    const cleaned = clean(exterior);
+    if (cleaned.length < 3) {
+      continue;
+    }
+    const orientedPolygon = { points: cleaned, plane };
+    orientedPolygons.push(orientedPolygon);
+  }
+  return taggedGraph(
+    { tags },
+    fromSurfaceMeshLazy(fromPolygonsToSurfaceMesh(orientedPolygons))
+  );
+};
+
+const getFaceablePaths = (geometry) => {
+  const pathsets = [];
+  eachItem(geometry, (item) => {
+    if (item.type !== 'paths') {
+      return;
+    }
+    if (item.tags && item.tags.includes('paths/Wire')) {
+      return;
+    }
+    pathsets.push(item);
+  });
+  return pathsets;
+};
+
+const measureBoundingBox$3 = (geometry) => {
+  if (
+    geometry.cache === undefined ||
+    geometry.cache.boundingBox === undefined
+  ) {
+    if (geometry.cache === undefined) {
+      geometry.cache = {};
+    }
+    const { graph } = geometry;
+    fromSurfaceMeshEmitBoundingBox(
+      toSurfaceMesh(graph),
+      geometry.matrix,
+      (xMin, yMin, zMin, xMax, yMax, zMax) => {
+        geometry.cache.boundingBox = [
+          [xMin, yMin, zMin],
+          [xMax, yMax, zMax],
+        ];
+      }
+    );
+  }
+  return geometry.cache.boundingBox;
+};
+
+const iota$1 = 1e-5;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
+
+// Requires a conservative gap.
+const doesNotOverlap$1 = (a, b) => {
+  if (a.graph.isEmpty || b.graph.isEmpty) {
+    return true;
+  }
+  const [minA, maxA] = measureBoundingBox$3(a);
+  const [minB, maxB] = measureBoundingBox$3(b);
+  if (maxA[X$2] <= minB[X$2] - iota$1 * 10) {
+    return true;
+  }
+  if (maxA[Y$2] <= minB[Y$2] - iota$1 * 10) {
+    return true;
+  }
+  if (maxA[Z$2] <= minB[Z$2] - iota$1 * 10) {
+    return true;
+  }
+  if (maxB[X$2] <= minA[X$2] - iota$1 * 10) {
+    return true;
+  }
+  if (maxB[Y$2] <= minA[Y$2] - iota$1 * 10) {
+    return true;
+  }
+  if (maxB[Z$2] <= minA[Z$2] - iota$1 * 10) {
+    return true;
+  }
+  return false;
+};
+
+const difference = (geometry, options = {}, ...geometries) =>
+  cut(geometry, geometries);
+
+/*
+export const difference = (geometry, options = {}, ...geometries) => {
   if (
     !['incremental', 'single', 'single_recursive', 'basic', undefined].includes(
       options.mode
@@ -762,6 +817,7 @@ const difference = (geometry, options = {}, ...geometries) => {
                 check,
                 geometries.flatMap((geometry) => getClosedGraphs(geometry))
               );
+            case 'basic':
             // fall through
           }
         }
@@ -771,15 +827,15 @@ const difference = (geometry, options = {}, ...geometries) => {
         let differenced = geometry;
         for (const geometry of geometries) {
           for (const graph of getGraphs(geometry)) {
-            differenced = difference$1(differenced, graph);
+            differenced = graphDifference(differenced, graph);
           }
           for (const pathsGeometry of getFaceablePaths(geometry)) {
-            differenced = difference$1(
+            differenced = graphDifference(
               differenced,
-              fill$1(
-                fromPaths(
+              fillOutlineGraph(
+                fromPathsToGraph(
                   { tags: pathsGeometry.tags },
-                  pathsGeometry.paths.map((path) => ({ points: path }))
+                  pathsGeometry.paths
                 )
               )
             );
@@ -790,12 +846,7 @@ const difference = (geometry, options = {}, ...geometries) => {
       case 'paths':
         // This will have problems with open paths, but we want to phase this out anyhow.
         return difference(
-          fill$1(
-            fromPaths(
-              { tags },
-              geometry.paths.map((path) => ({ points: path }))
-            )
-          ),
+          fillOutlineGraph(fromPathsToGraph({ tags }, geometry.paths)),
           options,
           ...geometries
         );
@@ -821,29 +872,33 @@ const difference = (geometry, options = {}, ...geometries) => {
 
   return rewrite(toConcreteGeometry(geometry), op);
 };
+*/
 
-const check = true;
+const check = false;
 
 // The stationary pivot comes first.
-const disjointVolumes = (geometries) => {
+const disjoint$1 = (geometries) => {
+  if (geometries.length < 2) {
+    return geometries;
+  }
   const request = [];
   for (const { graph, matrix, tags } of geometries) {
     request.push({ mesh: toSurfaceMesh(graph), matrix, tags });
   }
   const disjointGeometries = [];
-  for (const { matrix, mesh, tags } of disjointClosedSurfaceMeshes(
-    check,
-    request.reverse()
-  )) {
+  const results = disjointSurfaceMeshes(request.reverse(), check);
+  for (const { matrix, mesh, tags } of results) {
     disjointGeometries.push(
       taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
     );
   }
   deletePendingSurfaceMeshes();
-  return disjointGeometries;
+  return disjointGeometries.reverse();
 };
 
 const read = async (path) => read$1(path);
+
+const readNonblocking = (path) => readNonblocking$1(path);
 
 const taggedGroup = ({ tags = [], matrix }, ...content) => {
   if (content.some((value) => !value)) {
@@ -921,7 +976,7 @@ const toDisjointGeometry = (geometry) => toConcreteGeometry(geometry);
 const toVisiblyDisjointGeometry = (geometry) =>
   toDisjointGeometry(geometry);
 
-const write = async (geometry, path) => {
+const write = async (path, geometry) => {
   const disjointGeometry = toDisjointGeometry(geometry);
   // Ensure that the geometry carries a hash before saving.
   hash(disjointGeometry);
@@ -930,9 +985,18 @@ const write = async (geometry, path) => {
   return preparedGeometry;
 };
 
+const writeNonblocking = (path, geometry) => {
+  const disjointGeometry = toDisjointGeometry(geometry);
+  // Ensure that the geometry carries a hash before saving.
+  hash(disjointGeometry);
+  const preparedGeometry = prepareForSerialization(disjointGeometry);
+  writeNonblocking$1(path, preparedGeometry);
+  return preparedGeometry;
+};
+
 /* global self */
 
-const disjoint = (geometries) => {
+const disjoint2 = (geometries) => {
   geometries = [...geometries];
   for (let sup = geometries.length - 1; sup >= 0; sup--) {
     for (let sub = geometries.length - 1; sub > sup; sub--) {
@@ -943,27 +1007,28 @@ const disjoint = (geometries) => {
 };
 
 // An alternate disjunction that can be more efficient.
-const disjoint2 = (geometries) => {
+const disjoint = (geometries) => {
   // We need to determine the linearization of geometry by type, then rewrite
   // with the corresponding disjunction.
   const concreteGeometries = [];
   for (const geometry of geometries) {
     concreteGeometries.push(toConcreteGeometry(geometry));
   }
-  // For now we restrict ourselves to graph volumes.
-  const originalVolumes = [];
+  // For now we restrict ourselves to graphs.
+  const originalGraphs = [];
   const collect = (geometry, descend) => {
-    if (geometry.type === 'graph' && geometry.graph.isClosed) {
-      originalVolumes.push(geometry);
+    if (geometry.type === 'graph') {
+      originalGraphs.push(geometry);
     }
+    descend();
   };
   for (const geometry of concreteGeometries) {
     visit(geometry, collect);
   }
-  const disjointedVolumes = disjointVolumes(originalVolumes);
+  const disjointedGraphs = disjoint$1(originalGraphs);
   const map = new Map();
-  for (let nth = 0; nth < disjointedVolumes.length; nth++) {
-    map.set(originalVolumes[nth], disjointedVolumes[nth]);
+  for (let nth = 0; nth < disjointedGraphs.length; nth++) {
+    map.set(originalGraphs[nth], disjointedGraphs[nth]);
   }
   const update = (geometry, descend) => {
     const disjointed = map.get(geometry);
@@ -1005,10 +1070,10 @@ const distributedDisjoint = async (geometries) => {
   }
   // Schedule cleanup for the temporary paths.
   for (const path of paths) {
-    deleteFile({}, path);
+    remove(path, {});
   }
   for (const path of disjointPaths) {
-    deleteFile({}, path);
+    remove(path, {});
   }
   return taggedGroup({}, ...disjointGeometries);
 };
@@ -1037,6 +1102,7 @@ const op =
       segments = doNothing,
       triangles = doNothing,
       points = doNothing,
+      paths = doNothing,
     },
     method = rewrite
   ) =>
@@ -1051,6 +1117,8 @@ const op =
           return triangles(geometry, ...args);
         case 'points':
           return points(geometry, ...args);
+        case 'paths':
+          return paths(geometry, ...args);
         case 'plan':
           reify(geometry);
         // fall through
@@ -1067,12 +1135,12 @@ const op =
       }
     };
 
-    return method(toTransformedGeometry(geometry), walk);
+    return method(toConcreteGeometry(geometry), walk);
   };
 
 const bend = op({ graph: bend$1 });
 
-const close = (path) => (isClosed(path) ? path : path.slice(1));
+const close$1 = (path) => (isClosed(path) ? path : path.slice(1));
 
 const taggedPoints = ({ tags = [], matrix }, points, exactPoints) => {
   return { type: 'points', tags, matrix, points, exactPoints };
@@ -1090,67 +1158,17 @@ const computeCentroid$1 = (geometry) => {
   return taggedPoints({ tags: geometry.tags }, [approximate], [exact]);
 };
 
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
+const close = (paths) => paths.map(close$1);
 
-const getNonVoidGraphs = (geometry) => {
-  const graphs = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'graph') {
-      graphs.push(item);
-    }
-  });
-  return graphs;
-};
+const paths$1 = (geometry) =>
+  fill$1(
+    fromPaths(
+      { tags: geometry.tags, matrix: geometry.matrix },
+      close(geometry.paths)
+    )
+  );
 
-const getNonVoidPaths = (geometry) => {
-  const pathsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'paths') {
-      pathsets.push(item);
-    }
-  });
-  return pathsets;
-};
-
-// DEPRECATED
-const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
-
-const fill = (geometry, includeFaces = true, includeHoles = true) => {
-  const keptGeometry = toKeptGeometry(geometry);
-  const fills = [];
-  for (const geometry of getNonVoidGraphs(keptGeometry)) {
-    const { tags } = geometry;
-    if (tags && tags.includes('path/Wire')) {
-      continue;
-    }
-    if (geometry.graph.isOutline) {
-      fills.push(fill$1(geometry));
-    }
-  }
-  for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
-    if (tags && tags.includes('path/Wire')) {
-      continue;
-    }
-    fills.push(
-      fill$1(
-        fromPaths(
-          { tags },
-          paths.map((path) => ({ points: path }))
-        )
-      )
-    );
-  }
-  return taggedGroup({}, ...fills);
-};
+const fill = op({ graph: fill$1, paths: paths$1 });
 
 const computeCentroid = (geometry) => {
   const op = (geometry, descend) => {
@@ -1227,7 +1245,7 @@ const computeNormal = (geometry) => {
 };
 
 const concatenate = (...paths) => {
-  const result = [null, ...[].concat(...paths.map(close))];
+  const result = [null, ...[].concat(...paths.map(close$1))];
   return result;
 };
 
@@ -1715,12 +1733,15 @@ const segments = (
 
 const eachSegment = op({ graph: eachEdge, segments }, visit);
 
-const fromEmpty = ({ tags } = {}) =>
-  taggedGraph({ tags }, { isEmpty: true });
+const fromEmpty = ({ tags, isPlanar } = {}) =>
+  taggedGraph({ tags }, { isEmpty: true, isPlanar });
 
-const empty = ({ tags }) => fromEmpty({ tags });
+const empty = ({ tags, isPlanar }) => fromEmpty({ tags, isPlanar });
 
 const extrude$1 = (geometry, height, depth, normal) => {
+  if (geometry.graph.isEmpty) {
+    return geometry;
+  }
   const dir = {};
   if (normal.points && normal.points.length >= 1) {
     dir.direction = normal.points[0];
@@ -1788,6 +1809,9 @@ const extrude = (geometry, height, depth, direction) => {
 
 // FIX: The face needs to be selected with the transform in mind.
 const extrudeToPlane$1 = (geometry, highPlane, lowPlane, direction) => {
+  if (geometry.graph.isEmpty) {
+    return geometry;
+  }
   let graph = realizeGraph(geometry.graph);
   if (graph.faces.length > 0) {
     // Arbitrarily pick the plane of the first graph to extrude along.
@@ -1993,6 +2017,17 @@ const fromSurfaceToPathsImpl = (surface) => {
 
 const fromSurfaceToPaths = cache(fromSurfaceToPathsImpl);
 
+const eachNonVoidItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    // FIX: Sketches aren't real either -- but this is a bit unclear.
+    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
+      op(geometry);
+      descend();
+    }
+  };
+  visit(geometry, walk);
+};
+
 const getAnyNonVoidSurfaces = (geometry) => {
   const surfaces = [];
   eachNonVoidItem(geometry, (item) => {
@@ -2095,6 +2130,16 @@ const getLeafs = (geometry) => {
   return leafs;
 };
 
+const getNonVoidGraphs = (geometry) => {
+  const graphs = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'graph') {
+      graphs.push(item);
+    }
+  });
+  return graphs;
+};
+
 const getNonVoidItems = (geometry) => {
   const items = [];
   const op = (geometry, descend) => {
@@ -2106,6 +2151,16 @@ const getNonVoidItems = (geometry) => {
   };
   visit(geometry, op);
   return items;
+};
+
+const getNonVoidPaths = (geometry) => {
+  const pathsets = [];
+  eachNonVoidItem(geometry, (item) => {
+    if (item.type === 'paths') {
+      pathsets.push(item);
+    }
+  });
+  return pathsets;
 };
 
 const getNonVoidFaceablePaths = (geometry) => {
@@ -2485,7 +2540,6 @@ const intersection = (geometry, ...geometries) => {
 };
 
 const inset$1 = (geometry, initial, step, limit) => {
-  info('inset begin');
   const insetGraphs = [];
   const { tags, plane, exactPlane } = geometry;
   for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
@@ -2504,7 +2558,6 @@ const inset$1 = (geometry, initial, step, limit) => {
       }
     }
   }
-  info('inset end');
   return insetGraphs;
 };
 
@@ -2576,6 +2629,13 @@ const hasShowOutline = (geometry) => hasShow(geometry, showOutline);
 const isNotShowOutline = (geometry) => isNotShow(geometry, showOutline);
 const isShowOutline = (geometry) => isShow(geometry, showOutline);
 
+const showOverlay = 'show:overlay';
+const hasNotShowOverlay = (geometry) =>
+  hasNotShow(geometry, showOutline);
+const hasShowOverlay = (geometry) => hasShow(geometry, showOverlay);
+const isNotShowOverlay = (geometry) => isNotShow(geometry, showOverlay);
+const isShowOverlay = (geometry) => isShow(geometry, showOverlay);
+
 const showSkin = 'show:skin';
 const hasNotShowSkin = (geometry) => hasNotShow(geometry, showSkin);
 const hasShowSkin = (geometry) => hasShow(geometry, showSkin);
@@ -2590,28 +2650,67 @@ const isNotShowWireframe = (geometry) =>
   isNotShow(geometry, showWireframe);
 const isShowWireframe = (geometry) => isShow(geometry, showWireframe);
 
-const hasNotType = (geometry, type) =>
-  isNotType(geometry, type)
-    ? geometry
-    : { ...geometry, tags: geometry.tags.filter((tag) => tag !== type) };
-const hasType = (geometry, type) =>
-  isType(geometry, type)
-    ? geometry
-    : { ...geometry, tags: [...geometry.tags, type] };
-const isNotType = ({ tags }, type) => !tags.includes(type);
-const isType = ({ tags }, type) => tags.includes(type);
+const join$1 = (targets, sources) => {
+  if (sources.length === 0) {
+    return targets;
+  }
+  targets = targets.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  sources = sources.map(({ graph, matrix, tags }) => ({
+    mesh: toSurfaceMesh(graph),
+    matrix,
+    tags,
+    isPlanar: graph.isPlanar,
+    isEmpty: graph.isEmpty,
+  }));
+  const results = joinSurfaceMeshes(targets, sources);
+  const joinedGeometries = results.map(({ matrix, mesh, tags }) =>
+    taggedGraph({ tags, matrix }, fromSurfaceMeshLazy(mesh))
+  );
+  deletePendingSurfaceMeshes();
+  return joinedGeometries;
+};
 
-const typeVoid = 'type:void';
-const hasNotTypeVoid = (geometry) => hasNotType(geometry, typeVoid);
-const hasTypeVoid = (geometry) => hasType(geometry, typeVoid);
-const isNotTypeVoid = (geometry) => isNotType(geometry, typeVoid);
-const isTypeVoid = (geometry) => isType(geometry, typeVoid);
+const collect = (geometry, out) => {
+  const op = (geometry, descend) => {
+    if (geometry.type === 'graph' && isNotTypeVoid(geometry)) {
+      out.push(geometry);
+    }
+    descend();
+  };
+  visit(geometry, op);
+};
 
-const typeWire = 'type:wire';
-const hasNotTypeWire = (geometry) => hasNotType(geometry, typeWire);
-const hasTypeWire = (geometry) => hasType(geometry, typeWire);
-const isNotTypeWire = (geometry) => isNotType(geometry, typeWire);
-const isTypeWire = (geometry) => isType(geometry, typeWire);
+const join = (geometry, geometries) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  // Collect graphs for rewriting.
+  const rewriteGraphs = [];
+  collect(concreteGeometry, rewriteGraphs);
+  // The other graphs are just read from.
+  const readGraphs = [];
+  for (const geometry of geometries) {
+    collect(toConcreteGeometry(geometry), readGraphs);
+  }
+  const joinedGraphs = join$1(rewriteGraphs, readGraphs);
+  const map = new Map();
+  for (let nth = 0; nth < joinedGraphs.length; nth++) {
+    map.set(rewriteGraphs[nth], joinedGraphs[nth]);
+  }
+  const update = (geometry, descend) => {
+    const joined = map.get(geometry);
+    if (joined) {
+      return joined;
+    } else {
+      return descend();
+    }
+  };
+  return rewrite(concreteGeometry, update);
+};
 
 const keep = (tags, geometry) =>
   rewriteTags(['type:void'], [], geometry, tags, 'has not');
@@ -2832,7 +2931,6 @@ const minkowskiSum = (geometry, offset) => {
 };
 
 const offset$1 = (geometry, initial, step, limit) => {
-  info('offset begin');
   const offsetGraphs = [];
   const { tags, plane, exactPlane } = geometry;
   for (const { polygonsWithHoles } of toPolygonsWithHoles$1(geometry)) {
@@ -2853,57 +2951,25 @@ const offset$1 = (geometry, initial, step, limit) => {
       }
     }
   }
-  info('offset end');
   return offsetGraphs;
 };
 
-const offset = (geometry, initial = 1, step, limit) => {
-  const op = (geometry, descend) => {
-    const { tags } = geometry;
-    switch (geometry.type) {
-      case 'graph':
-        return taggedGroup(
-          { tags },
-          ...offset$1(geometry, initial, step, limit)
-        );
-      case 'triangles':
-      case 'points':
-        // Not implemented yet.
-        return geometry;
-      case 'polygonsWithHoles':
-        return offset(
-          fromPolygonsWithHoles(geometry),
-          initial,
-          step,
-          limit
-        );
-      case 'paths':
-        return offset(
-          fromPaths(
-            { tags },
-            geometry.paths.map((path) => ({ points: path }))
-          ),
-          initial,
-          step,
-          limit
-        );
-      case 'plan':
-        return offset(reify(geometry).content[0], initial, step, limit);
-      case 'item':
-      case 'group': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for offset.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
+const graph = (geometry, initial = 1, step, limit) =>
+  taggedGroup(
+    { tags: geometry.tags },
+    ...offset$1(geometry, initial, step, limit)
+  );
+const polygonsWithHoles = (geometry, initial = 1, step, limit) =>
+  offset(fromPolygonsWithHoles(geometry), initial, step, limit);
+const paths = (geometry, initial = 1, step, limit) =>
+  offset(
+    fromPaths({ tags: geometry.tags }, geometry.paths),
+    initial,
+    step,
+    limit
+  );
 
-  return rewrite(toTransformedGeometry(geometry), op);
-};
+const offset = op({ graph, polygonsWithHoles, paths });
 
 const open = (path) => (isClosed(path) ? [null, ...path] : path);
 
@@ -3142,6 +3208,16 @@ const sectionImpl = (geometry, matrices, { profile = false }) => {
 
 const section = cacheSection(sectionImpl);
 
+const simplify$1 = (geometry, resolution) =>
+  taggedGraph(
+    { tags: geometry.tags, matrix: geometry.matrix },
+    fromSurfaceMeshLazy(
+      simplifySurfaceMesh(toSurfaceMesh(geometry.graph), resolution)
+    )
+  );
+
+const simplify = op({ graph: simplify$1 });
+
 const smooth$1 = (geometry, options = {}) => {
   const { method = 'Remesh' } = options;
   switch (method) {
@@ -3310,13 +3386,9 @@ const soup = (
       }
       // Unreachable.
       case 'polygons':
-        return show(
-          taggedTriangles({ tags }, toTriangles(geometry))
-        );
+        return show(toTriangles(geometry));
       case 'polygonsWithHoles':
-        return show(
-          taggedTriangles({ tags }, toTriangles(geometry))
-        );
+        return show(toTriangles(geometry));
       case 'segments':
       case 'triangles':
       case 'points':
@@ -3338,7 +3410,7 @@ const soup = (
     }
   };
 
-  return rewrite(toTransformedGeometry(geometry), op);
+  return rewrite(toConcreteGeometry(geometry), op);
 };
 
 const taggedItem = ({ tags = [], matrix }, ...content) => {
@@ -3542,6 +3614,9 @@ const toDisplayGeometry = (
   });
 };
 
+// DEPRECATED
+const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
+
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
@@ -3727,93 +3802,7 @@ const twist = (geometry, turnsPerMm, axis) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const union$2 = (a, b) => {
-  if (a.graph.isEmpty) {
-    return b;
-  }
-  if (b.graph.isEmpty) {
-    return a;
-  }
-  // FIX: In an ideal world, if a and b do not overlap, we would generate a disjointAssembly of the two.
-  const result = fromSurfaceMeshLazy(
-    unionOfSurfaceMeshes(
-      toSurfaceMesh(a.graph),
-      a.matrix,
-      toSurfaceMesh(b.graph),
-      b.matrix
-    )
-  );
-  return taggedGraph({ tags: a.tags }, result);
-};
-
-const union$1 = (...geometries) => [].concat(...geometries);
-
-// Union is a little more complex, since it can violate disjointAssembly invariants.
-const unionImpl = (geometry, ...geometries) => {
-  geometries = geometries.map(toConcreteGeometry);
-  const op = (geometry, descend) => {
-    const { tags } = geometry;
-    switch (geometry.type) {
-      case 'graph': {
-        let unified = geometry;
-        for (const geometry of geometries) {
-          for (const graph of getNonVoidGraphs(geometry)) {
-            unified = union$2(unified, graph);
-          }
-          for (const pathsGeometry of getNonVoidFaceablePaths(geometry)) {
-            unified = union$2(
-              unified,
-              fromPaths(
-                { tags: pathsGeometry.tags },
-                pathsGeometry.paths
-              )
-            );
-          }
-        }
-        return unified;
-      }
-      case 'paths': {
-        if (tags && tags.includes('path/Wire')) {
-          return geometry;
-        }
-        return taggedPaths(
-          { tags },
-          toPaths(
-            union(
-              fromPaths({ tags: geometry.tags }, geometry.paths),
-              ...geometries
-            )
-          )
-        );
-      }
-      case 'points': {
-        const { points, tags } = geometry;
-        const pointsets = [];
-        for (const { points } of getNonVoidPoints(geometry)) {
-          pointsets.push(points);
-        }
-        return taggedPoints({ tags }, union$1(points, ...pointsets));
-      }
-      case 'segments':
-      case 'layout':
-      case 'plan':
-      case 'item':
-      case 'group': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for union.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(toConcreteGeometry(geometry), op);
-};
-
-const union = cache(unionImpl);
+const union = (geometry, ...geometries) => join(geometry, geometries);
 
 const rotateX = (angle, geometry) =>
   transform$3(fromXRotation((angle * Math.PI) / 180), geometry);
@@ -3826,4 +3815,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$3(fromScaling(vector), geometry);
 
-export { allTags, alphaShape, assemble, assemble2, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close as closePath, computeCentroid, computeNormal, concatenate as concatenatePath, convexHull as convexHullToGraph, deduplicate as deduplicatePath, difference, disjoint, distributedAssemble, doesNotOverlap, drop, eachItem, eachPoint, eachSegment, empty, extrude, extrudeToPlane, faces, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowSkin, hasShowWireframe, hasType, hasTypeVoid, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowSkin, isShowWireframe, isType, isTypeVoid, isTypeWire, isVoid, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, realize, realizeGraph, registerReifier, reify, remesh, removeSelfIntersections, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, showOutline, showSkin, showWireframe, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, taper, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangleArray, toTriangles$1 as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$3 as transform, transform$1 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeVoid, typeWire, union, update, visit, withQuery, write };
+export { allTags, alphaShape, assemble, assemble2, bend, canonicalize, canonicalize$4 as canonicalizePath, canonicalize$3 as canonicalizePaths, close$1 as closePath, computeCentroid, computeNormal, concatenate as concatenatePath, convexHull as convexHullToGraph, cut, deduplicate as deduplicatePath, difference, disjoint, distributedAssemble, doesNotOverlap, drop, eachItem, eachPoint, eachSegment, empty, extrude, extrudeToPlane, faces, fill, flip, flip$3 as flipPath, fresh, fromFunction as fromFunctionToGraph, fromPaths as fromPathsToGraph, fromPoints as fromPointsToGraph, fromPolygons as fromPolygonsToGraph, fromPolygonsWithHolesToTriangles, fromSurfaceToPaths, fromTriangles as fromTrianglesToGraph, getAnyNonVoidSurfaces, getAnySurfaces, getFaceablePaths, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getNonVoidFaceablePaths, getNonVoidGraphs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSegments, getEdges as getPathEdges, getPaths, getPeg, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, intersection, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeMasked, isTypeVoid, isTypeWire, isVoid, join, keep, loft, measureBoundingBox, minkowskiDifference, minkowskiShell, minkowskiSum, offset, open as openPath, outline, prepareForSerialization, projectToPlane, push, read, readNonblocking, realize, realizeGraph, registerReifier, reify, remesh, removeSelfIntersections, rerealizeGraph, reverseFaceOrientations as reverseFaceOrientationsOfGraph, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, scale$2 as scalePath, scale$1 as scalePaths, section, separate, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPaths, taggedPlan, taggedPoints, taggedPolygons, taggedSegments, taggedSketch, taggedTriangles, taper, test, toConcreteGeometry, toDisjointGeometry, toDisplayGeometry, toKeptGeometry, toPoints, toPolygonsWithHoles, toTransformedGeometry, toTriangleArray, toTriangles$1 as toTrianglesFromGraph, toVisiblyDisjointGeometry, transform$3 as transform, transform$1 as transformPaths, translate, translate$2 as translatePath, translate$1 as translatePaths, twist, typeMasked, typeVoid, typeWire, union, update, visit, withQuery, write, writeNonblocking };

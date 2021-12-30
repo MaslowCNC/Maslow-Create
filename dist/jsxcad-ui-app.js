@@ -1,5 +1,5 @@
 import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
-import { readOrWatch, unwatchFile, watchFile, boot, log, deleteFile, ask, touch, askService, clearCacheDb, write, read, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, unwatchFile, watchFile, boot, log, remove, ask, askService, setConfig, write, read, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -318,6 +318,8 @@ var ReactPropTypesSecret$2 = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 var ReactPropTypesSecret_1 = ReactPropTypesSecret$2;
 
+var has$2 = Function.call.bind(Object.prototype.hasOwnProperty);
+
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -330,7 +332,7 @@ var printWarning$2 = function() {};
 {
   var ReactPropTypesSecret$1 = ReactPropTypesSecret_1;
   var loggedTypeFailures = {};
-  var has$1 = Function.call.bind(Object.prototype.hasOwnProperty);
+  var has$1 = has$2;
 
   printWarning$2 = function(text) {
     var message = 'Warning: ' + text;
@@ -342,7 +344,7 @@ var printWarning$2 = function() {};
       // This error was thrown as a convenience so that you can use this stack
       // to find the callsite that caused this warning to fire.
       throw new Error(message);
-    } catch (x) {}
+    } catch (x) { /**/ }
   };
 }
 
@@ -371,7 +373,8 @@ function checkPropTypes$1(typeSpecs, values, location, componentName, getStack) 
           if (typeof typeSpecs[typeSpecName] !== 'function') {
             var err = Error(
               (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
-              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
+              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.' +
+              'This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.'
             );
             err.name = 'Invariant Violation';
             throw err;
@@ -430,9 +433,9 @@ var ReactIs$1 = reactIs.exports;
 var assign = objectAssign;
 
 var ReactPropTypesSecret = ReactPropTypesSecret_1;
+var has = has$2;
 var checkPropTypes = checkPropTypes_1;
 
-var has = Function.call.bind(Object.prototype.hasOwnProperty);
 var printWarning$1 = function() {};
 
 {
@@ -533,6 +536,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
   // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
   var ReactPropTypes = {
     array: createPrimitiveTypeChecker('array'),
+    bigint: createPrimitiveTypeChecker('bigint'),
     bool: createPrimitiveTypeChecker('boolean'),
     func: createPrimitiveTypeChecker('function'),
     number: createPrimitiveTypeChecker('number'),
@@ -578,8 +582,9 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
    * is prohibitively expensive if they are created too often, such as what
    * happens in oneOfType() for any type before the one that matched.
    */
-  function PropTypeError(message) {
+  function PropTypeError(message, data) {
     this.message = message;
+    this.data = data && typeof data === 'object' ? data: {};
     this.stack = '';
   }
   // Make `instanceof Error` still work for returned errors.
@@ -614,7 +619,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
           ) {
             printWarning$1(
               'You are manually calling a React.PropTypes validation ' +
-              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
+              'function for the `' + propFullName + '` prop on `' + componentName + '`. This is deprecated ' +
               'and will throw in the standalone `prop-types` package. ' +
               'You may be seeing this warning due to a third-party PropTypes ' +
               'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
@@ -653,7 +658,10 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
         // 'of type `object`'.
         var preciseType = getPreciseType(propValue);
 
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
+        return new PropTypeError(
+          'Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'),
+          {expectedType: expectedType}
+        );
       }
       return null;
     }
@@ -797,14 +805,19 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
     }
 
     function validate(props, propName, componentName, location, propFullName) {
+      var expectedTypes = [];
       for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
         var checker = arrayOfTypeCheckers[i];
-        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
+        var checkerResult = checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret);
+        if (checkerResult == null) {
           return null;
         }
+        if (checkerResult.data.hasOwnProperty('expectedType')) {
+          expectedTypes.push(checkerResult.data.expectedType);
+        }
       }
-
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
+      var expectedTypesMessage = (expectedTypes.length > 0) ? ', expected one of type [' + expectedTypes.join(', ') + ']': '';
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`' + expectedTypesMessage + '.'));
     }
     return createChainableTypeChecker(validate);
   }
@@ -819,6 +832,13 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
     return createChainableTypeChecker(validate);
   }
 
+  function invalidValidatorError(componentName, location, propFullName, key, type) {
+    return new PropTypeError(
+      (componentName || 'React class') + ': ' + location + ' type `' + propFullName + '.' + key + '` is invalid; ' +
+      'it must be a function, usually from the `prop-types` package, but received `' + type + '`.'
+    );
+  }
+
   function createShapeTypeChecker(shapeTypes) {
     function validate(props, propName, componentName, location, propFullName) {
       var propValue = props[propName];
@@ -828,8 +848,8 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
       }
       for (var key in shapeTypes) {
         var checker = shapeTypes[key];
-        if (!checker) {
-          continue;
+        if (typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
         }
         var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
         if (error) {
@@ -848,16 +868,18 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
       if (propType !== 'object') {
         return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
       }
-      // We need to check all keys in case some are required but missing from
-      // props.
+      // We need to check all keys in case some are required but missing from props.
       var allKeys = assign({}, props[propName], shapeTypes);
       for (var key in allKeys) {
         var checker = shapeTypes[key];
+        if (has(shapeTypes, key) && typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
+        }
         if (!checker) {
           return new PropTypeError(
             'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
             '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
+            '\nValid keys: ' + JSON.stringify(Object.keys(shapeTypes), null, '  ')
           );
         }
         var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
@@ -1209,7 +1231,7 @@ function createChainedFunction() {
   }, null);
 }
 
-var _excluded$m = ["as", "disabled", "onKeyDown"];
+var _excluded$n = ["as", "disabled", "onKeyDown"];
 
 function isTrivialHref(href) {
   return !href || href.trim() === '#';
@@ -1228,7 +1250,7 @@ var SafeAnchor = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'a' : _ref$as,
       disabled = _ref.disabled,
       onKeyDown = _ref.onKeyDown,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$m);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$n);
 
   var handleClick = function handleClick(event) {
     var href = props.href,
@@ -1277,7 +1299,7 @@ var SafeAnchor = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 SafeAnchor.displayName = 'SafeAnchor';
 var SafeAnchor$1 = SafeAnchor;
 
-var _excluded$l = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
+var _excluded$m = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
 var defaultProps$8 = {
   variant: 'primary',
   active: false,
@@ -1292,7 +1314,7 @@ var Button = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       block = _ref.block,
       type = _ref.type,
       as = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$l);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$m);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'btn');
   var classes = classNames(className, prefix, active && 'active', variant && prefix + "-" + variant, block && prefix + "-block", size && prefix + "-" + size);
@@ -1330,7 +1352,7 @@ function camelize(string) {
   });
 }
 
-var _excluded$k = ["className", "bsPrefix", "as"];
+var _excluded$l = ["className", "bsPrefix", "as"];
 
 var pascalCase = function pascalCase(str) {
   return str[0].toUpperCase() + camelize(str).slice(1);
@@ -1349,7 +1371,7 @@ function createWithBsPrefix(prefix, _temp) {
         bsPrefix = _ref2.bsPrefix,
         _ref2$as = _ref2.as,
         Tag = _ref2$as === void 0 ? Component || 'div' : _ref2$as,
-        props = _objectWithoutPropertiesLoose(_ref2, _excluded$k);
+        props = _objectWithoutPropertiesLoose(_ref2, _excluded$l);
 
     var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
     return /*#__PURE__*/ReactDOM$2.createElement(Tag, _extends({
@@ -1375,7 +1397,7 @@ var context = /*#__PURE__*/ReactDOM$2.createContext(null);
 context.displayName = 'CardContext';
 var CardContext = context;
 
-var _excluded$j = ["bsPrefix", "className", "variant", "as"];
+var _excluded$k = ["bsPrefix", "className", "variant", "as"];
 var defaultProps$7 = {
   variant: null
 };
@@ -1386,7 +1408,7 @@ function (_ref, ref) {
       variant = _ref.variant,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'img' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$j);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$k);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card-img');
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({
@@ -1398,7 +1420,7 @@ CardImg.displayName = 'CardImg';
 CardImg.defaultProps = defaultProps$7;
 var CardImg$1 = CardImg;
 
-var _excluded$i = ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"];
+var _excluded$j = ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"];
 var DivStyledAsH5 = divWithClassName('h5');
 var DivStyledAsH6 = divWithClassName('h6');
 var CardBody = createWithBsPrefix('card-body');
@@ -1430,7 +1452,7 @@ var Card = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       children = _ref.children,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$i);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$j);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card');
   var cardContext = d(function () {
@@ -1461,7 +1483,7 @@ Card.Header = CardHeader;
 Card.Footer = CardFooter;
 Card.ImgOverlay = CardImgOverlay;
 
-var _excluded$h = ["bsPrefix", "className", "as"];
+var _excluded$i = ["bsPrefix", "className", "as"];
 var DEVICE_SIZES$1 = ['xl', 'lg', 'md', 'sm', 'xs'];
 var Col = /*#__PURE__*/ReactDOM$2.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
@@ -1469,7 +1491,7 @@ function (_ref, ref) {
       className = _ref.className,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$h);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$i);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'col');
   var spans = [];
@@ -7970,7 +7992,7 @@ function all() {
 module.exports = exports['default'];
 }(all, all.exports));
 
-var _excluded$g = ["as", "className", "type", "tooltip"];
+var _excluded$h = ["as", "className", "type", "tooltip"];
 var propTypes = {
   /**
    * Specify whether the feedback is for valid or invalid fields
@@ -7992,7 +8014,7 @@ function (_ref, ref) {
       type = _ref$type === void 0 ? 'valid' : _ref$type,
       _ref$tooltip = _ref.tooltip,
       tooltip = _ref$tooltip === void 0 ? false : _ref$tooltip,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$g);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$h);
 
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, props, {
     ref: ref,
@@ -8008,7 +8030,7 @@ var FormContext = /*#__PURE__*/ReactDOM$2.createContext({
 });
 var FormContext$1 = FormContext;
 
-var _excluded$f = ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"];
+var _excluded$g = ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"];
 var FormCheckInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8023,7 +8045,7 @@ var FormCheckInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       isStatic = _ref.isStatic,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$f);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$g);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8044,13 +8066,13 @@ var FormCheckInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormCheckInput.displayName = 'FormCheckInput';
 var FormCheckInput$1 = FormCheckInput;
 
-var _excluded$e = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
+var _excluded$f = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
 var FormCheckLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$e);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$f);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8070,7 +8092,7 @@ var FormCheckLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormCheckLabel.displayName = 'FormCheckLabel';
 var FormCheckLabel$1 = FormCheckLabel;
 
-var _excluded$d = ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"];
+var _excluded$e = ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"];
 var FormCheck = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8097,7 +8119,7 @@ var FormCheck = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       propCustom = _ref.custom,
       _ref$as = _ref.as,
       as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$d);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$e);
 
   var custom = type === 'switch' ? true : propCustom;
 
@@ -8143,7 +8165,7 @@ FormCheck.Input = FormCheckInput$1;
 FormCheck.Label = FormCheckLabel$1;
 var FormCheck$1 = FormCheck;
 
-var _excluded$c = ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"];
+var _excluded$d = ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"];
 var FormFileInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8154,7 +8176,7 @@ var FormFileInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       lang = _ref.lang,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$c);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$d);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8178,13 +8200,13 @@ var FormFileInput = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormFileInput.displayName = 'FormFileInput';
 var FormFileInput$1 = FormFileInput;
 
-var _excluded$b = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
+var _excluded$c = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
 var FormFileLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$b);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$c);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId,
@@ -8205,7 +8227,7 @@ var FormFileLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormFileLabel.displayName = 'FormFileLabel';
 var FormFileLabel$1 = FormFileLabel;
 
-var _excluded$a = ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"];
+var _excluded$b = ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"];
 var FormFile = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
@@ -8230,7 +8252,7 @@ var FormFile = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'div' : _ref$as,
       _ref$inputAs = _ref.inputAs,
       inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$a);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$b);
 
   var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
       prefix = _ref2[0],
@@ -8326,7 +8348,7 @@ var warning = function() {};
 
 var warning_1 = warning;
 
-var _excluded$9 = ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"];
+var _excluded$a = ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"];
 var FormControl = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
@@ -8344,7 +8366,7 @@ var FormControl = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       custom = _ref.custom,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$9);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$a);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId;
@@ -8393,7 +8415,7 @@ var FormControl$1 = Object.assign(FormControl, {
   Feedback: Feedback$1
 });
 
-var _excluded$8 = ["bsPrefix", "className", "children", "controlId", "as"];
+var _excluded$9 = ["bsPrefix", "className", "children", "controlId", "as"];
 var FormGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
@@ -8401,7 +8423,7 @@ var FormGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       controlId = _ref.controlId,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$8);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$9);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
   var context = d(function () {
@@ -8419,7 +8441,7 @@ var FormGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 FormGroup.displayName = 'FormGroup';
 var FormGroup$1 = FormGroup;
 
-var _excluded$7 = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
+var _excluded$8 = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
 var defaultProps$5 = {
   column: false,
   srOnly: false
@@ -8432,7 +8454,7 @@ var FormLabel = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       srOnly = _ref.srOnly,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$7);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$8);
 
   var _useContext = F$1(FormContext$1),
       controlId = _useContext.controlId;
@@ -8463,7 +8485,7 @@ FormLabel.displayName = 'FormLabel';
 FormLabel.defaultProps = defaultProps$5;
 var FormLabel$1 = FormLabel;
 
-var _excluded$6 = ["bsPrefix", "className", "as", "muted"];
+var _excluded$7 = ["bsPrefix", "className", "as", "muted"];
 var FormText = /*#__PURE__*/ReactDOM$2.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
@@ -8471,7 +8493,7 @@ function (_ref, ref) {
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'small' : _ref$as,
       muted = _ref.muted,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$6);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$7);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, props, {
@@ -8493,7 +8515,7 @@ Switch.Input = FormCheck$1.Input;
 Switch.Label = FormCheck$1.Label;
 var Switch$1 = Switch;
 
-var _excluded$5 = ["bsPrefix", "inline", "className", "validated", "as"];
+var _excluded$6 = ["bsPrefix", "inline", "className", "validated", "as"];
 var FormRow = createWithBsPrefix('form-row');
 var defaultProps$4 = {
   inline: false
@@ -8505,7 +8527,7 @@ var FormImpl = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       validated = _ref.validated,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'form' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$5);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$6);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
   return /*#__PURE__*/ReactDOM$2.createElement(Component, _extends({}, props, {
@@ -41757,7 +41779,7 @@ var SelectableContext$1 = SelectableContext;
 var TabContext = /*#__PURE__*/ReactDOM$2.createContext(null);
 var TabContext$1 = TabContext;
 
-var _excluded$4 = ["as", "onSelect", "activeKey", "role", "onKeyDown"];
+var _excluded$5 = ["as", "onSelect", "activeKey", "role", "onKeyDown"];
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 var noop = function noop() {};
@@ -41769,7 +41791,7 @@ var AbstractNav = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       activeKey = _ref.activeKey,
       role = _ref.role,
       onKeyDown = _ref.onKeyDown,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$4);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$5);
 
   // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
   // and don't want to reset the set in the effect
@@ -41886,7 +41908,7 @@ function useEventCallback(fn) {
   }, [ref]);
 }
 
-var _excluded$3 = ["active", "className", "eventKey", "onSelect", "onClick", "as"];
+var _excluded$4 = ["active", "className", "eventKey", "onSelect", "onClick", "as"];
 var defaultProps$3 = {
   disabled: false
 };
@@ -41897,7 +41919,7 @@ var AbstractNavItem = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       onSelect = _ref.onSelect,
       onClick = _ref.onClick,
       Component = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$3);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$4);
 
   var navKey = makeEventKey(eventKey, props.href);
   var parentOnSelect = F$1(SelectableContext$1);
@@ -41940,7 +41962,7 @@ var AbstractNavItem = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 AbstractNavItem.defaultProps = defaultProps$3;
 var AbstractNavItem$1 = AbstractNavItem;
 
-var _excluded$2 = ["bsPrefix", "active", "disabled", "className", "variant", "action", "as", "onClick"];
+var _excluded$3 = ["bsPrefix", "active", "disabled", "className", "variant", "action", "as", "onClick"];
 var defaultProps$2 = {
   variant: undefined,
   active: false,
@@ -41955,7 +41977,7 @@ var ListGroupItem = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       action = _ref.action,
       as = _ref.as,
       onClick = _ref.onClick,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$2);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$3);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'list-group-item');
   var handleClick = A$1(function (event) {
@@ -41986,7 +42008,7 @@ ListGroupItem.defaultProps = defaultProps$2;
 ListGroupItem.displayName = 'ListGroupItem';
 var ListGroupItem$1 = ListGroupItem;
 
-var _excluded$1 = ["className", "bsPrefix", "variant", "horizontal", "as"];
+var _excluded$2 = ["className", "bsPrefix", "variant", "horizontal", "as"];
 var defaultProps$1 = {
   variant: undefined,
   horizontal: undefined
@@ -42001,7 +42023,7 @@ var ListGroup = /*#__PURE__*/ReactDOM$2.forwardRef(function (props, ref) {
       horizontal = _useUncontrolled.horizontal,
       _useUncontrolled$as = _useUncontrolled.as,
       as = _useUncontrolled$as === void 0 ? 'div' : _useUncontrolled$as,
-      controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, _excluded$1);
+      controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, _excluded$2);
 
   var bsPrefix = useBootstrapPrefix(initialBsPrefix, 'list-group');
   var horizontalVariant;
@@ -42129,9 +42151,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
     this.builtContainer = container;
 
     if (this.watcher) {
-      unwatchFile(this.builtPath, this.watcher, {
-        workspace
-      });
+      unwatchFile(this.builtPath, workspace, this.watcher);
     }
 
     this.watcher = async () => {
@@ -42158,9 +42178,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       trackballControls.reset();
     };
 
-    watchFile(path, this.watcher, {
-      workspace
-    });
+    watchFile(path, workspace, this.watcher);
     trackballControls.addEventListener('change', () => {
       const {
         onMove
@@ -42305,9 +42323,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
     } = this.props;
 
     if (this.watcher) {
-      unwatchFile(this.path, this.watcher, {
-        workspace
-      });
+      unwatchFile(this.path, workspace, this.watcher);
     }
   }
 
@@ -42324,7 +42340,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
 
 }
 
-var _excluded = ["bsPrefix", "className", "noGutters", "as"];
+var _excluded$1 = ["bsPrefix", "className", "noGutters", "as"];
 var DEVICE_SIZES = ['xl', 'lg', 'md', 'sm', 'xs'];
 var defaultProps = {
   noGutters: false
@@ -42335,7 +42351,7 @@ var Row = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
       noGutters = _ref.noGutters,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded);
+      props = _objectWithoutPropertiesLoose(_ref, _excluded$1);
 
   var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
   var sizePrefix = decoratedBsPrefix + "-cols";
@@ -42362,6 +42378,41 @@ var Row = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 });
 Row.displayName = 'Row';
 Row.defaultProps = defaultProps;
+
+var _excluded = ["bsPrefix", "className", "striped", "bordered", "borderless", "hover", "size", "variant", "responsive"];
+var Table = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      striped = _ref.striped,
+      bordered = _ref.bordered,
+      borderless = _ref.borderless,
+      hover = _ref.hover,
+      size = _ref.size,
+      variant = _ref.variant,
+      responsive = _ref.responsive,
+      props = _objectWithoutPropertiesLoose(_ref, _excluded);
+
+  var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'table');
+  var classes = classNames(className, decoratedBsPrefix, variant && decoratedBsPrefix + "-" + variant, size && decoratedBsPrefix + "-" + size, striped && decoratedBsPrefix + "-striped", bordered && decoratedBsPrefix + "-bordered", borderless && decoratedBsPrefix + "-borderless", hover && decoratedBsPrefix + "-hover");
+  var table = /*#__PURE__*/ReactDOM$2.createElement("table", _extends({}, props, {
+    className: classes,
+    ref: ref
+  }));
+
+  if (responsive) {
+    var responsiveClass = decoratedBsPrefix + "-responsive";
+
+    if (typeof responsive === 'string') {
+      responsiveClass = responsiveClass + "-" + responsive;
+    }
+
+    return /*#__PURE__*/ReactDOM$2.createElement("div", {
+      className: responsiveClass
+    }, table);
+  }
+
+  return table;
+});
 
 const ensureFile = async (file, url, {
   workspace
@@ -42442,6 +42493,13 @@ const defaultModelConfig = {
       component: 'Files',
       enableClose: false,
       borderWidth: 1024
+    }, {
+      id: 'Config',
+      type: 'tab',
+      name: 'Config',
+      component: 'Config',
+      enableClose: false,
+      borderWidth: 1024
     }]
   }],
   layout: {
@@ -42497,7 +42555,6 @@ class App extends ReactDOM$2.Component {
       const {
         op,
         entry,
-        id,
         identifier,
         notes,
         options,
@@ -42533,20 +42590,11 @@ class App extends ReactDOM$2.Component {
             return disjointPaths;
           }
 
-        case 'sys/touch':
-          await touch(path, {
-            workspace,
-            id,
-            clear: true,
-            broadcast: true
-          });
-          return;
-
         case 'ask':
           return ask(identifier, options);
 
         case 'deleteFile':
-          return deleteFile(options, path);
+          return remove(options, path);
 
         case 'log':
           return log(entry);
@@ -42633,7 +42681,7 @@ class App extends ReactDOM$2.Component {
 
                   const render = async () => {
                     try {
-                      console.log(`Ask render for ${path}/${id}`);
+                      logInfo('app/App', `Ask render for ${path}/${id}`);
                       const url = await this.ask({
                         op: 'app/staticView',
                         path,
@@ -42706,9 +42754,6 @@ class App extends ReactDOM$2.Component {
           }
           return;
 
-        case 'info':
-          return;
-
         default:
           throw Error(`Unknown operation ${op}`);
       }
@@ -42740,6 +42785,69 @@ class App extends ReactDOM$2.Component {
 
     this.Clipboard.save = () => {};
 
+    this.Config = {};
+
+    this.Config.path = path => {
+      const {
+        Config = {}
+      } = this.state;
+      let object = {
+        Config
+      };
+      const steps = path.split('/');
+
+      while (steps.length > 0) {
+        const step = steps.shift();
+
+        if (object[step] === undefined) {
+          object[step] = {};
+        }
+
+        object = object[step];
+      }
+
+      return object;
+    };
+
+    this.Config.update = async () => {
+      const {
+        Config = {}
+      } = this.state;
+      const form = document.getElementById('form/Config');
+      this.Config.path('Config/api/shape/endTimer').md = form['Config/api/shape/endTimer/md'].checked;
+      await this.updateState({
+        Config
+      });
+      await this.Config.store();
+      setConfig(Config);
+      window.alert('Configuration updated');
+    };
+
+    this.Config.store = async () => {
+      const {
+        workspace
+      } = this.props;
+      const {
+        Config
+      } = this.state;
+      await write('config/Config', Config, {
+        workspace
+      });
+    };
+
+    this.Config.restore = async () => {
+      const {
+        workspace
+      } = this.props;
+      const Config = await read('config/Config', {
+        workspace
+      });
+      setConfig(Config);
+      await this.updateState({
+        Config
+      });
+    };
+
     this.Files = {};
 
     this.Files.deleteCachedFiles = async () => {
@@ -42757,13 +42865,12 @@ class App extends ReactDOM$2.Component {
         workspace
       } = this.props;
       const {
-        WorkspaceFiles
+        WorkspaceFiles = []
       } = this.state;
       const nonRegenerableFiles = WorkspaceFiles.filter(file => !isRegenerable(file));
 
       for (const file of nonRegenerableFiles) {
-        console.log(`QQ/Deleting: ${file}`);
-        await deleteFile({
+        await remove({
           workspace
         }, file);
       }
@@ -42813,7 +42920,14 @@ class App extends ReactDOM$2.Component {
 
     this.Log.clear = async () => {
       this.updateState({
-        LogMessages: []
+        LogMessages: [],
+        LogFilter: ''
+      });
+    };
+
+    this.Log.updateFilter = async LogFilter => {
+      this.updateState({
+        LogFilter
       });
     };
 
@@ -43063,7 +43177,6 @@ class App extends ReactDOM$2.Component {
       });
       const notebookText = typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
       this.Notebook.ensureAdvice(path);
-      console.log(`QQ/Notebook.load/path: ${path}`);
       await this.updateState({
         [`NotebookText/${path}`]: notebookText
       }); // Let state propagate.
@@ -43103,7 +43216,6 @@ class App extends ReactDOM$2.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace
       });
-      console.log(`QQ/Notebook.save/path: ${path} ${cleanText}`);
       logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({
         [`NotebookText/${path}`]: cleanText
@@ -43115,7 +43227,6 @@ class App extends ReactDOM$2.Component {
     };
 
     this.Notebook.change = (path, data) => {
-      console.log(`QQ/Notebook.change/path: ${path} ${data}`);
       this.setState({
         [`NotebookText/${path}`]: data
       });
@@ -43139,7 +43250,6 @@ class App extends ReactDOM$2.Component {
       const {
         WorkspaceOpenPaths = []
       } = this.state;
-      console.log(`QQ/Notebook.close/path: ${closedPath}`);
       await this.updateState({
         [`NotebookText/${closedPath}`]: undefined,
         [`NotebookAdvice/${closedPath}`]: undefined,
@@ -43270,7 +43380,6 @@ class App extends ReactDOM$2.Component {
           [`NotebookText/${path}`]: NotebookText
         } = this.state;
         const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
-        console.log(`QQ/Notebook.jog/path: ${path} ${newNotebookText}`);
         await this.updateState({
           [`NotebookText/${path}`]: newNotebookText
         });
@@ -43315,7 +43424,6 @@ class App extends ReactDOM$2.Component {
                 viewId,
                 nth: object.parent.children.findIndex(value => value === object)
               });
-              console.log(`QQ/postDelete: ${newNotebookText}`);
               await this.updateState({
                 [`NotebookText/${path}`]: newNotebookText
               });
@@ -43410,7 +43518,6 @@ class App extends ReactDOM$2.Component {
                 viewId,
                 nth
               });
-              console.log(`QQ/Notebook.cut/path: ${path} ${newNotebookText}`);
               await this.updateState({
                 [`NotebookText/${path}`]: newNotebookText,
                 Clipboard: {
@@ -43549,7 +43656,6 @@ class App extends ReactDOM$2.Component {
       const geometry = await read(geometryPath, {
         workspace
       });
-      console.log(`QQ/update geometry`);
       await updateGeometry(geometry, {
         timestamp: this.Notebook.runStart[path]
       });
@@ -43688,7 +43794,7 @@ class App extends ReactDOM$2.Component {
         case 'Workspace':
           {
             const {
-              WorkspaceFiles,
+              WorkspaceFiles = [],
               WorkspaceOpenPaths = []
             } = this.state;
 
@@ -43705,9 +43811,10 @@ class App extends ReactDOM$2.Component {
             }, v$1(Button, {
               variant: "primary",
               onClick: () => {
-                const pathControl = document.getElementById('WorkspaceLoadPathId');
-                const path = pathControl.value;
-                this.Workspace.loadWorkingPath(path);
+                const {
+                  value
+                } = document.getElementById('WorkspaceLoadPathId');
+                this.Workspace.loadWorkingPath(value);
               }
             }, "Add"))))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Open Working Path"), v$1(Card.Text, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith('source/')).map((file, index) => v$1(ListGroup.Item, {
               variant: computeListItemVariant(file),
@@ -43781,7 +43888,7 @@ class App extends ReactDOM$2.Component {
         case 'Files':
           {
             const {
-              WorkspaceFiles
+              WorkspaceFiles = []
             } = this.state;
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
@@ -43801,19 +43908,55 @@ class App extends ReactDOM$2.Component {
         case 'Log':
           {
             const {
-              LogMessages = []
+              LogMessages = [],
+              LogFilter = '^sys/'
             } = this.state;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Log Messages"), v$1(Card.Text, null, v$1(Button, {
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Log Messages"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
+              controlId: "LogFilterId"
+            }, v$1(FormImpl.Control, {
+              placeholder: "Filter source by regex",
+              value: LogFilter
+            }))), v$1(Col, null, v$1(Button, {
+              variant: "primary",
+              onClick: () => {
+                const {
+                  value
+                } = document.getElementById('LogFilterId');
+                this.Log.updateFilter(value);
+              }
+            }, "Update Filter")))), v$1(Button, {
               variant: "primary",
               onClick: this.Log.clear
-            }, "Clear"), v$1(ListGroup, null, LogMessages.map(({
+            }, "Clear"), v$1(Table, {
+              striped: true,
+              border: true,
+              hover: true
+            }, v$1("thead", null, v$1("tr", null, v$1("td", null, "ID"), v$1("td", null, "Type"), v$1("td", null, "Source"), v$1("td", null, "Message"))), v$1("tbody", null, LogMessages.filter(({
+              source
+            }) => !source || !LogFilter || !source.match(LogFilter)).map(({
               type,
               source,
-              text
-            }, index) => v$1(ListGroup.Item, {
-              key: index,
-              disabled: true
-            }, text)))))));
+              text,
+              id
+            }, index) => v$1("tr", {
+              key: index
+            }, v$1("td", null, id), v$1("td", null, type), v$1("td", null, source), v$1("td", null, text)))))))));
+          }
+
+        case 'Config':
+          {
+            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Configuration"), v$1(Card.Text, null, v$1(FormImpl, {
+              id: "form/Config"
+            }, v$1(Button, {
+              variant: "primary",
+              onClick: this.Config.update
+            }, "Update"), v$1(FormImpl.Group, {
+              controlId: "Config/api/shape/endTimer/md"
+            }, v$1(FormImpl.Check, {
+              type: "checkbox",
+              label: "Emit md from endTimer",
+              checked: this.Config.path('Config/api/shape/endTimer').md
+            })))))));
           }
       }
     };
@@ -43827,11 +43970,13 @@ class App extends ReactDOM$2.Component {
     };
 
     this.logUpdater = ({
+      id,
       type,
       source,
       text
     }) => {
       this.Log.pendingMessages.unshift({
+        id,
         type,
         source,
         text
@@ -43850,7 +43995,7 @@ class App extends ReactDOM$2.Component {
               LogMessages = []
             } = this.state;
             await this.updateState({
-              LogMessages: [...commit, ...LogMessages]
+              LogMessages: [...commit, ...LogMessages.slice(0, 99)]
             });
           }
         } finally {
@@ -43881,7 +44026,6 @@ class App extends ReactDOM$2.Component {
       }
 
       this.servicesActiveCounts = servicesActiveCounts;
-      console.log(`QQ/SAC: ${JSON.stringify(this.servicesActiveCounts)}`);
 
       for (const path of WorkspaceOpenPaths) {
         this.Layout.updateSpinners(path);
@@ -43906,6 +44050,8 @@ class App extends ReactDOM$2.Component {
     };
 
     this.servicesActiveCounts = {};
+    await this.fileUpdater();
+    await this.Config.restore();
     await this.Workspace.restore();
     await this.View.restore();
     await this.Model.restore();
