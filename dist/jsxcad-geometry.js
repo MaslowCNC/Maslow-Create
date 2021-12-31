@@ -1320,8 +1320,14 @@ const measureBoundingBox = (geometry) => {
         return descend();
       case 'graph':
         return update(measureBoundingBox$3(geometry));
-      case 'layout':
-        return update(geometry.marks);
+      case 'layout': {
+        const { size = [] } = geometry.layout;
+        const [width, height] = size;
+        return update([
+          [width / -2, height / -2, 0],
+          [width / 2, height / 2, 0],
+        ]);
+      }
       case 'points':
         return update(measureBoundingBox$2(geometry.points));
       case 'polygonsWithHoles':
@@ -3231,7 +3237,7 @@ const taggedDisplayGeometry = ({ tags = [], matrix }, ...content) => {
 };
 
 const taggedLayout = (
-  { tags = [], matrix, size, margin, title, marks = [] },
+  { tags = [], matrix, size, margin, title },
   ...content
 ) => {
   if (content.some((value) => value === undefined)) {
@@ -3246,7 +3252,6 @@ const taggedLayout = (
   return {
     type: 'layout',
     layout: { size, margin, title },
-    marks,
     tags,
     matrix,
     content,
