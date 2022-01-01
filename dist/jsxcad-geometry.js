@@ -568,10 +568,11 @@ const op =
   (
     {
       graph = doNothing,
+      layout = doNothing,
+      paths = doNothing,
+      points = doNothing,
       segments = doNothing,
       triangles = doNothing,
-      points = doNothing,
-      paths = doNothing,
     },
     method = rewrite
   ) =>
@@ -580,14 +581,16 @@ const op =
       switch (geometry.type) {
         case 'graph':
           return graph(geometry, ...args);
+        case 'layout':
+          return layout(geometry, ...args);
+        case 'paths':
+          return paths(geometry, ...args);
+        case 'points':
+          return points(geometry, ...args);
         case 'segments':
           return segments(geometry, ...args);
         case 'triangles':
           return triangles(geometry, ...args);
-        case 'points':
-          return points(geometry, ...args);
-        case 'paths':
-          return paths(geometry, ...args);
         case 'plan':
           reify(geometry);
         // fall through

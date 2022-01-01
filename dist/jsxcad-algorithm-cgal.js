@@ -614,9 +614,9 @@ const getPathEdges = (path) => {
   return edges;
 };
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$3 = 0;
+const Y$3 = 1;
+const Z$3 = 2;
 
 const arrangePaths = (
   plane,
@@ -637,16 +637,16 @@ const arrangePaths = (
           if (equals(start, end)) {
             continue;
           }
-          c.addExactPoint(out, start[X$2], start[Y$2], start[Z$2]);
-          c.addExactPoint(out, end[X$2], end[Y$2], end[Z$2]);
+          c.addExactPoint(out, start[X$3], start[Y$3], start[Z$3]);
+          c.addExactPoint(out, end[X$3], end[Y$3], end[Z$3]);
         }
       } else if (points) {
         for (const [start, end] of getPathEdges(points)) {
           if (equals(start, end)) {
             continue;
           }
-          c.addPoint(out, start[X$2], start[Y$2], start[Z$2]);
-          c.addPoint(out, end[X$2], end[Y$2], end[Z$2]);
+          c.addPoint(out, start[X$3], start[Y$3], start[Z$3]);
+          c.addPoint(out, end[X$3], end[Y$3], end[Z$3]);
         }
       }
     }
@@ -788,6 +788,61 @@ const arrangePolygonsWithHoles = (polygons) => {
 
   return arrangements;
 };
+
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
+
+const arrangeSegments = (
+  plane,
+  exactPlane,
+  segments,
+  triangulate = false
+) => {
+  const c = getCgal();
+  let target;
+  let polygon;
+  let polygons = [];
+  const fill = (out) => {
+    for (const [start, end] of segments) {
+      c.addPoint(out, start[X$2], start[Y$2], start[Z$2]);
+      c.addPoint(out, end[X$2], end[Y$2], end[Z$2]);
+    }
+  };
+  const emitPolygon = (isHole) => {
+    target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
+    if (isHole) {
+      polygon.holes.push(target);
+    } else {
+      polygons.push(target);
+      polygon = target;
+    }
+  };
+  const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
+    target.points.push([x, y, z]);
+    target.exactPoints.push([exactX, exactY, exactZ]);
+  };
+  if (exactPlane) {
+    const [x, y, z, w] = exactPlane;
+    c.ArrangePathsExact(x, y, z, w, triangulate, fill, emitPolygon, emitPoint);
+  } else {
+    const [x, y, z, w] = plane;
+    c.ArrangePathsApproximate(
+      x,
+      y,
+      z,
+      w,
+      triangulate,
+      fill,
+      emitPolygon,
+      emitPoint
+    );
+  }
+  return polygons;
+};
+
+const arrangeSegmentsIntoTriangles = (plane, exactPlane, polygons) =>
+  arrangeSegments(plane, exactPlane, polygons, /* triangulate= */ true);
 
 const bendSurfaceMesh = (mesh, transform, radius) =>
   getCgal().BendSurfaceMesh(
@@ -1954,4 +2009,4 @@ const unionOfSurfaceMeshes = (a, aTransform, b, bTransform) =>
     false
   );
 
-export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, SurfaceMeshQuery, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, bendSurfaceMesh, booleansOfPolygonsWithHoles, clipSurfaceMeshes, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deserializeSurfaceMesh, differenceOfSurfaceMeshes, disjointSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, invertTransform, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, taperSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes, wireframeSurfaceMesh };
+export { BOOLEAN_ADD, BOOLEAN_CLIP, BOOLEAN_CUT, SurfaceMeshQuery, arrangePaths, arrangePathsIntoTriangles, arrangePolygonsWithHoles, arrangeSegments, arrangeSegmentsIntoTriangles, bendSurfaceMesh, booleansOfPolygonsWithHoles, clipSurfaceMeshes, composeTransforms, computeCentroidOfSurfaceMesh, computeNormalOfSurfaceMesh, cutOutOfSurfaceMeshes, cutSurfaceMeshes, deserializeSurfaceMesh, differenceOfSurfaceMeshes, disjointSurfaceMeshes, doesSelfIntersectOfSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fitPlaneToPoints, fromApproximateToCgalTransform, fromExactToCgalTransform, fromFunctionToSurfaceMesh, fromGraphToSurfaceMesh, fromIdentityToCgalTransform, fromPointsToAlphaShape2AsPolygonSegments, fromPointsToAlphaShapeAsSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshEmitBoundingBox, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromSurfaceMeshToPolygons, fromSurfaceMeshToPolygonsWithHoles, fromSurfaceMeshToTriangles, fromTranslateToTransform, growSurfaceMesh, initCgal, insetOfPolygonWithHoles, intersectionOfSurfaceMeshes, invertTransform, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, outlineSurfaceMesh, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, reverseFaceOrientationsOfSurfaceMesh, sectionOfSurfaceMesh, separateSurfaceMesh, serializeSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, taperSurfaceMesh, toCgalTransformFromJsTransform, transformSurfaceMesh, twistSurfaceMesh, unionOfSurfaceMeshes, wireframeSurfaceMesh };
