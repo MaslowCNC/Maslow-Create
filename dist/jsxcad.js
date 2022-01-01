@@ -55,8 +55,3 @@ orbitDisplay({view: {fit: false}, withAxes: true, withGrid: true, gridLayer: 0},
     window.updateDisplay = result.updateGeometry
 });
 
-
-//TODo: Add some garbage collection here which checks when a path was last written to or read from and deletes the old ones. Probably will require a wrapper for reading and writing to paths
-// listFiles().then(result => {
-    // console.log(result);
-// })

@@ -129,7 +129,7 @@ const agent = async ({ ask, message }) => {
             const hullGeometry = await maslowRead(path);
             hullGeometries.push(hullGeometry);
         }
-        const hullShape = api.Hull(...hullGeometries);
+        const hullShape = api.Hull(...hullGeometries).color("#bababa");
         await api.saveGeometry(message.writePath, hullShape);
         return 1;
         break;

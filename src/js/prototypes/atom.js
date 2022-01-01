@@ -73,7 +73,7 @@ export default class Atom {
          */
         this.selected = false
         /** 
-         * This atom's curent color
+         * This atom's current color
          * @type {string}
          */
         this.color = '#F3EFEF'
@@ -93,7 +93,7 @@ export default class Atom {
          */
         this.value = null
         /** 
-         * A flag to indicate if this atom is currently being draged on the screen.
+         * A flag to indicate if this atom is currently being dragged on the screen.
          * @type {boolean}
          */
         this.isMoving = false
@@ -103,12 +103,12 @@ export default class Atom {
          */
         this.showHover = false
         /** 
-         * The X cordinate of this atom now
+         * The X coordinate of this atom now
          * @type {number}
          */
         this.x = 0
         /** 
-         * The Y cordinate of this atom now
+         * The Y coordinate of this atom now
          * @type {number}
          */
         this.y = 0
@@ -154,7 +154,8 @@ export default class Atom {
             levelToInspect = levelToInspect.parent
         }
         
-        this.path ="atoms/" + levelToInspect.uniqueID + topPath + this.atomType
+        this.path ="source/" + levelToInspect.uniqueID + topPath + this.atomType
+
     }
     
     /**
