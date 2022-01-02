@@ -820,7 +820,7 @@ export default class Atom {
      * @param {boolean} resultShouldBeNumber - A flag to indicate if the input should be converted to a number.
      * @param {object} callBack - Optional. A function to call with the new value when the value changes.
      */ 
-    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack = () => console.log("no callback")){
 
         var listElement = document.createElement('LI')
         list.appendChild(listElement)

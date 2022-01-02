@@ -58,6 +58,11 @@ export default class Molecule extends Atom{
          */
         this.simplify = false
         /** 
+         * The threshold for simplification. This is the maximum fraction of vertices which will be removed.
+         * @type {float}
+         */
+        this.threshold = 0.80
+        /** 
          * A flag to indicate if this molecule is currently processing.
          * @type {boolean}
          */
@@ -270,15 +275,28 @@ export default class Molecule extends Atom{
      */ 
     propagate(){
         //Set the output nodes with type 'geometry' to be the generated code
-        try{
-            this.processing = true
-            const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
-            const {answer} = window.ask(values)
-            answer.then( () => {
-                this.processing = false
-                this.pushPropagation()
-            })
-        }catch(err){this.setAlert(err)}
+        if(this.simplify){
+            try{
+                this.processing = true
+                const values = {op: "simplify", readPath: this.readOutputAtomPath(), writePath: this.path, threshold: this.threshold}
+                const {answer} = window.ask(values)
+                answer.then( () => {
+                    this.processing = false
+                    this.pushPropagation()
+                })
+            }catch(err){this.setAlert(err)}
+        }
+        else{
+            try{
+                this.processing = true
+                const values = {op: "copy", readPath: this.readOutputAtomPath(), writePath: this.path}
+                const {answer} = window.ask(values)
+                answer.then( () => {
+                    this.processing = false
+                    this.pushPropagation()
+                })
+            }catch(err){this.setAlert(err)}
+        }
     }
     
     /**
@@ -337,6 +355,7 @@ export default class Molecule extends Atom{
     setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
         this.propagate()
+        this.updateSidebar();
     }
     
     changeUnits(newUnitsIndex){
@@ -392,6 +411,10 @@ export default class Molecule extends Atom{
         //Add the check box to simplify
         this.createCheckbox(valueList,"Simplify output",this.simplify,(anEvent)=>{this.setSimplifyFlag(anEvent)})
         
+        if(this.simplify){
+            this.createEditableValueListItem(valueList,this,'threshold', 'Threshold', true)
+        }
+
         //Only bother to generate the bom if we are not currently processing data
         if(this.toProcess == 0){
             this.displaySimpleBOM(valueList)

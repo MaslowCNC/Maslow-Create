@@ -68,28 +68,7 @@ const agent = async ({ ask, message }) => {
         break;
      case "simplify":
         const aShape2Smiplify = await maslowRead(message.readPath);
-        const simplified = aShape2Smiplify.noVoid().each((s) =>
-            api.Group(
-              ...s.map((e) =>
-                e.size(({ min, max }) => {
-                  const tags = e.toGeometry().tags;
-                  if(tags.includes("user/Do not simplify")){
-                      return e;
-                  }
-                  else{
-                      const rBox = api.Box()
-                        .c1(...min)
-                        .c2(...max);
-                      const coloredBox = api.Shape.fromGeometry({
-                        ...rBox.toGeometry(),
-                        tags: tags,
-                      });
-                      return coloredBox;
-                  }
-                })
-              )
-            )
-          )
+        const simplified = aShape2Smiplify.simplify(message.threshold);
         await api.saveGeometry(message.writePath, simplified);
         return 1;
         break;
