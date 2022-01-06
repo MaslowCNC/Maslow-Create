@@ -1,7 +1,7 @@
 {
   "coverage": "99.51%",
-  "expectCount": 614,
-  "actualCount": 611,
+  "expectCount": 615,
+  "actualCount": 612,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 16,
@@ -131,11 +131,11 @@
       "undocumentLines": []
     },
     "src/js/molecules/molecule.js": {
-      "expectCount": 48,
-      "actualCount": 46,
+      "expectCount": 49,
+      "actualCount": 47,
       "undocumentLines": [
-        96,
-        342
+        101,
+        361
       ]
     },
     "src/js/molecules/move.js": {

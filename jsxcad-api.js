@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, beginEmitGroup, resolvePending, finishEmitGroup, saveEmitGroup, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, logInfo, beginEmitGroup, resolvePending, getConfig, computeHash, finishEmitGroup, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -69,11 +69,25 @@ const emitSourceText = (sourceText) =>
 const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
+    logInfo('api/core/$run', text);
+    const startTime = new Date();
     beginRecordingNotes();
     beginEmitGroup({ path, id });
     emitSourceText(text);
     const result = await op();
     await resolvePending();
+    const endTime = new Date();
+    const durationMinutes = (endTime - startTime) / 60000;
+    try {
+      if (getConfig().api.evaluate.showTimeViaMd) {
+        const md = `Evaluation time ${durationMinutes.toFixed(2)} minutes.`;
+        emit({ md, hash: computeHash(md) });
+      }
+    } catch (error) {}
+    logInfo(
+      'api/core/evaluate/duration',
+      `Evaluation time ${durationMinutes.toFixed(2)}: ${text}`
+    );
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;
@@ -144,14 +158,32 @@ const evaluate = async (ecmascript, { api, path }) => {
   try {
     await acquire();
     emitGroup = saveEmitGroup();
-    console.log(`QQ/evaluate ${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`);
+    logInfo(
+      'api/core/evaluate/script',
+      `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`
+    );
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
     );
-    const op = await builder(api);
-    const result = await op();
-    return result;
+    // Add import to make import.meta.url available.
+    const op = await builder({ ...api, import: { meta: { url: path } } });
+    console.log('QQ/evaluate/done');
+    // Retry until none of the operations block.
+    for (;;) {
+      try {
+        const result = await op();
+        return result;
+      } catch (error) {
+        if (error instanceof ErrorWouldBlock) {
+          logInfo('api/core/evaluate/error', error.message);
+          await resolvePending();
+          restoreEmitGroup(emitGroup);
+          continue;
+        }
+        throw error;
+      }
+    }
   } catch (error) {
     throw error;
   } finally {
@@ -375,6 +407,7 @@ const control = (label, value, type, options) => {
 };
 
 const api = {
+  _: undefined,
   ...mathApi,
   ...shapeApi,
   ...notesApi,

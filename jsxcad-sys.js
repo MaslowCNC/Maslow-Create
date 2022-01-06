@@ -1,3 +1,10 @@
+class ErrorWouldBlock extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ErrorWouldBlock';
+  }
+}
+
 const pending$2 = [];
 
 let pendingErrorHandler = (error) => console.log(error);
@@ -13,6 +20,442 @@ const resolvePending = async () => {
 const getPendingErrorHandler = () => pendingErrorHandler;
 const setPendingErrorHandler = (handler) => {
   pendingErrorHandler = handler;
+};
+
+function pad (hash, len) {
+  while (hash.length < len) {
+    hash = '0' + hash;
+  }
+  return hash;
+}
+
+function fold (hash, text) {
+  var i;
+  var chr;
+  var len;
+  if (text.length === 0) {
+    return hash;
+  }
+  for (i = 0, len = text.length; i < len; i++) {
+    chr = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash < 0 ? hash * -2 : hash;
+}
+
+function foldObject (hash, o, seen) {
+  return Object.keys(o).sort().reduce(foldKey, hash);
+  function foldKey (hash, key) {
+    return foldValue(hash, o[key], key, seen);
+  }
+}
+
+function foldValue (input, value, key, seen) {
+  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
+  if (value === null) {
+    return fold(hash, 'null');
+  }
+  if (value === undefined) {
+    return fold(hash, 'undefined');
+  }
+  if (typeof value === 'object' || typeof value === 'function') {
+    if (seen.indexOf(value) !== -1) {
+      return fold(hash, '[Circular]' + key);
+    }
+    seen.push(value);
+
+    var objHash = foldObject(hash, value, seen);
+
+    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
+      return objHash;
+    }
+
+    try {
+      return fold(objHash, String(value.valueOf()))
+    } catch (err) {
+      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
+    }
+  }
+  return fold(hash, value.toString());
+}
+
+function toString (o) {
+  return Object.prototype.toString.call(o);
+}
+
+function sum (o) {
+  return pad(foldValue(0, o, '', []).toString(16), 8);
+}
+
+var hashSum = sum;
+
+const hash = (item) => hashSum(item);
+
+const computeHash = hash;
+
+const fromStringToIntegerHash = (s) =>
+  Math.abs(
+    s.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
+  );
+
+const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
+
+let idbProxyableTypes;
+let cursorAdvanceMethods;
+// This is a function to prevent it throwing up in node environments.
+function getIdbProxyableTypes() {
+    return (idbProxyableTypes ||
+        (idbProxyableTypes = [
+            IDBDatabase,
+            IDBObjectStore,
+            IDBIndex,
+            IDBCursor,
+            IDBTransaction,
+        ]));
+}
+// This is a function to prevent it throwing up in node environments.
+function getCursorAdvanceMethods() {
+    return (cursorAdvanceMethods ||
+        (cursorAdvanceMethods = [
+            IDBCursor.prototype.advance,
+            IDBCursor.prototype.continue,
+            IDBCursor.prototype.continuePrimaryKey,
+        ]));
+}
+const cursorRequestMap = new WeakMap();
+const transactionDoneMap = new WeakMap();
+const transactionStoreNamesMap = new WeakMap();
+const transformCache = new WeakMap();
+const reverseTransformCache = new WeakMap();
+function promisifyRequest(request) {
+    const promise = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            request.removeEventListener('success', success);
+            request.removeEventListener('error', error);
+        };
+        const success = () => {
+            resolve(wrap(request.result));
+            unlisten();
+        };
+        const error = () => {
+            reject(request.error);
+            unlisten();
+        };
+        request.addEventListener('success', success);
+        request.addEventListener('error', error);
+    });
+    promise
+        .then((value) => {
+        // Since cursoring reuses the IDBRequest (*sigh*), we cache it for later retrieval
+        // (see wrapFunction).
+        if (value instanceof IDBCursor) {
+            cursorRequestMap.set(value, request);
+        }
+        // Catching to avoid "Uncaught Promise exceptions"
+    })
+        .catch(() => { });
+    // This mapping exists in reverseTransformCache but doesn't doesn't exist in transformCache. This
+    // is because we create many promises from a single IDBRequest.
+    reverseTransformCache.set(promise, request);
+    return promise;
+}
+function cacheDonePromiseForTransaction(tx) {
+    // Early bail if we've already created a done promise for this transaction.
+    if (transactionDoneMap.has(tx))
+        return;
+    const done = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            tx.removeEventListener('complete', complete);
+            tx.removeEventListener('error', error);
+            tx.removeEventListener('abort', error);
+        };
+        const complete = () => {
+            resolve();
+            unlisten();
+        };
+        const error = () => {
+            reject(tx.error || new DOMException('AbortError', 'AbortError'));
+            unlisten();
+        };
+        tx.addEventListener('complete', complete);
+        tx.addEventListener('error', error);
+        tx.addEventListener('abort', error);
+    });
+    // Cache it for later retrieval.
+    transactionDoneMap.set(tx, done);
+}
+let idbProxyTraps = {
+    get(target, prop, receiver) {
+        if (target instanceof IDBTransaction) {
+            // Special handling for transaction.done.
+            if (prop === 'done')
+                return transactionDoneMap.get(target);
+            // Polyfill for objectStoreNames because of Edge.
+            if (prop === 'objectStoreNames') {
+                return target.objectStoreNames || transactionStoreNamesMap.get(target);
+            }
+            // Make tx.store return the only store in the transaction, or undefined if there are many.
+            if (prop === 'store') {
+                return receiver.objectStoreNames[1]
+                    ? undefined
+                    : receiver.objectStore(receiver.objectStoreNames[0]);
+            }
+        }
+        // Else transform whatever we get back.
+        return wrap(target[prop]);
+    },
+    set(target, prop, value) {
+        target[prop] = value;
+        return true;
+    },
+    has(target, prop) {
+        if (target instanceof IDBTransaction &&
+            (prop === 'done' || prop === 'store')) {
+            return true;
+        }
+        return prop in target;
+    },
+};
+function replaceTraps(callback) {
+    idbProxyTraps = callback(idbProxyTraps);
+}
+function wrapFunction(func) {
+    // Due to expected object equality (which is enforced by the caching in `wrap`), we
+    // only create one new func per func.
+    // Edge doesn't support objectStoreNames (booo), so we polyfill it here.
+    if (func === IDBDatabase.prototype.transaction &&
+        !('objectStoreNames' in IDBTransaction.prototype)) {
+        return function (storeNames, ...args) {
+            const tx = func.call(unwrap(this), storeNames, ...args);
+            transactionStoreNamesMap.set(tx, storeNames.sort ? storeNames.sort() : [storeNames]);
+            return wrap(tx);
+        };
+    }
+    // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+    // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+    // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+    // with real promises, so each advance methods returns a new promise for the cursor object, or
+    // undefined if the end of the cursor has been reached.
+    if (getCursorAdvanceMethods().includes(func)) {
+        return function (...args) {
+            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+            // the original object.
+            func.apply(unwrap(this), args);
+            return wrap(cursorRequestMap.get(this));
+        };
+    }
+    return function (...args) {
+        // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+        // the original object.
+        return wrap(func.apply(unwrap(this), args));
+    };
+}
+function transformCachableValue(value) {
+    if (typeof value === 'function')
+        return wrapFunction(value);
+    // This doesn't return, it just creates a 'done' promise for the transaction,
+    // which is later returned for transaction.done (see idbObjectHandler).
+    if (value instanceof IDBTransaction)
+        cacheDonePromiseForTransaction(value);
+    if (instanceOfAny(value, getIdbProxyableTypes()))
+        return new Proxy(value, idbProxyTraps);
+    // Return the same value back if we're not going to transform it.
+    return value;
+}
+function wrap(value) {
+    // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+    // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+    if (value instanceof IDBRequest)
+        return promisifyRequest(value);
+    // If we've already transformed this value before, reuse the transformed value.
+    // This is faster, but it also provides object equality.
+    if (transformCache.has(value))
+        return transformCache.get(value);
+    const newValue = transformCachableValue(value);
+    // Not all types are transformed.
+    // These may be primitive types, so they can't be WeakMap keys.
+    if (newValue !== value) {
+        transformCache.set(value, newValue);
+        reverseTransformCache.set(newValue, value);
+    }
+    return newValue;
+}
+const unwrap = (value) => reverseTransformCache.get(value);
+
+/**
+ * Open a database.
+ *
+ * @param name Name of the database.
+ * @param version Schema version.
+ * @param callbacks Additional callbacks.
+ */
+function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+    const request = indexedDB.open(name, version);
+    const openPromise = wrap(request);
+    if (upgrade) {
+        request.addEventListener('upgradeneeded', (event) => {
+            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction));
+        });
+    }
+    if (blocked)
+        request.addEventListener('blocked', () => blocked());
+    openPromise
+        .then((db) => {
+        if (terminated)
+            db.addEventListener('close', () => terminated());
+        if (blocking)
+            db.addEventListener('versionchange', () => blocking());
+    })
+        .catch(() => { });
+    return openPromise;
+}
+
+const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+const writeMethods = ['put', 'add', 'delete', 'clear'];
+const cachedMethods = new Map();
+function getMethod(target, prop) {
+    if (!(target instanceof IDBDatabase &&
+        !(prop in target) &&
+        typeof prop === 'string')) {
+        return;
+    }
+    if (cachedMethods.get(prop))
+        return cachedMethods.get(prop);
+    const targetFuncName = prop.replace(/FromIndex$/, '');
+    const useIndex = prop !== targetFuncName;
+    const isWrite = writeMethods.includes(targetFuncName);
+    if (
+    // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+    !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
+        !(isWrite || readMethods.includes(targetFuncName))) {
+        return;
+    }
+    const method = async function (storeName, ...args) {
+        // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+        const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+        let target = tx.store;
+        if (useIndex)
+            target = target.index(args.shift());
+        // Must reject if op rejects.
+        // If it's a write operation, must reject if tx.done rejects.
+        // Must reject with op rejection first.
+        // Must resolve with op value.
+        // Must handle both promises (no unhandled rejections)
+        return (await Promise.all([
+            target[targetFuncName](...args),
+            isWrite && tx.done,
+        ]))[0];
+    };
+    cachedMethods.set(prop, method);
+    return method;
+}
+replaceTraps((oldTraps) => ({
+    ...oldTraps,
+    get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+    has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
+}));
+
+const cacheStoreCount = 10;
+const workspaces = {};
+
+const ensureDb = (workspace) => {
+  let entry = workspaces[workspace];
+  if (!entry) {
+    const db = openDB('jsxcad/idb', 1, {
+      upgrade(db) {
+        db.createObjectStore('config/value');
+        db.createObjectStore('config/version');
+        db.createObjectStore('control/value');
+        db.createObjectStore('control/version');
+        db.createObjectStore('source/value');
+        db.createObjectStore('source/version');
+        for (let nth = 0; nth < cacheStoreCount; nth++) {
+          db.createObjectStore(`cache_${nth}/value`);
+          db.createObjectStore(`cache_${nth}/version`);
+        }
+      },
+    });
+    entry = { db, instances: [] };
+    workspaces[workspace] = entry;
+  }
+  return entry;
+};
+
+const ensureStore = (store, db, instances) => {
+  let instance = instances[store];
+  const valueStore = `${store}/value`;
+  const versionStore = `${store}/version`;
+  if (!instance) {
+    instance = {
+      clear: async () => {
+        const tx = (await db).transaction(
+          [valueStore, versionStore],
+          'readwrite'
+        );
+        await tx.objectStore(valueStore).clear();
+        await tx.objectStore(versionStore).clear();
+        await tx.done;
+        return true;
+      },
+      getItem: async (key) => (await db).get(valueStore, key),
+      getItemAndVersion: async (key) => {
+        const tx = (await db).transaction([valueStore, versionStore]);
+        const value = await tx.objectStore(valueStore).get(key);
+        const version = await tx.objectStore(versionStore).get(key);
+        await tx.done;
+        return { value, version };
+      },
+      getItemVersion: async (key) => (await db).get(versionStore, key),
+      keys: async () => (await db).getAllKeys(valueStore),
+      removeItem: async (key) => (await db).delete(valueStore, key),
+      setItem: async (key, value) => (await db).put(valueStore, value, key),
+      setItemAndIncrementVersion: async (key, value) => {
+        const tx = (await db).transaction(
+          [valueStore, versionStore],
+          'readwrite'
+        );
+        const version = (await tx.objectStore(versionStore).get(key)) || 0;
+        await tx.objectStore(versionStore).put(version + 1, key);
+        await tx.objectStore(valueStore).put(value, key);
+        await tx.done;
+        return version;
+      },
+    };
+    instances[store] = instance;
+  }
+  return instance;
+};
+
+const db = (key) => {
+  const [jsxcad, workspace, partition] = key.split('/');
+  let store;
+
+  if (jsxcad !== 'jsxcad') {
+    throw Error('Malformed key');
+  }
+
+  switch (partition) {
+    case 'config':
+    case 'control':
+    case 'source':
+      store = partition;
+      break;
+    default: {
+      const nth = fromStringToIntegerHash(key) % cacheStoreCount;
+      store = `cache_${nth}`;
+      break;
+    }
+  }
+  const { db, instances } = ensureDb(workspace);
+  return ensureStore(store, db, instances);
+};
+
+const clearCacheDb = async ({ workspace }) => {
+  const { db, instances } = ensureDb(workspace);
+  for (let nth = 0; nth < cacheStoreCount; nth++) {
+    await ensureStore(`cache_${nth}`, db, instances).clear();
+  }
 };
 
 var global$1 = (typeof global !== "undefined" ? global :
@@ -160,7 +603,7 @@ var argv = [];
 var version = ''; // empty string to avoid regexp issues
 var versions = {};
 var release = {};
-var config = {};
+var config$1 = {};
 
 function noop() {}
 
@@ -208,10 +651,10 @@ function hrtime(previousTimestamp){
   return [seconds,nanoseconds]
 }
 
-var startTime$1 = new Date();
+var startTime$2 = new Date();
 function uptime() {
   var currentTime = new Date();
-  var dif = currentTime - startTime$1;
+  var dif = currentTime - startTime$2;
   return dif / 1000;
 }
 
@@ -237,7 +680,7 @@ var process = {
   hrtime: hrtime,
   platform: platform,
   release: release,
-  config: config,
+  config: config$1,
   uptime: uptime
 };
 
@@ -262,6 +705,86 @@ const isNode =
   typeof process !== 'undefined' &&
   process.versions != null &&
   process.versions.node != null;
+
+/* global self */
+var self$1 = self;
+
+const watchers$1 = new Set();
+
+const log = async (entry) => {
+  if (isWebWorker) {
+    return addPending(self$1.tell({ op: 'log', entry }));
+  }
+
+  for (const watcher of watchers$1) {
+    watcher(entry);
+  }
+};
+
+const logInfo = (source, text) =>
+  log({ type: 'info', source, text, id: self$1 && self$1.id });
+
+const logError = (source, text) =>
+  log({ type: 'error', source, text, id: self$1 && self$1.id });
+
+const watchLog = (thunk) => {
+  watchers$1.add(thunk);
+  return thunk;
+};
+
+const unwatchLog = (thunk) => {
+  watchers$1.delete(thunk);
+};
+
+const aggregates = new Map();
+
+const startTime$1 = (name) => {
+  if (!aggregates.has(name)) {
+    aggregates.set(name, { name, count: 0, total: 0, average: 0 });
+  }
+  const start = new Date();
+  const aggregate = aggregates.get(name);
+  const timer = { start, name, aggregate };
+  logInfo('sys/profile/startTime', name);
+  return timer;
+};
+
+const endTime = ({ start, name, aggregate }) => {
+  const end = new Date();
+  const seconds = (end - start) / 1000;
+  aggregate.last = seconds;
+  aggregate.total += seconds;
+  aggregate.count += 1;
+  aggregate.average = aggregate.total / aggregate.count;
+  const { average, count, last, total } = aggregate;
+  logInfo(
+    'sys/profile/endTime',
+    `${name} average: ${average.toFixed(
+      2
+    )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
+  );
+  return aggregate;
+};
+
+const reportTimes = () => {
+  const entries = [...aggregates.values()].sort((a, b) => a.total - b.total);
+  for (const { average, count, last, name, total } of entries) {
+    logInfo(
+      'sys/profile',
+      `${name} average: ${average.toFixed(
+        2
+      )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
+    );
+  }
+};
+
+let config = {};
+
+const getConfig = () => config;
+
+const setConfig = (value = {}) => {
+  config = value;
+};
 
 const createConversation = ({ agent, say }) => {
   const conversation = {
@@ -357,29 +880,6 @@ const createConversation = ({ agent, say }) => {
   return conversation;
 };
 
-/* global self */
-
-const watchers$1 = new Set();
-
-const log = async (entry) => {
-  if (isWebWorker) {
-    return addPending(self.tell({ op: 'log', entry }));
-  }
-
-  for (const watcher of watchers$1) {
-    watcher(entry);
-  }
-};
-
-const watchLog = (thunk) => {
-  watchers$1.add(thunk);
-  return thunk;
-};
-
-const unwatchLog = (thunk) => {
-  watchers$1.delete(thunk);
-};
-
 const nodeWorker = () => {};
 
 /* global Worker */
@@ -457,7 +957,7 @@ const createService = (spec, worker) => {
       }
     };
     service.terminate = () => service.release(true);
-    service.tell({ op: 'sys/attach', id: service.id });
+    service.tell({ op: 'sys/attach', config: getConfig(), id: service.id });
     return service;
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
@@ -532,64 +1032,69 @@ const getFilesystem = () => {
 
 const getWorkspace = () => getFilesystem();
 
-const files = new Map();
+const fileChangeWatchers = new Set();
+const fileChangeWatchersByPath = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
-const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+const runFileCreationWatchers = async (path, workspace) => {
+  for (const watcher of fileCreationWatchers) {
+    await watcher(path, workspace);
   }
-  const path = qualifyPath(unqualifiedPath, options.workspace);
-  let file = files.get(path);
-  if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
+};
+
+const runFileDeletionWatchers = async (path, workspace) => {
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(path, workspace);
+  }
+};
+
+const runFileChangeWatchers = async (path, workspace) => {
+  for (const watcher of fileChangeWatchers) {
+    await watcher(path, workspace);
+  }
+  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
+  if (entry === undefined) {
+    return;
+  }
+  const { watchers } = entry;
+  if (watchers === undefined) {
+    return;
+  }
+  for (const watcher of watchers) {
+    await watcher(path, workspace);
+  }
+};
+
+const watchFile = async (path, workspace, thunk) => {
+  if (thunk) {
+    const qualifiedPath = qualifyPath(path, workspace);
+    let entry = fileChangeWatchersByPath.get(qualifiedPath);
+    if (entry === undefined) {
+      entry = { path, workspace, watchers: new Set() };
+      fileChangeWatchersByPath.set(qualifiedPath, entry);
+    }
+    entry.watchers.add(thunk);
+    return thunk;
+  }
+};
+
+const unwatchFile = async (path, workspace, thunk) => {
+  if (thunk) {
+    const qualifiedPath = qualifyPath(path, workspace);
+    const entry = fileChangeWatchersByPath.get(qualifiedPath);
+    if (entry === undefined) {
+      return;
+    }
+    entry.watchers.delete(thunk);
+    if (entry.watchers.size === 0) {
+      fileChangeWatchersByPath.delete(qualifiedPath);
     }
   }
-  return file;
-};
-
-const listFiles$1 = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-const deleteFile$1 = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath, options.workspace);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
-  }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
 };
 
 const unwatchFileCreation = async (thunk) => {
   fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
   return thunk;
 };
 
@@ -598,24 +1103,50 @@ const unwatchFileDeletion = async (thunk) => {
   return thunk;
 };
 
-const watchFile = async (path, thunk, options) => {
-  if (thunk) {
-    (await getFile(options, path)).watchers.add(thunk);
-    return thunk;
+const watchFileCreation = async (thunk) => {
+  fileCreationWatchers.add(thunk);
+  return thunk;
+};
+
+const watchFileDeletion = async (thunk) => {
+  fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+const files = new Map();
+
+// Do we need the ensureFile functions?
+const ensureQualifiedFile = (path, qualifiedPath) => {
+  let file = files.get(qualifiedPath);
+  // Accessing a file counts as creation.
+  if (file === undefined) {
+    file = { path, storageKey: qualifiedPath };
+    files.set(qualifiedPath, file);
+  }
+  return file;
+};
+
+const getQualifiedFile = (qualifiedPath) => files.get(qualifiedPath);
+
+const getFile = (path, workspace) =>
+  getQualifiedFile(qualifyPath(path, workspace));
+
+const listFiles$1 = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
   }
 };
 
-const unwatchFile = async (path, thunk, options) => {
-  if (thunk) {
-    return (await getFile(options, path)).watchers.delete(thunk);
+watchFileDeletion((path, workspace) => {
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = files.get(qualifiedPath);
+  if (file) {
+    file.data = undefined;
   }
-};
+  files.delete(qualifiedPath);
+});
 
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function commonjsRequire () {
-	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
-}
+var nodeFetch = _ => _;
 
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -625,3135 +1156,2372 @@ function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
-/**
- * https://bugs.webkit.org/show_bug.cgi?id=226547
- * Safari has a horrible bug where IDB requests can hang while the browser is starting up.
- * The only solution is to keep nudging it until it's awake.
- * This probably creates garbage, but garbage is better than totally failing.
- */
+var util = createCommonjsModule(function (module, exports) {
 
-function idbReady() {
-  var isSafari = !navigator.userAgentData && /Safari\//.test(navigator.userAgent) && !/Chrom(e|ium)\//.test(navigator.userAgent); // No point putting other browsers or older versions of Safari through this mess.
-
-  if (!isSafari || !indexedDB.databases) return Promise.resolve();
-  var intervalId;
-  return new Promise(function (resolve) {
-    var tryIdb = function tryIdb() {
-      return indexedDB.databases().finally(resolve);
-    };
-
-    intervalId = setInterval(tryIdb, 100);
-    tryIdb();
-  }).finally(function () {
-    return clearInterval(intervalId);
-  });
-}
-
-var cjsCompat$1 = idbReady;
-
-var cjsCompat = createCommonjsModule(function (module, exports) {
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.isNode = exports.PROMISE_RESOLVED_VOID = exports.PROMISE_RESOLVED_TRUE = exports.PROMISE_RESOLVED_FALSE = void 0;
+exports.isPromise = isPromise;
+exports.microSeconds = microSeconds;
+exports.randomInt = randomInt;
+exports.randomToken = randomToken;
+exports.sleep = sleep;
 
-
-
-function _interopDefaultLegacy(e) {
-  return e && _typeof(e) === 'object' && 'default' in e ? e : {
-    'default': e
-  };
+/**
+ * returns true if the given object is a promise
+ */
+function isPromise(obj) {
+  if (obj && typeof obj.then === 'function') {
+    return true;
+  } else {
+    return false;
+  }
 }
 
-var safariFix__default = /*#__PURE__*/_interopDefaultLegacy(cjsCompat$1);
+var PROMISE_RESOLVED_FALSE = Promise.resolve(false);
+exports.PROMISE_RESOLVED_FALSE = PROMISE_RESOLVED_FALSE;
+var PROMISE_RESOLVED_TRUE = Promise.resolve(true);
+exports.PROMISE_RESOLVED_TRUE = PROMISE_RESOLVED_TRUE;
+var PROMISE_RESOLVED_VOID = Promise.resolve();
+exports.PROMISE_RESOLVED_VOID = PROMISE_RESOLVED_VOID;
 
-function promisifyRequest(request) {
-  return new Promise(function (resolve, reject) {
-    // @ts-ignore - file size hacks
-    request.oncomplete = request.onsuccess = function () {
-      return resolve(request.result);
-    }; // @ts-ignore - file size hacks
-
-
-    request.onabort = request.onerror = function () {
-      return reject(request.error);
-    };
+function sleep(time, resolveWith) {
+  if (!time) time = 0;
+  return new Promise(function (res) {
+    return setTimeout(function () {
+      return res(resolveWith);
+    }, time);
   });
 }
 
-function createStore(dbName, storeName) {
-  var dbp = safariFix__default['default']().then(function () {
-    var request = indexedDB.open(dbName);
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+/**
+ * https://stackoverflow.com/a/8084248
+ */
 
-    request.onupgradeneeded = function () {
-      return request.result.createObjectStore(storeName);
-    };
 
-    return promisifyRequest(request);
-  });
-  return function (txMode, callback) {
-    return dbp.then(function (db) {
-      return callback(db.transaction(storeName, txMode).objectStore(storeName));
-    });
+function randomToken() {
+  return Math.random().toString(36).substring(2);
+}
+
+var lastMs = 0;
+var additional = 0;
+/**
+ * returns the current time in micro-seconds,
+ * WARNING: This is a pseudo-function
+ * Performance.now is not reliable in webworkers, so we just make sure to never return the same time.
+ * This is enough in browsers, and this function will not be used in nodejs.
+ * The main reason for this hack is to ensure that BroadcastChannel behaves equal to production when it is used in fast-running unit tests.
+ */
+
+function microSeconds() {
+  var ms = new Date().getTime();
+
+  if (ms === lastMs) {
+    additional++;
+    return ms * 1000 + additional;
+  } else {
+    lastMs = ms;
+    additional = 0;
+    return ms * 1000;
+  }
+}
+/**
+ * copied from the 'detect-node' npm module
+ * We cannot use the module directly because it causes problems with rollup
+ * @link https://github.com/iliakan/detect-node/blob/master/index.js
+ */
+
+
+var isNode = Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
+exports.isNode = isNode;
+});
+
+unwrapExports(util);
+util.isNode;
+util.PROMISE_RESOLVED_VOID;
+util.PROMISE_RESOLVED_TRUE;
+util.PROMISE_RESOLVED_FALSE;
+util.isPromise;
+util.microSeconds;
+util.randomInt;
+util.randomToken;
+util.sleep;
+
+var interopRequireDefault = createCommonjsModule(function (module) {
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
   };
 }
 
-var defaultGetStoreFunc;
+module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
 
-function defaultGetStore() {
-  if (!defaultGetStoreFunc) {
-    defaultGetStoreFunc = createStore('keyval-store', 'keyval');
+unwrapExports(interopRequireDefault);
+
+var _typeof_1 = createCommonjsModule(function (module) {
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
+}
+
+module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(_typeof_1);
+
+var native_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.averageResponseTime = averageResponseTime;
+exports.canBeUsed = canBeUsed;
+exports.close = close;
+exports.create = create;
+exports.microSeconds = exports["default"] = void 0;
+exports.onMessage = onMessage;
+exports.postMessage = postMessage;
+exports.type = void 0;
+
+
+
+var microSeconds = util.microSeconds;
+exports.microSeconds = microSeconds;
+var type = 'native';
+exports.type = type;
+
+function create(channelName) {
+  var state = {
+    messagesCallback: null,
+    bc: new BroadcastChannel(channelName),
+    subFns: [] // subscriberFunctions
+
+  };
+
+  state.bc.onmessage = function (msg) {
+    if (state.messagesCallback) {
+      state.messagesCallback(msg.data);
+    }
+  };
+
+  return state;
+}
+
+function close(channelState) {
+  channelState.bc.close();
+  channelState.subFns = [];
+}
+
+function postMessage(channelState, messageJson) {
+  try {
+    channelState.bc.postMessage(messageJson, false);
+    return util.PROMISE_RESOLVED_VOID;
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
+function onMessage(channelState, fn) {
+  channelState.messagesCallback = fn;
+}
+
+function canBeUsed() {
+  /**
+   * in the electron-renderer, isNode will be true even if we are in browser-context
+   * so we also check if window is undefined
+   */
+  if (util.isNode && typeof window === 'undefined') return false;
+
+  if (typeof BroadcastChannel === 'function') {
+    if (BroadcastChannel._pubkey) {
+      throw new Error('BroadcastChannel: Do not overwrite window.BroadcastChannel with this module, this is not a polyfill');
+    }
+
+    return true;
+  } else return false;
+}
+
+function averageResponseTime() {
+  return 150;
+}
+
+var _default = {
+  create: create,
+  close: close,
+  onMessage: onMessage,
+  postMessage: postMessage,
+  canBeUsed: canBeUsed,
+  type: type,
+  averageResponseTime: averageResponseTime,
+  microSeconds: microSeconds
+};
+exports["default"] = _default;
+});
+
+unwrapExports(native_1);
+native_1.averageResponseTime;
+native_1.canBeUsed;
+native_1.close;
+native_1.create;
+native_1.microSeconds;
+native_1.onMessage;
+native_1.postMessage;
+native_1.type;
+
+/**
+ * this is a set which automatically forgets
+ * a given entry when a new entry is set and the ttl
+ * of the old one is over
+ */
+var ObliviousSet = /** @class */ (function () {
+    function ObliviousSet(ttl) {
+        this.ttl = ttl;
+        this.set = new Set();
+        this.timeMap = new Map();
+    }
+    ObliviousSet.prototype.has = function (value) {
+        return this.set.has(value);
+    };
+    ObliviousSet.prototype.add = function (value) {
+        var _this = this;
+        this.timeMap.set(value, now());
+        this.set.add(value);
+        /**
+         * When a new value is added,
+         * start the cleanup at the next tick
+         * to not block the cpu for more important stuff
+         * that might happen.
+         */
+        setTimeout(function () {
+            removeTooOldValues(_this);
+        }, 0);
+    };
+    ObliviousSet.prototype.clear = function () {
+        this.set.clear();
+        this.timeMap.clear();
+    };
+    return ObliviousSet;
+}());
+/**
+ * Removes all entries from the set
+ * where the TTL has expired
+ */
+function removeTooOldValues(obliviousSet) {
+    var olderThen = now() - obliviousSet.ttl;
+    var iterator = obliviousSet.set[Symbol.iterator]();
+    /**
+     * Because we can assume the new values are added at the bottom,
+     * we start from the top and stop as soon as we reach a non-too-old value.
+     */
+    while (true) {
+        var value = iterator.next().value;
+        if (!value) {
+            return; // no more elements
+        }
+        var time = obliviousSet.timeMap.get(value);
+        if (time < olderThen) {
+            obliviousSet.timeMap.delete(value);
+            obliviousSet.set.delete(value);
+        }
+        else {
+            // We reached a value that is not old enough
+            return;
+        }
+    }
+}
+function now() {
+    return new Date().getTime();
+}
+
+var es$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  ObliviousSet: ObliviousSet,
+  removeTooOldValues: removeTooOldValues,
+  now: now
+});
+
+var options = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fillOptionsWithDefaults = fillOptionsWithDefaults;
+
+function fillOptionsWithDefaults() {
+  var originalOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var options = JSON.parse(JSON.stringify(originalOptions)); // main
+
+  if (typeof options.webWorkerSupport === 'undefined') options.webWorkerSupport = true; // indexed-db
+
+  if (!options.idb) options.idb = {}; //  after this time the messages get deleted
+
+  if (!options.idb.ttl) options.idb.ttl = 1000 * 45;
+  if (!options.idb.fallbackInterval) options.idb.fallbackInterval = 150; //  handles abrupt db onclose events.
+
+  if (originalOptions.idb && typeof originalOptions.idb.onclose === 'function') options.idb.onclose = originalOptions.idb.onclose; // localstorage
+
+  if (!options.localstorage) options.localstorage = {};
+  if (!options.localstorage.removeTimeout) options.localstorage.removeTimeout = 1000 * 60; // custom methods
+
+  if (originalOptions.methods) options.methods = originalOptions.methods; // node
+
+  if (!options.node) options.node = {};
+  if (!options.node.ttl) options.node.ttl = 1000 * 60 * 2; // 2 minutes;
+
+  /**
+   * On linux use 'ulimit -Hn' to get the limit of open files.
+   * On ubuntu this was 4096 for me, so we use half of that as maxParallelWrites default.
+   */
+
+  if (!options.node.maxParallelWrites) options.node.maxParallelWrites = 2048;
+  if (typeof options.node.useFastPath === 'undefined') options.node.useFastPath = true;
+  return options;
+}
+});
+
+unwrapExports(options);
+options.fillOptionsWithDefaults;
+
+var indexedDb = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.averageResponseTime = averageResponseTime;
+exports.canBeUsed = canBeUsed;
+exports.cleanOldMessages = cleanOldMessages;
+exports.close = close;
+exports.create = create;
+exports.createDatabase = createDatabase;
+exports["default"] = void 0;
+exports.getAllMessages = getAllMessages;
+exports.getIdb = getIdb;
+exports.getMessagesHigherThan = getMessagesHigherThan;
+exports.getOldMessages = getOldMessages;
+exports.microSeconds = void 0;
+exports.onMessage = onMessage;
+exports.postMessage = postMessage;
+exports.removeMessageById = removeMessageById;
+exports.type = void 0;
+exports.writeMessage = writeMessage;
+
+
+
+
+
+
+
+/**
+ * this method uses indexeddb to store the messages
+ * There is currently no observerAPI for idb
+ * @link https://github.com/w3c/IndexedDB/issues/51
+ */
+var microSeconds = util.microSeconds;
+exports.microSeconds = microSeconds;
+var DB_PREFIX = 'pubkey.broadcast-channel-0-';
+var OBJECT_STORE_ID = 'messages';
+var type = 'idb';
+exports.type = type;
+
+function getIdb() {
+  if (typeof indexedDB !== 'undefined') return indexedDB;
+
+  if (typeof window !== 'undefined') {
+    if (typeof window.mozIndexedDB !== 'undefined') return window.mozIndexedDB;
+    if (typeof window.webkitIndexedDB !== 'undefined') return window.webkitIndexedDB;
+    if (typeof window.msIndexedDB !== 'undefined') return window.msIndexedDB;
   }
 
-  return defaultGetStoreFunc;
+  return false;
 }
-/**
- * Get a value by its key.
- *
- * @param key
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
 
+function createDatabase(channelName) {
+  var IndexedDB = getIdb(); // create table
 
-function get(key) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readonly', function (store) {
-    return promisifyRequest(store.get(key));
-  });
-}
-/**
- * Set a value with a key.
- *
- * @param key
- * @param value
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
+  var dbName = DB_PREFIX + channelName;
+  var openRequest = IndexedDB.open(dbName, 1);
 
-
-function set(key, value) {
-  var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.put(value, key);
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Set multiple values at once. This is faster than calling set() multiple times.
- * It's also atomic – if one of the pairs can't be added, none will be added.
- *
- * @param entries Array of entries, where each entry is an array of `[key, value]`.
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function setMany(entries) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    entries.forEach(function (entry) {
-      return store.put(entry[1], entry[0]);
+  openRequest.onupgradeneeded = function (ev) {
+    var db = ev.target.result;
+    db.createObjectStore(OBJECT_STORE_ID, {
+      keyPath: 'id',
+      autoIncrement: true
     });
-    return promisifyRequest(store.transaction);
+  };
+
+  var dbPromise = new Promise(function (res, rej) {
+    openRequest.onerror = function (ev) {
+      return rej(ev);
+    };
+
+    openRequest.onsuccess = function () {
+      res(openRequest.result);
+    };
   });
+  return dbPromise;
 }
 /**
- * Get multiple values by their keys
- *
- * @param keys
- * @param customStore Method to get a custom store. Use with caution (see the docs).
+ * writes the new message to the database
+ * so other readers can find it
  */
 
 
-function getMany(keys) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readonly', function (store) {
-    return Promise.all(keys.map(function (key) {
-      return promisifyRequest(store.get(key));
+function writeMessage(db, readerUuid, messageJson) {
+  var time = new Date().getTime();
+  var writeObject = {
+    uuid: readerUuid,
+    time: time,
+    data: messageJson
+  };
+  var transaction = db.transaction([OBJECT_STORE_ID], 'readwrite');
+  return new Promise(function (res, rej) {
+    transaction.oncomplete = function () {
+      return res();
+    };
+
+    transaction.onerror = function (ev) {
+      return rej(ev);
+    };
+
+    var objectStore = transaction.objectStore(OBJECT_STORE_ID);
+    objectStore.add(writeObject);
+  });
+}
+
+function getAllMessages(db) {
+  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
+  var ret = [];
+  return new Promise(function (res) {
+    objectStore.openCursor().onsuccess = function (ev) {
+      var cursor = ev.target.result;
+
+      if (cursor) {
+        ret.push(cursor.value); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
+
+        cursor["continue"]();
+      } else {
+        res(ret);
+      }
+    };
+  });
+}
+
+function getMessagesHigherThan(db, lastCursorId) {
+  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
+  var ret = [];
+
+  function openCursor() {
+    // Occasionally Safari will fail on IDBKeyRange.bound, this
+    // catches that error, having it open the cursor to the first
+    // item. When it gets data it will advance to the desired key.
+    try {
+      var keyRangeValue = IDBKeyRange.bound(lastCursorId + 1, Infinity);
+      return objectStore.openCursor(keyRangeValue);
+    } catch (e) {
+      return objectStore.openCursor();
+    }
+  }
+
+  return new Promise(function (res) {
+    openCursor().onsuccess = function (ev) {
+      var cursor = ev.target.result;
+
+      if (cursor) {
+        if (cursor.value.id < lastCursorId + 1) {
+          cursor["continue"](lastCursorId + 1);
+        } else {
+          ret.push(cursor.value);
+          cursor["continue"]();
+        }
+      } else {
+        res(ret);
+      }
+    };
+  });
+}
+
+function removeMessageById(db, id) {
+  var request = db.transaction([OBJECT_STORE_ID], 'readwrite').objectStore(OBJECT_STORE_ID)["delete"](id);
+  return new Promise(function (res) {
+    request.onsuccess = function () {
+      return res();
+    };
+  });
+}
+
+function getOldMessages(db, ttl) {
+  var olderThen = new Date().getTime() - ttl;
+  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
+  var ret = [];
+  return new Promise(function (res) {
+    objectStore.openCursor().onsuccess = function (ev) {
+      var cursor = ev.target.result;
+
+      if (cursor) {
+        var msgObk = cursor.value;
+
+        if (msgObk.time < olderThen) {
+          ret.push(msgObk); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
+
+          cursor["continue"]();
+        } else {
+          // no more old messages,
+          res(ret);
+          return;
+        }
+      } else {
+        res(ret);
+      }
+    };
+  });
+}
+
+function cleanOldMessages(db, ttl) {
+  return getOldMessages(db, ttl).then(function (tooOld) {
+    return Promise.all(tooOld.map(function (msgObj) {
+      return removeMessageById(db, msgObj.id);
     }));
   });
 }
-/**
- * Update a value. This lets you see the old value and update it as an atomic operation.
- *
- * @param key
- * @param updater A callback that takes the old value and returns a new value.
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
 
+function create(channelName, options$1) {
+  options$1 = (0, options.fillOptionsWithDefaults)(options$1);
+  return createDatabase(channelName).then(function (db) {
+    var state = {
+      closed: false,
+      lastCursorId: 0,
+      channelName: channelName,
+      options: options$1,
+      uuid: (0, util.randomToken)(),
 
-function update(key, updater) {
-  var customStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    return (// Need to create the promise manually.
-      // If I try to chain promises, the transaction closes in browsers
-      // that use a promise polyfill (IE10/11).
-      new Promise(function (resolve, reject) {
-        store.get(key).onsuccess = function () {
-          try {
-            store.put(updater(this.result), key);
-            resolve(promisifyRequest(store.transaction));
-          } catch (err) {
-            reject(err);
-          }
-        };
-      })
-    );
-  });
-}
-/**
- * Delete a particular key from the store.
- *
- * @param key
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function del(key) {
-  var customStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.delete(key);
-    return promisifyRequest(store.transaction);
-  });
-}
-/**
- * Clear all values in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
-
-
-function clear() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  return customStore('readwrite', function (store) {
-    store.clear();
-    return promisifyRequest(store.transaction);
-  });
-}
-
-function eachCursor(customStore, callback) {
-  return customStore('readonly', function (store) {
-    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
-    // And openKeyCursor isn't supported by Safari.
-    store.openCursor().onsuccess = function () {
-      if (!this.result) return;
-      callback(this.result);
-      this.result.continue();
+      /**
+       * emittedMessagesIds
+       * contains all messages that have been emitted before
+       * @type {ObliviousSet}
+       */
+      eMIs: new es$1.ObliviousSet(options$1.idb.ttl * 2),
+      // ensures we do not read messages in parrallel
+      writeBlockPromise: util.PROMISE_RESOLVED_VOID,
+      messagesCallback: null,
+      readQueuePromises: [],
+      db: db
     };
+    /**
+     * Handle abrupt closes that do not originate from db.close().
+     * This could happen, for example, if the underlying storage is
+     * removed or if the user clears the database in the browser's
+     * history preferences.
+     */
 
-    return promisifyRequest(store.transaction);
+    db.onclose = function () {
+      state.closed = true;
+      if (options$1.idb.onclose) options$1.idb.onclose();
+    };
+    /**
+     * if service-workers are used,
+     * we have no 'storage'-event if they post a message,
+     * therefore we also have to set an interval
+     */
+
+
+    _readLoop(state);
+
+    return state;
   });
 }
+
+function _readLoop(state) {
+  if (state.closed) return;
+  readNewMessages(state).then(function () {
+    return (0, util.sleep)(state.options.idb.fallbackInterval);
+  }).then(function () {
+    return _readLoop(state);
+  });
+}
+
+function _filterMessage(msgObj, state) {
+  if (msgObj.uuid === state.uuid) return false; // send by own
+
+  if (state.eMIs.has(msgObj.id)) return false; // already emitted
+
+  if (msgObj.data.time < state.messagesCallbackTime) return false; // older then onMessageCallback
+
+  return true;
+}
 /**
- * Get all keys in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
+ * reads all new messages from the database and emits them
  */
 
 
-function keys() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  var items = [];
-  return eachCursor(customStore, function (cursor) {
-    return items.push(cursor.key);
-  }).then(function () {
-    return items;
-  });
-}
-/**
- * Get all values in the store.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
+function readNewMessages(state) {
+  // channel already closed
+  if (state.closed) return util.PROMISE_RESOLVED_VOID; // if no one is listening, we do not need to scan for new messages
 
+  if (!state.messagesCallback) return util.PROMISE_RESOLVED_VOID;
+  return getMessagesHigherThan(state.db, state.lastCursorId).then(function (newerMessages) {
+    var useMessages = newerMessages
+    /**
+     * there is a bug in iOS where the msgObj can be undefined some times
+     * so we filter them out
+     * @link https://github.com/pubkey/broadcast-channel/issues/19
+     */
+    .filter(function (msgObj) {
+      return !!msgObj;
+    }).map(function (msgObj) {
+      if (msgObj.id > state.lastCursorId) {
+        state.lastCursorId = msgObj.id;
+      }
 
-function values() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  var items = [];
-  return eachCursor(customStore, function (cursor) {
-    return items.push(cursor.value);
-  }).then(function () {
-    return items;
-  });
-}
-/**
- * Get all entries in the store. Each entry is an array of `[key, value]`.
- *
- * @param customStore Method to get a custom store. Use with caution (see the docs).
- */
+      return msgObj;
+    }).filter(function (msgObj) {
+      return _filterMessage(msgObj, state);
+    }).sort(function (msgObjA, msgObjB) {
+      return msgObjA.time - msgObjB.time;
+    }); // sort by time
 
-
-function entries() {
-  var customStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultGetStore();
-  var items = [];
-  return eachCursor(customStore, function (cursor) {
-    return items.push([cursor.key, cursor.value]);
-  }).then(function () {
-    return items;
+    useMessages.forEach(function (msgObj) {
+      if (state.messagesCallback) {
+        state.eMIs.add(msgObj.id);
+        state.messagesCallback(msgObj.data);
+      }
+    });
+    return util.PROMISE_RESOLVED_VOID;
   });
 }
 
-exports.clear = clear;
-exports.createStore = createStore;
-exports.del = del;
-exports.entries = entries;
-exports.get = get;
-exports.getMany = getMany;
-exports.keys = keys;
-exports.promisifyRequest = promisifyRequest;
-exports.set = set;
-exports.setMany = setMany;
-exports.update = update;
-exports.values = values;
+function close(channelState) {
+  channelState.closed = true;
+  channelState.db.close();
+}
+
+function postMessage(channelState, messageJson) {
+  channelState.writeBlockPromise = channelState.writeBlockPromise.then(function () {
+    return writeMessage(channelState.db, channelState.uuid, messageJson);
+  }).then(function () {
+    if ((0, util.randomInt)(0, 10) === 0) {
+      /* await (do not await) */
+      cleanOldMessages(channelState.db, channelState.options.idb.ttl);
+    }
+  });
+  return channelState.writeBlockPromise;
+}
+
+function onMessage(channelState, fn, time) {
+  channelState.messagesCallbackTime = time;
+  channelState.messagesCallback = fn;
+  readNewMessages(channelState);
+}
+
+function canBeUsed() {
+  if (util.isNode) return false;
+  var idb = getIdb();
+  if (!idb) return false;
+  return true;
+}
+
+function averageResponseTime(options) {
+  return options.idb.fallbackInterval * 2;
+}
+
+var _default = {
+  create: create,
+  close: close,
+  onMessage: onMessage,
+  postMessage: postMessage,
+  canBeUsed: canBeUsed,
+  type: type,
+  averageResponseTime: averageResponseTime,
+  microSeconds: microSeconds
+};
+exports["default"] = _default;
 });
 
-unwrapExports(cjsCompat);
-cjsCompat.clear;
-cjsCompat.createStore;
-cjsCompat.del;
-cjsCompat.entries;
-cjsCompat.get;
-cjsCompat.getMany;
-cjsCompat.keys;
-cjsCompat.promisifyRequest;
-cjsCompat.set;
-cjsCompat.setMany;
-cjsCompat.update;
-cjsCompat.values;
+unwrapExports(indexedDb);
+indexedDb.averageResponseTime;
+indexedDb.canBeUsed;
+indexedDb.cleanOldMessages;
+indexedDb.close;
+indexedDb.create;
+indexedDb.createDatabase;
+indexedDb.getAllMessages;
+indexedDb.getIdb;
+indexedDb.getMessagesHigherThan;
+indexedDb.getOldMessages;
+indexedDb.microSeconds;
+indexedDb.onMessage;
+indexedDb.postMessage;
+indexedDb.removeMessageById;
+indexedDb.type;
+indexedDb.writeMessage;
 
-var localforage = createCommonjsModule(function (module, exports) {
-/*!
-    localForage -- Offline Storage, Improved
-    Version 1.10.0
-    https://localforage.github.io/localForage
-    (c) 2013-2017 Mozilla, Apache License 2.0
-*/
-(function(f){{module.exports=f();}})(function(){return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof commonjsRequire=="function"&&commonjsRequire;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw (f.code="MODULE_NOT_FOUND", f)}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r);}return n[o].exports}var i=typeof commonjsRequire=="function"&&commonjsRequire;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-(function (global){
-var Mutation = global.MutationObserver || global.WebKitMutationObserver;
+var localstorage = createCommonjsModule(function (module, exports) {
 
-var scheduleDrain;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.addStorageEventListener = addStorageEventListener;
+exports.averageResponseTime = averageResponseTime;
+exports.canBeUsed = canBeUsed;
+exports.close = close;
+exports.create = create;
+exports["default"] = void 0;
+exports.getLocalStorage = getLocalStorage;
+exports.microSeconds = void 0;
+exports.onMessage = onMessage;
+exports.postMessage = postMessage;
+exports.removeStorageEventListener = removeStorageEventListener;
+exports.storageKey = storageKey;
+exports.type = void 0;
 
-{
-  if (Mutation) {
-    var called = 0;
-    var observer = new Mutation(nextTick);
-    var element = global.document.createTextNode('');
-    observer.observe(element, {
-      characterData: true
-    });
-    scheduleDrain = function () {
-      element.data = (called = ++called % 2);
-    };
-  } else if (!global.setImmediate && typeof global.MessageChannel !== 'undefined') {
-    var channel = new global.MessageChannel();
-    channel.port1.onmessage = nextTick;
-    scheduleDrain = function () {
-      channel.port2.postMessage(0);
-    };
-  } else if ('document' in global && 'onreadystatechange' in global.document.createElement('script')) {
-    scheduleDrain = function () {
 
-      // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
-      // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
-      var scriptEl = global.document.createElement('script');
-      scriptEl.onreadystatechange = function () {
-        nextTick();
 
-        scriptEl.onreadystatechange = null;
-        scriptEl.parentNode.removeChild(scriptEl);
-        scriptEl = null;
-      };
-      global.document.documentElement.appendChild(scriptEl);
-    };
-  } else {
-    scheduleDrain = function () {
-      setTimeout(nextTick, 0);
-    };
-  }
-}
 
-var draining;
-var queue = [];
-//named nextTick for less confusing stack traces
-function nextTick() {
-  draining = true;
-  var i, oldQueue;
-  var len = queue.length;
-  while (len) {
-    oldQueue = queue;
-    queue = [];
-    i = -1;
-    while (++i < len) {
-      oldQueue[i]();
-    }
-    len = queue.length;
-  }
-  draining = false;
-}
 
-module.exports = immediate;
-function immediate(task) {
-  if (queue.push(task) === 1 && !draining) {
-    scheduleDrain();
-  }
-}
 
-}).call(this,typeof commonjsGlobal !== "undefined" ? commonjsGlobal : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {});
-},{}],2:[function(_dereq_,module,exports){
-var immediate = _dereq_(1);
 
-/* istanbul ignore next */
-function INTERNAL() {}
+/**
+ * A localStorage-only method which uses localstorage and its 'storage'-event
+ * This does not work inside of webworkers because they have no access to locastorage
+ * This is basically implemented to support IE9 or your grandmothers toaster.
+ * @link https://caniuse.com/#feat=namevalue-storage
+ * @link https://caniuse.com/#feat=indexeddb
+ */
+var microSeconds = util.microSeconds;
+exports.microSeconds = microSeconds;
+var KEY_PREFIX = 'pubkey.broadcastChannel-';
+var type = 'localstorage';
+/**
+ * copied from crosstab
+ * @link https://github.com/tejacques/crosstab/blob/master/src/crosstab.js#L32
+ */
 
-var handlers = {};
+exports.type = type;
 
-var REJECTED = ['REJECTED'];
-var FULFILLED = ['FULFILLED'];
-var PENDING = ['PENDING'];
+function getLocalStorage() {
+  var localStorage;
+  if (typeof window === 'undefined') return null;
 
-module.exports = Promise;
-
-function Promise(resolver) {
-  if (typeof resolver !== 'function') {
-    throw new TypeError('resolver must be a function');
-  }
-  this.state = PENDING;
-  this.queue = [];
-  this.outcome = void 0;
-  if (resolver !== INTERNAL) {
-    safelyResolveThenable(this, resolver);
-  }
-}
-
-Promise.prototype["catch"] = function (onRejected) {
-  return this.then(null, onRejected);
-};
-Promise.prototype.then = function (onFulfilled, onRejected) {
-  if (typeof onFulfilled !== 'function' && this.state === FULFILLED ||
-    typeof onRejected !== 'function' && this.state === REJECTED) {
-    return this;
-  }
-  var promise = new this.constructor(INTERNAL);
-  if (this.state !== PENDING) {
-    var resolver = this.state === FULFILLED ? onFulfilled : onRejected;
-    unwrap(promise, resolver, this.outcome);
-  } else {
-    this.queue.push(new QueueItem(promise, onFulfilled, onRejected));
-  }
-
-  return promise;
-};
-function QueueItem(promise, onFulfilled, onRejected) {
-  this.promise = promise;
-  if (typeof onFulfilled === 'function') {
-    this.onFulfilled = onFulfilled;
-    this.callFulfilled = this.otherCallFulfilled;
-  }
-  if (typeof onRejected === 'function') {
-    this.onRejected = onRejected;
-    this.callRejected = this.otherCallRejected;
-  }
-}
-QueueItem.prototype.callFulfilled = function (value) {
-  handlers.resolve(this.promise, value);
-};
-QueueItem.prototype.otherCallFulfilled = function (value) {
-  unwrap(this.promise, this.onFulfilled, value);
-};
-QueueItem.prototype.callRejected = function (value) {
-  handlers.reject(this.promise, value);
-};
-QueueItem.prototype.otherCallRejected = function (value) {
-  unwrap(this.promise, this.onRejected, value);
-};
-
-function unwrap(promise, func, value) {
-  immediate(function () {
-    var returnValue;
-    try {
-      returnValue = func(value);
-    } catch (e) {
-      return handlers.reject(promise, e);
-    }
-    if (returnValue === promise) {
-      handlers.reject(promise, new TypeError('Cannot resolve promise with itself'));
-    } else {
-      handlers.resolve(promise, returnValue);
-    }
-  });
-}
-
-handlers.resolve = function (self, value) {
-  var result = tryCatch(getThen, value);
-  if (result.status === 'error') {
-    return handlers.reject(self, result.value);
-  }
-  var thenable = result.value;
-
-  if (thenable) {
-    safelyResolveThenable(self, thenable);
-  } else {
-    self.state = FULFILLED;
-    self.outcome = value;
-    var i = -1;
-    var len = self.queue.length;
-    while (++i < len) {
-      self.queue[i].callFulfilled(value);
-    }
-  }
-  return self;
-};
-handlers.reject = function (self, error) {
-  self.state = REJECTED;
-  self.outcome = error;
-  var i = -1;
-  var len = self.queue.length;
-  while (++i < len) {
-    self.queue[i].callRejected(error);
-  }
-  return self;
-};
-
-function getThen(obj) {
-  // Make sure we only access the accessor once as required by the spec
-  var then = obj && obj.then;
-  if (obj && (typeof obj === 'object' || typeof obj === 'function') && typeof then === 'function') {
-    return function appyThen() {
-      then.apply(obj, arguments);
-    };
-  }
-}
-
-function safelyResolveThenable(self, thenable) {
-  // Either fulfill, reject or reject with error
-  var called = false;
-  function onError(value) {
-    if (called) {
-      return;
-    }
-    called = true;
-    handlers.reject(self, value);
-  }
-
-  function onSuccess(value) {
-    if (called) {
-      return;
-    }
-    called = true;
-    handlers.resolve(self, value);
-  }
-
-  function tryToUnwrap() {
-    thenable(onSuccess, onError);
-  }
-
-  var result = tryCatch(tryToUnwrap);
-  if (result.status === 'error') {
-    onError(result.value);
-  }
-}
-
-function tryCatch(func, value) {
-  var out = {};
   try {
-    out.value = func(value);
-    out.status = 'success';
+    localStorage = window.localStorage;
+    localStorage = window['ie8-eventlistener/storage'] || window.localStorage;
+  } catch (e) {// New versions of Firefox throw a Security exception
+    // if cookies are disabled. See
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1028153
+  }
+
+  return localStorage;
+}
+
+function storageKey(channelName) {
+  return KEY_PREFIX + channelName;
+}
+/**
+* writes the new message to the storage
+* and fires the storage-event so other readers can find it
+*/
+
+
+function postMessage(channelState, messageJson) {
+  return new Promise(function (res) {
+    (0, util.sleep)().then(function () {
+      var key = storageKey(channelState.channelName);
+      var writeObj = {
+        token: (0, util.randomToken)(),
+        time: new Date().getTime(),
+        data: messageJson,
+        uuid: channelState.uuid
+      };
+      var value = JSON.stringify(writeObj);
+      getLocalStorage().setItem(key, value);
+      /**
+       * StorageEvent does not fire the 'storage' event
+       * in the window that changes the state of the local storage.
+       * So we fire it manually
+       */
+
+      var ev = document.createEvent('Event');
+      ev.initEvent('storage', true, true);
+      ev.key = key;
+      ev.newValue = value;
+      window.dispatchEvent(ev);
+      res();
+    });
+  });
+}
+
+function addStorageEventListener(channelName, fn) {
+  var key = storageKey(channelName);
+
+  var listener = function listener(ev) {
+    if (ev.key === key) {
+      fn(JSON.parse(ev.newValue));
+    }
+  };
+
+  window.addEventListener('storage', listener);
+  return listener;
+}
+
+function removeStorageEventListener(listener) {
+  window.removeEventListener('storage', listener);
+}
+
+function create(channelName, options$1) {
+  options$1 = (0, options.fillOptionsWithDefaults)(options$1);
+
+  if (!canBeUsed()) {
+    throw new Error('BroadcastChannel: localstorage cannot be used');
+  }
+
+  var uuid = (0, util.randomToken)();
+  /**
+   * eMIs
+   * contains all messages that have been emitted before
+   * @type {ObliviousSet}
+   */
+
+  var eMIs = new es$1.ObliviousSet(options$1.localstorage.removeTimeout);
+  var state = {
+    channelName: channelName,
+    uuid: uuid,
+    eMIs: eMIs // emittedMessagesIds
+
+  };
+  state.listener = addStorageEventListener(channelName, function (msgObj) {
+    if (!state.messagesCallback) return; // no listener
+
+    if (msgObj.uuid === uuid) return; // own message
+
+    if (!msgObj.token || eMIs.has(msgObj.token)) return; // already emitted
+
+    if (msgObj.data.time && msgObj.data.time < state.messagesCallbackTime) return; // too old
+
+    eMIs.add(msgObj.token);
+    state.messagesCallback(msgObj.data);
+  });
+  return state;
+}
+
+function close(channelState) {
+  removeStorageEventListener(channelState.listener);
+}
+
+function onMessage(channelState, fn, time) {
+  channelState.messagesCallbackTime = time;
+  channelState.messagesCallback = fn;
+}
+
+function canBeUsed() {
+  if (util.isNode) return false;
+  var ls = getLocalStorage();
+  if (!ls) return false;
+
+  try {
+    var key = '__broadcastchannel_check';
+    ls.setItem(key, 'works');
+    ls.removeItem(key);
   } catch (e) {
-    out.status = 'error';
-    out.value = e;
-  }
-  return out;
-}
-
-Promise.resolve = resolve;
-function resolve(value) {
-  if (value instanceof this) {
-    return value;
-  }
-  return handlers.resolve(new this(INTERNAL), value);
-}
-
-Promise.reject = reject;
-function reject(reason) {
-  var promise = new this(INTERNAL);
-  return handlers.reject(promise, reason);
-}
-
-Promise.all = all;
-function all(iterable) {
-  var self = this;
-  if (Object.prototype.toString.call(iterable) !== '[object Array]') {
-    return this.reject(new TypeError('must be an array'));
-  }
-
-  var len = iterable.length;
-  var called = false;
-  if (!len) {
-    return this.resolve([]);
-  }
-
-  var values = new Array(len);
-  var resolved = 0;
-  var i = -1;
-  var promise = new this(INTERNAL);
-
-  while (++i < len) {
-    allResolver(iterable[i], i);
-  }
-  return promise;
-  function allResolver(value, i) {
-    self.resolve(value).then(resolveFromAll, function (error) {
-      if (!called) {
-        called = true;
-        handlers.reject(promise, error);
-      }
-    });
-    function resolveFromAll(outValue) {
-      values[i] = outValue;
-      if (++resolved === len && !called) {
-        called = true;
-        handlers.resolve(promise, values);
-      }
-    }
-  }
-}
-
-Promise.race = race;
-function race(iterable) {
-  var self = this;
-  if (Object.prototype.toString.call(iterable) !== '[object Array]') {
-    return this.reject(new TypeError('must be an array'));
-  }
-
-  var len = iterable.length;
-  var called = false;
-  if (!len) {
-    return this.resolve([]);
-  }
-
-  var i = -1;
-  var promise = new this(INTERNAL);
-
-  while (++i < len) {
-    resolver(iterable[i]);
-  }
-  return promise;
-  function resolver(value) {
-    self.resolve(value).then(function (response) {
-      if (!called) {
-        called = true;
-        handlers.resolve(promise, response);
-      }
-    }, function (error) {
-      if (!called) {
-        called = true;
-        handlers.reject(promise, error);
-      }
-    });
-  }
-}
-
-},{"1":1}],3:[function(_dereq_,module,exports){
-(function (global){
-if (typeof global.Promise !== 'function') {
-  global.Promise = _dereq_(2);
-}
-
-}).call(this,typeof commonjsGlobal !== "undefined" ? commonjsGlobal : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {});
-},{"2":2}],4:[function(_dereq_,module,exports){
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function getIDB() {
-    /* global indexedDB,webkitIndexedDB,mozIndexedDB,OIndexedDB,msIndexedDB */
-    try {
-        if (typeof indexedDB !== 'undefined') {
-            return indexedDB;
-        }
-        if (typeof webkitIndexedDB !== 'undefined') {
-            return webkitIndexedDB;
-        }
-        if (typeof mozIndexedDB !== 'undefined') {
-            return mozIndexedDB;
-        }
-        if (typeof OIndexedDB !== 'undefined') {
-            return OIndexedDB;
-        }
-        if (typeof msIndexedDB !== 'undefined') {
-            return msIndexedDB;
-        }
-    } catch (e) {
-        return;
-    }
-}
-
-var idb = getIDB();
-
-function isIndexedDBValid() {
-    try {
-        // Initialize IndexedDB; fall back to vendor-prefixed versions
-        // if needed.
-        if (!idb || !idb.open) {
-            return false;
-        }
-        // We mimic PouchDB here;
-        //
-        // We test for openDatabase because IE Mobile identifies itself
-        // as Safari. Oh the lulz...
-        var isSafari = typeof openDatabase !== 'undefined' && /(Safari|iPhone|iPad|iPod)/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent) && !/BlackBerry/.test(navigator.platform);
-
-        var hasFetch = typeof fetch === 'function' && fetch.toString().indexOf('[native code') !== -1;
-
-        // Safari <10.1 does not meet our requirements for IDB support
-        // (see: https://github.com/pouchdb/pouchdb/issues/5572).
-        // Safari 10.1 shipped with fetch, we can use that to detect it.
-        // Note: this creates issues with `window.fetch` polyfills and
-        // overrides; see:
-        // https://github.com/localForage/localForage/issues/856
-        return (!isSafari || hasFetch) && typeof indexedDB !== 'undefined' &&
-        // some outdated implementations of IDB that appear on Samsung
-        // and HTC Android devices <4.4 are missing IDBKeyRange
-        // See: https://github.com/mozilla/localForage/issues/128
-        // See: https://github.com/mozilla/localForage/issues/272
-        typeof IDBKeyRange !== 'undefined';
-    } catch (e) {
-        return false;
-    }
-}
-
-// Abstracts constructing a Blob object, so it also works in older
-// browsers that don't support the native Blob constructor. (i.e.
-// old QtWebKit versions, at least).
-// Abstracts constructing a Blob object, so it also works in older
-// browsers that don't support the native Blob constructor. (i.e.
-// old QtWebKit versions, at least).
-function createBlob(parts, properties) {
-    /* global BlobBuilder,MSBlobBuilder,MozBlobBuilder,WebKitBlobBuilder */
-    parts = parts || [];
-    properties = properties || {};
-    try {
-        return new Blob(parts, properties);
-    } catch (e) {
-        if (e.name !== 'TypeError') {
-            throw e;
-        }
-        var Builder = typeof BlobBuilder !== 'undefined' ? BlobBuilder : typeof MSBlobBuilder !== 'undefined' ? MSBlobBuilder : typeof MozBlobBuilder !== 'undefined' ? MozBlobBuilder : WebKitBlobBuilder;
-        var builder = new Builder();
-        for (var i = 0; i < parts.length; i += 1) {
-            builder.append(parts[i]);
-        }
-        return builder.getBlob(properties.type);
-    }
-}
-
-// This is CommonJS because lie is an external dependency, so Rollup
-// can just ignore it.
-if (typeof Promise === 'undefined') {
-    // In the "nopromises" build this will just throw if you don't have
-    // a global promise object, but it would throw anyway later.
-    _dereq_(3);
-}
-var Promise$1 = Promise;
-
-function executeCallback(promise, callback) {
-    if (callback) {
-        promise.then(function (result) {
-            callback(null, result);
-        }, function (error) {
-            callback(error);
-        });
-    }
-}
-
-function executeTwoCallbacks(promise, callback, errorCallback) {
-    if (typeof callback === 'function') {
-        promise.then(callback);
-    }
-
-    if (typeof errorCallback === 'function') {
-        promise["catch"](errorCallback);
-    }
-}
-
-function normalizeKey(key) {
-    // Cast the key to a string, as that's all we can set as a key.
-    if (typeof key !== 'string') {
-        console.warn(key + ' used as a key, but it is not a string.');
-        key = String(key);
-    }
-
-    return key;
-}
-
-function getCallback() {
-    if (arguments.length && typeof arguments[arguments.length - 1] === 'function') {
-        return arguments[arguments.length - 1];
-    }
-}
-
-// Some code originally from async_storage.js in
-// [Gaia](https://github.com/mozilla-b2g/gaia).
-
-var DETECT_BLOB_SUPPORT_STORE = 'local-forage-detect-blob-support';
-var supportsBlobs = void 0;
-var dbContexts = {};
-var toString = Object.prototype.toString;
-
-// Transaction Modes
-var READ_ONLY = 'readonly';
-var READ_WRITE = 'readwrite';
-
-// Transform a binary string to an array buffer, because otherwise
-// weird stuff happens when you try to work with the binary string directly.
-// It is known.
-// From http://stackoverflow.com/questions/14967647/ (continues on next line)
-// encode-decode-image-with-base64-breaks-image (2013-04-21)
-function _binStringToArrayBuffer(bin) {
-    var length = bin.length;
-    var buf = new ArrayBuffer(length);
-    var arr = new Uint8Array(buf);
-    for (var i = 0; i < length; i++) {
-        arr[i] = bin.charCodeAt(i);
-    }
-    return buf;
-}
-
-//
-// Blobs are not supported in all versions of IndexedDB, notably
-// Chrome <37 and Android <5. In those versions, storing a blob will throw.
-//
-// Various other blob bugs exist in Chrome v37-42 (inclusive).
-// Detecting them is expensive and confusing to users, and Chrome 37-42
-// is at very low usage worldwide, so we do a hacky userAgent check instead.
-//
-// content-type bug: https://code.google.com/p/chromium/issues/detail?id=408120
-// 404 bug: https://code.google.com/p/chromium/issues/detail?id=447916
-// FileReader bug: https://code.google.com/p/chromium/issues/detail?id=447836
-//
-// Code borrowed from PouchDB. See:
-// https://github.com/pouchdb/pouchdb/blob/master/packages/node_modules/pouchdb-adapter-idb/src/blobSupport.js
-//
-function _checkBlobSupportWithoutCaching(idb) {
-    return new Promise$1(function (resolve) {
-        var txn = idb.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
-        var blob = createBlob(['']);
-        txn.objectStore(DETECT_BLOB_SUPPORT_STORE).put(blob, 'key');
-
-        txn.onabort = function (e) {
-            // If the transaction aborts now its due to not being able to
-            // write to the database, likely due to the disk being full
-            e.preventDefault();
-            e.stopPropagation();
-            resolve(false);
-        };
-
-        txn.oncomplete = function () {
-            var matchedChrome = navigator.userAgent.match(/Chrome\/(\d+)/);
-            var matchedEdge = navigator.userAgent.match(/Edge\//);
-            // MS Edge pretends to be Chrome 42:
-            // https://msdn.microsoft.com/en-us/library/hh869301%28v=vs.85%29.aspx
-            resolve(matchedEdge || !matchedChrome || parseInt(matchedChrome[1], 10) >= 43);
-        };
-    })["catch"](function () {
-        return false; // error, so assume unsupported
-    });
-}
-
-function _checkBlobSupport(idb) {
-    if (typeof supportsBlobs === 'boolean') {
-        return Promise$1.resolve(supportsBlobs);
-    }
-    return _checkBlobSupportWithoutCaching(idb).then(function (value) {
-        supportsBlobs = value;
-        return supportsBlobs;
-    });
-}
-
-function _deferReadiness(dbInfo) {
-    var dbContext = dbContexts[dbInfo.name];
-
-    // Create a deferred object representing the current database operation.
-    var deferredOperation = {};
-
-    deferredOperation.promise = new Promise$1(function (resolve, reject) {
-        deferredOperation.resolve = resolve;
-        deferredOperation.reject = reject;
-    });
-
-    // Enqueue the deferred operation.
-    dbContext.deferredOperations.push(deferredOperation);
-
-    // Chain its promise to the database readiness.
-    if (!dbContext.dbReady) {
-        dbContext.dbReady = deferredOperation.promise;
-    } else {
-        dbContext.dbReady = dbContext.dbReady.then(function () {
-            return deferredOperation.promise;
-        });
-    }
-}
-
-function _advanceReadiness(dbInfo) {
-    var dbContext = dbContexts[dbInfo.name];
-
-    // Dequeue a deferred operation.
-    var deferredOperation = dbContext.deferredOperations.pop();
-
-    // Resolve its promise (which is part of the database readiness
-    // chain of promises).
-    if (deferredOperation) {
-        deferredOperation.resolve();
-        return deferredOperation.promise;
-    }
-}
-
-function _rejectReadiness(dbInfo, err) {
-    var dbContext = dbContexts[dbInfo.name];
-
-    // Dequeue a deferred operation.
-    var deferredOperation = dbContext.deferredOperations.pop();
-
-    // Reject its promise (which is part of the database readiness
-    // chain of promises).
-    if (deferredOperation) {
-        deferredOperation.reject(err);
-        return deferredOperation.promise;
-    }
-}
-
-function _getConnection(dbInfo, upgradeNeeded) {
-    return new Promise$1(function (resolve, reject) {
-        dbContexts[dbInfo.name] = dbContexts[dbInfo.name] || createDbContext();
-
-        if (dbInfo.db) {
-            if (upgradeNeeded) {
-                _deferReadiness(dbInfo);
-                dbInfo.db.close();
-            } else {
-                return resolve(dbInfo.db);
-            }
-        }
-
-        var dbArgs = [dbInfo.name];
-
-        if (upgradeNeeded) {
-            dbArgs.push(dbInfo.version);
-        }
-
-        var openreq = idb.open.apply(idb, dbArgs);
-
-        if (upgradeNeeded) {
-            openreq.onupgradeneeded = function (e) {
-                var db = openreq.result;
-                try {
-                    db.createObjectStore(dbInfo.storeName);
-                    if (e.oldVersion <= 1) {
-                        // Added when support for blob shims was added
-                        db.createObjectStore(DETECT_BLOB_SUPPORT_STORE);
-                    }
-                } catch (ex) {
-                    if (ex.name === 'ConstraintError') {
-                        console.warn('The database "' + dbInfo.name + '"' + ' has been upgraded from version ' + e.oldVersion + ' to version ' + e.newVersion + ', but the storage "' + dbInfo.storeName + '" already exists.');
-                    } else {
-                        throw ex;
-                    }
-                }
-            };
-        }
-
-        openreq.onerror = function (e) {
-            e.preventDefault();
-            reject(openreq.error);
-        };
-
-        openreq.onsuccess = function () {
-            var db = openreq.result;
-            db.onversionchange = function (e) {
-                // Triggered when the database is modified (e.g. adding an objectStore) or
-                // deleted (even when initiated by other sessions in different tabs).
-                // Closing the connection here prevents those operations from being blocked.
-                // If the database is accessed again later by this instance, the connection
-                // will be reopened or the database recreated as needed.
-                e.target.close();
-            };
-            resolve(db);
-            _advanceReadiness(dbInfo);
-        };
-    });
-}
-
-function _getOriginalConnection(dbInfo) {
-    return _getConnection(dbInfo, false);
-}
-
-function _getUpgradedConnection(dbInfo) {
-    return _getConnection(dbInfo, true);
-}
-
-function _isUpgradeNeeded(dbInfo, defaultVersion) {
-    if (!dbInfo.db) {
-        return true;
-    }
-
-    var isNewStore = !dbInfo.db.objectStoreNames.contains(dbInfo.storeName);
-    var isDowngrade = dbInfo.version < dbInfo.db.version;
-    var isUpgrade = dbInfo.version > dbInfo.db.version;
-
-    if (isDowngrade) {
-        // If the version is not the default one
-        // then warn for impossible downgrade.
-        if (dbInfo.version !== defaultVersion) {
-            console.warn('The database "' + dbInfo.name + '"' + " can't be downgraded from version " + dbInfo.db.version + ' to version ' + dbInfo.version + '.');
-        }
-        // Align the versions to prevent errors.
-        dbInfo.version = dbInfo.db.version;
-    }
-
-    if (isUpgrade || isNewStore) {
-        // If the store is new then increment the version (if needed).
-        // This will trigger an "upgradeneeded" event which is required
-        // for creating a store.
-        if (isNewStore) {
-            var incVersion = dbInfo.db.version + 1;
-            if (incVersion > dbInfo.version) {
-                dbInfo.version = incVersion;
-            }
-        }
-
-        return true;
-    }
-
+    // Safari 10 in private mode will not allow write access to local
+    // storage and fail with a QuotaExceededError. See
+    // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API#Private_Browsing_Incognito_modes
     return false;
+  }
+
+  return true;
 }
 
-// encode a blob for indexeddb engines that don't support blobs
-function _encodeBlob(blob) {
-    return new Promise$1(function (resolve, reject) {
-        var reader = new FileReader();
-        reader.onerror = reject;
-        reader.onloadend = function (e) {
-            var base64 = btoa(e.target.result || '');
-            resolve({
-                __local_forage_encoded_blob: true,
-                data: base64,
-                type: blob.type
-            });
-        };
-        reader.readAsBinaryString(blob);
-    });
+function averageResponseTime() {
+  var defaultTime = 120;
+  var userAgent = navigator.userAgent.toLowerCase();
+
+  if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
+    // safari is much slower so this time is higher
+    return defaultTime * 2;
+  }
+
+  return defaultTime;
 }
 
-// decode an encoded blob
-function _decodeBlob(encodedBlob) {
-    var arrayBuff = _binStringToArrayBuffer(atob(encodedBlob.data));
-    return createBlob([arrayBuff], { type: encodedBlob.type });
-}
-
-// is this one of our fancy encoded blobs?
-function _isEncodedBlob(value) {
-    return value && value.__local_forage_encoded_blob;
-}
-
-// Specialize the default `ready()` function by making it dependent
-// on the current database operations. Thus, the driver will be actually
-// ready when it's been initialized (default) *and* there are no pending
-// operations on the database (initiated by some other instances).
-function _fullyReady(callback) {
-    var self = this;
-
-    var promise = self._initReady().then(function () {
-        var dbContext = dbContexts[self._dbInfo.name];
-
-        if (dbContext && dbContext.dbReady) {
-            return dbContext.dbReady;
-        }
-    });
-
-    executeTwoCallbacks(promise, callback, callback);
-    return promise;
-}
-
-// Try to establish a new db connection to replace the
-// current one which is broken (i.e. experiencing
-// InvalidStateError while creating a transaction).
-function _tryReconnect(dbInfo) {
-    _deferReadiness(dbInfo);
-
-    var dbContext = dbContexts[dbInfo.name];
-    var forages = dbContext.forages;
-
-    for (var i = 0; i < forages.length; i++) {
-        var forage = forages[i];
-        if (forage._dbInfo.db) {
-            forage._dbInfo.db.close();
-            forage._dbInfo.db = null;
-        }
-    }
-    dbInfo.db = null;
-
-    return _getOriginalConnection(dbInfo).then(function (db) {
-        dbInfo.db = db;
-        if (_isUpgradeNeeded(dbInfo)) {
-            // Reopen the database for upgrading.
-            return _getUpgradedConnection(dbInfo);
-        }
-        return db;
-    }).then(function (db) {
-        // store the latest db reference
-        // in case the db was upgraded
-        dbInfo.db = dbContext.db = db;
-        for (var i = 0; i < forages.length; i++) {
-            forages[i]._dbInfo.db = db;
-        }
-    })["catch"](function (err) {
-        _rejectReadiness(dbInfo, err);
-        throw err;
-    });
-}
-
-// FF doesn't like Promises (micro-tasks) and IDDB store operations,
-// so we have to do it with callbacks
-function createTransaction(dbInfo, mode, callback, retries) {
-    if (retries === undefined) {
-        retries = 1;
-    }
-
-    try {
-        var tx = dbInfo.db.transaction(dbInfo.storeName, mode);
-        callback(null, tx);
-    } catch (err) {
-        if (retries > 0 && (!dbInfo.db || err.name === 'InvalidStateError' || err.name === 'NotFoundError')) {
-            return Promise$1.resolve().then(function () {
-                if (!dbInfo.db || err.name === 'NotFoundError' && !dbInfo.db.objectStoreNames.contains(dbInfo.storeName) && dbInfo.version <= dbInfo.db.version) {
-                    // increase the db version, to create the new ObjectStore
-                    if (dbInfo.db) {
-                        dbInfo.version = dbInfo.db.version + 1;
-                    }
-                    // Reopen the database for upgrading.
-                    return _getUpgradedConnection(dbInfo);
-                }
-            }).then(function () {
-                return _tryReconnect(dbInfo).then(function () {
-                    createTransaction(dbInfo, mode, callback, retries - 1);
-                });
-            })["catch"](callback);
-        }
-
-        callback(err);
-    }
-}
-
-function createDbContext() {
-    return {
-        // Running localForages sharing a database.
-        forages: [],
-        // Shared database.
-        db: null,
-        // Database readiness (promise).
-        dbReady: null,
-        // Deferred operations on the database.
-        deferredOperations: []
-    };
-}
-
-// Open the IndexedDB database (automatically creates one if one didn't
-// previously exist), using any options set in the config.
-function _initStorage(options) {
-    var self = this;
-    var dbInfo = {
-        db: null
-    };
-
-    if (options) {
-        for (var i in options) {
-            dbInfo[i] = options[i];
-        }
-    }
-
-    // Get the current context of the database;
-    var dbContext = dbContexts[dbInfo.name];
-
-    // ...or create a new context.
-    if (!dbContext) {
-        dbContext = createDbContext();
-        // Register the new context in the global container.
-        dbContexts[dbInfo.name] = dbContext;
-    }
-
-    // Register itself as a running localForage in the current context.
-    dbContext.forages.push(self);
-
-    // Replace the default `ready()` function with the specialized one.
-    if (!self._initReady) {
-        self._initReady = self.ready;
-        self.ready = _fullyReady;
-    }
-
-    // Create an array of initialization states of the related localForages.
-    var initPromises = [];
-
-    function ignoreErrors() {
-        // Don't handle errors here,
-        // just makes sure related localForages aren't pending.
-        return Promise$1.resolve();
-    }
-
-    for (var j = 0; j < dbContext.forages.length; j++) {
-        var forage = dbContext.forages[j];
-        if (forage !== self) {
-            // Don't wait for itself...
-            initPromises.push(forage._initReady()["catch"](ignoreErrors));
-        }
-    }
-
-    // Take a snapshot of the related localForages.
-    var forages = dbContext.forages.slice(0);
-
-    // Initialize the connection process only when
-    // all the related localForages aren't pending.
-    return Promise$1.all(initPromises).then(function () {
-        dbInfo.db = dbContext.db;
-        // Get the connection or open a new one without upgrade.
-        return _getOriginalConnection(dbInfo);
-    }).then(function (db) {
-        dbInfo.db = db;
-        if (_isUpgradeNeeded(dbInfo, self._defaultConfig.version)) {
-            // Reopen the database for upgrading.
-            return _getUpgradedConnection(dbInfo);
-        }
-        return db;
-    }).then(function (db) {
-        dbInfo.db = dbContext.db = db;
-        self._dbInfo = dbInfo;
-        // Share the final connection amongst related localForages.
-        for (var k = 0; k < forages.length; k++) {
-            var forage = forages[k];
-            if (forage !== self) {
-                // Self is already up-to-date.
-                forage._dbInfo.db = dbInfo.db;
-                forage._dbInfo.version = dbInfo.version;
-            }
-        }
-    });
-}
-
-function getItem(key, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    var req = store.get(key);
-
-                    req.onsuccess = function () {
-                        var value = req.result;
-                        if (value === undefined) {
-                            value = null;
-                        }
-                        if (_isEncodedBlob(value)) {
-                            value = _decodeBlob(value);
-                        }
-                        resolve(value);
-                    };
-
-                    req.onerror = function () {
-                        reject(req.error);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Iterate over all items stored in database.
-function iterate(iterator, callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    var req = store.openCursor();
-                    var iterationNumber = 1;
-
-                    req.onsuccess = function () {
-                        var cursor = req.result;
-
-                        if (cursor) {
-                            var value = cursor.value;
-                            if (_isEncodedBlob(value)) {
-                                value = _decodeBlob(value);
-                            }
-                            var result = iterator(value, cursor.key, iterationNumber++);
-
-                            // when the iterator callback returns any
-                            // (non-`undefined`) value, then we stop
-                            // the iteration immediately
-                            if (result !== void 0) {
-                                resolve(result);
-                            } else {
-                                cursor["continue"]();
-                            }
-                        } else {
-                            resolve();
-                        }
-                    };
-
-                    req.onerror = function () {
-                        reject(req.error);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-
-    return promise;
-}
-
-function setItem(key, value, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = new Promise$1(function (resolve, reject) {
-        var dbInfo;
-        self.ready().then(function () {
-            dbInfo = self._dbInfo;
-            if (toString.call(value) === '[object Blob]') {
-                return _checkBlobSupport(dbInfo.db).then(function (blobSupport) {
-                    if (blobSupport) {
-                        return value;
-                    }
-                    return _encodeBlob(value);
-                });
-            }
-            return value;
-        }).then(function (value) {
-            createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-
-                    // The reason we don't _save_ null is because IE 10 does
-                    // not support saving the `null` type in IndexedDB. How
-                    // ironic, given the bug below!
-                    // See: https://github.com/mozilla/localForage/issues/161
-                    if (value === null) {
-                        value = undefined;
-                    }
-
-                    var req = store.put(value, key);
-
-                    transaction.oncomplete = function () {
-                        // Cast to undefined so the value passed to
-                        // callback/promise is the same as what one would get out
-                        // of `getItem()` later. This leads to some weirdness
-                        // (setItem('foo', undefined) will return `null`), but
-                        // it's not my fault localStorage is our baseline and that
-                        // it's weird.
-                        if (value === undefined) {
-                            value = null;
-                        }
-
-                        resolve(value);
-                    };
-                    transaction.onabort = transaction.onerror = function () {
-                        var err = req.error ? req.error : req.transaction.error;
-                        reject(err);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function removeItem(key, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    // We use a Grunt task to make this safe for IE and some
-                    // versions of Android (including those used by Cordova).
-                    // Normally IE won't like `.delete()` and will insist on
-                    // using `['delete']()`, but we have a build step that
-                    // fixes this for us now.
-                    var req = store["delete"](key);
-                    transaction.oncomplete = function () {
-                        resolve();
-                    };
-
-                    transaction.onerror = function () {
-                        reject(req.error);
-                    };
-
-                    // The request will be also be aborted if we've exceeded our storage
-                    // space.
-                    transaction.onabort = function () {
-                        var err = req.error ? req.error : req.transaction.error;
-                        reject(err);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function clear(callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    var req = store.clear();
-
-                    transaction.oncomplete = function () {
-                        resolve();
-                    };
-
-                    transaction.onabort = transaction.onerror = function () {
-                        var err = req.error ? req.error : req.transaction.error;
-                        reject(err);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function length(callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    var req = store.count();
-
-                    req.onsuccess = function () {
-                        resolve(req.result);
-                    };
-
-                    req.onerror = function () {
-                        reject(req.error);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function key(n, callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        if (n < 0) {
-            resolve(null);
-
-            return;
-        }
-
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    var advanced = false;
-                    var req = store.openKeyCursor();
-
-                    req.onsuccess = function () {
-                        var cursor = req.result;
-                        if (!cursor) {
-                            // this means there weren't enough keys
-                            resolve(null);
-
-                            return;
-                        }
-
-                        if (n === 0) {
-                            // We have the first key, return it if that's what they
-                            // wanted.
-                            resolve(cursor.key);
-                        } else {
-                            if (!advanced) {
-                                // Otherwise, ask the cursor to skip ahead n
-                                // records.
-                                advanced = true;
-                                cursor.advance(n);
-                            } else {
-                                // When we get here, we've got the nth key.
-                                resolve(cursor.key);
-                            }
-                        }
-                    };
-
-                    req.onerror = function () {
-                        reject(req.error);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function keys(callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
-                if (err) {
-                    return reject(err);
-                }
-
-                try {
-                    var store = transaction.objectStore(self._dbInfo.storeName);
-                    var req = store.openKeyCursor();
-                    var keys = [];
-
-                    req.onsuccess = function () {
-                        var cursor = req.result;
-
-                        if (!cursor) {
-                            resolve(keys);
-                            return;
-                        }
-
-                        keys.push(cursor.key);
-                        cursor["continue"]();
-                    };
-
-                    req.onerror = function () {
-                        reject(req.error);
-                    };
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function dropInstance(options, callback) {
-    callback = getCallback.apply(this, arguments);
-
-    var currentConfig = this.config();
-    options = typeof options !== 'function' && options || {};
-    if (!options.name) {
-        options.name = options.name || currentConfig.name;
-        options.storeName = options.storeName || currentConfig.storeName;
-    }
-
-    var self = this;
-    var promise;
-    if (!options.name) {
-        promise = Promise$1.reject('Invalid arguments');
-    } else {
-        var isCurrentDb = options.name === currentConfig.name && self._dbInfo.db;
-
-        var dbPromise = isCurrentDb ? Promise$1.resolve(self._dbInfo.db) : _getOriginalConnection(options).then(function (db) {
-            var dbContext = dbContexts[options.name];
-            var forages = dbContext.forages;
-            dbContext.db = db;
-            for (var i = 0; i < forages.length; i++) {
-                forages[i]._dbInfo.db = db;
-            }
-            return db;
-        });
-
-        if (!options.storeName) {
-            promise = dbPromise.then(function (db) {
-                _deferReadiness(options);
-
-                var dbContext = dbContexts[options.name];
-                var forages = dbContext.forages;
-
-                db.close();
-                for (var i = 0; i < forages.length; i++) {
-                    var forage = forages[i];
-                    forage._dbInfo.db = null;
-                }
-
-                var dropDBPromise = new Promise$1(function (resolve, reject) {
-                    var req = idb.deleteDatabase(options.name);
-
-                    req.onerror = function () {
-                        var db = req.result;
-                        if (db) {
-                            db.close();
-                        }
-                        reject(req.error);
-                    };
-
-                    req.onblocked = function () {
-                        // Closing all open connections in onversionchange handler should prevent this situation, but if
-                        // we do get here, it just means the request remains pending - eventually it will succeed or error
-                        console.warn('dropInstance blocked for database "' + options.name + '" until all open connections are closed');
-                    };
-
-                    req.onsuccess = function () {
-                        var db = req.result;
-                        if (db) {
-                            db.close();
-                        }
-                        resolve(db);
-                    };
-                });
-
-                return dropDBPromise.then(function (db) {
-                    dbContext.db = db;
-                    for (var i = 0; i < forages.length; i++) {
-                        var _forage = forages[i];
-                        _advanceReadiness(_forage._dbInfo);
-                    }
-                })["catch"](function (err) {
-                    (_rejectReadiness(options, err) || Promise$1.resolve())["catch"](function () {});
-                    throw err;
-                });
-            });
-        } else {
-            promise = dbPromise.then(function (db) {
-                if (!db.objectStoreNames.contains(options.storeName)) {
-                    return;
-                }
-
-                var newVersion = db.version + 1;
-
-                _deferReadiness(options);
-
-                var dbContext = dbContexts[options.name];
-                var forages = dbContext.forages;
-
-                db.close();
-                for (var i = 0; i < forages.length; i++) {
-                    var forage = forages[i];
-                    forage._dbInfo.db = null;
-                    forage._dbInfo.version = newVersion;
-                }
-
-                var dropObjectPromise = new Promise$1(function (resolve, reject) {
-                    var req = idb.open(options.name, newVersion);
-
-                    req.onerror = function (err) {
-                        var db = req.result;
-                        db.close();
-                        reject(err);
-                    };
-
-                    req.onupgradeneeded = function () {
-                        var db = req.result;
-                        db.deleteObjectStore(options.storeName);
-                    };
-
-                    req.onsuccess = function () {
-                        var db = req.result;
-                        db.close();
-                        resolve(db);
-                    };
-                });
-
-                return dropObjectPromise.then(function (db) {
-                    dbContext.db = db;
-                    for (var j = 0; j < forages.length; j++) {
-                        var _forage2 = forages[j];
-                        _forage2._dbInfo.db = db;
-                        _advanceReadiness(_forage2._dbInfo);
-                    }
-                })["catch"](function (err) {
-                    (_rejectReadiness(options, err) || Promise$1.resolve())["catch"](function () {});
-                    throw err;
-                });
-            });
-        }
-    }
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-var asyncStorage = {
-    _driver: 'asyncStorage',
-    _initStorage: _initStorage,
-    _support: isIndexedDBValid(),
-    iterate: iterate,
-    getItem: getItem,
-    setItem: setItem,
-    removeItem: removeItem,
-    clear: clear,
-    length: length,
-    key: key,
-    keys: keys,
-    dropInstance: dropInstance
+var _default = {
+  create: create,
+  close: close,
+  onMessage: onMessage,
+  postMessage: postMessage,
+  canBeUsed: canBeUsed,
+  type: type,
+  averageResponseTime: averageResponseTime,
+  microSeconds: microSeconds
 };
+exports["default"] = _default;
+});
 
-function isWebSQLValid() {
-    return typeof openDatabase === 'function';
+unwrapExports(localstorage);
+localstorage.addStorageEventListener;
+localstorage.averageResponseTime;
+localstorage.canBeUsed;
+localstorage.close;
+localstorage.create;
+localstorage.getLocalStorage;
+localstorage.microSeconds;
+localstorage.onMessage;
+localstorage.postMessage;
+localstorage.removeStorageEventListener;
+localstorage.storageKey;
+localstorage.type;
+
+var simulate = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.averageResponseTime = averageResponseTime;
+exports.canBeUsed = canBeUsed;
+exports.close = close;
+exports.create = create;
+exports.microSeconds = exports["default"] = void 0;
+exports.onMessage = onMessage;
+exports.postMessage = postMessage;
+exports.type = void 0;
+
+
+
+var microSeconds = util.microSeconds;
+exports.microSeconds = microSeconds;
+var type = 'simulate';
+exports.type = type;
+var SIMULATE_CHANNELS = new Set();
+
+function create(channelName) {
+  var state = {
+    name: channelName,
+    messagesCallback: null
+  };
+  SIMULATE_CHANNELS.add(state);
+  return state;
 }
 
-// Sadly, the best way to save binary data in WebSQL/localStorage is serializing
-// it to Base64, so this is how we store it to prevent very strange errors with less
-// verbose ways of binary <-> string data storage.
-var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
-var BLOB_TYPE_PREFIX = '~~local_forage_type~';
-var BLOB_TYPE_PREFIX_REGEX = /^~~local_forage_type~([^~]+)~/;
-
-var SERIALIZED_MARKER = '__lfsc__:';
-var SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
-
-// OMG the serializations!
-var TYPE_ARRAYBUFFER = 'arbf';
-var TYPE_BLOB = 'blob';
-var TYPE_INT8ARRAY = 'si08';
-var TYPE_UINT8ARRAY = 'ui08';
-var TYPE_UINT8CLAMPEDARRAY = 'uic8';
-var TYPE_INT16ARRAY = 'si16';
-var TYPE_INT32ARRAY = 'si32';
-var TYPE_UINT16ARRAY = 'ur16';
-var TYPE_UINT32ARRAY = 'ui32';
-var TYPE_FLOAT32ARRAY = 'fl32';
-var TYPE_FLOAT64ARRAY = 'fl64';
-var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
-
-var toString$1 = Object.prototype.toString;
-
-function stringToBuffer(serializedString) {
-    // Fill the string into a ArrayBuffer.
-    var bufferLength = serializedString.length * 0.75;
-    var len = serializedString.length;
-    var i;
-    var p = 0;
-    var encoded1, encoded2, encoded3, encoded4;
-
-    if (serializedString[serializedString.length - 1] === '=') {
-        bufferLength--;
-        if (serializedString[serializedString.length - 2] === '=') {
-            bufferLength--;
-        }
-    }
-
-    var buffer = new ArrayBuffer(bufferLength);
-    var bytes = new Uint8Array(buffer);
-
-    for (i = 0; i < len; i += 4) {
-        encoded1 = BASE_CHARS.indexOf(serializedString[i]);
-        encoded2 = BASE_CHARS.indexOf(serializedString[i + 1]);
-        encoded3 = BASE_CHARS.indexOf(serializedString[i + 2]);
-        encoded4 = BASE_CHARS.indexOf(serializedString[i + 3]);
-
-        /*jslint bitwise: true */
-        bytes[p++] = encoded1 << 2 | encoded2 >> 4;
-        bytes[p++] = (encoded2 & 15) << 4 | encoded3 >> 2;
-        bytes[p++] = (encoded3 & 3) << 6 | encoded4 & 63;
-    }
-    return buffer;
+function close(channelState) {
+  SIMULATE_CHANNELS["delete"](channelState);
 }
 
-// Converts a buffer to a string to store, serialized, in the backend
-// storage library.
-function bufferToString(buffer) {
-    // base64-arraybuffer
-    var bytes = new Uint8Array(buffer);
-    var base64String = '';
-    var i;
-
-    for (i = 0; i < bytes.length; i += 3) {
-        /*jslint bitwise: true */
-        base64String += BASE_CHARS[bytes[i] >> 2];
-        base64String += BASE_CHARS[(bytes[i] & 3) << 4 | bytes[i + 1] >> 4];
-        base64String += BASE_CHARS[(bytes[i + 1] & 15) << 2 | bytes[i + 2] >> 6];
-        base64String += BASE_CHARS[bytes[i + 2] & 63];
-    }
-
-    if (bytes.length % 3 === 2) {
-        base64String = base64String.substring(0, base64String.length - 1) + '=';
-    } else if (bytes.length % 3 === 1) {
-        base64String = base64String.substring(0, base64String.length - 2) + '==';
-    }
-
-    return base64String;
+function postMessage(channelState, messageJson) {
+  return new Promise(function (res) {
+    return setTimeout(function () {
+      var channelArray = Array.from(SIMULATE_CHANNELS);
+      channelArray.filter(function (channel) {
+        return channel.name === channelState.name;
+      }).filter(function (channel) {
+        return channel !== channelState;
+      }).filter(function (channel) {
+        return !!channel.messagesCallback;
+      }).forEach(function (channel) {
+        return channel.messagesCallback(messageJson);
+      });
+      res();
+    }, 5);
+  });
 }
 
-// Serialize a value, afterwards executing a callback (which usually
-// instructs the `setItem()` callback/promise to be executed). This is how
-// we store binary data with localStorage.
-function serialize(value, callback) {
-    var valueType = '';
-    if (value) {
-        valueType = toString$1.call(value);
-    }
-
-    // Cannot use `value instanceof ArrayBuffer` or such here, as these
-    // checks fail when running the tests using casper.js...
-    //
-    // TODO: See why those tests fail and use a better solution.
-    if (value && (valueType === '[object ArrayBuffer]' || value.buffer && toString$1.call(value.buffer) === '[object ArrayBuffer]')) {
-        // Convert binary arrays to a string and prefix the string with
-        // a special marker.
-        var buffer;
-        var marker = SERIALIZED_MARKER;
-
-        if (value instanceof ArrayBuffer) {
-            buffer = value;
-            marker += TYPE_ARRAYBUFFER;
-        } else {
-            buffer = value.buffer;
-
-            if (valueType === '[object Int8Array]') {
-                marker += TYPE_INT8ARRAY;
-            } else if (valueType === '[object Uint8Array]') {
-                marker += TYPE_UINT8ARRAY;
-            } else if (valueType === '[object Uint8ClampedArray]') {
-                marker += TYPE_UINT8CLAMPEDARRAY;
-            } else if (valueType === '[object Int16Array]') {
-                marker += TYPE_INT16ARRAY;
-            } else if (valueType === '[object Uint16Array]') {
-                marker += TYPE_UINT16ARRAY;
-            } else if (valueType === '[object Int32Array]') {
-                marker += TYPE_INT32ARRAY;
-            } else if (valueType === '[object Uint32Array]') {
-                marker += TYPE_UINT32ARRAY;
-            } else if (valueType === '[object Float32Array]') {
-                marker += TYPE_FLOAT32ARRAY;
-            } else if (valueType === '[object Float64Array]') {
-                marker += TYPE_FLOAT64ARRAY;
-            } else {
-                callback(new Error('Failed to get type for BinaryArray'));
-            }
-        }
-
-        callback(marker + bufferToString(buffer));
-    } else if (valueType === '[object Blob]') {
-        // Conver the blob to a binaryArray and then to a string.
-        var fileReader = new FileReader();
-
-        fileReader.onload = function () {
-            // Backwards-compatible prefix for the blob type.
-            var str = BLOB_TYPE_PREFIX + value.type + '~' + bufferToString(this.result);
-
-            callback(SERIALIZED_MARKER + TYPE_BLOB + str);
-        };
-
-        fileReader.readAsArrayBuffer(value);
-    } else {
-        try {
-            callback(JSON.stringify(value));
-        } catch (e) {
-            console.error("Couldn't convert value into a JSON string: ", value);
-
-            callback(null, e);
-        }
-    }
+function onMessage(channelState, fn) {
+  channelState.messagesCallback = fn;
 }
 
-// Deserialize data we've inserted into a value column/field. We place
-// special markers into our strings to mark them as encoded; this isn't
-// as nice as a meta field, but it's the only sane thing we can do whilst
-// keeping localStorage support intact.
-//
-// Oftentimes this will just deserialize JSON content, but if we have a
-// special marker (SERIALIZED_MARKER, defined above), we will extract
-// some kind of arraybuffer/binary data/typed array out of the string.
-function deserialize(value) {
-    // If we haven't marked this string as being specially serialized (i.e.
-    // something other than serialized JSON), we can just return it and be
-    // done with it.
-    if (value.substring(0, SERIALIZED_MARKER_LENGTH) !== SERIALIZED_MARKER) {
-        return JSON.parse(value);
-    }
-
-    // The following code deals with deserializing some kind of Blob or
-    // TypedArray. First we separate out the type of data we're dealing
-    // with from the data itself.
-    var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
-    var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
-
-    var blobType;
-    // Backwards-compatible blob type serialization strategy.
-    // DBs created with older versions of localForage will simply not have the blob type.
-    if (type === TYPE_BLOB && BLOB_TYPE_PREFIX_REGEX.test(serializedString)) {
-        var matcher = serializedString.match(BLOB_TYPE_PREFIX_REGEX);
-        blobType = matcher[1];
-        serializedString = serializedString.substring(matcher[0].length);
-    }
-    var buffer = stringToBuffer(serializedString);
-
-    // Return the right type based on the code/type set during
-    // serialization.
-    switch (type) {
-        case TYPE_ARRAYBUFFER:
-            return buffer;
-        case TYPE_BLOB:
-            return createBlob([buffer], { type: blobType });
-        case TYPE_INT8ARRAY:
-            return new Int8Array(buffer);
-        case TYPE_UINT8ARRAY:
-            return new Uint8Array(buffer);
-        case TYPE_UINT8CLAMPEDARRAY:
-            return new Uint8ClampedArray(buffer);
-        case TYPE_INT16ARRAY:
-            return new Int16Array(buffer);
-        case TYPE_UINT16ARRAY:
-            return new Uint16Array(buffer);
-        case TYPE_INT32ARRAY:
-            return new Int32Array(buffer);
-        case TYPE_UINT32ARRAY:
-            return new Uint32Array(buffer);
-        case TYPE_FLOAT32ARRAY:
-            return new Float32Array(buffer);
-        case TYPE_FLOAT64ARRAY:
-            return new Float64Array(buffer);
-        default:
-            throw new Error('Unkown type: ' + type);
-    }
+function canBeUsed() {
+  return true;
 }
 
-var localforageSerializer = {
-    serialize: serialize,
-    deserialize: deserialize,
-    stringToBuffer: stringToBuffer,
-    bufferToString: bufferToString
+function averageResponseTime() {
+  return 5;
+}
+
+var _default = {
+  create: create,
+  close: close,
+  onMessage: onMessage,
+  postMessage: postMessage,
+  canBeUsed: canBeUsed,
+  type: type,
+  averageResponseTime: averageResponseTime,
+  microSeconds: microSeconds
 };
+exports["default"] = _default;
+});
 
-/*
- * Includes code from:
- *
- * base64-arraybuffer
- * https://github.com/niklasvh/base64-arraybuffer
- *
- * Copyright (c) 2012 Niklas von Hertzen
- * Licensed under the MIT license.
+unwrapExports(simulate);
+simulate.averageResponseTime;
+simulate.canBeUsed;
+simulate.close;
+simulate.create;
+simulate.microSeconds;
+simulate.onMessage;
+simulate.postMessage;
+simulate.type;
+
+var methodChooser = createCommonjsModule(function (module, exports) {
+
+
+
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.chooseMethod = chooseMethod;
+
+var _native = interopRequireDefault(native_1);
+
+var _indexedDb = interopRequireDefault(indexedDb);
+
+var _localstorage = interopRequireDefault(localstorage);
+
+var _simulate = interopRequireDefault(simulate);
+
+// the line below will be removed from es5/browser builds
+// order is important
+var METHODS = [_native["default"], // fastest
+_indexedDb["default"], _localstorage["default"]];
+
+function chooseMethod(options) {
+  var chooseMethods = [].concat(options.methods, METHODS).filter(Boolean); // the line below will be removed from es5/browser builds
+
+
+
+  if (options.type) {
+    if (options.type === 'simulate') {
+      // only use simulate-method if directly chosen
+      return _simulate["default"];
+    }
+
+    var ret = chooseMethods.find(function (m) {
+      return m.type === options.type;
+    });
+    if (!ret) throw new Error('method-type ' + options.type + ' not found');else return ret;
+  }
+  /**
+   * if no webworker support is needed,
+   * remove idb from the list so that localstorage is been chosen
+   */
+
+
+  if (!options.webWorkerSupport && !util.isNode) {
+    chooseMethods = chooseMethods.filter(function (m) {
+      return m.type !== 'idb';
+    });
+  }
+
+  var useMethod = chooseMethods.find(function (method) {
+    return method.canBeUsed();
+  });
+  if (!useMethod) throw new Error("No useable method found in " + JSON.stringify(METHODS.map(function (m) {
+    return m.type;
+  })));else return useMethod;
+}
+});
+
+unwrapExports(methodChooser);
+methodChooser.chooseMethod;
+
+var broadcastChannel$1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.OPEN_BROADCAST_CHANNELS = exports.BroadcastChannel = void 0;
+exports.clearNodeFolder = clearNodeFolder;
+exports.enforceOptions = enforceOptions;
+
+
+
+
+
+
+
+/**
+ * Contains all open channels,
+ * used in tests to ensure everything is closed.
+ */
+var OPEN_BROADCAST_CHANNELS = new Set();
+exports.OPEN_BROADCAST_CHANNELS = OPEN_BROADCAST_CHANNELS;
+var lastId = 0;
+
+var BroadcastChannel = function BroadcastChannel(name, options$1) {
+  // identifier of the channel to debug stuff
+  this.id = lastId++;
+  OPEN_BROADCAST_CHANNELS.add(this);
+  this.name = name;
+
+  if (ENFORCED_OPTIONS) {
+    options$1 = ENFORCED_OPTIONS;
+  }
+
+  this.options = (0, options.fillOptionsWithDefaults)(options$1);
+  this.method = (0, methodChooser.chooseMethod)(this.options); // isListening
+
+  this._iL = false;
+  /**
+   * _onMessageListener
+   * setting onmessage twice,
+   * will overwrite the first listener
+   */
+
+  this._onML = null;
+  /**
+   * _addEventListeners
+   */
+
+  this._addEL = {
+    message: [],
+    internal: []
+  };
+  /**
+   * Unsend message promises
+   * where the sending is still in progress
+   * @type {Set<Promise>}
+   */
+
+  this._uMP = new Set();
+  /**
+   * _beforeClose
+   * array of promises that will be awaited
+   * before the channel is closed
+   */
+
+  this._befC = [];
+  /**
+   * _preparePromise
+   */
+
+  this._prepP = null;
+
+  _prepareChannel(this);
+}; // STATICS
+
+/**
+ * used to identify if someone overwrites
+ * window.BroadcastChannel with this
+ * See methods/native.js
  */
 
-function createDbTable(t, dbInfo, callback, errorCallback) {
-    t.executeSql('CREATE TABLE IF NOT EXISTS ' + dbInfo.storeName + ' ' + '(id INTEGER PRIMARY KEY, key unique, value)', [], callback, errorCallback);
-}
 
-// Open the WebSQL database (automatically creates one if one didn't
-// previously exist), using any options set in the config.
-function _initStorage$1(options) {
-    var self = this;
-    var dbInfo = {
-        db: null
+exports.BroadcastChannel = BroadcastChannel;
+BroadcastChannel._pubkey = true;
+/**
+ * clears the tmp-folder if is node
+ * @return {Promise<boolean>} true if has run, false if not node
+ */
+
+function clearNodeFolder(options$1) {
+  options$1 = (0, options.fillOptionsWithDefaults)(options$1);
+  var method = (0, methodChooser.chooseMethod)(options$1);
+
+  if (method.type === 'node') {
+    return method.clearNodeFolder().then(function () {
+      return true;
+    });
+  } else {
+    return util.PROMISE_RESOLVED_FALSE;
+  }
+}
+/**
+ * if set, this method is enforced,
+ * no mather what the options are
+ */
+
+
+var ENFORCED_OPTIONS;
+
+function enforceOptions(options) {
+  ENFORCED_OPTIONS = options;
+} // PROTOTYPE
+
+
+BroadcastChannel.prototype = {
+  postMessage: function postMessage(msg) {
+    if (this.closed) {
+      throw new Error('BroadcastChannel.postMessage(): ' + 'Cannot post message after channel has closed');
+    }
+
+    return _post(this, 'message', msg);
+  },
+  postInternal: function postInternal(msg) {
+    return _post(this, 'internal', msg);
+  },
+
+  set onmessage(fn) {
+    var time = this.method.microSeconds();
+    var listenObj = {
+      time: time,
+      fn: fn
     };
 
-    if (options) {
-        for (var i in options) {
-            dbInfo[i] = typeof options[i] !== 'string' ? options[i].toString() : options[i];
-        }
-    }
+    _removeListenerObject(this, 'message', this._onML);
 
-    var dbInfoPromise = new Promise$1(function (resolve, reject) {
-        // Open the database; the openDatabase API will automatically
-        // create it for us if it doesn't exist.
-        try {
-            dbInfo.db = openDatabase(dbInfo.name, String(dbInfo.version), dbInfo.description, dbInfo.size);
-        } catch (e) {
-            return reject(e);
-        }
+    if (fn && typeof fn === 'function') {
+      this._onML = listenObj;
 
-        // Create our key/value table if it doesn't exist.
-        dbInfo.db.transaction(function (t) {
-            createDbTable(t, dbInfo, function () {
-                self._dbInfo = dbInfo;
-                resolve();
-            }, function (t, error) {
-                reject(error);
-            });
-        }, reject);
-    });
-
-    dbInfo.serializer = localforageSerializer;
-    return dbInfoPromise;
-}
-
-function tryExecuteSql(t, dbInfo, sqlStatement, args, callback, errorCallback) {
-    t.executeSql(sqlStatement, args, callback, function (t, error) {
-        if (error.code === error.SYNTAX_ERR) {
-            t.executeSql('SELECT name FROM sqlite_master ' + "WHERE type='table' AND name = ?", [dbInfo.storeName], function (t, results) {
-                if (!results.rows.length) {
-                    // if the table is missing (was deleted)
-                    // re-create it table and retry
-                    createDbTable(t, dbInfo, function () {
-                        t.executeSql(sqlStatement, args, callback, errorCallback);
-                    }, errorCallback);
-                } else {
-                    errorCallback(t, error);
-                }
-            }, errorCallback);
-        } else {
-            errorCallback(t, error);
-        }
-    }, errorCallback);
-}
-
-function getItem$1(key, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-            dbInfo.db.transaction(function (t) {
-                tryExecuteSql(t, dbInfo, 'SELECT * FROM ' + dbInfo.storeName + ' WHERE key = ? LIMIT 1', [key], function (t, results) {
-                    var result = results.rows.length ? results.rows.item(0).value : null;
-
-                    // Check to see if this is serialized content we need to
-                    // unpack.
-                    if (result) {
-                        result = dbInfo.serializer.deserialize(result);
-                    }
-
-                    resolve(result);
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function iterate$1(iterator, callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-
-            dbInfo.db.transaction(function (t) {
-                tryExecuteSql(t, dbInfo, 'SELECT * FROM ' + dbInfo.storeName, [], function (t, results) {
-                    var rows = results.rows;
-                    var length = rows.length;
-
-                    for (var i = 0; i < length; i++) {
-                        var item = rows.item(i);
-                        var result = item.value;
-
-                        // Check to see if this is serialized content
-                        // we need to unpack.
-                        if (result) {
-                            result = dbInfo.serializer.deserialize(result);
-                        }
-
-                        result = iterator(result, item.key, i + 1);
-
-                        // void(0) prevents problems with redefinition
-                        // of `undefined`.
-                        if (result !== void 0) {
-                            resolve(result);
-                            return;
-                        }
-                    }
-
-                    resolve();
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function _setItem(key, value, callback, retriesLeft) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            // The localStorage API doesn't return undefined values in an
-            // "expected" way, so undefined is always cast to null in all
-            // drivers. See: https://github.com/mozilla/localForage/pull/42
-            if (value === undefined) {
-                value = null;
-            }
-
-            // Save the original value to pass to the callback.
-            var originalValue = value;
-
-            var dbInfo = self._dbInfo;
-            dbInfo.serializer.serialize(value, function (value, error) {
-                if (error) {
-                    reject(error);
-                } else {
-                    dbInfo.db.transaction(function (t) {
-                        tryExecuteSql(t, dbInfo, 'INSERT OR REPLACE INTO ' + dbInfo.storeName + ' ' + '(key, value) VALUES (?, ?)', [key, value], function () {
-                            resolve(originalValue);
-                        }, function (t, error) {
-                            reject(error);
-                        });
-                    }, function (sqlError) {
-                        // The transaction failed; check
-                        // to see if it's a quota error.
-                        if (sqlError.code === sqlError.QUOTA_ERR) {
-                            // We reject the callback outright for now, but
-                            // it's worth trying to re-run the transaction.
-                            // Even if the user accepts the prompt to use
-                            // more storage on Safari, this error will
-                            // be called.
-                            //
-                            // Try to re-run the transaction.
-                            if (retriesLeft > 0) {
-                                resolve(_setItem.apply(self, [key, originalValue, callback, retriesLeft - 1]));
-                                return;
-                            }
-                            reject(sqlError);
-                        }
-                    });
-                }
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function setItem$1(key, value, callback) {
-    return _setItem.apply(this, [key, value, callback, 1]);
-}
-
-function removeItem$1(key, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-            dbInfo.db.transaction(function (t) {
-                tryExecuteSql(t, dbInfo, 'DELETE FROM ' + dbInfo.storeName + ' WHERE key = ?', [key], function () {
-                    resolve();
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Deletes every item in the table.
-// TODO: Find out if this resets the AUTO_INCREMENT number.
-function clear$1(callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-            dbInfo.db.transaction(function (t) {
-                tryExecuteSql(t, dbInfo, 'DELETE FROM ' + dbInfo.storeName, [], function () {
-                    resolve();
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Does a simple `COUNT(key)` to get the number of items stored in
-// localForage.
-function length$1(callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-            dbInfo.db.transaction(function (t) {
-                // Ahhh, SQL makes this one soooooo easy.
-                tryExecuteSql(t, dbInfo, 'SELECT COUNT(key) as c FROM ' + dbInfo.storeName, [], function (t, results) {
-                    var result = results.rows.item(0).c;
-                    resolve(result);
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Return the key located at key index X; essentially gets the key from a
-// `WHERE id = ?`. This is the most efficient way I can think to implement
-// this rarely-used (in my experience) part of the API, but it can seem
-// inconsistent, because we do `INSERT OR REPLACE INTO` on `setItem()`, so
-// the ID of each key will change every time it's updated. Perhaps a stored
-// procedure for the `setItem()` SQL would solve this problem?
-// TODO: Don't change ID on `setItem()`.
-function key$1(n, callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-            dbInfo.db.transaction(function (t) {
-                tryExecuteSql(t, dbInfo, 'SELECT key FROM ' + dbInfo.storeName + ' WHERE id = ? LIMIT 1', [n + 1], function (t, results) {
-                    var result = results.rows.length ? results.rows.item(0).key : null;
-                    resolve(result);
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function keys$1(callback) {
-    var self = this;
-
-    var promise = new Promise$1(function (resolve, reject) {
-        self.ready().then(function () {
-            var dbInfo = self._dbInfo;
-            dbInfo.db.transaction(function (t) {
-                tryExecuteSql(t, dbInfo, 'SELECT key FROM ' + dbInfo.storeName, [], function (t, results) {
-                    var keys = [];
-
-                    for (var i = 0; i < results.rows.length; i++) {
-                        keys.push(results.rows.item(i).key);
-                    }
-
-                    resolve(keys);
-                }, function (t, error) {
-                    reject(error);
-                });
-            });
-        })["catch"](reject);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// https://www.w3.org/TR/webdatabase/#databases
-// > There is no way to enumerate or delete the databases available for an origin from this API.
-function getAllStoreNames(db) {
-    return new Promise$1(function (resolve, reject) {
-        db.transaction(function (t) {
-            t.executeSql('SELECT name FROM sqlite_master ' + "WHERE type='table' AND name <> '__WebKitDatabaseInfoTable__'", [], function (t, results) {
-                var storeNames = [];
-
-                for (var i = 0; i < results.rows.length; i++) {
-                    storeNames.push(results.rows.item(i).name);
-                }
-
-                resolve({
-                    db: db,
-                    storeNames: storeNames
-                });
-            }, function (t, error) {
-                reject(error);
-            });
-        }, function (sqlError) {
-            reject(sqlError);
-        });
-    });
-}
-
-function dropInstance$1(options, callback) {
-    callback = getCallback.apply(this, arguments);
-
-    var currentConfig = this.config();
-    options = typeof options !== 'function' && options || {};
-    if (!options.name) {
-        options.name = options.name || currentConfig.name;
-        options.storeName = options.storeName || currentConfig.storeName;
-    }
-
-    var self = this;
-    var promise;
-    if (!options.name) {
-        promise = Promise$1.reject('Invalid arguments');
+      _addListenerObject(this, 'message', listenObj);
     } else {
-        promise = new Promise$1(function (resolve) {
-            var db;
-            if (options.name === currentConfig.name) {
-                // use the db reference of the current instance
-                db = self._dbInfo.db;
-            } else {
-                db = openDatabase(options.name, '', '', 0);
-            }
+      this._onML = null;
+    }
+  },
 
-            if (!options.storeName) {
-                // drop all database tables
-                resolve(getAllStoreNames(db));
-            } else {
-                resolve({
-                    db: db,
-                    storeNames: [options.storeName]
-                });
-            }
-        }).then(function (operationInfo) {
-            return new Promise$1(function (resolve, reject) {
-                operationInfo.db.transaction(function (t) {
-                    function dropTable(storeName) {
-                        return new Promise$1(function (resolve, reject) {
-                            t.executeSql('DROP TABLE IF EXISTS ' + storeName, [], function () {
-                                resolve();
-                            }, function (t, error) {
-                                reject(error);
-                            });
-                        });
-                    }
+  addEventListener: function addEventListener(type, fn) {
+    var time = this.method.microSeconds();
+    var listenObj = {
+      time: time,
+      fn: fn
+    };
 
-                    var operations = [];
-                    for (var i = 0, len = operationInfo.storeNames.length; i < len; i++) {
-                        operations.push(dropTable(operationInfo.storeNames[i]));
-                    }
+    _addListenerObject(this, type, listenObj);
+  },
+  removeEventListener: function removeEventListener(type, fn) {
+    var obj = this._addEL[type].find(function (obj) {
+      return obj.fn === fn;
+    });
 
-                    Promise$1.all(operations).then(function () {
-                        resolve();
-                    })["catch"](function (e) {
-                        reject(e);
-                    });
-                }, function (sqlError) {
-                    reject(sqlError);
-                });
-            });
-        });
+    _removeListenerObject(this, type, obj);
+  },
+  close: function close() {
+    var _this = this;
+
+    if (this.closed) {
+      return;
     }
 
-    executeCallback(promise, callback);
-    return promise;
-}
+    OPEN_BROADCAST_CHANNELS["delete"](this);
+    this.closed = true;
+    var awaitPrepare = this._prepP ? this._prepP : util.PROMISE_RESOLVED_VOID;
+    this._onML = null;
+    this._addEL.message = [];
+    return awaitPrepare // wait until all current sending are processed
+    .then(function () {
+      return Promise.all(Array.from(_this._uMP));
+    }) // run before-close hooks
+    .then(function () {
+      return Promise.all(_this._befC.map(function (fn) {
+        return fn();
+      }));
+    }) // close the channel
+    .then(function () {
+      return _this.method.close(_this._state);
+    });
+  },
 
-var webSQLStorage = {
-    _driver: 'webSQLStorage',
-    _initStorage: _initStorage$1,
-    _support: isWebSQLValid(),
-    iterate: iterate$1,
-    getItem: getItem$1,
-    setItem: setItem$1,
-    removeItem: removeItem$1,
-    clear: clear$1,
-    length: length$1,
-    key: key$1,
-    keys: keys$1,
-    dropInstance: dropInstance$1
+  get type() {
+    return this.method.type;
+  },
+
+  get isClosed() {
+    return this.closed;
+  }
+
 };
+/**
+ * Post a message over the channel
+ * @returns {Promise} that resolved when the message sending is done
+ */
 
-function isLocalStorageValid() {
-    try {
-        return typeof localStorage !== 'undefined' && 'setItem' in localStorage &&
-        // in IE8 typeof localStorage.setItem === 'object'
-        !!localStorage.setItem;
-    } catch (e) {
-        return false;
-    }
-}
+function _post(broadcastChannel, type, msg) {
+  var time = broadcastChannel.method.microSeconds();
+  var msgObj = {
+    time: time,
+    type: type,
+    data: msg
+  };
+  var awaitPrepare = broadcastChannel._prepP ? broadcastChannel._prepP : util.PROMISE_RESOLVED_VOID;
+  return awaitPrepare.then(function () {
+    var sendPromise = broadcastChannel.method.postMessage(broadcastChannel._state, msgObj); // add/remove to unsend messages list
 
-function _getKeyPrefix(options, defaultConfig) {
-    var keyPrefix = options.name + '/';
+    broadcastChannel._uMP.add(sendPromise);
 
-    if (options.storeName !== defaultConfig.storeName) {
-        keyPrefix += options.storeName + '/';
-    }
-    return keyPrefix;
-}
-
-// Check if localStorage throws when saving an item
-function checkIfLocalStorageThrows() {
-    var localStorageTestKey = '_localforage_support_test';
-
-    try {
-        localStorage.setItem(localStorageTestKey, true);
-        localStorage.removeItem(localStorageTestKey);
-
-        return false;
-    } catch (e) {
-        return true;
-    }
-}
-
-// Check if localStorage is usable and allows to save an item
-// This method checks if localStorage is usable in Safari Private Browsing
-// mode, or in any other case where the available quota for localStorage
-// is 0 and there wasn't any saved items yet.
-function _isLocalStorageUsable() {
-    return !checkIfLocalStorageThrows() || localStorage.length > 0;
-}
-
-// Config the localStorage backend, using options set in the config.
-function _initStorage$2(options) {
-    var self = this;
-    var dbInfo = {};
-    if (options) {
-        for (var i in options) {
-            dbInfo[i] = options[i];
-        }
-    }
-
-    dbInfo.keyPrefix = _getKeyPrefix(options, self._defaultConfig);
-
-    if (!_isLocalStorageUsable()) {
-        return Promise$1.reject();
-    }
-
-    self._dbInfo = dbInfo;
-    dbInfo.serializer = localforageSerializer;
-
-    return Promise$1.resolve();
-}
-
-// Remove all keys from the datastore, effectively destroying all data in
-// the app's key/value store!
-function clear$2(callback) {
-    var self = this;
-    var promise = self.ready().then(function () {
-        var keyPrefix = self._dbInfo.keyPrefix;
-
-        for (var i = localStorage.length - 1; i >= 0; i--) {
-            var key = localStorage.key(i);
-
-            if (key.indexOf(keyPrefix) === 0) {
-                localStorage.removeItem(key);
-            }
-        }
+    sendPromise["catch"]().then(function () {
+      return broadcastChannel._uMP["delete"](sendPromise);
     });
-
-    executeCallback(promise, callback);
-    return promise;
+    return sendPromise;
+  });
 }
 
-// Retrieve an item from the store. Unlike the original async_storage
-// library in Gaia, we don't modify return values at all. If a key's value
-// is `undefined`, we pass that value to the callback function.
-function getItem$2(key, callback) {
-    var self = this;
+function _prepareChannel(channel) {
+  var maybePromise = channel.method.create(channel.name, channel.options);
 
-    key = normalizeKey(key);
+  if ((0, util.isPromise)(maybePromise)) {
+    channel._prepP = maybePromise;
+    maybePromise.then(function (s) {
+      // used in tests to simulate slow runtime
 
-    var promise = self.ready().then(function () {
-        var dbInfo = self._dbInfo;
-        var result = localStorage.getItem(dbInfo.keyPrefix + key);
+      /*if (channel.options.prepareDelay) {
+           await new Promise(res => setTimeout(res, this.options.prepareDelay));
+      }*/
+      channel._state = s;
+    });
+  } else {
+    channel._state = maybePromise;
+  }
+}
 
-        // If a result was found, parse it from the serialized
-        // string into a JS object. If result isn't truthy, the key
-        // is likely undefined and we'll pass it straight to the
-        // callback.
-        if (result) {
-            result = dbInfo.serializer.deserialize(result);
+function _hasMessageListeners(channel) {
+  if (channel._addEL.message.length > 0) return true;
+  if (channel._addEL.internal.length > 0) return true;
+  return false;
+}
+
+function _addListenerObject(channel, type, obj) {
+  channel._addEL[type].push(obj);
+
+  _startListening(channel);
+}
+
+function _removeListenerObject(channel, type, obj) {
+  channel._addEL[type] = channel._addEL[type].filter(function (o) {
+    return o !== obj;
+  });
+
+  _stopListening(channel);
+}
+
+function _startListening(channel) {
+  if (!channel._iL && _hasMessageListeners(channel)) {
+    // someone is listening, start subscribing
+    var listenerFn = function listenerFn(msgObj) {
+      channel._addEL[msgObj.type].forEach(function (listenerObject) {
+        /**
+         * Getting the current time in JavaScript has no good precision.
+         * So instead of only listening to events that happend 'after' the listener
+         * was added, we also listen to events that happended 100ms before it.
+         * This ensures that when another process, like a WebWorker, sends events
+         * we do not miss them out because their timestamp is a bit off compared to the main process.
+         * Not doing this would make messages missing when we send data directly after subscribing and awaiting a response.
+         * @link https://johnresig.com/blog/accuracy-of-javascript-time/
+         */
+        var hundredMsInMicro = 100 * 1000;
+        var minMessageTime = listenerObject.time - hundredMsInMicro;
+
+        if (msgObj.time >= minMessageTime) {
+          listenerObject.fn(msgObj.data);
         }
+      });
+    };
 
-        return result;
-    });
+    var time = channel.method.microSeconds();
 
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Iterate over all items in the store.
-function iterate$2(iterator, callback) {
-    var self = this;
-
-    var promise = self.ready().then(function () {
-        var dbInfo = self._dbInfo;
-        var keyPrefix = dbInfo.keyPrefix;
-        var keyPrefixLength = keyPrefix.length;
-        var length = localStorage.length;
-
-        // We use a dedicated iterator instead of the `i` variable below
-        // so other keys we fetch in localStorage aren't counted in
-        // the `iterationNumber` argument passed to the `iterate()`
-        // callback.
-        //
-        // See: github.com/mozilla/localForage/pull/435#discussion_r38061530
-        var iterationNumber = 1;
-
-        for (var i = 0; i < length; i++) {
-            var key = localStorage.key(i);
-            if (key.indexOf(keyPrefix) !== 0) {
-                continue;
-            }
-            var value = localStorage.getItem(key);
-
-            // If a result was found, parse it from the serialized
-            // string into a JS object. If result isn't truthy, the
-            // key is likely undefined and we'll pass it straight
-            // to the iterator.
-            if (value) {
-                value = dbInfo.serializer.deserialize(value);
-            }
-
-            value = iterator(value, key.substring(keyPrefixLength), iterationNumber++);
-
-            if (value !== void 0) {
-                return value;
-            }
-        }
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Same as localStorage's key() method, except takes a callback.
-function key$2(n, callback) {
-    var self = this;
-    var promise = self.ready().then(function () {
-        var dbInfo = self._dbInfo;
-        var result;
-        try {
-            result = localStorage.key(n);
-        } catch (error) {
-            result = null;
-        }
-
-        // Remove the prefix from the key, if a key is found.
-        if (result) {
-            result = result.substring(dbInfo.keyPrefix.length);
-        }
-
-        return result;
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function keys$2(callback) {
-    var self = this;
-    var promise = self.ready().then(function () {
-        var dbInfo = self._dbInfo;
-        var length = localStorage.length;
-        var keys = [];
-
-        for (var i = 0; i < length; i++) {
-            var itemKey = localStorage.key(i);
-            if (itemKey.indexOf(dbInfo.keyPrefix) === 0) {
-                keys.push(itemKey.substring(dbInfo.keyPrefix.length));
-            }
-        }
-
-        return keys;
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Supply the number of keys in the datastore to the callback function.
-function length$2(callback) {
-    var self = this;
-    var promise = self.keys().then(function (keys) {
-        return keys.length;
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Remove an item from the store, nice and simple.
-function removeItem$2(key, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = self.ready().then(function () {
-        var dbInfo = self._dbInfo;
-        localStorage.removeItem(dbInfo.keyPrefix + key);
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-// Set a key's value and run an optional callback once the value is set.
-// Unlike Gaia's implementation, the callback function is passed the value,
-// in case you want to operate on that value only after you're sure it
-// saved, or something like that.
-function setItem$2(key, value, callback) {
-    var self = this;
-
-    key = normalizeKey(key);
-
-    var promise = self.ready().then(function () {
-        // Convert undefined values to null.
-        // https://github.com/mozilla/localForage/pull/42
-        if (value === undefined) {
-            value = null;
-        }
-
-        // Save the original value to pass to the callback.
-        var originalValue = value;
-
-        return new Promise$1(function (resolve, reject) {
-            var dbInfo = self._dbInfo;
-            dbInfo.serializer.serialize(value, function (value, error) {
-                if (error) {
-                    reject(error);
-                } else {
-                    try {
-                        localStorage.setItem(dbInfo.keyPrefix + key, value);
-                        resolve(originalValue);
-                    } catch (e) {
-                        // localStorage capacity exceeded.
-                        // TODO: Make this a specific error/event.
-                        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                            reject(e);
-                        }
-                        reject(e);
-                    }
-                }
-            });
-        });
-    });
-
-    executeCallback(promise, callback);
-    return promise;
-}
-
-function dropInstance$2(options, callback) {
-    callback = getCallback.apply(this, arguments);
-
-    options = typeof options !== 'function' && options || {};
-    if (!options.name) {
-        var currentConfig = this.config();
-        options.name = options.name || currentConfig.name;
-        options.storeName = options.storeName || currentConfig.storeName;
-    }
-
-    var self = this;
-    var promise;
-    if (!options.name) {
-        promise = Promise$1.reject('Invalid arguments');
+    if (channel._prepP) {
+      channel._prepP.then(function () {
+        channel._iL = true;
+        channel.method.onMessage(channel._state, listenerFn, time);
+      });
     } else {
-        promise = new Promise$1(function (resolve) {
-            if (!options.storeName) {
-                resolve(options.name + '/');
-            } else {
-                resolve(_getKeyPrefix(options, self._defaultConfig));
-            }
-        }).then(function (keyPrefix) {
-            for (var i = localStorage.length - 1; i >= 0; i--) {
-                var key = localStorage.key(i);
-
-                if (key.indexOf(keyPrefix) === 0) {
-                    localStorage.removeItem(key);
-                }
-            }
-        });
+      channel._iL = true;
+      channel.method.onMessage(channel._state, listenerFn, time);
     }
-
-    executeCallback(promise, callback);
-    return promise;
+  }
 }
 
-var localStorageWrapper = {
-    _driver: 'localStorageWrapper',
-    _initStorage: _initStorage$2,
-    _support: isLocalStorageValid(),
-    iterate: iterate$2,
-    getItem: getItem$2,
-    setItem: setItem$2,
-    removeItem: removeItem$2,
-    clear: clear$2,
-    length: length$2,
-    key: key$2,
-    keys: keys$2,
-    dropInstance: dropInstance$2
+function _stopListening(channel) {
+  if (channel._iL && !_hasMessageListeners(channel)) {
+    // noone is listening, stop subscribing
+    channel._iL = false;
+    var time = channel.method.microSeconds();
+    channel.method.onMessage(channel._state, null, time);
+  }
+}
+});
+
+unwrapExports(broadcastChannel$1);
+broadcastChannel$1.OPEN_BROADCAST_CHANNELS;
+broadcastChannel$1.BroadcastChannel;
+broadcastChannel$1.clearNodeFolder;
+broadcastChannel$1.enforceOptions;
+
+/* global WorkerGlobalScope */
+function add$1(fn) {
+  if (typeof WorkerGlobalScope === 'function' && self instanceof WorkerGlobalScope) ; else {
+    /**
+     * if we are on react-native, there is no window.addEventListener
+     * @link https://github.com/pubkey/unload/issues/6
+     */
+    if (typeof window.addEventListener !== 'function') return;
+    /**
+     * for normal browser-windows, we use the beforeunload-event
+     */
+
+    window.addEventListener('beforeunload', function () {
+      fn();
+    }, true);
+    /**
+     * for iframes, we have to use the unload-event
+     * @link https://stackoverflow.com/q/47533670/3443137
+     */
+
+    window.addEventListener('unload', function () {
+      fn();
+    }, true);
+  }
+  /**
+   * TODO add fallback for safari-mobile
+   * @link https://stackoverflow.com/a/26193516/3443137
+   */
+
+}
+
+var BrowserMethod = {
+  add: add$1
 };
 
-var sameValue = function sameValue(x, y) {
-    return x === y || typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y);
+var USE_METHOD = BrowserMethod;
+var LISTENERS = new Set();
+var startedListening = false;
+
+function startListening() {
+  if (startedListening) return;
+  startedListening = true;
+  USE_METHOD.add(runAll);
+}
+
+function add(fn) {
+  startListening();
+  if (typeof fn !== 'function') throw new Error('Listener is no function');
+  LISTENERS.add(fn);
+  var addReturn = {
+    remove: function remove() {
+      return LISTENERS["delete"](fn);
+    },
+    run: function run() {
+      LISTENERS["delete"](fn);
+      return fn();
+    }
+  };
+  return addReturn;
+}
+function runAll() {
+  var promises = [];
+  LISTENERS.forEach(function (fn) {
+    promises.push(fn());
+    LISTENERS["delete"](fn);
+  });
+  return Promise.all(promises);
+}
+function removeAll() {
+  LISTENERS.clear();
+}
+function getSize() {
+  return LISTENERS.size;
+}
+
+var es = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  add: add,
+  runAll: runAll,
+  removeAll: removeAll,
+  getSize: getSize
+});
+
+var leaderElection = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.beLeader = beLeader;
+exports.createLeaderElection = createLeaderElection;
+
+
+
+
+
+var LeaderElection = function LeaderElection(broadcastChannel, options) {
+  var _this = this;
+
+  this.broadcastChannel = broadcastChannel;
+  this._options = options;
+  this.isLeader = false;
+  this.hasLeader = false;
+  this.isDead = false;
+  this.token = (0, util.randomToken)();
+  /**
+   * Apply Queue,
+   * used to ensure we do not run applyOnce()
+   * in parallel.
+   */
+
+  this._aplQ = util.PROMISE_RESOLVED_VOID; // amount of unfinished applyOnce() calls
+
+  this._aplQC = 0; // things to clean up
+
+  this._unl = []; // _unloads
+
+  this._lstns = []; // _listeners
+
+  this._dpL = function () {}; // onduplicate listener
+
+
+  this._dpLC = false; // true when onduplicate called
+
+  /**
+   * Even when the own instance is not applying,
+   * we still listen to messages to ensure the hasLeader flag
+   * is set correctly.
+   */
+
+  var hasLeaderListener = function hasLeaderListener(msg) {
+    if (msg.context === 'leader') {
+      if (msg.action === 'death') {
+        _this.hasLeader = false;
+      }
+
+      if (msg.action === 'tell') {
+        _this.hasLeader = true;
+      }
+    }
+  };
+
+  this.broadcastChannel.addEventListener('internal', hasLeaderListener);
+
+  this._lstns.push(hasLeaderListener);
 };
 
-var includes = function includes(array, searchElement) {
-    var len = array.length;
-    var i = 0;
-    while (i < len) {
-        if (sameValue(array[i], searchElement)) {
+LeaderElection.prototype = {
+  /**
+   * Returns true if the instance is leader,
+   * false if not.
+   * @async
+   */
+  applyOnce: function applyOnce( // true if the applyOnce() call came from the fallbackInterval cycle
+  isFromFallbackInterval) {
+    var _this2 = this;
+
+    if (this.isLeader) {
+      return (0, util.sleep)(0, true);
+    }
+
+    if (this.isDead) {
+      return (0, util.sleep)(0, false);
+    }
+    /**
+     * Already applying more then once,
+     * -> wait for the apply queue to be finished.
+     */
+
+
+    if (this._aplQC > 1) {
+      return this._aplQ;
+    }
+    /**
+     * Add a new apply-run
+     */
+
+
+    var applyRun = function applyRun() {
+      /**
+       * Optimization shortcuts.
+       * Directly return if a previous run
+       * has already elected a leader.
+       */
+      if (_this2.isLeader) {
+        return util.PROMISE_RESOLVED_TRUE;
+      }
+
+      var stopCriteria = false;
+      var stopCriteriaPromiseResolve;
+      /**
+       * Resolves when a stop criteria is reached.
+       * Uses as a performance shortcut so we do not
+       * have to await the responseTime when it is already clear
+       * that the election failed.
+       */
+
+      var stopCriteriaPromise = new Promise(function (res) {
+        stopCriteriaPromiseResolve = function stopCriteriaPromiseResolve() {
+          stopCriteria = true;
+          res();
+        };
+      });
+
+      var handleMessage = function handleMessage(msg) {
+        if (msg.context === 'leader' && msg.token != _this2.token) {
+
+          if (msg.action === 'apply') {
+            // other is applying
+            if (msg.token > _this2.token) {
+              /**
+               * other has higher token
+               * -> stop applying and let other become leader.
+               */
+              stopCriteriaPromiseResolve();
+            }
+          }
+
+          if (msg.action === 'tell') {
+            // other is already leader
+            stopCriteriaPromiseResolve();
+            _this2.hasLeader = true;
+          }
+        }
+      };
+
+      _this2.broadcastChannel.addEventListener('internal', handleMessage);
+      /**
+       * If the applyOnce() call came from the fallbackInterval,
+       * we can assume that the election runs in the background and
+       * not critical process is waiting for it.
+       * When this is true, we give the other intances
+       * more time to answer to messages in the election cycle.
+       * This makes it less likely to elect duplicate leaders.
+       * But also it takes longer which is not a problem because we anyway
+       * run in the background.
+       */
+
+
+      var waitForAnswerTime = isFromFallbackInterval ? _this2._options.responseTime * 4 : _this2._options.responseTime;
+
+      var applyPromise = _sendMessage(_this2, 'apply') // send out that this one is applying
+      .then(function () {
+        return Promise.race([(0, util.sleep)(waitForAnswerTime), stopCriteriaPromise.then(function () {
+          return Promise.reject(new Error());
+        })]);
+      }) // send again in case another instance was just created
+      .then(function () {
+        return _sendMessage(_this2, 'apply');
+      }) // let others time to respond
+      .then(function () {
+        return Promise.race([(0, util.sleep)(waitForAnswerTime), stopCriteriaPromise.then(function () {
+          return Promise.reject(new Error());
+        })]);
+      })["catch"](function () {}).then(function () {
+        _this2.broadcastChannel.removeEventListener('internal', handleMessage);
+
+        if (!stopCriteria) {
+          // no stop criteria -> own is leader
+          return beLeader(_this2).then(function () {
             return true;
-        }
-        i++;
-    }
-
-    return false;
-};
-
-var isArray = Array.isArray || function (arg) {
-    return Object.prototype.toString.call(arg) === '[object Array]';
-};
-
-// Drivers are stored here when `defineDriver()` is called.
-// They are shared across all instances of localForage.
-var DefinedDrivers = {};
-
-var DriverSupport = {};
-
-var DefaultDrivers = {
-    INDEXEDDB: asyncStorage,
-    WEBSQL: webSQLStorage,
-    LOCALSTORAGE: localStorageWrapper
-};
-
-var DefaultDriverOrder = [DefaultDrivers.INDEXEDDB._driver, DefaultDrivers.WEBSQL._driver, DefaultDrivers.LOCALSTORAGE._driver];
-
-var OptionalDriverMethods = ['dropInstance'];
-
-var LibraryMethods = ['clear', 'getItem', 'iterate', 'key', 'keys', 'length', 'removeItem', 'setItem'].concat(OptionalDriverMethods);
-
-var DefaultConfig = {
-    description: '',
-    driver: DefaultDriverOrder.slice(),
-    name: 'localforage',
-    // Default DB size is _JUST UNDER_ 5MB, as it's the highest size
-    // we can use without a prompt.
-    size: 4980736,
-    storeName: 'keyvaluepairs',
-    version: 1.0
-};
-
-function callWhenReady(localForageInstance, libraryMethod) {
-    localForageInstance[libraryMethod] = function () {
-        var _args = arguments;
-        return localForageInstance.ready().then(function () {
-            return localForageInstance[libraryMethod].apply(localForageInstance, _args);
-        });
-    };
-}
-
-function extend() {
-    for (var i = 1; i < arguments.length; i++) {
-        var arg = arguments[i];
-
-        if (arg) {
-            for (var _key in arg) {
-                if (arg.hasOwnProperty(_key)) {
-                    if (isArray(arg[_key])) {
-                        arguments[0][_key] = arg[_key].slice();
-                    } else {
-                        arguments[0][_key] = arg[_key];
-                    }
-                }
-            }
-        }
-    }
-
-    return arguments[0];
-}
-
-var LocalForage = function () {
-    function LocalForage(options) {
-        _classCallCheck(this, LocalForage);
-
-        for (var driverTypeKey in DefaultDrivers) {
-            if (DefaultDrivers.hasOwnProperty(driverTypeKey)) {
-                var driver = DefaultDrivers[driverTypeKey];
-                var driverName = driver._driver;
-                this[driverTypeKey] = driverName;
-
-                if (!DefinedDrivers[driverName]) {
-                    // we don't need to wait for the promise,
-                    // since the default drivers can be defined
-                    // in a blocking manner
-                    this.defineDriver(driver);
-                }
-            }
-        }
-
-        this._defaultConfig = extend({}, DefaultConfig);
-        this._config = extend({}, this._defaultConfig, options);
-        this._driverSet = null;
-        this._initDriver = null;
-        this._ready = false;
-        this._dbInfo = null;
-
-        this._wrapLibraryMethodsWithReady();
-        this.setDriver(this._config.driver)["catch"](function () {});
-    }
-
-    // Set any config values for localForage; can be called anytime before
-    // the first API call (e.g. `getItem`, `setItem`).
-    // We loop through options so we don't overwrite existing config
-    // values.
-
-
-    LocalForage.prototype.config = function config(options) {
-        // If the options argument is an object, we use it to set values.
-        // Otherwise, we return either a specified config value or all
-        // config values.
-        if ((typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object') {
-            // If localforage is ready and fully initialized, we can't set
-            // any new configuration values. Instead, we return an error.
-            if (this._ready) {
-                return new Error("Can't call config() after localforage " + 'has been used.');
-            }
-
-            for (var i in options) {
-                if (i === 'storeName') {
-                    options[i] = options[i].replace(/\W/g, '_');
-                }
-
-                if (i === 'version' && typeof options[i] !== 'number') {
-                    return new Error('Database version must be a number.');
-                }
-
-                this._config[i] = options[i];
-            }
-
-            // after all config options are set and
-            // the driver option is used, try setting it
-            if ('driver' in options && options.driver) {
-                return this.setDriver(this._config.driver);
-            }
-
-            return true;
-        } else if (typeof options === 'string') {
-            return this._config[options];
+          });
         } else {
-            return this._config;
+          // other is leader
+          return false;
         }
+      });
+
+      return applyPromise;
     };
 
-    // Used to define a custom driver, shared across all instances of
-    // localForage.
+    this._aplQC = this._aplQC + 1;
+    this._aplQ = this._aplQ.then(function () {
+      return applyRun();
+    }).then(function () {
+      _this2._aplQC = _this2._aplQC - 1;
+    });
+    return this._aplQ.then(function () {
+      return _this2.isLeader;
+    });
+  },
+  awaitLeadership: function awaitLeadership() {
+    if (
+    /* _awaitLeadershipPromise */
+    !this._aLP) {
+      this._aLP = _awaitLeadershipOnce(this);
+    }
+
+    return this._aLP;
+  },
+
+  set onduplicate(fn) {
+    this._dpL = fn;
+  },
+
+  die: function die() {
+    var _this3 = this;
+
+    this._lstns.forEach(function (listener) {
+      return _this3.broadcastChannel.removeEventListener('internal', listener);
+    });
+
+    this._lstns = [];
+
+    this._unl.forEach(function (uFn) {
+      return uFn.remove();
+    });
+
+    this._unl = [];
+
+    if (this.isLeader) {
+      this.hasLeader = false;
+      this.isLeader = false;
+    }
+
+    this.isDead = true;
+    return _sendMessage(this, 'death');
+  }
+};
+/**
+ * @param leaderElector {LeaderElector}
+ */
+
+function _awaitLeadershipOnce(leaderElector) {
+  if (leaderElector.isLeader) {
+    return util.PROMISE_RESOLVED_VOID;
+  }
+
+  return new Promise(function (res) {
+    var resolved = false;
+
+    function finish() {
+      if (resolved) {
+        return;
+      }
+
+      resolved = true;
+      leaderElector.broadcastChannel.removeEventListener('internal', whenDeathListener);
+      res(true);
+    } // try once now
 
 
-    LocalForage.prototype.defineDriver = function defineDriver(driverObject, callback, errorCallback) {
-        var promise = new Promise$1(function (resolve, reject) {
-            try {
-                var driverName = driverObject._driver;
-                var complianceError = new Error('Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver');
+    leaderElector.applyOnce().then(function () {
+      if (leaderElector.isLeader) {
+        finish();
+      }
+    });
+    /**
+     * Try on fallbackInterval
+     * @recursive
+     */
 
-                // A driver name should be defined and not overlap with the
-                // library-defined, default drivers.
-                if (!driverObject._driver) {
-                    reject(complianceError);
-                    return;
-                }
+    var tryOnFallBack = function tryOnFallBack() {
+      return (0, util.sleep)(leaderElector._options.fallbackInterval).then(function () {
+        if (leaderElector.isDead || resolved) {
+          return;
+        }
 
-                var driverMethods = LibraryMethods.concat('_initStorage');
-                for (var i = 0, len = driverMethods.length; i < len; i++) {
-                    var driverMethodName = driverMethods[i];
-
-                    // when the property is there,
-                    // it should be a method even when optional
-                    var isRequired = !includes(OptionalDriverMethods, driverMethodName);
-                    if ((isRequired || driverObject[driverMethodName]) && typeof driverObject[driverMethodName] !== 'function') {
-                        reject(complianceError);
-                        return;
-                    }
-                }
-
-                var configureMissingMethods = function configureMissingMethods() {
-                    var methodNotImplementedFactory = function methodNotImplementedFactory(methodName) {
-                        return function () {
-                            var error = new Error('Method ' + methodName + ' is not implemented by the current driver');
-                            var promise = Promise$1.reject(error);
-                            executeCallback(promise, arguments[arguments.length - 1]);
-                            return promise;
-                        };
-                    };
-
-                    for (var _i = 0, _len = OptionalDriverMethods.length; _i < _len; _i++) {
-                        var optionalDriverMethod = OptionalDriverMethods[_i];
-                        if (!driverObject[optionalDriverMethod]) {
-                            driverObject[optionalDriverMethod] = methodNotImplementedFactory(optionalDriverMethod);
-                        }
-                    }
-                };
-
-                configureMissingMethods();
-
-                var setDriverSupport = function setDriverSupport(support) {
-                    if (DefinedDrivers[driverName]) {
-                        console.info('Redefining LocalForage driver: ' + driverName);
-                    }
-                    DefinedDrivers[driverName] = driverObject;
-                    DriverSupport[driverName] = support;
-                    // don't use a then, so that we can define
-                    // drivers that have simple _support methods
-                    // in a blocking manner
-                    resolve();
-                };
-
-                if ('_support' in driverObject) {
-                    if (driverObject._support && typeof driverObject._support === 'function') {
-                        driverObject._support().then(setDriverSupport, reject);
-                    } else {
-                        setDriverSupport(!!driverObject._support);
-                    }
-                } else {
-                    setDriverSupport(true);
-                }
-            } catch (e) {
-                reject(e);
+        if (leaderElector.isLeader) {
+          finish();
+        } else {
+          return leaderElector.applyOnce(true).then(function () {
+            if (leaderElector.isLeader) {
+              finish();
+            } else {
+              tryOnFallBack();
             }
+          });
+        }
+      });
+    };
+
+    tryOnFallBack(); // try when other leader dies
+
+    var whenDeathListener = function whenDeathListener(msg) {
+      if (msg.context === 'leader' && msg.action === 'death') {
+        leaderElector.hasLeader = false;
+        leaderElector.applyOnce().then(function () {
+          if (leaderElector.isLeader) {
+            finish();
+          }
         });
-
-        executeTwoCallbacks(promise, callback, errorCallback);
-        return promise;
+      }
     };
 
-    LocalForage.prototype.driver = function driver() {
-        return this._driver || null;
-    };
+    leaderElector.broadcastChannel.addEventListener('internal', whenDeathListener);
 
-    LocalForage.prototype.getDriver = function getDriver(driverName, callback, errorCallback) {
-        var getDriverPromise = DefinedDrivers[driverName] ? Promise$1.resolve(DefinedDrivers[driverName]) : Promise$1.reject(new Error('Driver not found.'));
-
-        executeTwoCallbacks(getDriverPromise, callback, errorCallback);
-        return getDriverPromise;
-    };
-
-    LocalForage.prototype.getSerializer = function getSerializer(callback) {
-        var serializerPromise = Promise$1.resolve(localforageSerializer);
-        executeTwoCallbacks(serializerPromise, callback);
-        return serializerPromise;
-    };
-
-    LocalForage.prototype.ready = function ready(callback) {
-        var self = this;
-
-        var promise = self._driverSet.then(function () {
-            if (self._ready === null) {
-                self._ready = self._initDriver();
-            }
-
-            return self._ready;
-        });
-
-        executeTwoCallbacks(promise, callback, callback);
-        return promise;
-    };
-
-    LocalForage.prototype.setDriver = function setDriver(drivers, callback, errorCallback) {
-        var self = this;
-
-        if (!isArray(drivers)) {
-            drivers = [drivers];
-        }
-
-        var supportedDrivers = this._getSupportedDrivers(drivers);
-
-        function setDriverToConfig() {
-            self._config.driver = self.driver();
-        }
-
-        function extendSelfWithDriver(driver) {
-            self._extend(driver);
-            setDriverToConfig();
-
-            self._ready = self._initStorage(self._config);
-            return self._ready;
-        }
-
-        function initDriver(supportedDrivers) {
-            return function () {
-                var currentDriverIndex = 0;
-
-                function driverPromiseLoop() {
-                    while (currentDriverIndex < supportedDrivers.length) {
-                        var driverName = supportedDrivers[currentDriverIndex];
-                        currentDriverIndex++;
-
-                        self._dbInfo = null;
-                        self._ready = null;
-
-                        return self.getDriver(driverName).then(extendSelfWithDriver)["catch"](driverPromiseLoop);
-                    }
-
-                    setDriverToConfig();
-                    var error = new Error('No available storage method found.');
-                    self._driverSet = Promise$1.reject(error);
-                    return self._driverSet;
-                }
-
-                return driverPromiseLoop();
-            };
-        }
-
-        // There might be a driver initialization in progress
-        // so wait for it to finish in order to avoid a possible
-        // race condition to set _dbInfo
-        var oldDriverSetDone = this._driverSet !== null ? this._driverSet["catch"](function () {
-            return Promise$1.resolve();
-        }) : Promise$1.resolve();
-
-        this._driverSet = oldDriverSetDone.then(function () {
-            var driverName = supportedDrivers[0];
-            self._dbInfo = null;
-            self._ready = null;
-
-            return self.getDriver(driverName).then(function (driver) {
-                self._driver = driver._driver;
-                setDriverToConfig();
-                self._wrapLibraryMethodsWithReady();
-                self._initDriver = initDriver(supportedDrivers);
-            });
-        })["catch"](function () {
-            setDriverToConfig();
-            var error = new Error('No available storage method found.');
-            self._driverSet = Promise$1.reject(error);
-            return self._driverSet;
-        });
-
-        executeTwoCallbacks(this._driverSet, callback, errorCallback);
-        return this._driverSet;
-    };
-
-    LocalForage.prototype.supports = function supports(driverName) {
-        return !!DriverSupport[driverName];
-    };
-
-    LocalForage.prototype._extend = function _extend(libraryMethodsAndProperties) {
-        extend(this, libraryMethodsAndProperties);
-    };
-
-    LocalForage.prototype._getSupportedDrivers = function _getSupportedDrivers(drivers) {
-        var supportedDrivers = [];
-        for (var i = 0, len = drivers.length; i < len; i++) {
-            var driverName = drivers[i];
-            if (this.supports(driverName)) {
-                supportedDrivers.push(driverName);
-            }
-        }
-        return supportedDrivers;
-    };
-
-    LocalForage.prototype._wrapLibraryMethodsWithReady = function _wrapLibraryMethodsWithReady() {
-        // Add a stub for each driver API method that delays the call to the
-        // corresponding driver method until localForage is ready. These stubs
-        // will be replaced by the driver methods as soon as the driver is
-        // loaded, so there is no performance impact.
-        for (var i = 0, len = LibraryMethods.length; i < len; i++) {
-            callWhenReady(this, LibraryMethods[i]);
-        }
-    };
-
-    LocalForage.prototype.createInstance = function createInstance(options) {
-        return new LocalForage(options);
-    };
-
-    return LocalForage;
-}();
-
-// The actual localForage object that we expose as a module or via a
-// global. It's extended by pulling in one of our other libraries.
+    leaderElector._lstns.push(whenDeathListener);
+  });
+}
+/**
+ * sends and internal message over the broadcast-channel
+ */
 
 
-var localforage_js = new LocalForage();
+function _sendMessage(leaderElector, action) {
+  var msgJson = {
+    context: 'leader',
+    action: action,
+    token: leaderElector.token
+  };
+  return leaderElector.broadcastChannel.postInternal(msgJson);
+}
 
-module.exports = localforage_js;
+function beLeader(leaderElector) {
+  leaderElector.isLeader = true;
+  leaderElector.hasLeader = true;
+  var unloadFn = (0, es.add)(function () {
+    return leaderElector.die();
+  });
 
-},{"3":3}]},{},[4])(4)
+  leaderElector._unl.push(unloadFn);
+
+  var isLeaderListener = function isLeaderListener(msg) {
+    if (msg.context === 'leader' && msg.action === 'apply') {
+      _sendMessage(leaderElector, 'tell');
+    }
+
+    if (msg.context === 'leader' && msg.action === 'tell' && !leaderElector._dpLC) {
+      /**
+       * another instance is also leader!
+       * This can happen on rare events
+       * like when the CPU is at 100% for long time
+       * or the tabs are open very long and the browser throttles them.
+       * @link https://github.com/pubkey/broadcast-channel/issues/414
+       * @link https://github.com/pubkey/broadcast-channel/issues/385
+       */
+      leaderElector._dpLC = true;
+
+      leaderElector._dpL(); // message the lib user so the app can handle the problem
+
+
+      _sendMessage(leaderElector, 'tell'); // ensure other leader also knows the problem
+
+    }
+  };
+
+  leaderElector.broadcastChannel.addEventListener('internal', isLeaderListener);
+
+  leaderElector._lstns.push(isLeaderListener);
+
+  return _sendMessage(leaderElector, 'tell');
+}
+
+function fillOptionsWithDefaults(options, channel) {
+  if (!options) options = {};
+  options = JSON.parse(JSON.stringify(options));
+
+  if (!options.fallbackInterval) {
+    options.fallbackInterval = 3000;
+  }
+
+  if (!options.responseTime) {
+    options.responseTime = channel.method.averageResponseTime(channel.options);
+  }
+
+  return options;
+}
+
+function createLeaderElection(channel, options) {
+  if (channel._leaderElector) {
+    throw new Error('BroadcastChannel already has a leader-elector');
+  }
+
+  options = fillOptionsWithDefaults(options, channel);
+  var elector = new LeaderElection(channel, options);
+
+  channel._befC.push(function () {
+    return elector.die();
+  });
+
+  channel._leaderElector = elector;
+  return elector;
+}
+});
+
+unwrapExports(leaderElection);
+leaderElection.beLeader;
+leaderElection.createLeaderElection;
+
+var lib = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "BroadcastChannel", {
+  enumerable: true,
+  get: function get() {
+    return broadcastChannel$1.BroadcastChannel;
+  }
+});
+Object.defineProperty(exports, "OPEN_BROADCAST_CHANNELS", {
+  enumerable: true,
+  get: function get() {
+    return broadcastChannel$1.OPEN_BROADCAST_CHANNELS;
+  }
+});
+Object.defineProperty(exports, "beLeader", {
+  enumerable: true,
+  get: function get() {
+    return leaderElection.beLeader;
+  }
+});
+Object.defineProperty(exports, "clearNodeFolder", {
+  enumerable: true,
+  get: function get() {
+    return broadcastChannel$1.clearNodeFolder;
+  }
+});
+Object.defineProperty(exports, "createLeaderElection", {
+  enumerable: true,
+  get: function get() {
+    return leaderElection.createLeaderElection;
+  }
+});
+Object.defineProperty(exports, "enforceOptions", {
+  enumerable: true,
+  get: function get() {
+    return broadcastChannel$1.enforceOptions;
+  }
 });
 });
 
-let localForageDbInstance;
+unwrapExports(lib);
 
-const localForageDb = () => {
-  if (localForageDbInstance === undefined) {
-    localForageDbInstance = localforage.createInstance({
-      name: 'jsxcad',
-      driver: localforage.INDEXEDDB,
-      storeName: 'jsxcad',
-      description: 'jsxcad local filesystem',
+/**
+ * because babel can only export on default-attribute,
+ * we use this for the non-module-build
+ * this ensures that users do not have to use
+ * var BroadcastChannel = require('broadcast-channel').default;
+ * but
+ * var BroadcastChannel = require('broadcast-channel');
+ */
+var index_es5 = {
+  BroadcastChannel: lib.BroadcastChannel,
+  createLeaderElection: lib.createLeaderElection,
+  clearNodeFolder: lib.clearNodeFolder,
+  enforceOptions: lib.enforceOptions,
+  beLeader: lib.beLeader
+};
+var index_es5_1 = index_es5.BroadcastChannel;
+
+let broadcastChannel;
+
+const receiveNotification = async ({ id, op, path, workspace }) => {
+  logInfo(
+    'sys/broadcast',
+    `Received broadcast: ${JSON.stringify({ id, op, path, workspace })}`
+  );
+  switch (op) {
+    case 'changePath':
+      await runFileChangeWatchers(path, workspace);
+      break;
+    case 'createPath':
+      await runFileCreationWatchers(path, workspace);
+      break;
+    case 'deletePath':
+      await runFileDeletionWatchers(path, workspace);
+      break;
+    default:
+      throw Error(
+        `Unexpected broadcast ${JSON.stringify({ id, op, path, workspace })}`
+      );
+  }
+};
+
+const receiveBroadcast = ({ id, op, path, workspace }) => {
+  if (id === (self$1 && self$1.id)) {
+    // We already received this via a local receiveNotification.
+    return;
+  }
+  receiveNotification({ id, op, path, workspace });
+};
+
+const sendBroadcast = async (message) => {
+  // We send to ourself immediately, so that we can order effects like cache clears and updates.
+  await receiveNotification(message);
+  broadcastChannel.postMessage(message);
+};
+
+const initBroadcastChannel = async () => {
+  broadcastChannel = new index_es5_1('sys/fs');
+  broadcastChannel.onmessage = receiveBroadcast;
+};
+
+const notifyFileChange = async (path, workspace) =>
+  sendBroadcast({ id: self$1 && self$1.id, op: 'changePath', path, workspace });
+
+const notifyFileCreation = async (path, workspace) =>
+  sendBroadcast({ id: self$1 && self$1.id, op: 'createPath', path, workspace });
+
+const notifyFileDeletion = async (path, workspace) =>
+  sendBroadcast({ id: self$1 && self$1.id, op: 'deletePath', path, workspace });
+
+initBroadcastChannel();
+
+// Copyright Joyent, Inc. and other Node contributors.
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
+
+function dirname(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+}
+
+const { promises: promises$3 } = fs;
+const { serialize } = v8$1;
+
+const getFileWriter = () => {
+  if (isNode) {
+    return async (qualifiedPath, data, doSerialize) => {
+      try {
+        await promises$3.mkdir(dirname(qualifiedPath), { recursive: true });
+      } catch (error) {
+        throw error;
+      }
+      try {
+        if (doSerialize) {
+          data = serialize(data);
+        }
+        await promises$3.writeFile(qualifiedPath, data);
+        // FIX: Do proper versioning.
+        const version = 0;
+        return version;
+      } catch (error) {
+        throw error;
+      }
+    };
+  } else if (isBrowser || isWebWorker) {
+    return async (qualifiedPath, data) => {
+      return db(qualifiedPath).setItemAndIncrementVersion(qualifiedPath, data);
+    };
+  }
+};
+
+const fileWriter = getFileWriter();
+
+const writeNonblocking = (path, data, options = {}) => {
+  // Schedule a deferred write to update persistent storage.
+  addPending(write(path, data, options));
+  throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+};
+
+const write = async (path, data, options = {}) => {
+  data = await data;
+
+  if (typeof data === 'function') {
+    // Always fail to write functions.
+    return undefined;
+  }
+
+  const {
+    doSerialize = true,
+    ephemeral,
+    workspace = getFilesystem(),
+  } = options;
+
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+
+  if (!file.data) {
+    await notifyFileCreation(path, workspace);
+  }
+
+  file.data = data;
+
+  if (!ephemeral && workspace !== undefined) {
+    file.version = await fileWriter(qualifiedPath, data, doSerialize);
+  }
+
+  // Let everyone else know the file has changed.
+  await notifyFileChange(path, workspace);
+
+  return true;
+};
+
+/* global self */
+
+const { promises: promises$2 } = fs;
+const { deserialize } = v8$1;
+
+const getUrlFetcher = () => {
+  if (isBrowser) {
+    return window.fetch;
+  }
+  if (isWebWorker) {
+    return self.fetch;
+  }
+  if (isNode) {
+    return nodeFetch;
+  }
+  throw Error('Expected browser or web worker or node');
+};
+
+const urlFetcher = getUrlFetcher();
+
+const getExternalFileFetcher = () => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (qualifiedPath) => {
+      try {
+        let data = await promises$2.readFile(qualifiedPath);
+        return data;
+      } catch (e) {
+        if (e.code && e.code === 'ENOENT') {
+          return {};
+        }
+        logInfo('sys/getExternalFile/error', e.toString());
+      }
+    };
+  } else if (isBrowser || isWebWorker) {
+    return async (qualifiedPath) => {};
+  } else {
+    throw Error('Expected node or browser or web worker');
+  }
+};
+
+const externalFileFetcher = getExternalFileFetcher();
+
+const getInternalFileFetcher = () => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (qualifiedPath, doSerialize = true) => {
+      try {
+        let data = await promises$2.readFile(qualifiedPath);
+        if (doSerialize) {
+          data = deserialize(data);
+        }
+        // FIX: Use a proper version.
+        return { data, version: 0 };
+      } catch (e) {
+        if (e.code && e.code === 'ENOENT') {
+          return {};
+        }
+        logInfo('sys/getExternalFile/error', e.toString());
+      }
+    };
+  } else if (isBrowser || isWebWorker) {
+    return (qualifiedPath) =>
+      db(qualifiedPath).getItemAndVersion(qualifiedPath);
+  } else {
+    throw Error('Expected node or browser or web worker');
+  }
+};
+
+const internalFileFetcher = getInternalFileFetcher();
+
+const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return (qualifiedPath) => {
+      // FIX: Use a proper version.
+      return 0;
+    };
+  } else if (isBrowser || isWebWorker) {
+    return (qualifiedPath) => db(qualifiedPath).getItemVersion(qualifiedPath);
+  } else {
+    throw Error('Expected node or browser or web worker');
+  }
+};
+
+const internalFileVersionFetcher = getInternalFileVersionFetcher();
+
+// Fetch from internal store.
+const fetchPersistent = (qualifiedPath, { workspace, doSerialize }) => {
+  try {
+    if (workspace) {
+      return internalFileFetcher(qualifiedPath, doSerialize);
+    } else {
+      return {};
+    }
+  } catch (e) {
+    if (e.code && e.code === 'ENOENT') {
+      return {};
+    }
+    logInfo('sys/fetchPersistent/error', e.toString());
+  }
+};
+
+const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
+  try {
+    if (workspace) {
+      return internalFileVersionFetcher(qualifiedPath);
+    }
+  } catch (e) {
+    if (e.code && e.code === 'ENOENT') {
+      return;
+    }
+    logInfo('sys/fetchPersistentVersion/error', e.toString());
+  }
+};
+
+// Fetch from external sources.
+const fetchSources = async (sources, { workspace }) => {
+  // Try to load the data from a source.
+  for (const source of sources) {
+    if (typeof source === 'string') {
+      try {
+        if (source.startsWith('http:') || source.startsWith('https:')) {
+          logInfo('sys/fetchSources/url', source);
+          const response = await urlFetcher(source, { cache: 'reload' });
+          if (response.ok) {
+            return new Uint8Array(await response.arrayBuffer());
+          }
+        } else {
+          logInfo('sys/fetchSources/file', source);
+          // Assume a file path.
+          const data = await externalFileFetcher(source);
+          if (data !== undefined) {
+            return data;
+          }
+        }
+      } catch (e) {}
+    } else {
+      throw Error('Expected file source to be a string');
+    }
+  }
+};
+
+const readNonblocking = (path, options = {}) => {
+  const { workspace = getFilesystem() } = options;
+  const file = getFile(path, workspace);
+  if (file) {
+    return file.data;
+  }
+  addPending(read(path, options));
+  throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+};
+
+const read = async (path, options = {}) => {
+  const {
+    allowFetch = true,
+    ephemeral,
+    sources = [],
+    workspace = getFilesystem(),
+    useCache = true,
+    forceNoCache = false,
+    decode,
+  } = options;
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+
+  if (file.data && workspace) {
+    // Check that the version is still up to date.
+    if (
+      file.version !==
+      (await fetchPersistentVersion(qualifiedPath, { workspace }))
+    ) {
+      file.data = undefined;
+    }
+  }
+
+  if (file.data === undefined || useCache === false || forceNoCache) {
+    const { value, version } = await fetchPersistent(qualifiedPath, {
+      workspace,
+      doSerialize: true,
+    });
+    file.data = value;
+    file.version = version;
+  }
+
+  if (file.data === undefined && allowFetch && sources.length > 0) {
+    let data = await fetchSources(sources, { workspace });
+    if (decode) {
+      data = new TextDecoder(decode).decode(data);
+    }
+    if (!ephemeral && file.data !== undefined) {
+      // Update persistent cache.
+      await write(path, data, { ...options, doSerialize: true });
+    }
+    file.data = data;
+  }
+  if (file.data !== undefined) {
+    if (file.data.then) {
+      // Resolve any outstanding promises.
+      file.data = await file.data;
+    }
+  }
+  return file.data;
+};
+
+const readOrWatch = async (path, options = {}) => {
+  const data = await read(path, options);
+  if (data !== undefined) {
+    return data;
+  }
+  let resolveWatch;
+  const watch = new Promise((resolve) => {
+    resolveWatch = resolve;
+  });
+  const watcher = await watchFile(path, options.workspace, (file) =>
+    resolveWatch(path)
+  );
+  await watch;
+  await unwatchFile(path, options.workspace, watcher);
+  return read(path, options);
+};
+
+/* global self */
+
+let handleAskUser;
+
+const askUser = async (identifier, options) => {
+  if (handleAskUser) {
+    return handleAskUser(identifier, options);
+  } else {
+    return { identifier, value: '', type: 'string' };
+  }
+};
+
+const ask = async (identifier, options = {}) => {
+  if (isWebWorker) {
+    return addPending(self.ask({ op: 'ask', identifier, options }));
+  }
+
+  return askUser(identifier, options);
+};
+
+const setHandleAskUser = (handler) => {
+  handleAskUser = handler;
+};
+
+const tasks = [];
+
+// Add task to complete before using system.
+// Note: These are expected to be idempotent.
+const onBoot = (op) => {
+  tasks.push(op);
+};
+
+const UNBOOTED = 'unbooted';
+const BOOTING = 'booting';
+const BOOTED = 'booted';
+
+let status = UNBOOTED;
+
+const pending$1 = [];
+
+// Execute tasks to complete before using system.
+const boot = async () => {
+  // No need to wait.
+  if (status === BOOTED) {
+    return;
+  }
+  if (status === BOOTING) {
+    // Wait for the system to boot.
+    return new Promise((resolve, reject) => {
+      pending$1.push(resolve);
     });
   }
-  return localForageDbInstance;
+  // Initiate boot.
+  status = BOOTING;
+  for (const task of tasks) {
+    await task();
+  }
+  // Complete boot.
+  status = BOOTED;
+  // Release the pending clients.
+  while (pending$1.length > 0) {
+    pending$1.pop()();
+  }
 };
-
-const db = localForageDb;
-// export const db = idbKeyvalDb;
-
-// import hashSum from 'hash-sum';
 
 const sourceLocations = [];
 
@@ -3792,6 +3560,7 @@ const emit = (value) => {
   if (value.sourceLocation === undefined) {
     value.sourceLocation = getSourceLocation();
   }
+  console.log(JSON.stringify(value));
   emitGroup.push(value);
 };
 
@@ -3837,50 +3606,69 @@ const finishEmitGroup = (sourceLocation) => {
 
 const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 
-const info = (text) => {
-  /*
-  console.log(text);
-  const entry = { info: text };
-  const hash = hashSum(entry);
-  emit({ info: text, hash });
-*/
+const { promises: promises$1 } = fs;
+
+const getFileLister = async ({ workspace }) => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async () => {
+      const qualifiedPaths = new Set();
+      const walk = async (path) => {
+        for (const file of await promises$1.readdir(path)) {
+          if (file.startsWith('.') || file === 'node_modules') {
+            continue;
+          }
+          const subpath = `${path}${file}`;
+          const stats = await promises$1.stat(subpath);
+          if (stats.isDirectory()) {
+            await walk(`${subpath}/`);
+          } else {
+            qualifiedPaths.add(subpath);
+          }
+        }
+      };
+      await walk('jsxcad/');
+      listFiles$1(qualifiedPaths);
+      return qualifiedPaths;
+    };
+  } else if (isBrowser || isWebWorker) {
+    // FIX: Make localstorage optional.
+    return async () => {
+      const qualifiedPaths = new Set(
+        await db(`jsxcad/${workspace}/source`).keys(),
+        await db(`jsxcad/${workspace}/config`).keys(),
+        await db(`jsxcad/${workspace}/control`).keys()
+      );
+      listFiles$1(qualifiedPaths);
+      return qualifiedPaths;
+    };
+  } else {
+    throw Error('Did not detect node, browser, or webworker');
+  }
 };
 
-var nodeFetch = _ => _;
+const getKeys = async ({ workspace }) => (await getFileLister({ workspace }))();
 
-// Copyright Joyent, Inc. and other Node contributors.
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
+const listFiles = async ({ workspace } = {}) => {
+  if (workspace === undefined) {
+    workspace = getFilesystem();
+  }
+  const prefix = qualifyPath('', workspace);
+  const keys = await getKeys({ workspace });
+  const files = [];
+  for (const key of keys) {
+    if (key && key.startsWith(prefix)) {
+      files.push(key.substring(prefix.length));
+    }
+  }
+  return files;
 };
-
-function dirname(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-}
 
 let activeServiceLimit = 5;
 let idleServiceLimit = 5;
 const activeServices = new Set();
 const idleServices = [];
-const pending$1 = [];
+const pending = [];
 const watchers = new Set();
 
 // TODO: Consider different specifications.
@@ -3893,6 +3681,11 @@ const notifyWatchers = () => {
 
 const acquireService = async (spec, context) => {
   if (idleServices.length > 0) {
+    logInfo('sys/servicePool', 'Recycle worker');
+    logInfo(
+      'sys/servicePool/counts',
+      `Active service count: ${activeServices.size}`
+    );
     // Recycle an existing worker.
     // FIX: We might have multiple paths to consider in the future.
     // For now, just assume that the path is correct.
@@ -3905,6 +3698,11 @@ const acquireService = async (spec, context) => {
     notifyWatchers();
     return service;
   } else if (activeServices.size < activeServiceLimit) {
+    logInfo('sys/servicePool', 'Allocate worker');
+    logInfo(
+      'sys/servicePool/counts',
+      `Active service count: ${activeServices.size}`
+    );
     // Create a new service.
     const service = createService({ ...spec, release: releaseService });
     activeServices.add(service);
@@ -3915,14 +3713,24 @@ const acquireService = async (spec, context) => {
     notifyWatchers();
     return service;
   } else {
+    logInfo('sys/servicePool', 'Wait for worker');
+    logInfo(
+      'sys/servicePool/counts',
+      `Active service count: ${activeServices.size}`
+    );
     // Wait for a service to become available.
     return new Promise((resolve, reject) =>
-      pending$1.push({ spec, resolve, context })
+      pending.push({ spec, resolve, context })
     );
   }
 };
 
 const releaseService = (spec, service, terminate = false) => {
+  logInfo('sys/servicePool', 'Release worker');
+  logInfo(
+    'sys/servicePool/counts',
+    `Active service count: ${activeServices.size}`
+  );
   service.poolReleased = true;
   activeServices.delete(service);
   const worker = service.releaseWorker();
@@ -3935,8 +3743,8 @@ const releaseService = (spec, service, terminate = false) => {
       );
     }
   }
-  if (pending$1.length > 0 && activeServices.size < activeServiceLimit) {
-    const { spec, resolve, context } = pending$1.shift();
+  if (pending.length > 0 && activeServices.size < activeServiceLimit) {
+    const { spec, resolve, context } = pending.shift();
     resolve(acquireService(spec, context));
   }
   notifyWatchers();
@@ -3949,7 +3757,7 @@ const getServicePoolInfo = () => ({
   idleServices: [...idleServices],
   idleServiceLimit,
   idleServiceCount: idleServices.length,
-  pendingCount: pending$1.length,
+  pendingCount: pending.length,
 });
 
 const getActiveServices = (contextFilter = (context) => true) => {
@@ -3989,7 +3797,7 @@ const askService = (spec, question, transfer, context) => {
         return Promise.reject(Error('Terminated'));
       };
       if (terminated) {
-        terminate();
+        return terminate();
       }
       const answer = await service.ask(question, transfer);
       return answer;
@@ -4042,477 +3850,27 @@ const unwatchServices = (watcher) => {
   return watcher;
 };
 
-/* global self */
-
-const touch = async (
-  path,
-  { workspace, clear = true, broadcast = true } = {}
-) => {
-  const file = await getFile({ workspace }, path);
-  if (file !== undefined) {
-    if (clear) {
-      // This will force a reload of the data.
-      file.data = undefined;
-    }
-
-    for (const watcher of file.watchers) {
-      await watcher({ workspace }, file);
-    }
-  }
-
-  if (isWebWorker) {
-    if (broadcast) {
-      addPending(
-        await self.ask({ op: 'sys/touch', path, workspace, id: self.id })
-      );
-    }
-  } else {
-    tellServices({ op: 'sys/touch', path, workspace });
-  }
-};
-
-const { promises: promises$3 } = fs;
-const { serialize } = v8$1;
-
-const writeFile = async (options, path, data) => {
-  data = await data;
-
-  const {
-    doSerialize = true,
-    ephemeral,
-    workspace = getFilesystem(),
-  } = options;
-  const file = await getFile(options, path);
-  file.data = data;
-
-  if (!ephemeral && workspace !== undefined) {
-    const persistentPath = qualifyPath(path, workspace);
-    if (isNode) {
-      try {
-        await promises$3.mkdir(dirname(persistentPath), { recursive: true });
-      } catch (error) {
-        throw error;
-      }
-      try {
-        if (doSerialize) {
-          data = serialize(data);
-        }
-        await promises$3.writeFile(persistentPath, data);
-      } catch (error) {
-        throw error;
-      }
-    } else if (isBrowser || isWebWorker) {
-      await db().setItem(persistentPath, data);
-    }
-
-    // Let everyone know the file has changed.
-    await touch(path, { workspace, clear: false });
-  }
-
-  for (const watcher of file.watchers) {
-    await watcher(options, file);
-  }
-
-  return true;
-};
-
-const write = async (path, data, options = {}) => {
-  if (typeof data === 'function') {
-    // Always fail to write functions.
-    return undefined;
-  }
-  return writeFile(options, path, data);
-};
-
-/* global self */
-
-const { promises: promises$2 } = fs;
-const { deserialize } = v8$1;
-
-const getUrlFetcher = async () => {
-  if (isBrowser) {
-    return window.fetch;
-  }
-  if (isWebWorker) {
-    return self.fetch;
-  }
-  if (isNode) {
-    return nodeFetch;
-  }
-  throw Error('die');
-};
-
-const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async (path) => {
-      let data = await promises$2.readFile(qualify(path));
-      if (doSerialize) {
-        data = deserialize(data);
-      }
-      return data;
-    };
-  } else if (isBrowser || isWebWorker) {
-    return async (path) => {
-      const data = await db().getItem(qualify(path));
-      if (data !== null) {
-        return data;
-      }
-    };
-  } else {
-    throw Error('die');
-  }
-};
-
-// Fetch from internal store.
-const fetchPersistent = async (path, { workspace, doSerialize }) => {
-  try {
-    if (workspace) {
-      const fetchFile = await getFileFetcher(
-        (path) => qualifyPath(path, workspace),
-        doSerialize
-      );
-      const data = await fetchFile(path);
-      return data;
-    }
-  } catch (e) {
-    if (e.code && e.code === 'ENOENT') {
-      return;
-    }
-    console.log(e);
-  }
-};
-
-// Fetch from external sources.
-const fetchSources = async (sources) => {
-  const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher((path) => path, false);
-  // Try to load the data from a source.
-  for (const source of sources) {
-    if (typeof source === 'string') {
-      try {
-        if (source.startsWith('http:') || source.startsWith('https:')) {
-          log({ op: 'text', text: `# Fetching ${source}` });
-          info(`Fetching url ${source}`);
-          const response = await fetchUrl(source, { cache: 'reload' });
-          if (response.ok) {
-            return new Uint8Array(await response.arrayBuffer());
-          }
-        } else {
-          log({ op: 'text', text: `# Fetching ${source}` });
-          info(`Fetching file ${source}`);
-          // Assume a file path.
-          const data = await fetchFile(source);
-          if (data !== undefined) {
-            return data;
-          }
-        }
-      } catch (e) {}
-    } else {
-      throw Error('die');
-    }
-  }
-};
-
-// Deprecated
-const readFile = async (options, path) => {
-  const {
-    allowFetch = true,
-    ephemeral,
-    sources = [],
-    workspace = getFilesystem(),
-    useCache = true,
-    forceNoCache = false,
-    decode,
-  } = options;
-  const file = await getFile(options, path);
-  if (file.data === undefined || useCache === false || forceNoCache) {
-    file.data = await fetchPersistent(path, { workspace, doSerialize: true });
-  }
-
-  if (file.data === undefined && allowFetch && sources.length > 0) {
-    let data = await fetchSources(sources);
-    if (decode) {
-      data = new TextDecoder(decode).decode(data);
-    }
-    if (!ephemeral && file.data !== undefined) {
-      // Update persistent cache.
-      await writeFile({ ...options, doSerialize: true }, path, data);
-    }
-    // The writeFile above can trigger a touch which can invalidate the cache
-    // so we need to set the cached value after that is resolved.
-    file.data = data;
-  }
-  if (file.data !== undefined) {
-    if (file.data.then) {
-      // Resolve any outstanding promises.
-      file.data = await file.data;
-    }
-  }
-  info(`Read complete: ${path} ${file.data ? 'present' : 'missing'}`);
-
-  return file.data;
-};
-
-const read = async (path, options = {}) => readFile(options, path);
-
-const readOrWatch = async (path, options = {}) => {
-  const data = await read(path, options);
-  if (data !== undefined) {
-    return data;
-  }
-  let resolveWatch;
-  const watch = new Promise((resolve) => {
-    resolveWatch = resolve;
-  });
-  const watcher = await watchFile(path, (file) => resolveWatch(path), options);
-  await watch;
-  await unwatchFile(path, watcher);
-  return read(path, options);
-};
-
-/* global self */
-
-let handleAskUser;
-
-const askUser = async (identifier, options) => {
-  if (handleAskUser) {
-    return handleAskUser(identifier, options);
-  } else {
-    return { identifier, value: '', type: 'string' };
-  }
-};
-
-const ask = async (identifier, options = {}) => {
-  if (isWebWorker) {
-    return addPending(self.ask({ op: 'ask', identifier, options }));
-  }
-
-  return askUser(identifier, options);
-};
-
-const setHandleAskUser = (handler) => {
-  handleAskUser = handler;
-};
-
-const tasks = [];
-
-// Add task to complete before using system.
-// Note: These are expected to be idempotent.
-const onBoot = (op) => {
-  tasks.push(op);
-};
-
-const UNBOOTED = 'unbooted';
-const BOOTING = 'booting';
-const BOOTED = 'booted';
-
-let status = UNBOOTED;
-
-const pending = [];
-
-// Execute tasks to complete before using system.
-const boot = async () => {
-  // No need to wait.
-  if (status === BOOTED) {
-    return;
-  }
-  if (status === BOOTING) {
-    // Wait for the system to boot.
-    return new Promise((resolve, reject) => {
-      pending.push(resolve);
-    });
-  }
-  // Initiate boot.
-  status = BOOTING;
-  for (const task of tasks) {
-    await task();
-  }
-  // Complete boot.
-  status = BOOTED;
-  // Release the pending clients.
-  while (pending.length > 0) {
-    pending.pop()();
-  }
-};
-
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
-
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
-
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
-
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
-  }
-  if (value === undefined) {
-    return fold(hash, 'undefined');
-  }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
-
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
-
-const hash = (item) => hashSum(item);
-
-const { promises: promises$1 } = fs;
-
-const getFileLister = async () => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async () => {
-      const qualifiedPaths = new Set();
-      const walk = async (path) => {
-        for (const file of await promises$1.readdir(path)) {
-          if (file.startsWith('.') || file === 'node_modules') {
-            continue;
-          }
-          const subpath = `${path}${file}`;
-          const stats = await promises$1.stat(subpath);
-          if (stats.isDirectory()) {
-            await walk(`${subpath}/`);
-          } else {
-            qualifiedPaths.add(subpath);
-          }
-        }
-      };
-      await walk('jsxcad/');
-      listFiles$1(qualifiedPaths);
-      return qualifiedPaths;
-    };
-  } else if (isBrowser || isWebWorker) {
-    // FIX: Make localstorage optional.
-    return async () => {
-      const qualifiedPaths = new Set(await db().keys());
-      listFiles$1(qualifiedPaths);
-      return qualifiedPaths;
-    };
-  } else {
-    throw Error('Did not detect node, browser, or webworker');
-  }
-};
-
-let cachedKeys;
-
-const updateCachedKeys = (options = {}, file) =>
-  cachedKeys.add(file.storageKey);
-const deleteCachedKeys = (options = {}, file) =>
-  cachedKeys.delete(file.storageKey);
-
-const getKeys = async () => {
-  if (cachedKeys === undefined) {
-    const listFiles = await getFileLister();
-    cachedKeys = await listFiles();
-    watchFileCreation(updateCachedKeys);
-    watchFileDeletion(deleteCachedKeys);
-  }
-  return cachedKeys;
-};
-
-const listFilesystems = async () => {
-  const keys = await getKeys();
-  const filesystems = new Set();
-  for (const key of keys) {
-    if (key.startsWith('jsxcad/')) {
-      const [, filesystem] = key.split('/');
-      filesystems.add(filesystem);
-    }
-  }
-  return [...filesystems];
-};
-
-const listFiles = async ({ workspace } = {}) => {
-  if (workspace === undefined) {
-    workspace = getFilesystem();
-  }
-  const prefix = qualifyPath('', workspace);
-  const keys = await getKeys();
-  const files = [];
-  for (const key of keys) {
-    if (key.startsWith(prefix)) {
-      files.push(key.substring(prefix.length));
-    }
-  }
-  return files;
-};
-
-/* global self */
-
 const { promises } = fs;
 
-const getFileDeleter = async ({ workspace } = {}) => {
+const getPersistentFileDeleter = () => {
   if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async (path) => {
-      return promises.unlink(qualifyPath(path, workspace));
+    return async (qualifiedPath) => {
+      return promises.unlink(qualifiedPath);
     };
-  } else if (isBrowser) {
-    return async (path) => {
-      await db().removeItem(qualifyPath(path, workspace));
+  } else if (isBrowser || isWebWorker) {
+    return async (qualifiedPath) => {
+      await db(qualifiedPath).removeItem(qualifiedPath);
     };
   } else {
-    throw Error('die');
+    throw Error('Expected node or browser or web worker');
   }
 };
 
-const deleteFile = async (options, path) => {
-  if (isWebWorker) {
-    return addPending(self.ask({ op: 'deleteFile', options, path }));
-  }
-  const deleter = await getFileDeleter(options);
-  await deleter(path);
-  await deleteFile$1(options, path);
+const persistentFileDeleter = getPersistentFileDeleter();
+
+const remove = async (path, { workspace } = {}) => {
+  await persistentFileDeleter(qualifyPath(path, workspace));
+  await notifyFileDeletion(path, workspace);
 };
 
 const sleep = (ms = 0) =>
@@ -4533,4 +3891,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearEmitted, createConversation, createService, deleteFile, elapsed, emit, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, info, isBrowser, isNode, isWebWorker, listFiles, listFilesystems, log, onBoot, qualifyPath, read, readFile, readOrWatch, removeOnEmitHandler, resolvePending, restoreEmitGroup, saveEmitGroup, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, tellServices, terminateActiveServices, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeFile };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };

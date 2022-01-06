@@ -2430,6 +2430,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/molecule.js~molecule#threshold",
+    "class/src/js/molecules/molecule.js~Molecule.html#instance-member-threshold",
+    "src/js/molecules/molecule.js~Molecule#threshold",
+    "member"
+  ],
+  [
     "src/js/molecules/molecule.js~molecule#toprocess",
     "class/src/js/molecules/molecule.js~Molecule.html#instance-member-toProcess",
     "src/js/molecules/molecule.js~Molecule#toProcess",

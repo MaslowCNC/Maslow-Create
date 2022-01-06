@@ -154,7 +154,7 @@ export default class Atom {
          */
         this.selected = false
         /** 
-         * This atom&apos;s curent color
+         * This atom&apos;s current color
          * @type {string}
          */
         this.color = &apos;#F3EFEF&apos;
@@ -174,7 +174,7 @@ export default class Atom {
          */
         this.value = null
         /** 
-         * A flag to indicate if this atom is currently being draged on the screen.
+         * A flag to indicate if this atom is currently being dragged on the screen.
          * @type {boolean}
          */
         this.isMoving = false
@@ -184,12 +184,12 @@ export default class Atom {
          */
         this.showHover = false
         /** 
-         * The X cordinate of this atom now
+         * The X coordinate of this atom now
          * @type {number}
          */
         this.x = 0
         /** 
-         * The Y cordinate of this atom now
+         * The Y coordinate of this atom now
          * @type {number}
          */
         this.y = 0
@@ -235,7 +235,8 @@ export default class Atom {
             levelToInspect = levelToInspect.parent
         }
         
-        this.path =&quot;atoms/&quot; + levelToInspect.uniqueID + topPath + this.atomType
+        this.path =&quot;source/&quot; + levelToInspect.uniqueID + topPath + this.atomType
+
     }
     
     /**
@@ -900,7 +901,7 @@ export default class Atom {
      * @param {boolean} resultShouldBeNumber - A flag to indicate if the input should be converted to a number.
      * @param {object} callBack - Optional. A function to call with the new value when the value changes.
      */ 
-    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack){
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack = () =&gt; console.log(&quot;no callback&quot;)){
 
         var listElement = document.createElement(&apos;LI&apos;)
         list.appendChild(listElement)
