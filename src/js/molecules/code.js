@@ -34,7 +34,7 @@ export default class Code extends Atom {
          * The code contained within the atom stored as a string.
          * @type {string}
          */
-        this.code = "//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \n\n\nfunction main(Input1, Input2){\n  return Orb(40)        //return must be geometry;\n}\n\nreturn main(Input1, Input2)"
+        this.code = "//You can learn more about all of the available methods at https://jsxcad.js.org/app/UserGuide.html \n//Inputs:[Input1, Input2];\n\n\nreturn Orb(10)"
         
         this.addIO("output", "geometry", this, "geometry", "")
         
@@ -79,30 +79,33 @@ export default class Code extends Atom {
      */ 
     parseInputs(ready = true){
         //Parse this.code for the line "\nmain(input1, input2....) and add those as inputs if needed
-        var variables = /\(\s*([^)]+?)\s*\)/.exec(this.code)
-        if (variables[1]) {
-            variables = variables[1].split(/\s*,\s*/)
-        }
+        var variables = /Inputs:\[\s*([^)]+?)\s*\]/.exec(this.code)
         
-        //Add any inputs which are needed
-        for (var variable in variables){
-            if(!this.inputs.some(input => input.Name === variables[variable])){
-                this.addIO('input', variables[variable], this, 'geometry', null, ready)
+        if(variables){
+            if (variables[1]) {
+                variables = variables[1].split(/\s*,\s*/)
             }
-        }
-        
-        //Remove any inputs which are not needed
-        for (var input in this.inputs){
-            if( !variables.includes(this.inputs[input].name) ){
-                this.removeIO('input', this.inputs[input].name, this)
+            
+            //Add any inputs which are needed
+            for (var variable in variables){
+                if(!this.inputs.some(input => input.Name === variables[variable])){
+                    this.addIO('input', variables[variable], this, 'geometry', null, ready)
+                }
+            }
+            
+            //Remove any inputs which are not needed
+            for (var input in this.inputs){
+                if( !variables.includes(this.inputs[input].name) ){
+                    this.removeIO('input', this.inputs[input].name, this)
+                }
             }
         }
     }
     
     /**
      * Edit the atom's code when it is double clicked
-     * @param {number} x - The X cordinate of the click
-     * @param {number} y - The Y cordinate of the click
+     * @param {number} x - The X coordinate of the click
+     * @param {number} y - The Y coordinate of the click
      */ 
     doubleClick(x,y){
         //returns true if something was done with the click
@@ -121,7 +124,7 @@ export default class Code extends Atom {
     }
     
     /**
-     * Callled to trigger editing the code atom
+     * Called to trigger editing the code atom
      */ 
     editCode(){
         //Remove everything in the popup now

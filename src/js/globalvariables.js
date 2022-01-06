@@ -63,7 +63,7 @@ class GlobalVariables{
             difference:         {creator: Difference, atomType: 'Difference', atomCategory: 'Interactions'},
             assembly:           {creator: Assembly, atomType: 'Assembly', atomCategory: 'Interactions'},
             union:              {creator: Group, atomType: 'Union', atomCategory: 'None'},
-            group:              {creator: Group, atomType: 'Group', atomCategory: 'Interactions'},
+            group:              {creator: Group, atomType: 'Group', atomCategory: 'None'},
             shrinkwrap:         {creator: ShrinkWrap, atomType: 'ShrinkWrap', atomCategory: 'Interactions'},
             
             

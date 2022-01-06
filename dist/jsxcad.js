@@ -1,4 +1,4 @@
-import { askService, touch } from './jsxcad-sys.js';
+import { askService } from './jsxcad-sys.js';
 
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 
@@ -6,9 +6,6 @@ window.bootstrap = async () => {
   const agent = async ({ ask, message }) => {
     const { id, op, path, workspace } = message;
     switch (op) {
-      case 'sys/touch':
-        await touch(path, { workspace, id, clear: true, broadcast: true });
-        return;
       case 'log':
         return;
       default:
@@ -58,8 +55,3 @@ orbitDisplay({view: {fit: false}, withAxes: true, withGrid: true, gridLayer: 0},
     window.updateDisplay = result.updateGeometry
 });
 
-
-//TODo: Add some garbage collection here which checks when a path was last written to or read from and deletes the old ones. Probably will require a wrapper for reading and writing to paths
-// listFiles().then(result => {
-    // console.log(result);
-// })
