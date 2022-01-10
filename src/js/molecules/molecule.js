@@ -821,7 +821,7 @@ export default class Molecule extends Atom{
     
     /**
      * Places a new connector within the molecule
-     * @param {object} connectorObj - An object represntation of the connector specifying its inputs and outputs.
+     * @param {object} connectorObj - An object representation of the connector specifying its inputs and outputs.
      */
     placeConnector(connectorObj){
         

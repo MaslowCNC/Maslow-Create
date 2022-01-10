@@ -57,10 +57,6 @@ export default class Atom {
          * This atom's color when selected
          * @type {string}
          */
-        /** 
-         * The color to use for strokes when selected
-         * @type {string}
-         */
         this.selectedColor = '#484848'
         /** 
          * The color currently used for strokes
@@ -68,7 +64,7 @@ export default class Atom {
          */
         this.strokeColor = '#484848'
         /** 
-         * A flag to indicate if this atom is curently selected
+         * A flag to indicate if this atom is currently selected
          * @type {boolean}
          */
         this.selected = false
