@@ -1,5 +1,5 @@
 /**
- * Returns a randome integer within a range.
+ * Returns a random integer within a range.
  * @param {number} min - The minimum possible value.
  * @param {number} max - The maximum possible value.
  */ 
