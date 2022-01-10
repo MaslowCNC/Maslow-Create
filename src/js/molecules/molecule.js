@@ -355,7 +355,7 @@ export default class Molecule extends Atom{
     setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
         this.propagate()
-        this.updateSidebar();
+        this.updateSidebar()
     }
     
     changeUnits(newUnitsIndex){
