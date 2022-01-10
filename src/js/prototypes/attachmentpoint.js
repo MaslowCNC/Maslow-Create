@@ -17,7 +17,7 @@ export default class AttachmentPoint {
          */
         this.defaultRadius = 1/60
         /** 
-         * A flag to indicate if this attachmet point is currently expanded.
+         * A flag to indicate if this attachment point is currently expanded.
          * @type {boolean}
          */
         this.expandedRadius = false

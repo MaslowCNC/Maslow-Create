@@ -55,6 +55,9 @@ export default class ShrinkWrap extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
+
+
+        this.setValues([])
         
     }
     

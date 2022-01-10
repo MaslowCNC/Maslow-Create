@@ -49,6 +49,8 @@ export default class Group extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
+
+        this.setValues([])
     }
     
     /**
