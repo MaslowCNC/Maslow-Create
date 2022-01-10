@@ -812,7 +812,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
         if (checkerResult == null) {
           return null;
         }
-        if (checkerResult.data.hasOwnProperty('expectedType')) {
+        if (checkerResult.data && has(checkerResult.data, 'expectedType')) {
           expectedTypes.push(checkerResult.data.expectedType);
         }
       }
@@ -42833,20 +42833,19 @@ class App extends ReactDOM$2.Component {
       window.alert('Cached files deleted');
     };
 
-    this.Files.deleteSourceFiles = async () => {
+    this.Files.deleteSourceFile = async file => {
       const {
         workspace
       } = this.props;
       const {
         WorkspaceFiles = []
       } = this.state;
-      const nonRegenerableFiles = WorkspaceFiles.filter(file => !isRegenerable(file));
-
-      for (const file of nonRegenerableFiles) {
-        await remove({
-          workspace
-        }, file);
-      }
+      await remove(file, {
+        workspace
+      });
+      await this.updateState({
+        WorkspaceFiles: WorkspaceFiles.filter(entry => entry !== file)
+      });
     };
 
     this.Layout = {};
@@ -43866,13 +43865,15 @@ class App extends ReactDOM$2.Component {
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Regeneable Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Delete Source Files"), v$1(Card.Text, null, v$1(Button, {
-              variant: "primary",
-              onClick: this.Files.deleteSourceFiles
-            }, "Delete Source Files Forever"), v$1(ListGroup, null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => v$1(ListGroup.Item, {
-              key: index,
-              disabled: true
-            }, file))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
+            }, "Delete Regeneable Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Source Files"), v$1(Card.Text, null, v$1(Table, {
+              striped: true,
+              border: true,
+              hover: true
+            }, v$1("tbody", null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => v$1("tr", {
+              key: index
+            }, v$1("td", null, v$1(Button, {
+              onClick: () => this.Files.deleteSourceFile(file)
+            }, "Delete")), v$1("td", null, file))))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Model.reset
             }, "Reset")))));
