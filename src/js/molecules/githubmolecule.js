@@ -82,7 +82,7 @@ export default class GitHubMolecule extends Molecule {
         else{
             //Store values that we want to overwrite in the loaded version
             var valuesToOverwriteInLoadedVersion
-            if(this.topLevel){
+            if(this.topLevel){ //If we are loading this as a stand alone project
                 valuesToOverwriteInLoadedVersion = {atomType: this.atomType, topLevel: this.topLevel}
             }
             else{
@@ -107,14 +107,26 @@ export default class GitHubMolecule extends Molecule {
      */
     reloadMolecule(){
         
+        var outputConnector = false
+        if(this.output.connectors.length > 0){
+            outputConnector = this.output.connectors[0]
+        }
+
         //Delete everything currently inside...Make a copy to prevent index issues
         const copyOfNodesOnTheScreen = [...this.nodesOnTheScreen]
         copyOfNodesOnTheScreen.forEach(node => {
             node.deleteNode(false, false, true)
         })
         
-        //Re-serialize this molecule
+        //Re-de-serialize this molecule
         this.loadProjectByID(this.projectID).then( ()=> {
+
+            if(outputConnector){
+                //Reconnect the output connector
+                outputConnector.attachmentPoint1 = this.output
+                this.output.connectors.push(outputConnector)
+            }
+
             this.beginPropagation(true)
             this.updateSidebar()
         })

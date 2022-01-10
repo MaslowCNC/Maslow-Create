@@ -119,7 +119,7 @@ export default class AttachmentPoint {
          */
         this.ready = true
         /** 
-         * A list of all of the connectors attached to this attachmet point
+         * A list of all of the connectors attached to this attachment point
          * @type {object}
          */
         this.connectors = []
