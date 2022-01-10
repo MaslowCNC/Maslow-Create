@@ -4270,29 +4270,21 @@ const toSvg = async (
       const { points, holes } = polygonWithHoles;
       const color = toRgbColorFromTags(tags, definitions);
       const d = [];
-      d.push(
-        points
-          .map(
-            (point, index) =>
-              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-          )
-          .join(' ')
+      points.forEach((point, index) =>
+        d.push(`${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`)
       );
+      d.push('z');
       for (const { points } of holes) {
-        d.push(
-          points
-            .map(
-              (point, index) =>
-                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
-            )
-            .join(' ')
+        points.forEach((point, index) =>
+          d.push(`${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`)
         );
+        d.push('z');
       }
       if (isTypeWire({ tags })) {
-        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')} z"/>`);
+        svg.push(`<path fill="none" stroke="${color}" d="${d.join(' ')}"/>`);
       } else {
         svg.push(
-          `<path fill="${color}" stroke="${color}" d="${d.join(' ')} z"/>`
+          `<path fill="${color}" stroke="${color}" d="${d.join(' ')}"/>`
         );
       }
     }
