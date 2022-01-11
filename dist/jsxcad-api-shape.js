@@ -3589,9 +3589,15 @@ const push =
 Shape.registerMethod('push', push);
 
 const remesh =
-  (...lengths) =>
+  (options, ...selections) =>
   (shape) =>
-    Shape.fromGeometry(remesh$1(shape.toGeometry(), { lengths }));
+    Shape.fromGeometry(
+      remesh$1(
+        shape.toGeometry(),
+        options,
+        shape.toShapes(selections).map((selection) => selection.toGeometry())
+      )
+    );
 
 Shape.registerMethod('remesh', remesh);
 
@@ -3717,9 +3723,15 @@ const scaleToFit =
 Shape.registerMethod('scaleToFit', scaleToFit);
 
 const simplify =
-  ({ ratio = 0.25, eps } = {}) =>
+  (options = {}, ...selections) =>
   (shape) =>
-    Shape.fromGeometry(simplify$1(shape.toGeometry(), { ratio, eps }));
+    Shape.fromGeometry(
+      simplify$1(
+        shape.toGeometry(),
+        options,
+        shape.toShapes(selections).map((selection) => selection.toGeometry())
+      )
+    );
 
 Shape.registerMethod('simplify', simplify);
 
@@ -3873,13 +3885,13 @@ const serialize =
 Shape.registerMethod('serialize', serialize);
 
 const smooth =
-  (options = { iterations: 1, method: 'Subdivide' }, ...shapes) =>
+  (options = { iterations: 1, method: 'subdivide' }, ...selections) =>
   (shape) =>
     Shape.fromGeometry(
       smooth$1(
         shape.toGeometry(),
         options,
-        shape.toShapes(shapes).map((shape) => shape.toGeometry())
+        shape.toShapes(selections).map((selection) => selection.toGeometry())
       )
     );
 

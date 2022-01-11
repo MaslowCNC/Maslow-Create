@@ -44588,6 +44588,7 @@ const moveToFit = ({
   withGrid = false,
   gridLayer = GEOMETRY_LAYER,
   pageSize = [],
+  gridState = { objects: [], visible: withGrid },
 } = {}) => {
   const { fit = true } = view;
   const [length = 100, width = 100] = pageSize;
@@ -44619,6 +44620,13 @@ const moveToFit = ({
     }
   });
 
+  while (gridState.objects.length > 0) {
+    const object = gridState.objects.pop();
+    if (object.parent) {
+      object.parent.remove(object);
+    }
+  }
+
   if (!box) {
     box = new Box3();
     box.setFromObject(scene);
@@ -44639,7 +44647,9 @@ const moveToFit = ({
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
+      grid.userData.grid = true;
       scene.add(grid);
+      gridState.objects.push(grid);
     }
     {
       const grid = new GridHelper(size * 2, 20, 0x000040, 0xf04040);
@@ -44650,7 +44660,9 @@ const moveToFit = ({
       grid.layers.set(gridLayer);
       grid.userData.tangible = false;
       grid.userData.dressing = true;
+      grid.userData.grid = true;
       scene.add(grid);
+      gridState.objects.push(grid);
     }
   }
   if (withGrid) {
@@ -44669,7 +44681,9 @@ const moveToFit = ({
     plane.layers.set(gridLayer);
     plane.userData.tangible = false;
     plane.userData.dressing = true;
+    plane.userData.grid = true;
     scene.add(plane);
+    gridState.objects.push(plane);
   }
 
   if (!fit) {
@@ -44869,6 +44883,37 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
+  const pageSize = [];
+
+  const gridState = {
+    objects: [],
+    visible: withGrid,
+  };
+
+  const updateFit = () =>
+    moveToFit({
+      view,
+      camera,
+      controls: [trackballControls],
+      scene,
+      withGrid: true,
+      gridLayer,
+      pageSize,
+      gridState,
+    });
+
+  const showGrid = (visible) => {
+    if (gridState.visible !== visible) {
+      gridState.visible = visible;
+      for (const object of gridState.objects) {
+        object.visible = visible;
+      }
+      render();
+    }
+  };
+
+  showGrid(withGrid);
+
   let moveToFitDone = false;
 
   const updateGeometry = async (geometry, { fit = true, timestamp } = {}) => {
@@ -44886,8 +44931,6 @@ const orbitDisplay = async (
 
     view = { ...view, fit };
 
-    const pageSize = [];
-
     await buildMeshes({
       geometry,
       scene,
@@ -44898,15 +44941,7 @@ const orbitDisplay = async (
 
     if (!moveToFitDone) {
       moveToFitDone = true;
-      moveToFit({
-        view,
-        camera,
-        controls: [trackballControls],
-        scene,
-        withGrid,
-        gridLayer,
-        pageSize,
-      });
+      updateFit();
     }
 
     render();
@@ -44926,7 +44961,9 @@ const orbitDisplay = async (
     render,
     renderer,
     scene,
+    showGrid,
     trackballControls,
+    updateFit,
     updateGeometry,
   };
 };
