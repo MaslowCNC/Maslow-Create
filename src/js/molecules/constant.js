@@ -89,6 +89,12 @@ export default class Constant extends Atom{
         this.value = this.output.getValue()  //We read from the output because it is set by the sidebar for confusing reasons
         this.output.setValue(this.value)
         this.output.ready = true
+
+        //Write to this's path just so that we know it has happened and don't load this again next time the project is opened
+        try{
+            const values = {op: "rectangle", x: 5, y:5, writePath: this.path }
+            window.ask(values)
+        }catch(err){this.setAlert(err)}
     }
     
     /**
