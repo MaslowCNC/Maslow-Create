@@ -44869,6 +44869,17 @@ const orbitDisplay = async (
     render();
   }).observe(page);
 
+  const updateFit = () =>
+    moveToFit({
+      view,
+      camera,
+      controls: [trackballControls],
+      scene,
+      withGrid,
+      gridLayer,
+      pageSize,
+    });
+
   let moveToFitDone = false;
 
   const updateGeometry = async (geometry, { fit = true, timestamp } = {}) => {
@@ -44898,15 +44909,7 @@ const orbitDisplay = async (
 
     if (!moveToFitDone) {
       moveToFitDone = true;
-      moveToFit({
-        view,
-        camera,
-        controls: [trackballControls],
-        scene,
-        withGrid,
-        gridLayer,
-        pageSize,
-      });
+      updateFit();
     }
 
     render();
@@ -44927,6 +44930,7 @@ const orbitDisplay = async (
     renderer,
     scene,
     trackballControls,
+    updateFit,
     updateGeometry,
   };
 };
