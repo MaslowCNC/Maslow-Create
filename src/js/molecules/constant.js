@@ -104,7 +104,7 @@ export default class Constant extends Atom{
         //Check to see if a value already exists. Generate it if it doesn't.
         if(!GlobalVariables.availablePaths.includes(this.path)){
             //Triggers inputs with nothing connected to begin propagation
-            this.updateValue();
+            this.updateValue()
         }
     }
     
