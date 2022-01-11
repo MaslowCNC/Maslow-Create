@@ -62,7 +62,7 @@ export default class Code extends Atom {
     beginPropagation(){
         //If there are no inputs
         if(this.inputs.length == 0){
-            this.updateValue();
+            this.updateValue()
         }
 
         //If none of the inputs are connected
