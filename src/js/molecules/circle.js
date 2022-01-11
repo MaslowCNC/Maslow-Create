@@ -40,9 +40,11 @@ export default class Circle extends Atom {
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(force = false){
+        console.log("beginPropagation called for circle")
         //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
         if(!GlobalVariables.availablePaths.includes(this.path)||force){
             //Triggers inputs with nothing connected to begin propagation
+            console.log("and acted on")
             this.inputs.forEach(input => {
                 input.beginPropagation()
             })
