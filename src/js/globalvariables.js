@@ -270,7 +270,7 @@ class GlobalVariables{
                 window.updateDisplay(result)
                 window.showGrid(this.displayGrid)
                 if(resetView){
-                    window.updateFit();
+                    window.updateFit()
                 }
             }
         }).catch ((e) => console.warn(e))
