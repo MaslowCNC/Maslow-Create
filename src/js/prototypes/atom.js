@@ -731,7 +731,7 @@ export default class Atom {
     }
     
     /**
-     * Starts propagation from this atom if it is not waiting for anything up stream.
+     * Starts propagation placeholder. Most atom types do not begin propagation.
      */ 
     beginPropagation(){
         
