@@ -52,8 +52,6 @@ document.onreadystatechange = () => {
 
 //Add 3d view
 orbitDisplay({view: {fit: false}, withAxes: true, withGrid: true, gridLayer: 0}, document.getElementById('viewerContext')).then(result=>{
-    console.log("Returned: ");
-    console.log(result);
     window.updateFit = result.updateFit;
     window.showGrid = result.showGrid;
     window.updateDisplay = result.updateGeometry;
