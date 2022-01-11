@@ -87,19 +87,24 @@ export default class Constant extends Atom{
      */ 
     updateValue(){
         this.value = this.output.getValue()  //We read from the output because it is set by the sidebar for confusing reasons
-        this.displayAndPropogate()
+        this.output.setValue(this.value)
+        this.output.ready = true
+
+        //Write to this's path just so that we know it has happened and don't load this again next time the project is opened
+        try{
+            const values = {op: "rectangle", x: 5, y:5, writePath: this.path }
+            window.ask(values)
+        }catch(err){this.setAlert(err)}
     }
     
     /**
      * Starts propagation from this atom if it is not waiting for anything up stream.
      */ 
     beginPropagation(){
-        //Check to see if a value already exists. Generate it if it doesn't. Only do this for circles and rectangles
+        //Check to see if a value already exists. Generate it if it doesn't.
         if(!GlobalVariables.availablePaths.includes(this.path)){
             //Triggers inputs with nothing connected to begin propagation
-            this.inputs.forEach(input => {
-                input.beginPropagation()
-            })
+            this.updateValue()
         }
     }
     
