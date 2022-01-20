@@ -22,77 +22,118 @@ const setPendingErrorHandler = (handler) => {
   pendingErrorHandler = handler;
 };
 
-function pad (hash, len) {
-  while (hash.length < len) {
-    hash = '0' + hash;
-  }
-  return hash;
-}
+var digest_min = {exports: {}};
 
-function fold (hash, text) {
-  var i;
-  var chr;
-  var len;
-  if (text.length === 0) {
-    return hash;
-  }
-  for (i = 0, len = text.length; i < len; i++) {
-    chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
-}
+/*! digest-js - v0.3.0 - 2015-09-13 */
 
-function foldObject (hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
-  function foldKey (hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
-}
+(function (module, exports) {
+/*! ***** BEGIN LICENSE BLOCK *****
+ *!
+ *! Copyright 2011-2012, 2014 Jean-Christophe Sirot <sirot@chelonix.com>
+ *!
+ *! This file is part of digest.js
+ *!
+ *! digest.js is free software: you can redistribute it and/or modify it under
+ *! the terms of the GNU General Public License as published by the Free Software
+ *! Foundation, either version 3 of the License, or (at your option) any later
+ *! version.
+ *!
+ *! digest.js is distributed in the hope that it will be useful, but
+ *! WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *! or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *! more details.
+ *!
+ *! You should have received a copy of the GNU General Public License along with
+ *! digest.js. If not, see http://www.gnu.org/licenses/.
+ *!
+ *! ***** END LICENSE BLOCK *****  */
+!function(){ArrayBuffer.prototype.slice||(ArrayBuffer.prototype.slice=function(a,b){var c,d=new Uint8Array(this);void 0===b&&(b=d.length);var e=new ArrayBuffer(b-a),f=new Uint8Array(e);for(c=0;c<f.length;c++)f[c]=d[c+a];return e});}(),function(a){function b(){}function c(){}function d(){}b.prototype.processBlock=function(a){var b,c=this.current[0],d=this.current[1],e=this.current[2],f=this.current[3],g=a[3]<<24|a[2]<<16|a[1]<<8|a[0],h=a[7]<<24|a[6]<<16|a[5]<<8|a[4],i=a[11]<<24|a[10]<<16|a[9]<<8|a[8],j=a[15]<<24|a[14]<<16|a[13]<<8|a[12],k=a[19]<<24|a[18]<<16|a[17]<<8|a[16],l=a[23]<<24|a[22]<<16|a[21]<<8|a[20],m=a[27]<<24|a[26]<<16|a[25]<<8|a[24],n=a[31]<<24|a[30]<<16|a[29]<<8|a[28],o=a[35]<<24|a[34]<<16|a[33]<<8|a[32],p=a[39]<<24|a[38]<<16|a[37]<<8|a[36],q=a[43]<<24|a[42]<<16|a[41]<<8|a[40],r=a[47]<<24|a[46]<<16|a[45]<<8|a[44],s=a[51]<<24|a[50]<<16|a[49]<<8|a[48],t=a[55]<<24|a[54]<<16|a[53]<<8|a[52],u=a[59]<<24|a[58]<<16|a[57]<<8|a[56],v=a[63]<<24|a[62]<<16|a[61]<<8|a[60];b=c+g+3614090360+(d&e|~d&f)|0,c=d+(b<<7|b>>>25)|0,b=f+h+3905402710+(c&d|~c&e)|0,f=c+(b<<12|b>>>20)|0,b=e+i+606105819+(f&c|~f&d)|0,e=f+(b<<17|b>>>15)|0,b=d+j+3250441966+(e&f|~e&c)|0,d=e+(b<<22|b>>>10)|0,b=c+k+4118548399+(d&e|~d&f)|0,c=d+(b<<7|b>>>25)|0,b=f+l+1200080426+(c&d|~c&e)|0,f=c+(b<<12|b>>>20)|0,b=e+m+2821735955+(f&c|~f&d)|0,e=f+(b<<17|b>>>15)|0,b=d+n+4249261313+(e&f|~e&c)|0,d=e+(b<<22|b>>>10)|0,b=c+o+1770035416+(d&e|~d&f)|0,c=d+(b<<7|b>>>25)|0,b=f+p+2336552879+(c&d|~c&e)|0,f=c+(b<<12|b>>>20)|0,b=e+q+4294925233+(f&c|~f&d)|0,e=f+(b<<17|b>>>15)|0,b=d+r+2304563134+(e&f|~e&c)|0,d=e+(b<<22|b>>>10)|0,b=c+s+1804603682+(d&e|~d&f)|0,c=d+(b<<7|b>>>25)|0,b=f+t+4254626195+(c&d|~c&e)|0,f=c+(b<<12|b>>>20)|0,b=e+u+2792965006+(f&c|~f&d)|0,e=f+(b<<17|b>>>15)|0,b=d+v+1236535329+(e&f|~e&c)|0,d=e+(b<<22|b>>>10)|0,b=c+h+4129170786+(f&d|~f&e)|0,c=d+(b<<5|b>>>27)|0,b=f+m+3225465664+(e&c|~e&d)|0,f=c+(b<<9|b>>>23)|0,b=e+r+643717713+(d&f|~d&c)|0,e=f+(b<<14|b>>>18)|0,b=d+g+3921069994+(c&e|~c&f)|0,d=e+(b<<20|b>>>12)|0,b=c+l+3593408605+(f&d|~f&e)|0,c=d+(b<<5|b>>>27)|0,b=f+q+38016083+(e&c|~e&d)|0,f=c+(b<<9|b>>>23)|0,b=e+v+3634488961+(d&f|~d&c)|0,e=f+(b<<14|b>>>18)|0,b=d+k+3889429448+(c&e|~c&f)|0,d=e+(b<<20|b>>>12)|0,b=c+p+568446438+(f&d|~f&e)|0,c=d+(b<<5|b>>>27)|0,b=f+u+3275163606+(e&c|~e&d)|0,f=c+(b<<9|b>>>23)|0,b=e+j+4107603335+(d&f|~d&c)|0,e=f+(b<<14|b>>>18)|0,b=d+o+1163531501+(c&e|~c&f)|0,d=e+(b<<20|b>>>12)|0,b=c+t+2850285829+(f&d|~f&e)|0,c=d+(b<<5|b>>>27)|0,b=f+i+4243563512+(e&c|~e&d)|0,f=c+(b<<9|b>>>23)|0,b=e+n+1735328473+(d&f|~d&c)|0,e=f+(b<<14|b>>>18)|0,b=d+s+2368359562+(c&e|~c&f)|0,d=e+(b<<20|b>>>12)|0,b=c+l+4294588738+(d^e^f)|0,c=d+(b<<4|b>>>28)|0,b=f+o+2272392833+(c^d^e)|0,f=c+(b<<11|b>>>21)|0,b=e+r+1839030562+(f^c^d)|0,e=f+(b<<16|b>>>16)|0,b=d+u+4259657740+(e^f^c)|0,d=e+(b<<23|b>>>9)|0,b=c+h+2763975236+(d^e^f)|0,c=d+(b<<4|b>>>28)|0,b=f+k+1272893353+(c^d^e)|0,f=c+(b<<11|b>>>21)|0,b=e+n+4139469664+(f^c^d)|0,e=f+(b<<16|b>>>16)|0,b=d+q+3200236656+(e^f^c)|0,d=e+(b<<23|b>>>9)|0,b=c+t+681279174+(d^e^f)|0,c=d+(b<<4|b>>>28)|0,b=f+g+3936430074+(c^d^e)|0,f=c+(b<<11|b>>>21)|0,b=e+j+3572445317+(f^c^d)|0,e=f+(b<<16|b>>>16)|0,b=d+m+76029189+(e^f^c)|0,d=e+(b<<23|b>>>9)|0,b=c+p+3654602809+(d^e^f)|0,c=d+(b<<4|b>>>28)|0,b=f+s+3873151461+(c^d^e)|0,f=c+(b<<11|b>>>21)|0,b=e+v+530742520+(f^c^d)|0,e=f+(b<<16|b>>>16)|0,b=d+i+3299628645+(e^f^c)|0,d=e+(b<<23|b>>>9)|0,b=c+g+4096336452+(e^(d|~f))|0,c=d+(b<<6|b>>>26)|0,b=f+n+1126891415+(d^(c|~e))|0,f=c+(b<<10|b>>>22)|0,b=e+u+2878612391+(c^(f|~d))|0,e=f+(b<<15|b>>>17)|0,b=d+l+4237533241+(f^(e|~c))|0,d=e+(b<<21|b>>>11)|0,b=c+s+1700485571+(e^(d|~f))|0,c=d+(b<<6|b>>>26)|0,b=f+j+2399980690+(d^(c|~e))|0,f=c+(b<<10|b>>>22)|0,b=e+q+4293915773+(c^(f|~d))|0,e=f+(b<<15|b>>>17)|0,b=d+h+2240044497+(f^(e|~c))|0,d=e+(b<<21|b>>>11)|0,b=c+o+1873313359+(e^(d|~f))|0,c=d+(b<<6|b>>>26)|0,b=f+v+4264355552+(d^(c|~e))|0,f=c+(b<<10|b>>>22)|0,b=e+m+2734768916+(c^(f|~d))|0,e=f+(b<<15|b>>>17)|0,b=d+t+1309151649+(f^(e|~c))|0,d=e+(b<<21|b>>>11)|0,b=c+k+4149444226+(e^(d|~f))|0,c=d+(b<<6|b>>>26)|0,b=f+r+3174756917+(d^(c|~e))|0,f=c+(b<<10|b>>>22)|0,b=e+i+718787259+(c^(f|~d))|0,e=f+(b<<15|b>>>17)|0,b=d+p+3951481745+(f^(e|~c))|0,d=e+(b<<21|b>>>11)|0,this.current[0]+=c,this.current[1]+=d,this.current[2]+=e,this.current[3]+=f,this.currentLen+=64;},b.prototype.doPadding=function(){var a=8*(this.inLen+this.currentLen),b=0,c=4294967295&a,d=this.inLen<=55?55-this.inLen:119-this.inLen,e=new Uint8Array(new ArrayBuffer(d+1+8));return e[0]=128,e[e.length-8]=255&c,e[e.length-7]=c>>>8&255,e[e.length-6]=c>>>16&255,e[e.length-5]=c>>>24&255,e[e.length-4]=255&b,e[e.length-3]=b>>>8&255,e[e.length-2]=b>>>16&255,e[e.length-1]=b>>>24&255,e},b.prototype.getDigest=function(){var a=new Uint8Array(new ArrayBuffer(16));return a[0]=255&this.current[0],a[1]=this.current[0]>>>8&255,a[2]=this.current[0]>>>16&255,a[3]=this.current[0]>>>24&255,a[4]=255&this.current[1],a[5]=this.current[1]>>>8&255,a[6]=this.current[1]>>>16&255,a[7]=this.current[1]>>>24&255,a[8]=255&this.current[2],a[9]=this.current[2]>>>8&255,a[10]=this.current[2]>>>16&255,a[11]=this.current[2]>>>24&255,a[12]=255&this.current[3],a[13]=this.current[3]>>>8&255,a[14]=this.current[3]>>>16&255,a[15]=this.current[3]>>>24&255,a.buffer},b.prototype.reset=function(){this.currentLen=0,this.inLen=0,this.current=new Uint32Array(new ArrayBuffer(16)),this.current[0]=1732584193,this.current[1]=4023233417,this.current[2]=2562383102,this.current[3]=271733878;},b.prototype.blockLen=64,b.prototype.digestLen=16,c.prototype.processBlock=function(a){var b,c,d=this.current[0],e=this.current[1],f=this.current[2],g=this.current[3],h=this.current[4],i=[a[0]<<24|a[1]<<16|a[2]<<8|a[3],a[4]<<24|a[5]<<16|a[6]<<8|a[7],a[8]<<24|a[9]<<16|a[10]<<8|a[11],a[12]<<24|a[13]<<16|a[14]<<8|a[15],a[16]<<24|a[17]<<16|a[18]<<8|a[19],a[20]<<24|a[21]<<16|a[22]<<8|a[23],a[24]<<24|a[25]<<16|a[26]<<8|a[27],a[28]<<24|a[29]<<16|a[30]<<8|a[31],a[32]<<24|a[33]<<16|a[34]<<8|a[35],a[36]<<24|a[37]<<16|a[38]<<8|a[39],a[40]<<24|a[41]<<16|a[42]<<8|a[43],a[44]<<24|a[45]<<16|a[46]<<8|a[47],a[48]<<24|a[49]<<16|a[50]<<8|a[51],a[52]<<24|a[53]<<16|a[54]<<8|a[55],a[56]<<24|a[57]<<16|a[58]<<8|a[59],a[60]<<24|a[61]<<16|a[62]<<8|a[63]];for(c=16;80>c;c++)i.push((i[c-3]^i[c-8]^i[c-14]^i[c-16])<<1|(i[c-3]^i[c-8]^i[c-14]^i[c-16])>>>31);for(c=0;80>c;c++)b=(d<<5|d>>>27)+h+i[c],b+=20>c?(e&f|~e&g)+1518500249|0:40>c?(e^f^g)+1859775393|0:60>c?(e&f|e&g|f&g)+2400959708|0:(e^f^g)+3395469782|0,h=g,g=f,f=e<<30|e>>>2,e=d,d=b;this.current[0]+=d,this.current[1]+=e,this.current[2]+=f,this.current[3]+=g,this.current[4]+=h,this.currentLen+=64;},c.prototype.doPadding=function(){var a=8*(this.inLen+this.currentLen),b=0,c=4294967295&a,d=this.inLen<=55?55-this.inLen:119-this.inLen,e=new Uint8Array(new ArrayBuffer(d+1+8));return e[0]=128,e[e.length-1]=255&c,e[e.length-2]=c>>>8&255,e[e.length-3]=c>>>16&255,e[e.length-4]=c>>>24&255,e[e.length-5]=255&b,e[e.length-6]=b>>>8&255,e[e.length-7]=b>>>16&255,e[e.length-8]=b>>>24&255,e},c.prototype.getDigest=function(){var a=new Uint8Array(new ArrayBuffer(20));return a[3]=255&this.current[0],a[2]=this.current[0]>>>8&255,a[1]=this.current[0]>>>16&255,a[0]=this.current[0]>>>24&255,a[7]=255&this.current[1],a[6]=this.current[1]>>>8&255,a[5]=this.current[1]>>>16&255,a[4]=this.current[1]>>>24&255,a[11]=255&this.current[2],a[10]=this.current[2]>>>8&255,a[9]=this.current[2]>>>16&255,a[8]=this.current[2]>>>24&255,a[15]=255&this.current[3],a[14]=this.current[3]>>>8&255,a[13]=this.current[3]>>>16&255,a[12]=this.current[3]>>>24&255,a[19]=255&this.current[4],a[18]=this.current[4]>>>8&255,a[17]=this.current[4]>>>16&255,a[16]=this.current[4]>>>24&255,a.buffer},c.prototype.reset=function(){this.currentLen=0,this.inLen=0,this.current=new Uint32Array(new ArrayBuffer(20)),this.current[0]=1732584193,this.current[1]=4023233417,this.current[2]=2562383102,this.current[3]=271733878,this.current[4]=3285377520;},c.prototype.blockLen=64,c.prototype.digestLen=20,d.prototype.processBlock=function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t=this.current[0],u=this.current[1],v=this.current[2],w=this.current[3],x=this.current[4],y=this.current[5],z=this.current[6],A=this.current[7];d=a[0]<<24|a[1]<<16|a[2]<<8|a[3],e=a[4]<<24|a[5]<<16|a[6]<<8|a[7],f=a[8]<<24|a[9]<<16|a[10]<<8|a[11],g=a[12]<<24|a[13]<<16|a[14]<<8|a[15],h=a[16]<<24|a[17]<<16|a[18]<<8|a[19],i=a[20]<<24|a[21]<<16|a[22]<<8|a[23],j=a[24]<<24|a[25]<<16|a[26]<<8|a[27],k=a[28]<<24|a[29]<<16|a[30]<<8|a[31],l=a[32]<<24|a[33]<<16|a[34]<<8|a[35],m=a[36]<<24|a[37]<<16|a[38]<<8|a[39],n=a[40]<<24|a[41]<<16|a[42]<<8|a[43],o=a[44]<<24|a[45]<<16|a[46]<<8|a[47],p=a[48]<<24|a[49]<<16|a[50]<<8|a[51],q=a[52]<<24|a[53]<<16|a[54]<<8|a[55],r=a[56]<<24|a[57]<<16|a[58]<<8|a[59],s=a[60]<<24|a[61]<<16|a[62]<<8|a[63];for(var B=[d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s],C=16;64>C;C++)B.push(((B[C-2]>>>17|B[C-2]<<15)^(B[C-2]>>>19|B[C-2]<<13)^B[C-2]>>>10)+B[C-7]+((B[C-15]>>>7|B[C-15]<<25)^(B[C-15]>>>18|B[C-15]<<14)^B[C-15]>>>3)+B[C-16]|0);for(var D=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298],E=0;64>E;E++)b=A+((x>>>6|x<<26)^(x>>>11|x<<21)^(x>>>25|x<<7))+(x&y^~x&z)+D[E]+B[E]|0,c=((t>>>2|t<<30)^(t>>>13|t<<19)^(t>>>22|t<<10))+(t&u^u&v^t&v)|0,A=z,z=y,y=x,x=w+b|0,w=v,v=u,u=t,t=b+c|0;this.current[0]+=t,this.current[1]+=u,this.current[2]+=v,this.current[3]+=w,this.current[4]+=x,this.current[5]+=y,this.current[6]+=z,this.current[7]+=A,this.currentLen+=64;},d.prototype.doPadding=function(){var a=8*(this.inLen+this.currentLen),b=0,c=0|a,d=this.inLen<=55?55-this.inLen:119-this.inLen,e=new Uint8Array(new ArrayBuffer(d+1+8));return e[0]=128,e[e.length-1]=255&c,e[e.length-2]=c>>>8&255,e[e.length-3]=c>>>16&255,e[e.length-4]=c>>>24&255,e[e.length-5]=255&b,e[e.length-6]=b>>>8&255,e[e.length-7]=b>>>16&255,e[e.length-8]=b>>>24&255,e},d.prototype.getDigest=function(){var a=new Uint8Array(new ArrayBuffer(32));return a[3]=255&this.current[0],a[2]=this.current[0]>>>8&255,a[1]=this.current[0]>>>16&255,a[0]=this.current[0]>>>24&255,a[7]=255&this.current[1],a[6]=this.current[1]>>>8&255,a[5]=this.current[1]>>>16&255,a[4]=this.current[1]>>>24&255,a[11]=255&this.current[2],a[10]=this.current[2]>>>8&255,a[9]=this.current[2]>>>16&255,a[8]=this.current[2]>>>24&255,a[15]=255&this.current[3],a[14]=this.current[3]>>>8&255,a[13]=this.current[3]>>>16&255,a[12]=this.current[3]>>>24&255,a[19]=255&this.current[4],a[18]=this.current[4]>>>8&255,a[17]=this.current[4]>>>16&255,a[16]=this.current[4]>>>24&255,a[23]=255&this.current[5],a[22]=this.current[5]>>>8&255,a[21]=this.current[5]>>>16&255,a[20]=this.current[5]>>>24&255,a[27]=255&this.current[6],a[26]=this.current[6]>>>8&255,a[25]=this.current[6]>>>16&255,a[24]=this.current[6]>>>24&255,a[31]=255&this.current[7],a[30]=this.current[7]>>>8&255,a[29]=this.current[7]>>>16&255,a[28]=this.current[7]>>>24&255,a.buffer},d.prototype.reset=function(){this.currentLen=0,this.inLen=0,this.current=new Uint32Array(new ArrayBuffer(32)),this.current[0]=1779033703,this.current[1]=3144134277,this.current[2]=1013904242,this.current[3]=2773480762,this.current[4]=1359893119,this.current[5]=2600822924,this.current[6]=528734635,this.current[7]=1541459225;},d.prototype.blockLen=64,d.prototype.digestLen=32;var e=function(a){var b,c=new ArrayBuffer(a.length),d=new Uint8Array(c);for(b=0;b<a.length;b++)d[b]=a.charCodeAt(b);return d},f=function(a){var b=new ArrayBuffer(1),c=new Uint8Array(b);return c[0]=a,c},g=function(a){if(a.constructor===Uint8Array)return a;if(a.constructor===ArrayBuffer)return new Uint8Array(a);if(a.constructor===String)return e(a);if(a.constructor===Number){if(a>255)throw "For more than one byte, use an array buffer";if(0>a)throw "Input value must be positive";return f(a)}throw "Unsupported type"},h=function(a){var b=new Uint8Array(new ArrayBuffer(4));return b[0]=(4278190080&a)>>24,b[1]=(16711680&a)>>16,b[2]=(65280&a)>>8,b[3]=255&a,b},i=function(a){var b=function(a){for(var b=a.length,c=0;b>0;){var d=this.blockLen-this.inLen;d>b&&(d=b);var e=a.subarray(c,c+d);this.inbuf.set(e,this.inLen),c+=d,b-=d,this.inLen+=d,this.inLen===this.blockLen&&(this.processBlock(this.inbuf),this.inLen=0);}},c=function(){var a=this.doPadding();this.update(a);var b=this.getDigest();return this.reset(),b},d=function(){if(!a)throw "Unsupported algorithm: "+a.toString();a.prototype.update=b,a.prototype.finalize=c;var d=new a;return d.inbuf=new Uint8Array(new ArrayBuffer(d.blockLen)),d.reset(),d}();return {update:function(a){d.update(g(a));},finalize:function(){return d.finalize()},digest:function(a){return d.update(g(a)),d.finalize()},reset:function(){d.reset();},digestLength:function(){return d.digestLen}}},j=function(a){var b,c,d,e=!1,f=function(){var f,g;if(!e){if(void 0===b)throw "MAC key is not defined";for(g=b.byteLength>64?new Uint8Array(a.digest(b)):new Uint8Array(b),c=new Uint8Array(new ArrayBuffer(64)),f=0;f<g.length;f++)c[f]=54^g[f];for(f=g.length;64>f;f++)c[f]=54;for(d=new Uint8Array(new ArrayBuffer(64)),f=0;f<g.length;f++)d[f]=92^g[f];for(f=g.length;64>f;f++)d[f]=92;e=!0,a.update(c.buffer);}},h=function(){e=!1,b=void 0,c=void 0,d=void 0,a.reset();},i=function(){var b=a.finalize();return a.reset(),a.update(d.buffer),a.update(b),b=a.finalize(),h(),b},j=function(a){b=a;};return {setKey:function(a){j(g(a)),f();},update:function(b){a.update(b);},finalize:function(){return i()},mac:function(a){return this.update(a),this.finalize()},reset:function(){h();},hmacLength:function(){return a.digestLength()}}},k=function(a,b){var c=function(c,d,e){var f,g;if(e>a.digestLength())throw "Key length larger than digest length";for(a.reset(),a.update(c),a.update(d),g=a.finalize(),f=1;b>f;f++)g=a.digest(g);return g.slice(0,e)};return {deriveKey:function(a,b,d){return c(g(a),g(b),d)}}},l=function(a,b){var c=function(a,b){var c;for(c=0;c<a.length;c++)a[c]=a[c]^b[c];return a},d=function(b,d,e,f){var g,i=new Uint8Array(new ArrayBuffer(a.hmacLength())),j=new Uint8Array(new ArrayBuffer(d.length+4));for(j.set(d,0),j.set(h(f),d.length),g=1;e>=g;g++)a.setKey(b),a.update(j),j=new Uint8Array(a.finalize()),i=c(i,j);return i},e=function(c,e,f){var g,h,i;if(f>4294967295*a.hmacLength())throw "Derived key length too long";for(h=Math.ceil(f/a.hmacLength()),i=new Uint8Array(new ArrayBuffer(f*a.hmacLength())),g=1;h>=g;g++)i.set(d(c,e,b,g),a.hmacLength()*(g-1));return i.buffer.slice(0,f)};return {deriveKey:function(a,b,c){return e(g(a),g(b),c)}}},m={SHA1:function(){return i(c)},MD5:function(){return i(b)},SHA256:function(){return i(d)},HMAC_SHA1:function(){return j(i(c))},HMAC_MD5:function(){return j(i(b))},HMAC_SHA256:function(){return j(i(d))},PBKDF1_SHA1:function(a){return k(i(c),a)},PBKDF1_MD5:function(a){return k(i(b),a)},PBKDF2_HMAC_SHA1:function(a){return l(j(i(c)),a)},PBKDF2_HMAC_SHA256:function(a){return l(j(i(d)),a)}};module.exports?module.exports=m:m;}();
+}(digest_min));
 
-function foldValue (input, value, key, seen) {
-  var hash = fold(fold(fold(input, key), toString(value)), typeof value);
-  if (value === null) {
-    return fold(hash, 'null');
+var Digest = digest_min.exports;
+
+/*
+ * base64-arraybuffer 1.0.1 <https://github.com/niklasvh/base64-arraybuffer>
+ * Copyright (c) 2021 Niklas von Hertzen <https://hertzen.com>
+ * Released under MIT License
+ */
+var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+// Use a lookup table to find the index.
+var lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
+for (var i = 0; i < chars.length; i++) {
+    lookup[chars.charCodeAt(i)] = i;
+}
+var encode = function (arraybuffer) {
+    var bytes = new Uint8Array(arraybuffer), i, len = bytes.length, base64 = '';
+    for (i = 0; i < len; i += 3) {
+        base64 += chars[bytes[i] >> 2];
+        base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+        base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+        base64 += chars[bytes[i + 2] & 63];
+    }
+    if (len % 3 === 2) {
+        base64 = base64.substring(0, base64.length - 1) + '=';
+    }
+    else if (len % 3 === 1) {
+        base64 = base64.substring(0, base64.length - 2) + '==';
+    }
+    return base64;
+};
+
+const hashObject = (object, hash) => {
+  if (object.hash) {
+    hash.update('hash');
+    hash.update(object.hash);
+    return;
   }
+  const keys = Object.keys(object);
+  keys.sort();
+  for (const key of keys) {
+    if (typeof key === 'symbol') {
+      continue;
+    }
+    hash.update(key);
+    hashValue(object[key], hash);
+  }
+};
+
+const hashArray = (array, hash) => {
+  for (const value of array) {
+    hashValue(value, hash);
+  }
+};
+
+const hashValue = (value, hash) => {
   if (value === undefined) {
-    return fold(hash, 'undefined');
+    hash.update('undefined');
+  } else if (value === null) {
+    hash.update('null');
+  } else if (value instanceof Array) {
+    hash.update('array');
+    hashArray(value, hash);
+  } else if (value instanceof Object) {
+    hash.update('object');
+    hashObject(value, hash);
+  } else if (typeof value === 'number') {
+    hash.update('number');
+    hash.update(value.toString());
+  } else if (typeof value === 'string') {
+    hash.update('string');
+    hash.update(value);
+  } else if (typeof value === 'boolean') {
+    hash.update('bool');
+    hash.update(value ? 'true' : 'false');
+  } else {
+    throw Error(`Unexpected hashValue value ${value}`);
   }
-  if (typeof value === 'object' || typeof value === 'function') {
-    if (seen.indexOf(value) !== -1) {
-      return fold(hash, '[Circular]' + key);
-    }
-    seen.push(value);
+};
 
-    var objHash = foldObject(hash, value, seen);
-
-    if (!('valueOf' in value) || typeof value.valueOf !== 'function') {
-      return objHash;
-    }
-
-    try {
-      return fold(objHash, String(value.valueOf()))
-    } catch (err) {
-      return fold(objHash, '[valueOf exception]' + (err.stack || err.message))
-    }
-  }
-  return fold(hash, value.toString());
-}
-
-function toString (o) {
-  return Object.prototype.toString.call(o);
-}
-
-function sum (o) {
-  return pad(foldValue(0, o, '', []).toString(16), 8);
-}
-
-var hashSum = sum;
-
-const hash = (item) => hashSum(item);
-
-const computeHash = hash;
+const computeHash = (value) => {
+  // const hash = createHash('sha256');
+  const hash = new Digest.SHA256('sha256');
+  hashValue(value, hash);
+  return encode(hash.finalize());
+};
 
 const fromStringToIntegerHash = (s) =>
   Math.abs(
@@ -701,7 +742,7 @@ const checkIsWebWorker = () => {
 
 const isWebWorker = checkIsWebWorker();
 
-const isNode =
+const isNode$1 =
   typeof process !== 'undefined' &&
   process.versions != null &&
   process.versions.node != null;
@@ -890,7 +931,7 @@ const webWorker = (spec) =>
 let serviceId = 0;
 
 const newWorker = (spec) => {
-  if (isNode) {
+  if (isNode$1) {
     return nodeWorker();
   } else if (isBrowser) {
     return webWorker(spec);
@@ -1148,26 +1189,6 @@ watchFileDeletion((path, workspace) => {
 
 var nodeFetch = _ => _;
 
-function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var util = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isNode = exports.PROMISE_RESOLVED_VOID = exports.PROMISE_RESOLVED_TRUE = exports.PROMISE_RESOLVED_FALSE = void 0;
-exports.isPromise = isPromise;
-exports.microSeconds = microSeconds;
-exports.randomInt = randomInt;
-exports.randomToken = randomToken;
-exports.sleep = sleep;
-
 /**
  * returns true if the given object is a promise
  */
@@ -1178,15 +1199,10 @@ function isPromise(obj) {
     return false;
   }
 }
-
-var PROMISE_RESOLVED_FALSE = Promise.resolve(false);
-exports.PROMISE_RESOLVED_FALSE = PROMISE_RESOLVED_FALSE;
-var PROMISE_RESOLVED_TRUE = Promise.resolve(true);
-exports.PROMISE_RESOLVED_TRUE = PROMISE_RESOLVED_TRUE;
+Promise.resolve(false);
+Promise.resolve(true);
 var PROMISE_RESOLVED_VOID = Promise.resolve();
-exports.PROMISE_RESOLVED_VOID = PROMISE_RESOLVED_VOID;
-
-function sleep(time, resolveWith) {
+function sleep$1(time, resolveWith) {
   if (!time) time = 0;
   return new Promise(function (res) {
     return setTimeout(function () {
@@ -1194,7 +1210,6 @@ function sleep(time, resolveWith) {
     }, time);
   });
 }
-
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -1202,11 +1217,9 @@ function randomInt(min, max) {
  * https://stackoverflow.com/a/8084248
  */
 
-
 function randomToken() {
   return Math.random().toString(36).substring(2);
 }
-
 var lastMs = 0;
 var additional = 0;
 /**
@@ -1217,7 +1230,7 @@ var additional = 0;
  * The main reason for this hack is to ensure that BroadcastChannel behaves equal to production when it is used in fast-running unit tests.
  */
 
-function microSeconds() {
+function microSeconds$4() {
   var ms = new Date().getTime();
 
   if (ms === lastMs) {
@@ -1235,72 +1248,11 @@ function microSeconds() {
  * @link https://github.com/iliakan/detect-node/blob/master/index.js
  */
 
-
 var isNode = Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
-exports.isNode = isNode;
-});
 
-unwrapExports(util);
-util.isNode;
-util.PROMISE_RESOLVED_VOID;
-util.PROMISE_RESOLVED_TRUE;
-util.PROMISE_RESOLVED_FALSE;
-util.isPromise;
-util.microSeconds;
-util.randomInt;
-util.randomToken;
-util.sleep;
-
-var interopRequireDefault = createCommonjsModule(function (module) {
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-
-module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(interopRequireDefault);
-
-var _typeof_1 = createCommonjsModule(function (module) {
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
-}
-
-module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(_typeof_1);
-
-var native_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.averageResponseTime = averageResponseTime;
-exports.canBeUsed = canBeUsed;
-exports.close = close;
-exports.create = create;
-exports.microSeconds = exports["default"] = void 0;
-exports.onMessage = onMessage;
-exports.postMessage = postMessage;
-exports.type = void 0;
-
-
-
-var microSeconds = util.microSeconds;
-exports.microSeconds = microSeconds;
-var type = 'native';
-exports.type = type;
-
-function create(channelName) {
+var microSeconds$3 = microSeconds$4;
+var type$3 = 'native';
+function create$3(channelName) {
   var state = {
     messagesCallback: null,
     bc: new BroadcastChannel(channelName),
@@ -1316,31 +1268,27 @@ function create(channelName) {
 
   return state;
 }
-
-function close(channelState) {
+function close$3(channelState) {
   channelState.bc.close();
   channelState.subFns = [];
 }
-
-function postMessage(channelState, messageJson) {
+function postMessage$3(channelState, messageJson) {
   try {
     channelState.bc.postMessage(messageJson, false);
-    return util.PROMISE_RESOLVED_VOID;
+    return PROMISE_RESOLVED_VOID;
   } catch (err) {
     return Promise.reject(err);
   }
 }
-
-function onMessage(channelState, fn) {
+function onMessage$3(channelState, fn) {
   channelState.messagesCallback = fn;
 }
-
-function canBeUsed() {
+function canBeUsed$3() {
   /**
    * in the electron-renderer, isNode will be true even if we are in browser-context
    * so we also check if window is undefined
    */
-  if (util.isNode && typeof window === 'undefined') return false;
+  if (isNode && typeof window === 'undefined') return false;
 
   if (typeof BroadcastChannel === 'function') {
     if (BroadcastChannel._pubkey) {
@@ -1350,33 +1298,19 @@ function canBeUsed() {
     return true;
   } else return false;
 }
-
-function averageResponseTime() {
+function averageResponseTime$3() {
   return 150;
 }
-
-var _default = {
-  create: create,
-  close: close,
-  onMessage: onMessage,
-  postMessage: postMessage,
-  canBeUsed: canBeUsed,
-  type: type,
-  averageResponseTime: averageResponseTime,
-  microSeconds: microSeconds
+var NativeMethod = {
+  create: create$3,
+  close: close$3,
+  onMessage: onMessage$3,
+  postMessage: postMessage$3,
+  canBeUsed: canBeUsed$3,
+  type: type$3,
+  averageResponseTime: averageResponseTime$3,
+  microSeconds: microSeconds$3
 };
-exports["default"] = _default;
-});
-
-unwrapExports(native_1);
-native_1.averageResponseTime;
-native_1.canBeUsed;
-native_1.close;
-native_1.create;
-native_1.microSeconds;
-native_1.onMessage;
-native_1.postMessage;
-native_1.type;
 
 /**
  * this is a set which automatically forgets
@@ -1443,20 +1377,6 @@ function now() {
     return new Date().getTime();
 }
 
-var es$1 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  ObliviousSet: ObliviousSet,
-  removeTooOldValues: removeTooOldValues,
-  now: now
-});
-
-var options = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fillOptionsWithDefaults = fillOptionsWithDefaults;
-
 function fillOptionsWithDefaults() {
   var originalOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var options = JSON.parse(JSON.stringify(originalOptions)); // main
@@ -1487,52 +1407,16 @@ function fillOptionsWithDefaults() {
   if (typeof options.node.useFastPath === 'undefined') options.node.useFastPath = true;
   return options;
 }
-});
-
-unwrapExports(options);
-options.fillOptionsWithDefaults;
-
-var indexedDb = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.averageResponseTime = averageResponseTime;
-exports.canBeUsed = canBeUsed;
-exports.cleanOldMessages = cleanOldMessages;
-exports.close = close;
-exports.create = create;
-exports.createDatabase = createDatabase;
-exports["default"] = void 0;
-exports.getAllMessages = getAllMessages;
-exports.getIdb = getIdb;
-exports.getMessagesHigherThan = getMessagesHigherThan;
-exports.getOldMessages = getOldMessages;
-exports.microSeconds = void 0;
-exports.onMessage = onMessage;
-exports.postMessage = postMessage;
-exports.removeMessageById = removeMessageById;
-exports.type = void 0;
-exports.writeMessage = writeMessage;
-
-
-
-
-
-
 
 /**
  * this method uses indexeddb to store the messages
  * There is currently no observerAPI for idb
  * @link https://github.com/w3c/IndexedDB/issues/51
  */
-var microSeconds = util.microSeconds;
-exports.microSeconds = microSeconds;
+var microSeconds$2 = microSeconds$4;
 var DB_PREFIX = 'pubkey.broadcast-channel-0-';
 var OBJECT_STORE_ID = 'messages';
-var type = 'idb';
-exports.type = type;
-
+var type$2 = 'idb';
 function getIdb() {
   if (typeof indexedDB !== 'undefined') return indexedDB;
 
@@ -1544,7 +1428,6 @@ function getIdb() {
 
   return false;
 }
-
 function createDatabase(channelName) {
   var IndexedDB = getIdb(); // create table
 
@@ -1575,7 +1458,6 @@ function createDatabase(channelName) {
  * so other readers can find it
  */
 
-
 function writeMessage(db, readerUuid, messageJson) {
   var time = new Date().getTime();
   var writeObject = {
@@ -1597,25 +1479,6 @@ function writeMessage(db, readerUuid, messageJson) {
     objectStore.add(writeObject);
   });
 }
-
-function getAllMessages(db) {
-  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
-  var ret = [];
-  return new Promise(function (res) {
-    objectStore.openCursor().onsuccess = function (ev) {
-      var cursor = ev.target.result;
-
-      if (cursor) {
-        ret.push(cursor.value); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
-
-        cursor["continue"]();
-      } else {
-        res(ret);
-      }
-    };
-  });
-}
-
 function getMessagesHigherThan(db, lastCursorId) {
   var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
   var ret = [];
@@ -1649,7 +1512,6 @@ function getMessagesHigherThan(db, lastCursorId) {
     };
   });
 }
-
 function removeMessageById(db, id) {
   var request = db.transaction([OBJECT_STORE_ID], 'readwrite').objectStore(OBJECT_STORE_ID)["delete"](id);
   return new Promise(function (res) {
@@ -1658,7 +1520,6 @@ function removeMessageById(db, id) {
     };
   });
 }
-
 function getOldMessages(db, ttl) {
   var olderThen = new Date().getTime() - ttl;
   var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
@@ -1685,7 +1546,6 @@ function getOldMessages(db, ttl) {
     };
   });
 }
-
 function cleanOldMessages(db, ttl) {
   return getOldMessages(db, ttl).then(function (tooOld) {
     return Promise.all(tooOld.map(function (msgObj) {
@@ -1693,25 +1553,24 @@ function cleanOldMessages(db, ttl) {
     }));
   });
 }
-
-function create(channelName, options$1) {
-  options$1 = (0, options.fillOptionsWithDefaults)(options$1);
+function create$2(channelName, options) {
+  options = fillOptionsWithDefaults(options);
   return createDatabase(channelName).then(function (db) {
     var state = {
       closed: false,
       lastCursorId: 0,
       channelName: channelName,
-      options: options$1,
-      uuid: (0, util.randomToken)(),
+      options: options,
+      uuid: randomToken(),
 
       /**
        * emittedMessagesIds
        * contains all messages that have been emitted before
        * @type {ObliviousSet}
        */
-      eMIs: new es$1.ObliviousSet(options$1.idb.ttl * 2),
+      eMIs: new ObliviousSet(options.idb.ttl * 2),
       // ensures we do not read messages in parrallel
-      writeBlockPromise: util.PROMISE_RESOLVED_VOID,
+      writeBlockPromise: PROMISE_RESOLVED_VOID,
       messagesCallback: null,
       readQueuePromises: [],
       db: db
@@ -1725,7 +1584,7 @@ function create(channelName, options$1) {
 
     db.onclose = function () {
       state.closed = true;
-      if (options$1.idb.onclose) options$1.idb.onclose();
+      if (options.idb.onclose) options.idb.onclose();
     };
     /**
      * if service-workers are used,
@@ -1743,7 +1602,7 @@ function create(channelName, options$1) {
 function _readLoop(state) {
   if (state.closed) return;
   readNewMessages(state).then(function () {
-    return (0, util.sleep)(state.options.idb.fallbackInterval);
+    return sleep$1(state.options.idb.fallbackInterval);
   }).then(function () {
     return _readLoop(state);
   });
@@ -1765,9 +1624,9 @@ function _filterMessage(msgObj, state) {
 
 function readNewMessages(state) {
   // channel already closed
-  if (state.closed) return util.PROMISE_RESOLVED_VOID; // if no one is listening, we do not need to scan for new messages
+  if (state.closed) return PROMISE_RESOLVED_VOID; // if no one is listening, we do not need to scan for new messages
 
-  if (!state.messagesCallback) return util.PROMISE_RESOLVED_VOID;
+  if (!state.messagesCallback) return PROMISE_RESOLVED_VOID;
   return getMessagesHigherThan(state.db, state.lastCursorId).then(function (newerMessages) {
     var useMessages = newerMessages
     /**
@@ -1795,99 +1654,49 @@ function readNewMessages(state) {
         state.messagesCallback(msgObj.data);
       }
     });
-    return util.PROMISE_RESOLVED_VOID;
+    return PROMISE_RESOLVED_VOID;
   });
 }
 
-function close(channelState) {
+function close$2(channelState) {
   channelState.closed = true;
   channelState.db.close();
 }
-
-function postMessage(channelState, messageJson) {
+function postMessage$2(channelState, messageJson) {
   channelState.writeBlockPromise = channelState.writeBlockPromise.then(function () {
     return writeMessage(channelState.db, channelState.uuid, messageJson);
   }).then(function () {
-    if ((0, util.randomInt)(0, 10) === 0) {
+    if (randomInt(0, 10) === 0) {
       /* await (do not await) */
       cleanOldMessages(channelState.db, channelState.options.idb.ttl);
     }
   });
   return channelState.writeBlockPromise;
 }
-
-function onMessage(channelState, fn, time) {
+function onMessage$2(channelState, fn, time) {
   channelState.messagesCallbackTime = time;
   channelState.messagesCallback = fn;
   readNewMessages(channelState);
 }
-
-function canBeUsed() {
-  if (util.isNode) return false;
+function canBeUsed$2() {
+  if (isNode) return false;
   var idb = getIdb();
   if (!idb) return false;
   return true;
 }
-
-function averageResponseTime(options) {
+function averageResponseTime$2(options) {
   return options.idb.fallbackInterval * 2;
 }
-
-var _default = {
-  create: create,
-  close: close,
-  onMessage: onMessage,
-  postMessage: postMessage,
-  canBeUsed: canBeUsed,
-  type: type,
-  averageResponseTime: averageResponseTime,
-  microSeconds: microSeconds
+var IndexeDbMethod = {
+  create: create$2,
+  close: close$2,
+  onMessage: onMessage$2,
+  postMessage: postMessage$2,
+  canBeUsed: canBeUsed$2,
+  type: type$2,
+  averageResponseTime: averageResponseTime$2,
+  microSeconds: microSeconds$2
 };
-exports["default"] = _default;
-});
-
-unwrapExports(indexedDb);
-indexedDb.averageResponseTime;
-indexedDb.canBeUsed;
-indexedDb.cleanOldMessages;
-indexedDb.close;
-indexedDb.create;
-indexedDb.createDatabase;
-indexedDb.getAllMessages;
-indexedDb.getIdb;
-indexedDb.getMessagesHigherThan;
-indexedDb.getOldMessages;
-indexedDb.microSeconds;
-indexedDb.onMessage;
-indexedDb.postMessage;
-indexedDb.removeMessageById;
-indexedDb.type;
-indexedDb.writeMessage;
-
-var localstorage = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addStorageEventListener = addStorageEventListener;
-exports.averageResponseTime = averageResponseTime;
-exports.canBeUsed = canBeUsed;
-exports.close = close;
-exports.create = create;
-exports["default"] = void 0;
-exports.getLocalStorage = getLocalStorage;
-exports.microSeconds = void 0;
-exports.onMessage = onMessage;
-exports.postMessage = postMessage;
-exports.removeStorageEventListener = removeStorageEventListener;
-exports.storageKey = storageKey;
-exports.type = void 0;
-
-
-
-
-
-
 
 /**
  * A localStorage-only method which uses localstorage and its 'storage'-event
@@ -1896,16 +1705,13 @@ exports.type = void 0;
  * @link https://caniuse.com/#feat=namevalue-storage
  * @link https://caniuse.com/#feat=indexeddb
  */
-var microSeconds = util.microSeconds;
-exports.microSeconds = microSeconds;
+var microSeconds$1 = microSeconds$4;
 var KEY_PREFIX = 'pubkey.broadcastChannel-';
-var type = 'localstorage';
+var type$1 = 'localstorage';
 /**
  * copied from crosstab
  * @link https://github.com/tejacques/crosstab/blob/master/src/crosstab.js#L32
  */
-
-exports.type = type;
 
 function getLocalStorage() {
   var localStorage;
@@ -1921,7 +1727,6 @@ function getLocalStorage() {
 
   return localStorage;
 }
-
 function storageKey(channelName) {
   return KEY_PREFIX + channelName;
 }
@@ -1930,13 +1735,12 @@ function storageKey(channelName) {
 * and fires the storage-event so other readers can find it
 */
 
-
-function postMessage(channelState, messageJson) {
+function postMessage$1(channelState, messageJson) {
   return new Promise(function (res) {
-    (0, util.sleep)().then(function () {
+    sleep$1().then(function () {
       var key = storageKey(channelState.channelName);
       var writeObj = {
-        token: (0, util.randomToken)(),
+        token: randomToken(),
         time: new Date().getTime(),
         data: messageJson,
         uuid: channelState.uuid
@@ -1958,7 +1762,6 @@ function postMessage(channelState, messageJson) {
     });
   });
 }
-
 function addStorageEventListener(channelName, fn) {
   var key = storageKey(channelName);
 
@@ -1971,26 +1774,24 @@ function addStorageEventListener(channelName, fn) {
   window.addEventListener('storage', listener);
   return listener;
 }
-
 function removeStorageEventListener(listener) {
   window.removeEventListener('storage', listener);
 }
+function create$1(channelName, options) {
+  options = fillOptionsWithDefaults(options);
 
-function create(channelName, options$1) {
-  options$1 = (0, options.fillOptionsWithDefaults)(options$1);
-
-  if (!canBeUsed()) {
+  if (!canBeUsed$1()) {
     throw new Error('BroadcastChannel: localstorage cannot be used');
   }
 
-  var uuid = (0, util.randomToken)();
+  var uuid = randomToken();
   /**
    * eMIs
    * contains all messages that have been emitted before
    * @type {ObliviousSet}
    */
 
-  var eMIs = new es$1.ObliviousSet(options$1.localstorage.removeTimeout);
+  var eMIs = new ObliviousSet(options.localstorage.removeTimeout);
   var state = {
     channelName: channelName,
     uuid: uuid,
@@ -2011,18 +1812,15 @@ function create(channelName, options$1) {
   });
   return state;
 }
-
-function close(channelState) {
+function close$1(channelState) {
   removeStorageEventListener(channelState.listener);
 }
-
-function onMessage(channelState, fn, time) {
+function onMessage$1(channelState, fn, time) {
   channelState.messagesCallbackTime = time;
   channelState.messagesCallback = fn;
 }
-
-function canBeUsed() {
-  if (util.isNode) return false;
+function canBeUsed$1() {
+  if (isNode) return false;
   var ls = getLocalStorage();
   if (!ls) return false;
 
@@ -2039,8 +1837,7 @@ function canBeUsed() {
 
   return true;
 }
-
-function averageResponseTime() {
+function averageResponseTime$1() {
   var defaultTime = 120;
   var userAgent = navigator.userAgent.toLowerCase();
 
@@ -2051,56 +1848,20 @@ function averageResponseTime() {
 
   return defaultTime;
 }
-
-var _default = {
-  create: create,
-  close: close,
-  onMessage: onMessage,
-  postMessage: postMessage,
-  canBeUsed: canBeUsed,
-  type: type,
-  averageResponseTime: averageResponseTime,
-  microSeconds: microSeconds
+var LocalstorageMethod = {
+  create: create$1,
+  close: close$1,
+  onMessage: onMessage$1,
+  postMessage: postMessage$1,
+  canBeUsed: canBeUsed$1,
+  type: type$1,
+  averageResponseTime: averageResponseTime$1,
+  microSeconds: microSeconds$1
 };
-exports["default"] = _default;
-});
 
-unwrapExports(localstorage);
-localstorage.addStorageEventListener;
-localstorage.averageResponseTime;
-localstorage.canBeUsed;
-localstorage.close;
-localstorage.create;
-localstorage.getLocalStorage;
-localstorage.microSeconds;
-localstorage.onMessage;
-localstorage.postMessage;
-localstorage.removeStorageEventListener;
-localstorage.storageKey;
-localstorage.type;
-
-var simulate = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.averageResponseTime = averageResponseTime;
-exports.canBeUsed = canBeUsed;
-exports.close = close;
-exports.create = create;
-exports.microSeconds = exports["default"] = void 0;
-exports.onMessage = onMessage;
-exports.postMessage = postMessage;
-exports.type = void 0;
-
-
-
-var microSeconds = util.microSeconds;
-exports.microSeconds = microSeconds;
+var microSeconds = microSeconds$4;
 var type = 'simulate';
-exports.type = type;
 var SIMULATE_CHANNELS = new Set();
-
 function create(channelName) {
   var state = {
     name: channelName,
@@ -2109,11 +1870,9 @@ function create(channelName) {
   SIMULATE_CHANNELS.add(state);
   return state;
 }
-
 function close(channelState) {
   SIMULATE_CHANNELS["delete"](channelState);
 }
-
 function postMessage(channelState, messageJson) {
   return new Promise(function (res) {
     return setTimeout(function () {
@@ -2131,20 +1890,16 @@ function postMessage(channelState, messageJson) {
     }, 5);
   });
 }
-
 function onMessage(channelState, fn) {
   channelState.messagesCallback = fn;
 }
-
 function canBeUsed() {
   return true;
 }
-
 function averageResponseTime() {
   return 5;
 }
-
-var _default = {
+var SimulateMethod = {
   create: create,
   close: close,
   onMessage: onMessage,
@@ -2154,43 +1909,9 @@ var _default = {
   averageResponseTime: averageResponseTime,
   microSeconds: microSeconds
 };
-exports["default"] = _default;
-});
 
-unwrapExports(simulate);
-simulate.averageResponseTime;
-simulate.canBeUsed;
-simulate.close;
-simulate.create;
-simulate.microSeconds;
-simulate.onMessage;
-simulate.postMessage;
-simulate.type;
-
-var methodChooser = createCommonjsModule(function (module, exports) {
-
-
-
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.chooseMethod = chooseMethod;
-
-var _native = interopRequireDefault(native_1);
-
-var _indexedDb = interopRequireDefault(indexedDb);
-
-var _localstorage = interopRequireDefault(localstorage);
-
-var _simulate = interopRequireDefault(simulate);
-
-// the line below will be removed from es5/browser builds
-// order is important
-var METHODS = [_native["default"], // fastest
-_indexedDb["default"], _localstorage["default"]];
-
+var METHODS = [NativeMethod, // fastest
+IndexeDbMethod, LocalstorageMethod];
 function chooseMethod(options) {
   var chooseMethods = [].concat(options.methods, METHODS).filter(Boolean); // the line below will be removed from es5/browser builds
 
@@ -2199,7 +1920,7 @@ function chooseMethod(options) {
   if (options.type) {
     if (options.type === 'simulate') {
       // only use simulate-method if directly chosen
-      return _simulate["default"];
+      return SimulateMethod;
     }
 
     var ret = chooseMethods.find(function (m) {
@@ -2213,7 +1934,7 @@ function chooseMethod(options) {
    */
 
 
-  if (!options.webWorkerSupport && !util.isNode) {
+  if (!options.webWorkerSupport && !isNode) {
     chooseMethods = chooseMethods.filter(function (m) {
       return m.type !== 'idb';
     });
@@ -2226,46 +1947,26 @@ function chooseMethod(options) {
     return m.type;
   })));else return useMethod;
 }
-});
-
-unwrapExports(methodChooser);
-methodChooser.chooseMethod;
-
-var broadcastChannel$1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.OPEN_BROADCAST_CHANNELS = exports.BroadcastChannel = void 0;
-exports.clearNodeFolder = clearNodeFolder;
-exports.enforceOptions = enforceOptions;
-
-
-
-
-
-
 
 /**
  * Contains all open channels,
  * used in tests to ensure everything is closed.
  */
-var OPEN_BROADCAST_CHANNELS = new Set();
-exports.OPEN_BROADCAST_CHANNELS = OPEN_BROADCAST_CHANNELS;
-var lastId = 0;
 
-var BroadcastChannel = function BroadcastChannel(name, options$1) {
+var OPEN_BROADCAST_CHANNELS = new Set();
+var lastId = 0;
+var BroadcastChannel$1 = function BroadcastChannel(name, options) {
   // identifier of the channel to debug stuff
   this.id = lastId++;
   OPEN_BROADCAST_CHANNELS.add(this);
   this.name = name;
 
   if (ENFORCED_OPTIONS) {
-    options$1 = ENFORCED_OPTIONS;
+    options = ENFORCED_OPTIONS;
   }
 
-  this.options = (0, options.fillOptionsWithDefaults)(options$1);
-  this.method = (0, methodChooser.chooseMethod)(this.options); // isListening
+  this.options = fillOptionsWithDefaults(options);
+  this.method = chooseMethod(this.options); // isListening
 
   this._iL = false;
   /**
@@ -2312,40 +2013,15 @@ var BroadcastChannel = function BroadcastChannel(name, options$1) {
  * See methods/native.js
  */
 
-
-exports.BroadcastChannel = BroadcastChannel;
-BroadcastChannel._pubkey = true;
-/**
- * clears the tmp-folder if is node
- * @return {Promise<boolean>} true if has run, false if not node
- */
-
-function clearNodeFolder(options$1) {
-  options$1 = (0, options.fillOptionsWithDefaults)(options$1);
-  var method = (0, methodChooser.chooseMethod)(options$1);
-
-  if (method.type === 'node') {
-    return method.clearNodeFolder().then(function () {
-      return true;
-    });
-  } else {
-    return util.PROMISE_RESOLVED_FALSE;
-  }
-}
+BroadcastChannel$1._pubkey = true;
 /**
  * if set, this method is enforced,
  * no mather what the options are
  */
 
-
 var ENFORCED_OPTIONS;
 
-function enforceOptions(options) {
-  ENFORCED_OPTIONS = options;
-} // PROTOTYPE
-
-
-BroadcastChannel.prototype = {
+BroadcastChannel$1.prototype = {
   postMessage: function postMessage(msg) {
     if (this.closed) {
       throw new Error('BroadcastChannel.postMessage(): ' + 'Cannot post message after channel has closed');
@@ -2400,7 +2076,7 @@ BroadcastChannel.prototype = {
 
     OPEN_BROADCAST_CHANNELS["delete"](this);
     this.closed = true;
-    var awaitPrepare = this._prepP ? this._prepP : util.PROMISE_RESOLVED_VOID;
+    var awaitPrepare = this._prepP ? this._prepP : PROMISE_RESOLVED_VOID;
     this._onML = null;
     this._addEL.message = [];
     return awaitPrepare // wait until all current sending are processed
@@ -2438,7 +2114,7 @@ function _post(broadcastChannel, type, msg) {
     type: type,
     data: msg
   };
-  var awaitPrepare = broadcastChannel._prepP ? broadcastChannel._prepP : util.PROMISE_RESOLVED_VOID;
+  var awaitPrepare = broadcastChannel._prepP ? broadcastChannel._prepP : PROMISE_RESOLVED_VOID;
   return awaitPrepare.then(function () {
     var sendPromise = broadcastChannel.method.postMessage(broadcastChannel._state, msgObj); // add/remove to unsend messages list
 
@@ -2454,7 +2130,7 @@ function _post(broadcastChannel, type, msg) {
 function _prepareChannel(channel) {
   var maybePromise = channel.method.create(channel.name, channel.options);
 
-  if ((0, util.isPromise)(maybePromise)) {
+  if (isPromise(maybePromise)) {
     channel._prepP = maybePromise;
     maybePromise.then(function (s) {
       // used in tests to simulate slow runtime
@@ -2534,554 +2210,6 @@ function _stopListening(channel) {
     channel.method.onMessage(channel._state, null, time);
   }
 }
-});
-
-unwrapExports(broadcastChannel$1);
-broadcastChannel$1.OPEN_BROADCAST_CHANNELS;
-broadcastChannel$1.BroadcastChannel;
-broadcastChannel$1.clearNodeFolder;
-broadcastChannel$1.enforceOptions;
-
-/* global WorkerGlobalScope */
-function add$1(fn) {
-  if (typeof WorkerGlobalScope === 'function' && self instanceof WorkerGlobalScope) ; else {
-    /**
-     * if we are on react-native, there is no window.addEventListener
-     * @link https://github.com/pubkey/unload/issues/6
-     */
-    if (typeof window.addEventListener !== 'function') return;
-    /**
-     * for normal browser-windows, we use the beforeunload-event
-     */
-
-    window.addEventListener('beforeunload', function () {
-      fn();
-    }, true);
-    /**
-     * for iframes, we have to use the unload-event
-     * @link https://stackoverflow.com/q/47533670/3443137
-     */
-
-    window.addEventListener('unload', function () {
-      fn();
-    }, true);
-  }
-  /**
-   * TODO add fallback for safari-mobile
-   * @link https://stackoverflow.com/a/26193516/3443137
-   */
-
-}
-
-var BrowserMethod = {
-  add: add$1
-};
-
-var USE_METHOD = BrowserMethod;
-var LISTENERS = new Set();
-var startedListening = false;
-
-function startListening() {
-  if (startedListening) return;
-  startedListening = true;
-  USE_METHOD.add(runAll);
-}
-
-function add(fn) {
-  startListening();
-  if (typeof fn !== 'function') throw new Error('Listener is no function');
-  LISTENERS.add(fn);
-  var addReturn = {
-    remove: function remove() {
-      return LISTENERS["delete"](fn);
-    },
-    run: function run() {
-      LISTENERS["delete"](fn);
-      return fn();
-    }
-  };
-  return addReturn;
-}
-function runAll() {
-  var promises = [];
-  LISTENERS.forEach(function (fn) {
-    promises.push(fn());
-    LISTENERS["delete"](fn);
-  });
-  return Promise.all(promises);
-}
-function removeAll() {
-  LISTENERS.clear();
-}
-function getSize() {
-  return LISTENERS.size;
-}
-
-var es = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  add: add,
-  runAll: runAll,
-  removeAll: removeAll,
-  getSize: getSize
-});
-
-var leaderElection = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.beLeader = beLeader;
-exports.createLeaderElection = createLeaderElection;
-
-
-
-
-
-var LeaderElection = function LeaderElection(broadcastChannel, options) {
-  var _this = this;
-
-  this.broadcastChannel = broadcastChannel;
-  this._options = options;
-  this.isLeader = false;
-  this.hasLeader = false;
-  this.isDead = false;
-  this.token = (0, util.randomToken)();
-  /**
-   * Apply Queue,
-   * used to ensure we do not run applyOnce()
-   * in parallel.
-   */
-
-  this._aplQ = util.PROMISE_RESOLVED_VOID; // amount of unfinished applyOnce() calls
-
-  this._aplQC = 0; // things to clean up
-
-  this._unl = []; // _unloads
-
-  this._lstns = []; // _listeners
-
-  this._dpL = function () {}; // onduplicate listener
-
-
-  this._dpLC = false; // true when onduplicate called
-
-  /**
-   * Even when the own instance is not applying,
-   * we still listen to messages to ensure the hasLeader flag
-   * is set correctly.
-   */
-
-  var hasLeaderListener = function hasLeaderListener(msg) {
-    if (msg.context === 'leader') {
-      if (msg.action === 'death') {
-        _this.hasLeader = false;
-      }
-
-      if (msg.action === 'tell') {
-        _this.hasLeader = true;
-      }
-    }
-  };
-
-  this.broadcastChannel.addEventListener('internal', hasLeaderListener);
-
-  this._lstns.push(hasLeaderListener);
-};
-
-LeaderElection.prototype = {
-  /**
-   * Returns true if the instance is leader,
-   * false if not.
-   * @async
-   */
-  applyOnce: function applyOnce( // true if the applyOnce() call came from the fallbackInterval cycle
-  isFromFallbackInterval) {
-    var _this2 = this;
-
-    if (this.isLeader) {
-      return (0, util.sleep)(0, true);
-    }
-
-    if (this.isDead) {
-      return (0, util.sleep)(0, false);
-    }
-    /**
-     * Already applying more then once,
-     * -> wait for the apply queue to be finished.
-     */
-
-
-    if (this._aplQC > 1) {
-      return this._aplQ;
-    }
-    /**
-     * Add a new apply-run
-     */
-
-
-    var applyRun = function applyRun() {
-      /**
-       * Optimization shortcuts.
-       * Directly return if a previous run
-       * has already elected a leader.
-       */
-      if (_this2.isLeader) {
-        return util.PROMISE_RESOLVED_TRUE;
-      }
-
-      var stopCriteria = false;
-      var stopCriteriaPromiseResolve;
-      /**
-       * Resolves when a stop criteria is reached.
-       * Uses as a performance shortcut so we do not
-       * have to await the responseTime when it is already clear
-       * that the election failed.
-       */
-
-      var stopCriteriaPromise = new Promise(function (res) {
-        stopCriteriaPromiseResolve = function stopCriteriaPromiseResolve() {
-          stopCriteria = true;
-          res();
-        };
-      });
-
-      var handleMessage = function handleMessage(msg) {
-        if (msg.context === 'leader' && msg.token != _this2.token) {
-
-          if (msg.action === 'apply') {
-            // other is applying
-            if (msg.token > _this2.token) {
-              /**
-               * other has higher token
-               * -> stop applying and let other become leader.
-               */
-              stopCriteriaPromiseResolve();
-            }
-          }
-
-          if (msg.action === 'tell') {
-            // other is already leader
-            stopCriteriaPromiseResolve();
-            _this2.hasLeader = true;
-          }
-        }
-      };
-
-      _this2.broadcastChannel.addEventListener('internal', handleMessage);
-      /**
-       * If the applyOnce() call came from the fallbackInterval,
-       * we can assume that the election runs in the background and
-       * not critical process is waiting for it.
-       * When this is true, we give the other intances
-       * more time to answer to messages in the election cycle.
-       * This makes it less likely to elect duplicate leaders.
-       * But also it takes longer which is not a problem because we anyway
-       * run in the background.
-       */
-
-
-      var waitForAnswerTime = isFromFallbackInterval ? _this2._options.responseTime * 4 : _this2._options.responseTime;
-
-      var applyPromise = _sendMessage(_this2, 'apply') // send out that this one is applying
-      .then(function () {
-        return Promise.race([(0, util.sleep)(waitForAnswerTime), stopCriteriaPromise.then(function () {
-          return Promise.reject(new Error());
-        })]);
-      }) // send again in case another instance was just created
-      .then(function () {
-        return _sendMessage(_this2, 'apply');
-      }) // let others time to respond
-      .then(function () {
-        return Promise.race([(0, util.sleep)(waitForAnswerTime), stopCriteriaPromise.then(function () {
-          return Promise.reject(new Error());
-        })]);
-      })["catch"](function () {}).then(function () {
-        _this2.broadcastChannel.removeEventListener('internal', handleMessage);
-
-        if (!stopCriteria) {
-          // no stop criteria -> own is leader
-          return beLeader(_this2).then(function () {
-            return true;
-          });
-        } else {
-          // other is leader
-          return false;
-        }
-      });
-
-      return applyPromise;
-    };
-
-    this._aplQC = this._aplQC + 1;
-    this._aplQ = this._aplQ.then(function () {
-      return applyRun();
-    }).then(function () {
-      _this2._aplQC = _this2._aplQC - 1;
-    });
-    return this._aplQ.then(function () {
-      return _this2.isLeader;
-    });
-  },
-  awaitLeadership: function awaitLeadership() {
-    if (
-    /* _awaitLeadershipPromise */
-    !this._aLP) {
-      this._aLP = _awaitLeadershipOnce(this);
-    }
-
-    return this._aLP;
-  },
-
-  set onduplicate(fn) {
-    this._dpL = fn;
-  },
-
-  die: function die() {
-    var _this3 = this;
-
-    this._lstns.forEach(function (listener) {
-      return _this3.broadcastChannel.removeEventListener('internal', listener);
-    });
-
-    this._lstns = [];
-
-    this._unl.forEach(function (uFn) {
-      return uFn.remove();
-    });
-
-    this._unl = [];
-
-    if (this.isLeader) {
-      this.hasLeader = false;
-      this.isLeader = false;
-    }
-
-    this.isDead = true;
-    return _sendMessage(this, 'death');
-  }
-};
-/**
- * @param leaderElector {LeaderElector}
- */
-
-function _awaitLeadershipOnce(leaderElector) {
-  if (leaderElector.isLeader) {
-    return util.PROMISE_RESOLVED_VOID;
-  }
-
-  return new Promise(function (res) {
-    var resolved = false;
-
-    function finish() {
-      if (resolved) {
-        return;
-      }
-
-      resolved = true;
-      leaderElector.broadcastChannel.removeEventListener('internal', whenDeathListener);
-      res(true);
-    } // try once now
-
-
-    leaderElector.applyOnce().then(function () {
-      if (leaderElector.isLeader) {
-        finish();
-      }
-    });
-    /**
-     * Try on fallbackInterval
-     * @recursive
-     */
-
-    var tryOnFallBack = function tryOnFallBack() {
-      return (0, util.sleep)(leaderElector._options.fallbackInterval).then(function () {
-        if (leaderElector.isDead || resolved) {
-          return;
-        }
-
-        if (leaderElector.isLeader) {
-          finish();
-        } else {
-          return leaderElector.applyOnce(true).then(function () {
-            if (leaderElector.isLeader) {
-              finish();
-            } else {
-              tryOnFallBack();
-            }
-          });
-        }
-      });
-    };
-
-    tryOnFallBack(); // try when other leader dies
-
-    var whenDeathListener = function whenDeathListener(msg) {
-      if (msg.context === 'leader' && msg.action === 'death') {
-        leaderElector.hasLeader = false;
-        leaderElector.applyOnce().then(function () {
-          if (leaderElector.isLeader) {
-            finish();
-          }
-        });
-      }
-    };
-
-    leaderElector.broadcastChannel.addEventListener('internal', whenDeathListener);
-
-    leaderElector._lstns.push(whenDeathListener);
-  });
-}
-/**
- * sends and internal message over the broadcast-channel
- */
-
-
-function _sendMessage(leaderElector, action) {
-  var msgJson = {
-    context: 'leader',
-    action: action,
-    token: leaderElector.token
-  };
-  return leaderElector.broadcastChannel.postInternal(msgJson);
-}
-
-function beLeader(leaderElector) {
-  leaderElector.isLeader = true;
-  leaderElector.hasLeader = true;
-  var unloadFn = (0, es.add)(function () {
-    return leaderElector.die();
-  });
-
-  leaderElector._unl.push(unloadFn);
-
-  var isLeaderListener = function isLeaderListener(msg) {
-    if (msg.context === 'leader' && msg.action === 'apply') {
-      _sendMessage(leaderElector, 'tell');
-    }
-
-    if (msg.context === 'leader' && msg.action === 'tell' && !leaderElector._dpLC) {
-      /**
-       * another instance is also leader!
-       * This can happen on rare events
-       * like when the CPU is at 100% for long time
-       * or the tabs are open very long and the browser throttles them.
-       * @link https://github.com/pubkey/broadcast-channel/issues/414
-       * @link https://github.com/pubkey/broadcast-channel/issues/385
-       */
-      leaderElector._dpLC = true;
-
-      leaderElector._dpL(); // message the lib user so the app can handle the problem
-
-
-      _sendMessage(leaderElector, 'tell'); // ensure other leader also knows the problem
-
-    }
-  };
-
-  leaderElector.broadcastChannel.addEventListener('internal', isLeaderListener);
-
-  leaderElector._lstns.push(isLeaderListener);
-
-  return _sendMessage(leaderElector, 'tell');
-}
-
-function fillOptionsWithDefaults(options, channel) {
-  if (!options) options = {};
-  options = JSON.parse(JSON.stringify(options));
-
-  if (!options.fallbackInterval) {
-    options.fallbackInterval = 3000;
-  }
-
-  if (!options.responseTime) {
-    options.responseTime = channel.method.averageResponseTime(channel.options);
-  }
-
-  return options;
-}
-
-function createLeaderElection(channel, options) {
-  if (channel._leaderElector) {
-    throw new Error('BroadcastChannel already has a leader-elector');
-  }
-
-  options = fillOptionsWithDefaults(options, channel);
-  var elector = new LeaderElection(channel, options);
-
-  channel._befC.push(function () {
-    return elector.die();
-  });
-
-  channel._leaderElector = elector;
-  return elector;
-}
-});
-
-unwrapExports(leaderElection);
-leaderElection.beLeader;
-leaderElection.createLeaderElection;
-
-var lib = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "BroadcastChannel", {
-  enumerable: true,
-  get: function get() {
-    return broadcastChannel$1.BroadcastChannel;
-  }
-});
-Object.defineProperty(exports, "OPEN_BROADCAST_CHANNELS", {
-  enumerable: true,
-  get: function get() {
-    return broadcastChannel$1.OPEN_BROADCAST_CHANNELS;
-  }
-});
-Object.defineProperty(exports, "beLeader", {
-  enumerable: true,
-  get: function get() {
-    return leaderElection.beLeader;
-  }
-});
-Object.defineProperty(exports, "clearNodeFolder", {
-  enumerable: true,
-  get: function get() {
-    return broadcastChannel$1.clearNodeFolder;
-  }
-});
-Object.defineProperty(exports, "createLeaderElection", {
-  enumerable: true,
-  get: function get() {
-    return leaderElection.createLeaderElection;
-  }
-});
-Object.defineProperty(exports, "enforceOptions", {
-  enumerable: true,
-  get: function get() {
-    return broadcastChannel$1.enforceOptions;
-  }
-});
-});
-
-unwrapExports(lib);
-
-/**
- * because babel can only export on default-attribute,
- * we use this for the non-module-build
- * this ensures that users do not have to use
- * var BroadcastChannel = require('broadcast-channel').default;
- * but
- * var BroadcastChannel = require('broadcast-channel');
- */
-var index_es5 = {
-  BroadcastChannel: lib.BroadcastChannel,
-  createLeaderElection: lib.createLeaderElection,
-  clearNodeFolder: lib.clearNodeFolder,
-  enforceOptions: lib.enforceOptions,
-  beLeader: lib.beLeader
-};
-var index_es5_1 = index_es5.BroadcastChannel;
 
 let broadcastChannel;
 
@@ -3122,7 +2250,7 @@ const sendBroadcast = async (message) => {
 };
 
 const initBroadcastChannel = async () => {
-  broadcastChannel = new index_es5_1('sys/fs');
+  broadcastChannel = new BroadcastChannel$1('sys/fs');
   broadcastChannel.onmessage = receiveBroadcast;
 };
 
@@ -3169,18 +2297,15 @@ const { promises: promises$3 } = fs;
 const { serialize } = v8$1;
 
 const getFileWriter = () => {
-  if (isNode) {
-    return async (qualifiedPath, data, doSerialize) => {
+  if (isNode$1) {
+    return async (qualifiedPath, data) => {
       try {
         await promises$3.mkdir(dirname(qualifiedPath), { recursive: true });
       } catch (error) {
         throw error;
       }
       try {
-        if (doSerialize) {
-          data = serialize(data);
-        }
-        await promises$3.writeFile(qualifiedPath, data);
+        await promises$3.writeFile(qualifiedPath, serialize(data));
         // FIX: Do proper versioning.
         const version = 0;
         return version;
@@ -3198,9 +2323,18 @@ const getFileWriter = () => {
 const fileWriter = getFileWriter();
 
 const writeNonblocking = (path, data, options = {}) => {
+  const { workspace = getFilesystem(), errorOnBlocking = true } = options;
+  const qualifiedPath = qualifyPath(path, workspace);
+  const file = ensureQualifiedFile(path, qualifiedPath);
+  if (file.data === data) {
+    // This has already been written.
+    return true;
+  }
   // Schedule a deferred write to update persistent storage.
   addPending(write(path, data, options));
-  throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+  if (errorOnBlocking) {
+    throw new ErrorWouldBlock(`Would have blocked on write ${path}`);
+  }
 };
 
 const write = async (path, data, options = {}) => {
@@ -3211,11 +2345,7 @@ const write = async (path, data, options = {}) => {
     return undefined;
   }
 
-  const {
-    doSerialize = true,
-    ephemeral,
-    workspace = getFilesystem(),
-  } = options;
+  const { ephemeral, workspace = getFilesystem() } = options;
 
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
@@ -3227,7 +2357,7 @@ const write = async (path, data, options = {}) => {
   file.data = data;
 
   if (!ephemeral && workspace !== undefined) {
-    file.version = await fileWriter(qualifiedPath, data, doSerialize);
+    file.version = await fileWriter(qualifiedPath, data);
   }
 
   // Let everyone else know the file has changed.
@@ -3248,7 +2378,7 @@ const getUrlFetcher = () => {
   if (isWebWorker) {
     return self.fetch;
   }
-  if (isNode) {
+  if (isNode$1) {
     return nodeFetch;
   }
   throw Error('Expected browser or web worker or node');
@@ -3257,7 +2387,7 @@ const getUrlFetcher = () => {
 const urlFetcher = getUrlFetcher();
 
 const getExternalFileFetcher = () => {
-  if (isNode) {
+  if (isNode$1) {
     // FIX: Put this through getFile, also.
     return async (qualifiedPath) => {
       try {
@@ -3280,7 +2410,7 @@ const getExternalFileFetcher = () => {
 const externalFileFetcher = getExternalFileFetcher();
 
 const getInternalFileFetcher = () => {
-  if (isNode) {
+  if (isNode$1) {
     // FIX: Put this through getFile, also.
     return async (qualifiedPath, doSerialize = true) => {
       try {
@@ -3308,7 +2438,7 @@ const getInternalFileFetcher = () => {
 const internalFileFetcher = getInternalFileFetcher();
 
 const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
-  if (isNode) {
+  if (isNode$1) {
     // FIX: Put this through getFile, also.
     return (qualifiedPath) => {
       // FIX: Use a proper version.
@@ -3380,13 +2510,15 @@ const fetchSources = async (sources, { workspace }) => {
 };
 
 const readNonblocking = (path, options = {}) => {
-  const { workspace = getFilesystem() } = options;
+  const { workspace = getFilesystem(), errorOnMissing = true } = options;
   const file = getFile(path, workspace);
   if (file) {
     return file.data;
   }
   addPending(read(path, options));
-  throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+  if (errorOnMissing) {
+    throw new ErrorWouldBlock(`Would have blocked on read ${path}`);
+  }
 };
 
 const read = async (path, options = {}) => {
@@ -3609,7 +2741,7 @@ const removeOnEmitHandler = (handler) => onEmitHandlers.delete(handler);
 const { promises: promises$1 } = fs;
 
 const getFileLister = async ({ workspace }) => {
-  if (isNode) {
+  if (isNode$1) {
     // FIX: Put this through getFile, also.
     return async () => {
       const qualifiedPaths = new Set();
@@ -3853,7 +2985,7 @@ const unwatchServices = (watcher) => {
 const { promises } = fs;
 
 const getPersistentFileDeleter = () => {
-  if (isNode) {
+  if (isNode$1) {
     return async (qualifiedPath) => {
       return promises.unlink(qualifiedPath);
     };
@@ -3891,4 +3023,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, hash, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, isBrowser, isNode$1 as isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
