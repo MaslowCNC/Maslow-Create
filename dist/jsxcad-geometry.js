@@ -1,4 +1,4 @@
-import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, computeNormalOfSurfaceMesh, fromPointsToConvexHullAsSurfaceMesh, demeshSurfaceMesh, eachPointOfSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMeshToLazyGraph, fromPointsToAlphaShapeAsSurfaceMesh, serializeSurfaceMesh, deleteSurfaceMesh, deserializeSurfaceMesh, fromGraphToSurfaceMesh, fromSurfaceMeshEmitBoundingBox, arrangePaths, fromPolygonsToSurfaceMesh, cutSurfaceMeshes, STATUS_OK, STATUS_UNCHANGED, STATUS_EMPTY, bendSurfaceMesh, clipSurfaceMeshes, computeCentroidOfSurfaceMesh, fitPlaneToPoints, arrangePathsIntoTriangles, fromPointsToConvexHullAsSurfaceMesh, demeshSurfaceMesh, eachPointOfSurfaceMesh, outlineSurfaceMesh, extrudeSurfaceMesh, extrudeToPlaneOfSurfaceMesh, fromSurfaceMeshToPolygonsWithHoles, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fuseSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, growSurfaceMesh, insetOfPolygonWithHoles, joinSurfaceMeshes, loftBetweenCongruentSurfaceMeshes, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offsetOfPolygonWithHoles, projectToPlaneOfSurfaceMesh, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, sectionOfSurfaceMesh, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separateSurfaceMesh, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { arrangePolygonsWithHoles } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { transform as transform$4, equals, canonicalize as canonicalize$5, max, min, scale as scale$3, subtract } from './jsxcad-math-vec3.js';
@@ -562,25 +562,26 @@ const op =
       segments = doNothing,
       triangles = doNothing,
     },
-    method = rewrite
+    method = rewrite,
+    accumulate = (x) => x
   ) =>
   (geometry, ...args) => {
     const walk = (geometry, descend) => {
       switch (geometry.type) {
         case 'graph':
-          return graph(geometry, ...args);
+          return accumulate(graph(geometry, ...args));
         case 'layout':
-          return layout(geometry, ...args);
+          return accumulate(layout(geometry, ...args));
         case 'paths':
-          return paths(geometry, ...args);
+          return accumulate(paths(geometry, ...args));
         case 'points':
-          return points(geometry, ...args);
+          return accumulate(points(geometry, ...args));
         case 'polygonsWithHoles':
-          return polygonsWithHoles(geometry, ...args);
+          return accumulate(polygonsWithHoles(geometry, ...args));
         case 'segments':
-          return segments(geometry, ...args);
+          return accumulate(segments(geometry, ...args));
         case 'triangles':
-          return triangles(geometry, ...args);
+          return accumulate(triangles(geometry, ...args));
         case 'plan':
           reify(geometry);
         // fall through
@@ -1263,47 +1264,8 @@ const computeCentroid = (geometry) => {
   return rewrite(toTransformedGeometry(geometry), op);
 };
 
-const computeNormal$1 = (geometry) => {
-  const approximate = [];
-  const exact = [];
-  computeNormalOfSurfaceMesh(
-    toSurfaceMesh(geometry.graph),
-    geometry.matrix,
-    approximate,
-    exact
-  );
-  return taggedPoints({ tags: geometry.tags }, [approximate], [exact]);
-};
-
 const computeNormal = (geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph':
-        return computeNormal$1(geometry);
-      case 'polygonsWithHoles':
-        return computeNormal$1(fromPolygonsWithHoles(geometry));
-      case 'triangles':
-      case 'points':
-        // Not implemented yet.
-        return geometry;
-      case 'paths':
-        return computeNormal(fill(geometry));
-      case 'plan':
-        return computeNormal(reify(geometry).content[0]);
-      case 'item':
-      case 'group': {
-        return descend();
-      }
-      case 'sketch': {
-        // Sketches aren't real for extrude.
-        return geometry;
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(toTransformedGeometry(geometry), op);
+  return taggedGroup({});
 };
 
 const concatenate = (...paths) => {
@@ -1370,7 +1332,7 @@ const canonicalize = (geometry) => {
           planes: geometry.planes.map(canonicalize$7),
         });
       case 'graph':
-        return prepareForSerialization(graph);
+        return prepareForSerialization(geometry);
       case 'item':
       case 'group':
       case 'layout':
@@ -1733,7 +1695,12 @@ const extrude = (geometry, height, depth, direction) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
-        return extrude$1(geometry, height, depth, reify(direction));
+        return extrude$1(
+          geometry,
+          height,
+          depth,
+          reify(direction(geometry))
+        );
       case 'triangles':
       case 'points':
         // Not implemented yet.
@@ -1743,17 +1710,12 @@ const extrude = (geometry, height, depth, direction) => {
           fromPolygonsWithHoles(geometry),
           height,
           depth,
-          reify(direction)
+          direction
         );
       case 'paths':
-        return extrude(fill(geometry), height, depth, reify(direction));
+        return extrude(fill(geometry), height, depth, direction);
       case 'plan':
-        return extrude(
-          reify(geometry).content[0],
-          height,
-          depth,
-          reify(direction)
-        );
+        return extrude(reify(geometry).content[0], height, depth, direction);
       case 'item':
       case 'group': {
         return descend();
@@ -2949,7 +2911,7 @@ const offset$1 = (geometry, initial, step, limit) => {
   return offsetGraphs;
 };
 
-const graph$1 = (geometry, initial = 1, step, limit) =>
+const graph = (geometry, initial = 1, step, limit) =>
   taggedGroup(
     { tags: geometry.tags },
     ...offset$1(geometry, initial, step, limit)
@@ -2965,7 +2927,7 @@ const paths = (geometry, initial = 1, step, limit) =>
     limit
   );
 
-const offset = op({ graph: graph$1, polygonsWithHoles, paths });
+const offset = op({ graph, polygonsWithHoles, paths });
 
 const open = (path) => (isClosed(path) ? [null, ...path] : path);
 
