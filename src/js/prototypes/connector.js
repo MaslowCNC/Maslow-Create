@@ -211,7 +211,7 @@ export default class Connector {
     }
     
     /**
-     * Commputes the connectors position and draw it to the screen.
+     * Computes the connectors position and draw it to the screen.
      */ 
     update() {
         this.startX = this.attachmentPoint1.x

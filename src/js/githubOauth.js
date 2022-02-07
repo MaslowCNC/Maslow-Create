@@ -1133,7 +1133,7 @@ export default function GitHubModule(){
             return jsonData
             
         }catch(err){
-            console.warn("Unable to load project data from github")
+            console.warn("Unable to load project data from github...using full model")
             return false
         }
     }

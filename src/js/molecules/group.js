@@ -49,6 +49,8 @@ export default class Group extends Atom{
                 this.addIO('input', ioValue.name, this, 'geometry', '')
             })
         }
+
+        this.setValues([])
     }
     
     /**
@@ -132,7 +134,7 @@ export default class Group extends Atom{
             if (io.connectors.length > 0){
                 var saveIO = {
                     name: io.name,
-                    ioValue: 10
+                    ioValue: io.getValue()
                 }
                 ioValues.push(saveIO)
             }

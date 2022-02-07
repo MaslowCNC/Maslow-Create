@@ -57,6 +57,27 @@ export default class Code extends Atom {
     }
     
     /**
+     * Begin propagation from this code atom if it has no inputs or if none of the inputs are connected. 
+     */ 
+    beginPropagation(){
+        //If there are no inputs
+        if(this.inputs.length == 0){
+            this.updateValue()
+        }
+
+        //If none of the inputs are connected
+        var connectedInput = false
+        this.inputs.forEach(input => {
+            if(input.connectors.length > 0){
+                connectedInput = true
+            }
+        })
+        if(!connectedInput){
+            this.updateValue()
+        }
+    }
+
+    /**
      * Grab the code as a text string and execute it. 
      */ 
     updateValue(){

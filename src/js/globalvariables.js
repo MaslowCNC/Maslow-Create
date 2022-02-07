@@ -267,9 +267,13 @@ class GlobalVariables{
             document.getElementById('viewerContext').style.filter="sepia(0%)"
             
             if(result && result != -1){
-                window.updateDisplay(result, {withGrid: this.displayGrid, fit: resetView})
+                window.updateDisplay(result)
+                window.showGrid(this.displayGrid)
+                if(resetView){
+                    window.updateFit()
+                }
             }
-        }).catch (() => console.warn("Canceled display update"))
+        }).catch ((e) => console.warn(e))
         
         this.displayProcessing = true
         document.getElementById('viewerContext').style.filter="sepia(100%)"

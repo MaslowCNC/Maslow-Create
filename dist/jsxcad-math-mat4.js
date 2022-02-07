@@ -9,6 +9,9 @@ import { fromValues as fromValues$1 } from './jsxcad-math-vec2.js';
 
 const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
+// FIX: Move to cgal.
+identityMatrix.blessed = true;
+
 const identity = () => identityMatrix;
 
 /**

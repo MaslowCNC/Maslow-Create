@@ -355,7 +355,7 @@ export default class Molecule extends Atom{
     setSimplifyFlag(anEvent){
         this.simplify = anEvent.target.checked
         this.propagate()
-        this.updateSidebar();
+        this.updateSidebar()
     }
     
     changeUnits(newUnitsIndex){
@@ -821,7 +821,7 @@ export default class Molecule extends Atom{
     
     /**
      * Places a new connector within the molecule
-     * @param {object} connectorObj - An object represntation of the connector specifying its inputs and outputs.
+     * @param {object} connectorObj - An object representation of the connector specifying its inputs and outputs.
      */
     placeConnector(connectorObj){
         

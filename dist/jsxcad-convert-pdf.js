@@ -1,5 +1,4 @@
-import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { measureBoundingBox, toDisjointGeometry, transform, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
+import { measureBoundingBox, toDisjointGeometry, translate, scale, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const X = 0;
@@ -73,16 +72,15 @@ const toPdf = async (
   const [min, max] = measureBoundingBox(geometry);
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
-  const scale = 1 / pointSize;
+  const scale$1 = 1 / pointSize;
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const lines = [];
-  const matrix = multiply(
-    fromTranslation([1, 1, 0]),
-    fromScaling([scale, scale, scale])
-  );
   const disjointGeometry = toDisjointGeometry(
-    transform(matrix, await geometry)
+    translate(
+      [1, 1, 0],
+      scale([scale$1, scale$1, scale$1], await geometry)
+    )
   );
   for (const { tags, polygonsWithHoles } of toPolygonsWithHoles(
     disjointGeometry
@@ -131,7 +129,7 @@ const toPdf = async (
 
   const output = []
     .concat(
-      header({ scale, min, max, width, height, lineWidth }),
+      header({ scale: scale$1, min, max, width, height, lineWidth }),
       lines,
       footer
     )
