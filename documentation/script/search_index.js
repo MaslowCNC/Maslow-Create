@@ -1116,6 +1116,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/js/molecules/code.js~code#beginpropagation",
+    "class/src/js/molecules/code.js~Code.html#instance-method-beginPropagation",
+    "src/js/molecules/code.js~Code#beginPropagation",
+    "method"
+  ],
+  [
     "src/js/molecules/code.js~code#code",
     "class/src/js/molecules/code.js~Code.html#instance-member-code",
     "src/js/molecules/code.js~Code#code",

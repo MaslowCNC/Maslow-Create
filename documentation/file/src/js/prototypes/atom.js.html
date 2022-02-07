@@ -138,10 +138,6 @@ export default class Atom {
          * This atom&apos;s color when selected
          * @type {string}
          */
-        /** 
-         * The color to use for strokes when selected
-         * @type {string}
-         */
         this.selectedColor = &apos;#484848&apos;
         /** 
          * The color currently used for strokes
@@ -149,7 +145,7 @@ export default class Atom {
          */
         this.strokeColor = &apos;#484848&apos;
         /** 
-         * A flag to indicate if this atom is curently selected
+         * A flag to indicate if this atom is currently selected
          * @type {boolean}
          */
         this.selected = false
@@ -816,7 +812,7 @@ export default class Atom {
     }
     
     /**
-     * Starts propagation from this atom if it is not waiting for anything up stream.
+     * Starts propagation placeholder. Most atom types do not begin propagation.
      */ 
     beginPropagation(){
         
@@ -901,7 +897,7 @@ export default class Atom {
      * @param {boolean} resultShouldBeNumber - A flag to indicate if the input should be converted to a number.
      * @param {object} callBack - Optional. A function to call with the new value when the value changes.
      */ 
-    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack = () =&gt; console.log(&quot;no callback&quot;)){
+    createEditableValueListItem(list,object,key, label, resultShouldBeNumber, callBack = () =&gt; console.warn(&quot;no callback&quot;)){
 
         var listElement = document.createElement(&apos;LI&apos;)
         list.appendChild(listElement)

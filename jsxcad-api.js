@@ -2,7 +2,7 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, hash, logInfo, beginEmitGroup, resolvePending, getConfig, computeHash, finishEmitGroup, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, getConfig, finishEmitGroup, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -60,11 +60,11 @@ const replayRecordedNotes = async (path, id) => {
 
 const emitSourceLocation = ({ path, id }) => {
   const setContext = { sourceLocation: { path, id } };
-  emit({ hash: hash(setContext), setContext });
+  emit({ hash: computeHash(setContext), setContext });
 };
 
 const emitSourceText = (sourceText) =>
-  emit({ hash: hash(sourceText), sourceText });
+  emit({ hash: computeHash(sourceText), sourceText });
 
 const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
@@ -402,7 +402,7 @@ const control = (label, value, type, options) => {
     options,
     path,
   };
-  emit({ control, hash: hash(control) });
+  emit({ control, hash: computeHash(control) });
   return value;
 };
 

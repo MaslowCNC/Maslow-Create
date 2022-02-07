@@ -136,6 +136,9 @@ export default class ShrinkWrap extends Atom{
                 this.addIO(&apos;input&apos;, ioValue.name, this, &apos;geometry&apos;, &apos;&apos;)
             })
         }
+
+
+        this.setValues([])
         
     }
     
@@ -207,7 +210,7 @@ export default class ShrinkWrap extends Atom{
             if (io.type == &apos;input&apos;){
                 var saveIO = {
                     name: io.name,
-                    ioValue: 10
+                    ioValue: io.getValue()
                 }
                 ioValues.push(saveIO)
             }
