@@ -198,7 +198,7 @@ const agent = async ({ ask, message }) => {
         break;
     case "stl":
         const geometryToStl = await maslowRead(message.readPath);
-        const stlString = await toStl(geometryToStl.toGeometry());
+        const stlString = await toStl(geometryToStl.fuse().toGeometry());
         return stlString;
         break;
     case "svg":
