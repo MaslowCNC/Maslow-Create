@@ -266,7 +266,7 @@ export default class Atom {
      * Adds a new attachment point to this atom
      * @param {boolean} type - The type of the IO (input or output)
      * @param {string} name - The name of the new attachment point
-     * @param {object} target - The attom to attach the new attachment point to. Should we force this to always be this one?
+     * @param {object} target - The atom to attach the new attachment point to. Should we force this to always be this one?
      * @param {string} valueType - Describes the type of value the input is expecting options are number, geometry, array
      * @param {object} defaultValue - The default value to be used when the value is not yet set
      */ 

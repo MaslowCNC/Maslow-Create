@@ -86,13 +86,13 @@ export default class Constant extends Atom{
      * Set's the output value and shows the atom output on the 3D view.
      */ 
     updateValue(){
-        this.value = this.output.getValue()  //We read from the output because it is set by the sidebar for confusing reasons
+        this.value = this.output.getValue()  //We read from the output because it is set by the sidebar because constants have no inputs
         this.output.setValue(this.value)
         this.output.ready = true
 
         //Write to this's path just so that we know it has happened and don't load this again next time the project is opened
         try{
-            const values = {op: "rectangle", x: 5, y:5, writePath: this.path }
+            const values = {op: "text", value:this.value, writePath: this.path }
             window.ask(values)
         }catch(err){this.setAlert(err)}
     }
@@ -169,6 +169,25 @@ export default class Constant extends Atom{
         
         return valuesObj
         
+    }
+
+    /**
+     * Send the value of this atom to the 3D display. Used to display the number
+     */ 
+    sendToRender(){
+        //Send code to jotcad to render
+        console.log("Constant send to render ran")
+        try{
+            const values = {op: "text", value:this.output.getValue(), writePath: this.path }
+            const {answer} = window.ask(values)
+                answer.then( () => {
+                    GlobalVariables.writeToDisplay(this.path)
+                })
+        }
+        catch(err){
+            this.setAlert(err)
+        }
+
     }
     
 }

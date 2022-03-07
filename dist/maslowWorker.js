@@ -196,6 +196,11 @@ const agent = async ({ ask, message }) => {
             return -1;
         }
         break;
+    case "text":
+        const textMessage = api.Hershey(String(message.value), 20).align('xy');
+        await api.saveGeometry(message.writePath, textMessage);
+        return true;
+        break;
     case "stl":
         const geometryToStl = await maslowRead(message.readPath);
         const stlString = await toStl(geometryToStl.fuse().toGeometry());
