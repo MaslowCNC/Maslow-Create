@@ -47,6 +47,11 @@ export default class Readme extends Atom{
          * This atom's height as drawn on the screen
          */
         this.height = 10
+
+        /**
+         * Should this atom contribute to the molecule level readme
+         */
+        this.global = true
         
         
         this.setValues(values)
@@ -57,6 +62,9 @@ export default class Readme extends Atom{
     updateSidebar(){
         var valueList = super.updateSidebar() //call the super function
         this.createEditableValueListItem(valueList,this,'readmeText', 'Notes', false)
+        this.createCheckbox(valueList,"Global",this.global,(event) => {
+            this.global = event.target.checked
+        })
     }
     /**
      * Draw the readme atom with // icon.
@@ -87,7 +95,12 @@ export default class Readme extends Atom{
      * Provides this molecules contribution to the global Readme
      */ 
     requestReadme(){
-        return [this.readmeText]
+        if(this.global){
+            return [this.readmeText]
+        }
+        else{
+            return []
+        }
     }
     
     /**
@@ -98,6 +111,7 @@ export default class Readme extends Atom{
         var valuesObj = super.serialize(values)
         
         valuesObj.readmeText = this.readmeText
+        valuesObj.global     = this.global
         
         return valuesObj
         
