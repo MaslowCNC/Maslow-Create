@@ -211,9 +211,9 @@ export default class Equation extends Atom {
         try{
             const values = {op: "text", value:this.output.getValue(), writePath: this.path }
             const {answer} = window.ask(values)
-                answer.then( () => {
-                    GlobalVariables.writeToDisplay(this.path)
-                })
+            answer.then( () => {
+                GlobalVariables.writeToDisplay(this.path)
+            })
         }
         catch(err){
             this.setAlert(err)
