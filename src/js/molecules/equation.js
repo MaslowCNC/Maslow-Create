@@ -202,4 +202,22 @@ export default class Equation extends Atom {
         this.currentEquation = newEquation.trim() //remove leading and trailing whitespace
         this.updateValue()
     }
+
+    /**
+     * Send the value of this atom to the 3D display. Used to display the number
+     */ 
+    sendToRender(){
+        //Send code to jotcad to render
+        try{
+            const values = {op: "text", value:this.output.getValue(), writePath: this.path }
+            const {answer} = window.ask(values)
+                answer.then( () => {
+                    GlobalVariables.writeToDisplay(this.path)
+                })
+        }
+        catch(err){
+            this.setAlert(err)
+        }
+
+    }
 }

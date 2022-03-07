@@ -176,7 +176,6 @@ export default class Constant extends Atom{
      */ 
     sendToRender(){
         //Send code to jotcad to render
-        console.log("Constant send to render ran")
         try{
             const values = {op: "text", value:this.output.getValue(), writePath: this.path }
             const {answer} = window.ask(values)
