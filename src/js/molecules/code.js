@@ -90,7 +90,43 @@ export default class Code extends Atom {
             })
             
             const values = { op: "code", code: this.code, paths: argumentsArray, writePath: this.path }
-            this.basicThreadValueProcessing(values)
+            
+            var go = true
+            this.inputs.forEach(input => {
+                if(!input.ready){
+                    go = false
+                }
+            })
+            if(go){     //Then we update the value
+                
+                this.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. It also cancels anything processing if this atom was doing a calculation already.
+                
+                this.processing = true
+                this.decreaseToProcessCountByOne()
+                
+                
+                this.clearAlert()
+                
+                const {answer, terminate} = window.ask(values)
+                answer.then(result => {
+                    if (result.success){
+                        if(result.type == "path"){
+                            this.displayAndPropagate()
+                        }
+                        else{
+                            if(this.output){
+                                this.output.setValue(result.value)
+                                this.output.ready = true
+                            }
+                        }
+                    }else{
+                        this.setAlert("Unable to compute")
+                    }
+                    this.processing = false
+                })
+                
+                this.cancelProcessing = terminate //This can be called to interrupt the computation
+            }
             
         }catch(err){this.setAlert(err)}
     }

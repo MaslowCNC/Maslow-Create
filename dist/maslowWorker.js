@@ -188,12 +188,22 @@ const agent = async ({ ask, message }) => {
         
         try{
             const returnedGeometry = foo({...inputs, ...api });
-            await api.saveGeometry(message.writePath, returnedGeometry);
-            return 1;
+            console.log("Returned geometry is: ");
+            console.log(returnedGeometry);
+            console.log(typeof returnedGeometry);
+            console.log(typeof returnedGeometry == 'number');
+
+            if(typeof returnedGeometry == 'number'){
+                return {success: true, type: "number", value: returnedGeometry};
+            }
+            else{
+                await api.saveGeometry(message.writePath, returnedGeometry);
+                return {success: true, type: "path"};
+            }
         }
         catch(err){
             console.warn(err);
-            return -1;
+            return {success: false};
         }
         break;
     case "text":
