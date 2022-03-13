@@ -144,13 +144,13 @@ export default class GeneticAlgorithm extends Atom {
             this.population[this.individualIndex].fitness = this.findIOValue('fitness function')
             
             //Evaluate the next individual
-            this.individualIndex ++
+            this.individualIndex = this.individualIndex + 1
             if(this.individualIndex < this.findIOValue('population size')){
                 //Evaluate the next individual by updating all of the inputs
                 this.beginEvaluatingIndividual()
             }
             else{
-                this.generation++
+                this.generation = this.generation + 1
                 if(this.generation < this.findIOValue('number of generations')){
                     // Generate a new generation from the existing generation and start the process over
                     this.breedAndCullPopulation()
@@ -176,8 +176,6 @@ export default class GeneticAlgorithm extends Atom {
      * Add a button to trigger the evolution process
      */ 
     updateSidebar(){
-        
-        
         
         if(this.evolutionInProcess){
             
