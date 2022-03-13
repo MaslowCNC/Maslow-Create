@@ -188,10 +188,6 @@ const agent = async ({ ask, message }) => {
         
         try{
             const returnedGeometry = foo({...inputs, ...api });
-            console.log("Returned geometry is: ");
-            console.log(returnedGeometry);
-            console.log(typeof returnedGeometry);
-            console.log(typeof returnedGeometry == 'number');
 
             if(typeof returnedGeometry == 'number'){
                 return {success: true, type: "number", value: returnedGeometry};
