@@ -101,6 +101,10 @@ export default class Code extends Atom {
                 
                 this.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. It also cancels anything processing if this atom was doing a calculation already.
                 
+                /**
+                 * Indicates that this atom is computing
+                 * @type {boolean}
+                 */
                 this.processing = true
                 this.decreaseToProcessCountByOne()
                 
@@ -124,8 +128,12 @@ export default class Code extends Atom {
                     }
                     this.processing = false
                 })
-                
-                this.cancelProcessing = terminate //This can be called to interrupt the computation
+
+                /**
+                 * This can be called to interrupt the computation
+                 * @type {function}
+                 */
+                this.cancelProcessing = terminate
             }
             
         }catch(err){this.setAlert(err)}
