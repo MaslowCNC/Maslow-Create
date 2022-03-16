@@ -242,12 +242,12 @@ const agent = async ({ ask, message }) => {
         
         const cutDepth = shapeHeight / message.passes;
         
-        api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: message.speed, diameter: message.toolSize, type: 'spindle' });
-        
-        const toolPath = geometryToGcode.section().offset(message.toolSize/2).tool('cnc').engrave(shapeHeight);
+        //api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: message.speed, diameter: message.toolSize, type: 'spindle' });
+
+        const toolPath =   geometryToGcode.section().offset(message.toolSize / 2).outline().toolpath();//.section().offset(message.toolSize/2).outline().toolpath();
         await api.saveGeometry(message.writePath, toolPath);
         
-        return new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()}));
+        return new TextDecoder().decode(await toGcode(toolPath.toGeometry()));
         
         break;
     case "getHash":
