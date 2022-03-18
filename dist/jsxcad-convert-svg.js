@@ -1,8 +1,6 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { isCounterClockwisePath, flipPath, transformPaths, isClosedPath, canonicalizePath, taggedGroup, fill, transform, taggedPaths, toTransformedGeometry, scale, measureBoundingBox, toPolygonsWithHoles, isTypeWire, getNonVoidPaths, getNonVoidSegments, isNotTypeWire } from './jsxcad-geometry.js';
-import { equals as equals$1 } from './jsxcad-math-vec2.js';
-import { fromScaling } from './jsxcad-math-mat4.js';
+import { scale, taggedSegments, taggedGroup, fill, transform, toTransformedGeometry, measureBoundingBox, toPolygonsWithHoles, isTypeWire, getNonVoidPaths, isClosedPath, getNonVoidSegments, isNotTypeWire } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -1069,7 +1067,6 @@ function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 				if(end<0){
 					
 	        		tagName = source.substring(tagStart+2).replace(/[\s<].*/,'');
-	        		//console.error('#@@@@@@'+tagName)
 	        		errorHandler.error("end tag name: "+tagName+' is not complete:'+config.tagName);
 	        		end = tagStart+1+tagName.length;
 	        	}else if(tagName.match(/\s</)){
@@ -1077,8 +1074,6 @@ function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 	        		errorHandler.error("end tag name: "+tagName+' maybe not complete');
 	        		end = tagStart+1+tagName.length;
 				}
-				//console.error(parseStack.length,parseStack)
-				//console.error(config);
 				var localNSMap = config.localNSMap;
 				var endMatch = config.tagName == tagName;
 				var endIgnoreCaseMach = endMatch || config.tagName&&config.tagName.toLowerCase() == tagName.toLowerCase();
@@ -1130,7 +1125,6 @@ function parse$1(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 						position(a.offset);
 						a.locator = copyLocator(locator,{});
 					}
-					//}catch(e){console.error('@@@@@'+e)}
 					domBuilder.locator = locator2;
 					if(appendElement(el,domBuilder,currentNSMap)){
 						parseStack.push(el);
@@ -2608,9 +2602,13 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 		if (needNamespaceDefine(node,isHTML, visibleNamespaces)) {
 			var prefix = node.prefix||'';
 			var uri = node.namespaceURI;
-			var ns = prefix ? ' xmlns:' + prefix : " xmlns";
-			buf.push(ns, '="' , uri , '"');
-			visibleNamespaces.push({ prefix: prefix, namespace:uri });
+			if (uri) {
+				// Avoid empty namespace value like xmlns:ds=""
+				// Empty namespace URL will we produce an invalid XML document
+				var ns = prefix ? ' xmlns:' + prefix : " xmlns";
+				buf.push(ns, '="' , uri , '"');
+				visibleNamespaces.push({ prefix: prefix, namespace:uri });
+			}
 		}
 		
 		if(child || isHTML && !/^(?:meta|link|img|br|hr|input)$/i.test(nodeName)){
@@ -2648,7 +2646,13 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 		}
 		return;
 	case ATTRIBUTE_NODE$1:
-		return buf.push(' ',node.name,'="',node.value.replace(/[&"]/g,_xmlEncoder),'"');
+		/**
+		 * Well-formedness constraint: No < in Attribute Values
+		 * The replacement text of any entity referred to directly or indirectly in an attribute value must not contain a <.
+		 * @see https://www.w3.org/TR/xml/#CleanAttrVals
+		 * @see https://www.w3.org/TR/xml/#NT-AttValue
+		 */
+		return buf.push(' ', node.name, '="', node.value.replace(/[<&"]/g,_xmlEncoder), '"');
 	case TEXT_NODE$1:
 		/**
 		 * The ampersand character (&) and the left angle bracket (<) must not appear in their literal form,
@@ -3811,78 +3815,53 @@ var douglasPeucker = douglasPeucker$1;
 simplifyPath.radialDistance = radialDistance;
 simplifyPath.douglasPeucker = douglasPeucker;
 
-const simplify = (path, tolerance) => {
-  if (isClosedPath(path)) {
-    return simplifyPath(path, tolerance);
-  } else {
-    return [null, ...simplifyPath(path.slice(1), tolerance)];
-  }
-};
+const X$1 = 0;
+const Y$1 = 1;
 
-const removeRepeatedPoints = (path) => {
-  const unrepeated = [path[0]];
-  for (let nth = 1; nth < path.length; nth++) {
-    const last = path[nth - 1];
-    const current = path[nth];
-    if (last === null || !equals$1(last, current)) {
-      unrepeated.push(current);
-    }
-  }
-  return unrepeated;
-};
-
-const toPaths = (
-  { curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 },
-  svgPath
-) => {
-  const paths = [];
-  let path = [null];
+const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
+  const segments = [];
+  let position;
 
   const newPath = () => {
-    if (path[0] === null) {
-      maybeClosePath();
-    }
-    if (path.length < 2) {
-      // An empty path.
-      return;
-    }
-    paths.push(path);
-    path = [null];
+    position = undefined;
   };
 
-  const maybeClosePath = () => {
-    path = removeRepeatedPoints(canonicalizePath(path));
-    if (path.length > 3) {
-      if (path[0] === null && equals$1(path[1], path[path.length - 1])) {
-        // The path is closed, remove the leading null, and the duplicate point at the end.
-        path = path.slice(1, path.length - 1);
-        newPath();
-      }
+  const appendPoint = (nextPosition) => {
+    if (!position) {
+      position = nextPosition;
+      return;
     }
+    if (position[X$1] === nextPosition[X$1] && position[Y$1] === nextPosition[Y$1]) {
+      return;
+    }
+    segments.push([position, nextPosition]);
+    position = nextPosition;
   };
 
   for (const segment of svgPath) {
     const [directive, ...args] = segment;
     switch (directive) {
       case 'M': {
-        maybeClosePath();
         newPath();
         const [x, y] = args;
-        path.push([x, y]);
+        appendPoint([x, y]);
         break;
       }
       case 'C': {
         const [x1, y1, x2, y2, x, y] = args;
-        const start = path[path.length - 1];
-        const [xStart, yStart] = start === null ? [0, 0] : start;
-        path = path.concat(
-          buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [
+        const [xStart, yStart] = position || [0, 0];
+        const path = buildAdaptiveCubicBezierCurve(
+          { segments: curveSegments },
+          [
             [xStart, yStart],
             [x1, y1],
             [x2, y2],
             [x, y],
-          ])
+          ]
         );
+        for (const [x, y] of simplifyPath(path, tolerance)) {
+          appendPoint([x, y]);
+        }
         break;
       }
       default: {
@@ -3891,33 +3870,23 @@ const toPaths = (
     }
   }
 
-  maybeClosePath();
   newPath();
 
-  const simplifiedPaths = paths.map((path) => simplify(path, tolerance));
-
-  if (normalizeCoordinateSystem) {
-    // Turn it upside down.
-    return transformPaths(fromScaling([1, -1, 0]), simplifiedPaths);
-  } else {
-    return simplifiedPaths;
-  }
+  return segments;
 };
 
 const fromSvgPath$1 = (svgPath, options = {}) => {
-  const paths = toPaths(
+  const segments = toSegments(
     options,
     curvify(
       absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
     )
   );
-  const geometry = {
-    type: 'paths',
-    paths: paths.map((path) =>
-      isCounterClockwisePath(path) ? path : flipPath(path)
-    ),
-  };
-  return geometry;
+  if (options.normalizeCoordinateSystem) {
+    return scale([1, -1, 0], taggedSegments({}, segments));
+  } else {
+    return taggedSegments({}, segments);
+  }
 };
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
@@ -4088,7 +4057,7 @@ const fromSvg = async (
         ));
 
         const output = (svgPath) => {
-          const paths = fromSvgPath(svgPath).paths;
+          const segments = fromSvgPath(svgPath);
           const attributes = {
             fill: node.getAttribute('fill') || 'black',
             stroke: node.getAttribute('stroke') || 'none',
@@ -4105,7 +4074,7 @@ const fromSvg = async (
             const tags = toTagsFromName(fill$1, definitions);
             geometry.content.push(
               fill(
-                transform(scale(matrix), taggedPaths({ tags }, paths))
+                transform(scale(matrix), { ...segments, tags })
               )
             );
           }
@@ -4121,11 +4090,7 @@ const fromSvg = async (
             const scaledMatrix = scale(matrix);
             const tags = toTagsFromName(stroke, definitions);
             geometry.content.push(
-              transform(scaledMatrix, {
-                type: 'paths',
-                paths: paths,
-                tags,
-              })
+              transform(scaledMatrix, { ...segments, tags })
             );
           }
         };
