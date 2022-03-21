@@ -196,7 +196,7 @@ export default class GeneticAlgorithm extends Atom {
             
             var labelDiv = document.createElement('div')
             listElement.appendChild(labelDiv)
-            var labelText = document.createTextNode("Evolving...Generation: " + this.generation + "    Best Fitness Value: " + this.topFitness)
+            var labelText = document.createTextNode("Evolving...   Individual: " + this.individualIndex + ",    Generation: " + this.generation + ",    Best Fitness Value: " + this.topFitness)
             labelDiv.appendChild(labelText)
             labelDiv.setAttribute('class', 'sidebar-subitem label-item')
         }
