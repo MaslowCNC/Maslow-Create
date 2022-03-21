@@ -15,6 +15,7 @@ import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 import { toDisplayGeometry } from './jsxcad-geometry.js';
+import { ensurePages } from './jsxcad-api-shape.js';
 
 const say = (message) => postMessage(message);
 
@@ -214,9 +215,9 @@ const agent = async ({ ask, message }) => {
         break;
     case "svg":
         const geometryToSvg = await maslowRead(message.readPath);
-        const svgShapeHeight = geometryToSvg.size().height;
-        const rotatedShapeSVG = geometryToSvg.rotateY(-.625).rotateZ(.25).move(0, svgShapeHeight/-3, 2*svgShapeHeight);
-        const svgString = await toSvg(rotatedShapeSVG.toKeptGeometry());
+        //const svgShapeHeight = geometryToSvg.size().height;
+        //const rotatedShapeSVG = geometryToSvg.rotateY(1/8).rotateZ(1/8);
+        const svgString = await toSvg(ensurePages(geometryToSvg.toDisjointGeometry())[0]);
         return svgString;
         break;
     case "outline":
