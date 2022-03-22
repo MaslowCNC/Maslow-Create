@@ -214,10 +214,10 @@ const agent = async ({ ask, message }) => {
         return stlString;
         break;
     case "svg":
-        const geometryToSvg = await maslowRead(message.readPath);
+        const shapeToSvg = await maslowRead(message.readPath);
         //const svgShapeHeight = geometryToSvg.size().height;
         //const rotatedShapeSVG = geometryToSvg.rotateY(1/8).rotateZ(1/8);
-        const svgString = await toSvg(ensurePages(geometryToSvg.toDisjointGeometry())[0]);
+        const svgString = await toSvg(api.Page({ pack: false, pageMargin: 0 }, shapeToSvg).toDisjointGeometry());
         return svgString;
         break;
     case "outline":
