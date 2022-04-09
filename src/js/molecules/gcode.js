@@ -105,7 +105,8 @@ export default class Gcode extends Atom {
             var tabs = this.findIOValue('tabs')
             var safeHeight = this.findIOValue('safe height')
             const values = {op: "gcode", readPath:geometry, toolSize:toolSize, passes:passes, speed:speed, tabs:tabs, safeHeight:safeHeight ,writePath: this.path }
-            window.ask(values).then( returnedAnswer => {
+            const {answer} = window.ask(values)
+            answer.then( returnedAnswer => {
                 const blob = new Blob([returnedAnswer])
                 saveAs(blob, GlobalVariables.currentMolecule.name+'.nc')
             })

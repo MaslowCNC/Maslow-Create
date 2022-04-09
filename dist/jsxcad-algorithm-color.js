@@ -1700,6 +1700,14 @@ const toTagsFromName = (name) => [toTagFromName(name)];
 const toTagFromRgbInt = (rgbInt, defaultTag = 'color:#000000') =>
   toTagFromName(`#${rgbInt.toString(16).padStart(6, '0')}`);
 
+const toTagFromRgb = (r, g, b) => {
+  const convert = (value) =>
+    Math.floor(value * 0xff)
+      .toString(16)
+      .padStart(2, '0');
+  return toTagFromName(`#${convert(r)}${convert(g)}${convert(b)}`);
+};
+
 const toRgbColorFromTags = (
   tags = [],
   customDefinitions = {},
@@ -1752,4 +1760,4 @@ const toRgbFromTags = (
   return rgb;
 };
 
-export { toRgbColorFromTags, toRgbFromTags, toTagFromRgbInt, toTagsFromName };
+export { toRgbColorFromTags, toRgbFromTags, toTagFromRgb, toTagFromRgbInt, toTagsFromName };

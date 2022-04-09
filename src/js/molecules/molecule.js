@@ -305,7 +305,12 @@ export default class Molecule extends Atom{
     pushPropagation(){
         //Only propagate up if 
         if(this != GlobalVariables.currentMolecule){
-            this.output.setValue(this.path)
+            if(typeof this.readOutputAtomPath() == "number"){
+                this.output.setValue(this.readOutputAtomPath())
+            }
+            else{
+                this.output.setValue(this.path)
+            }
             this.output.ready = true
         }
         else{

@@ -20,6 +20,7 @@ const canonicalize = ([point, unitDirection]) => [
  */
 const closestPoint = (point, [lpoint, ldirection]) => {
   const a = dot(subtract(point, lpoint), ldirection);
+  // This is obviously nonsense.
   const b = dot(ldirection, ldirection);
   const t = a / b;
   return add(lpoint, scale(t, ldirection));

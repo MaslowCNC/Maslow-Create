@@ -15,6 +15,7 @@ import { toStl } from './jsxcad-convert-stl.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 import { toDisplayGeometry } from './jsxcad-geometry.js';
+import { ensurePages } from './jsxcad-api-shape.js';
 
 const say = (message) => postMessage(message);
 
@@ -188,24 +189,35 @@ const agent = async ({ ask, message }) => {
         
         try{
             const returnedGeometry = foo({...inputs, ...api });
-            await api.saveGeometry(message.writePath, returnedGeometry);
-            return 1;
+
+            if(typeof returnedGeometry == 'number'){
+                return {success: true, type: "number", value: returnedGeometry};
+            }
+            else{
+                await api.saveGeometry(message.writePath, returnedGeometry);
+                return {success: true, type: "path"};
+            }
         }
         catch(err){
             console.warn(err);
-            return -1;
+            return {success: false};
         }
+        break;
+    case "text":
+        const textMessage = api.Hershey(String(message.value), 20).align('xy');
+        await api.saveGeometry(message.writePath, textMessage);
+        return true;
         break;
     case "stl":
         const geometryToStl = await maslowRead(message.readPath);
-        const stlString = await toStl(geometryToStl.toGeometry());
+        const stlString = await toStl(geometryToStl.fuse().toGeometry());
         return stlString;
         break;
     case "svg":
-        const geometryToSvg = await maslowRead(message.readPath);
-        const svgShapeHeight = geometryToSvg.size().height;
-        const rotatedShapeSVG = geometryToSvg.rotateY(-.625).rotateZ(.25).move(0, svgShapeHeight/-3, 2*svgShapeHeight);
-        const svgString = await toSvg(rotatedShapeSVG.toKeptGeometry());
+        const shapeToSvg = await maslowRead(message.readPath);
+        //const svgShapeHeight = geometryToSvg.size().height;
+        //const rotatedShapeSVG = geometryToSvg.rotateY(1/8).rotateZ(1/8);
+        const svgString = await toSvg(api.Page({ pack: false, pageMargin: 0 }, shapeToSvg).toDisjointGeometry());
         return svgString;
         break;
     case "outline":
@@ -231,12 +243,21 @@ const agent = async ({ ask, message }) => {
         
         const cutDepth = shapeHeight / message.passes;
         
-        api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: message.speed, diameter: message.toolSize, type: 'spindle' });
-        
-        const toolPath = geometryToGcode.section().offset(message.toolSize/2).tool('cnc').engrave(shapeHeight);
+        //api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: message.speed, diameter: message.toolSize, type: 'spindle' });
+
+        const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
+
+        var acumulatedShape = oneSlice;
+        var i = 1;
+        while(i < message.passes){
+            acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth));
+            i = i + 1;
+        }
+
+        const toolPath = acumulatedShape.toolpath();
         await api.saveGeometry(message.writePath, toolPath);
         
-        return new TextDecoder().decode(await toGcode(toolPath.toGeometry(), {definitions: getDefinitions()}));
+        return new TextDecoder().decode(await toGcode(toolPath.toGeometry()));
         
         break;
     case "getHash":
