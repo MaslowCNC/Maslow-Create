@@ -171,7 +171,51 @@ export default class Code extends Atom {
             })
             
             const values = { op: &quot;code&quot;, code: this.code, paths: argumentsArray, writePath: this.path }
-            this.basicThreadValueProcessing(values)
+            
+            var go = true
+            this.inputs.forEach(input =&gt; {
+                if(!input.ready){
+                    go = false
+                }
+            })
+            if(go){     //Then we update the value
+                
+                this.waitOnComingInformation() //This sends a chain command through the tree to lock all the inputs which are down stream of this one. It also cancels anything processing if this atom was doing a calculation already.
+                
+                /**
+                 * Indicates that this atom is computing
+                 * @type {boolean}
+                 */
+                this.processing = true
+                this.decreaseToProcessCountByOne()
+                
+                
+                this.clearAlert()
+                
+                const {answer, terminate} = window.ask(values)
+                answer.then(result =&gt; {
+                    if (result.success){
+                        if(result.type == &quot;path&quot;){
+                            this.displayAndPropagate()
+                        }
+                        else{
+                            if(this.output){
+                                this.output.setValue(result.value)
+                                this.output.ready = true
+                            }
+                        }
+                    }else{
+                        this.setAlert(&quot;Unable to compute&quot;)
+                    }
+                    this.processing = false
+                })
+
+                /**
+                 * This can be called to interrupt the computation
+                 * @type {function}
+                 */
+                this.cancelProcessing = terminate
+            }
             
         }catch(err){this.setAlert(err)}
     }

@@ -225,13 +225,13 @@ export default class GeneticAlgorithm extends Atom {
             this.population[this.individualIndex].fitness = this.findIOValue(&apos;fitness function&apos;)
             
             //Evaluate the next individual
-            this.individualIndex ++
+            this.individualIndex = this.individualIndex + 1
             if(this.individualIndex &lt; this.findIOValue(&apos;population size&apos;)){
                 //Evaluate the next individual by updating all of the inputs
                 this.beginEvaluatingIndividual()
             }
             else{
-                this.generation++
+                this.generation = this.generation + 1
                 if(this.generation &lt; this.findIOValue(&apos;number of generations&apos;)){
                     // Generate a new generation from the existing generation and start the process over
                     this.breedAndCullPopulation()
@@ -258,8 +258,6 @@ export default class GeneticAlgorithm extends Atom {
      */ 
     updateSidebar(){
         
-        
-        
         if(this.evolutionInProcess){
             
             //Remove everything in the sidebar
@@ -279,7 +277,7 @@ export default class GeneticAlgorithm extends Atom {
             
             var labelDiv = document.createElement(&apos;div&apos;)
             listElement.appendChild(labelDiv)
-            var labelText = document.createTextNode(&quot;Evolving...Generation: &quot; + this.generation + &quot;    Best Fitness Value: &quot; + this.topFitness)
+            var labelText = document.createTextNode(&quot;Evolving...   Individual: &quot; + this.individualIndex + &quot;,    Generation: &quot; + this.generation + &quot;,    Best Fitness Value: &quot; + this.topFitness)
             labelDiv.appendChild(labelText)
             labelDiv.setAttribute(&apos;class&apos;, &apos;sidebar-subitem label-item&apos;)
         }

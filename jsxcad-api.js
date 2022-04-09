@@ -2,9 +2,9 @@ import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, getConfig, finishEmitGroup, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import * as shapeApi from './jsxcad-api-shape.js';
-import { saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
+import { Group, Shape, saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, getConfig, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
@@ -74,7 +74,22 @@ const $run = async (op, { path, id, text, sha }) => {
     beginRecordingNotes();
     beginEmitGroup({ path, id });
     emitSourceText(text);
-    const result = await op();
+    let result;
+    try {
+      result = await op();
+    } catch (error) {
+      if (error.debugGeometry) {
+        Group(
+          ...error.debugGeometry.map((geometry) => Shape.fromGeometry(geometry))
+        )
+          .md(error.message)
+          .md('Debug Geometry: ')
+          .view();
+        await resolvePending();
+        finishEmitGroup({ path, id });
+      }
+      throw error;
+    }
     await resolvePending();
     const endTime = new Date();
     const durationMinutes = (endTime - startTime) / 60000;
@@ -226,7 +241,6 @@ const execute = async (
       });
       // Make sure modules are prepared.
       if (!importsDone) {
-        console.log(`QQ/Imports ${where}`);
         const { importModule } = getApi();
         // The imports we'll need to run these updates.
         const imports = new Set();
@@ -240,14 +254,12 @@ const execute = async (
         }
         // We could run these in parallel, but let's keep it simple for now.
         for (const path of imports) {
-          console.log(`QQ/Imports ${where}: ${path}`);
           await importModule(path, { evaluate, replay, doRelease: false });
         }
         // At this point the modules should build with a simple replay.
       }
       // Replay anything we can.
       if (!replaysDone) {
-        console.log(`QQ/Replay ${where}`);
         replaysDone = true;
         for (const id of Object.keys(replays)) {
           await replay(replays[id].program, { path });
@@ -255,7 +267,6 @@ const execute = async (
         }
       }
       // Update what we can.
-      console.log(`QQ/Update ${where}`);
       const unprocessedUpdates = new Set(Object.keys(updates));
       while (unprocessedUpdates.size > 0) {
         const updatePromises = [];
@@ -312,8 +323,9 @@ const execute = async (
 
 const DYNAMIC_MODULES = new Map();
 
-const registerDynamicModule = (bare, path) =>
-  DYNAMIC_MODULES.set(bare, path);
+const registerDynamicModule = (path, nodePath) => {
+  DYNAMIC_MODULES.set(path, isNode ? nodePath : path);
+};
 
 const CACHED_MODULES = new Map();
 
@@ -424,27 +436,26 @@ const importModule = buildImportModule(api);
 
 api.importModule = importModule;
 
-// Register Dynamic libraries.
+// Register Dynamically loadable modules.
 
-const module = (name) => `@jsxcad/api-v1-${name}`;
-
-registerDynamicModule(module('armature'), './jsxcad-api-v1-armature.js');
-registerDynamicModule(module('cursor'), './jsxcad-api-v1-cursor.js');
-registerDynamicModule(module('deform'), './jsxcad-api-v1-deform.js');
-registerDynamicModule(module('dst'), './jsxcad-api-v1-dst.js');
-registerDynamicModule(module('dxf'), './jsxcad-api-v1-dxf.js');
-registerDynamicModule(module('font'), './jsxcad-api-v1-font.js');
-registerDynamicModule(module('gcode'), './jsxcad-api-v1-gcode.js');
-registerDynamicModule(module('ldraw'), './jsxcad-api-v1-ldraw.js');
-registerDynamicModule(module('math'), './jsxcad-api-v1-math.js');
-registerDynamicModule(module('pdf'), './jsxcad-api-v1-pdf.js');
-registerDynamicModule(module('png'), './jsxcad-api-v1-png.js');
-registerDynamicModule(module('shape'), './jsxcad-api-v1-shape.js');
-registerDynamicModule(module('shapefile'), './jsxcad-api-v1-shapefile.js');
-registerDynamicModule(module('stl'), './jsxcad-api-v1-stl.js');
-registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
-registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
-registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
+registerDynamicModule('./jsxcad-api-threejs.js', '../threejs/main.js');
+registerDynamicModule('./jsxcad-api-v1-armature.js', '../v1-armature/main.js');
+registerDynamicModule('./jsxcad-api-v1-cursor.js', '../v1-cursor/main.js');
+registerDynamicModule('./jsxcad-api-v1-deform.js', '../v1-deform/main.js');
+registerDynamicModule('./jsxcad-api-v1-dst.js', '../v1-dst/main.js');
+registerDynamicModule('./jsxcad-api-v1-dxf.js', '../v1-dxf.main.js');
+registerDynamicModule('./jsxcad-api-v1-font.js', '../v1-font/main.js');
+registerDynamicModule('./jsxcad-api-v1-gcode.js', '../v1-gcode/main.js');
+registerDynamicModule('./jsxcad-api-v1-ldraw.js', '../v1-ldraw/main.js');
+registerDynamicModule('./jsxcad-api-v1-math.js', '../v1-math/main.js');
+registerDynamicModule('./jsxcad-api-v1-pdf.js', '../v1-pdf/main.js');
+registerDynamicModule('./jsxcad-api-v1-png.js', '../v1-png/main.js');
+registerDynamicModule('./jsxcad-api-v1-threejs.js', '../v1-threejs/main.js');
+registerDynamicModule('./jsxcad-api-v1-shape.js', '../v1-shape/main.js');
+registerDynamicModule('./jsxcad-api-v1-shapefile.js', '../v1-shapefile/main.js');
+registerDynamicModule('./jsxcad-api-v1-stl.js', '../v1-stl/main.js');
+registerDynamicModule('./jsxcad-api-v1-svg.js', '../v1-svg/main.js');
+registerDynamicModule('./jsxcad-api-v1-units.js', '../v1-units/main.js');
 
 setApi(api);
 

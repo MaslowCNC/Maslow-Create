@@ -1122,6 +1122,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/js/molecules/code.js~code#cancelprocessing",
+    "class/src/js/molecules/code.js~Code.html#instance-member-cancelProcessing",
+    "src/js/molecules/code.js~Code#cancelProcessing",
+    "member"
+  ],
+  [
     "src/js/molecules/code.js~code#code",
     "class/src/js/molecules/code.js~Code.html#instance-member-code",
     "src/js/molecules/code.js~Code#code",
@@ -1168,6 +1174,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/code.js~Code.html#instance-method-parseInputs",
     "src/js/molecules/code.js~Code#parseInputs",
     "method"
+  ],
+  [
+    "src/js/molecules/code.js~code#processing",
+    "class/src/js/molecules/code.js~Code.html#instance-member-processing",
+    "src/js/molecules/code.js~Code#processing",
+    "member"
   ],
   [
     "src/js/molecules/code.js~code#serialize",
@@ -1330,6 +1342,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/constant.js~Constant.html#instance-member-name",
     "src/js/molecules/constant.js~Constant#name",
     "member"
+  ],
+  [
+    "src/js/molecules/constant.js~constant#sendtorender",
+    "class/src/js/molecules/constant.js~Constant.html#instance-method-sendToRender",
+    "src/js/molecules/constant.js~Constant#sendToRender",
+    "method"
   ],
   [
     "src/js/molecules/constant.js~constant#serialize",
@@ -1576,6 +1594,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/equation.js~Equation.html#instance-member-name",
     "src/js/molecules/equation.js~Equation#name",
     "member"
+  ],
+  [
+    "src/js/molecules/equation.js~equation#sendtorender",
+    "class/src/js/molecules/equation.js~Equation.html#instance-method-sendToRender",
+    "src/js/molecules/equation.js~Equation#sendToRender",
+    "method"
   ],
   [
     "src/js/molecules/equation.js~equation#serialize",
@@ -2788,6 +2812,12 @@ window.esdocSearchIndex = [
     "class/src/js/molecules/readme.js~Readme.html#instance-method-draw",
     "src/js/molecules/readme.js~Readme#draw",
     "method"
+  ],
+  [
+    "src/js/molecules/readme.js~readme#global",
+    "class/src/js/molecules/readme.js~Readme.html#instance-member-global",
+    "src/js/molecules/readme.js~Readme#global",
+    "member"
   ],
   [
     "src/js/molecules/readme.js~readme#height",

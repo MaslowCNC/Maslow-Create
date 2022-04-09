@@ -1,4 +1,4 @@
-import { measureBoundingBox, toDisjointGeometry, translate, scale, toPolygonsWithHoles, getNonVoidPaths } from './jsxcad-geometry.js';
+import { measureBoundingBox, toDisjointGeometry, translate, scale, toPolygonsWithHoles, getNonVoidPaths, getNonVoidSegments } from './jsxcad-geometry.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const X = 0;
@@ -106,6 +106,7 @@ const toPdf = async (
       lines.push(`f`); // Surface paths are always filled.
     }
   }
+
   for (const { tags, paths } of getNonVoidPaths(disjointGeometry)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     for (const path of paths) {
@@ -125,6 +126,22 @@ const toPdf = async (
       }
       lines.push(`S`); // stroke.
     }
+  }
+
+  for (const { tags, segments } of getNonVoidSegments(disjointGeometry)) {
+    lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
+    let last;
+    for (const [start, end] of segments) {
+      if (!last || start[X] !== last[X] || start[Y] !== last[Y]) {
+        if (last) {
+          lines.push(`S`); // stroke.
+        }
+        lines.push(`${start[X].toFixed(9)} ${start[Y].toFixed(9)} m`); // move-to.
+      }
+      lines.push(`${end[X].toFixed(9)} ${end[Y].toFixed(9)} l`); // line-to.
+      last = end;
+    }
+    lines.push(`S`); // stroke.
   }
 
   const output = []

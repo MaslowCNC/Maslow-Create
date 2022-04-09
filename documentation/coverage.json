@@ -1,7 +1,7 @@
 {
   "coverage": "99.51%",
-  "expectCount": 616,
-  "actualCount": 613,
+  "expectCount": 621,
+  "actualCount": 618,
   "files": {
     "src/flowDraw.js": {
       "expectCount": 16,
@@ -54,8 +54,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/code.js": {
-      "expectCount": 14,
-      "actualCount": 14,
+      "expectCount": 16,
+      "actualCount": 16,
       "undocumentLines": []
     },
     "src/js/molecules/color.js": {
@@ -64,8 +64,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/constant.js": {
-      "expectCount": 18,
-      "actualCount": 18,
+      "expectCount": 19,
+      "actualCount": 19,
       "undocumentLines": []
     },
     "src/js/molecules/cutlayout.js": {
@@ -84,8 +84,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/equation.js": {
-      "expectCount": 16,
-      "actualCount": 16,
+      "expectCount": 17,
+      "actualCount": 17,
       "undocumentLines": []
     },
     "src/js/molecules/extracttag.js": {
@@ -135,7 +135,7 @@
       "actualCount": 47,
       "undocumentLines": [
         101,
-        361
+        366
       ]
     },
     "src/js/molecules/move.js": {
@@ -154,8 +154,8 @@
       "undocumentLines": []
     },
     "src/js/molecules/readme.js": {
-      "expectCount": 14,
-      "actualCount": 14,
+      "expectCount": 15,
+      "actualCount": 15,
       "undocumentLines": []
     },
     "src/js/molecules/rectangle.js": {
