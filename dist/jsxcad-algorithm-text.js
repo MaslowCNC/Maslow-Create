@@ -15875,7 +15875,7 @@ const toFont = (options = {}, data) => {
     const group = [];
     for (const geometry of svgPaths.map((svgPath) =>
       fromSvgPath(new TextEncoder('utf8').encode(svgPath), {
-        curveSegments: curveSegments,
+        curveSegments,
       })
     )) {
       group.push(fill(scale([factor, -factor, factor], geometry)));

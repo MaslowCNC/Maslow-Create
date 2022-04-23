@@ -1,4 +1,4 @@
-import { translate, scale, toKeptGeometry, getNonVoidPaths, getPathEdges } from './jsxcad-geometry.js';
+import { translate, scale, section, disjoint, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
 
@@ -4190,14 +4190,18 @@ var Drawing_1 = Drawing;
 
 var dxfWriter = Drawing_1;
 
-const toDxf = async (geometry, options = {}) => {
+const X = 0;
+const Y = 1;
+
+const toDxf = async (baseGeometry, options = {}) => {
   const drawing = new dxfWriter();
-  const keptGeometry = toKeptGeometry(await geometry);
-  for (const { paths } of getNonVoidPaths(keptGeometry)) {
-    for (const path of paths) {
-      for (const [[x1, y1], [x2, y2]] of getPathEdges(path)) {
-        drawing.drawLine(x1, y1, x2, y2);
-      }
+  const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
+  const geometry = disjoint([sectioned]);
+  for (const { matrix, segments } of getNonVoidSegments(geometry)) {
+    for (let [start, end] of segments) {
+      start = transformCoordinate(matrix, start);
+      end = transformCoordinate(matrix, end);
+      drawing.drawLine(start[X], start[Y], end[X], end[Y]);
     }
   }
   return drawing.toDxfString();
