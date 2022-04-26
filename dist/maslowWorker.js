@@ -243,8 +243,6 @@ const agent = async ({ ask, message }) => {
         
         const cutDepth = shapeHeight / message.passes;
         
-        //api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: message.speed, diameter: message.toolSize, type: 'spindle' });
-
         const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
 
         var acumulatedShape = oneSlice;
@@ -255,7 +253,7 @@ const agent = async ({ ask, message }) => {
         }
 
         const toolPath = acumulatedShape.toolpath();
-        await api.saveGeometry(message.writePath, toolPath);
+        await api.saveGeometry(message.writePath, acumulatedShape);
         
         return new TextDecoder().decode(await toGcode(toolPath.toGeometry()));
         
