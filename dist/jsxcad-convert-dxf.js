@@ -4190,18 +4190,15 @@ var Drawing_1 = Drawing;
 
 var dxfWriter = Drawing_1;
 
-const X = 0;
-const Y = 1;
-
 const toDxf = async (baseGeometry, options = {}) => {
   const drawing = new dxfWriter();
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
   const geometry = disjoint([sectioned]);
   for (const { matrix, segments } of getNonVoidSegments(geometry)) {
     for (let [start, end] of segments) {
-      start = transformCoordinate(matrix, start);
-      end = transformCoordinate(matrix, end);
-      drawing.drawLine(start[X], start[Y], end[X], end[Y]);
+      const [startX, startY] = transformCoordinate(start, matrix);
+      const [endX, endY] = transformCoordinate(end, matrix);
+      drawing.drawLine(startX, startY, endX, endY);
     }
   }
   return drawing.toDxfString();

@@ -1,4 +1,4 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, measureArea, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, cast as cast$1, computeCentroid, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, generatePackingEnvelope, generateUpperEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, fuse as fuse$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, measureVolume, withQuery, alphaShape, convexHullToGraph, fromFunctionToGraph } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, measureArea, taggedItem, getLeafs, getInverseMatrices, bend as bend$1, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, eachSegment, removeSelfIntersections as removeSelfIntersections$1, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, write, writeNonblocking, simplify as simplify$1, section as section$1, separate as separate$1, serialize as serialize$1, smooth as smooth$1, taggedSketch, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
@@ -960,6 +960,53 @@ const center = () => (shape) =>
 
 Shape.registerMethod('center', center);
 
+const Hull = (...shapes) =>
+  Shape.fromGeometry(
+    convexHull(shapes.map((other) => Shape.toShape(other).toGeometry()))
+  );
+
+Shape.prototype.Hull = Shape.shapeMethod(Hull);
+
+const hull =
+  (...shapes) =>
+  (shape) =>
+    Hull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+
+Shape.registerMethod('hull', hull);
+
+const Group = (...shapes) =>
+  Shape.fromGeometry(
+    taggedGroup(
+      {},
+      ...Shape.toShapes(shapes).map((shape) => shape.toGeometry())
+    )
+  );
+
+Shape.prototype.Group = Shape.shapeMethod(Group);
+Shape.Group = Group;
+
+const Join = (...shapes) =>
+  Shape.fromGeometry(fuse$1(Group(...shapes).toGeometry()));
+
+Shape.prototype.Join = Shape.shapeMethod(Join);
+
+const ChainHull = (...shapes) => {
+  const chain = [];
+  for (let nth = 1; nth < shapes.length; nth++) {
+    chain.push(Hull(shapes[nth - 1], shapes[nth]));
+  }
+  return Join(...chain);
+};
+
+const chainHull =
+  (...shapes) =>
+  (shape) =>
+    ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+
+Shape.registerMethod('chainHull', chainHull);
+
+Shape.prototype.ChainHull = Shape.shapeMethod(ChainHull);
+
 const clip =
   (...shapes) =>
   (shape) =>
@@ -1036,8 +1083,8 @@ const deform =
         entries.map(({ selection, deformation }) => ({
           selection: selection.toGeometry(),
           deformation: deformation
-            ? deformation.toGeometry().matrix
-            : identityMatrix,
+            ? deformation.toGeometry()
+            : Point().toGeometry,
         })),
         iterations,
         tolerance,
@@ -1059,17 +1106,6 @@ const disjoint =
     fromGeometry(disjoint$1([shape.toGeometry()], strategy));
 
 Shape.registerMethod('disjoint', disjoint);
-
-const Group = (...shapes) =>
-  Shape.fromGeometry(
-    taggedGroup(
-      {},
-      ...Shape.toShapes(shapes).map((shape) => shape.toGeometry())
-    )
-  );
-
-Shape.prototype.Group = Shape.shapeMethod(Group);
-Shape.Group = Group;
 
 const qualifyTag = (tag, namespace = 'user') => {
   if (tag.includes(':')) {
@@ -3109,11 +3145,6 @@ const packingEnvelope =
 
 Shape.registerMethod('packingEnvelope', packingEnvelope);
 
-const upperEnvelope = () => (shape) =>
-  Shape.fromGeometry(generateUpperEnvelope(shape.toGeometry()));
-
-Shape.registerMethod('upperEnvelope', upperEnvelope);
-
 const normal = () => (shape) =>
   Shape.fromGeometry(computeNormal(shape.toGeometry()));
 
@@ -3457,6 +3488,11 @@ const loop =
     Loop(shape, ...shape.toShapes(shapes, shape));
 
 Shape.registerMethod('loop', loop);
+
+const lowerEnvelope = () => (shape) =>
+  Shape.fromGeometry(generateLowerEnvelope(shape.toGeometry()));
+
+Shape.registerMethod('lowerEnvelope', lowerEnvelope);
 
 const overlay = () => (shape) =>
   Shape.fromGeometry(hasShowOverlay(shape.toGeometry()));
@@ -4378,6 +4414,11 @@ const untag =
 
 Shape.registerMethod('untag', untag);
 
+const upperEnvelope = () => (shape) =>
+  Shape.fromGeometry(generateUpperEnvelope(shape.toGeometry()));
+
+Shape.registerMethod('upperEnvelope', upperEnvelope);
+
 const markContent = (geometry) => {
   if (geometry.type === 'group') {
     return {
@@ -4976,43 +5017,6 @@ const Cached = (name, thunk) => {
   return op;
 };
 
-const Hull = (...shapes) => {
-  const points = [];
-  for (const shape of shapes) {
-    if (!shape) {
-      continue;
-    }
-    eachPoint(shape.toGeometry(), (point) => points.push(point));
-  }
-  return Shape.fromGeometry(convexHullToGraph({}, points));
-};
-
-Shape.prototype.Hull = Shape.shapeMethod(Hull);
-
-const hull =
-  (...shapes) =>
-  (shape) =>
-    Hull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
-
-Shape.registerMethod('hull', hull);
-
-const ChainedHull = (...shapes) => {
-  const pointsets = shapes.map((shape) => shape.toPoints());
-  const chain = [];
-  for (let nth = 1; nth < pointsets.length; nth++) {
-    const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    chain.push(Hull(Points(points)));
-  }
-  return Group(...chain);
-};
-
-const chainHullMethod = function (...shapes) {
-  return ChainedHull(this, ...shapes);
-};
-
-Shape.prototype.chainHull = chainHullMethod;
-Shape.prototype.ChainedHull = Shape.shapeMethod(ChainedHull);
-
 const Empty = (...shapes) => Shape.fromGeometry(taggedGroup({}));
 
 Shape.prototype.Empty = Shape.shapeMethod(Empty);
@@ -5104,11 +5108,6 @@ const Implicit = (op, options) =>
   Shape.fromGeometry(fromFunctionToGraph({}, op, options));
 
 Shape.prototype.Implicit = Shape.shapeMethod(Implicit);
-
-const Join = (...shapes) =>
-  Shape.fromGeometry(fuse$1(Group(...shapes).toGeometry()));
-
-Shape.prototype.Join = Shape.shapeMethod(Join);
 
 const Line = (forward, backward = 0) =>
   Edge(Point(forward), Point(backward));
@@ -5442,4 +5441,4 @@ const yz = Shape.fromGeometry({
   ],
 });
 
-export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainedHull, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, cast, center, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, inline, inset, join, keep, link, loadGeometry, loft, log, loop, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, packingEnvelope, play, points$1 as points, push, reify, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };
+export { Alpha, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, cast, center, chainHull, clip, clipFrom, cloudSolid, color, colors, cut, cutFrom, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fuse, g, get, getEdge, getNot, gn, grow, hull, inline, inset, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, material, md, minkowskiDifference, minkowskiShell, minkowskiSum, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, ofPlan, offset, on, op, orient, outline, overlay, pack, packingEnvelope, play, points$1 as points, push, reify, remesh, removeSelfIntersections, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sx, sy, sz, table, tag, tags, taper, test, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xy, xyz, xz, y, yz, z };

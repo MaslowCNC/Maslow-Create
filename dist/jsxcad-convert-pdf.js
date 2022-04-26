@@ -113,8 +113,8 @@ const toPdf = async (
     lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     let last;
     for (let [start, end] of segments) {
-      start = transformCoordinate(matrix, start);
-      end = transformCoordinate(matrix, end);
+      start = transformCoordinate(start, matrix);
+      end = transformCoordinate(end, matrix);
       if (!last || start[X] !== last[X] || start[Y] !== last[Y]) {
         if (last) {
           lines.push(`S`); // stroke.

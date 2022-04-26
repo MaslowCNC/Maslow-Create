@@ -4221,12 +4221,12 @@ const toSvg = async (
     let first;
     let last;
     for (let [start, end] of segments) {
-      start = transformCoordinate(matrix, start);
-      end = transformCoordinate(matrix, end);
+      const [startX, startY] = transformCoordinate(start, matrix);
+      const [endX, endY] = transformCoordinate(end, matrix);
       if (!equals(start, last)) {
-        d.push(`M ${start[0].toFixed(5)} ${start[1].toFixed(5)}`);
+        d.push(`M ${startX.toFixed(5)} ${startY.toFixed(5)}`);
       }
-      d.push(`L ${end[0].toFixed(5)} ${end[1].toFixed(5)}`);
+      d.push(`L ${endX.toFixed(5)} ${endY.toFixed(5)}`);
       if (!first) {
         first = start;
       }

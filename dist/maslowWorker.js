@@ -242,7 +242,7 @@ const agent = async ({ ask, message }) => {
         const shapeHeight = geometryToGcode.size().height;
         
         const cutDepth = shapeHeight / message.passes;
-        
+
         const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
 
         var acumulatedShape = oneSlice;
@@ -250,6 +250,12 @@ const agent = async ({ ask, message }) => {
         while(i < message.passes){
             acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth));
             i = i + 1;
+        }
+
+        if(message.tabs == "true"){
+            const tabs = api.Group(api.Box(10, 10000).ez(shapeHeight/2), api.Box(10000, 10).ez(shapeHeight/2)).z(-1*(cutDepth + shapeHeight/2));
+
+            acumulatedShape = acumulatedShape.cut(tabs);
         }
 
         const toolPath = acumulatedShape.toolpath();

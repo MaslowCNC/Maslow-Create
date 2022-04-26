@@ -786,7 +786,7 @@ const startTime$1 = (name) => {
   const start = new Date();
   const aggregate = aggregates.get(name);
   const timer = { start, name, aggregate };
-  logInfo('sys/profile/startTime', name);
+  // logInfo('sys/profile/startTime', name);
   return timer;
 };
 
@@ -797,6 +797,7 @@ const endTime = ({ start, name, aggregate }) => {
   aggregate.total += seconds;
   aggregate.count += 1;
   aggregate.average = aggregate.total / aggregate.count;
+  /*
   const { average, count, last, total } = aggregate;
   logInfo(
     'sys/profile/endTime',
@@ -804,6 +805,7 @@ const endTime = ({ start, name, aggregate }) => {
       2
     )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
   );
+*/
   return aggregate;
 };
 
