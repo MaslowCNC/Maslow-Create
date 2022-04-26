@@ -253,10 +253,12 @@ const agent = async ({ ask, message }) => {
         }
 
         if(message.tabs == "true"){
-            const tabs = api.Group(api.Box(10, 10000).ez(shapeHeight/2), api.Box(10000, 10).ez(shapeHeight/2)).z(-1*(cutDepth + shapeHeight/2));
+            const tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(-1*(shapeHeight/2.01));
 
             acumulatedShape = acumulatedShape.cut(tabs);
         }
+
+        acumulatedShape = acumulatedShape.z(-1*cutDepth);
 
         const toolPath = acumulatedShape.toolpath();
         await api.saveGeometry(message.writePath, acumulatedShape);
