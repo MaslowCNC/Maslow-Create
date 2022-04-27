@@ -245,25 +245,26 @@ const agent = async ({ ask, message }) => {
 
         const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
 
-        var acumulatedShape = oneSlice;
-        var i = 1;
-        while(i < message.passes){
+        const tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(shapeHeight/-2.1); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
+
+        var acumulatedShape = oneSlice.z(-1*cutDepth).toolpath();
+        var i = 2;
+        while(i <= message.passes){
+            if(message.tabs == "true"){
+                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).cut(tabs).toolpath());
+            }
+            else{
+                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).toolpath());
+            }
             acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth));
             i = i + 1;
         }
 
-        if(message.tabs == "true"){
-            const tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(-1*(shapeHeight/2.01));
+        //acumulatedShape = acumulatedShape.z(-1*cutDepth);
 
-            acumulatedShape = acumulatedShape.cut(tabs);
-        }
-
-        acumulatedShape = acumulatedShape.z(-1*cutDepth);
-
-        const toolPath = acumulatedShape.toolpath();
-        await api.saveGeometry(message.writePath, acumulatedShape);
+        await api.saveGeometry(message.writePath, api.Group(acumulatedShape, tabs));
         
-        return new TextDecoder().decode(await toGcode(toolPath.toGeometry()));
+        return new TextDecoder().decode(await toGcode(acumulatedShape.toGeometry()));
         
         break;
     case "getHash":
