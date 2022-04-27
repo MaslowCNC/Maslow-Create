@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, BufferGeometry, Float32BufferAttribute, Group, EdgesGeometry, LineSegments, LineBasicMaterial, WireframeGeometry, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Quaternion, Group, Shape, Path, ShapeGeometry, EdgesGeometry, LineSegments, LineBasicMaterial, BufferGeometry, Float32BufferAttribute, WireframeGeometry, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 import { toPlane } from './jsxcad-math-poly3.js';
@@ -69,7 +69,7 @@ const buildScene = ({
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
-    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.camera.near = 0.5;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
     spotLight.userData.dressing = true;
@@ -1029,6 +1029,57 @@ const buildMeshes = async ({
         mesh.add(outline);
       }
 
+      scene.add(mesh);
+      break;
+    }
+    case 'polygonsWithHoles': {
+      const normal = new Vector3(
+        geometry.plane[0],
+        geometry.plane[1],
+        geometry.plane[2]
+      ).normalize();
+      const baseNormal = new Vector3(0, 0, 1);
+      const quaternion = new Quaternion().setFromUnitVectors(
+        normal,
+        baseNormal
+      );
+      mesh = new Group();
+      for (const { points, holes } of geometry.polygonsWithHoles) {
+        const boundaryPoints = [];
+        for (const point of points) {
+          boundaryPoints.push(
+            new Vector3(point[0], point[1], point[2]).applyQuaternion(
+              quaternion
+            )
+          );
+        }
+        const shape = new Shape(boundaryPoints);
+        for (const { points } of holes) {
+          const holePoints = [];
+          for (const point of points) {
+            holePoints.push(
+              new Vector3(point[0], point[1], point[2]).applyQuaternion(
+                quaternion
+              )
+            );
+          }
+          shape.holes.push(new Path(holePoints));
+        }
+        const shapeGeometry = new ShapeGeometry(shape);
+        const material = await buildMeshMaterial(definitions, tags);
+        mesh.add(new Mesh(shapeGeometry, material));
+        {
+          const edges = new EdgesGeometry(shapeGeometry);
+          const outline = new LineSegments(
+            edges,
+            new LineBasicMaterial({ color: 0x000000 })
+          );
+          outline.userData.isOutline = true;
+          outline.userData.hasShowOutline = tags.includes('show:outline');
+          outline.visible = outline.userData.hasShowOutline;
+          mesh.add(outline);
+        }
+      }
       scene.add(mesh);
       break;
     }

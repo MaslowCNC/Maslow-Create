@@ -129,7 +129,7 @@ export default class UploadSVG extends Atom {
      * Add the file name to the object which is saved for this molecule
      */
     serialize(){
-        var superSerialObject = super.serialize(null)
+        var superSerialObject = super.serialize()
         
         //Write the current equation to the serialized object
         superSerialObject.fileName = this.fileName

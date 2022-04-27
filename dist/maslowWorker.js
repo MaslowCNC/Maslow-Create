@@ -242,22 +242,29 @@ const agent = async ({ ask, message }) => {
         const shapeHeight = geometryToGcode.size().height;
         
         const cutDepth = shapeHeight / message.passes;
-        
-        //api.defGrblSpindle('cnc', { rpm: 700, cutDepth: cutDepth, feedRate: message.speed, diameter: message.toolSize, type: 'spindle' });
 
         const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
 
-        var acumulatedShape = oneSlice;
-        var i = 1;
-        while(i < message.passes){
+        const tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(shapeHeight/-2.1); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
+
+        var acumulatedShape = oneSlice.z(-1*cutDepth).toolpath();
+        var i = 2;
+        while(i <= message.passes){
+            if(message.tabs == "true"){
+                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).cut(tabs).toolpath());
+            }
+            else{
+                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).toolpath());
+            }
             acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth));
             i = i + 1;
         }
 
-        const toolPath = acumulatedShape.toolpath();
-        await api.saveGeometry(message.writePath, toolPath);
+        //acumulatedShape = acumulatedShape.z(-1*cutDepth);
+
+        await api.saveGeometry(message.writePath, api.Group(acumulatedShape, tabs));
         
-        return new TextDecoder().decode(await toGcode(toolPath.toGeometry()));
+        return new TextDecoder().decode(await toGcode(acumulatedShape.toGeometry()));
         
         break;
     case "getHash":

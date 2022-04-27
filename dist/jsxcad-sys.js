@@ -786,9 +786,7 @@ const startTime$1 = (name) => {
   const start = new Date();
   const aggregate = aggregates.get(name);
   const timer = { start, name, aggregate };
-  /*
-  logInfo('sys/profile/startTime', name);
-*/
+  // logInfo('sys/profile/startTime', name);
   return timer;
 };
 

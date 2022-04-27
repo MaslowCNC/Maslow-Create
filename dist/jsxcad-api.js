@@ -323,8 +323,8 @@ const execute = async (
 
 const DYNAMIC_MODULES = new Map();
 
-const registerDynamicModule = (path, nodePath) => {
-  DYNAMIC_MODULES.set(path, isNode ? nodePath : path);
+const registerDynamicModule = (path, browserPath, nodePath) => {
+  DYNAMIC_MODULES.set(path, isNode ? nodePath : browserPath);
 };
 
 const CACHED_MODULES = new Map();
@@ -438,24 +438,96 @@ api.importModule = importModule;
 
 // Register Dynamically loadable modules.
 
-registerDynamicModule('./jsxcad-api-threejs.js', '../threejs/main.js');
-registerDynamicModule('./jsxcad-api-v1-armature.js', '../v1-armature/main.js');
-registerDynamicModule('./jsxcad-api-v1-cursor.js', '../v1-cursor/main.js');
-registerDynamicModule('./jsxcad-api-v1-deform.js', '../v1-deform/main.js');
-registerDynamicModule('./jsxcad-api-v1-dst.js', '../v1-dst/main.js');
-registerDynamicModule('./jsxcad-api-v1-dxf.js', '../v1-dxf.main.js');
-registerDynamicModule('./jsxcad-api-v1-font.js', '../v1-font/main.js');
-registerDynamicModule('./jsxcad-api-v1-gcode.js', '../v1-gcode/main.js');
-registerDynamicModule('./jsxcad-api-v1-ldraw.js', '../v1-ldraw/main.js');
-registerDynamicModule('./jsxcad-api-v1-math.js', '../v1-math/main.js');
-registerDynamicModule('./jsxcad-api-v1-pdf.js', '../v1-pdf/main.js');
-registerDynamicModule('./jsxcad-api-v1-png.js', '../v1-png/main.js');
-registerDynamicModule('./jsxcad-api-v1-threejs.js', '../v1-threejs/main.js');
-registerDynamicModule('./jsxcad-api-v1-shape.js', '../v1-shape/main.js');
-registerDynamicModule('./jsxcad-api-v1-shapefile.js', '../v1-shapefile/main.js');
-registerDynamicModule('./jsxcad-api-v1-stl.js', '../v1-stl/main.js');
-registerDynamicModule('./jsxcad-api-v1-svg.js', '../v1-svg/main.js');
-registerDynamicModule('./jsxcad-api-v1-units.js', '../v1-units/main.js');
+registerDynamicModule(
+  '@' + 'jsxcad/api-threejs',
+  './jsxcad-api-threejs.js',
+  '../threejs/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-armature',
+  './jsxcad-api-v1-armature.js',
+  '../v1-armature/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-cursor',
+  './jsxcad-api-v1-cursor.js',
+  '../v1-cursor/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-deform',
+  './jsxcad-api-v1-deform.js',
+  '../v1-deform/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-dst',
+  './jsxcad-api-v1-dst.js',
+  '../v1-dst/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-dxf',
+  './jsxcad-api-v1-dxf.js',
+  '../v1-dxf.main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-font',
+  './jsxcad-api-v1-font.js',
+  '../v1-font/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-gcode',
+  './jsxcad-api-v1-gcode.js',
+  '../v1-gcode/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-ldraw',
+  './jsxcad-api-v1-ldraw.js',
+  '../v1-ldraw/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-math',
+  './jsxcad-api-v1-math.js',
+  '../v1-math/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-pdf',
+  './jsxcad-api-v1-pdf.js',
+  '../v1-pdf/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-png',
+  './jsxcad-api-v1-png.js',
+  '../v1-png/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-threejs',
+  './jsxcad-api-v1-threejs.js',
+  '../v1-threejs/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-shape',
+  './jsxcad-api-v1-shape.js',
+  '../v1-shape/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-shapefile',
+  './jsxcad-api-v1-shapefile.js',
+  '../v1-shapefile/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-stl',
+  './jsxcad-api-v1-stl.js',
+  '../v1-stl/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-svg',
+  './jsxcad-api-v1-svg.js',
+  '../v1-svg/main.js'
+);
+registerDynamicModule(
+  '@' + 'jsxcad/api-v1-units',
+  './jsxcad-api-v1-units.js',
+  '../v1-units/main.js'
+);
 
 setApi(api);
 
