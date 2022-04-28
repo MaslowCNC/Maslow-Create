@@ -235,6 +235,21 @@ const agent = async ({ ask, message }) => {
         const svgOutlineBuffer = await toSvg(geometryToSvgOutline.toKeptGeometry());
         return svgOutlineBuffer;
         break;
+    case "layout":
+        console.log("Layout ran");
+        const layoutInput = await maslowRead(message.readPath);
+
+        const cutlistItems = layoutInput.get('part:' + "cutlist");
+
+        var leafs = cutlistItems.each(
+          (s) => s.to(s, (a) => a),
+          (leafs, shape) => leafs
+        );
+
+        await api.saveGeometry(message.writePath, api.Group(...leafs).pack({itemMargin: message.spacing}));
+        
+        return true;
+        break;
     case "gcode":
         
         const geometryToGcode = await maslowRead(message.readPath);
