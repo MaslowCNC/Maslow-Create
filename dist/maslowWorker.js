@@ -242,7 +242,7 @@ const agent = async ({ ask, message }) => {
         const cutlistItems = layoutInput.get('part:' + "cutlist");
 
         var leafs = cutlistItems.each(
-          (s) => s.to(s, (a) => a),
+          (s) => s.to(api.XY(), (a) => a),
           (leafs, shape) => leafs
         );
 
