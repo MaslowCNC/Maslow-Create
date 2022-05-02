@@ -447,7 +447,7 @@ var Cache = /** @class */ (function () {
         get: function () {
             return this.keys.length;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Cache.prototype, "snapshot", {
@@ -458,7 +458,7 @@ var Cache = /** @class */ (function () {
                 values: cloneArray(this.values),
             };
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     /**
