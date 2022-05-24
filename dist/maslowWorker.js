@@ -258,28 +258,46 @@ const agent = async ({ ask, message }) => {
         
         const cutDepth = shapeHeight / message.passes;
 
-        const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
+        const addTabs = (toAddTabs) => {
+          console.log("Adding tabs");
 
-        const tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(shapeHeight/-2.1); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
+          const shapeHeight = toAddTabs.size().height;
 
-        var acumulatedShape = oneSlice.z(-1*cutDepth).toolpath();
-        var i = 2;
-        while(i <= message.passes){
-            if(message.tabs == "true"){
+          const cutDepth = shapeHeight / 5;
+
+          const oneSlice = toAddTabs.section().fuse().offset(6 / 2).outline();
+
+          var tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(shapeHeight/-2.1); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
+          
+          tabs = tabs.to(toAddTabs.in()); //Moves the tabs to be in the middle of the input shape
+
+          var acumulatedShape = oneSlice.z(-1*cutDepth).toolpath();
+          var i = 2;
+          while(i <= 5){
+              if(true){
                 acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).cut(tabs).toolpath());
-            }
-            else{
+              }
+              else{
                 acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).toolpath());
-            }
-            acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth));
-            i = i + 1;
+              }
+              i = i + 1;
+          }
+
+          return acumulatedShape;
         }
 
-        //acumulatedShape = acumulatedShape.z(-1*cutDepth);
+        const cutlistItemsTabs = geometryToGcode.in();
 
-        await api.saveGeometry(message.writePath, api.Group(acumulatedShape, tabs));
+        var leafs = cutlistItemsTabs.each(
+          (s) => addTabs(s),
+          (leafs, shape) => leafs
+        );
+
+        const output = api.Group(...leafs);
+
+        await api.saveGeometry(message.writePath, output);
         
-        return new TextDecoder().decode(await toGcode(acumulatedShape.toGeometry()));
+        return new TextDecoder().decode(await toGcode(output.toGeometry()));
         
         break;
     case "getHash":
