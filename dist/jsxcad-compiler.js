@@ -11317,10 +11317,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }
 	    Parser.prototype.throwError = function (messageFormat) {
-	        var values = [];
-	        for (var _i = 1; _i < arguments.length; _i++) {
-	            values[_i - 1] = arguments[_i];
-	        }
 	        var args = Array.prototype.slice.call(arguments, 1);
 	        var msg = messageFormat.replace(/%(\d)/g, function (whole, idx) {
 	            assert_1.assert(idx < args.length, 'Message reference must be in range');
@@ -11332,10 +11328,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw this.errorHandler.createError(index, line, column, msg);
 	    };
 	    Parser.prototype.tolerateError = function (messageFormat) {
-	        var values = [];
-	        for (var _i = 1; _i < arguments.length; _i++) {
-	            values[_i - 1] = arguments[_i];
-	        }
 	        var args = Array.prototype.slice.call(arguments, 1);
 	        var msg = messageFormat.replace(/%(\d)/g, function (whole, idx) {
 	            assert_1.assert(idx < args.length, 'Message reference must be in range');

@@ -1,6 +1,6 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -4167,7 +4167,7 @@ const toSvg = async (
   const scaled = scale([1, -1, 1], disjointed);
   const [baseMin] = measureBoundingBox(scaled);
   const translated = translate([-baseMin[X], -baseMin[Y], 0], disjointed);
-  const geometry = translated;
+  const geometry = makeAbsolute(translated);
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -4218,7 +4218,8 @@ const toSvg = async (
     }
   }
 
-  for (const { matrix, tags, segments } of getNonVoidSegments(geometry)) {
+  for (const g of getNonVoidSegments(geometry)) {
+    const { matrix, tags, segments } = g;
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];
     let first;
