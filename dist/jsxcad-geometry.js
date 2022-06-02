@@ -1,4 +1,4 @@
-import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, fromSurfaceMeshEmitBoundingBox, toSurfaceMesh, serializeSurfaceMesh, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, eachPointOfSurfaceMesh, section as section$1, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demeshSurfaceMesh, extrude as extrude$1, faces as faces$1, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, generateEnvelope, generatePackingEnvelopeForSurfaceMesh, invertTransform, fromSegmentToInverseTransform, grow as grow$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offset as offset$1, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, seam as seam$1, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separate as separate$1, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromSurfaceMesh, fromPointsToAlphaShapeAsSurfaceMesh, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, fromSurfaceMeshEmitBoundingBox, toSurfaceMesh, serializeSurfaceMesh, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, eachPointOfSurfaceMesh, section as section$1, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demeshSurfaceMesh, extrude as extrude$1, faces as faces$1, reverseFaceOrientationsOfSurfaceMesh, fromFunctionToSurfaceMesh, fromPointsToSurfaceMesh, fromPolygonsToSurfaceMesh, generateEnvelope, generatePackingEnvelopeForSurfaceMesh, invertTransform, grow as grow$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, minkowskiDifferenceOfSurfaceMeshes, minkowskiShellOfSurfaceMeshes, minkowskiSumOfSurfaceMeshes, offset as offset$1, pushSurfaceMesh, remeshSurfaceMesh, isotropicRemeshingOfSurfaceMesh, removeSelfIntersectionsOfSurfaceMesh, seam as seam$1, approximateSurfaceMesh, simplifySurfaceMesh, subdivideSurfaceMesh, smoothShapeOfSurfaceMesh, smoothSurfaceMesh, separate as separate$1, fromSurfaceMeshToTriangles, taperSurfaceMesh, doesSelfIntersectOfSurfaceMesh, twistSurfaceMesh, SurfaceMeshQuery, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { transform as transform$4, min, max, equals, subtract, dot, distance, canonicalize as canonicalize$5 } from './jsxcad-math-vec3.js';
 import { identityMatrix, fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -2091,12 +2091,15 @@ const getItems = (geometry) => {
 const getInverseMatrices = (geometry) => {
   geometry = toConcreteGeometry(geometry);
   switch (geometry.type) {
+    /*
     case 'item': {
       // These maintain an invertible matrix.
       const global = geometry.matrix;
       const local = invertTransform(global);
       return { global, local };
     }
+*/
+    /*
     case 'segments': {
       // This is a bit trickier.
       // We transform the matrices such that the first segment starts at [0, 0, 0], and extends to [length, 0, 0].
@@ -2116,6 +2119,7 @@ const getInverseMatrices = (geometry) => {
       const global = invertTransform(local);
       return { global, local };
     }
+*/
     default: {
       return {
         global: geometry.matrix,

@@ -258,33 +258,42 @@ const agent = async ({ ask, message }) => {
         
         const cutDepth = shapeHeight / message.passes;
 
-        const addTabs = (toAddTabs) => {
-          console.log("Adding tabs");
+        const addTabs = (geometryToGcode) => {
+          console.log('Adding tabs');
 
-          const shapeHeight = toAddTabs.size().height;
+          const shapeHeight = geometryToGcode.size().height;
 
           const cutDepth = shapeHeight / 5;
 
-          const oneSlice = toAddTabs.section().fuse().offset(6 / 2).outline();
+          const oneSlice = geometryToGcode
+            .section()
+            .fuse()
+            .offset(6 / 2) //This is to compensate for the cutting tool size
+            .outline();
 
-          var tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(shapeHeight/-2.1); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
-          
-          tabs = tabs.to(toAddTabs.in()); //Moves the tabs to be in the middle of the input shape
+          var tabs = api.Group(
+            api.Box(7, 10000).ez(-shapeHeight),
+            api.Box(10000, 7).ez(-shapeHeight)
+          ).z(shapeHeight / -2.1).void(); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
 
-          var acumulatedShape = oneSlice.z(-1*cutDepth).toolpath();
+          //tabs = tabs.to(geometryToGcode.in()); //Moves the tabs to be in the middle of the input shape
+          tabs = tabs.to(geometryToGcode.in().align().origin()).z(shapeHeight/-2); //Moves the tabs to be in the middle of the input shape
+
+          var acumulatedShape = oneSlice.z(-1 * cutDepth);//.toolpath();
           var i = 2;
-          while(i <= 5){
-              if(true){
-                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).cut(tabs).toolpath());
-              }
-              else{
-                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).toolpath());
-              }
-              i = i + 1;
+          while (i <= 5) {
+            acumulatedShape = api.Group(
+              acumulatedShape,
+              oneSlice
+                .z(-i * cutDepth)
+                .cut(tabs)
+                .toolpath()
+            );
+            i = i + 1;
           }
 
-          return acumulatedShape;
-        }
+          return acumulatedShape;//api.Group(acumulatedShape, tabs);
+        };
 
         const cutlistItemsTabs = geometryToGcode.in();
 
@@ -296,7 +305,12 @@ const agent = async ({ ask, message }) => {
         const output = api.Group(...leafs);
 
         await api.saveGeometry(message.writePath, output);
-        
+
+
+        console.log(output);
+        console.log("Generated gcode: ");
+        console.log(new TextDecoder().decode(await toGcode(output.toGeometry())));
+
         return new TextDecoder().decode(await toGcode(output.toGeometry()));
         
         break;

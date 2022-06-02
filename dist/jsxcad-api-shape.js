@@ -1,12 +1,12 @@
-import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
+import { closePath, concatenatePath, assemble as assemble$1, flip, toConcreteGeometry, toDisplayGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPaths, taggedPoints, fromPolygonsToGraph, registerReifier, taggedPlan, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, fromPointsToGraph, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, generatePackingEnvelope, computeNormal, extrude, faces as faces$1, fill as fill$1, grow as grow$1, outline as outline$1, inset as inset$1, link as link$1, read, readNonblocking, loft as loft$1, prepareForSerialization, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, minkowskiDifference as minkowskiDifference$1, minkowskiShell as minkowskiShell$1, minkowskiSum as minkowskiSum$1, linearize, isVoid, offset as offset$1, eachPoint, push as push$1, remesh as remesh$1, removeSelfIntersections as removeSelfIntersections$1, write, writeNonblocking, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, taper as taper$1, test as test$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withQuery, alphaShape, fromFunctionToGraph } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
 import { scale as scale$1, subtract, add, abs, transform as transform$1, squaredLength, normalize, cross, distance, lerp } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
+import { fromSegmentToInverseTransform, invertTransform, fromTranslateToTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
-import { fromTranslateToTransform, invertTransform, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
 import { fromPoints as fromPoints$1 } from './jsxcad-math-poly3.js';
@@ -3174,8 +3174,14 @@ const fix =
 Shape.registerMethod('fix', fix);
 
 const each =
-  (leafOp = (leaf) => leaf, groupOp = Shape.Group) =>
+  (...args) =>
   (shape) => {
+    const { shapesAndFunctions } = destructure(args);
+    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+    if (leafOp instanceof Shape) {
+      const leafShape = leafOp;
+      leafOp = (edge) => leafShape.to(edge);
+    }
     const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
       shape.op(leafOp(Shape.fromGeometry(leaf)))
     );
@@ -3209,13 +3215,27 @@ Shape.registerMethod('edit', edit);
 const edges =
   (...args) =>
   (shape) => {
-    const { functions } = destructure(args);
-    const [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] = functions;
+    const { shapesAndFunctions } = destructure(args);
+    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+    if (leafOp instanceof Shape) {
+      const leafShape = leafOp;
+      leafOp = (edge) => leafShape.to(edge);
+    }
     const leafs = [];
-    eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) =>
-      leafs.push(leafOp(Shape.fromGeometry(taggedSegments({}, [segment]))))
-    );
-    const grouped = groupOp(leafs);
+    eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
+      const inverse = fromSegmentToInverseTransform(segment);
+      const baseSegment = [
+        transformCoordinate(segment[0], inverse),
+        transformCoordinate(segment[1], inverse),
+      ];
+      const matrix = invertTransform(inverse);
+      // We get a pair of absolute coordinates from eachSegment.
+      // We need a segment from [0,0,0] to [x,0,0] in its local space.
+      leafs.push(
+        leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])))
+      );
+    });
+    const grouped = groupOp(...leafs);
     if (grouped instanceof Function) {
       return grouped(shape);
     } else {
@@ -3297,9 +3317,19 @@ Shape.registerMethod('ey', ey);
 Shape.registerMethod('ez', ez);
 
 const faces =
-  (op = (s) => s) =>
-  (shape) =>
-    Shape.fromGeometry(faces$1(shape.toGeometry())).each(op);
+  (...args) =>
+  (shape) => {
+    const { shapesAndFunctions } = destructure(args);
+    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+    if (leafOp instanceof Shape) {
+      const leafShape = leafOp;
+      leafOp = (edge) => leafShape.to(edge);
+    }
+    return Shape.fromGeometry(faces$1(shape.toGeometry())).each(
+      leafOp,
+      groupOp
+    );
+  };
 
 Shape.registerMethod('faces', faces);
 
@@ -3942,11 +3972,26 @@ const play =
 Shape.registerMethod('play', play);
 
 const points$1 =
-  (op = Point, group = Group) =>
+  (...args) =>
   (shape) => {
-    const results = [];
-    eachPoint((point) => results.push(op(point)), shape.toGeometry());
-    return group(...results);
+    const { shapesAndFunctions } = destructure(args);
+    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] =
+      shapesAndFunctions;
+    if (leafOp instanceof Shape) {
+      const leafShape = leafOp;
+      leafOp = (edge) => leafShape.to(edge);
+    }
+    const leafs = [];
+    eachPoint(
+      Shape.toShape(shape, shape).toGeometry(),
+      ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z)))
+    );
+    const grouped = groupOp(...leafs);
+    if (grouped instanceof Function) {
+      return grouped(shape);
+    } else {
+      return grouped;
+    }
   };
 
 Shape.registerMethod('points', points$1);
@@ -4910,33 +4955,10 @@ const Voxels = (...points) => {
 
 Shape.prototype.Voxels = Shape.shapeMethod(Voxels);
 
-// import { arrangePolygonsWithHoles, fromPolygonsWithHolesToTriangles, fromTrianglesToGraph, taggedGroup, toPolygonsWithHoles, } from './jsxcad-geometry.js';
-
 const weld =
   (...rest) =>
-  (first) => {
-    return Group(first, ...rest).fill();
-    /*
-    const unwelded = [];
-    for (const shape of [first, ...rest]) {
-      // We lose the tags at this point.
-      const result = toPolygonsWithHoles(shape.toGeometry());
-      for (const { polygonsWithHoles } of result) {
-        unwelded.push(...polygonsWithHoles);
-      }
-    }
-    const welds = [];
-    const arrangements = arrangePolygonsWithHoles(unwelded);
-    for (const polygonsWithHoles of arrangements) {
-      // Keep the planar grouping.
-      const triangles = fromPolygonsWithHolesToTriangles(polygonsWithHoles);
-      const graph = fromTrianglesToGraph({}, triangles);
-      welds.push(graph);
-    }
-    // A group of planar welds.
-    return Shape.fromGeometry(taggedGroup({}, ...welds));
-*/
-  };
+  (first) =>
+    Group(first, ...rest).fill();
 
 Shape.registerMethod('weld', weld);
 
