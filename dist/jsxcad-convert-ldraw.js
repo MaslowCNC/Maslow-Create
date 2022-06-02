@@ -1,5 +1,5 @@
 import { isStrictlyCoplanar, flip, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { fromPolygonsToGraph, rotateX, scale } from './jsxcad-geometry.js';
+import { fromPolygons, rotateX, scale } from './jsxcad-geometry.js';
 import { fromValues } from './jsxcad-math-mat4.js';
 import { read } from './jsxcad-sys.js';
 
@@ -15,7 +15,7 @@ const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
 // Three numerics at the start seem to indicate parts vs primitives.
 
-const readPart = async (part, { allowFetch = true } = {}) => {
+const readPart = async (part, { allowFetch }) => {
   part = part.toLowerCase().replace(/\\/, '/');
   if (part.match(/^u[0-9]{4}/)) {
     return read(`cache/ldraw/part/${part}`, {
@@ -57,7 +57,7 @@ const fromPartToPolygons = async (
   part,
   { allowFetch = true, invert = false, stack = [] }
 ) => {
-  const data = await readPart(part, { allowFetch });
+  const data = await readPart(part);
   const code = fromDataToCode(data);
   return fromCodeToPolygons(code, { allowFetch, invert, stack });
 };
@@ -202,14 +202,14 @@ const fromCodeToPolygons = async (
 
 const fromLDrawPart = async (part, { allowFetch = true } = {}) => {
   const polygons = await fromPartToPolygons(`${part}.dat`, { allowFetch });
-  const geometry = fromPolygonsToGraph({}, polygons);
+  const geometry = fromPolygons({}, polygons);
   return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
 };
 
 const fromLDraw = async (data, { allowFetch = true } = {}) => {
   const code = fromDataToCode(data);
   const polygons = await fromCodeToPolygons(code, { allowFetch });
-  const geometry = fromPolygonsToGraph(polygons);
+  const geometry = fromPolygons(polygons);
   return rotateX(-90, scale([0.4, 0.4, 0.4], geometry));
 };
 

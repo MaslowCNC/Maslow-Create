@@ -240,7 +240,11 @@ const Y = 1;
 const Z = 2;
 
 const measureSize = (geometry) => {
-  const [min, max] = measureBoundingBox(geometry);
+  const bounds = measureBoundingBox(geometry);
+  if (bounds === undefined) {
+    return;
+  }
+  const [min, max] = bounds;
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   return [width, height, min[Z]];
@@ -280,7 +284,11 @@ const pack = (
   const blocks = [];
 
   for (const geometry of geometries) {
-    const [width, height, minZ] = measureSize(geometry);
+    const size = measureSize(geometry);
+    if (size === undefined) {
+      continue;
+    }
+    const [width, height, minZ] = size;
     if (!isFinite(width) || !isFinite(height)) {
       continue;
     }

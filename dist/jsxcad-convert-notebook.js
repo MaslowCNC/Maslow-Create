@@ -28,7 +28,7 @@ var encode = function (arraybuffer) {
     return base64;
 };
 
-const encodeNotebook = async (notebook, { workspace, module } = {}) => {
+const encodeNotebook = async (notebook, { workspace, module }) => {
   const encoded = [];
   const seen = new Set();
   for (const note of notebook) {

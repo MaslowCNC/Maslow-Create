@@ -2456,7 +2456,7 @@ function getAcadColor(index) {
 //   BYBLOCK means inherits from block
 //   BYLAYER (default) mean inherits from layer
 
-const buildRegularPolygon = (sides = 32) => {
+const buildRegularPolygon = (sides) => {
   let points = [];
   for (let i = 0; i < sides; i++) {
     let radians = (2 * Math.PI * i) / sides;

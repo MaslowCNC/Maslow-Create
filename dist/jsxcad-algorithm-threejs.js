@@ -20319,7 +20319,7 @@ function WebGLRenderStates( extensions, capabilities ) {
 
 	let renderStates = new WeakMap();
 
-	function get( scene, renderCallDepth = 0 ) {
+	function get( scene, renderCallDepth ) {
 
 		let renderState;
 
@@ -23903,7 +23903,7 @@ function WebGLUtils( gl, extensions, capabilities ) {
 
 	const isWebGL2 = capabilities.isWebGL2;
 
-	function convert( p, encoding = null ) {
+	function convert( p, encoding ) {
 
 		let extension;
 

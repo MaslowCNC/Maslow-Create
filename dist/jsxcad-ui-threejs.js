@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Group, Shape, Path, ShapeGeometry, EdgesGeometry, LineSegments, LineBasicMaterial, BufferGeometry, Float32BufferAttribute, WireframeGeometry, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, Matrix3, Quaternion, GridHelper, PlaneGeometry, MeshStandardMaterial, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Group, Shape, Path, ShapeGeometry, EdgesGeometry, LineBasicMaterial, LineSegments, WireframeGeometry, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, Matrix3, Quaternion, GridHelper, PlaneGeometry, MeshStandardMaterial, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 import { toPlane } from './jsxcad-math-poly3.js';
@@ -565,8 +565,8 @@ class AnchorControls extends EventDispatcher {
 const setColor = (
   definitions,
   tags = [],
-  parameters = {},
-  otherwise = [0, 0, 0]
+  parameters,
+  otherwise
 ) => {
   let rgb = toRgbFromTags(tags, definitions, null);
   if (rgb === null) {
@@ -894,11 +894,24 @@ const orient = (mesh, source, target, offset) => {
 
   matrix4.decompose(position, quaternion, scale);
 
-  console.log(`QQ/position: ${JSON.stringify(position)}`);
-  console.log(`QQ/quaternion: ${JSON.stringify(quaternion)}`);
-  console.log(`QQ/scale: ${JSON.stringify(scale)}`);
-
   mesh.applyMatrix4(matrix4);
+};
+
+const parseRational = (text) => {
+  if (text === '') {
+    return 0;
+  }
+  let [numerator, denominator = '1'] = text.split('/');
+  while (true) {
+    const value = parseInt(numerator) / parseInt(denominator);
+    if (!isFinite(value)) {
+      // console.log(`Non-finite: ${numerator}/${denominator}`);
+      numerator = numerator.substring(0, numerator.length - 1);
+      denominator = denominator.substring(0, denominator.length - 1);
+      continue;
+    }
+    return value;
+  }
 };
 
 const buildMeshes = async ({
@@ -1033,6 +1046,111 @@ const buildMeshes = async ({
       scene.add(mesh);
       break;
     }
+    case 'graph': {
+      const { tags, graph } = geometry;
+      const { serializedSurfaceMesh } = graph;
+      if (serializedSurfaceMesh === undefined) {
+        throw Error(`Graph is not serialized: ${JSON.stringify(geometry)}`);
+      }
+      const tokens = serializedSurfaceMesh
+        .split(/\s+/g)
+        .map((token) => parseRational(token));
+      let p = 0;
+      let vertexCount = tokens[p++];
+      const vertices = [];
+      while (vertexCount-- > 0) {
+        vertices.push([tokens[p++], tokens[p++], tokens[p++]]);
+      }
+      let faceCount = tokens[p++];
+      const positions = [];
+      const normals = [];
+      while (faceCount-- > 0) {
+        let vertexCount = tokens[p++];
+        if (vertexCount !== 3) {
+          throw Error('Faces must be triangles');
+        }
+        const triangle = [];
+        while (vertexCount-- > 0) {
+          const vertex = vertices[tokens[p++]];
+          if (!vertex.every(isFinite)) {
+            throw Error(`Non-finite vertex: ${vertex}`);
+          }
+          triangle.push(vertex);
+        }
+        const plane = toPlane(triangle);
+        if (plane === undefined) {
+          continue;
+        }
+        positions.push(...triangle[0]);
+        positions.push(...triangle[1]);
+        positions.push(...triangle[2]);
+        const [x, y, z] = plane;
+        normals.push(x, y, z);
+        normals.push(x, y, z);
+        normals.push(x, y, z);
+      }
+      if (positions.length === 0) {
+        break;
+      }
+      const bufferGeometry = new BufferGeometry();
+      bufferGeometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      bufferGeometry.setAttribute(
+        'normal',
+        new Float32BufferAttribute(normals, 3)
+      );
+      applyBoxUV(bufferGeometry);
+
+      if (tags.includes('show:skin')) {
+        const material = await buildMeshMaterial(definitions, tags);
+        mesh = new Mesh(bufferGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.layers.set(layer);
+        updateUserData(geometry, scene, mesh.userData);
+        mesh.userData.tangible = true;
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.125;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
+        }
+      } else {
+        mesh = new Group();
+      }
+
+      {
+        const edges = new EdgesGeometry(bufferGeometry);
+        const material = new LineBasicMaterial({ color: 0x000000 });
+        const outline = new LineSegments(edges, material);
+        outline.userData.isOutline = true;
+        outline.userData.hasShowOutline = tags.includes('show:outline');
+        outline.visible = outline.userData.hasShowOutline;
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.25;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
+        }
+        mesh.add(outline);
+      }
+
+      if (tags.includes('show:wireframe')) {
+        const edges = new WireframeGeometry(bufferGeometry);
+        const outline = new LineSegments(
+          edges,
+          new LineBasicMaterial({ color: 0x000000 })
+        );
+        mesh.add(outline);
+      }
+
+      scene.add(mesh);
+      break;
+    }
     case 'triangles': {
       const prepareTriangles = (triangles) => {
         const normals = [];
@@ -1075,7 +1193,7 @@ const buildMeshes = async ({
         if (tags.includes('type:void')) {
           material.transparent = true;
           material.depthWrite = false;
-          material.opacity *= 0.1;
+          material.opacity *= 0.125;
           mesh.castShadow = false;
           mesh.receiveShadow = false;
         }
@@ -1129,17 +1247,48 @@ const buildMeshes = async ({
           shape.holes.push(new Path(holePoints));
         }
         const shapeGeometry = new ShapeGeometry(shape);
-        const material = await buildMeshMaterial(definitions, tags);
-        mesh.add(new Mesh(shapeGeometry, material));
+        if (tags.includes('show:skin')) {
+          const material = await buildMeshMaterial(definitions, tags);
+          mesh = new Mesh(shapeGeometry, material);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          mesh.layers.set(layer);
+          updateUserData(geometry, scene, mesh.userData);
+          mesh.userData.tangible = true;
+          if (tags.includes('type:void')) {
+            material.transparent = true;
+            material.depthWrite = false;
+            material.opacity *= 0.125;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+        } else {
+          mesh = new Group();
+        }
+
         {
           const edges = new EdgesGeometry(shapeGeometry);
+          const material = new LineBasicMaterial({ color: 0x000000 });
+          const outline = new LineSegments(edges, material);
+          outline.userData.isOutline = true;
+          outline.userData.hasShowOutline = tags.includes('show:outline');
+          outline.visible = outline.userData.hasShowOutline;
+          if (tags.includes('type:void')) {
+            material.transparent = true;
+            material.depthWrite = false;
+            material.opacity *= 0.25;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+          mesh.add(outline);
+        }
+
+        if (tags.includes('show:wireframe')) {
+          const edges = new WireframeGeometry(shapeGeometry);
           const outline = new LineSegments(
             edges,
             new LineBasicMaterial({ color: 0x000000 })
           );
-          outline.userData.isOutline = true;
-          outline.userData.hasShowOutline = tags.includes('show:outline');
-          outline.visible = outline.userData.hasShowOutline;
           mesh.add(outline);
         }
       }
@@ -1190,7 +1339,7 @@ const moveToFit = ({
   gridLayer = GEOMETRY_LAYER,
   pageSize = [],
   gridState = { objects: [], visible: withGrid },
-} = {}) => {
+}) => {
   const { fit = true } = view;
   const [length = 100, width = 100] = pageSize;
 

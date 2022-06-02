@@ -282,6 +282,8 @@ const agent = async ({ ask, message }) => {
           var acumulatedShape = oneSlice.z(-1 * cutDepth);//.toolpath();
           var i = 2;
           while (i <= 5) {
+            console.log("In while:");
+            console.log(oneSlice.z(-i * cutDepth).cut(tabs));
             acumulatedShape = api.Group(
               acumulatedShape,
               oneSlice

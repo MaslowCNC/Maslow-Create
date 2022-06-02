@@ -331,7 +331,7 @@ const unwrap = (value) => reverseTransformCache.get(value);
  * @param version Schema version.
  * @param callbacks Additional callbacks.
  */
-function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+function openDB(name, version, { blocked, upgrade, blocking, terminated }) {
     const request = indexedDB.open(name, version);
     const openPromise = wrap(request);
     if (upgrade) {
@@ -1322,29 +1322,35 @@ var NativeMethod = {
 var ObliviousSet = /** @class */ (function () {
     function ObliviousSet(ttl) {
         this.ttl = ttl;
-        this.set = new Set();
-        this.timeMap = new Map();
+        this.map = new Map();
+        /**
+         * Creating calls to setTimeout() is expensive,
+         * so we only do that if there is not timeout already open.
+         */
+        this._to = false;
     }
     ObliviousSet.prototype.has = function (value) {
-        return this.set.has(value);
+        return this.map.has(value);
     };
     ObliviousSet.prototype.add = function (value) {
         var _this = this;
-        this.timeMap.set(value, now());
-        this.set.add(value);
+        this.map.set(value, now());
         /**
          * When a new value is added,
          * start the cleanup at the next tick
          * to not block the cpu for more important stuff
          * that might happen.
          */
-        setTimeout(function () {
-            removeTooOldValues(_this);
-        }, 0);
+        if (!this._to) {
+            this._to = true;
+            setTimeout(function () {
+                _this._to = false;
+                removeTooOldValues(_this);
+            }, 0);
+        }
     };
     ObliviousSet.prototype.clear = function () {
-        this.set.clear();
-        this.timeMap.clear();
+        this.map.clear();
     };
     return ObliviousSet;
 }());
@@ -1354,20 +1360,20 @@ var ObliviousSet = /** @class */ (function () {
  */
 function removeTooOldValues(obliviousSet) {
     var olderThen = now() - obliviousSet.ttl;
-    var iterator = obliviousSet.set[Symbol.iterator]();
+    var iterator = obliviousSet.map[Symbol.iterator]();
     /**
      * Because we can assume the new values are added at the bottom,
      * we start from the top and stop as soon as we reach a non-too-old value.
      */
     while (true) {
-        var value = iterator.next().value;
-        if (!value) {
+        var next = iterator.next().value;
+        if (!next) {
             return; // no more elements
         }
-        var time = obliviousSet.timeMap.get(value);
+        var value = next[0];
+        var time = next[1];
         if (time < olderThen) {
-            obliviousSet.timeMap.delete(value);
-            obliviousSet.set.delete(value);
+            obliviousSet.map.delete(value);
         }
         else {
             // We reached a value that is not old enough
@@ -2507,7 +2513,7 @@ const getInternalFileFetcher = () => {
 
 const internalFileFetcher = getInternalFileFetcher();
 
-const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
+const getInternalFileVersionFetcher = (qualify) => {
   if (isNode$1) {
     // FIX: Put this through getFile, also.
     return (qualifiedPath) => {
@@ -2624,7 +2630,7 @@ const read = async (path, options = {}) => {
   }
 
   if (file.data === undefined && allowFetch && sources.length > 0) {
-    let data = await fetchSources(sources, { workspace });
+    let data = await fetchSources(sources);
     if (decode) {
       data = new TextDecoder(decode).decode(data);
     }
