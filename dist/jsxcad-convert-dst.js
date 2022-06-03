@@ -2008,7 +2008,7 @@ const createByteFetcher = (bytes) => {
   return byteFetcher;
 };
 
-const fetchHeader = (options, fetchBytes) => {
+const fetchHeader = (options = {}, fetchBytes) => {
   function readBytes(prefix, field, converter, start, length, flag) {
     let bytes = fetchBytes(length);
     if (field !== '') {

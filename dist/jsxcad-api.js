@@ -71,7 +71,7 @@ const $run = async (op, { path, id, text, sha }) => {
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
     const startTime = new Date();
-    beginRecordingNotes(path, id);
+    beginRecordingNotes();
     beginEmitGroup({ path, id });
     emitSourceText(text);
     let result;

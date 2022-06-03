@@ -1,5 +1,4 @@
 import { fromPolygons, toTriangleArray } from './jsxcad-geometry.js';
-import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse$1(str) {
   if(typeof str !== 'string') {
@@ -138,9 +137,23 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+
+const computeNormal = ([one, two, three]) => {
+  const [aX, aY, aZ] = subtract(two, one);
+  const [bX, bY, bZ] = subtract(three, one);
+  const nX = aY * bZ - aZ * bY;
+  const nY = aZ * bX - aX * bZ;
+  const nZ = aX * bY - aY * bX;
+  const length = Math.sqrt(nX * nX + nY * nY + nZ * nZ);
+  return [nX / length, nY / length, nZ / length];
+};
+
 const equals = ([aX, aY, aZ], [bX, bY, bZ]) =>
   aX === bX && aY === bY && aZ === bZ;
+
 const round = (value, tolerance) => Math.round(value / tolerance) * tolerance;
+
 const roundVertex = ([x, y, z], tolerance = 0.001) => [
   round(x, tolerance),
   round(y, tolerance),
@@ -169,10 +182,10 @@ const convertToFacet = (polygon) => {
     // Filter degenerate facets.
     return;
   }
-  const plane = toPlane(polygon);
-  if (plane !== undefined) {
+  const normal = computeNormal(polygon);
+  if (normal !== undefined) {
     return (
-      `facet normal ${toStlVector(toPlane(polygon))}\n` +
+      `facet normal ${toStlVector(normal)}\n` +
       `  outer loop\n` +
       `    ${toStlVertex(polygon[0])}\n` +
       `    ${toStlVertex(polygon[1])}\n` +

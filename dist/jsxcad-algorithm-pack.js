@@ -1,4 +1,3 @@
-import { min, max } from './jsxcad-math-vec3.js';
 import { toTransformedGeometry, translate, measureBoundingBox } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -234,6 +233,18 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var BinPackingEs = unwrapExports(binPacking);
 
 const { GrowingPacker, Packer } = BinPackingEs;
+
+const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];
+
+const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];
 
 const X = 0;
 const Y = 1;

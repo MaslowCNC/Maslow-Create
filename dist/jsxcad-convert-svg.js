@@ -1,14 +1,6 @@
-import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
-
-const canonicalizeSegment = ([directive, ...args]) => [
-  directive,
-  ...args.map(reallyQuantizeForSpace),
-];
-
-const canonicalize = (svgPath) => svgPath.map(canonicalizeSegment);
 
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -4248,4 +4240,4 @@ const toSvg = async (
   return new TextEncoder('utf8').encode(output);
 };
 
-export { canonicalize, fromSvg, fromSvgPath$1 as fromSvgPath, toSvg };
+export { fromSvg, fromSvgPath$1 as fromSvgPath, toSvg };

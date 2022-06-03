@@ -1,5 +1,4 @@
 import { translate, scale, section, disjoint, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
-import { fromAngleRadians } from './jsxcad-math-vec2.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
 
 /**
@@ -2456,7 +2455,9 @@ function getAcadColor(index) {
 //   BYBLOCK means inherits from block
 //   BYLAYER (default) mean inherits from layer
 
-const buildRegularPolygon = (sides) => {
+const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
+
+const buildRegularPolygon = (sides = 32) => {
   let points = [];
   for (let i = 0; i < sides; i++) {
     let radians = (2 * Math.PI * i) / sides;
@@ -2631,7 +2632,9 @@ class TagsManager {
      * @param {Tag[]} tags
      */
     addTags(tags) {
-        this._tags.push(...tags);
+        for (let tag of tags) {
+            this._tags.push(tag);
+        }
     }
 
     /**

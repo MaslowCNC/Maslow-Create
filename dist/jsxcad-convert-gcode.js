@@ -75,7 +75,7 @@ const toGcode = async (geometry) => {
     z = state.z,
     f = state.f,
     s = state.s,
-  }) => {
+  } = {}) => {
     const code = `G0${pX(x)}${pY(y)}${pZ(z)}`;
     if (code === 'G0') {
       return;
@@ -93,7 +93,7 @@ const toGcode = async (geometry) => {
     z = state.z,
     f = state.f,
     s = state.s,
-  }) => {
+  } = {}) => {
     const code = `G1${pX(x)}${pY(y)}${pZ(z)}`;
     if (code === 'G1') {
       return;
@@ -104,14 +104,14 @@ const toGcode = async (geometry) => {
     state.z = z;
   };
 
-  const cS = ({ s = state.s }) => {
+  const cS = ({ s = state.s } = {}) => {
     if (s !== state.s) {
       emit(`S${value(s)}`);
       state.s = s;
     }
   };
 
-  const cF = ({ f = state.f }) => {
+  const cF = ({ f = state.f } = {}) => {
     if (f !== state.f) {
       emit(`F${value(f)}`);
       state.f = f;

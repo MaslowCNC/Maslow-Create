@@ -12532,7 +12532,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.5.2";
+exports.version = "1.5.3";
 
 });
 
@@ -42687,7 +42687,7 @@ var Table = /*#__PURE__*/ReactDOM$2.forwardRef(function (_ref, ref) {
 
 const ensureFile = async (file, url, {
   workspace
-}) => {
+} = {}) => {
   const sources = [];
 
   if (url !== undefined) {

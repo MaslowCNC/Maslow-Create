@@ -1,42 +1,15 @@
-import { closePath, concatenatePath, assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, eachPoint, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, eachPoint, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { identityMatrix, fromRotation } from './jsxcad-math-mat4.js';
-import { scale as scale$1, subtract, add, abs, transform as transform$1, squaredLength, normalize, cross, distance, lerp } from './jsxcad-math-vec3.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, fromTranslateToTransform, fromRotateZToTransform, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
-import { fromPoints as fromPoints$1 } from './jsxcad-math-poly3.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 
 class Shape {
-  close() {
-    const geometry = this.toConcreteGeometry();
-    if (!isSingleOpenPath(geometry)) {
-      throw Error('Close requires a single open path.');
-    }
-    return Shape.fromClosedPath(closePath(geometry.paths[0]));
-  }
-
-  concat(...shapes) {
-    const paths = [];
-    for (const shape of [this, ...shapes]) {
-      const geometry = shape.toConcreteGeometry();
-      if (!isSingleOpenPath(geometry)) {
-        throw Error(
-          `Concatenation requires single open paths: ${JSON.stringify(
-            geometry
-          )}`
-        );
-      }
-      paths.push(geometry.paths[0]);
-    }
-    return Shape.fromOpenPath(concatenatePath(...paths));
-  }
-
   constructor(geometry = assemble$1(), context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
@@ -78,11 +51,7 @@ class Shape {
   }
 
   transform(matrix) {
-    if (matrix === identityMatrix) {
-      return this;
-    } else {
-      return fromGeometry(transform(matrix, this.toGeometry()), this.context);
-    }
+    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
 
   // Low level setter for reifiers.
@@ -118,9 +87,6 @@ class Shape {
     return Shape.toNestedValues(values, this);
   }
 }
-
-const isSingleOpenPath = ({ paths }) =>
-  paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 Shape.method = {};
 
@@ -417,6 +383,19 @@ const destructure = (
 
 Shape.destructure = destructure;
 
+const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
+const add$1 = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax + bx,
+  ay + by,
+  az + bz,
+];
+const scale$4 = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+
 const updatePlan =
   (...updates) =>
   (shape) => {
@@ -554,13 +533,13 @@ const ofPlan = find;
 const getAngle = (geometry) => find(geometry, 'angle', {});
 const getCorner1 = (geometry) => find(geometry, 'corner1', [0, 0, 0]);
 const getCorner2 = (geometry) => find(geometry, 'corner2', [0, 0, 0]);
-const getMatrix = (geometry) => geometry.matrix || identityMatrix;
-const getZag = (geometry, otherwise) =>
+const getMatrix = (geometry) => geometry.matrix || identity();
+const getZag = (geometry, otherwise = defaultZag) =>
   find(geometry, 'zag', otherwise);
 
 const defaultZag = 0.01;
 
-const getSides = (geometry, otherwise) => {
+const getSides = (geometry, otherwise = 32) => {
   const [scale] = getScale(geometry);
   let [length, width] = abs(scale);
   {
@@ -583,8 +562,8 @@ const getScale = (geometry) => {
   const corner1 = getCorner1(geometry);
   const corner2 = getCorner2(geometry);
   return [
-    scale$1(0.5, subtract(corner1, corner2)),
-    scale$1(0.5, add(corner1, corner2)),
+    scale$4(0.5, subtract$2(corner1, corner2)),
+    scale$4(0.5, add$1(corner1, corner2)),
   ];
 };
 
@@ -804,13 +783,15 @@ const X$8 = 0;
 const Y$8 = 1;
 const Z$8 = 2;
 
+const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+
 // Round to the nearest 0.001 mm
 
 const round = (v) => Math.round(v * 1000) / 1000;
 
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
-const computeOffset = (spec = 'xyz', origin, shape) =>
+const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
   shape.size(({ max, min, center }) => (shape) => {
     // This is producing very small deviations.
     // FIX: Try a more principled approach.
@@ -879,7 +860,7 @@ const align =
   (spec = 'xyz', origin = [0, 0, 0]) =>
   (shape) => {
     const offset = computeOffset(spec, origin, shape);
-    const reference = Point().move(...subtract(offset, origin));
+    const reference = Point().move(...subtract$1(offset, origin));
     return reference;
   };
 
@@ -1167,7 +1148,7 @@ const tagMatcher = (tag, namespace = 'user') => {
   }
 };
 
-const oneOfTagMatcher = (tags, namespace) => {
+const oneOfTagMatcher = (tags, namespace = 'user') => {
   const matchers = tags.map((tag) => tagMatcher(tag, namespace));
   const isMatch = (tag) => {
     for (const matcher of matchers) {
@@ -3630,6 +3611,12 @@ Shape.registerMethod('xyz', xyz);
 
 Shape.registerMethod('move', move);
 
+const scale$3 = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+
 const moveAlong =
   (direction, ...offsets) =>
   (shape) => {
@@ -3639,7 +3626,7 @@ const moveAlong =
     const moves = [];
     while (offsets.length > 0) {
       const offset = offsets.pop();
-      moves.push(shape.move(scale$1(offset, direction)));
+      moves.push(shape.move(scale$3(offset, direction)));
     }
     return Shape.Group(...moves);
   };
@@ -3664,7 +3651,7 @@ const moveTo =
       );
       if (geometry.length >= 1) {
         const { matrix, points } = geometry[0];
-        const point = transform$1(matrix, points[0]);
+        const point = transformCoordinate(points[0], matrix);
         [x, y, z] = point;
       }
     }
@@ -3776,6 +3763,33 @@ const withOp =
 
 Shape.registerMethod('op', op);
 Shape.registerMethod('withOp', withOp);
+
+const cross = ([ax, ay, az], [bx, by, bz]) => [
+  ay * bz - az * by,
+  az * bx - ax * bz,
+  ax * by - ay * bx,
+];
+
+const scale$2 = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+
+const normalize = (a) => {
+  const [x, y, z] = a;
+  const len = x * x + y * y + z * z;
+  if (len > 0) {
+    // TODO: evaluate use of glm_invsqrt here?
+    return scale$2(1 / Math.sqrt(len), a);
+  } else {
+    return a;
+  }
+};
+
+const squaredLength = ([x, y, z]) => x * x + y * y + z * z;
+
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const X$5 = 0;
 const Y$5 = 1;
@@ -3953,18 +3967,6 @@ const remesh =
 
 Shape.registerMethod('remesh', remesh);
 
-// FIX: Move this to cgal.
-const rotate =
-  (turn = 0, axis = [0, 0, 1]) =>
-  (shape) => {
-    const matrix = fromRotation(turn * Math.PI * 2, axis);
-    // FIX: Move to cgal.
-    matrix.blessed = true;
-    return shape.transform(matrix);
-  };
-
-Shape.registerMethod('rotate', rotate);
-
 // rz is in terms of turns -- 1/2 is a half turn.
 const rz =
   (...turns) =>
@@ -3986,7 +3988,7 @@ const saveGeometry = async (path, shape) =>
 const saveGeometryNonblocking = (path, shape) =>
   Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
 
-const scale =
+const scale$1 =
   (x = 1, y = x, z = y) =>
   (shape) => {
     [x = 1, y = x, z] = shape.toCoordinate(x, y, z);
@@ -4008,12 +4010,12 @@ const scale =
     }
   };
 
-Shape.registerMethod('scale', scale);
+Shape.registerMethod('scale', scale$1);
 
 const scaleX =
   (...x) =>
   (shape) =>
-    Shape.Group(...shape.toFlatValues(x).map((x) => scale(x, 1, 1)(shape)));
+    Shape.Group(...shape.toFlatValues(x).map((x) => scale$1(x, 1, 1)(shape)));
 
 const sx = scaleX;
 
@@ -4023,7 +4025,7 @@ Shape.registerMethod('sx', sx);
 const scaleY =
   (...y) =>
   (shape) =>
-    Shape.Group(...shape.toFlatValues(y).map((y) => scale(1, y, 1)(shape)));
+    Shape.Group(...shape.toFlatValues(y).map((y) => scale$1(1, y, 1)(shape)));
 
 const sy = scaleY;
 
@@ -4033,7 +4035,7 @@ Shape.registerMethod('sy', sy);
 const scaleZ =
   (...z) =>
   (shape) =>
-    Shape.Group(...shape.toFlatValues(z).map((z) => scale(1, 1, z)(shape)));
+    Shape.Group(...shape.toFlatValues(z).map((z) => scale$1(1, 1, z)(shape)));
 
 const sz = scaleZ;
 
@@ -4069,7 +4071,7 @@ const seam =
 Shape.registerMethod('seam', seam);
 
 const baseSection =
-  ({ profile = false }, orientations) =>
+  ({ profile = false } = {}, orientations) =>
   (shape) => {
     orientations = orientations
       .flatMap((orientation) => Shape.toShapes(orientation, shape))
@@ -4227,6 +4229,25 @@ const simplify =
 
 Shape.registerMethod('simplify', simplify);
 
+const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax + bx,
+  ay + by,
+  az + bz,
+];
+
+const distance = ([ax, ay, az], [bx, by, bz]) => {
+  const x = bx - ax;
+  const y = by - ay;
+  const z = bz - az;
+  return Math.sqrt(x * x + y * y + z * z);
+};
+
+const scale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+
 const X$4 = 0;
 const Y$4 = 1;
 const Z$5 = 2;
@@ -4251,7 +4272,7 @@ const size =
     const length = max[X$4] - min[X$4];
     const width = max[Y$4] - min[Y$4];
     const height = max[Z$5] - min[Z$5];
-    const center = scale$1(0.5, add(min, max));
+    const center = scale(0.5, add(min, max));
     const radius = distance(center, max);
     return op({
       length,
@@ -4420,6 +4441,12 @@ const Points = (points) =>
   Shape.fromPoints(points.map((arg) => Shape.toCoordinate(undefined, arg)));
 
 Shape.prototype.Points = Shape.shapeMethod(Points);
+
+const lerp = (t, [ax, ay, az], [bx, by, bz]) => [
+  ax + t * (bx - ax),
+  ay + t * (by - ay),
+  az + t * (bz - az),
+];
 
 const toolpath =
   ({
@@ -4893,7 +4920,7 @@ const Y$1 = 1;
 const Z$1 = 2;
 
 const reifyArc =
-  (axis) =>
+  (axis = Z$1) =>
   (geometry) => {
     let { start = 0, end = 1 } = getAngle(geometry);
 
@@ -5320,11 +5347,11 @@ const Hexagon = (x, y, z) => Arc(x, y, z).hasSides(6);
 Shape.prototype.Hexagon = Shape.shapeMethod(Hexagon);
 
 /** @type {function(Point[], Path[]):Triangle[]} */
-const fromPointsAndPaths = (points, paths) => {
+const fromPointsAndPaths = (points = [], paths = []) => {
   /** @type {Polygon[]} */
   const polygons = [];
   for (const path of paths) {
-    polygons.push({ points: fromPoints$1(path.map((nth) => points[nth])) });
+    polygons.push({ points: path.map((nth) => points[nth]) });
   }
   return polygons;
 };
@@ -5579,4 +5606,4 @@ const RX = (t = 0) => Point().rx(t);
 const RY = (t = 0) => Point().ry(t);
 const RZ = (t = 0) => Point().rz(t);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, play, points$1 as points, reify, remesh, rotate, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, play, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xyz, y, z };

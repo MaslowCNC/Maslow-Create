@@ -331,7 +331,7 @@ const unwrap = (value) => reverseTransformCache.get(value);
  * @param version Schema version.
  * @param callbacks Additional callbacks.
  */
-function openDB(name, version, { blocked, upgrade, blocking, terminated }) {
+function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
     const request = indexedDB.open(name, version);
     const openPromise = wrap(request);
     if (upgrade) {
@@ -2513,7 +2513,7 @@ const getInternalFileFetcher = () => {
 
 const internalFileFetcher = getInternalFileFetcher();
 
-const getInternalFileVersionFetcher = (qualify) => {
+const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
   if (isNode$1) {
     // FIX: Put this through getFile, also.
     return (qualifiedPath) => {
@@ -2630,7 +2630,7 @@ const read = async (path, options = {}) => {
   }
 
   if (file.data === undefined && allowFetch && sources.length > 0) {
-    let data = await fetchSources(sources);
+    let data = await fetchSources(sources, { workspace });
     if (decode) {
       data = new TextDecoder(decode).decode(data);
     }

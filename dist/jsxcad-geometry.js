@@ -1,8 +1,6 @@
-import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demesh as demesh$1, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, extrude as extrude$1, faces as faces$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, identity, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demesh as demesh$1, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, extrude as extrude$1, faces as faces$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
-import { equals, subtract, dot, distance, transform as transform$3 } from './jsxcad-math-vec3.js';
-import { identityMatrix, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -124,7 +122,7 @@ const visit = (geometry, op, state) => {
   return walk(geometry, state);
 };
 
-const transform$2 = (matrix, geometry) => {
+const transform$1 = (matrix, geometry) => {
   const op = (geometry, descend, walk) =>
     descend({
       matrix: geometry.matrix
@@ -549,11 +547,6 @@ const clip = (geometry, geometries, open) => {
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
 
-const isClosed = (path) => path.length === 0 || path[0] !== null;
-const isOpen = (path) => !isClosed(path);
-
-const close = (path) => (isClosed(path) ? path : path.slice(1));
-
 const filter$u = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeVoid(geometry);
@@ -797,7 +790,7 @@ const outline = (geometry) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const transform$1 = ([x = 0, y = 0, z = 0], matrix) => {
+const transform = ([x = 0, y = 0, z = 0], matrix) => {
   if (!matrix) {
     return [x, y, z];
   }
@@ -810,7 +803,7 @@ const transform$1 = ([x = 0, y = 0, z = 0], matrix) => {
 };
 
 const transformCoordinate = (coordinate, matrix) =>
-  transform$1(coordinate, matrix);
+  transform(coordinate, matrix);
 
 const transformingCoordinates =
   (matrix, op) =>
@@ -916,8 +909,19 @@ const taggedToolpath = ({ tags = [], provenance }, toolpath) => {
   return { type: 'toolpath', tags, toolpath };
 };
 
-const X$1 = 0;
-const Y$1 = 1;
+const X = 0;
+const Y = 1;
+
+const measureDistance = ([ax, ay, az], [bx, by, bz]) => {
+  const x = bx - ax;
+  const y = by - ay;
+  const z = bz - az;
+  return Math.sqrt(x * x + y * y + z * z);
+};
+const computeDot = ([ax, ay, az], [bx, by, bz]) => ax * bx + ay * by + az * bz;
+const equals = ([ax, ay, az], [bx, by, bz]) =>
+  ax === bx && ay === by && az === bz;
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const computeToolpath = (
   geometry,
@@ -951,7 +955,7 @@ const computeToolpath = (
 
     const concreteGeometry = toConcreteGeometry(geometry);
     const sections = section(concreteGeometry, [
-      { type: 'points', matrix: identityMatrix },
+      { type: 'points', matrix: identity() },
     ]);
     const fusedArea = fuse(sections);
     const insetArea = inset(fusedArea, toolRadius);
@@ -966,13 +970,17 @@ const computeToolpath = (
         const isInteriorPoint = (x, y, z) => {
           return query.isIntersectingPointApproximate(x, y, z);
         };
-        const [minPoint, maxPoint] = measureBoundingBox(sections);
+        const bounds = measureBoundingBox(sections);
+        if (!bounds) {
+          return;
+        }
+        const [minPoint, maxPoint] = bounds;
         const z = 0;
         const sqrt3 = Math.sqrt(3);
-        const width = maxPoint[X$1] - minPoint[X$1];
-        const offsetX = (maxPoint[X$1] + minPoint[X$1]) / 2 - width / 2;
-        const height = maxPoint[Y$1] - minPoint[Y$1];
-        const offsetY = (maxPoint[Y$1] + minPoint[Y$1]) / 2 - height / 2;
+        const width = maxPoint[X] - minPoint[X];
+        const offsetX = (maxPoint[X] + minPoint[X]) / 2 - width / 2;
+        const height = maxPoint[Y] - minPoint[Y];
+        const offsetY = (maxPoint[Y] + minPoint[Y]) / 2 - height / 2;
         const columns = width / (sqrt3 * 0.5 * toolRadius) + 1;
         const rows = height / (toolRadius * 0.75);
         const index = [];
@@ -1042,11 +1050,11 @@ const computeToolpath = (
     time('QQ/computeToolpath/Grooves');
 
     const compareCoord = (a, b) => {
-      const dX = a[X$1] - b[X$1];
+      const dX = a[X] - b[X];
       if (dX !== 0) {
         return dX;
       }
-      return a[Y$1] - b[Y$1];
+      return a[Y] - b[Y];
     };
 
     const compareStart = (a, b) => compareCoord(a.start, b.start);
@@ -1110,8 +1118,8 @@ const computeToolpath = (
 
     const kd = new KDBush(
       points,
-      (p) => p.start[X$1],
-      (p) => p.start[Y$1]
+      (p) => p.start[X],
+      (p) => p.start[Y]
     );
     time('QQ/computeToolpath/Index');
 
@@ -1164,12 +1172,12 @@ const computeToolpath = (
           candidate.last.at.start
         );
         const nextDirection = subtract(target.start, candidate.at.start);
-        const dot$1 = dot(lastDirection, nextDirection);
-        cost += dot$1 * turnCost;
+        const dot = computeDot(lastDirection, nextDirection);
+        cost += dot * turnCost;
       }
 
-      const distance$1 = distance(candidate.at.start, target.start);
-      if ((candidate.at.isFill || target.isFill) && distance$1 < toolDiameter) {
+      const distance = measureDistance(candidate.at.start, target.start);
+      if ((candidate.at.isFill || target.isFill) && distance < toolDiameter) {
         // Reaching a fill point fulfills it, but reaching a profile or groove point won't.
         const fulfills = [];
         if (target.isFill) {
@@ -1178,7 +1186,7 @@ const computeToolpath = (
         if (candidate.isFill) {
           fulfills.push(computeHash(candidate.at.start));
         }
-        cost += stepCost / distance$1;
+        cost += stepCost / distance;
         const length = candidate.length + 1;
         // Cutting from a fill point also fulfills it.
         const last = candidate;
@@ -1191,7 +1199,7 @@ const computeToolpath = (
       // This is an unsafe cut -- jump.
       // FIX: This is not a very sensible penalty.
       // cost += distance + stepCost + stopCost * 3;
-      cost = stepCost / (distance$1 * 2);
+      cost = stepCost / (distance * 2);
       const length = candidate.length + 1;
       const last = candidate;
       const fulfills = [];
@@ -1200,18 +1208,18 @@ const computeToolpath = (
       }
       const next = { last, toolpath: [], at: target, cost, length, fulfills };
       jump(next.toolpath, candidate.at.start, [
-        candidate.at.start[X$1],
-        candidate.at.start[Y$1],
+        candidate.at.start[X],
+        candidate.at.start[Y],
         jumpHeight,
       ]);
       jump(
         next.toolpath,
-        [candidate.at.start[X$1], candidate.at.start[Y$1], jumpHeight],
-        [target.start[X$1], target.start[Y$1], jumpHeight]
+        [candidate.at.start[X], candidate.at.start[Y], jumpHeight],
+        [target.start[X], target.start[Y], jumpHeight]
       );
       cut(
         next.toolpath,
-        [target.start[X$1], target.start[Y$1], jumpHeight],
+        [target.start[X], target.start[Y], jumpHeight],
         target.start
       );
       candidates.push(next);
@@ -1248,11 +1256,11 @@ const computeToolpath = (
           candidate.last.at.start
         );
         const nextDirection = subtract(target.start, candidate.at.start);
-        const dot$1 = dot(lastDirection, nextDirection);
-        cost += dot$1 * turnCost;
+        const dot = computeDot(lastDirection, nextDirection);
+        cost += dot * turnCost;
       }
 
-      const distance$1 = distance(candidate.at.start, target.start);
+      const distance = measureDistance(candidate.at.start, target.start);
       const fulfills = [];
       let isFulfilled = true;
       for (const end of candidate.at.ends) {
@@ -1261,7 +1269,7 @@ const computeToolpath = (
           end: end.end,
         });
         if (equals(target.start, end.end)) {
-          cost += stepCost / distance$1;
+          cost += stepCost / distance;
           const length = candidate.length + 1;
           fulfills.push(fulfilledEdge);
           const last = candidate;
@@ -1376,11 +1384,6 @@ const computeToolpath = (
   }
 };
 
-const concatenate = (...paths) => {
-  const result = [null, ...[].concat(...paths.map(close))];
-  return result;
-};
-
 const filter$n = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
 
@@ -1410,18 +1413,6 @@ const cut = (geometry, geometries, open = false) => {
   const outputs = cut$1(inputs, count, open);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
-};
-
-const deduplicate = (path) => {
-  const unique = [];
-  let last = path[path.length - 1];
-  for (const point of path) {
-    if (last === null || point === null || !equals(point, last)) {
-      unique.push(point);
-    }
-    last = point;
-  }
-  return unique;
 };
 
 const filterShape = (geometry) =>
@@ -1615,14 +1606,6 @@ const fix = (geometry, selfIntersection = true) => {
   const outputs = fix$1(inputs, selfIntersection);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
-};
-
-const flip = (path) => {
-  if (path[0] === null) {
-    return [null, ...path.slice(1).reverse()];
-  } else {
-    return path.slice().reverse();
-  }
 };
 
 // Remove any symbols (which refer to cached values).
@@ -1856,24 +1839,6 @@ const getGraphs = (geometry) => {
   return graphs;
 };
 
-const getEdges = (path) => {
-  const edges = [];
-  let last = null;
-  for (const point of path) {
-    if (point === null) {
-      continue;
-    }
-    if (last !== null) {
-      edges.push([last, point]);
-    }
-    last = point;
-  }
-  if (path[0] !== null) {
-    edges.push([last, path[0]]);
-  }
-  return edges;
-};
-
 const getPlans = (geometry) => {
   const plans = [];
   eachItem(geometry, (item) => {
@@ -1943,30 +1908,6 @@ const fill = (geometry, tags = []) => {
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
-
-const X = 0;
-const Y = 1;
-
-/**
- * Measure the area of a path as though it were a polygon.
- * A negative area indicates a clockwise path, and a positive area indicates a counter-clock-wise path.
- * See: http://mathworld.wolfram.com/PolygonArea.html
- * @returns {Number} The area the path would have if it were a polygon.
- */
-const measureArea$1 = (path) => {
-  let last = path.length - 1;
-  let current = path[0] === null ? 1 : 0;
-  let twiceArea = 0;
-  for (; current < path.length; last = current++) {
-    twiceArea +=
-      path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
-  }
-  return twiceArea / 2;
-};
-
-const isClockwise = (path) => measureArea$1(path) < 0;
-
-const isCounterClockwise = (path) => measureArea$1(path) > 0;
 
 const hasNotShow = (geometry, show) =>
   isNotShow(geometry, show)
@@ -2156,8 +2097,6 @@ const op =
     return method(toConcreteGeometry(geometry), walk);
   };
 
-const open = (path) => (isClosed(path) ? [null, ...path] : path);
-
 // We expect the type to be uniquely qualified.
 const registerReifier = (type, reifier) => registry.set(type, reifier);
 
@@ -2189,37 +2128,6 @@ const remesh = (
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
-
-// A path point may be supplemented by a 'forward' and a 'right' vector
-// allowing it to define a plane with a rotation.
-
-const transform = (matrix, path) => {
-  const transformedPath = [];
-  if (isOpen(path)) {
-    transformedPath.push(null);
-  }
-  for (let nth = isOpen(path) ? 1 : 0; nth < path.length; nth++) {
-    const point = path[nth];
-    const transformedPoint = transform$3(matrix, point);
-    if (point.length > 3) {
-      const forward = point.slice(3, 6);
-      const transformedForward = transform$3(matrix, forward);
-      transformedPoint.push(...transformedForward);
-    }
-    if (point.length > 6) {
-      const right = point.slice(6, 9);
-      const transformedRight = transform$3(matrix, right);
-      transformedPoint.push(...transformedRight);
-    }
-    transformedPath.push(transformedPoint);
-  }
-  return transformedPath;
-};
-
-const translate$1 = (vector, path) =>
-  transform(fromTranslation(vector), path);
-const rotateZ$1 = (radians, path) =>
-  transform(fromZRotation(radians), path);
 
 const filter$4 = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
@@ -2513,10 +2421,10 @@ const toTriangles = ({ tags }, geometry) => {
 const toTriangleArray = (geometry) => {
   const triangles = [];
   const op = (geometry, descend) => {
-    const { matrix = identityMatrix, tags, type } = geometry;
+    const { matrix = identity(), tags, type } = geometry;
     const transformTriangles = (triangles) =>
       triangles.map((triangle) =>
-        triangle.map((point) => transform$3(matrix, point))
+        triangle.map((point) => transformCoordinate(point, matrix))
       );
     switch (type) {
       case 'graph': {
@@ -2569,14 +2477,14 @@ const twist = (geometry, radius) => {
 };
 
 const rotateX = (turn, geometry) =>
-  transform$2(fromRotateXToTransform(turn), geometry);
+  transform$1(fromRotateXToTransform(turn), geometry);
 const rotateY = (turn, geometry) =>
-  transform$2(fromRotateYToTransform(turn), geometry);
+  transform$1(fromRotateYToTransform(turn), geometry);
 const rotateZ = (turn, geometry) =>
-  transform$2(fromRotateZToTransform(turn), geometry);
+  transform$1(fromRotateZToTransform(turn), geometry);
 const translate = (vector, geometry) =>
-  transform$2(fromTranslateToTransform(...vector), geometry);
+  transform$1(fromTranslateToTransform(...vector), geometry);
 const scale = (vector, geometry) =>
-  transform$2(fromScaleToTransform(...vector), geometry);
+  transform$1(fromScaleToTransform(...vector), geometry);
 
-export { allTags, assemble, bend, cached, cast, clip, close as closePath, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, concatenate as concatenatePath, convexHull, cut, deduplicate as deduplicatePath, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, flip as flipPath, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getNonVoidGraphs, getNonVoidItems, getNonVoidPlans, getNonVoidPoints, getNonVoidPolygonsWithHoles, getNonVoidSegments, getEdges as getPathEdges, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isClockwise as isClockwisePath, isClosed as isClosedPath, isCounterClockwise as isCounterClockwisePath, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeMasked, isTypeVoid, isTypeWire, isVoid, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, offset, op, open as openPath, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, rotateZ$1 as rotateZPath, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$2 as transform, transformCoordinate, transformingCoordinates, translate, translate$1 as translatePath, twist, typeMasked, typeVoid, typeWire, update, visit, write, writeNonblocking };
+export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getNonVoidGraphs, getNonVoidItems, getNonVoidPlans, getNonVoidPoints, getNonVoidPolygonsWithHoles, getNonVoidSegments, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeMasked, isTypeVoid, isTypeWire, isVoid, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeMasked, typeVoid, typeWire, update, visit, write, writeNonblocking };
