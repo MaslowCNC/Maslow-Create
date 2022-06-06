@@ -4477,6 +4477,10 @@ const toolpath =
     // console.log(JSON.stringify(shape));
     // console.log(JSON.stringify(toolpath));
     for (const { op, from, to } of toolpath.toolpath) {
+      if (!from.every(isFinite)) {
+        // This is from an unknown position.
+        continue;
+      }
       switch (op) {
         case 'cut':
           cuts.push([lerp(0.2, from, to), to]);

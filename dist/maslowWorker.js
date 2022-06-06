@@ -263,7 +263,7 @@ const agent = async ({ ask, message }) => {
 
           const shapeHeight = geometryToGcode.size().height;
 
-          const cutDepth = shapeHeight / 5;
+          const cutDepth = shapeHeight / message.passes;
 
           const oneSlice = geometryToGcode
             .section()
@@ -281,7 +281,7 @@ const agent = async ({ ask, message }) => {
 
           var acumulatedShape = oneSlice.z(-1 * cutDepth);//.toolpath();
           var i = 2;
-          while (i <= 5) {
+          while (i <= message.passes) {
             console.log("In while:");
             console.log(oneSlice.z(-i * cutDepth).cut(tabs));
             acumulatedShape = api.Group(
