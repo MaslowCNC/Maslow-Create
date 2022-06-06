@@ -1,14 +1,6 @@
-import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
-
-const canonicalizeSegment = ([directive, ...args]) => [
-  directive,
-  ...args.map(reallyQuantizeForSpace),
-];
-
-const canonicalize = (svgPath) => svgPath.map(canonicalizeSegment);
 
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -4163,12 +4155,15 @@ const toSvg = async (
 ) => {
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
   const disjointed = disjoint([sectioned]);
+  // svg reverses the Y axis.
   const scaled = scale([1, -1, 1], disjointed);
-  const [min, max] = measureBoundingBox(scaled);
+  const [baseMin] = measureBoundingBox(scaled);
+  const translated = translate([-baseMin[X], -baseMin[Y], 0], disjointed);
+  const geometry = makeAbsolute(translated);
+  const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const geometry = translate([0, -height, 0], scaled);
-  const viewBox = `${min[X].toFixed(5)} ${-max[Y].toFixed(5)} ${width.toFixed(
+  const viewBox = `${min[X].toFixed(5)} ${min[Y].toFixed(5)} ${width.toFixed(
     5
   )} ${height.toFixed(5)}`;
   const svg = [
@@ -4215,7 +4210,8 @@ const toSvg = async (
     }
   }
 
-  for (const { matrix, tags, segments } of getNonVoidSegments(geometry)) {
+  for (const g of getNonVoidSegments(geometry)) {
+    const { matrix, tags, segments } = g;
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];
     let first;
@@ -4244,4 +4240,4 @@ const toSvg = async (
   return new TextEncoder('utf8').encode(output);
 };
 
-export { canonicalize, fromSvg, fromSvgPath$1 as fromSvgPath, toSvg };
+export { fromSvg, fromSvgPath$1 as fromSvgPath, toSvg };

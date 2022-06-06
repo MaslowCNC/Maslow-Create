@@ -235,6 +235,21 @@ const agent = async ({ ask, message }) => {
         const svgOutlineBuffer = await toSvg(geometryToSvgOutline.toKeptGeometry());
         return svgOutlineBuffer;
         break;
+    case "layout":
+        console.log("Layout ran");
+        const layoutInput = await maslowRead(message.readPath);
+
+        const cutlistItems = layoutInput.get('part:' + "cutlist");
+
+        var leafs = cutlistItems.each(
+          (s) => s.to(api.XY(), (a) => a),
+          (leafs, shape) => leafs
+        );
+
+        await api.saveGeometry(message.writePath, api.Group(...leafs).pack({itemMargin: message.spacing}));
+        
+        return true;
+        break;
     case "gcode":
         
         const geometryToGcode = await maslowRead(message.readPath);
@@ -243,28 +258,62 @@ const agent = async ({ ask, message }) => {
         
         const cutDepth = shapeHeight / message.passes;
 
-        const oneSlice = geometryToGcode.section().fuse().offset(message.toolSize / 2).outline();
+        const addTabs = (geometryToGcode) => {
+          console.log('Adding tabs');
 
-        const tabs = api.Group(api.Box(10, 10000).ez(-shapeHeight), api.Box(10000, 10).ez(-shapeHeight)).z(shapeHeight/-2.1); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
+          const shapeHeight = geometryToGcode.size().height;
 
-        var acumulatedShape = oneSlice.z(-1*cutDepth).toolpath();
-        var i = 2;
-        while(i <= message.passes){
-            if(message.tabs == "true"){
-                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).cut(tabs).toolpath());
-            }
-            else{
-                acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth).toolpath());
-            }
-            acumulatedShape = api.Group(acumulatedShape, oneSlice.z(-i*cutDepth));
+          const cutDepth = shapeHeight / message.passes;
+
+          const oneSlice = geometryToGcode
+            .section()
+            .fuse()
+            .offset(6 / 2) //This is to compensate for the cutting tool size
+            .outline();
+
+          var tabs = api.Group(
+            api.Box(7, 10000).ez(-shapeHeight),
+            api.Box(10000, 7).ez(-shapeHeight)
+          ).z(shapeHeight / -2.1).void(); //This is not quite 1/2 because we want to cut the middle path in 3 passes...just a style choice
+
+          //tabs = tabs.to(geometryToGcode.in()); //Moves the tabs to be in the middle of the input shape
+          tabs = tabs.to(geometryToGcode.in().align().origin()).z(shapeHeight/-2); //Moves the tabs to be in the middle of the input shape
+
+          var acumulatedShape = oneSlice.z(-1 * cutDepth);//.toolpath();
+          var i = 2;
+          while (i <= message.passes) {
+            console.log("In while:");
+            console.log(oneSlice.z(-i * cutDepth).cut(tabs));
+            acumulatedShape = api.Group(
+              acumulatedShape,
+              oneSlice
+                .z(-i * cutDepth)
+                .cut(tabs)
+                .toolpath()
+            );
             i = i + 1;
-        }
+          }
 
-        //acumulatedShape = acumulatedShape.z(-1*cutDepth);
+          return acumulatedShape;//api.Group(acumulatedShape, tabs);
+        };
 
-        await api.saveGeometry(message.writePath, api.Group(acumulatedShape, tabs));
-        
-        return new TextDecoder().decode(await toGcode(acumulatedShape.toGeometry()));
+        const cutlistItemsTabs = geometryToGcode.in();
+
+        var leafs = cutlistItemsTabs.each(
+          (s) => addTabs(s),
+          (leafs, shape) => leafs
+        );
+
+        const output = api.Group(...leafs);
+
+        await api.saveGeometry(message.writePath, output);
+
+
+        console.log(output);
+        console.log("Generated gcode: ");
+        console.log(new TextDecoder().decode(await toGcode(output.toGeometry())));
+
+        return new TextDecoder().decode(await toGcode(output.toGeometry()));
         
         break;
     case "getHash":
