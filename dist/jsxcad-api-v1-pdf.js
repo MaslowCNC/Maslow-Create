@@ -71,10 +71,10 @@ function sum (o) {
 
 var hashSum = sum;
 
-const preparePdf = (shape, name, options = {}) => {
+const preparePdf = (shape, name, op = (s) => s, options = {}) => {
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(shape.toDisjointGeometry())) {
+  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const op = toPdf(entry, options).catch(getPendingErrorHandler());
     addPending(op);
     entries.push({
@@ -82,18 +82,20 @@ const preparePdf = (shape, name, options = {}) => {
       filename: `${name}_${index++}.pdf`,
       type: 'application/pdf',
     });
+    Shape.fromGeometry(entry).gridView(name, options.view);
   }
   return entries;
 };
 
 const pdf =
-  (name, options = {}) =>
+  (...args) =>
   (shape) => {
-    const entries = preparePdf(undefined, name, options);
+    const { value: name, func: op, object: options } = Shape.destructure(args);
+    const entries = preparePdf(shape, name, op, options);
     const download = { entries };
-    const hash$1 = hashSum({ name, options }) + hash(undefined.toGeometry());
+    const hash$1 = hashSum({ name, options }) + hash(shape.toGeometry());
     emit({ download, hash: hash$1 });
-    return undefined;
+    return shape;
   };
 
 Shape.registerMethod('pdf', pdf);

@@ -1,7 +1,6 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, BufferGeometry, Float32BufferAttribute, Group, EdgesGeometry, LineSegments, LineBasicMaterial, WireframeGeometry, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, EventDispatcher, MeshBasicMaterial, Vector3, Mesh, BoxGeometry, ArrowHelper, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Group, Shape, Path, ShapeGeometry, EdgesGeometry, LineBasicMaterial, LineSegments, WireframeGeometry, Plane, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, VertexColors, Color, Matrix4, Box3, Matrix3, Quaternion, GridHelper, PlaneGeometry, MeshStandardMaterial, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
-import { toPlane } from './jsxcad-math-poly3.js';
 
 const GEOMETRY_LAYER = 0;
 const SKETCH_LAYER = 1;
@@ -69,7 +68,7 @@ const buildScene = ({
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
-    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.camera.near = 0.5;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
     spotLight.userData.dressing = true;
@@ -826,6 +825,94 @@ const updateUserData = (geometry, scene, userData) => {
   }
 };
 
+// https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
+const orient = (mesh, source, target, offset) => {
+  const translation = new Matrix4();
+  translation.makeTranslation(0, 0, -offset);
+  mesh.applyMatrix4(translation);
+
+  const cosA = target.clone().dot(source);
+
+  if (cosA === 1) {
+    return;
+  }
+
+  if (cosA === -1) {
+    const w = 1;
+    const cosAlpha = -1;
+    const sinAlpha = 0;
+    const matrix4 = new Matrix4();
+
+    matrix4.set(
+      w,
+      0,
+      0,
+      0,
+      0,
+      cosAlpha,
+      -sinAlpha,
+      0,
+      0,
+      sinAlpha,
+      cosAlpha,
+      0,
+      0,
+      0,
+      0,
+      w
+    );
+    mesh.applyMatrix4(matrix4);
+    return;
+  }
+
+  // Otherwise we need to build a matrix.
+
+  const axis = new Vector3();
+  axis.crossVectors(target, source);
+  const k = 1 / (1 + cosA);
+
+  const matrix3 = new Matrix3();
+  matrix3.set(
+    axis.x * axis.x * k + cosA,
+    axis.y * axis.x * k - axis.z,
+    axis.z * axis.x * k + axis.y,
+    axis.x * axis.y * k + axis.z,
+    axis.y * axis.y * k + cosA,
+    axis.z * axis.y * k - axis.x,
+    axis.x * axis.z * k - axis.y,
+    axis.y * axis.z * k + axis.x,
+    axis.z * axis.z * k + cosA
+  );
+
+  const matrix4 = new Matrix4();
+  matrix4.setFromMatrix3(matrix3);
+
+  const position = new Vector3();
+  const quaternion = new Quaternion();
+  const scale = new Vector3();
+
+  matrix4.decompose(position, quaternion, scale);
+
+  mesh.applyMatrix4(matrix4);
+};
+
+const parseRational = (text) => {
+  if (text === '') {
+    return 0;
+  }
+  let [numerator, denominator = '1'] = text.split('/');
+  while (true) {
+    const value = parseInt(numerator) / parseInt(denominator);
+    if (!isFinite(value)) {
+      // console.log(`Non-finite: ${numerator}/${denominator}`);
+      numerator = numerator.substring(0, numerator.length - 1);
+      denominator = denominator.substring(0, denominator.length - 1);
+      continue;
+    }
+    return value;
+  }
+};
+
 const buildMeshes = async ({
   geometry,
   scene,
@@ -958,26 +1045,55 @@ const buildMeshes = async ({
       scene.add(mesh);
       break;
     }
-    case 'triangles': {
-      const prepareTriangles = (triangles) => {
-        const normals = [];
-        const positions = [];
-        for (const triangle of triangles) {
-          const plane = toPlane(triangle);
-          if (plane === undefined) {
-            continue;
-          }
-          const [px, py, pz] = plane;
-          for (const [x = 0, y = 0, z = 0] of triangle) {
-            normals.push(px, py, pz);
-            positions.push(x, y, z);
-          }
+    case 'graph': {
+      const { tags, graph } = geometry;
+      const { serializedSurfaceMesh } = graph;
+      if (serializedSurfaceMesh === undefined) {
+        throw Error(`Graph is not serialized: ${JSON.stringify(geometry)}`);
+      }
+      const tokens = serializedSurfaceMesh
+        .split(/\s+/g)
+        .map((token) => parseRational(token));
+      let p = 0;
+      let vertexCount = tokens[p++];
+      const vertices = [];
+      while (vertexCount-- > 0) {
+        vertices.push([tokens[p++], tokens[p++], tokens[p++]]);
+      }
+      let faceCount = tokens[p++];
+      const positions = [];
+      const normals = [];
+      while (faceCount-- > 0) {
+        let vertexCount = tokens[p++];
+        if (vertexCount !== 3) {
+          throw Error('Faces must be triangles');
         }
-        return { normals, positions };
-      };
-
-      const { triangles } = geometry;
-      const { positions, normals } = prepareTriangles(triangles);
+        const triangle = [];
+        while (vertexCount-- > 0) {
+          const vertex = vertices[tokens[p++]];
+          if (!vertex.every(isFinite)) {
+            throw Error(`Non-finite vertex: ${vertex}`);
+          }
+          triangle.push(vertex);
+        }
+        const plane = new Plane();
+        plane.setFromCoplanarPoints(
+          new Vector3(...triangle[0]),
+          new Vector3(...triangle[1]),
+          new Vector3(...triangle[2])
+        );
+        positions.push(...triangle[0]);
+        positions.push(...triangle[1]);
+        positions.push(...triangle[2]);
+        plane.normalize();
+        const { x, y, z } = plane.normal;
+        normals.push(x, y, z);
+        normals.push(x, y, z);
+        normals.push(x, y, z);
+      }
+      if (positions.length === 0) {
+        break;
+      }
       const bufferGeometry = new BufferGeometry();
       bufferGeometry.setAttribute(
         'position',
@@ -1000,7 +1116,7 @@ const buildMeshes = async ({
         if (tags.includes('type:void')) {
           material.transparent = true;
           material.depthWrite = false;
-          material.opacity *= 0.1;
+          material.opacity *= 0.125;
           mesh.castShadow = false;
           mesh.receiveShadow = false;
         }
@@ -1010,13 +1126,18 @@ const buildMeshes = async ({
 
       {
         const edges = new EdgesGeometry(bufferGeometry);
-        const outline = new LineSegments(
-          edges,
-          new LineBasicMaterial({ color: 0x000000 })
-        );
+        const material = new LineBasicMaterial({ color: 0x000000 });
+        const outline = new LineSegments(edges, material);
         outline.userData.isOutline = true;
         outline.userData.hasShowOutline = tags.includes('show:outline');
         outline.visible = outline.userData.hasShowOutline;
+        if (tags.includes('type:void')) {
+          material.transparent = true;
+          material.depthWrite = false;
+          material.opacity *= 0.25;
+          mesh.castShadow = false;
+          mesh.receiveShadow = false;
+        }
         mesh.add(outline);
       }
 
@@ -1030,6 +1151,78 @@ const buildMeshes = async ({
       }
 
       scene.add(mesh);
+      break;
+    }
+    case 'polygonsWithHoles': {
+      const normal = new Vector3(
+        geometry.plane[0],
+        geometry.plane[1],
+        geometry.plane[2]
+      ).normalize();
+      const baseNormal = new Vector3(0, 0, 1);
+      mesh = new Group();
+      for (const { points, holes } of geometry.polygonsWithHoles) {
+        const boundaryPoints = [];
+        for (const point of points) {
+          boundaryPoints.push(new Vector3(point[0], point[1], point[2]));
+        }
+        const shape = new Shape(boundaryPoints);
+        for (const { points } of holes) {
+          const holePoints = [];
+          for (const point of points) {
+            holePoints.push(new Vector3(point[0], point[1], point[2]));
+          }
+          shape.holes.push(new Path(holePoints));
+        }
+        const shapeGeometry = new ShapeGeometry(shape);
+        if (tags.includes('show:skin')) {
+          const material = await buildMeshMaterial(definitions, tags);
+          mesh = new Mesh(shapeGeometry, material);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          mesh.layers.set(layer);
+          updateUserData(geometry, scene, mesh.userData);
+          mesh.userData.tangible = true;
+          if (tags.includes('type:void')) {
+            material.transparent = true;
+            material.depthWrite = false;
+            material.opacity *= 0.125;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+        } else {
+          mesh = new Group();
+        }
+
+        {
+          const edges = new EdgesGeometry(shapeGeometry);
+          const material = new LineBasicMaterial({ color: 0x000000 });
+          const outline = new LineSegments(edges, material);
+          outline.userData.isOutline = true;
+          outline.userData.hasShowOutline = tags.includes('show:outline');
+          outline.visible = outline.userData.hasShowOutline;
+          if (tags.includes('type:void')) {
+            material.transparent = true;
+            material.depthWrite = false;
+            material.opacity *= 0.25;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+          mesh.add(outline);
+        }
+
+        if (tags.includes('show:wireframe')) {
+          const edges = new WireframeGeometry(shapeGeometry);
+          const outline = new LineSegments(
+            edges,
+            new LineBasicMaterial({ color: 0x000000 })
+          );
+          mesh.add(outline);
+        }
+      }
+      scene.add(mesh);
+      // Need to handle the origin shift.
+      orient(mesh, normal, baseNormal, geometry.plane[3]);
       break;
     }
     default:

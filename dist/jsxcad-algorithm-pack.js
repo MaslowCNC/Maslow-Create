@@ -1,4 +1,3 @@
-import { min, max } from './jsxcad-math-vec3.js';
 import { toTransformedGeometry, translate, measureBoundingBox } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -235,12 +234,28 @@ var BinPackingEs = unwrapExports(binPacking);
 
 const { GrowingPacker, Packer } = BinPackingEs;
 
+const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];
+
+const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];
+
 const X = 0;
 const Y = 1;
 const Z = 2;
 
 const measureSize = (geometry) => {
-  const [min, max] = measureBoundingBox(geometry);
+  const bounds = measureBoundingBox(geometry);
+  if (bounds === undefined) {
+    return;
+  }
+  const [min, max] = bounds;
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   return [width, height, min[Z]];
@@ -280,7 +295,11 @@ const pack = (
   const blocks = [];
 
   for (const geometry of geometries) {
-    const [width, height, minZ] = measureSize(geometry);
+    const size = measureSize(geometry);
+    if (size === undefined) {
+      continue;
+    }
+    const [width, height, minZ] = size;
     if (!isFinite(width) || !isFinite(height)) {
       continue;
     }

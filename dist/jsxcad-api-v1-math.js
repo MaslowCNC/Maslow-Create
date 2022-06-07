@@ -1,6 +1,3 @@
-import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-export { jsxcadMathVec3_js as vec };
-
 /**
  *
  * # Ease

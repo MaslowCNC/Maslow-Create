@@ -26201,7 +26201,7 @@ function WebGLRenderer( parameters = {} ) {
 
 		state = new WebGLState( _gl, extensions, capabilities );
 
-		info = new WebGLInfo( _gl );
+		info = new WebGLInfo();
 		properties = new WebGLProperties();
 		textures = new WebGLTextures( _gl, extensions, state, properties, capabilities, utils, info );
 		cubemaps = new WebGLCubeMaps( _this );
@@ -55534,4 +55534,4 @@ class TrackballControls extends EventDispatcher {
 
 }
 
-export { ArrowHelper, AxesHelper, Box3, BoxGeometry, BufferGeometry, CanvasTexture, ColladaLoader, Color, CylinderGeometry, DoubleSide, EdgesGeometry, Euler, EventDispatcher, Float32BufferAttribute, GridHelper, Group, ImageBitmapLoader, Layers, Line, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshBasicMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry, PerspectiveCamera, Plane, PlaneGeometry, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, SVGLoader, Scene, ShapeGeometry, SphereGeometry, SpotLight, TorusGeometry, TrackballControls, Vector2, Vector3, VertexColors, WebGLRenderer, WireframeGeometry };
+export { ArrowHelper, AxesHelper, Box3, BoxGeometry, BufferGeometry, CanvasTexture, ColladaLoader, Color, CylinderGeometry, DoubleSide, EdgesGeometry, Euler, EventDispatcher, Float32BufferAttribute, GridHelper, Group, ImageBitmapLoader, Layers, Line, LineBasicMaterial, LineSegments, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry, Path, PerspectiveCamera, Plane, PlaneGeometry, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, SVGLoader, Scene, Shape, ShapeGeometry, SphereGeometry, SpotLight, TorusGeometry, TrackballControls, Vector2, Vector3, VertexColors, WebGLRenderer, WireframeGeometry };

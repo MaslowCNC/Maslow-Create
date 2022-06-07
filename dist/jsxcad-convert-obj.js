@@ -1,4 +1,4 @@
-import { reverseFaceOrientationsOfGraph, taggedGraph, taggedGroup } from './jsxcad-geometry.js';
+import { fromPolygons, taggedGroup } from './jsxcad-geometry.js';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -235,40 +235,24 @@ var OBJFile = function () {
 
 var OBJFile_1 = OBJFile;
 
-const fromObjSync = (data, { invert = false } = {}) => {
+const fromObjSync = (data) => {
   const { models } = new OBJFile_1(new TextDecoder('utf8').decode(data)).parse();
-
   const group = [];
-
   for (const model of models) {
     const { vertices, faces } = model;
-
-    let graph = { points: [], exactPoints: [], edges: [], facets: [] };
-
-    for (const { x, y, z } of vertices) {
-      graph.points.push([x, y, z]);
+    const polygons = [];
+    for (const face of faces) {
+      const polygon = face.vertices.map(({ vertexIndex }) => {
+        const { x, y, z } = vertices[vertexIndex - 1];
+        return [x, y, z];
+      });
+      polygons.push({ points: polygon });
     }
-
-    for (const { vertices } of faces) {
-      const facet = graph.facets.length;
-      const firstEdgeId = graph.edges.length;
-      let edge;
-      for (const { vertexIndex } of vertices) {
-        edge = { point: vertexIndex - 1, next: graph.edges.length + 1, facet };
-        graph.edges.push(edge);
-      }
-      edge.next = firstEdgeId;
-      graph.facets[facet] = { edge: firstEdgeId };
-    }
-    if (invert) {
-      graph = reverseFaceOrientationsOfGraph(graph);
-    }
-    group.push(taggedGraph({}, graph));
+    group.push(fromPolygons({}, polygons));
   }
-
   return taggedGroup({}, ...group);
 };
 
-const fromObj = async (data, options = {}) => fromObjSync(data, options);
+const fromObj = async (data) => fromObjSync(data);
 
 export { fromObj, fromObjSync };
