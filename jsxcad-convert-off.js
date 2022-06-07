@@ -1,4 +1,4 @@
-import { reverseFaceOrientationsOfGraph, taggedGraph } from './jsxcad-geometry.js';
+import { fromPolygons } from './jsxcad-geometry.js';
 
 // First line (optional): the letters OFF to mark the file type.
 // Second line: the number of vertices, number of faces, and number of edges, in order (the latter can be ignored by writing 0 instead).
@@ -8,7 +8,7 @@ import { reverseFaceOrientationsOfGraph, taggedGraph } from './jsxcad-geometry.j
 
 const split = (text) => text.match(/\S+/g) || [];
 
-const fromOffSync = (data, { invert = false } = {}) => {
+const fromOffSync = (data) => {
   const text = new TextDecoder('utf8').decode(data);
   let line = 0;
   const lines = text.split('\n').filter((line) => !line.startsWith('#'));
@@ -18,39 +18,23 @@ const fromOffSync = (data, { invert = false } = {}) => {
   const [vertexCount = 0, faceCount = 0] = lines[line++]
     .split(' ')
     .map((span) => parseInt(span, 10));
-  let graph = { points: [], exactPoints: [], edges: [], facets: [] };
+  const points = [];
   for (let nth = 0; nth < vertexCount; nth++) {
     const text = lines[line++];
     const [x, y, z] = split(text);
-    if (text.includes('.')) {
-      graph.points[nth] = [parseFloat(x), parseFloat(y), parseFloat(z)];
-    } else {
-      graph.exactPoints[nth] = [x, y, z];
-    }
+    points[nth] = [parseFloat(x), parseFloat(y), parseFloat(z)];
   }
+  const polygons = [];
   for (let nthFacet = 0; nthFacet < faceCount; nthFacet++) {
-    const [vertexCount, ...vertices] = split(lines[line++]).map((span) =>
+    const [, /* vertexCount */ ...vertices] = split(lines[line++]).map((span) =>
       parseInt(span, 10)
     );
-    const firstEdge = graph.edges.length;
-    let lastEdgeNode;
-    for (let nthVertex = 0; nthVertex < vertexCount; nthVertex++) {
-      lastEdgeNode = {
-        point: vertices[nthVertex],
-        next: graph.edges.length + 1,
-        facet: nthFacet,
-      };
-      graph.edges.push(lastEdgeNode);
-    }
-    lastEdgeNode.next = firstEdge;
-    graph.facets[nthFacet] = { edge: firstEdge };
+    const polygon = vertices.map((nthVertex) => points[nthVertex]);
+    polygons.push({ points: polygon });
   }
-  if (invert) {
-    graph = reverseFaceOrientationsOfGraph(graph);
-  }
-  return taggedGraph({}, graph);
+  return fromPolygons({}, polygons);
 };
 
-const fromOff = async (data, options = {}) => fromOffSync(data, options);
+const fromOff = async (data) => fromOffSync(data);
 
 export { fromOff, fromOffSync };

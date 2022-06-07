@@ -1,19 +1,15 @@
-import { op, visit } from './jsxcad-geometry.js';
-
-const X = 0;
-const Y = 1;
-const Z = 2;
+import { op, visit, transformCoordinate } from './jsxcad-geometry.js';
 
 // FIX: This is actually GRBL.
-const toGcode = async (geometry) => {
+const toGcode = async (geometry, { jumpHeight = 1 } = {}) => {
   const codes = [];
 
   // CHECK: Perhaps this should be a more direct modeling of the GRBL state?
   const state = {
     // Where is the tool
-    x: 0,
-    y: 0,
-    z: 0,
+    x: undefined,
+    y: undefined,
+    z: undefined,
     // How 'fast' the tool is running (rpm or power).
     s: 0,
     f: 0,
@@ -31,7 +27,7 @@ const toGcode = async (geometry) => {
   };
 
   const pX = (x = state.x) => {
-    if (x !== state.x) {
+    if (isFinite(x) && x !== state.x) {
       return ` X${value(x)}`;
     } else {
       return '';
@@ -39,7 +35,7 @@ const toGcode = async (geometry) => {
   };
 
   const pY = (y = state.y) => {
-    if (y !== state.y) {
+    if (isFinite(y) && y !== state.y) {
       return ` Y${value(y)}`;
     } else {
       return '';
@@ -47,7 +43,7 @@ const toGcode = async (geometry) => {
   };
 
   const pZ = (z = state.z) => {
-    if (z !== state.z) {
+    if (isFinite(z) && z !== state.z) {
       return ` Z${value(z)}`;
     } else {
       return '';
@@ -128,18 +124,28 @@ const toGcode = async (geometry) => {
 
   cM3();
 
-  const processToolpath = ({ toolpath }) => {
+  const processToolpath = ({ matrix, toolpath }) => {
+    const update = (original, transformed) =>
+      isFinite(original) ? transformed : original;
+    const transform = ([ox, oy, oz]) => {
+      // Transform the coordinate.
+      const [x = 0, y = 0, z = 0] = [ox, oy, oz];
+      const [tx, ty, tz] = transformCoordinate([x, y, z], matrix);
+      // Making sure that undefined elements remain undefined.
+      return [update(ox, tx), update(oy, ty), update(oz, tz)];
+    };
     for (const entry of toolpath) {
+      const [x, y, z] = transform(entry.to);
       switch (entry.op) {
         case 'jump':
           cF({ f: entry.speed });
           cS({ s: entry.power });
-          cG0({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
+          cG0({ x, y, z: jumpHeight });
           break;
         case 'cut':
           cF({ f: entry.speed });
           cS({ s: entry.power });
-          cG1({ x: entry.to[X], y: entry.to[Y], z: entry.to[Z] });
+          cG1({ x, y, z });
           break;
       }
     }

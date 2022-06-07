@@ -236,6 +236,11 @@ Buffer.TYPED_ARRAY_SUPPORT = global$1.TYPED_ARRAY_SUPPORT !== undefined
   ? global$1.TYPED_ARRAY_SUPPORT
   : true;
 
+/*
+ * Export kMaxLength after typed array support is determined.
+ */
+kMaxLength();
+
 function kMaxLength () {
   return Buffer.TYPED_ARRAY_SUPPORT
     ? 0x7fffffff
@@ -327,6 +332,8 @@ Buffer.from = function (value, encodingOrOffset, length) {
 if (Buffer.TYPED_ARRAY_SUPPORT) {
   Buffer.prototype.__proto__ = Uint8Array.prototype;
   Buffer.__proto__ = Uint8Array;
+  if (typeof Symbol !== 'undefined' && Symbol.species &&
+      Buffer[Symbol.species] === Buffer) ;
 }
 
 function assertSize (size) {
@@ -15875,7 +15882,7 @@ const toFont = (options = {}, data) => {
     const group = [];
     for (const geometry of svgPaths.map((svgPath) =>
       fromSvgPath(new TextEncoder('utf8').encode(svgPath), {
-        curveSegments: curveSegments,
+        curveSegments,
       })
     )) {
       group.push(fill(scale([factor, -factor, factor], geometry)));

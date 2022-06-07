@@ -300,6 +300,9 @@ const subtract = ([ax, ay, az], [bx, by, bz]) => [
  * @returns {vec3} out
  */
 const transform = (matrix, [x = 0, y = 0, z = 0]) => {
+  if (!matrix) {
+    return [x, y, z];
+  }
   let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
   w = w || 1.0;
   return [

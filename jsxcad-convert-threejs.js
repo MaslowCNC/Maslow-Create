@@ -1,5 +1,5 @@
 import { ColladaLoader, SVGLoader, Group, MeshBasicMaterial, Color, DoubleSide, ShapeGeometry, Mesh } from './jsxcad-algorithm-threejs.js';
-import { taggedGroup, fromTrianglesToGraph, toDisjointGeometry } from './jsxcad-geometry.js';
+import { taggedGroup, fromPolygons, toConcreteGeometry } from './jsxcad-geometry.js';
 import { toTagFromRgb } from './jsxcad-algorithm-color.js';
 
 const fromColladaToThreejs = async (input) => {
@@ -110,7 +110,7 @@ const fromThreejsToGeometry = async (threejs) => {
         triangles.push({ points });
       }
     }
-    return fromTrianglesToGraph({ tags }, triangles);
+    return fromPolygons({ tags }, triangles);
   }
 };
 
@@ -122,7 +122,7 @@ const toThreejsPage = async (
   geometry,
   { view, title = 'JSxCAD Viewer' } = {}
 ) => {
-  const disjointGeometry = toDisjointGeometry(await geometry);
+  const disjointGeometry = toConcreteGeometry(await geometry);
   const html = `
 <html>
  <head>
