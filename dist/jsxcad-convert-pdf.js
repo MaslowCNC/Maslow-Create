@@ -1,4 +1,4 @@
-import { measureBoundingBox, section, disjoint, scale, getNonVoidPolygonsWithHoles, getNonVoidSegments, transformCoordinate, transformingCoordinates } from './jsxcad-geometry.js';
+import { measureBoundingBox, section, disjoint, scale, linearize, isNotTypeGhost, transformCoordinate, transformingCoordinates } from './jsxcad-geometry.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const X = 0;
@@ -82,8 +82,10 @@ const toPdf = async (
   const disjoint$1 = disjoint([section$1]);
   const prepared = scale([scale$1, scale$1, scale$1], disjoint$1);
 
-  for (const { matrix, tags, polygonsWithHoles } of getNonVoidPolygonsWithHoles(
-    prepared
+  for (const { matrix, tags, polygonsWithHoles } of linearize(
+    prepared,
+    (geometry) =>
+      geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry)
   )) {
     for (const { points, holes } of polygonsWithHoles) {
       lines.push(toFillColor(toRgbFromTags(tags, definitions, black)));
@@ -109,7 +111,10 @@ const toPdf = async (
     }
   }
 
-  for (const { matrix, tags, segments } of getNonVoidSegments(prepared)) {
+  for (const { matrix, tags, segments } of linearize(
+    prepared,
+    (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
+  )) {
     lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     let last;
     for (let [start, end] of segments) {

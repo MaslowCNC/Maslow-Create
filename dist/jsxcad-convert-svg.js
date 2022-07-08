@@ -1,5 +1,5 @@
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, getNonVoidPolygonsWithHoles, transformingCoordinates, getNonVoidSegments, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 function unwrapExports (x) {
@@ -4177,8 +4177,10 @@ const toSvg = async (
     )}mm" viewBox="${viewBox}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { matrix, tags, polygonsWithHoles } of getNonVoidPolygonsWithHoles(
-    geometry
+  for (const { matrix, tags, polygonsWithHoles } of linearize(
+    geometry,
+    (geometry) =>
+      geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry)
   )) {
     for (const polygonWithHoles of polygonsWithHoles) {
       const { points, holes } = polygonWithHoles;
@@ -4210,7 +4212,10 @@ const toSvg = async (
     }
   }
 
-  for (const g of getNonVoidSegments(geometry)) {
+  for (const g of linearize(
+    geometry,
+    (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
+  )) {
     const { matrix, tags, segments } = g;
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];

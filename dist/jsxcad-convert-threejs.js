@@ -110,7 +110,7 @@ const fromThreejsToGeometry = async (threejs) => {
         triangles.push({ points });
       }
     }
-    return fromPolygons({ tags }, triangles);
+    return fromPolygons(triangles, { tags });
   }
 };
 

@@ -1,7 +1,6 @@
-import { rewriteViewGroupOrient, appendViewGroupCode, extractViewGroupCode, deleteViewGroupCode } from './jsxcad-compiler.js';
 import { readOrWatch, unwatchFile, watchFile, boot, read, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { toDomElement, getNotebookControlData } from './jsxcad-ui-notebook.js';
-import { orbitDisplay, raycast, getWorldPosition } from './jsxcad-ui-threejs.js';
+import { orbitDisplay, raycast } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { execute } from './jsxcad-api.js';
@@ -11064,6 +11063,8 @@ ace.define("ace/tooltip",["require","exports","module","ace/lib/oop","ace/lib/do
 
 require("./lib/oop");
 var dom = require("./lib/dom");
+
+var CLASSNAME = "ace_tooltip";
 function Tooltip (parentNode) {
     this.isOpen = false;
     this.$element = null;
@@ -11073,7 +11074,7 @@ function Tooltip (parentNode) {
 (function() {
     this.$init = function() {
         this.$element = dom.createElement("div");
-        this.$element.className = "ace_tooltip";
+        this.$element.className = CLASSNAME;
         this.$element.style.display = "none";
         this.$parentNode.appendChild(this.$element);
         return this.$element;
@@ -11108,6 +11109,7 @@ function Tooltip (parentNode) {
     this.hide = function() {
         if (this.isOpen) {
             this.getElement().style.display = "none";
+            this.getElement().className = CLASSNAME;
             this.isOpen = false;
         }
     };
@@ -11188,6 +11190,12 @@ function GutterHandler(mouseHandler) {
         tooltipAnnotation = annotation.text.join("<br/>");
 
         tooltip.setHtml(tooltipAnnotation);
+
+        var annotationClassName = annotation.className;
+        if (annotationClassName) {
+            tooltip.setClassName(annotationClassName.trim());
+        }
+
         tooltip.show();
         editor._signal("showGutterTooltip", tooltip);
         editor.on("mousewheel", hideTooltip);
@@ -12532,7 +12540,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.5.3";
+exports.version = "1.7.1";
 
 });
 
@@ -23898,7 +23906,10 @@ var Gutter = function(parentEl) {
                 rowInfo.text.push(annoText);
 
             var type = annotation.type;
-            if (type == "error")
+            var className = annotation.className;
+            if (className) 
+                rowInfo.className = className;
+            else if (type == "error")
                 rowInfo.className = " ace_error";
             else if (type == "warning" && rowInfo.className != " ace_error")
                 rowInfo.className = " ace_warning";
@@ -24950,15 +24961,15 @@ var Text = function(parentEl) {
 
     this.$renderSimpleLine = function(parent, tokens) {
         var screenColumn = 0;
-        var token = tokens[0];
-        var value = token.value;
-        if (this.displayIndentGuides)
-            value = this.renderIndentGuide(parent, value);
-        if (value)
-            screenColumn = this.$renderToken(parent, screenColumn, token, value);
-        for (var i = 1; i < tokens.length; i++) {
-            token = tokens[i];
-            value = token.value;
+
+        for (var i = 0; i < tokens.length; i++) {
+            var token = tokens[i];
+            var value = token.value;
+            if (i == 0 && this.displayIndentGuides) {
+                value = this.renderIndentGuide(parent, value);
+                if (!value)
+                    continue;
+            }
             if (screenColumn + value.length > this.MAX_LINE_LENGTH)
                 return this.$renderOverflowMessage(parent, screenColumn, token, value);
             screenColumn = this.$renderToken(parent, screenColumn, token, value);
@@ -27753,7 +27764,7 @@ var WorkerClient = function(worker) {
 
         this.$doc = doc;
         this.call("setValue", [doc.getValue()]);
-        doc.on("change", this.changeListener);
+        doc.on("change", this.changeListener, true);
     };
 
     this.changeListener = function(delta) {
@@ -40444,49 +40455,18 @@ dom.importCssString("\
     opacity: 0.5;\
     margin: 0.9em;\
 }\
+.ace_completion-message {\
+    color: blue;\
+}\
 .ace_editor.ace_autocomplete .ace_completion-highlight{\
     color: #2d69c7;\
 }\
 .ace_dark.ace_editor.ace_autocomplete .ace_completion-highlight{\
     color: #93ca12;\
 }\
-.ace_autocomplete.ace-tm .ace_marker-layer .ace_active-line {\
-    background-color: #CAD6FA;\
-    z-index: 1;\
-}\
-.ace_autocomplete.ace-tm .ace_line-hover {\
-    border: 1px solid #abbffe;\
-    margin-top: -1px;\
-    background: rgba(233,233,253,0.4);\
-}\
-.ace_autocomplete .ace_line-hover {\
-    position: absolute;\
-    z-index: 2;\
-}\
-.ace_autocomplete .ace_scroller {\
-    background: none;\
-    border: none;\
-    box-shadow: none;\
-}\
-.ace_rightAlignedText {\
-    color: gray;\
-    display: inline-block;\
-    position: absolute;\
-    right: 4px;\
-    text-align: right;\
-    z-index: -1;\
-}\
-.ace_completion-message {\
-    color: blue;\
-}\
-.ace_autocomplete .ace_completion-highlight{\
-    text-shadow: 0 0 0.01em;\
-}\
-.ace_autocomplete {\
-    width: 280px;\
+.ace_editor.ace_autocomplete {\
+    width: 300px;\
     z-index: 200000;\
-    background: #fbfbfb;\
-    color: #444;\
     border: 1px lightgray solid;\
     position: fixed;\
     box-shadow: 2px 3px 5px rgba(0,0,0,.2);\
@@ -40712,6 +40692,8 @@ var Autocomplete = function() {
         if (data.completer && data.completer.insertMatch) {
             data.completer.insertMatch(this.editor, data);
         } else {
+            if (!completions)
+                return false;
             if (completions.filterText) {
                 var ranges = this.editor.selection.getAllRanges();
                 for (var i = 0, range; range = ranges[i]; i++) {
@@ -42328,6 +42310,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
       onClick: propTypes$1.exports["function"],
       onDrag: propTypes$1.exports["function"],
       onDragEnd: propTypes$1.exports["function"],
+      onEdits: propTypes$1.exports["function"],
       onKeydown: propTypes$1.exports["function"],
       onJog: propTypes$1.exports["function"],
       onUpdateGeometry: propTypes$1.exports["function"],
@@ -42474,6 +42457,20 @@ class OrbitView extends ReactDOM$2.PureComponent {
       }
     });
 
+    const handleEdits = ({
+      edits
+    }) => {
+      const {
+        onEdits
+      } = this.props;
+
+      if (onEdits) {
+        onEdits({
+          edits
+        });
+      }
+    };
+
     const handleJog = ({
       object,
       at,
@@ -42530,6 +42527,7 @@ class OrbitView extends ReactDOM$2.PureComponent {
 
     anchorControls.addEventListener('change', handleJog);
     anchorControls.addEventListener('keydown', handleKeydown);
+    anchorControls.addEventListener('edits', handleEdits);
 
     const handleClick = type => event => {
       const {
@@ -42548,6 +42546,8 @@ class OrbitView extends ReactDOM$2.PureComponent {
       if (!object) {
         return;
       }
+
+      console.log(`QQ/object/userData: ${JSON.stringify(object.userData)}`);
 
       if (object.userData.onClick) {
         return object.userData.onClick({
@@ -43033,13 +43033,23 @@ class App extends ReactDOM$2.Component {
 
     this.Clipboard.change = data => {
       const {
-        Clipboard
+        Clipboard = {}
       } = this.state;
       this.setState({
         Clipboard: { ...Clipboard,
           code: data
         }
       });
+    };
+
+    this.Clipboard.getCode = data => {
+      const {
+        Clipboard = {}
+      } = this.state;
+      const {
+        code = 'const $ = Group();'
+      } = Clipboard;
+      return code;
     };
 
     this.Clipboard.run = () => {};
@@ -43265,11 +43275,13 @@ class App extends ReactDOM$2.Component {
       await this.updateState({
         model,
         WorkspaceOpenPaths
-      }); // Now that layout is in place, run the notebooks we just loaded.
-
+      });
+      /*
+      // Now that layout is in place, run the notebooks we just loaded.
       for (const path of WorkspaceOpenPaths) {
         await this.Notebook.run(path);
       }
+      */
     };
 
     this.Notebook = {};
@@ -43353,7 +43365,7 @@ class App extends ReactDOM$2.Component {
           workspace
         });
         logInfo('app/App', `Run/6 ${path}`);
-        let script = NotebookText;
+        let script = this.Clipboard.getCode() + NotebookText;
 
         const evaluate = async script => {
           try {
@@ -43541,6 +43553,14 @@ class App extends ReactDOM$2.Component {
     this.View.pendingOperations = [];
     this.View.operationsScheduled = false;
 
+    this.View.click = ({
+      object,
+      ray
+    }) => {
+      console.log(`QQ/object: ${JSON.stringify(object)}`);
+      console.log(`QQ/ray: ${JSON.stringify(ray)}`);
+    };
+
     this.View.executeOperations = async () => {
       try {
         while (this.View.pendingOperations.length > 0) {
@@ -43592,63 +43612,100 @@ class App extends ReactDOM$2.Component {
       this.View.executeOperations();
     };
 
+    this.View.edits = async ({
+      edits
+    }) => {
+      const points = [];
+      const segments = [];
+
+      for (const edit of edits) {
+        const [, type] = edit;
+
+        switch (type) {
+          case 'point':
+            {
+              const [,, point] = edit;
+              points.push(`[${point[0].toFixed(2)}, ${point[1].toFixed(2)}, ${point[2].toFixed(2)}]`);
+              break;
+            }
+
+          case 'segment':
+            {
+              const [,, source, target] = edit;
+              segments.push(`[[${source[0].toFixed(2)}, ${source[1].toFixed(2)}, ${source[2].toFixed(2)}], [${target[0].toFixed(2)}, ${target[1].toFixed(2)}, ${target[2].toFixed(2)}]]`);
+              break;
+            }
+        }
+      }
+
+      const ops = [];
+
+      if (points.length > 0) {
+        ops.push(`Points([${points.join(', ')}])`);
+      }
+
+      if (segments.length > 0) {
+        ops.push(`Segments([${segments.join(', ')}])`);
+      }
+
+      switch (ops.length) {
+        case 0:
+          {
+            this.Clipboard.change(``);
+            break;
+          }
+
+        case 1:
+          {
+            this.Clipboard.change(`const $ = ${ops[0]};`);
+            break;
+          }
+
+        default:
+          {
+            this.Clipboard.change(`const $ = Group(${ops.join(', ')});`);
+            break;
+          }
+      }
+    };
+
     this.View.jogPendingUpdate = new Map();
 
     this.View.jog = async update => {
-      const {
-        object,
-        path
-      } = update;
-
-      if (object) {
+      /*
+      const { object, path } = update;
+       if (object) {
         this.View.jogPendingUpdate.set(object, update);
       }
-
-      const operation = async () => {
+       const operation = async () => {
         if (!this.View.jogPendingUpdate.has(object)) {
           // We already handled this jog.
           return;
         }
-
-        const {
-          sourceLocation,
-          at,
-          to,
-          up
-        } = this.View.jogPendingUpdate.get(object);
-        const {
-          viewId
-        } = object.userData;
+        const { sourceLocation, at, to, up } =
+          this.View.jogPendingUpdate.get(object);
+        const { viewId } = object.userData;
         this.View.jogPendingUpdate.delete(object);
         const request = {
           viewId,
-          nth: object.parent.children.findIndex(value => value === object),
+          nth: object.parent.children.findIndex((value) => value === object),
           at: getWorldPosition(at, 0.01),
           to: getWorldPosition(to, 0.01),
-          up: getWorldPosition(up, 0.01)
+          up: getWorldPosition(up, 0.01),
         };
-
         if (request.nth === undefined) {
           return;
         }
-
         console.log(JSON.stringify(request));
-        const {
-          path
-        } = sourceLocation;
-        const {
-          [`NotebookText/${path}`]: NotebookText
-        } = this.state;
+        const { path } = sourceLocation;
+        const { [`NotebookText/${path}`]: NotebookText } = this.state;
         const newNotebookText = rewriteViewGroupOrient(NotebookText, request);
         await this.updateState({
-          [`NotebookText/${path}`]: newNotebookText
+          [`NotebookText/${path}`]: newNotebookText,
         });
       };
-
-      this.View.scheduleOperation({
-        path,
-        operation
-      });
+       this.View.scheduleOperation({ path, operation });
+      */
     };
 
     this.View.keydown = async ({
@@ -43661,197 +43718,123 @@ class App extends ReactDOM$2.Component {
       up,
       placeObject
     }) => {
+      /*
       switch (event.key) {
         case 'Backspace':
-        case 'Delete':
-          {
-            if (deleteObject && object) {
-              deleteObject(object);
-            }
-
-            const {
-              path
-            } = sourceLocation;
-            const {
-              viewId
-            } = object.userData;
-
-            const operation = async () => {
-              const {
-                [`NotebookText/${path}`]: NotebookText
-              } = this.state;
-              const newNotebookText = deleteViewGroupCode(NotebookText, {
-                viewId,
-                nth: object.parent.children.findIndex(value => value === object)
-              });
-              await this.updateState({
-                [`NotebookText/${path}`]: newNotebookText
-              });
-            };
-
-            this.View.scheduleOperation({
-              path,
-              operation
-            });
-            return false;
+        case 'Delete': {
+          if (deleteObject && object) {
+            deleteObject(object);
           }
-
-        case 'c':
+          const { path } = sourceLocation;
+          const { viewId } = object.userData;
+          const operation = async () => {
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const newNotebookText = deleteViewGroupCode(NotebookText, {
+              viewId,
+              nth: object.parent.children.findIndex(
+                (value) => value === object
+              ),
+            });
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
+          return false;
+        }
+         case 'c':
           if (!event.getModifierState('Control')) {
             break;
           }
-
         // fall through to Copy
-
-        case 'Copy':
-          {
-            const {
-              path
-            } = sourceLocation;
-
-            const operation = async () => {
-              // We should have already extracted the source into userData.
-              // Other operations may have made this introspection out of date.
-              const {
-                [`NotebookText/${path}`]: NotebookText
-              } = this.state;
-              const {
-                viewId
-              } = object.userData;
-              const nth = object.parent.children.findIndex(value => value === object);
-              const {
-                code
-              } = extractViewGroupCode(NotebookText, {
-                viewId,
-                nth
-              });
-              await this.updateState({
-                Clipboard: {
-                  path,
-                  code,
-                  viewId,
-                  nth,
-                  object
-                }
-              });
-            };
-
-            this.View.scheduleOperation({
-              path,
-              operation
+        case 'Copy': {
+          const { path } = sourceLocation;
+          const operation = async () => {
+            // We should have already extracted the source into userData.
+            // Other operations may have made this introspection out of date.
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const { viewId } = object.userData;
+            const nth = object.parent.children.findIndex(
+              (value) => value === object
+            );
+            const { code } = extractViewGroupCode(NotebookText, {
+              viewId,
+              nth,
             });
-            return false;
-          }
-
-        case 'x':
+            await this.updateState({
+              Clipboard: { path, code, viewId, nth, object },
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
+          return false;
+        }
+         case 'x':
           if (!event.getModifierState('Control')) {
             break;
           }
-
         // fall through to Cut
-
-        case 'Cut':
-          {
-            if (deleteObject && object) {
-              deleteObject(object);
-            }
-
-            const {
-              path
-            } = sourceLocation;
-            const {
-              viewId
-            } = object.userData;
-
-            const operation = async () => {
-              const {
-                [`NotebookText/${path}`]: NotebookText
-              } = this.state;
-              const nth = object.parent.children.findIndex(value => value === object);
-              const {
-                code
-              } = extractViewGroupCode(NotebookText, {
-                viewId,
-                nth
-              });
-              const newNotebookText = deleteViewGroupCode(NotebookText, {
-                viewId,
-                nth
-              });
-              await this.updateState({
-                [`NotebookText/${path}`]: newNotebookText,
-                Clipboard: {
-                  code,
-                  viewId,
-                  object
-                }
-              });
-            };
-
-            this.View.scheduleOperation({
-              path,
-              operation
-            });
-            return false;
+        case 'Cut': {
+          if (deleteObject && object) {
+            deleteObject(object);
           }
-
-        case 'v':
+          const { path } = sourceLocation;
+          const { viewId } = object.userData;
+          const operation = async () => {
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const nth = object.parent.children.findIndex(
+              (value) => value === object
+            );
+            const { code } = extractViewGroupCode(NotebookText, {
+              viewId,
+              nth,
+            });
+            const newNotebookText = deleteViewGroupCode(NotebookText, {
+              viewId,
+              nth,
+            });
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+              Clipboard: { code, viewId, object },
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
+          return false;
+        }
+         case 'v':
           if (!event.getModifierState('Control')) {
             break;
           }
-
         // fall through to Paste
-
         case 'Insert':
-        case 'Paste':
-          {
-            const {
-              path
-            } = sourceLocation;
-            const {
-              Clipboard = {}
-            } = this.state;
-            const {
-              code,
-              viewId,
-              object
-            } = Clipboard;
-
-            if (!code) {
-              return;
-            }
-
-            if (placeObject && object) {
-              placeObject(object, {
-                at
-              });
-            }
-
-            const request = {
-              viewId,
-              code,
-              at: getWorldPosition(at, 0.01),
-              to: getWorldPosition(to, 0.01),
-              up: getWorldPosition(up, 0.01)
-            };
-
-            const operation = async () => {
-              const {
-                [`NotebookText/${path}`]: NotebookText
-              } = this.state;
-              const newNotebookText = appendViewGroupCode(NotebookText, request);
-              await this.updateState({
-                [`NotebookText/${path}`]: newNotebookText
-              });
-            };
-
-            this.View.scheduleOperation({
-              path,
-              operation
-            });
-            return false;
+        case 'Paste': {
+          const { path } = sourceLocation;
+          const { Clipboard = {} } = this.state;
+          const { code, viewId, object } = Clipboard;
+          if (!code) {
+            return;
           }
+          if (placeObject && object) {
+            placeObject(object, { at });
+          }
+          const request = {
+            viewId,
+            code,
+            at: getWorldPosition(at, 0.01),
+            to: getWorldPosition(to, 0.01),
+            up: getWorldPosition(up, 0.01),
+          };
+          const operation = async () => {
+            const { [`NotebookText/${path}`]: NotebookText } = this.state;
+            const newNotebookText = appendViewGroupCode(NotebookText, request);
+            await this.updateState({
+              [`NotebookText/${path}`]: newNotebookText,
+            });
+          };
+          this.View.scheduleOperation({ path, operation });
+          return false;
+        }
       }
+      */
     };
 
     this.View.move = async ({
@@ -44137,6 +44120,8 @@ class App extends ReactDOM$2.Component {
               view: View.view,
               sourceLocation: View.sourceLocation,
               workspace: workspace,
+              onClick: this.View.click,
+              onEdits: this.View.edits,
               onJog: this.View.jog,
               onKeydown: this.View.keydown,
               onMove: this.View.move,

@@ -1,12 +1,11 @@
-import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotVoid, getLeafsIn, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$2, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, linearize, isVoid, offset as offset$1, eachPoint, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, computeImplicitVolume } from './jsxcad-geometry.js';
+import { assemble as assemble$1, toDisplayGeometry, toConcreteGeometry, toTransformedGeometry, toPoints, transform, rewriteTags, taggedGraph, taggedSegments, taggedPoints, fromPolygons, registerReifier, taggedPlan, identity, taggedGroup, join as join$1, makeAbsolute, measureArea, taggedItem, getInverseMatrices, bend as bend$1, getLeafs, cast as cast$1, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, allTags, cut as cut$1, deform as deform$1, demesh as demesh$1, disjoint as disjoint$1, rewrite, visit, hasTypeGhost, hasTypeVoid, computeNormal, extrude, link as link$1, taggedLayout, measureBoundingBox, getLayouts, isNotTypeGhost, getLeafsIn, eachPoint as eachPoint$1, eachSegment, transformCoordinate, faces as faces$1, fill as fill$1, fix as fix$1, grow as grow$1, outline as outline$1, inset as inset$1, involute as involute$1, read, readNonblocking, loft as loft$1, serialize as serialize$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, linearize, isTypeVoid, offset as offset$1, remesh as remesh$1, write, writeNonblocking, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { getSourceLocation, startTime, endTime, emit, computeHash, logInfo, log as log$1, generateUniqueId, addPending, write as write$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, fromTranslateToTransform, fromRotateZToTransform, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
-import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
-import { toTagsFromName as toTagsFromName$2 } from './jsxcad-algorithm-tool.js';
+import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 
 class Shape {
@@ -169,7 +168,7 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry(taggedPoints({}, points), context);
 Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(fromPolygons({}, polygons), context);
+  fromGeometry(fromPolygons(polygons), context);
 
 Shape.registerMethod = registerShapeMethod;
 
@@ -316,6 +315,39 @@ Shape.toCoordinates = (shape, ...args) => {
   return coordinates;
 };
 
+Shape.chainable = (op) => {
+  let free, bound;
+
+  // This is waiting for a shape or a chain.
+  bound = {
+    apply(target, obj, args) {
+      // Received a shape.
+      return target(...args);
+    },
+    get(target, prop, receiver) {
+      return new Proxy(
+        (...args) =>
+          (s) => {
+            const a = s[prop];
+            const t = target(s);
+            const b = a.apply(t, args);
+            return b;
+          },
+        free
+      );
+    },
+  };
+
+  // This is waiting for arguments.
+  free = {
+    apply(target, obj, args) {
+      return new Proxy(target(...args), bound);
+    },
+  };
+
+  return new Proxy(op, free);
+};
+
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
 
@@ -416,77 +448,94 @@ const updatePlan =
 
 Shape.registerMethod('updatePlan', updatePlan);
 
-const hasAngle =
+const hasAngle = Shape.chainable(
   (start = 0, end = 0) =>
-  (shape) =>
-    shape.updatePlan({ angle: { start: start, end: end } });
-const hasBase = (base) => (shape) => shape.updatePlan({ base });
-const hasAt =
+    (shape) =>
+      shape.updatePlan({ angle: { start: start, end: end } })
+);
+const hasBase = Shape.chainable(
+  (base) => (shape) => shape.updatePlan({ base })
+);
+const hasAt = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({
-      at: [x, y, z],
-    });
-const hasCorner1 =
+    (shape) =>
+      shape.updatePlan({
+        at: [x, y, z],
+      })
+);
+const hasCorner1 = Shape.chainable(
   (x = 0, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan({
-      corner1: [x, y, z],
-    });
-const hasCorner2 =
+    (shape) =>
+      shape.updatePlan({
+        corner1: [x, y, z],
+      })
+);
+const hasCorner2 = Shape.chainable(
   (x = 0, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan({
-      corner2: [x, y, z],
-    });
-const hasDiameter =
+    (shape) =>
+      shape.updatePlan({
+        corner2: [x, y, z],
+      })
+);
+const hasDiameter = Shape.chainable(
   (x = 1, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan(
-      { corner1: [x / 2, y / 2, z / 2] },
-      { corner2: [x / -2, y / -2, z / -2] }
-    );
-const hasRadius =
+    (shape) =>
+      shape.updatePlan(
+        { corner1: [x / 2, y / 2, z / 2] },
+        { corner2: [x / -2, y / -2, z / -2] }
+      )
+);
+const hasRadius = Shape.chainable(
   (x = 1, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan(
-      {
-        corner1: [x, y, z],
-      },
-      {
-        corner2: [-x, -y, -z],
-      }
-    );
-const hasApothem =
+    (shape) =>
+      shape.updatePlan(
+        {
+          corner1: [x, y, z],
+        },
+        {
+          corner2: [-x, -y, -z],
+        }
+      )
+);
+const hasApothem = Shape.chainable(
   (x = 1, y = x, z = 0) =>
-  (shape) =>
-    shape.updatePlan(
-      {
-        corner1: [x, y, z],
-      },
-      {
-        corner2: [-x, -y, -z],
-      },
-      { apothem: [x, y, z] }
-    );
-const hasFrom =
+    (shape) =>
+      shape.updatePlan(
+        {
+          corner1: [x, y, z],
+        },
+        {
+          corner2: [-x, -y, -z],
+        },
+        { apothem: [x, y, z] }
+      )
+);
+const hasFrom = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({ from: [x, y, z] });
-const hasSides =
+    (shape) =>
+      shape.updatePlan({ from: [x, y, z] })
+);
+const hasSides = Shape.chainable(
   (sides = 1) =>
-  (shape) =>
-    shape.updatePlan({ sides });
-const hasTo =
+    (shape) =>
+      shape.updatePlan({ sides })
+);
+const hasTo = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({ to: [x, y, z], top: undefined });
-const hasTop = (top) => (shape) => shape.updatePlan({ top });
-const hasUp =
+    (shape) =>
+      shape.updatePlan({ to: [x, y, z], top: undefined })
+);
+const hasTop = Shape.chainable(
+  (top) => (shape) => shape.updatePlan({ top })
+);
+const hasUp = Shape.chainable(
   (x = 0, y = 0, z = 0) =>
-  (shape) =>
-    shape.updatePlan({ up: [x, y, z], top: undefined });
-const hasZag = (zag) => (shape) => shape.updatePlan({ zag });
+    (shape) =>
+      shape.updatePlan({ up: [x, y, z], top: undefined })
+);
+const hasZag = Shape.chainable(
+  (zag) => (shape) => shape.updatePlan({ zag })
+);
 
 // Let's consider migrating to a 'has' prefix for planning.
 
@@ -677,21 +726,19 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-const mdMethod =
-  (...chunks) =>
-  (shape) => {
-    const strings = [];
-    for (const chunk of chunks) {
-      if (chunk instanceof Function) {
-        strings.push(chunk(shape));
-      } else {
-        strings.push(chunk);
-      }
+const mdMethod = Shape.chainable((...chunks) => (shape) => {
+  const strings = [];
+  for (const chunk of chunks) {
+    if (chunk instanceof Function) {
+      strings.push(chunk(shape));
+    } else {
+      strings.push(chunk);
     }
-    const md = strings.join('');
-    emit({ md, hash: computeHash(md) });
-    return shape;
-  };
+  }
+  const md = strings.join('');
+  emit({ md, hash: computeHash(md) });
+  return shape;
+});
 
 Shape.registerMethod('md', mdMethod);
 
@@ -726,57 +773,58 @@ const render = (abstract, shape) => {
   return shape.md(graph.join('\n'));
 };
 
-const abstract =
-  (op = render) =>
-  (shape) => {
-    const walk = ({ type, tags, plan, content }) => {
-      if (type === 'group') {
-        return content.flatMap(walk);
-      } else if (type === 'plan') {
-        return [{ type, plan }];
-      } else if (content) {
-        return [{ type, tags, content: content.flatMap(walk) }];
-      } else {
-        return [{ type, tags }];
-      }
-    };
-    return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
+const abstract = Shape.chainable((op = render) => (shape) => {
+  const walk = ({ type, tags, plan, content }) => {
+    if (type === 'group') {
+      return content.flatMap(walk);
+    } else if (type === 'plan') {
+      return [{ type, plan }];
+    } else if (content) {
+      return [{ type, tags, content: content.flatMap(walk) }];
+    } else {
+      return [{ type, tags }];
+    }
   };
+  return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
+});
 
 Shape.registerMethod('abstract', abstract);
 
-const join =
+const join = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
-      join$1(
-        shape.toGeometry(),
-        shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+    (shape) =>
+      Shape.fromGeometry(
+        join$1(
+          shape.toGeometry(),
+          shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        )
       )
-    );
+);
 
 Shape.registerMethod('join', join);
 Shape.registerMethod('add', join);
 
-const absolute = () => (shape) =>
-  Shape.fromGeometry(makeAbsolute(shape.toGeometry()));
+const absolute = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(makeAbsolute(shape.toGeometry()))
+);
 
 Shape.registerMethod('absolute', absolute);
 
-const and =
+const and = Shape.chainable(
   (...args) =>
-  (shape) =>
-    Shape.fromGeometry(
-      taggedGroup(
-        {},
-        shape.toGeometry(),
-        ...shape.toShapes(args).map((shape) => shape.toGeometry())
+    (shape) =>
+      Shape.fromGeometry(
+        taggedGroup(
+          {},
+          shape.toGeometry(),
+          ...shape.toShapes(args).map((shape) => shape.toGeometry())
+        )
       )
-    );
+);
 
 Shape.registerMethod('and', and);
 
-const addTo = (other) => (shape) => other.add(shape);
+const addTo = Shape.chainable((other) => (shape) => other.add(shape));
 Shape.registerMethod('addTo', addTo);
 
 const X$8 = 0;
@@ -856,73 +904,78 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
     return offset;
   });
 
-const align =
+const align = Shape.chainable(
   (spec = 'xyz', origin = [0, 0, 0]) =>
-  (shape) => {
-    const offset = computeOffset(spec, origin, shape);
-    const reference = Point().move(...subtract$1(offset, origin));
-    return reference;
-  };
+    (shape) => {
+      const offset = computeOffset(spec, origin, shape);
+      const reference = Point().move(...subtract$1(offset, origin));
+      return reference;
+    }
+);
 
 Shape.registerMethod('align', align);
 
-const area =
+const area = Shape.chainable(
   (op = (value) => (shape) => value) =>
-  (shape) =>
-    op(measureArea(shape.toGeometry()))(shape);
+    (shape) =>
+      op(measureArea(shape.toGeometry()))(shape)
+);
 
 Shape.registerMethod('area', area);
 
 // Constructs an item from the designator.
-const as =
+const as = Shape.chainable(
   (...names) =>
-  (shape) =>
-    Shape.fromGeometry(
-      taggedItem(
-        { tags: names.map((name) => `item:${name}`) },
-        shape.toGeometry()
+    (shape) =>
+      Shape.fromGeometry(
+        taggedItem(
+          { tags: names.map((name) => `item:${name}`) },
+          shape.toGeometry()
+        )
       )
-    );
+);
 
 Shape.registerMethod('as', as);
 
 // Constructs an item, as a part, from the designator.
-const asPart = (partName) => (shape) =>
-  Shape.fromGeometry(
-    taggedItem({ tags: [`part:${partName}`] }, shape.toGeometry())
-  );
+const asPart = Shape.chainable(
+  (partName) => (shape) =>
+    Shape.fromGeometry(
+      taggedItem({ tags: [`part:${partName}`] }, shape.toGeometry())
+    )
+);
 
 Shape.registerMethod('asPart', asPart);
 
-const at =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions: ops } = destructure(args);
-    const selections = shape.toShapes(ops.shift());
-    for (const selection of selections) {
-      const { local, global } = getInverseMatrices(selection.toGeometry());
-      shape = shape
-        .transform(global)
-        .op(...ops)
-        .transform(local);
-    }
-    return shape;
-  };
+const at = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions: ops } = destructure(args);
+  const selections = shape.toShapes(ops.shift());
+  for (const selection of selections) {
+    const { local, global } = getInverseMatrices(selection.toGeometry());
+    shape = shape
+      .transform(global)
+      .op(...ops)
+      .transform(local);
+  }
+  return shape;
+});
 
 Shape.registerMethod('at', at);
 
-const bend =
+const bend = Shape.chainable(
   (radius = 100) =>
-  (shape) =>
-    Shape.fromGeometry(bend$1(shape.toGeometry(), radius));
+    (shape) =>
+      Shape.fromGeometry(bend$1(shape.toGeometry(), radius))
+);
 
 Shape.registerMethod('bend', bend);
 
 // Is this better than s.get('part:*').tags('part')?
-const billOfMaterials =
-  (op = (list) => list) =>
-  (shape) =>
-    shape.get('part:*').tags('part', op);
+const billOfMaterials = Shape.chainable(
+  (op = (list) => (shape) => list) =>
+    (shape) =>
+      shape.get('part:*').tags('part', op)
+);
 
 Shape.registerMethod('billOfMaterials', billOfMaterials);
 Shape.registerMethod('bom', billOfMaterials);
@@ -938,43 +991,43 @@ const Group = (...shapes) =>
 Shape.prototype.Group = Shape.shapeMethod(Group);
 Shape.Group = Group;
 
-const by =
-  (selection, ...ops) =>
-  (shape) => {
-    if (ops.length === 0) {
-      ops.push((local) => local);
-    }
-    ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
-    if (selection instanceof Function) {
-      selection = selection(shape);
-    }
-    const placed = [];
-    for (const leaf of getLeafs(selection.toGeometry())) {
-      const { global } = getInverseMatrices(leaf);
-      // Perform the operation then place the
-      // result in the global frame of the reference.
-      placed.push(shape.op(...ops).transform(global));
-    }
-    return Group(...placed);
-  };
+const by = Shape.chainable((selection, ...ops) => (shape) => {
+  if (ops.length === 0) {
+    ops.push((local) => local);
+  }
+  ops = ops.map((op) => (op instanceof Function ? op : () => op));
+  // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
+  if (selection instanceof Function) {
+    selection = selection(shape);
+  }
+  const placed = [];
+  for (const leaf of getLeafs(selection.toGeometry())) {
+    const { global } = getInverseMatrices(leaf);
+    // Perform the operation then place the
+    // result in the global frame of the reference.
+    placed.push(shape.op(...ops).transform(global));
+  }
+  return Group(...placed);
+});
 
 Shape.registerMethod('by', by);
 
-const cast =
+const cast = Shape.chainable(
   (plane = [0, 0, 1, 0], reference = Point()) =>
-  (shape) =>
-    Shape.fromGeometry(
-      cast$1(
-        shape.toGeometry(),
-        Shape.toShape(reference, shape).toGeometry()
+    (shape) =>
+      Shape.fromGeometry(
+        cast$1(
+          shape.toGeometry(),
+          Shape.toShape(reference, shape).toGeometry()
+        )
       )
-    );
+);
 
 Shape.registerMethod('cast', cast);
 
-const center = () => (shape) =>
-  Shape.fromGeometry(computeCentroid(shape.toGeometry()));
+const center = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(computeCentroid(shape.toGeometry()))
+);
 
 Shape.registerMethod('center', center);
 
@@ -985,10 +1038,11 @@ const Hull = (...shapes) =>
 
 Shape.prototype.Hull = Shape.shapeMethod(Hull);
 
-const hull =
+const hull = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Hull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+    (shape) =>
+      Hull(...shapes.map((other) => Shape.toShape(other, shape)))
+);
 
 Shape.registerMethod('hull', hull);
 
@@ -1005,128 +1059,151 @@ const ChainHull = (...shapes) => {
   return Join(...chain);
 };
 
-const chainHull =
+const chainHull = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+    (shape) =>
+      ChainHull(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
+);
 
 Shape.registerMethod('chainHull', chainHull);
 
 Shape.prototype.ChainHull = Shape.shapeMethod(ChainHull);
 
-const clip =
+const clean = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(noGhost(shape.toGeometry()))
+);
+
+Shape.registerMethod('clean', clean);
+
+const Clip = (shape, ...shapes) => shape.clip(...shapes);
+
+const clip = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
-      clip$1(
-        shape.toGeometry(),
-        shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+    (shape) =>
+      Shape.fromGeometry(
+        clip$1(
+          shape.toGeometry(),
+          shapes.map((other) => Shape.toShape(other, shape).toGeometry())
+        )
       )
-    );
+);
 
 Shape.registerMethod('clip', clip);
 
-const clipopen =
+const clipopen = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
-      clip$1(
-        shape.toGeometry(),
-        shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
-        /* open= */ true
+    (shape) =>
+      Shape.fromGeometry(
+        clip$1(
+          shape.toGeometry(),
+          shapes.map((other) => Shape.toShape(other, shape).toGeometry()),
+          /* open= */ true
+        )
       )
-    );
+);
 
 Shape.registerMethod('clipopen', clipopen);
 
-const clipfrom = (other) => (shape) => other.clip(shape);
+const clipfrom = Shape.chainable(
+  (other) => (shape) => other.clip(shape)
+);
 Shape.registerMethod('clipFrom', clipfrom);
 
-const color = (name) => (shape) =>
-  shape.untag('color:*').tag(...toTagsFromName(name));
+const color = Shape.chainable(
+  (name) => (shape) => shape.untag('color:*').tag(...toTagsFromName(name))
+);
 
 Shape.registerMethod('color', color);
 
-const colors =
+const colors = Shape.chainable(
   (op = (colors, shape) => colors) =>
-  (shape) =>
-    op(
-      [...allTags(shape.toGeometry())]
-        .filter((tag) => tag.startsWith('color/'))
-        .map((tag) => tag.substring(6)),
-      shape
-    );
+    (shape) =>
+      op(
+        [...allTags(shape.toGeometry())]
+          .filter((tag) => tag.startsWith('color/'))
+          .map((tag) => tag.substring(6)),
+        shape
+      )
+);
 
 Shape.registerMethod('colors', colors);
 
-const cut =
+const cut = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
-      cut$1(
-        shape.toGeometry(),
-        shape.toShapes(shapes).map((other) => other.toGeometry())
+    (shape) =>
+      Shape.fromGeometry(
+        cut$1(
+          shape.toGeometry(),
+          shape.toShapes(shapes).map((other) => other.toGeometry())
+        )
       )
-    );
+);
 
 Shape.registerMethod('cut', cut);
 
-const cutfrom = (other) => (shape) =>
-  Shape.toShape(other, shape).cut(shape);
+const cutFrom = Shape.chainable(
+  (other) => (shape) => Shape.toShape(other, shape).cut(shape)
+);
 
-Shape.registerMethod('cutfrom', cutfrom);
+Shape.registerMethod('cutFrom', cutFrom);
 
-const cutopen =
+const cutopen = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Shape.fromGeometry(
-      cut$1(
-        shape.toGeometry(),
-        shape.toShapes(shapes).map((other) => other.toGeometry()),
-        /* open= */ true
+    (shape) =>
+      Shape.fromGeometry(
+        cut$1(
+          shape.toGeometry(),
+          shape.toShapes(shapes).map((other) => other.toGeometry()),
+          /* open= */ true
+        )
       )
-    );
+);
 
 Shape.registerMethod('cutopen', cutopen);
 
-const cutout =
+const cutout = Shape.chainable(
   (other, op = (cut) => (clipped) => cut.and(clipped.void())) =>
-  (shape) => {
-    other = Shape.toShape(other, shape);
-    return shape.cut(other).op((cut) => op(cut)(shape.clip(other)));
-  };
+    (shape) => {
+      other = Shape.toShape(other, shape);
+      return shape.cut(other).op((cut) => op(cut)(shape.clip(other)));
+    }
+);
 Shape.registerMethod('cutout', cutout);
 
-const deform =
+const deform = Shape.chainable(
   (entries = [], { iterations, tolerance, alpha } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      deform$1(
-        shape.toGeometry(),
-        entries.map(({ selection, deformation }) => ({
-          selection: selection.toGeometry(),
-          deformation: deformation
-            ? deformation.toGeometry()
-            : Point().toGeometry(),
-        })),
-        iterations,
-        tolerance,
-        alpha
+    (shape) =>
+      Shape.fromGeometry(
+        deform$1(
+          shape.toGeometry(),
+          entries.map(({ selection, deformation }) => ({
+            selection: selection.toGeometry(),
+            deformation: deformation
+              ? deformation.toGeometry()
+              : Point().toGeometry(),
+          })),
+          iterations,
+          tolerance,
+          alpha
+        )
       )
-    );
+);
 
 Shape.registerMethod('deform', deform);
 
 // TODO: Rename clean at the lower levels.
-const demesh = (options) => (shape) =>
-  Shape.fromGeometry(demesh$1(shape.toGeometry(), options));
+const demesh = Shape.chainable(
+  (options) => (shape) =>
+    Shape.fromGeometry(demesh$1(shape.toGeometry(), options))
+);
 
 Shape.registerMethod('demesh', demesh);
 
-const disjoint =
+const disjoint = Shape.chainable(
   ({ strategy } = {}) =>
-  (shape) =>
-    fromGeometry(disjoint$1([shape.toGeometry()], strategy));
+    (shape) =>
+      fromGeometry(disjoint$1([shape.toGeometry()], strategy))
+);
 
 Shape.registerMethod('disjoint', disjoint);
 
@@ -1183,97 +1260,102 @@ const tagGeometry = (geometry, tags) => {
   return rewrite(geometry, op);
 };
 
-const tag =
+const tag = Shape.chainable(
   (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags));
+    (shape) =>
+      Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags))
+);
 
 Shape.registerMethod('tag', tag);
 
-const get =
-  (...tags) =>
-  (shape) => {
-    const isMatch = oneOfTagMatcher(tags, 'item');
-    const picks = [];
-    const walk = (geometry, descend) => {
-      const { tags, type } = geometry;
-      if (type === 'group') {
-        return descend();
-      }
-      if (isMatch(`type:${geometry.type}`)) {
-        picks.push(Shape.fromGeometry(geometry));
-      } else {
-        for (const tag of tags) {
-          if (isMatch(tag)) {
-            picks.push(Shape.fromGeometry(geometry));
-            break;
-          }
+const get = Shape.chainable((...tags) => (shape) => {
+  const isMatch = oneOfTagMatcher(tags, 'item');
+  const picks = [];
+  const walk = (geometry, descend) => {
+    const { tags, type } = geometry;
+    if (type === 'group') {
+      return descend();
+    }
+    if (isMatch(`type:${geometry.type}`)) {
+      picks.push(Shape.fromGeometry(geometry));
+    } else {
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          picks.push(Shape.fromGeometry(geometry));
+          break;
         }
       }
-      if (type !== 'item') {
-        return descend();
-      }
-    };
-    const geometry = shape.toGeometry();
-    if (geometry.type === 'item') {
-      // FIX: Can we make this less magical?
-      // This allows constructions like s.get('a').get('b')
-      visit(geometry.content[0], walk);
-    } else {
-      visit(geometry, walk);
     }
-    return Group(...picks);
+    if (type !== 'item') {
+      return descend();
+    }
   };
+  const geometry = shape.toGeometry();
+  if (geometry.type === 'item') {
+    // FIX: Can we make this less magical?
+    // This allows constructions like s.get('a').get('b')
+    visit(geometry.content[0], walk);
+  } else {
+    visit(geometry, walk);
+  }
+  return Group(...picks);
+});
 
 const g = get;
 
 Shape.registerMethod('get', get);
 Shape.registerMethod('g', get);
 
-const voidFn = () => (shape) =>
-  Shape.fromGeometry(hasTypeVoid(shape.toGeometry()));
+const voidFn = Shape.chainable(
+  () => (shape) =>
+    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(shape.toGeometry())))
+);
 
 Shape.registerMethod('void', voidFn);
 
-const drop = (tag) => (shape) => shape.on(get(tag), voidFn());
+const drop = Shape.chainable(
+  (tag) => (shape) => shape.on(get(tag), voidFn())
+);
 
 Shape.registerMethod('drop', drop);
 
-const normal = () => (shape) =>
-  Shape.fromGeometry(computeNormal(shape.toGeometry()));
+const normal = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(computeNormal(shape.toGeometry()))
+);
 
 Shape.registerMethod('normal', normal);
 
-const extrudeAlong =
+const extrudeAlong = Shape.chainable(
   (direction, ...extents) =>
-  (shape) => {
-    const vector = shape.toCoordinate(direction);
-    const heights = extents.map((extent) => Shape.toValue(extent, shape));
-    if (heights.length % 2 === 1) {
-      heights.push(0);
-    }
-    heights.sort((a, b) => a - b);
-    const extrusions = [];
-    while (heights.length > 0) {
-      const height = heights.pop();
-      const depth = heights.pop();
-      if (height === depth) {
-        // Return unextruded geometry at this height, instead.
-        extrusions.push(shape.moveAlong(vector, height));
-        continue;
+    (shape) => {
+      const vector = shape.toCoordinate(direction);
+      const heights = extents.map((extent) => Shape.toValue(extent, shape));
+      if (heights.length % 2 === 1) {
+        heights.push(0);
       }
-      extrusions.push(
-        Shape.fromGeometry(
-          extrude(
-            shape.toGeometry(),
-            Point().moveAlong(vector, height).toGeometry(),
-            Point().moveAlong(vector, depth).toGeometry()
+      heights.sort((a, b) => a - b);
+      const extrusions = [];
+      while (heights.length > 0) {
+        const height = heights.pop();
+        const depth = heights.pop();
+        if (height === depth) {
+          // Return unextruded geometry at this height, instead.
+          extrusions.push(shape.moveAlong(vector, height));
+          continue;
+        }
+        extrusions.push(
+          Shape.fromGeometry(
+            extrude(
+              shape.toGeometry(),
+              Point().moveAlong(vector, height).toGeometry(),
+              Point().moveAlong(vector, depth).toGeometry()
+            )
           )
-        )
-      );
+        );
+      }
+      return Shape.Group(...extrusions);
     }
-    return Shape.Group(...extrusions);
-  };
+);
 
 // Note that the operator is applied to each leaf geometry by default.
 const e = (...extents) => extrudeAlong(normal(), ...extents);
@@ -1297,14 +1379,15 @@ Shape.registerMethod('ey', ey);
 Shape.registerMethod('ez', ez);
 
 // rx is in terms of turns -- 1/2 is a half turn.
-const rx =
+const rx = Shape.chainable(
   (...turns) =>
-  (shape) =>
-    Shape.Group(
-      ...shape
-        .toFlatValues(turns)
-        .map((turn) => shape.transform(fromRotateXToTransform(turn)))
-    );
+    (shape) =>
+      Shape.Group(
+        ...shape
+          .toFlatValues(turns)
+          .map((turn) => shape.transform(fromRotateXToTransform(turn)))
+      )
+);
 
 Shape.registerMethod('rx', rx);
 
@@ -1312,14 +1395,15 @@ const rotateX = rx;
 Shape.registerMethod('rotateX', rotateX);
 
 // ry is in terms of turns -- 1/2 is a half turn.
-const ry =
+const ry = Shape.chainable(
   (...turns) =>
-  (shape) =>
-    Shape.Group(
-      ...shape
-        .toFlatValues(turns)
-        .map((turn) => shape.transform(fromRotateYToTransform(turn)))
-    );
+    (shape) =>
+      Shape.Group(
+        ...shape
+          .toFlatValues(turns)
+          .map((turn) => shape.transform(fromRotateYToTransform(turn)))
+      )
+);
 
 Shape.registerMethod('ry', ry);
 
@@ -1347,10 +1431,11 @@ const Loop = (...shapes) =>
 Shape.prototype.Loop = Shape.shapeMethod(Loop);
 Shape.Loop = Loop;
 
-const loop =
+const loop = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Loop(shape, ...shape.toShapes(shapes, shape));
+    (shape) =>
+      Loop(shape, ...shape.toShapes(shapes, shape))
+);
 
 Shape.registerMethod('loop', loop);
 
@@ -2965,7 +3050,7 @@ const getItemNames = (geometry) => {
   const op = (geometry, descend) => {
     if (
       geometry.type === 'item' &&
-      isNotVoid(geometry) &&
+      isNotTypeGhost(geometry) &&
       geometry.tags &&
       geometry.tags.some((tag) => tag.startsWith('item/'))
     ) {
@@ -3000,7 +3085,7 @@ const buildLayoutGeometry = ({ layer, pageWidth, pageLength, margin }) => {
       Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
     )
     .color('red')
-    .sketch()
+    .ghost()
     .toGeometry();
   return taggedLayout({ size, margin, title }, layer, visualization);
 };
@@ -3172,111 +3257,124 @@ const ensurePages = (geometry, depth = 0) => {
   }
 };
 
-const fix$1 =
-  (options = {}) =>
-  (shape) =>
-    Page({ ...options, pack: false }, shape);
-Shape.registerMethod('fix', fix$1);
-
-const each =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
-    if (leafOp instanceof Shape) {
-      const leafShape = leafOp;
-      leafOp = (edge) => leafShape.to(edge);
-    }
-    const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-      shape.op(leafOp(Shape.fromGeometry(leaf)))
-    );
-    const grouped = groupOp(leafShapes);
-    if (grouped instanceof Function) {
-      return grouped(shape);
-    } else {
-      return grouped;
-    }
-  };
+const each = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions } = destructure(args);
+  let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+  if (leafOp instanceof Shape) {
+    const leafShape = leafOp;
+    leafOp = (edge) => leafShape.to(edge);
+  }
+  const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
+    shape.op(leafOp(Shape.fromGeometry(leaf)))
+  );
+  const grouped = groupOp(leafShapes);
+  if (grouped instanceof Function) {
+    return grouped(shape);
+  } else {
+    return grouped;
+  }
+});
 Shape.registerMethod('each', each);
 
-const eachIn =
+const eachIn = Shape.chainable(
   (
-    leafOp = (leaf) => leaf,
-    groupOp = (leafs, shape) => Shape.Group(...leafs)
-  ) =>
-  (shape) => {
-    const leafShapes = getLeafsIn(shape.toGeometry()).map((leaf) =>
-      leafOp(Shape.fromGeometry(leaf))
-    );
-    return groupOp(leafShapes, shape);
-  };
+      leafOp = (leaf) => leaf,
+      groupOp = (leafs, shape) => Shape.Group(...leafs)
+    ) =>
+    (shape) => {
+      const leafShapes = getLeafsIn(shape.toGeometry()).map((leaf) =>
+        leafOp(Shape.fromGeometry(leaf))
+      );
+      return groupOp(leafShapes, shape);
+    }
+);
 Shape.registerMethod('eachIn', eachIn);
 
-const edit = (editId) => (shape) =>
-  shape.untag('editId:*').tag(`editId:${editId}`);
+const eachPoint = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions } = destructure(args);
+  let [leafOp = (l) => (s) => l, groupOp = Group] = shapesAndFunctions;
+  if (leafOp instanceof Shape) {
+    const leafShape = leafOp;
+    leafOp = (edge) => (shape) => leafShape.by(edge);
+  }
+  const leafs = [];
+  eachPoint$1(
+    Shape.toShape(shape, shape).toGeometry(),
+    ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z))(shape))
+  );
+  const grouped = groupOp(...leafs);
+  if (grouped instanceof Function) {
+    return grouped(shape);
+  } else {
+    return grouped;
+  }
+});
+
+Shape.registerMethod('eachPoint', eachPoint);
+
+const edit = Shape.chainable(
+  (editId) => (shape) => shape.untag('editId:*').tag(`editId:${editId}`)
+);
 
 Shape.registerMethod('edit', edit);
 
-const edges =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
-    if (leafOp instanceof Shape) {
-      const leafShape = leafOp;
-      leafOp = (edge) => leafShape.to(edge);
-    }
-    const leafs = [];
-    eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
-      const inverse = fromSegmentToInverseTransform(segment);
-      const baseSegment = [
-        transformCoordinate(segment[0], inverse),
-        transformCoordinate(segment[1], inverse),
-      ];
-      const matrix = invertTransform(inverse);
-      // We get a pair of absolute coordinates from eachSegment.
-      // We need a segment from [0,0,0] to [x,0,0] in its local space.
-      leafs.push(
-        leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])))
-      );
-    });
-    const grouped = groupOp(...leafs);
-    if (grouped instanceof Function) {
-      return grouped(shape);
-    } else {
-      return grouped;
-    }
-  };
+// TODO: Add an option to include a virtual segment at the target of the last
+// edge.
+
+const edges = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions } = destructure(args);
+  let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+  if (leafOp instanceof Shape) {
+    const leafShape = leafOp;
+    leafOp = (edge) => leafShape.to(edge);
+  }
+  const leafs = [];
+  eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) => {
+    const inverse = fromSegmentToInverseTransform(segment);
+    const baseSegment = [
+      transformCoordinate(segment[0], inverse),
+      transformCoordinate(segment[1], inverse),
+    ];
+    const matrix = invertTransform(inverse);
+    // We get a pair of absolute coordinates from eachSegment.
+    // We need a segment from [0,0,0] to [x,0,0] in its local space.
+    leafs.push(
+      leafOp(Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment])))
+    );
+  });
+  const grouped = groupOp(...leafs);
+  if (grouped instanceof Function) {
+    return grouped(shape);
+  } else {
+    return grouped;
+  }
+});
 
 Shape.registerMethod('edges', edges);
 
-const faces =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
-    if (leafOp instanceof Shape) {
-      const leafShape = leafOp;
-      leafOp = (edge) => leafShape.to(edge);
-    }
-    return Shape.fromGeometry(faces$1(shape.toGeometry())).each(
-      leafOp,
-      groupOp
-    );
-  };
+const faces = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions } = destructure(args);
+  let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
+  if (leafOp instanceof Shape) {
+    const leafShape = leafOp;
+    leafOp = (edge) => leafShape.to(edge);
+  }
+  return Shape.fromGeometry(faces$1(shape.toGeometry())).each(
+    leafOp,
+    groupOp
+  );
+});
 
 Shape.registerMethod('faces', faces);
 
-const fill = () => (shape) =>
-  Shape.fromGeometry(fill$1(shape.toGeometry()));
+const fill = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(fill$1(shape.toGeometry()))
+);
 
 const f = fill;
 
 Shape.registerMethod('fill', fill);
 Shape.registerMethod('f', f);
-
-const withFill = () => (shape) => shape.group(shape.fill());
-Shape.registerMethod('withFill', withFill);
 
 const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
@@ -3293,161 +3391,165 @@ const assemble = (...shapes) => {
   }
 };
 
-const fit =
+const fit = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    assemble(...shapes.map((other) => Shape.toShape(other, shape)), shape);
+    (shape) =>
+      assemble(...shapes.map((other) => Shape.toShape(other, shape)), shape)
+);
 
 Shape.registerMethod('fit', fit);
 
-const fitTo =
+const fitTo = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    assemble(shape, ...shapes.map((other) => Shape.toShape(other, shape)));
+    (shape) =>
+      assemble(shape, ...shapes.map((other) => Shape.toShape(other, shape)))
+);
 
 Shape.registerMethod('fitTo', fitTo);
 
-const fix = () => (shape) =>
-  Shape.fromGeometry(
-    fix$2(shape.toGeometry(), /* removeSelfIntersections= */ true)
-  );
+const fix = Shape.chainable(
+  () => (shape) =>
+    Shape.fromGeometry(
+      fix$1(shape.toGeometry(), /* removeSelfIntersections= */ true)
+    )
+);
 
 Shape.registerMethod('fix', fix);
 
-const origin = () => (shape) => {
+const origin = Shape.chainable(() => (shape) => {
   const { local } = getInverseMatrices(shape.toGeometry());
   return Point().transform(local);
-};
+});
 
 const o = origin;
 
 Shape.registerMethod('origin', origin);
 Shape.registerMethod('o', o);
 
-const fuse = () => (shape) =>
-  fromGeometry(fuse$1(shape.toGeometry()));
+const fuse = Shape.chainable(
+  () => (shape) => fromGeometry(fuse$1(shape.toGeometry()))
+);
 
 Shape.registerMethod('fuse', fuse);
 
-const getNot =
-  (...tags) =>
-  (shape) => {
-    const isMatch = oneOfTagMatcher(tags, 'item');
-    const picks = [];
-    const walk = (geometry, descend) => {
-      const { tags, type } = geometry;
-      if (type === 'group') {
-        return descend();
-      }
-      let discard = false;
-      if (isMatch(`type:${geometry.type}`)) {
-        discard = true;
-      } else {
-        for (const tag of tags) {
-          if (isMatch(tag)) {
-            discard = true;
-            break;
-          }
+const ghost = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(hasTypeGhost(shape.toGeometry()))
+);
+
+Shape.registerMethod('ghost', ghost);
+
+const getNot = Shape.chainable((...tags) => (shape) => {
+  const isMatch = oneOfTagMatcher(tags, 'item');
+  const picks = [];
+  const walk = (geometry, descend) => {
+    const { tags, type } = geometry;
+    if (type === 'group') {
+      return descend();
+    }
+    let discard = false;
+    if (isMatch(`type:${geometry.type}`)) {
+      discard = true;
+    } else {
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          discard = true;
+          break;
         }
       }
-      if (!discard) {
-        picks.push(Shape.fromGeometry(geometry));
-      }
-      if (type !== 'item') {
-        return descend();
-      }
-    };
-    const geometry = shape.toGeometry();
-    if (geometry.type === 'item') {
-      // FIX: Can we make this less magical?
-      // This allows constructions like s.get('a').get('b')
-      visit(geometry.content[0], walk);
-    } else {
-      visit(geometry, walk);
     }
-    return Group(...picks);
+    if (!discard) {
+      picks.push(Shape.fromGeometry(geometry));
+    }
+    if (type !== 'item') {
+      return descend();
+    }
   };
+  const geometry = shape.toGeometry();
+  if (geometry.type === 'item') {
+    // FIX: Can we make this less magical?
+    // This allows constructions like s.get('a').get('b')
+    visit(geometry.content[0], walk);
+  } else {
+    visit(geometry, walk);
+  }
+  return Group(...picks);
+});
 
 const gn = getNot;
 
 Shape.registerMethod('getNot', getNot);
 Shape.registerMethod('gn', gn);
 
-const grow =
-  (...args) =>
-  (shape) => {
-    const {
-      number: amount,
-      string: axes = 'xyz',
-      shapesAndFunctions: selections,
-    } = destructure(args);
-    return Shape.fromGeometry(
-      grow$1(
-        shape.toGeometry(),
-        Point().z(amount).toGeometry(),
-        shape.toShapes(selections).map((shape) => shape.toGeometry()),
-        {
-          x: axes.includes('x'),
-          y: axes.includes('y'),
-          z: axes.includes('z'),
-        }
-      )
-    );
-  };
+const grow = Shape.chainable((...args) => (shape) => {
+  const {
+    number: amount,
+    string: axes = 'xyz',
+    shapesAndFunctions: selections,
+  } = destructure(args);
+  return Shape.fromGeometry(
+    grow$1(
+      shape.toGeometry(),
+      Point().z(amount).toGeometry(),
+      shape.toShapes(selections).map((shape) => shape.toGeometry()),
+      {
+        x: axes.includes('x'),
+        y: axes.includes('y'),
+        z: axes.includes('z'),
+      }
+    )
+  );
+});
 
 Shape.registerMethod('grow', grow);
 
-const inFn = () => (shape) => {
+const image = Shape.chainable(
+  (url) => (shape) => shape.untag('image:*').tag(`image:${url}`)
+);
+
+Shape.registerMethod('image', image);
+
+const inFn = Shape.chainable(() => (shape) => {
   const geometry = shape.toGeometry();
   if (geometry.type === 'item') {
     return Shape.fromGeometry(geometry.content[0]);
   } else {
     return shape;
   }
-};
+});
 
 Shape.registerMethod('in', inFn);
 
-const outline = () => (shape) =>
-  Shape.fromGeometry(outline$1(shape.toGeometry()));
+const outline = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(outline$1(shape.toGeometry()))
+);
 
 Shape.registerMethod('outline', outline);
 
-const withOutline =
-  (op = (x) => x) =>
-  (shape) =>
-    shape.and(op(outline()));
-
-Shape.registerMethod('withOutline', withOutline);
-
-const inline = () => (shape) => outline({}, shape.flip());
+const inline = Shape.chainable(
+  () => (shape) => outline({}, shape.flip())
+);
 
 Shape.registerMethod('inline', inline);
 
-const withInline = () => (shape) => shape.with(inline());
-
-Shape.registerMethod('withInline', withInline);
-
-const inset =
+const inset = Shape.chainable(
   (initial = 1, { segments = 16, step, limit } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      inset$1(shape.toGeometry(), initial, step, limit, segments)
-    );
-
-// CHECK: Using 'with' for may be confusing, but andInset looks odd.
-const withInset = (initial, step, limit) => (shape) =>
-  shape.and(shape.inset(initial, step, limit));
+    (shape) =>
+      Shape.fromGeometry(
+        inset$1(shape.toGeometry(), initial, step, limit, segments)
+      )
+);
 
 Shape.registerMethod('inset', inset);
-Shape.registerMethod('withInset', withInset);
 
-const involute = () => (shape) =>
-  Shape.fromGeometry(involute$1(shape.toGeometry()));
+const involute = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(involute$1(shape.toGeometry()))
+);
 
 Shape.registerMethod('involute', involute);
 
-const keep = (tag) => (shape) => shape.on(getNot(tag), voidFn());
+const keep = Shape.chainable(
+  (tag) => (shape) => shape.on(getNot(tag), voidFn())
+);
 
 Shape.registerMethod('keep', keep);
 
@@ -3459,10 +3561,11 @@ const Link = (...shapes) =>
 Shape.prototype.Link = Shape.shapeMethod(Link);
 Shape.Link = Link;
 
-const link =
+const link = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Link([shape, ...shape.toShapes(shapes, shape)]);
+    (shape) =>
+      Link([shape, ...shape.toShapes(shapes, shape)])
+);
 
 Shape.registerMethod('link', link);
 
@@ -3495,10 +3598,11 @@ const Loft = (...shapes) =>
 Shape.prototype.Loft = Shape.shapeMethod(Loft);
 Shape.Loft = Loft;
 
-const loft =
+const loft = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    Loft(shape, ...shape.toShapes(shapes));
+    (shape) =>
+      Loft(...shape.toShapes(shapes))
+);
 
 Shape.registerMethod('loft', loft);
 
@@ -3513,10 +3617,11 @@ const OpenLoft = (...shapes) =>
 Shape.prototype.OpenLoft = Shape.shapeMethod(OpenLoft);
 Shape.OpenLoft = OpenLoft;
 
-const openLoft =
+const openLoft = Shape.chainable(
   (...shapes) =>
-  (shape) =>
-    OpenLoft(shape, ...shape.toShapes(shapes));
+    (shape) =>
+      OpenLoft(shape, ...shape.toShapes(shapes))
+);
 
 Shape.registerMethod('openLoft', openLoft);
 
@@ -3563,47 +3668,56 @@ const logMethod = function (op = (shape) => JSON.stringify(shape)) {
 };
 Shape.prototype.log = logMethod;
 
-const lowerEnvelope = () => (shape) =>
-  Shape.fromGeometry(generateLowerEnvelope(shape.toGeometry()));
+const lowerEnvelope = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(generateLowerEnvelope(shape.toGeometry()))
+);
 
 Shape.registerMethod('lowerEnvelope', lowerEnvelope);
 
-const overlay = () => (shape) =>
-  Shape.fromGeometry(hasShowOverlay(shape.toGeometry()));
+const overlay = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(hasShowOverlay(shape.toGeometry()))
+);
 
 Shape.registerMethod('overlay', overlay);
 
-const mask =
+const mask = Shape.chainable(
   (...args) =>
-  (shape) =>
-    Group(
-      ...args.map((arg) => Shape.toShape(arg, shape).void()),
-      Shape.fromGeometry(hasTypeMasked(shape.toGeometry()))
-    );
+    (shape) =>
+      Group(
+        ...args.map((arg) => Shape.toShape(arg, shape).void()),
+        Shape.fromGeometry(hasTypeMasked(shape.toGeometry()))
+      )
+);
 
 Shape.registerMethod('mask', mask);
 
-const masking = (masked) => (shape) =>
-  Group(
-    shape.void(),
-    Shape.fromGeometry(hasTypeMasked(Shape.toShape(masked, shape).toGeometry()))
-  );
+const masking = Shape.chainable(
+  (masked) => (shape) =>
+    Group(
+      shape.void(),
+      Shape.fromGeometry(
+        hasTypeMasked(Shape.toShape(masked, shape).toGeometry())
+      )
+    )
+);
 
 Shape.registerMethod('masking', masking);
 
-const material = (name) => (shape) =>
-  Shape.fromGeometry(rewriteTags(toTagsFromName$1(name), [], shape.toGeometry()));
+const material = Shape.chainable(
+  (name) => (shape) => Shape.fromGeometry(hasMaterial(shape.toGeometry(), name))
+);
 
 Shape.registerMethod('material', material);
 
-const move =
+const move = Shape.chainable(
   (...args) =>
-  (shape) =>
-    Shape.Group(
-      ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
-        shape.transform(fromTranslateToTransform(...coordinate))
+    (shape) =>
+      Shape.Group(
+        ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
+          shape.transform(fromTranslateToTransform(...coordinate))
+        )
       )
-    );
+);
 
 const xyz = move;
 
@@ -3617,19 +3731,17 @@ const scale$3 = (amount, [x = 0, y = 0, z = 0]) => [
   z * amount,
 ];
 
-const moveAlong =
-  (direction, ...offsets) =>
-  (shape) => {
-    direction = shape.toCoordinate(direction);
-    offsets = offsets.map((extent) => Shape.toValue(extent, shape));
-    offsets.sort((a, b) => a - b);
-    const moves = [];
-    while (offsets.length > 0) {
-      const offset = offsets.pop();
-      moves.push(shape.move(scale$3(offset, direction)));
-    }
-    return Shape.Group(...moves);
-  };
+const moveAlong = Shape.chainable((direction, ...offsets) => (shape) => {
+  direction = shape.toCoordinate(direction);
+  offsets = offsets.map((extent) => Shape.toValue(extent, shape));
+  offsets.sort((a, b) => a - b);
+  const moves = [];
+  while (offsets.length > 0) {
+    const offset = offsets.pop();
+    moves.push(shape.move(scale$3(offset, direction)));
+  }
+  return Shape.Group(...moves);
+});
 
 const m = (...offsets) => moveAlong(normal(), ...offsets);
 
@@ -3637,43 +3749,41 @@ Shape.registerMethod('m', m);
 Shape.registerMethod('moveAlong', moveAlong);
 
 // FIX: This is probably the wrong approach to moving to a particular location.
-const moveTo =
-  (x = 0, y = 0, z = 0) =>
-  (shape) => {
-    x = Shape.toValue(x, shape);
-    y = Shape.toValue(y, shape);
-    z = Shape.toValue(z, shape);
-    // Allow a Point to be provided.
-    if (x instanceof Shape) {
-      const geometry = linearize(
-        x.toGeometry(),
-        ({ type, points }) => type === 'points' && points.length >= 1
-      );
-      if (geometry.length >= 1) {
-        const { matrix, points } = geometry[0];
-        const point = transformCoordinate(points[0], matrix);
-        [x, y, z] = point;
-      }
+const moveTo = Shape.chainable((x = 0, y = 0, z = 0) => (shape) => {
+  x = Shape.toValue(x, shape);
+  y = Shape.toValue(y, shape);
+  z = Shape.toValue(z, shape);
+  // Allow a Point to be provided.
+  if (x instanceof Shape) {
+    const geometry = linearize(
+      x.toGeometry(),
+      ({ type, points }) => type === 'points' && points.length >= 1
+    );
+    if (geometry.length >= 1) {
+      const { matrix, points } = geometry[0];
+      const point = transformCoordinate(points[0], matrix);
+      [x, y, z] = point;
     }
-    if (!isFinite(x)) {
-      x = 0;
-    }
-    if (!isFinite(y)) {
-      y = 0;
-    }
-    if (!isFinite(z)) {
-      z = 0;
-    }
-    return shape.transform(fromTranslateToTransform(-x, -y, -z));
-  };
+  }
+  if (!isFinite(x)) {
+    x = 0;
+  }
+  if (!isFinite(y)) {
+    y = 0;
+  }
+  if (!isFinite(z)) {
+    z = 0;
+  }
+  return shape.transform(fromTranslateToTransform(-x, -y, -z));
+});
 
 Shape.registerMethod('moveTo', moveTo);
 
-const noop = () => (shape) => shape;
+const noop = Shape.chainable(() => (shape) => shape);
 
-const noVoid = (tags, select) => (shape) => {
+const noVoid = Shape.chainable((tags, select) => (shape) => {
   const op = (geometry, descend) => {
-    if (isVoid(geometry)) {
+    if (isTypeVoid(geometry)) {
       return taggedGroup({});
     } else {
       return descend();
@@ -3682,87 +3792,80 @@ const noVoid = (tags, select) => (shape) => {
 
   const rewritten = rewrite(shape.toDisjointGeometry(), op);
   return Shape.fromGeometry(rewritten);
-};
+});
 
 Shape.registerMethod('noVoid', noVoid);
 
-const notColor =
+const notColor = Shape.chainable(
   (...colors) =>
-  (shape) =>
-    shape.untag(...colors.map((color) => qualifyTag(color, 'color')));
+    (shape) =>
+      shape.untag(...colors.map((color) => qualifyTag(color, 'color')))
+);
 
 Shape.registerMethod('notColor', notColor);
 
-const nth =
-  (...ns) =>
-  (shape) => {
-    const candidates = shape.each(
-      (leaf) => leaf,
-      (leafs) => (shape) => leafs
-    );
-    return Group(...ns.map((n) => candidates[n]));
-  };
+const nth = Shape.chainable((...ns) => (shape) => {
+  const candidates = shape.each(
+    (leaf) => leaf,
+    (leafs) => (shape) => leafs
+  );
+  return Group(...ns.map((n) => candidates[n]));
+});
 
 const n = nth;
 
 Shape.registerMethod('nth', nth);
 Shape.registerMethod('n', nth);
 
-const offset =
+const offset = Shape.chainable(
   (initial = 1, { segments = 16, step, limit } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      offset$1(shape.toGeometry(), initial, step, limit, segments)
-    );
+    (shape) =>
+      Shape.fromGeometry(
+        offset$1(shape.toGeometry(), initial, step, limit, segments)
+      )
+);
 
 Shape.registerMethod('offset', offset);
 
-const on =
-  (selection, ...ops) =>
-  (shape) => {
-    ops = ops.map((op) => (op instanceof Function ? op : () => op));
-    // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
-    if (selection instanceof Function) {
-      selection = selection(shape);
+const on = Shape.chainable((selection, ...ops) => (shape) => {
+  ops = ops.map((op) => (op instanceof Function ? op : () => op));
+  // We've already selected the item to replace, e.g., s.on(g('plate'), ...);
+  if (selection instanceof Function) {
+    selection = selection(shape);
+  }
+  // FIX: This needs to walk through items.
+  const leafs = getLeafs(selection.toGeometry());
+  const walk = (geometry, descend) => {
+    if (leafs.includes(geometry)) {
+      // This is a target.
+      const global = geometry.matrix;
+      const local = invertTransform(global);
+      const target = Shape.fromGeometry(geometry);
+      // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+      return target
+        .transform(local)
+        .op(...ops)
+        .transform(global)
+        .toGeometry();
     }
-    // FIX: This needs to walk through items.
-    const leafs = getLeafs(selection.toGeometry());
-    const walk = (geometry, descend) => {
-      if (leafs.includes(geometry)) {
-        // This is a target.
-        const global = geometry.matrix;
-        const local = invertTransform(global);
-        const target = Shape.fromGeometry(geometry);
-        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-        return target
-          .transform(local)
-          .op(...ops)
-          .transform(global)
-          .toGeometry();
-      }
-      return descend();
-    };
-    return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
+    return descend();
   };
+  return Shape.fromGeometry(rewrite(shape.toGeometry(), walk));
+});
 
 Shape.registerMethod('on', on);
 
-const op =
+const op = Shape.chainable(
   (...fns) =>
-  (shape) =>
-    Group(
-      ...fns
-        .filter((fn) => fn)
-        .map((fn) => (fn instanceof Function ? fn(shape) : fn))
-    );
-
-const withOp =
-  (...fns) =>
-  (shape) =>
-    shape.with(shape.op(...fns));
+    (shape) =>
+      Group(
+        ...fns
+          .filter((fn) => fn)
+          .map((fn) => (fn instanceof Function ? fn(shape) : fn))
+      )
+);
 
 Shape.registerMethod('op', op);
-Shape.registerMethod('withOp', withOp);
 
 const cross = ([ax, ay, az], [bx, by, bz]) => [
   ay * bz - az * by,
@@ -3800,182 +3903,166 @@ const Z$6 = 2;
 // to is where the object's axis should point at.
 // up rotates around the axis to point a dorsal position toward.
 
-const orient =
+const orient = Shape.chainable(
   ({ at = [0, 0, 0], to = [0, 0, 0], up = [0, 0, 0] }) =>
-  (shape) => {
-    const { local } = getInverseMatrices(shape.toGeometry());
-    // Algorithm from threejs Matrix4
-    let u = subtract(up, at);
-    if (squaredLength(u) === 0) {
-      u[Z$6] = 1;
-    }
-    u = normalize(u);
-    let z = subtract(to, at);
-    if (squaredLength(z) === 0) {
-      z[Z$6] = 1;
-    }
-    z = normalize(z);
-    let x = cross(u, z);
-    if (squaredLength(x) === 0) {
-      // u and z are parallel
-      if (Math.abs(u[Z$6]) === 1) {
-        z[X$5] += 0.0001;
-      } else {
-        z[Z$6] += 0.0001;
+    (shape) => {
+      const { local } = getInverseMatrices(shape.toGeometry());
+      // Algorithm from threejs Matrix4
+      let u = subtract(up, at);
+      if (squaredLength(u) === 0) {
+        u[Z$6] = 1;
+      }
+      u = normalize(u);
+      let z = subtract(to, at);
+      if (squaredLength(z) === 0) {
+        z[Z$6] = 1;
       }
       z = normalize(z);
-      x = cross(u, z);
+      let x = cross(u, z);
+      if (squaredLength(x) === 0) {
+        // u and z are parallel
+        if (Math.abs(u[Z$6]) === 1) {
+          z[X$5] += 0.0001;
+        } else {
+          z[Z$6] += 0.0001;
+        }
+        z = normalize(z);
+        x = cross(u, z);
+      }
+      x = normalize(x);
+      let y = cross(z, x);
+      const lookAt = [
+        x[X$5],
+        x[Y$5],
+        x[Z$6],
+        0,
+        y[X$5],
+        y[Y$5],
+        y[Z$6],
+        0,
+        z[X$5],
+        z[Y$5],
+        z[Z$6],
+        0,
+        0,
+        0,
+        0,
+        1,
+      ];
+      // FIX: Move this to CGAL.
+      lookAt.blessed = true;
+      return shape
+        .transform(local)
+        .transform(lookAt)
+        .move(...at);
     }
-    x = normalize(x);
-    let y = cross(z, x);
-    const lookAt = [
-      x[X$5],
-      x[Y$5],
-      x[Z$6],
-      0,
-      y[X$5],
-      y[Y$5],
-      y[Z$6],
-      0,
-      z[X$5],
-      z[Y$5],
-      z[Z$6],
-      0,
-      0,
-      0,
-      0,
-      1,
-    ];
-    // FIX: Move this to CGAL.
-    lookAt.blessed = true;
-    return shape
-      .transform(local)
-      .transform(lookAt)
-      .move(...at);
-  };
+);
 
 Shape.registerMethod('orient', orient);
 
-const pack =
+const pack = Shape.chainable(
   ({
-    size,
-    pageMargin = 5,
-    itemMargin = 1,
-    perLayout = Infinity,
-    packSize = [],
-  } = {}) =>
-  (shape) => {
-    if (perLayout === 0) {
-      // Packing was disabled -- do nothing.
-      return shape;
-    }
+      size,
+      pageMargin = 5,
+      itemMargin = 1,
+      perLayout = Infinity,
+      packSize = [],
+    } = {}) =>
+    (shape) => {
+      if (perLayout === 0) {
+        // Packing was disabled -- do nothing.
+        return shape;
+      }
 
-    let todo = [];
-    for (const leaf of getLeafs(shape.toTransformedGeometry())) {
-      todo.push(leaf);
-    }
-    const packedLayers = [];
-    while (todo.length > 0) {
-      const input = [];
-      while (todo.length > 0 && input.length < perLayout) {
-        input.push(todo.shift());
+      let todo = [];
+      for (const leaf of getLeafs(shape.toTransformedGeometry())) {
+        todo.push(leaf);
       }
-      const [packed, unpacked, minPoint, maxPoint] = pack$1(
-        { size, pageMargin, itemMargin },
-        ...input
-      );
-      packSize[0] = minPoint;
-      packSize[1] = maxPoint;
-      if (packed.length === 0) {
-        break;
-      } else {
-        packedLayers.push(
-          taggedItem({}, taggedGroup({}, ...packed.map(toTransformedGeometry)))
+      const packedLayers = [];
+      while (todo.length > 0) {
+        const input = [];
+        while (todo.length > 0 && input.length < perLayout) {
+          input.push(todo.shift());
+        }
+        const [packed, unpacked, minPoint, maxPoint] = pack$1(
+          { size, pageMargin, itemMargin },
+          ...input
         );
+        packSize[0] = minPoint;
+        packSize[1] = maxPoint;
+        if (packed.length === 0) {
+          break;
+        } else {
+          packedLayers.push(
+            taggedItem(
+              {},
+              taggedGroup({}, ...packed.map(toTransformedGeometry))
+            )
+          );
+        }
+        todo.unshift(...unpacked);
       }
-      todo.unshift(...unpacked);
+      let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
+      if (size === undefined) {
+        packedShape = packedShape.by(align('xy'));
+      }
+      return packedShape;
     }
-    let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
-    if (size === undefined) {
-      packedShape = packedShape.by(align('xy'));
-    }
-    return packedShape;
-  };
+);
 
 Shape.registerMethod('pack', pack);
 
-const play =
-  (amount = 0.1) =>
-  (shape) =>
-    shape.grow(amount).void().and(shape);
-
-Shape.registerMethod('play', play);
-
-const points$1 =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions } = destructure(args);
-    let [leafOp = (l) => l, groupOp = (g) => (s) => Group(...g)] =
-      shapesAndFunctions;
-    if (leafOp instanceof Shape) {
-      const leafShape = leafOp;
-      leafOp = (edge) => leafShape.to(edge);
-    }
-    const leafs = [];
-    eachPoint(
-      Shape.toShape(shape, shape).toGeometry(),
-      ([x = 0, y = 0, z = 0]) => leafs.push(leafOp(Point().move(x, y, z)))
-    );
-    const grouped = groupOp(...leafs);
-    if (grouped instanceof Function) {
-      return grouped(shape);
-    } else {
-      return grouped;
-    }
-  };
+const points$1 = Shape.chainable(() => (shape) => {
+  const points = [];
+  eachPoint$1(
+    Shape.toShape(shape, shape).toGeometry(),
+    ([x = 0, y = 0, z = 0, exact]) => points.push([x, y, z, exact])
+  );
+  return Shape.fromGeometry(taggedPoints({}, points));
+});
 
 Shape.registerMethod('points', points$1);
 
-const reify = () => (shape) =>
-  Shape.fromGeometry(toConcreteGeometry(shape.toGeometry()));
+const reify = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(toConcreteGeometry(shape.toGeometry()))
+);
 
 Shape.registerMethod('reify', reify);
 
-const remesh =
-  (...args) =>
-  (shape) => {
-    const {
-      number: resolution = 1,
-      shapesAndFunctions: selections,
-      object: options,
-    } = Shape.destructure(args);
-    const {
-      iterations = 1,
-      relaxationSteps = 1,
-      targetEdgeLength = resolution,
-    } = options;
-    return Shape.fromGeometry(
-      remesh$1(
-        shape.toGeometry(),
-        shape.toShapes(selections).map((selection) => selection.toGeometry()),
-        iterations,
-        relaxationSteps,
-        targetEdgeLength
-      )
-    );
-  };
+const remesh = Shape.chainable((...args) => (shape) => {
+  const {
+    number: resolution = 1,
+    shapesAndFunctions: selections,
+    object: options,
+  } = Shape.destructure(args);
+  const {
+    iterations = 1,
+    relaxationSteps = 1,
+    targetEdgeLength = resolution,
+  } = options;
+  return Shape.fromGeometry(
+    remesh$1(
+      shape.toGeometry(),
+      shape.toShapes(selections).map((selection) => selection.toGeometry()),
+      iterations,
+      relaxationSteps,
+      targetEdgeLength
+    )
+  );
+});
 
 Shape.registerMethod('remesh', remesh);
 
 // rz is in terms of turns -- 1/2 is a half turn.
-const rz =
+const rz = Shape.chainable(
   (...turns) =>
-  (shape) =>
-    Shape.Group(
-      ...shape
-        .toFlatValues(turns)
-        .map((turn) => shape.transform(fromRotateZToTransform(turn)))
-    );
+    (shape) =>
+      Shape.Group(
+        ...shape
+          .toFlatValues(turns)
+          .map((turn) => shape.transform(fromRotateZToTransform(turn)))
+      )
+);
 
 Shape.registerMethod('rz', rz);
 
@@ -3988,85 +4075,82 @@ const saveGeometry = async (path, shape) =>
 const saveGeometryNonblocking = (path, shape) =>
   Shape.fromGeometry(writeNonblocking(path, shape.toGeometry()));
 
-const scale$1 =
-  (x = 1, y = x, z = y) =>
-  (shape) => {
-    [x = 1, y = x, z] = shape.toCoordinate(x, y, z);
-    if (x === 0) {
-      x = 1;
-    }
-    if (y === 0) {
-      y = 1;
-    }
-    if (z === 0) {
-      z = 1;
-    }
-    const negatives = (x < 0) + (y < 0) + (z < 0);
-    if (negatives % 2) {
-      // Compensate for inversion.
-      return shape.transform(fromScaleToTransform(x, y, z)).involute();
-    } else {
-      return shape.transform(fromScaleToTransform(x, y, z));
-    }
-  };
+const scale$1 = Shape.chainable((x = 1, y = x, z = y) => (shape) => {
+  [x = 1, y = x, z] = shape.toCoordinate(x, y, z);
+  if (x === 0) {
+    x = 1;
+  }
+  if (y === 0) {
+    y = 1;
+  }
+  if (z === 0) {
+    z = 1;
+  }
+  const negatives = (x < 0) + (y < 0) + (z < 0);
+  if (negatives % 2) {
+    // Compensate for inversion.
+    return shape.transform(fromScaleToTransform(x, y, z)).involute();
+  } else {
+    return shape.transform(fromScaleToTransform(x, y, z));
+  }
+});
 
 Shape.registerMethod('scale', scale$1);
 
-const scaleX =
+const scaleX = Shape.chainable(
   (...x) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(x).map((x) => scale$1(x, 1, 1)(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(x).map((x) => scale$1(x, 1, 1)(shape)))
+);
 
 const sx = scaleX;
 
 Shape.registerMethod('scaleX', scaleX);
 Shape.registerMethod('sx', sx);
 
-const scaleY =
+const scaleY = Shape.chainable(
   (...y) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(y).map((y) => scale$1(1, y, 1)(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(y).map((y) => scale$1(1, y, 1)(shape)))
+);
 
 const sy = scaleY;
 
 Shape.registerMethod('scaleY', scaleY);
 Shape.registerMethod('sy', sy);
 
-const scaleZ =
+const scaleZ = Shape.chainable(
   (...z) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(z).map((z) => scale$1(1, 1, z)(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(z).map((z) => scale$1(1, 1, z)(shape)))
+);
 
 const sz = scaleZ;
 
 Shape.registerMethod('scaleZ', scaleZ);
 Shape.registerMethod('sz', sz);
 
-const scaleToFit =
-  (x = 1, y = x, z = y) =>
-  (shape) => {
-    const { length, width, height } = shape.size();
-    const xFactor = x / length;
-    const yFactor = y / width;
-    const zFactor = z / height;
-    // Surfaces may get non-finite factors -- use the unit instead.
-    const finite = (factor) => (isFinite(factor) ? factor : 1);
-    return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
-  };
+const scaleToFit = Shape.chainable((x = 1, y = x, z = y) => (shape) => {
+  const { length, width, height } = shape.size();
+  const xFactor = x / length;
+  const yFactor = y / width;
+  const zFactor = z / height;
+  // Surfaces may get non-finite factors -- use the unit instead.
+  const finite = (factor) => (isFinite(factor) ? factor : 1);
+  return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+});
 
 Shape.registerMethod('scaleToFit', scaleToFit);
 
-const seam =
-  (...args) =>
-  (shape) => {
-    const { shapesAndFunctions: selections } = destructure(args);
-    return Shape.fromGeometry(
-      seam$1(
-        shape.toGeometry(),
-        shape.toShapes(selections).map((shape) => shape.toGeometry())
-      )
-    );
-  };
+const seam = Shape.chainable((...args) => (shape) => {
+  const { shapesAndFunctions: selections } = destructure(args);
+  return Shape.fromGeometry(
+    seam$1(
+      shape.toGeometry(),
+      shape.toShapes(selections).map((shape) => shape.toGeometry())
+    )
+  );
+});
 
 Shape.registerMethod('seam', seam);
 
@@ -4088,35 +4172,46 @@ const baseSection =
     );
   };
 
-const section =
+const section = Shape.chainable(
   (...orientations) =>
-  (shape) =>
-    baseSection({ profile: false }, orientations)(shape);
+    (shape) =>
+      baseSection({ profile: false }, orientations)(shape)
+);
 
 Shape.registerMethod('section', section);
 
-const sectionProfile =
+const sectionProfile = Shape.chainable(
   (...orientations) =>
-  (shape) =>
-    baseSection({ profile: true }, orientations)(shape);
+    (shape) =>
+      baseSection({ profile: true }, orientations)(shape)
+);
 
 Shape.registerMethod('sectionProfile', sectionProfile);
 
-const separate =
+const self = Shape.chainable(
+  (...args) =>
+    (shape) =>
+      shape
+);
+
+Shape.registerMethod('self', self);
+
+const separate = Shape.chainable(
   ({
-    keepShapes = true,
-    keepHolesInShapes = true,
-    keepHolesAsShapes = false,
-  } = {}) =>
-  (shape) =>
-    Shape.fromGeometry(
-      separate$1(
-        shape.toGeometry(),
-        keepShapes,
-        keepHolesInShapes,
-        keepHolesAsShapes
+      keepShapes = true,
+      keepHolesInShapes = true,
+      keepHolesAsShapes = false,
+    } = {}) =>
+    (shape) =>
+      Shape.fromGeometry(
+        separate$1(
+          shape.toGeometry(),
+          keepShapes,
+          keepHolesInShapes,
+          keepHolesAsShapes
+        )
       )
-    );
+);
 
 Shape.registerMethod('separate', separate);
 
@@ -4131,101 +4226,98 @@ const maybeApply = (value, shape) => {
 };
 
 // This is getting a bit excessively magical.
-const seq =
-  (...args) =>
-  (shape) => {
-    let op;
-    let groupOp;
-    let specs = [];
-    for (const arg of args) {
-      if (arg instanceof Function) {
-        if (!op) {
-          op = arg;
-        } else if (!groupOp) {
-          groupOp = arg;
-        }
-      } else if (arg instanceof Object) {
-        specs.push(arg);
+const seq = Shape.chainable((...args) => (shape) => {
+  let op;
+  let groupOp;
+  let specs = [];
+  for (const arg of args) {
+    if (arg instanceof Function) {
+      if (!op) {
+        op = arg;
+      } else if (!groupOp) {
+        groupOp = arg;
       }
+    } else if (arg instanceof Object) {
+      specs.push(arg);
     }
-    if (!op) {
-      op = (n) => n;
-    }
-    if (!groupOp) {
-      groupOp = (...values) => values;
-    }
+  }
+  if (!op) {
+    op = (n) => n;
+  }
+  if (!groupOp) {
+    groupOp = (...values) => values;
+  }
 
-    const indexes = [];
-    for (const spec of specs) {
-      let { from = 0, to = 1, upto, downto, by = 1 } = spec;
+  const indexes = [];
+  for (const spec of specs) {
+    let { from = 0, to = 1, upto, downto, by = 1 } = spec;
 
-      from = Shape.toValue(from, shape);
-      to = Shape.toValue(to, shape);
-      upto = Shape.toValue(upto, shape);
-      downto = Shape.toValue(downto, shape);
-      by = Shape.toValue(by, shape);
+    from = Shape.toValue(from, shape);
+    to = Shape.toValue(to, shape);
+    upto = Shape.toValue(upto, shape);
+    downto = Shape.toValue(downto, shape);
+    by = Shape.toValue(by, shape);
 
-      let consider;
+    let consider;
 
-      if (by > 0) {
-        if (upto !== undefined) {
-          consider = (value) => value < upto - EPSILON;
-        } else {
-          consider = (value) => value <= to + EPSILON;
-        }
-      } else if (by < 0) {
-        if (downto !== undefined) {
-          consider = (value) => value > downto + EPSILON;
-        } else {
-          consider = (value) => value >= to - EPSILON;
-        }
+    if (by > 0) {
+      if (upto !== undefined) {
+        consider = (value) => value < upto - EPSILON;
       } else {
-        throw Error('seq: Expects by != 0');
+        consider = (value) => value <= to + EPSILON;
       }
-      const numbers = [];
-      for (let number = from, nth = 0; consider(number); number += by, nth++) {
-        numbers.push(number);
+    } else if (by < 0) {
+      if (downto !== undefined) {
+        consider = (value) => value > downto + EPSILON;
+      } else {
+        consider = (value) => value >= to - EPSILON;
       }
-      indexes.push(numbers);
+    } else {
+      throw Error('seq: Expects by != 0');
     }
-    const results = [];
-    const index = indexes.map(() => 0);
-    for (;;) {
-      results.push(
-        maybeApply(op(...index.map((nth, index) => indexes[index][nth])), shape)
-      );
-      let nth;
-      for (nth = 0; nth < index.length; nth++) {
-        if (++index[nth] < indexes[nth].length) {
-          break;
-        }
-        index[nth] = 0;
-      }
-      if (nth === index.length) {
+    const numbers = [];
+    for (let number = from, nth = 0; consider(number); number += by, nth++) {
+      numbers.push(number);
+    }
+    indexes.push(numbers);
+  }
+  const results = [];
+  const index = indexes.map(() => 0);
+  for (;;) {
+    results.push(
+      maybeApply(op(...index.map((nth, index) => indexes[index][nth])), shape)
+    );
+    let nth;
+    for (nth = 0; nth < index.length; nth++) {
+      if (++index[nth] < indexes[nth].length) {
         break;
       }
+      index[nth] = 0;
     }
-    return groupOp(...results);
-  };
+    if (nth === index.length) {
+      break;
+    }
+  }
+  return groupOp(...results);
+});
 
 Shape.registerMethod('seq', seq);
 
-const serialize =
+const serialize = Shape.chainable(
   (op = (v) => v, groupOp = (v, s) => s) =>
-  (shape) =>
-    groupOp(op(serialize$1(shape.toGeometry())), shape);
+    (shape) =>
+      groupOp(op(serialize$1(shape.toGeometry())), shape)
+);
 
 Shape.registerMethod('serialize', serialize);
 
-const simplify =
-  (...args) =>
-  (shape) => {
-    const { object: options = {} } = destructure(args);
-    const { ratio, simplifyPoints, eps } = options;
-    return Shape.fromGeometry(
-      simplify$1(shape.toGeometry(), ratio, simplifyPoints, eps)
-    );
-  };
+const simplify = Shape.chainable((...args) => (shape) => {
+  const { object: options = {} } = destructure(args);
+  const { ratio, simplifyPoints, eps } = options;
+  return Shape.fromGeometry(
+    simplify$1(shape.toGeometry(), ratio, simplifyPoints, eps)
+  );
+});
 
 Shape.registerMethod('simplify', simplify);
 
@@ -4252,61 +4344,61 @@ const X$4 = 0;
 const Y$4 = 1;
 const Z$5 = 2;
 
-const size =
+const size = Shape.chainable(
   (op = (size) => (shape) => size) =>
-  (shape) => {
-    const geometry = shape.toConcreteGeometry();
-    let bounds = measureBoundingBox(geometry);
-    if (bounds === undefined) {
+    (shape) => {
+      const geometry = shape.toConcreteGeometry();
+      let bounds = measureBoundingBox(geometry);
+      if (bounds === undefined) {
+        return op({
+          length: 0,
+          width: 0,
+          height: 0,
+          max: [0, 0, 0],
+          min: [0, 0, 0],
+          center: [0, 0, 0],
+          radius: 0,
+        })(Shape.fromGeometry(geometry));
+      }
+      let [min, max] = bounds;
+      const length = max[X$4] - min[X$4];
+      const width = max[Y$4] - min[Y$4];
+      const height = max[Z$5] - min[Z$5];
+      const center = scale(0.5, add(min, max));
+      const radius = distance(center, max);
       return op({
-        length: 0,
-        width: 0,
-        height: 0,
-        max: [0, 0, 0],
-        min: [0, 0, 0],
-        center: [0, 0, 0],
-        radius: 0,
+        length,
+        width,
+        height,
+        max,
+        min,
+        center,
+        radius,
       })(Shape.fromGeometry(geometry));
     }
-    let [min, max] = bounds;
-    const length = max[X$4] - min[X$4];
-    const width = max[Y$4] - min[Y$4];
-    const height = max[Z$5] - min[Z$5];
-    const center = scale(0.5, add(min, max));
-    const radius = distance(center, max);
-    return op({
-      length,
-      width,
-      height,
-      max,
-      min,
-      center,
-      radius,
-    })(Shape.fromGeometry(geometry));
-  };
+);
 
 Shape.registerMethod('size', size);
 
-const sketch = () => (shape) =>
-  Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));
+const sketch = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(taggedSketch({}, shape.toGeometry()))
+);
 
 Shape.registerMethod('sketch', sketch);
 
-const smooth =
-  (...args) =>
-  (shape) => {
-    const { object: options = {}, shapesAndFunctions: selections } =
-      destructure(args);
-    const { iterations = 1, time = 1 } = options;
-    return Shape.fromGeometry(
-      smooth$1(
-        shape.toGeometry(),
-        shape.toShapes(selections).map((selection) => selection.toGeometry()),
-        iterations,
-        time
-      )
-    );
-  };
+const smooth = Shape.chainable((...args) => (shape) => {
+  const { object: options = {}, shapesAndFunctions: selections } =
+    destructure(args);
+  const { iterations = 1, time = 1 } = options;
+  return Shape.fromGeometry(
+    smooth$1(
+      shape.toGeometry(),
+      shape.toShapes(selections).map((selection) => selection.toGeometry()),
+      iterations,
+      time
+    )
+  );
+});
 
 Shape.registerMethod('smooth', smooth);
 
@@ -4314,116 +4406,123 @@ const X$3 = 0;
 const Y$3 = 1;
 const Z$4 = 2;
 
-const sort =
+const sort = Shape.chainable(
   (spec = 'z<y<x<', origin = [0, 0, 0]) =>
-  (shape) => {
-    let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
-      const [min, max] = measureBoundingBox(leaf);
-      const shape = Shape.fromGeometry(leaf);
-      return { min, max, shape };
-    });
-    const ops = [];
-    while (spec) {
-      const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
-      if (found === null) {
-        throw Error(`Bad sort spec ${spec}`);
+    (shape) => {
+      let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
+        const [min, max] = measureBoundingBox(leaf);
+        const shape = Shape.fromGeometry(leaf);
+        return { min, max, shape };
+      });
+      const ops = [];
+      while (spec) {
+        const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
+        if (found === null) {
+          throw Error(`Bad sort spec ${spec}`);
+        }
+        const [, dimension, order, limit, rest] = found;
+        console.log(`dimension: ${dimension}`);
+        console.log(`order: ${order}`);
+        console.log(`limit: ${limit}`);
+        console.log(`rest: ${rest}`);
+        // We apply the sorting ops in reverse.
+        ops.unshift({ dimension, order, limit });
+        spec = rest;
       }
-      const [, dimension, order, limit, rest] = found;
-      console.log(`dimension: ${dimension}`);
-      console.log(`order: ${order}`);
-      console.log(`limit: ${limit}`);
-      console.log(`rest: ${rest}`);
-      // We apply the sorting ops in reverse.
-      ops.unshift({ dimension, order, limit });
-      spec = rest;
-    }
-    for (const { dimension, order, limit } of ops) {
-      let axis;
-      switch (dimension) {
-        case 'x':
-          axis = X$3;
-          break;
-        case 'y':
-          axis = Y$3;
-          break;
-        case 'z':
-          axis = Z$4;
-          break;
-      }
-      if (limit !== undefined) {
+      for (const { dimension, order, limit } of ops) {
+        let axis;
+        switch (dimension) {
+          case 'x':
+            axis = X$3;
+            break;
+          case 'y':
+            axis = Y$3;
+            break;
+          case 'z':
+            axis = Z$4;
+            break;
+        }
+        if (limit !== undefined) {
+          switch (order) {
+            case '>':
+              leafs = leafs.filter(({ min }) => min[axis] > limit);
+              break;
+            case '<':
+              leafs = leafs.filter(({ max }) => max[axis] < limit);
+              break;
+          }
+        }
         switch (order) {
           case '>':
-            leafs = leafs.filter(({ min }) => min[axis] > limit);
+            leafs = leafs.sort((a, b) => b.min[axis] - a.min[axis]);
             break;
           case '<':
-            leafs = leafs.filter(({ max }) => max[axis] < limit);
+            leafs = leafs.sort((a, b) => a.max[axis] - b.max[axis]);
             break;
         }
       }
-      switch (order) {
-        case '>':
-          leafs = leafs.sort((a, b) => b.min[axis] - a.min[axis]);
-          break;
-        case '<':
-          leafs = leafs.sort((a, b) => a.max[axis] - b.max[axis]);
-          break;
-      }
+      return Group(...leafs.map(({ shape }) => shape));
     }
-    return Group(...leafs.map(({ shape }) => shape));
-  };
+);
 
 Shape.registerMethod('sort', sort);
 
-const table =
-  (rows, columns, ...cells) =>
-  (shape) => {
-    const uniqueId = generateUniqueId;
-    const open = { open: { type: 'table', rows, columns, uniqueId } };
-    emit({ open, hash: computeHash(open) });
-    for (let cell of cells) {
-      if (cell instanceof Function) {
-        cell = cell(shape);
-      }
-      if (typeof cell === 'string') {
-        md(cell);
-      }
+const table = Shape.chainable((rows, columns, ...cells) => (shape) => {
+  const uniqueId = generateUniqueId;
+  const open = { open: { type: 'table', rows, columns, uniqueId } };
+  emit({ open, hash: computeHash(open) });
+  for (let cell of cells) {
+    if (cell instanceof Function) {
+      cell = cell(shape);
     }
-    const close = { close: { type: 'table', rows, columns, uniqueId } };
-    emit({ close, hash: computeHash(close) });
-    return shape;
-  };
+    if (typeof cell === 'string') {
+      md(cell);
+    }
+  }
+  const close = { close: { type: 'table', rows, columns, uniqueId } };
+  emit({ close, hash: computeHash(close) });
+  return shape;
+});
 
 Shape.registerMethod('table', table);
 
-const tags =
-  (namespace = 'user', op = (tags, shape) => tags) =>
-  (shape) => {
-    const prefix = `${namespace}:`;
-    const collected = [];
-    for (const { tags } of getLeafs(shape.toGeometry())) {
-      for (const tag of tags) {
-        if (tag.startsWith(prefix)) {
-          collected.push(tag.substring(prefix.length));
+const tags = Shape.chainable(
+  (namespace = 'user', op = (tags) => (shape) => shape.md(`tags: ${tags}`)) =>
+    (shape) => {
+      const prefix = `${namespace}:`;
+      const collected = [];
+      for (const { tags } of getLeafs(shape.toGeometry())) {
+        for (const tag of tags) {
+          if (tag.startsWith(prefix)) {
+            collected.push(tag.substring(prefix.length));
+          }
         }
       }
+      return op(collected)(shape);
     }
-    return op(collected, shape);
-  };
+);
 
 Shape.registerMethod('tags', tags);
 
 // Tint adds another color to the mix.
-const tint = (name) => (shape) => shape.tag(...toTagsFromName(name));
+const tint = Shape.chainable(
+  (name) => (shape) => shape.tag(...toTagsFromName(name))
+);
 
 Shape.registerMethod('tint', tint);
 
-const to = (selection) => (shape) =>
-  shape.by(origin()).by(shape.toShape(selection));
+const to = Shape.chainable(
+  (selection) => (shape) => shape.by(origin()).by(shape.toShape(selection))
+);
 
 Shape.registerMethod('to', to);
 
-const tool = (name) => (shape) =>
-  Shape.fromGeometry(rewriteTags(toTagsFromName$2(name), [], shape.toGeometry()));
+const tool = Shape.chainable(
+  (name) => (shape) =>
+    Shape.fromGeometry(
+      rewriteTags(toTagsFromName$1(name), [], shape.toGeometry())
+    )
+);
 
 Shape.registerMethod('tool', tool);
 
@@ -4448,76 +4547,80 @@ const lerp = (t, [ax, ay, az], [bx, by, bz]) => [
   az + t * (bz - az),
 ];
 
-const toolpath =
+const toolpath = Shape.chainable(
   ({
-    diameter = 1,
-    jumpHeight = 1,
-    stepCost = diameter * -2,
-    turnCost = -2,
-    neighborCost = -2,
-    stopCost = 30,
-    candidateLimit = 1,
-    subCandidateLimit = 1,
-  } = {}) =>
-  (shape) => {
-    const toolpath = computeToolpath(shape.toGeometry(), {
-      diameter,
-      jumpHeight,
-      stepCost,
-      turnCost,
-      neighborCost,
-      stopCost,
-      candidateLimit,
-      subCandidateLimit,
-    });
-    const cuts = [];
-    const jumpEnds = [];
-    const cutEnds = [];
-    const jumps = [];
-    // console.log(JSON.stringify(shape));
-    // console.log(JSON.stringify(toolpath));
-    for (const { op, from, to } of toolpath.toolpath) {
-      if (!from.every(isFinite)) {
-        // This is from an unknown position.
-        continue;
+      diameter = 1,
+      jumpHeight = 1,
+      stepCost = diameter * -2,
+      turnCost = -2,
+      neighborCost = -2,
+      stopCost = 30,
+      candidateLimit = 1,
+      subCandidateLimit = 1,
+    } = {}) =>
+    (shape) => {
+      const toolpath = computeToolpath(shape.toGeometry(), {
+        diameter,
+        jumpHeight,
+        stepCost,
+        turnCost,
+        neighborCost,
+        stopCost,
+        candidateLimit,
+        subCandidateLimit,
+      });
+      const cuts = [];
+      const jumpEnds = [];
+      const cutEnds = [];
+      const jumps = [];
+      // console.log(JSON.stringify(shape));
+      // console.log(JSON.stringify(toolpath));
+      for (const { op, from, to } of toolpath.toolpath) {
+        if (!from.every(isFinite)) {
+          // This is from an unknown position.
+          continue;
+        }
+        switch (op) {
+          case 'cut':
+            cuts.push([lerp(0.2, from, to), to]);
+            cutEnds.push(to);
+            break;
+          case 'jump':
+            jumps.push([lerp(0.2, from, to), to]);
+            jumpEnds.push(to);
+            break;
+        }
       }
-      switch (op) {
-        case 'cut':
-          cuts.push([lerp(0.2, from, to), to]);
-          cutEnds.push(to);
-          break;
-        case 'jump':
-          jumps.push([lerp(0.2, from, to), to]);
-          jumpEnds.push(to);
-          break;
-      }
+      return Group(
+        Points(cutEnds).color('red'),
+        Edges(cuts).color('red'),
+        Points(jumpEnds).color('blue'),
+        Edges(jumps).color('blue'),
+        Shape.fromGeometry(toolpath)
+      );
     }
-    return Group(
-      Points(cutEnds).color('red'),
-      Edges(cuts).color('red'),
-      Points(jumpEnds).color('blue'),
-      Edges(jumps).color('blue'),
-      Shape.fromGeometry(toolpath)
-    );
-  };
+);
 
 Shape.registerMethod('toolpath', toolpath);
 
 const Z$3 = 2;
 
-const top = () => (shape) =>
-  shape.size(
-    ({ max }) =>
-      (shape) =>
-        max[Z$3]
-  );
+const top = Shape.chainable(
+  () => (shape) =>
+    shape.size(
+      ({ max }) =>
+        (shape) =>
+          max[Z$3]
+    )
+);
 
 Shape.registerMethod('top', top);
 
-const twist =
+const twist = Shape.chainable(
   (turnsPerMm = 1) =>
-  (shape) =>
-    Shape.fromGeometry(twist$1(shape.toGeometry(), turnsPerMm));
+    (shape) =>
+      Shape.fromGeometry(twist$1(shape.toGeometry(), turnsPerMm))
+);
 
 Shape.registerMethod('twist', twist);
 
@@ -4543,15 +4646,17 @@ const untagGeometry = (geometry, tags) => {
   return rewrite(geometry, op);
 };
 
-const untag =
+const untag = Shape.chainable(
   (...tags) =>
-  (shape) =>
-    Shape.fromGeometry(untagGeometry(shape.toGeometry(), tags));
+    (shape) =>
+      Shape.fromGeometry(untagGeometry(shape.toGeometry(), tags))
+);
 
 Shape.registerMethod('untag', untag);
 
-const upperEnvelope = () => (shape) =>
-  Shape.fromGeometry(generateUpperEnvelope(shape.toGeometry()));
+const upperEnvelope = Shape.chainable(
+  () => (shape) => Shape.fromGeometry(generateUpperEnvelope(shape.toGeometry()))
+);
 
 Shape.registerMethod('upperEnvelope', upperEnvelope);
 
@@ -4581,10 +4686,8 @@ const baseView =
       wireframe = false,
       inline,
       width = 512,
-      height = 256,
+      height = 512,
       position = [100, -100, 100],
-      withAxes = false,
-      withGrid = true,
     } = options;
 
     if (size !== undefined) {
@@ -4611,38 +4714,13 @@ const baseView =
         height,
         position,
         inline,
-        withAxes,
-        withGrid,
       };
       emit({ hash: generateUniqueId(), path: viewPath, view });
     }
     return shape;
   };
 
-const topView =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args, {
-      object: {
-        size: 512,
-        skin: true,
-        outline: true,
-        wireframe: false,
-        width: 1024,
-        height: 512,
-        position: [0, 0, 100],
-      },
-    });
-    return view(viewId, op, options)(shape);
-  };
-
-Shape.registerMethod('topView', topView);
-
-const gridView = (...args) => {
+const topView = Shape.chainable((...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -4653,75 +4731,112 @@ const gridView = (...args) => {
       skin: true,
       outline: true,
       wireframe: false,
-      width: 1024,
+      width: 512,
       height: 512,
       position: [0, 0, 100],
-      withGrid: true,
+    },
+  });
+  return view(viewId, op, options)(shape);
+});
+
+Shape.registerMethod('topView', topView);
+
+const gridView = Shape.chainable((...args) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 512,
+      height: 512,
+      position: [0, 0, 100],
     },
   });
   return (shape) => view(viewId, op, options)(shape);
-};
+});
 
 Shape.registerMethod('gridView', gridView);
 
-const frontView =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args, {
-      object: {
-        size: 512,
-        skin: true,
-        outline: true,
-        wireframe: false,
-        width: 1024,
-        height: 512,
-        position: [0, -100, 0],
-      },
-    });
-    return (shape) => view(viewId, op, options)(shape);
-  };
+const frontView = Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 512,
+      height: 512,
+      position: [0, -100, 0],
+    },
+  });
+  return (shape) => view(viewId, op, options)(shape);
+});
 
 Shape.registerMethod('frontView', frontView);
 
+Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args, {
+    object: {
+      size: 512,
+      skin: true,
+      outline: true,
+      wireframe: false,
+      width: 512,
+      height: 512,
+      position: [100, 0, 0],
+    },
+  });
+  return view(viewId, op, options)(shape);
+});
+
 Shape.registerMethod('sideView');
 
-const view =
-  (...args) =>
-  (shape) => {
-    const {
-      value: viewId,
-      func: op = (x) => x,
-      object: options,
-    } = Shape.destructure(args);
-    switch (options.style) {
-      case 'grid':
-        return shape.gridView(viewId, op, options);
-      case 'none':
-        return shape;
-      case 'side':
-        return shape.sideView(viewId, op, options);
-      case 'top':
-        return shape.topView(viewId, op, options);
-      default:
-        return baseView(viewId, op, options)(shape);
-    }
-  };
+const view = Shape.chainable((...args) => (shape) => {
+  const {
+    value: viewId,
+    func: op = (x) => x,
+    object: options,
+  } = Shape.destructure(args);
+  switch (options.style) {
+    case 'grid':
+      return shape.gridView(viewId, op, options);
+    case 'none':
+      return shape;
+    case 'side':
+      return shape.sideView(viewId, op, options);
+    case 'top':
+      return shape.topView(viewId, op, options);
+    default:
+      return baseView(viewId, op, options)(shape);
+  }
+});
 
 Shape.registerMethod('view', view);
 
-const voidIn = (other) => (shape) =>
-  Shape.toShape(other, shape).fitTo(shape.void());
+const voidIn = Shape.chainable(
+  (other) => (shape) => Shape.toShape(other, shape).fitTo(shape.void())
+);
 
 Shape.registerMethod('voidIn', voidIn);
 
-const volume =
+const volume = Shape.chainable(
   (op = (value) => (shape) => value) =>
-  (shape) =>
-    op(measureVolume(shape.toGeometry()))(shape);
+    (shape) =>
+      op(measureVolume(shape.toGeometry()))(shape)
+);
 
 Shape.registerMethod('volume', volume);
 
@@ -4744,64 +4859,58 @@ const ceilPoint = ([x, y, z], resolution) => [
   ceil(z, resolution),
 ];
 
-const voxels =
-  (resolution = 1) =>
-  (shape) => {
-    const offset = resolution / 2;
-    const geometry = shape.toGeometry();
-    const [boxMin, boxMax] = measureBoundingBox(geometry);
-    const min = floorPoint(boxMin, resolution);
-    const max = ceilPoint(boxMax, resolution);
-    const polygons = [];
-    withAabbTreeQuery(
-      linearize(geometry, ({ type }) =>
-        ['graph', 'polygonsWithHoles'].includes(type)
-      ),
-      (query) => {
-        const isInteriorPoint = (x, y, z) =>
-          query.isIntersectingPointApproximate(x, y, z);
-        for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
-          for (let y = min[Y$2] - offset; y <= max[Y$2] + offset; y += resolution) {
-            for (
-              let z = min[Z$2] - offset;
-              z <= max[Z$2] + offset;
-              z += resolution
-            ) {
-              const state = isInteriorPoint(x, y, z);
-              if (state !== isInteriorPoint(x + resolution, y, z)) {
-                const face = [
-                  [x + offset, y - offset, z - offset],
-                  [x + offset, y + offset, z - offset],
-                  [x + offset, y + offset, z + offset],
-                  [x + offset, y - offset, z + offset],
-                ];
-                polygons.push({ points: state ? face : face.reverse() });
-              }
-              if (state !== isInteriorPoint(x, y + resolution, z)) {
-                const face = [
-                  [x - offset, y + offset, z - offset],
-                  [x + offset, y + offset, z - offset],
-                  [x + offset, y + offset, z + offset],
-                  [x - offset, y + offset, z + offset],
-                ];
-                polygons.push({ points: state ? face.reverse() : face });
-              }
-              if (state !== isInteriorPoint(x, y, z + resolution)) {
-                const face = [
-                  [x - offset, y - offset, z + offset],
-                  [x + offset, y - offset, z + offset],
-                  [x + offset, y + offset, z + offset],
-                  [x - offset, y + offset, z + offset],
-                ];
-                polygons.push({ points: state ? face : face.reverse() });
-              }
+const voxels = Shape.chainable((resolution = 1) => (shape) => {
+  const offset = resolution / 2;
+  const geometry = shape.toGeometry();
+  const [boxMin, boxMax] = measureBoundingBox(geometry);
+  const min = floorPoint(boxMin, resolution);
+  const max = ceilPoint(boxMax, resolution);
+  const polygons = [];
+  withAabbTreeQuery(
+    linearize(geometry, ({ type }) =>
+      ['graph', 'polygonsWithHoles'].includes(type)
+    ),
+    (query) => {
+      const isInteriorPoint = (x, y, z) =>
+        query.isIntersectingPointApproximate(x, y, z);
+      for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
+        for (let y = min[Y$2] - offset; y <= max[Y$2] + offset; y += resolution) {
+          for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
+            const state = isInteriorPoint(x, y, z);
+            if (state !== isInteriorPoint(x + resolution, y, z)) {
+              const face = [
+                [x + offset, y - offset, z - offset],
+                [x + offset, y + offset, z - offset],
+                [x + offset, y + offset, z + offset],
+                [x + offset, y - offset, z + offset],
+              ];
+              polygons.push({ points: state ? face : face.reverse() });
+            }
+            if (state !== isInteriorPoint(x, y + resolution, z)) {
+              const face = [
+                [x - offset, y + offset, z - offset],
+                [x + offset, y + offset, z - offset],
+                [x + offset, y + offset, z + offset],
+                [x - offset, y + offset, z + offset],
+              ];
+              polygons.push({ points: state ? face.reverse() : face });
+            }
+            if (state !== isInteriorPoint(x, y, z + resolution)) {
+              const face = [
+                [x - offset, y - offset, z + offset],
+                [x + offset, y - offset, z + offset],
+                [x + offset, y + offset, z + offset],
+                [x - offset, y + offset, z + offset],
+              ];
+              polygons.push({ points: state ? face : face.reverse() });
             }
           }
         }
       }
-    );
-    return Shape.fromPolygons(polygons);
-  };
+    }
+  );
+  return Shape.fromPolygons(polygons);
+});
 
 Shape.registerMethod('voxels', voxels);
 
@@ -4863,44 +4972,42 @@ const Voxels = (...points) => {
 
 Shape.prototype.Voxels = Shape.shapeMethod(Voxels);
 
-const weld =
-  (...rest) =>
-  (first) =>
-    Group(first, ...rest).fill();
-
-Shape.registerMethod('weld', weld);
-
-const Weld = (first, ...rest) => first.weld(...rest);
-
-Shape.prototype.Weld = Shape.shapeMethod(Weld);
-
-// DEPRECATE
-
-const withFn =
+const Wrap =
+  (offset = 1, alpha = 0.1) =>
   (...shapes) =>
-  (shape) =>
-    assemble(shape, ...shapes);
+    Group(...shapes).wrap(offset, alpha);
 
-Shape.registerMethod('with', withFn);
+const wrap = Shape.chainable(
+  (offset = 1, alpha = 0.1) =>
+    (shape) =>
+      Shape.fromGeometry(
+        wrap$1(shape.toGeometry(), shape.getTags(), offset, alpha)
+      )
+);
 
-const x =
+Shape.registerMethod('wrap', wrap);
+
+const x = Shape.chainable(
   (...x) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(x).map((x) => move([x, 0, 0])(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(x).map((x) => move([x, 0, 0])(shape)))
+);
 
 Shape.registerMethod('x', x);
 
-const y =
+const y = Shape.chainable(
   (...y) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(y).map((y) => move([0, y, 0])(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(y).map((y) => move([0, y, 0])(shape)))
+);
 
 Shape.registerMethod('y', y);
 
-const z =
+const z = Shape.chainable(
   (...z) =>
-  (shape) =>
-    Shape.Group(...shape.toFlatValues(z).map((z) => move([0, 0, z])(shape)));
+    (shape) =>
+      Shape.Group(...shape.toFlatValues(z).map((z) => move([0, 0, z])(shape)))
+);
 
 Shape.registerMethod('z', z);
 
@@ -5496,7 +5603,7 @@ const fromVec3 = (...points) =>
 const fromPoints = (...shapes) => {
   const vec3List = [];
   for (const shape of shapes) {
-    eachPoint(shape.toGeometry(), (vec3) => vec3List.push(vec3));
+    eachPoint$1(shape.toGeometry(), (vec3) => vec3List.push(vec3));
   }
   return fromVec3(...vec3List);
 };
@@ -5540,9 +5647,9 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);
 
-const Segments = (...segments) =>
+const Segments = (segments) =>
   Shape.fromSegments(
-    ...Shape.toNestedValues(segments).map(([source, target]) => [
+    Shape.toNestedValues(segments).map(([source, target]) => [
       Shape.toCoordinate(undefined, source),
       Shape.toCoordinate(undefined, target),
     ])
@@ -5610,4 +5717,4 @@ const RX = (t = 0) => Point().rx(t);
 const RY = (t = 0) => Point().ry(t);
 const RZ = (t = 0) => Point().rz(t);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Weld, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clip, clipfrom, clipopen, color, colors, cut, cutfrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, gn, grow, hull, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, play, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, weld, withFill, withFn, withInset, withOp, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, Loft, Loop, Octagon, Orb, Page, Path, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Segments, Septagon, Shape, Spiral, SurfaceMesh, Tetragon, Triangle, Voxels, Wave, Wrap, X, XY, XZ, Y, YZ, Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bend, billOfMaterials, by, cast, center, chainHull, clean, clip, clipfrom, clipopen, color, colors, cut, cutFrom, cutopen, cutout, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, disjoint, drop, e, each, eachIn, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, fuse, g, get, getNot, ghost, gn, grow, hull, image, inFn, inline, inset, involute, join, keep, link, loadGeometry, loft, log, loop, lowerEnvelope, mask, masking, material, md, move, moveAlong, moveTo, n, noVoid, noop, normal, notColor, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, points$1 as points, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, top, twist, untag, upperEnvelope, view, voidFn, voidIn, volume, voxels, wrap, x, xyz, y, z };

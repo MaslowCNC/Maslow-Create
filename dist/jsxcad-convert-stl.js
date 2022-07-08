@@ -1,4 +1,4 @@
-import { fromPolygons, toTriangleArray } from './jsxcad-geometry.js';
+import { fromPolygons, eachTriangle } from './jsxcad-geometry.js';
 
 function parse$1(str) {
   if(typeof str !== 'string') {
@@ -127,7 +127,7 @@ const fromStl = async (
   }
   switch (geometry) {
     case 'graph':
-      return fromPolygons({}, polygons);
+      return fromPolygons(polygons);
     default:
       throw Error(`Unknown geometry type ${geometry}`);
   }
@@ -251,7 +251,7 @@ const compareTriangles = (t1, t2) => {
 
 const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const triangles = [];
-  for (const [a, b, c] of toTriangleArray(await geometry)) {
+  eachTriangle(await geometry, ([a, b, c]) => {
     triangles.push(
       orderVertices([
         roundVertex(a, tolerance),
@@ -259,7 +259,7 @@ const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
         roundVertex(c, tolerance),
       ])
     );
-  }
+  });
   triangles.sort(compareTriangles);
   const output = `solid JSxCAD\n${convertToFacets(
     triangles

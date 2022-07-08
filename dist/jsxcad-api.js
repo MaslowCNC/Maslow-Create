@@ -444,21 +444,6 @@ registerDynamicModule(
   '../threejs/main.js'
 );
 registerDynamicModule(
-  '@' + 'jsxcad/api-v1-armature',
-  './jsxcad-api-v1-armature.js',
-  '../v1-armature/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-cursor',
-  './jsxcad-api-v1-cursor.js',
-  '../v1-cursor/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-deform',
-  './jsxcad-api-v1-deform.js',
-  '../v1-deform/main.js'
-);
-registerDynamicModule(
   '@' + 'jsxcad/api-v1-dst',
   './jsxcad-api-v1-dst.js',
   '../v1-dst/main.js'

@@ -1,6 +1,7 @@
-import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, identity, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demesh as demesh$1, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, extrude as extrude$1, faces as faces$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, identity, withAabbTreeQuery, convexHull as convexHull$1, cut as cut$1, deform as deform$1, demesh as demesh$1, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, extrude as extrude$1, faces as faces$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, wrap as wrap$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
+import { toTagsFromName } from './jsxcad-algorithm-material.js';
 
 const update = (geometry, updates, changes) => {
   if (updates === undefined) {
@@ -132,12 +133,6 @@ const transform$1 = (matrix, geometry) => {
   return rewrite(geometry, op);
 };
 
-const isNotVoid = ({ tags }) => {
-  return tags === undefined || tags.includes('type:void') === false;
-};
-
-const isVoid = (geometry) => !isNotVoid(geometry);
-
 const allTags = (geometry) => {
   const collectedTags = new Set();
   const op = ({ tags }, descend) => {
@@ -151,6 +146,55 @@ const allTags = (geometry) => {
   visit(geometry, op);
   return collectedTags;
 };
+
+const rewriteType = (op) => (geometry) =>
+  rewrite(geometry, (geometry, descend) => descend(op(geometry)));
+
+const addType = (type) => (geometry) => {
+  if (geometry.tags.includes(type)) {
+    return undefined;
+  } else {
+    return { tags: [...geometry.tags, type] };
+  }
+};
+
+const removeType = (type) => (geometry) => {
+  if (geometry.tags.includes(type)) {
+    return { tags: geometry.tags.filter((tag) => tag !== type) };
+  } else {
+    return undefined;
+  }
+};
+
+const hasNotType = (type) => rewriteType(removeType(type));
+const hasType = (type) => rewriteType(addType(type));
+const isNotType =
+  (type) =>
+  ({ tags }) =>
+    !tags.includes(type);
+const isType =
+  (type) =>
+  ({ tags }) =>
+    tags.includes(type);
+
+const typeGhost = 'type:ghost';
+const hasNotTypeGhost = hasNotType(typeGhost);
+const hasTypeGhost = hasType(typeGhost);
+const isNotTypeGhost = isNotType(typeGhost);
+const isTypeGhost = isType(typeGhost);
+
+const typeMasked = 'type:masked';
+const hasNotTypeMasked = hasNotType(typeMasked);
+const hasTypeMasked = hasType(typeMasked);
+const isNotTypeMasked = isNotType(typeMasked);
+const isTypeMasked = isType(typeMasked);
+
+const typeVoid = 'type:void';
+const hasNotTypeVoid = hasNotType(typeVoid);
+const hasTypeVoid = hasType(typeVoid);
+const isNotTypeVoid = isNotType(typeVoid);
+const isTypeVoid = isType(typeVoid);
+const isSegments = ({ type }) => type === 'segments';
 
 const registry = new Map();
 
@@ -223,6 +267,7 @@ const linearize = (
       descend();
     }
   };
+  // FIX: Remove toConcreteGeometry.
   visit(toConcreteGeometry(geometry), collect);
   return out;
 };
@@ -240,8 +285,11 @@ const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   return { type: 'group', tags, matrix, content, provenance };
 };
 
-const filter$z = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
+const filter$A = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) &&
+  (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
 const disjoint = (geometries) => {
   const concreteGeometries = geometries.map((geometry) =>
@@ -249,7 +297,7 @@ const disjoint = (geometries) => {
   );
   const inputs = [];
   for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter$z, inputs);
+    linearize(concreteGeometry, filter$A, inputs);
   }
   const outputs = disjoint$1(inputs);
   const disjointGeometries = [];
@@ -263,24 +311,24 @@ const disjoint = (geometries) => {
 
 const assemble = (...geometries) => disjoint(geometries);
 
-const filter$y = (geometry) => ['graph'].includes(geometry.type);
+const filter$z = (geometry) => ['graph'].includes(geometry.type);
 
 const bend = (geometry, radius) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$y, inputs);
+  linearize(concreteGeometry, filter$z, inputs);
   const outputs = bend$1(inputs, radius);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$x = (geometry) =>
+const filter$y = (geometry) =>
   geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
 
 const serialize = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$x, inputs, /* includeSketches= */ true);
+  linearize(concreteGeometry, filter$y, inputs, /* includeSketches= */ true);
   if (inputs.length === 0) {
     return geometry;
   }
@@ -317,6 +365,9 @@ const store = async (geometry) => {
   // Share graphs across geometries.
   const graph = geometry.graph;
   if (graph && !graph[isStored]) {
+    if (graph.hash === undefined) {
+      throw Error(`Graph has no hash`);
+    }
     await write$1(`graph/${graph.hash}`, graph);
     stored.graph = {
       hash: graph.hash,
@@ -436,6 +487,7 @@ const readNonblocking = (path, options) => {
 };
 
 const write = async (path, geometry, options) => {
+  console.log(`QQ/geometry/write`);
   // Ensure that the geometry carries a hash before saving.
   hash(geometry);
   const stored = await store(geometry);
@@ -445,6 +497,7 @@ const write = async (path, geometry, options) => {
 
 // Generally addPending(write(...)) seems a better option.
 const writeNonblocking = (path, geometry, options) => {
+  console.log(`QQ/geometry/writeNonblocking`);
   addPending(write(path, geometry, options));
   return geometry;
 };
@@ -470,91 +523,119 @@ const cached =
     return result;
   };
 
-const rewriteType = (op) => (geometry) =>
-  rewrite(geometry, (geometry, descend) => descend(op(geometry)));
-
-const addType = (type) => (geometry) => {
-  if (geometry.tags.includes(type)) {
-    return undefined;
-  } else {
-    return { tags: [...geometry.tags, type] };
-  }
-};
-
-const removeType = (type) => (geometry) => {
-  if (geometry.tags.includes(type)) {
-    return { tags: geometry.tags.filter((tag) => tag !== type) };
-  } else {
-    return undefined;
-  }
-};
-
-const hasNotType = (type) => rewriteType(removeType(type));
-const hasType = (type) => rewriteType(addType(type));
-const isNotType =
-  (type) =>
-  ({ tags }) =>
-    !tags.includes(type);
-const isType =
-  (type) =>
-  ({ tags }) =>
-    tags.includes(type);
-
-const typeMasked = 'type:masked';
-const hasNotTypeMasked = hasNotType(typeMasked);
-const hasTypeMasked = hasType(typeMasked);
-const isNotTypeMasked = isNotType(typeMasked);
-const isTypeMasked = isType(typeMasked);
-
-const typeVoid = 'type:void';
-const hasNotTypeVoid = hasNotType(typeVoid);
-const hasTypeVoid = hasType(typeVoid);
-const isNotTypeVoid = isNotType(typeVoid);
-const isTypeVoid = isType(typeVoid);
-
-const typeWire = 'type:wire';
-const hasNotTypeWire = hasNotType(typeWire);
-const hasTypeWire = hasType(typeWire);
-const isNotTypeWire = isNotType(typeWire);
-const isTypeWire = isType(typeWire);
-
-const filter$w = (geometry) =>
+const filter$x = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const cast = (geometry, reference) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$w, inputs);
+  linearize(concreteGeometry, filter$x, inputs);
   const outputs = cast$1(inputs, reference);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 
-const filter$v = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTags = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter((tag) => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+        return descend();
+      default:
+        const composedTags = composeTags(geometry.tags);
+        if (composedTags === undefined) {
+          const copy = { ...geometry };
+          delete copy.tags;
+          return copy;
+        }
+        if (composedTags === geometry.tags) {
+          return geometry;
+        } else {
+          return descend({ tags: composedTags });
+        }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
+const hasMaterial = (geometry, name) =>
+  rewriteTags(toTagsFromName(name), [], geometry);
+
+const filter$w = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
+
+const filterClips = (geometry) => filter$w(geometry) && isNotTypeGhost(geometry);
 
 const clip = (geometry, geometries, open) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$v, inputs);
+  linearize(concreteGeometry, filter$w, inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filter$v, inputs);
+    linearize(geometry, filterClips, inputs);
   }
   const outputs = clip$1(inputs, count, open);
+  const ghosts = [];
+  for (let nth = count; nth < inputs.length; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
 };
 
-const filter$u = (geometry) =>
+const filter$v = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const computeCentroid = (geometry, top, bottom) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$u, inputs);
+  linearize(concreteGeometry, filter$v, inputs);
   const outputs = computeCentroid$1(inputs, top, bottom);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
@@ -580,14 +661,14 @@ const computeImplicitVolume = (
   return taggedGroup({}, ...outputs);
 };
 
-const filter$t = (geometry) =>
+const filter$u = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const computeNormal = (geometry, top, bottom) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$t, inputs);
+  linearize(concreteGeometry, filter$u, inputs);
   const outputs = computeNormal$1(inputs, top, bottom);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
@@ -777,14 +858,14 @@ class KDBush {
     }
 }
 
-const filter$s = (geometry) =>
+const filter$t = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const outline = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$s, inputs);
+  linearize(concreteGeometry, filter$t, inputs);
   const outputs = outline$1(inputs);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
@@ -810,10 +891,10 @@ const transformingCoordinates =
   (coordinate, ...args) =>
     op(transformCoordinate(coordinate, matrix), ...args);
 
-const filter$r = ({ type }) => type === 'segments';
+const filter$s = ({ type }) => type === 'segments';
 
 const eachSegment = (geometry, emit) => {
-  for (const { matrix, segments } of linearize(outline(geometry), filter$r)) {
+  for (const { matrix, segments } of linearize(outline(geometry), filter$s)) {
     for (const [source, target] of segments) {
       emit([
         transformCoordinate(source, matrix),
@@ -823,62 +904,41 @@ const eachSegment = (geometry, emit) => {
   }
 };
 
-const filter$q = (geometry) =>
+const filter$r = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const fuse = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$q, inputs);
+  linearize(concreteGeometry, filter$r, inputs);
   const outputs = fuse$1(inputs);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 
-const eachNonVoidItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    // FIX: Sketches aren't real either -- but this is a bit unclear.
-    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
-      op(geometry);
-      descend();
-    }
-  };
-  visit(geometry, walk);
-};
-
-const getNonVoidSegments = (geometry) => {
-  const segmentsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'segments') {
-      segmentsets.push(item);
-    }
-  });
-  return segmentsets;
-};
-
-const filter$p = (geometry) =>
+const filter$q = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const inset = (geometry, ...args) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$p, inputs);
+  linearize(concreteGeometry, filter$q, inputs);
   const outputs = inset$1(inputs, ...args);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 
-const filter$o = (geometry) =>
-  isNotTypeVoid(geometry) &&
+const filter$p = (geometry) =>
+  isNotTypeGhost(geometry) &&
   ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
     ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
 
 const measureBoundingBox = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$o, inputs);
+  linearize(concreteGeometry, filter$p, inputs);
   const boundingBox = computeBoundingBox(inputs);
   deletePendingSurfaceMeshes();
   return boundingBox;
@@ -1047,7 +1107,10 @@ const computeToolpath = (
 
     // Grooves
     // FIX: These should be sectioned segments.
-    for (const { matrix, segments } of getNonVoidSegments(concreteGeometry)) {
+    for (const { matrix, segments } of linearize(
+      concreteGeometry,
+      (geometry) => isSegments(geometry) && isTypeGhost(geometry)
+    )) {
       for (const [localStart, localEnd] of segments) {
         const start = transformCoordinate(localStart, matrix);
         const end = transformCoordinate(localEnd, matrix);
@@ -1385,13 +1448,13 @@ const computeToolpath = (
   }
 };
 
-const filter$n = (geometry) =>
+const filter$o = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
 
 const convexHull = (geometries) => {
   const inputs = [];
   for (const geometry of geometries) {
-    linearize(toConcreteGeometry(geometry), filter$n, inputs);
+    linearize(toConcreteGeometry(geometry), filter$o, inputs);
   }
   const outputs = convexHull$1(inputs);
   deletePendingSurfaceMeshes();
@@ -1399,9 +1462,14 @@ const convexHull = (geometries) => {
 };
 
 const filterTargets$1 = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
+
 const filterRemoves = (geometry) =>
-  filterTargets$1(geometry) && isNotTypeMasked(geometry);
+  filterTargets$1(geometry) &&
+  isNotTypeMasked(geometry) &&
+  (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
 const cut = (geometry, geometries, open = false) => {
   const concreteGeometry = toConcreteGeometry(geometry);
@@ -1412,21 +1480,29 @@ const cut = (geometry, geometries, open = false) => {
     linearize(geometry, filterRemoves, inputs);
   }
   const outputs = cut$1(inputs, count, open);
+  const ghosts = [];
+  for (let nth = count; nth < inputs.length; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
   deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs, count)(concreteGeometry);
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
 };
 
 const filterShape = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const filterSelection = (geometry) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const filterDeformation = (geometry) =>
   ['graph', 'polygonsWithHoles', 'points', 'segments'].includes(
     geometry.type
-  ) && isNotTypeVoid(geometry);
+  ) && isNotTypeGhost(geometry);
 
 const deform = (geometry, entries, iterations, tolerance, alpha) => {
   const concreteGeometry = toConcreteGeometry(geometry);
@@ -1453,76 +1529,15 @@ const deform = (geometry, entries, iterations, tolerance, alpha) => {
   return replacer(inputs, outputs, length)(concreteGeometry);
 };
 
-const filter$m = (geometry) => ['graph'].includes(geometry.type);
+const filter$n = (geometry) => ['graph'].includes(geometry.type);
 
 const demesh = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$m, inputs);
+  linearize(concreteGeometry, filter$n, inputs);
   const outputs = demesh$1(inputs);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
-};
-
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const rewriteTags = (
-  add,
-  remove,
-  geometry,
-  conditionTags,
-  conditionSpec
-) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return add.filter((tag) => !remove.includes(tag));
-      } else {
-        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-        return descend();
-      default:
-        const composedTags = composeTags(geometry.tags);
-        if (composedTags === undefined) {
-          const copy = { ...geometry };
-          delete copy.tags;
-          return copy;
-        }
-        if (composedTags === geometry.tags) {
-          return geometry;
-        } else {
-          return descend({ tags: composedTags });
-        }
-    }
-  };
-  return rewrite(geometry, op);
 };
 
 // Dropped elements displace as usual, but are not included in positive output.
@@ -1546,15 +1561,15 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
-const filter$l = (geometry) =>
+const filter$m = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeVoid(geometry);
+  ) && isNotTypeGhost(geometry);
 
 const eachPoint = (geometry, emit) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$l, inputs);
+  linearize(concreteGeometry, filter$m, inputs);
   eachPoint$1(inputs, emit);
   deletePendingSurfaceMeshes();
 };
@@ -1569,14 +1584,14 @@ const eachTriangle = (geometry, emitTriangle) => {
   deletePendingSurfaceMeshes();
 };
 
-const filter$k = (geometry) =>
+const filter$l = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const extrude = (geometry, top, bottom) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$k, inputs);
+  linearize(concreteGeometry, filter$l, inputs);
   const count = inputs.length;
   inputs.push(top, bottom);
   const outputs = extrude$1(inputs, count);
@@ -1584,26 +1599,26 @@ const extrude = (geometry, top, bottom) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$j = (geometry) =>
+const filter$k = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const faces = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$j, inputs);
+  linearize(concreteGeometry, filter$k, inputs);
   const outputs = faces$1(inputs);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 
-const filter$i = (geometry) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+const filter$j = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const fix = (geometry, selfIntersection = true) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$i, inputs);
+  linearize(concreteGeometry, filter$j, inputs);
   const outputs = fix$1(inputs, selfIntersection);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
@@ -1620,46 +1635,37 @@ const fresh = (geometry) => {
   return fresh;
 };
 
-const fromPolygons = (options, polygons) => {
-  const outputs = fromPolygons$1(polygons);
+const fromPolygons = (
+  polygons,
+  { tags = [], close = false, tolerance = 0.001 } = {}
+) => {
+  const outputs = fromPolygons$1(polygons, close, tolerance);
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
 
-const filter$h = (geometry) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+const filter$i = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const generateLowerEnvelope = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$h, inputs);
+  linearize(concreteGeometry, filter$i, inputs);
   const outputs = generateEnvelope(inputs, /* envelopeType= */ 1);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$g = (geometry) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+const filter$h = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const generateUpperEnvelope = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$g, inputs);
+  linearize(concreteGeometry, filter$h, inputs);
   const outputs = generateEnvelope(inputs, /* envelopeType= */ 0);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
-};
-
-const getAnyNonVoidSurfaces = (geometry) => {
-  const surfaces = [];
-  eachNonVoidItem(geometry, (item) => {
-    switch (item.type) {
-      case 'surface':
-      case 'z0Surface':
-        surfaces.push(item);
-    }
-  });
-  return surfaces;
 };
 
 const getAnySurfaces = (geometry) => {
@@ -1777,59 +1783,6 @@ const getLeafsIn = (geometry) => {
   return leafs;
 };
 
-const getNonVoidGraphs = (geometry) => {
-  const graphs = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'graph') {
-      graphs.push(item);
-    }
-  });
-  return graphs;
-};
-
-const getNonVoidItems = (geometry) => {
-  const items = [];
-  const op = (geometry, descend) => {
-    if (geometry.type === 'item' && isNotVoid(geometry)) {
-      items.push(geometry);
-    } else {
-      descend();
-    }
-  };
-  visit(geometry, op);
-  return items;
-};
-
-const getNonVoidPolygonsWithHoles = (geometry) => {
-  const polygons = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'polygonsWithHoles') {
-      polygons.push(item);
-    }
-  });
-  return polygons;
-};
-
-const getNonVoidPlans = (geometry) => {
-  const plans = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'plan') {
-      plans.push(item);
-    }
-  });
-  return plans;
-};
-
-const getNonVoidPoints = (geometry) => {
-  const pointsets = [];
-  eachNonVoidItem(geometry, (item) => {
-    if (item.type === 'points') {
-      pointsets.push(item);
-    }
-  });
-  return pointsets;
-};
-
 const getGraphs = (geometry) => {
   const graphs = [];
   eachItem(geometry, (item) => {
@@ -1868,43 +1821,43 @@ const getTags = (geometry) => {
   }
 };
 
-const filter$f = (geometry, parent) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+const filter$g = (geometry, parent) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const grow = (geometry, offset, selections, options) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$f, inputs);
+  linearize(concreteGeometry, filter$g, inputs);
   const count = inputs.length;
   inputs.push(offset);
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$f, inputs);
+    linearize(toConcreteGeometry(selection), filter$g, inputs);
   }
   const outputs = grow$1(inputs, count, options);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$e = (geometry) =>
+const filter$f = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type);
 
 const involute = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$e, inputs);
+  linearize(concreteGeometry, filter$f, inputs);
   const outputs = involute$1(inputs);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$d = (geometry) =>
+const filter$e = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const fill = (geometry, tags = []) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$d, inputs);
+  linearize(concreteGeometry, filter$e, inputs);
   const outputs = fill$1(inputs);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
@@ -1949,16 +1902,19 @@ const isNotShowWireframe = (geometry) =>
   isNotShow(geometry, showWireframe);
 const isShowWireframe = (geometry) => isShow(geometry, showWireframe);
 
-const filter$c = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type);
+const filter$d = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
+  isNotTypeGhost(geometry);
+
+const filterAdds = (geometry) => filter$d(geometry) && isNotTypeGhost(geometry);
 
 const join = (geometry, geometries) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$c, inputs);
+  linearize(concreteGeometry, filter$d, inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filter$c, inputs);
+    linearize(geometry, filterAdds, inputs);
   }
   const outputs = join$1(inputs, count);
   deletePendingSurfaceMeshes();
@@ -1968,75 +1924,85 @@ const join = (geometry, geometries) => {
 const keep = (tags, geometry) =>
   rewriteTags(['type:void'], [], geometry, tags, 'has not');
 
-const filter$b = (geometry) =>
-  ['points', 'segments'].includes(geometry.type) && isNotTypeVoid(geometry);
+const filter$c = (geometry) =>
+  ['points', 'segments'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const link = (geometries, close = false) => {
   const inputs = [];
   for (const geometry of geometries) {
-    linearize(toConcreteGeometry(geometry), filter$b, inputs);
+    linearize(toConcreteGeometry(geometry), filter$c, inputs);
   }
   const outputs = link$1(inputs, close);
   return taggedGroup({}, ...outputs);
 };
 
-const filter$a = (geometry) =>
+const filter$b = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const loft = (geometries, close = true) => {
   const inputs = [];
   // This is wrong -- we produce a total linearization over geometries,
   // but really it should be partitioned.
   for (const geometry of geometries) {
-    linearize(toConcreteGeometry(geometry), filter$a, inputs);
+    linearize(toConcreteGeometry(geometry), filter$b, inputs);
   }
   const outputs = loft$1(inputs, close);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 
-const filter$9 = (geometry) =>
+const filter$a = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeVoid(geometry);
+  ) && isNotTypeGhost(geometry);
 
 const makeAbsolute = (geometry, tags = []) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$9, inputs);
+  linearize(concreteGeometry, filter$a, inputs);
   const outputs = makeAbsolute$1(inputs);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$8 = (geometry) =>
+const filter$9 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   hasNotTypeVoid(geometry);
 
 const measureArea = (geometry) => {
   const linear = [];
-  linearize(geometry, filter$8, linear);
+  linearize(geometry, filter$9, linear);
   return computeArea(linear);
 };
 
-const filter$7 = (geometry) =>
+const filter$8 = (geometry) =>
   geometry.type === 'graph' && hasNotTypeVoid(geometry);
 
 const measureVolume = (geometry) => {
   const linear = [];
-  linearize(geometry, filter$7, linear);
+  linearize(geometry, filter$8, linear);
   return computeVolume(linear);
 };
 
-const filter$6 = (geometry) =>
+const removeIfGhost = (geometry) =>
+  isTypeGhost(geometry) && !isTypeVoid(geometry) ? taggedGroup({}) : geometry;
+
+const noGhost = (geometry) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = linearize(concreteGeometry, isTypeGhost);
+  const outputs = inputs.map(removeIfGhost);
+  return replacer(inputs, outputs)(concreteGeometry);
+};
+
+const filter$7 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const offset = (geometry, ...args) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$6, inputs);
+  linearize(concreteGeometry, filter$7, inputs);
   const outputs = offset$1(inputs, ...args);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
@@ -2101,7 +2067,7 @@ const op =
 // We expect the type to be uniquely qualified.
 const registerReifier = (type, reifier) => registry.set(type, reifier);
 
-const filter$5 = (geometry) => ['graph'].includes(geometry.type);
+const filter$6 = (geometry) => ['graph'].includes(geometry.type);
 
 const remesh = (
   geometry,
@@ -2113,10 +2079,10 @@ const remesh = (
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$5, inputs);
+  linearize(concreteGeometry, filter$6, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$5, inputs);
+    linearize(toConcreteGeometry(selection), filter$6, inputs);
   }
   const outputs = remesh$1(
     inputs,
@@ -2130,51 +2096,51 @@ const remesh = (
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$4 = (geometry, parent) =>
-  ['graph'].includes(geometry.type) && isNotTypeVoid(geometry);
+const filter$5 = (geometry, parent) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const seam = (geometry, selections) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$4, inputs);
+  linearize(concreteGeometry, filter$5, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$4, inputs);
+    linearize(toConcreteGeometry(selection), filter$5, inputs);
   }
   const outputs = seam$1(inputs, count);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$3 = (geometry) => ['graph'].includes(geometry.type);
+const filter$4 = (geometry) => ['graph'].includes(geometry.type);
 
 const simplify = (geometry, ratio, simplifyPoints, eps) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$3, inputs);
+  linearize(concreteGeometry, filter$4, inputs);
   const outputs = simplify$1(inputs, ratio, simplifyPoints, eps);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$2 = (geometry) => ['graph'].includes(geometry.type);
+const filter$3 = (geometry) => ['graph'].includes(geometry.type);
 
 const smooth = (geometry, selections, iterations, time) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$2, inputs);
+  linearize(concreteGeometry, filter$3, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$2, inputs);
+    linearize(toConcreteGeometry(selection), filter$3, inputs);
   }
   const outputs = smooth$1(inputs, count, iterations, time);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$1 = (geometry) =>
+const filter$2 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeVoid(geometry);
+  isNotTypeGhost(geometry);
 
 const separate = (
   geometry,
@@ -2184,7 +2150,7 @@ const separate = (
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$1, inputs);
+  linearize(concreteGeometry, filter$2, inputs);
   const outputs = separate$1(
     inputs,
     keepShapes,
@@ -2422,6 +2388,9 @@ const toTriangles = ({ tags }, geometry) => {
 const toTriangleArray = (geometry) => {
   const triangles = [];
   const op = (geometry, descend) => {
+    if (isTypeGhost(geometry)) {
+      return;
+    }
     const { matrix = identity(), tags, type } = geometry;
     const transformTriangles = (triangles) =>
       triangles.map((triangle) =>
@@ -2429,19 +2398,15 @@ const toTriangleArray = (geometry) => {
       );
     switch (type) {
       case 'graph': {
-        if (isNotVoid(geometry)) {
-          triangles.push(
-            ...transformTriangles(
-              toTriangles({ tags }, geometry).triangles
-            )
-          );
-        }
+        triangles.push(
+          ...transformTriangles(
+            toTriangles({ tags }, geometry).triangles
+          )
+        );
         break;
       }
       case 'triangles': {
-        if (isNotVoid(geometry)) {
-          triangles.push(...transformTriangles(geometry.triangles));
-        }
+        triangles.push(...transformTriangles(geometry.triangles));
         break;
       }
       case 'polygonsWithHoles':
@@ -2466,15 +2431,29 @@ const toTriangleArray = (geometry) => {
   return triangles;
 };
 
-const filter = (geometry) => ['graph'].includes(geometry.type);
+const filter$1 = (geometry) => ['graph'].includes(geometry.type);
 
 const twist = (geometry, radius) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
+  linearize(concreteGeometry, filter$1, inputs);
   const outputs = twist$1(inputs, radius);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
+};
+
+const filter = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
+
+const wrap = (geometry, tags = [], offset, alpha) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter, inputs);
+  const outputs = wrap$1(inputs, offset, alpha);
+  deletePendingSurfaceMeshes();
+  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
 
 const rotateX = (turn, geometry) =>
@@ -2488,4 +2467,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$1(fromScaleToTransform(...vector), geometry);
 
-export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnyNonVoidSurfaces, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getNonVoidGraphs, getNonVoidItems, getNonVoidPlans, getNonVoidPoints, getNonVoidPolygonsWithHoles, getNonVoidSegments, getPlans, getPoints, getTags, grow, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeMasked, hasNotTypeVoid, hasNotTypeWire, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeMasked, hasTypeVoid, hasTypeWire, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeMasked, isNotTypeVoid, isNotTypeWire, isNotVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeMasked, isTypeVoid, isTypeWire, isVoid, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeMasked, typeVoid, typeWire, update, visit, write, writeNonblocking };
+export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convexHull, cut, deform, demesh, disjoint, drop, eachItem, eachPoint, eachSegment, eachTriangle, extrude, faces, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeVoid, join, keep, linearize, link, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeVoid, update, visit, wrap, write, writeNonblocking };
