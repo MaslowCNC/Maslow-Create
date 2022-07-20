@@ -82,14 +82,14 @@ const agent = async ({ ask, message }) => {
     case "difference":
         const aShape2Difference1 = await maslowRead(message.readPath1);
         const aShape2Difference2 = await maslowRead(message.readPath2);
-        const cutShape = aShape2Difference1.cut(aShape2Difference2);
+        const cutShape = aShape2Difference1.cut(aShape2Difference2).clean();
         await api.saveGeometry(message.writePath, cutShape);
         return 1;
         break;
     case "intersection":
         const aShape2Intersect1 = await maslowRead(message.readPath1);
         const aShape2Intersect2 = await maslowRead(message.readPath2);
-        const intersectionShape = aShape2Intersect1.clip(aShape2Intersect2);
+        const intersectionShape = aShape2Intersect1.clip(aShape2Intersect2).clean();
         await api.saveGeometry(message.writePath, intersectionShape);
         return 1;
         break;
