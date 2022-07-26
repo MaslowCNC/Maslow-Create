@@ -223,7 +223,7 @@ const agent = async ({ ask, message }) => {
     case "outline":
         const geometryToOutline = await maslowRead(message.readPath);
         
-        const outlineShape = geometryToOutline.align('z').section().fuse({ isPlanar: true }).outline();
+        const outlineShape = geometryToOutline.section().fuse({ isPlanar: true }).outline();
         await api.saveGeometry(message.writePath, outlineShape);
         
         
