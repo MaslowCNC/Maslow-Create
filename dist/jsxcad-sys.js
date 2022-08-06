@@ -779,6 +779,11 @@ const unwatchLog = (thunk) => {
 
 const aggregates = new Map();
 
+const clearTimes = () => {
+  aggregates.clear();
+};
+const getTimes = () => [...aggregates];
+
 const startTime$1 = (name) => {
   if (!aggregates.has(name)) {
     aggregates.set(name, { name, count: 0, total: 0, average: 0 });
@@ -813,7 +818,7 @@ const reportTimes = () => {
   const entries = [...aggregates.values()].sort((a, b) => a.total - b.total);
   for (const { average, count, last, name, total } of entries) {
     logInfo(
-      'sys/profile',
+      'profile',
       `${name} average: ${average.toFixed(
         2
       )} count: ${count} last: ${last.toFixed(2)} total: ${total.toFixed(2)}`
@@ -3099,4 +3104,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getWorkspace, isBrowser, isNode$1 as isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearTimes, computeHash, createConversation, createService, elapsed, emit, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode$1 as isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchLog, watchServices, write, writeNonblocking };

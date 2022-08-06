@@ -334,6 +334,11 @@ const agent = async ({ ask, message }) => {
         await api.saveGeometry(message.writePath, shapeFromSVG);
         return true;
         break;
+    case "fromSTL":
+        const shapeFromSTL = await api.readStl(message.stlPath, { format: 'binary' });
+        await api.saveGeometry(message.writePath, shapeFromSTL);
+        return true;
+        break;
     case "getPathsList":
         const listedFiles = await listFiles();
         return listedFiles
