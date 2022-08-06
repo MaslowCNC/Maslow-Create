@@ -156,7 +156,7 @@ const raycast = (x, y, camera, objects, filter) => {
 // global document
 
 class AnchorControls extends EventDispatcher {
-  constructor(_camera, _domElement, scene, render) {
+  constructor({ camera, domElement, scene, render, editId }) {
     super();
 
     const _material = new MeshBasicMaterial({
@@ -184,6 +184,8 @@ class AnchorControls extends EventDispatcher {
     const _yAxis = new Vector3();
     const _zAxis = new Vector3();
 
+    let _camera = camera;
+    let _domElement = domElement;
     let _step = 1;
     let _object = null;
     let _scene = scene;
@@ -329,6 +331,7 @@ class AnchorControls extends EventDispatcher {
         const { isOutline } = child.userData;
         if (isOutline) {
           child.visible = true;
+          child.material.color.set(0x9900cc); // violet
         }
       }
       _at.material.color.setHex(0xff4500); // orange red
@@ -352,8 +355,11 @@ class AnchorControls extends EventDispatcher {
       _object.material.opacity /= 0.5;
       for (const child of _object.children) {
         const { isOutline, hasShowOutline } = child.userData;
-        if (isOutline && !hasShowOutline) {
-          child.visible = false;
+        if (isOutline) {
+          child.material.color.set(0x000000);
+          if (!hasShowOutline) {
+            child.visible = false;
+          }
         }
       }
       _object = null;
@@ -376,6 +382,7 @@ class AnchorControls extends EventDispatcher {
       */
       this.dispatchEvent({
         edits: _edits,
+        editId: editId,
         type: 'edits',
       });
     };
@@ -549,7 +556,7 @@ class AnchorControls extends EventDispatcher {
       const { object } = raycast(_mouseX, _mouseY, _camera, [_scene]);
       if (!object) {
         detach();
-      } else {
+      } else if (object !== _object) {
         attach(object);
       }
     };
@@ -648,7 +655,7 @@ const buildMeshMaterial = async (definitions, tags) => {
   }
 
   // Else, default to normal material.
-  return new MeshNormalMaterial();
+  return new MeshNormalMaterial({ transparent: true, opacity: 1 });
 };
 
 // FIX: Found it somewhere -- attribute.
@@ -992,11 +999,11 @@ const buildMeshes = async ({
       while (vertexCount-- > 0) {
         // The first three are precise values that we don't use.
         p += 3;
-        // These three are approximate values in 100th of mm that we will use.
+        // These three are approximate values in 1000th of mm that we will use.
         vertices.push([
-          tokens[p++] / 100,
-          tokens[p++] / 100,
-          tokens[p++] / 100,
+          tokens[p++] / 1000,
+          tokens[p++] / 1000,
+          tokens[p++] / 1000,
         ]);
       }
       let faceCount = tokens[p++];
@@ -1057,6 +1064,7 @@ const buildMeshes = async ({
         updateUserData(geometry, scene, mesh.userData);
         mesh.userData.tangible = true;
         if (tags.includes('type:ghost')) {
+          mesh.userData.tangible = false;
           material.transparent = true;
           material.depthWrite = false;
           material.opacity *= 0.125;
@@ -1075,6 +1083,7 @@ const buildMeshes = async ({
         outline.userData.hasShowOutline = tags.includes('show:outline');
         outline.visible = outline.userData.hasShowOutline;
         if (tags.includes('type:ghost')) {
+          mesh.userData.tangible = false;
           material.transparent = true;
           material.depthWrite = false;
           material.opacity *= 0.25;
@@ -1127,6 +1136,7 @@ const buildMeshes = async ({
           updateUserData(geometry, scene, mesh.userData);
           mesh.userData.tangible = true;
           if (tags.includes('type:ghost')) {
+            mesh.userData.tangible = false;
             material.transparent = true;
             material.depthWrite = false;
             material.opacity *= 0.125;
@@ -1139,12 +1149,16 @@ const buildMeshes = async ({
 
         {
           const edges = new EdgesGeometry(shapeGeometry);
-          const material = new LineBasicMaterial({ color: 0x000000 });
+          const material = new LineBasicMaterial({
+            color: 0x000000,
+            linewidth: 1,
+          });
           const outline = new LineSegments(edges, material);
           outline.userData.isOutline = true;
           outline.userData.hasShowOutline = tags.includes('show:outline');
           outline.visible = outline.userData.hasShowOutline;
           if (tags.includes('type:ghost')) {
+            mesh.userData.tangible = false;
             material.transparent = true;
             material.depthWrite = false;
             material.opacity *= 0.25;
@@ -1215,7 +1229,6 @@ const moveToFit = ({
   gridState = { objects: [], visible: withGrid },
 } = {}) => {
   const { fit = true } = view;
-  const [length = 100, width = 100] = pageSize;
 
   let box;
 
@@ -1296,35 +1309,15 @@ const moveToFit = ({
       gridState.objects.push(grid);
     }
   }
-  if (withGrid) {
-    // The visible mat is slightly below z0.
-    const plane = new Mesh(
-      new PlaneGeometry(length, width),
-      new MeshStandardMaterial({
-        color: 0x00ff00,
-        // depthWrite: false,
-        transparent: true,
-        opacity: 0.25,
-      })
-    );
-    plane.castShadow = false;
-    plane.receiveShadow = true;
-    plane.position.set(0, 0, -0.05);
-    plane.layers.set(gridLayer);
-    plane.userData.tangible = false;
-    plane.userData.dressing = true;
-    plane.userData.grid = true;
-    scene.add(plane);
-    gridState.objects.push(plane);
-  }
 
   if (withGrid) {
     // The interactive mat is on z0.
     const plane = new Mesh(
-      new PlaneGeometry(length, width),
+      new PlaneGeometry(10 * 1000, 10 * 1000),
       new MeshStandardMaterial({
         transparent: true,
         opacity: 0,
+        depthWrite: false,
       })
     );
     plane.castShadow = false;
@@ -1420,15 +1413,24 @@ const buildAnchorControls = ({
   startUpdating,
   trackballControls,
   viewerElement,
+  editId,
 }) => {
-  const anchorControls = new AnchorControls(
+  const anchorControls = new AnchorControls({
     camera,
-    viewerElement,
+    domElement: viewerElement,
     scene,
-    render
-  );
+    render,
+    editId,
+  });
   anchorControls.enable();
   return { anchorControls };
+};
+
+const toEditIdFromPath = (path) => {
+  if (path) {
+    const pieces = path.split('/');
+    return pieces.slice(pieces.length - 2).join('$');
+  }
 };
 
 const orbitDisplay = async (
@@ -1444,6 +1446,7 @@ const orbitDisplay = async (
   } = {},
   page
 ) => {
+  const editId = toEditIdFromPath(path);
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -1535,6 +1538,7 @@ const orbitDisplay = async (
     trackballControls,
     view,
     viewerElement: displayCanvas,
+    editId,
   });
 
   anchorControls.addEventListener('change', update);

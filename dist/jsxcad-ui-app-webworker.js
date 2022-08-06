@@ -149,11 +149,8 @@ const agent = async ({
         }
 
       case 'app/evaluate':
-        await sys.log({
-          op: 'text',
-          text: 'Evaluation Started'
-        });
         sys.clearEmitted();
+        sys.clearTimes();
 
         try {
           // console.log({ op: 'text', text: `QQ/script: ${script}` });
@@ -165,24 +162,14 @@ const agent = async ({
             path
           });
           await sys.log({
-            op: 'text',
-            text: 'Evaluation Succeeded',
-            level: 'serious'
-          });
-          await sys.log({
             op: 'evaluate',
             status: 'success'
           }); // Wait for any pending operations.
           // Finally answer the top level question.
 
-          return true;
+          return sys.getTimes();
         } catch (error) {
           reportError(error);
-          await sys.log({
-            op: 'text',
-            text: 'Evaluation Failed',
-            level: 'serious'
-          });
           await sys.log({
             op: 'evaluate',
             status: 'failure'

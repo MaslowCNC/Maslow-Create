@@ -4,7 +4,7 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, beginEmitGroup, resolvePending, finishEmitGroup, getConfig, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
@@ -70,7 +70,7 @@ const $run = async (op, { path, id, text, sha }) => {
   const meta = await read(`meta/def/${path}/${id}`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
-    const startTime = new Date();
+    const timer = startTime(`${path}/${id}`);
     beginRecordingNotes();
     beginEmitGroup({ path, id });
     emitSourceText(text);
@@ -91,18 +91,7 @@ const $run = async (op, { path, id, text, sha }) => {
       throw error;
     }
     await resolvePending();
-    const endTime = new Date();
-    const durationMinutes = (endTime - startTime) / 60000;
-    try {
-      if (getConfig().api.evaluate.showTimeViaMd) {
-        const md = `Evaluation time ${durationMinutes.toFixed(2)} minutes.`;
-        emit({ md, hash: computeHash(md) });
-      }
-    } catch (error) {}
-    logInfo(
-      'api/core/evaluate/duration',
-      `Evaluation time ${durationMinutes.toFixed(2)}: ${text}`
-    );
+    endTime(timer);
     finishEmitGroup({ path, id });
     if (typeof result === 'object') {
       const type = result.constructor.name;

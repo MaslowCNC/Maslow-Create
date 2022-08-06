@@ -58,17 +58,34 @@ export default class UploadSVG extends Atom {
     }
 
     /**
-     * Upload a new svg file
+     * Update the displayed svg file
      */ 
     updateValue(){
         
         const rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
+
+        console.log("This filename:")
+        console.log(this.fileName)
+        console.log(this.fileName.split('.').pop())
+
+        if(this.fileName.split('.').pop() == 'svg'){
+            try{
+                const values = { op: "fromSVG", svgPath:rawPath, writePath: this.path }
+                
+                this.basicThreadValueProcessing(values)
+            }catch(err){this.setAlert(err)}
+        }
+        else if(this.fileName.split('.').pop() == 'stl'){
+            console.log("STL recognized")
+            try{
+                const values = { op: "fromSTL", stlPath:rawPath, writePath: this.path }
+                
+                this.basicThreadValueProcessing(values)
+            }catch(err){this.setAlert(err)}
+        }
+
         
-        try{
-            const values = { op: "fromSVG", svgPath:rawPath, writePath: this.path }
-            
-            this.basicThreadValueProcessing(values)
-        }catch(err){this.setAlert(err)}
+        
         
         
     }
@@ -94,16 +111,16 @@ export default class UploadSVG extends Atom {
                 const toSend = {}
                 
                 //Delete the previous file if this one is a new one
-                if(this.fileName != x.files[0].name){
-                    //Make sure the file to delete actually exists before deleting it
-                    let rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
-                    var http = new XMLHttpRequest()
-                    http.open('HEAD', rawPath, false)
-                    http.send()
-                    if ( http.status!=404){
-                        toSend[this.fileName] = null
-                    }
-                }
+                // if(this.fileName != x.files[0].name){
+                //     //Make sure the file to delete actually exists before deleting it
+                //     let rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
+                //     var http = new XMLHttpRequest()
+                //     http.open('HEAD', rawPath, false)
+                //     http.send()
+                //     if ( http.status!=404){
+                //         toSend[this.fileName] = null
+                //     }
+                // }
                 
                 this.fileName = x.files[0].name
                 this.name = this.fileName

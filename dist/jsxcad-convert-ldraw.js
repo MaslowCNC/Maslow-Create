@@ -1,4 +1,4 @@
-import { fromPolygons, rotateX, scale, taggedGroup, read, write, transformCoordinate, transform as transform$1 } from './jsxcad-geometry.js';
+import { fromPolygons, rotateX, scale, taggedGroup, read, write, transform as transform$1, transformCoordinate } from './jsxcad-geometry.js';
 import { read as read$1 } from './jsxcad-sys.js';
 
 const transform = (matrix, polygons) =>
