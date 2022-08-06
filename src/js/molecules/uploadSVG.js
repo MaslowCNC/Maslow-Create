@@ -64,10 +64,6 @@ export default class UploadSVG extends Atom {
         
         const rawPath = GlobalVariables.gitHub.getAFileRawPath(this.fileName)
 
-        console.log("This filename:")
-        console.log(this.fileName)
-        console.log(this.fileName.split('.').pop())
-
         if(this.fileName.split('.').pop() == 'svg'){
             try{
                 const values = { op: "fromSVG", svgPath:rawPath, writePath: this.path }
@@ -76,7 +72,6 @@ export default class UploadSVG extends Atom {
             }catch(err){this.setAlert(err)}
         }
         else if(this.fileName.split('.').pop() == 'stl'){
-            console.log("STL recognized")
             try{
                 const values = { op: "fromSTL", stlPath:rawPath, writePath: this.path }
                 
