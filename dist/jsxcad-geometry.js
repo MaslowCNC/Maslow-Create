@@ -297,7 +297,7 @@ const filter$A = (geometry) =>
   ) &&
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
-const disjoint = (geometries) => {
+const disjoint = (geometries, mode, exact) => {
   const concreteGeometries = geometries.map((geometry) =>
     toConcreteGeometry(geometry)
   );
@@ -305,7 +305,7 @@ const disjoint = (geometries) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$A, inputs);
   }
-  const outputs = disjoint$1(inputs);
+  const outputs = disjoint$1(inputs, mode, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
   for (const concreteGeometry of concreteGeometries) {
@@ -615,20 +615,21 @@ const rewriteTags = (
 const hasMaterial = (geometry, name) =>
   rewriteTags(toTagsFromName(name), [], geometry);
 
-const filter$w = (geometry) =>
+const filter$w = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeGhost(geometry);
+  ) &&
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-const clip = (geometry, geometries, open) => {
+const clip = (geometry, geometries, open, exact, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$w, inputs);
+  linearize(concreteGeometry, filter$w(noVoid), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filter$w, inputs);
+    linearize(geometry, filter$w(noVoid), inputs);
   }
-  const outputs = clip$1(inputs, count, open);
+  const outputs = clip$1(inputs, count, open, exact);
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
@@ -1481,23 +1482,22 @@ const convexHull = (geometries) => {
   return taggedGroup({}, ...outputs);
 };
 
-const filterTargets$1 = (geometry) =>
+const filterTargets$1 = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
-  ) && isNotTypeGhost(geometry);
+  ) &&
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-const filterRemoves = (geometry) =>
-  filterTargets$1(geometry) &&
-  isNotTypeMasked(geometry) &&
-  (isNotTypeGhost(geometry) || isTypeVoid(geometry));
+const filterRemoves = (noVoid) => (geometry) =>
+  filterTargets$1(noVoid)(geometry) && isNotTypeMasked(geometry);
 
-const cut = (geometry, geometries, open = false, exact = true) => {
+const cut = (geometry, geometries, open = false, exact, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filterTargets$1, inputs);
+  linearize(concreteGeometry, filterTargets$1(noVoid), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filterRemoves, inputs);
+    linearize(geometry, filterRemoves(noVoid), inputs);
   }
   const outputs = cut$1(inputs, count, open, exact);
   const ghosts = [];
@@ -1605,17 +1605,17 @@ const eachTriangle = (geometry, emitTriangle) => {
   deletePendingSurfaceMeshes();
 };
 
-const filter$l = (geometry) =>
+const filter$l = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid));
 
-const extrude = (geometry, top, bottom) => {
+const extrude = (geometry, top, bottom, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$l, inputs);
+  linearize(concreteGeometry, filter$l(noVoid), inputs);
   const count = inputs.length;
   inputs.push(top, bottom);
-  const outputs = extrude$1(inputs, count);
+  const outputs = extrude$1(inputs, count, noVoid);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -1931,21 +1931,23 @@ const isNotShowWireframe = (geometry) =>
   isNotShow(geometry, showWireframe);
 const isShowWireframe = (geometry) => isShow(geometry, showWireframe);
 
-const filter$d = (geometry) =>
+const filter$d = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-const filterAdds = (geometry) => filter$d(geometry) && isNotTypeGhost(geometry);
+const filterAdds = (noVoid) => (geometry) =>
+  filter$d(geometry) &&
+  (isNotTypeGhost(geometry) || !noVoid || isTypeVoid(geometry));
 
-const join = (geometry, geometries) => {
+const join = (geometry, geometries, exact, noVoid) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$d, inputs);
+  linearize(concreteGeometry, filter$d(noVoid), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filterAdds, inputs);
+    linearize(geometry, filterAdds(noVoid), inputs);
   }
-  const outputs = join$1(inputs, count);
+  const outputs = join$1(inputs, count, exact);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };

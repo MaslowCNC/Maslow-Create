@@ -44008,6 +44008,24 @@ class App extends ReactDOM$2.Component {
       await this.Notebook.run(path);
     };
 
+    this.Workspace.uploadWorkingPath = async (path, e) => {
+      const {
+        workspace
+      } = this.props;
+      const file = document.getElementById('WorkspaceUploadControl').files[0];
+      const reader = new FileReader();
+
+      const writeData = async data => {
+        await write(`source/${path}`, new Uint8Array(data), {
+          workspace
+        });
+      };
+
+      reader.onload = e => writeData(e.target.result);
+
+      reader.readAsArrayBuffer(file);
+    };
+
     this.Workspace.openWorkingFile = async file => {
       const {
         WorkspaceOpenPaths = []
@@ -44066,7 +44084,8 @@ class App extends ReactDOM$2.Component {
           {
             const {
               WorkspaceFiles = [],
-              WorkspaceOpenPaths = []
+              WorkspaceOpenPaths = [],
+              WorkspaceLoadPath
             } = this.state;
 
             const isDisabled = file => WorkspaceOpenPaths.includes(file.substring(7));
@@ -44076,18 +44095,42 @@ class App extends ReactDOM$2.Component {
             return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Load Working Path"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
               controlId: "WorkspaceLoadPathId"
             }, v$1(FormImpl.Control, {
-              placeholder: "URL or Path"
+              placeholder: "URL or Path",
+              onChange: e => this.updateState({
+                WorkspaceLoadPath: e.target.value
+              })
             }))), v$1(Col, {
               xs: "auto"
             }, v$1(Button, {
               variant: "primary",
               onClick: () => {
                 const {
-                  value
-                } = document.getElementById('WorkspaceLoadPathId');
-                this.Workspace.loadWorkingPath(value);
+                  WorkspaceLoadPath
+                } = this.state;
+                this.Workspace.loadWorkingPath(WorkspaceLoadPath);
+              },
+              disabled: !WorkspaceLoadPath
+            }, "Add"), v$1(FormImpl.Control, {
+              as: "input",
+              type: "file",
+              id: "WorkspaceUploadControl",
+              multiple: false,
+              onChange: e => {
+                const {
+                  WorkspaceLoadPath
+                } = this.state;
+                this.Workspace.uploadWorkingPath(WorkspaceLoadPath, e);
+              },
+              style: {
+                display: 'none'
               }
-            }, "Add"))))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Open Working Path"), v$1(Card.Text, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith('source/')).map((file, index) => v$1(ListGroup.Item, {
+            }), "\xA0", v$1(Button, {
+              variant: "primary",
+              onClick: () => {
+                document.getElementById('WorkspaceUploadControl').click();
+              },
+              disabled: !WorkspaceLoadPath
+            }, "Upload"))))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Open Working Path"), v$1(Card.Text, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith('source/')).map((file, index) => v$1(ListGroup.Item, {
               variant: computeListItemVariant(file),
               key: index,
               action: true,
