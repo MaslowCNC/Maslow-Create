@@ -225,13 +225,9 @@
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-6.1.0.tgz#4fc33a00c1d0c16987b1a20cf92d20614c55ac35"
 
-"@types/node@*":
-  version "12.0.0"
-  resolved "https://registry.npmjs.org/@types/node/-/node-12.0.0.tgz"
-
-"@types/node@>=10.0.0":
-  version "18.11.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.7.tgz#8ccef136f240770c1379d50100796a6952f01f94"
+"@types/node@*", "@types/node@>=10.0.0":
+  version "18.11.9"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.9.tgz#02d013de7058cea16d36168ef2fc653464cfbad4"
 
 "@webassemblyjs/ast@1.7.11":
   version "1.7.11"
@@ -375,11 +371,11 @@ abab@^2.0.3, abab@^2.0.5:
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.6.tgz#41b80f2c871d19686216b82309231cfd3cb3d291"
 
 accepts@~1.3.4:
-  version "1.3.5"
-  resolved "https://registry.npmjs.org/accepts/-/accepts-1.3.5.tgz"
+  version "1.3.8"
+  resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.8.tgz#0bf0be125b67014adcb0b0921e62db7bffe16b2e"
   dependencies:
-    mime-types "~2.1.18"
-    negotiator "0.6.1"
+    mime-types "~2.1.34"
+    negotiator "0.6.3"
 
 acorn-dynamic-import@^3.0.0:
   version "3.0.0"
@@ -2187,13 +2183,7 @@ debug@4.3.2:
   dependencies:
     ms "2.1.2"
 
-debug@^4.0.1, debug@^4.1.0, debug@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.npmjs.org/debug/-/debug-4.1.1.tgz"
-  dependencies:
-    ms "^2.1.1"
-
-debug@~4.3.1, debug@~4.3.2:
+debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@~4.3.1, debug@~4.3.2:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
   dependencies:
@@ -2489,8 +2479,8 @@ engine.io-parser@~5.0.3:
   resolved "https://registry.yarnpkg.com/engine.io-parser/-/engine.io-parser-5.0.4.tgz#0b13f704fa9271b3ec4f33112410d8f3f41d0fc0"
 
 engine.io@~6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/engine.io/-/engine.io-6.2.0.tgz#003bec48f6815926f2b1b17873e576acd54f41d0"
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/engine.io/-/engine.io-6.2.1.tgz#e3f7826ebc4140db9bbaa9021ad6b1efb175878f"
   dependencies:
     "@types/cookie" "^0.4.1"
     "@types/cors" "^2.8.12"
@@ -4252,15 +4242,25 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
+mime-db@1.52.0:
+  version "1.52.0"
+  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
+
 mime-db@~1.37.0:
   version "1.37.0"
   resolved "https://registry.npmjs.org/mime-db/-/mime-db-1.37.0.tgz"
 
-mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.18, mime-types@~2.1.19:
+mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.19:
   version "2.1.21"
   resolved "https://registry.npmjs.org/mime-types/-/mime-types-2.1.21.tgz"
   dependencies:
     mime-db "~1.37.0"
+
+mime-types@~2.1.34:
+  version "2.1.35"
+  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.35.tgz#381a871b62a734450660ae3deee44813f70d959a"
+  dependencies:
+    mime-db "1.52.0"
 
 mime@1.4.1:
   version "1.4.1"
@@ -4423,9 +4423,9 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz"
 
-negotiator@0.6.1:
-  version "0.6.1"
-  resolved "https://registry.npmjs.org/negotiator/-/negotiator-0.6.1.tgz"
+negotiator@0.6.3:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.3.tgz#58e323a72fedc0d6f9cd4d31fe49f51479590ccd"
 
 neo-async@^2.5.0, neo-async@^2.6.0:
   version "2.6.0"
@@ -4576,7 +4576,7 @@ oauthio-web@^0.6.2:
 
 object-assign@^4:
   version "4.1.1"
-  resolved "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz"
+  resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
 object-copy@^0.1.0:
   version "0.1.0"
