@@ -2,6 +2,7 @@ import GlobalVariables from './js/globalvariables'
 import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import {cmenu, showGitHubSearch} from './js/NewMenu.js'
+import initOpenCascade from "opencascade.js";
 
 
 GlobalVariables.canvas = document.querySelector('canvas')

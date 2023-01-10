@@ -24,6 +24,7 @@
     "nyc": "^14.1.1",
     "oauthio-web": "^0.6.2",
     "opencascade.js": "^2.0.0-beta.94e2944",
+    "path-browserify": "^1.0.1",
     "showdown": "^1.9.1"
   },
   "devDependencies": {
@@ -41,6 +42,7 @@
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^5.16.0",
     "eslint-config-strongloop": "^2.1.0",
+    "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.2",
     "jsdom": "^16.5.0",
     "jsdom-global": "^3.0.2",
