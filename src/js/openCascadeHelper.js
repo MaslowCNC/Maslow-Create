@@ -14,7 +14,7 @@ const openCascadeHelper = {
     for (ExpFace.Init(shape, this.openCascade.TopAbs_ShapeEnum.TopAbs_FACE, this.openCascade.TopAbs_ShapeEnum.TopAbs_SHAPE); ExpFace.More(); ExpFace.Next()) {
       const myFace = this.openCascade.TopoDS.Face_1(ExpFace.Current());
       const aLocation = new this.openCascade.TopLoc_Location_1();
-      const myT = this.openCascade.BRep_Tool.Triangulation(myFace, aLocation, 0 /* == Poly_MeshPurpose_NONE */);
+      const myT = this.openCascade.BRep_Tool.Triangulation(myFace, aLocation);
       if (myT.IsNull()) {
         continue;
       }
@@ -124,6 +124,9 @@ const openCascadeHelper = {
       vertices.push(new Vector3(x, y, z));
     }
     function f3(a, b, c, n1_x, n1_y, n1_z, n2_x, n2_y, n2_z, n3_x, n3_y, n3_z) {
+      console.log(a);
+      console.log(b);
+      console.log(c);
       faces.push(new Face3(a, b, c, [
         new Vector3(n1_x, n1_y, n1_z),
         new Vector3(n2_x, n2_y, n2_z),
