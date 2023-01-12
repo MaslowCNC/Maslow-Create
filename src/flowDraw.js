@@ -36,35 +36,15 @@ var lastTouchTime = new Date().getTime()
 //const scene = setupThreeJSViewport();
 
 initOpenCascade().then(oc => {
-    console.log("OPENCASCAD Initialized");
-    console.log(oc);
-    console.log(oc.BRepPrimAPI_MakeBox_2);
 
     const sphereSize  = .6;
     const box = new oc.BRepPrimAPI_MakeBox_2(1, 1, 1);
     const sphere = new oc.BRepPrimAPI_MakeSphere_5(new oc.gp_Pnt_3(0.5, 0.5, 0.5), sphereSize);
-    console.log("Middle");
     const cut = new oc.BRepAlgoAPI_Cut_3(box.Shape(), sphere.Shape(), new oc.Message_ProgressRange_1());
-    console.log("After cut");
     cut.Build(new oc.Message_ProgressRange_1());
-    console.log("Build");
     const dataBlob = visualizeShapes(oc, cut.Shape());
-    console.log(dataBlob);
-    //var urlCreator = window.URL || window.webkitURL;
-    //var imageUrl = urlCreator.createObjectURL(dataBlob);
-    //console.log(imageUrl);
-
-
-    // // Building the Resulting Compound 
-    // const aRes = new oc.TopoDS_Compound();
-    // const aBuilder = new oc.BRep_Builder();
-    // aBuilder.MakeCompound(aRes);
-    // aBuilder.Add(aRes, cut.Shape());
-
-    // addShapeToScene(oc, aRes, scene);
-
-    const elem = document.getElementById('modelViewer');
-    elem.src = dataBlob;//"./pistol.glb";
+    
+    document.getElementById('modelViewer').src = dataBlob;
 
 });
 
