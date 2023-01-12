@@ -14,7 +14,6 @@ export function visualizeShapes(oc, shapes_) {
   const shapes = Array.isArray(shapes_) ? shapes_ : [shapes_];
 
   // Create a document add our shapes
-  console.log(oc);
   const doc = new oc.TDocStd_Document(new oc.TCollection_ExtendedString_1());
   const shapeTool = oc.XCAFDoc_DocumentTool.ShapeTool(doc.Main()).get();
   for (const s of shapes) {

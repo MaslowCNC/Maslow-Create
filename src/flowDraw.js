@@ -48,7 +48,12 @@ initOpenCascade().then(oc => {
     console.log("After cut");
     cut.Build(new oc.Message_ProgressRange_1());
     console.log("Build");
-    visualizeShapes(oc, cut.Shape());
+    const dataBlob = visualizeShapes(oc, cut.Shape());
+    console.log(dataBlob);
+    //var urlCreator = window.URL || window.webkitURL;
+    //var imageUrl = urlCreator.createObjectURL(dataBlob);
+    //console.log(imageUrl);
+
 
     // // Building the Resulting Compound 
     // const aRes = new oc.TopoDS_Compound();
@@ -57,6 +62,9 @@ initOpenCascade().then(oc => {
     // aBuilder.Add(aRes, cut.Shape());
 
     // addShapeToScene(oc, aRes, scene);
+
+    const elem = document.getElementById('modelViewer');
+    elem.src = dataBlob;//"./pistol.glb";
 
 });
 
