@@ -352,7 +352,7 @@ input:checked + .sliderAtom:before {
   margin: 0px; /* not inherited */
 }
 
-#viewerContext {
+#modelViewer {
   margin: 0px; /* not inherited */
   padding: 10px; /* not inherited */
   padding-top: 0px;

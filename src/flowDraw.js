@@ -3,12 +3,6 @@ import Molecule from './js/molecules/molecule.js'
 import GitHubMolecule from './js/molecules/githubmolecule.js'
 import {cmenu, showGitHubSearch} from './js/NewMenu.js'
 import initOpenCascade from "opencascade.js";
-// import {
-//   loadSTEPorIGES,
-//   makeBottle,
-//   setupThreeJSViewport,
-//   addShapeToScene,
-// } from "./js/library.js";
 
 import { visualizeShapes } from "./js/visualize.js";
 
@@ -541,7 +535,7 @@ function checkBoxes(){
     
 }
 
-document.getElementById('viewerContext').addEventListener('mouseenter', () => {
+document.getElementById('modelViewer').addEventListener('mouseenter', () => {
     if(viewerBar.innerHTML.trim().length == 0){
         checkBoxes()
     }

@@ -16,6 +16,8 @@
     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css">
     <link rel="icon" href="https://www.maslowcnc.com/favicon.ico">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     
 </head>
 <body id= "mainBody">
@@ -91,11 +93,9 @@
         <div id="viewport">
         </div>
         <div class="jscad-container"> 
-            <model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="./export.glb" shadow-intensity="1" camera-controls touch-action="pan-y" id = "modelViewer"></model-viewer>
-            <!-- setup display of the viewer, i.e. canvas -->
-            <div oncontextmenu="return false;" id="viewerContext" design-url="/currentProject.jscad"></div> 
-                <div id="arrow-up-menu" class="arrow-up"></div>
-                <div id="viewer_bar"></div>
+            <model-viewer alt="3D Model" src="./export.glb" shadow-intensity=".5" camera-controls touch-action="pan-y" id = "modelViewer" width = "100%" height = "100%"></model-viewer>
+            <div id="arrow-up-menu" class="arrow-up"></div>
+            <div id="viewer_bar"></div>
            
         </div>
         <div class="sideBar">
@@ -107,16 +107,8 @@
     <div id="bins"></div>
     <!-- CodeMirror -->
     <link rel="stylesheet" href="codemirror.css">
-    <!-- <script src="https://codemirror.net/lib/codemirror.js"></script> -->
-    <!-- <script src="https://codemirror.net/addon/display/autorefresh.js"></script> -->
-    <!-- <script src="https://codemirror.net/addon/display/fullscreen.js"></script> -->
-    <!-- <script src="https://codemirror.net/mode/javascript/javascript.js"></script> -->
     
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <script src="three.js"></script>
-    <script src="TrackballControls.js"></script>
-    <script type="module"; src="/jsxcad.js"></script>
-    <!-- <script type="module"; src="http://localhost:3000/maslowWorker.js"></script> -->
     <script src="/js/flowDraw.bundle.js"></script>
     
 </body>
