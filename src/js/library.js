@@ -246,9 +246,8 @@ const addShapeToScene = async (openCascade, shape, scene) => {
   console.log("After tessellate");
   const [locVertexcoord, locNormalcoord, locTriIndices] = await openCascadeHelper.joinPrimitives(facelist);
   const tot_triangle_count = facelist.reduce((a, b) => a + b.number_of_triangles, 0);
-  console.log("Before generate geometry");
   const [vertices, faces] = await openCascadeHelper.generateGeometry(tot_triangle_count, locVertexcoord, locNormalcoord, locTriIndices);
-  console.log("After generateGeometry");
+  console.log("Middle");
   const objectMat = new MeshStandardMaterial({
     color: new Color(0.9, 0.9, 0.9)
   });

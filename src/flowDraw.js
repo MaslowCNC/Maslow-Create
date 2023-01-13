@@ -37,8 +37,19 @@ initOpenCascade().then(oc => {
     const cut = new oc.BRepAlgoAPI_Cut_3(box.Shape(), sphere.Shape(), new oc.Message_ProgressRange_1());
     cut.Build(new oc.Message_ProgressRange_1());
     const dataBlob = visualizeShapes(oc, cut.Shape());
-    
+
+    const radius = 1;
+    let circle = new oc.GC_MakeCircle_2(new oc.gp_Ax2_3(new oc.gp_Pnt_3(0, 0, 0),
+        new oc.gp_Dir_1()), radius).Value();
+    console.log(typeof circle);
+    let edge = new oc.BRepBuilderAPI_MakeEdge_1(circle).Edge();
+    //let circleWire = new oc.BRepBuilderAPI_MakeWire(edge).Wire();
+    //if (wire) { return circleWire; }
+    //return new oc.BRepBuilderAPI_MakeFace(circleWire).Face();
+
     document.getElementById('modelViewer').src = dataBlob;
+
+    console.log("Done loading");
 
 });
 
