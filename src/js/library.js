@@ -224,7 +224,6 @@ const makeBottle = (openCascade, myWidth, myHeight, myThickness) => {
   aTool.AddWire(threadingWire1.Wire());
   aTool.AddWire(threadingWire2.Wire());
   aTool.CheckCompatibility(false);
-  console.log("Make bottle 7");
   const myThreading = aTool.Shape();
 
   // Building the Resulting Compound 
@@ -239,15 +238,11 @@ const makeBottle = (openCascade, myWidth, myHeight, myThickness) => {
 export { makeBottle };
 
 const addShapeToScene = async (openCascade, shape, scene) => {
-  console.log("Begin");
   openCascadeHelper.setOpenCascade(openCascade);
-  console.log("After cascade helper");
   const facelist = await openCascadeHelper.tessellate(shape);
-  console.log("After tessellate");
   const [locVertexcoord, locNormalcoord, locTriIndices] = await openCascadeHelper.joinPrimitives(facelist);
   const tot_triangle_count = facelist.reduce((a, b) => a + b.number_of_triangles, 0);
   const [vertices, faces] = await openCascadeHelper.generateGeometry(tot_triangle_count, locVertexcoord, locNormalcoord, locTriIndices);
-  console.log("Middle");
   const objectMat = new MeshStandardMaterial({
     color: new Color(0.9, 0.9, 0.9)
   });
