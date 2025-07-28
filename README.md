@@ -1,3 +1,6 @@
+# This project has been superseeded by https://github.com/BarbourSmith/Abundance all ongoing work is happening there
+
+
 # A web based CAD program for cooperative design.
 
 [![Build Status](https://travis-ci.org/MaslowCNC/Maslow-Create.svg?branch=master)](https://travis-ci.org/MaslowCNC/Maslow-Create)
